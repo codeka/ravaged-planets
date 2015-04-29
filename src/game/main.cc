@@ -3,56 +3,49 @@
 
 #include "framework/settings.h"
 #include "framework/logging.h"
+#include "framework/misc.h"
+
+#include "game/application.h"
 
 namespace rp {
   void settings_initialize(int argc, char** argv);
 }
 
+void display_exception(std::string const &msg);
+
 int main(int argc, char** argv) {
-  rp::settings_initialize(argc, argv);
+  try {
+    rp::settings_initialize(argc, argv);
 
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
-    return 1;
-  }
+    rp::application app;
+    new fw::framework(&app);
+    fw::framework::get_instance()->initialize("Ravaged Planet");
 
-  fw::logging_initialize();
-  fw::debug << "Hello World!" << std::endl;
+    fw::debug << "Hello World!" << std::endl;
 
-  SDL_Window *win = SDL_CreateWindow("Ravaged Planets", 100, 100, 640, 480, SDL_WINDOW_SHOWN);
-  if (win == nullptr) {
-    std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return 1;
-  }
+    fw::framework::get_instance()->run();
+  } catch(std::exception &e) {
+    std::string msg = boost::diagnostic_information(e);
+    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
+    fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
+    fw::debug << msg << std::endl;
 
-  SDL_Renderer *ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-  if (ren == nullptr) {
-    SDL_DestroyWindow(win);
-    std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return 1;
-  }
-
-  SDL_Event e;
-  bool quit = false;
-  while (!quit) {
-    while (SDL_PollEvent(&e)) {
-      if (e.type == SDL_QUIT) {
-        quit = true;
-      }
-      if (e.type == SDL_KEYDOWN) {
-        quit = true;
-      }
-      if (e.type == SDL_MOUSEBUTTONDOWN) {
-        quit = true;
-      }
-    }
-
-    SDL_RenderClear(ren);
-    SDL_RenderPresent(ren);
+    display_exception(e.what());
+  } catch (...) {
+    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
+    fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
   }
 
   SDL_Quit();
   return 0;
+}
+
+void display_exception(std::string const &msg) {
+  std::stringstream ss;
+  ss << "An error has occurred. Please send your log file (below) to dean@codeka.com.au for diagnostics." << std::endl;
+  ss << std::endl;
+  ss << fw::debug.get_filename() << std::endl;
+  ss << std::endl;
+  ss << msg;
+  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", ss.str().c_str(), nullptr);
 }

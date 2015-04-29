@@ -7,7 +7,7 @@ add_executable(rp
     ${GAME_FILES}
 )
 
-target_link_libraries(rp 
+target_link_libraries(rp
     ${SDL2_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
@@ -15,6 +15,8 @@ target_link_libraries(rp
     ${Boost_THREAD_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_SIGNALS_LIBRARY}
+    ${OPENGL_LIBRARY}
+    ${GLEW_LIBRARY}
     framework
 )
 

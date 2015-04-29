@@ -28,5 +28,7 @@ target_link_libraries(framework
     ${Boost_THREAD_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_SIGNALS_LIBRARY}
+    ${OPENGL_LIBRARY}
+    ${GLEW_LIBRARY}
 )
 
