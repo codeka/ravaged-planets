@@ -30,9 +30,9 @@ struct screenshot_request {
 static framework *only_instance = 0;
 
 framework::framework(base_app* app) :
-    _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(
-        nullptr), _graphics(nullptr), _timer(nullptr), _audio(nullptr), _input(
-        nullptr), _lang(nullptr), _running(true) {
+    _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(nullptr),
+    _graphics(nullptr), _timer(nullptr), _audio(nullptr), _input(nullptr), _lang(nullptr),
+    _running(true) {
   only_instance = this;
 }
 
@@ -43,8 +43,8 @@ framework::~framework() {
     delete _graphics;
   if (_lang != nullptr)
     delete _lang;
-//  if (_input != nullptr)
-//    delete _input;
+  if (_input != nullptr)
+    delete _input;
 
   /*
    if (_particle_mgr != 0) delete _particle_mgr;
@@ -79,8 +79,8 @@ bool framework::initialize(char const *title) {
    _audio->initialise();
    */
   // initialise input
-  //_input = new input();
-  //_input->initialize();
+  _input = new input();
+  _input->initialize();
   // initialise the gui subsystem
   //_gui = new gui::cegui();
   //_gui->initialise(_graphics);
@@ -93,8 +93,8 @@ bool framework::initialize(char const *title) {
    http::initialise();
    */
   debug << "framework initialization complete, application initialization starting..." << std::endl;
-  //if (!_app->initialize(this))
-  //  return false;
+  if (!_app->initialize(this))
+    return false;
 
   debug << "application initialization complete, running..." << std::endl;
 
@@ -148,25 +148,6 @@ void framework::reactivate() {/*
   _active = true;
 }
 
-void framework::update_proc() {
-  int64_t accum_micros = 0;
-  int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
-  while (_running) {
-    _timer->update();
-    accum_micros += std::chrono::duration_cast<std::chrono::microseconds>(
-        _timer->get_frame_duration()).count();
-
-    while (accum_micros > timestep_micros && _running) {
-      float dt = static_cast<float>(timestep_micros) / 1000000.f;
-      update(dt);
-      accum_micros -= timestep_micros;
-    }
-
-    // TODO: should we yield or sleep for a while?
-    boost::this_thread::yield();
-  }
-}
-
 void framework::run() {
   // kick off the update thread
   boost::thread update_thread(boost::bind(&framework::update_proc, this));
@@ -200,8 +181,33 @@ void framework::set_camera(camera *cam) {
     _camera->enable();
 }
 
+void framework::update_proc() {
+  int64_t accum_micros = 0;
+  int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
+  while (_running) {
+    _timer->update();
+    accum_micros += std::chrono::duration_cast<std::chrono::microseconds>(
+        _timer->get_frame_duration()).count();
+
+    int64_t remaining_micros = timestep_micros - accum_micros;
+    if (remaining_micros > 1000) {
+      usleep(remaining_micros);
+      continue;
+    }
+
+    while (accum_micros > timestep_micros && _running) {
+      float dt = static_cast<float>(timestep_micros) / 1000000.f;
+      update(dt);
+      accum_micros -= timestep_micros;
+    }
+
+    // TODO: should we yield or sleep for a while?
+    boost::this_thread::yield();
+  }
+}
+
 void framework::update(float dt) {
-  // _input->update(dt);
+  _input->update(dt);
   // _gui->update(dt);
   /*
    _audio->update();
@@ -209,7 +215,7 @@ void framework::update(float dt) {
    if (_paused)
    return;
    */
-  // _app->update(dt);
+  _app->update(dt);
   /*
    _particle_mgr->update();*/
   if (_camera != nullptr)
@@ -218,12 +224,13 @@ void framework::update(float dt) {
 
 void framework::render() {
   // update the camera first
-//  if (_camera != 0)
-//    _camera->update_transform(_graphics);
+  if (_camera != nullptr) {
+    _camera->update_transform(_graphics);
+  }
 
   // populate the scene graph by calling into the application itself
   sg::scenegraph scenegraph;
-//  _app->render(scenegraph);
+  _app->render(scenegraph);
 //		_particle_mgr->render(scenegraph);
 
   // if we've been asked for some screenshots, take them before we do the

@@ -1,6 +1,7 @@
 
 file(GLOB GAME_FILES
     *.cc
+    world/*.cc
 )
 
 add_executable(rp
@@ -18,6 +19,7 @@ target_link_libraries(rp
     ${OPENGL_LIBRARY}
     ${GLEW_LIBRARY}
     framework
+    soil
 )
 
 install(TARGETS rp RUNTIME DESTINATION bin)

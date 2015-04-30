@@ -42,11 +42,6 @@ public:
   inline int get_num_vertices() const {
     return _num_vertices;
   }
-
-  // OpenGL buffers are never "lost", but it could be uninitialized, which is the same thing
-  bool is_lost() {
-    return _num_vertices == 0;
-  }
 };
 
 template<typename T>

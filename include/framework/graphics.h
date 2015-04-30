@@ -63,11 +63,6 @@ public:
   inline int get_width() { return _width; }
   inline int get_height() { return _height; }
 
-  // Some signals which are fired during various events that may happen.
-  boost::signals2::signal<void()> sig_device_reset;
-  boost::signals2::signal<void()> sig_device_lost;
-  boost::signals2::signal<void()> sig_device_destroy;
-
   // This signal is fired just before the graphics present().
   boost::signals2::signal<void()> sig_before_present;
 

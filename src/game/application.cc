@@ -7,6 +7,7 @@
 #include <framework/logging.h>
 
 #include <game/application.h>
+#include <game/world/terrain.h>
 //#include <warworlds/screens/screen.h>
 //#include <warworlds/session/session.h>
 //#include <warworlds/simulation/simulation_thread.h>
@@ -20,14 +21,20 @@ application::application()
 application::~application() {
 }
 
+ww::terrain *terrain = nullptr;
+
 bool application::initialize(fw::framework *frmwrk) {
   _framework = frmwrk;
 //  _framework->get_input()->show_cursor();
 
   // set up the camera
-//  fw::top_down_camera *cam = new fw::top_down_camera();
-//  cam->set_mouse_move(false);
-//  _framework->set_camera(cam);
+  fw::top_down_camera *cam = new fw::top_down_camera();
+  cam->set_mouse_move(false);
+  _framework->set_camera(cam);
+
+  terrain = new ww::terrain();
+  terrain->create(1024, 1024, 1);
+  terrain->initialize();
 
   // start the simulation thread now, it'll always run even if there's
   // no actual game running....
@@ -53,11 +60,13 @@ void application::destroy() {
 }
 
 void application::update(float dt) {
+  terrain->update();
 //  _screen->get_active_screen()->update(dt);
 //  session::get_instance()->update(dt);
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {
+  terrain->render(scenegraph);
 //  _screen->get_active_screen()->render(scenegraph);
 }
 

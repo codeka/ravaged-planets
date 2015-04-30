@@ -4,6 +4,7 @@
 #include <framework/camera.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
+#include <framework/logging.h>
 #include <framework/input.h>
 #include <framework/vector.h>
 #include <framework/timer.h>
@@ -262,6 +263,8 @@ void top_down_camera::disable() {
   // this call will unbind all our keys
   camera::disable();
 }
+
+int a = 0;
 
 void top_down_camera::update(float dt) {
   input *inp = framework::get_instance()->get_input();

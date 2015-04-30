@@ -32,7 +32,7 @@ public:
   input();
   ~input();
 
-  void initialise();
+  void initialize();
   void update(float dt);
   void release();
 

@@ -68,12 +68,10 @@ void graphics::initialize(char const *title) {
   fw::debug << "shading language version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
   glEnable(GL_DEPTH_TEST);
+  glViewport(0, 0, _width, _height);
 }
 
 void graphics::destroy() {
-  sig_device_lost();
-  sig_device_destroy();
-
   SDL_GL_DeleteContext(_context);
   _context = nullptr;
 }
@@ -82,12 +80,6 @@ bool graphics::poll_events() {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
-      return false;
-    }
-    if (e.type == SDL_KEYDOWN) {
-      return false;
-    }
-    if (e.type == SDL_MOUSEBUTTONDOWN) {
       return false;
     }
   }
@@ -99,8 +91,6 @@ void graphics::begin_scene(fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
       static_cast<float>(clear_colour.g), static_cast<float>(clear_colour.b),
       static_cast<float>(clear_colour.a));
   glClear(GL_COLOR_BUFFER_BIT);
-
-  glViewport(0, 0, _width, _height);
 }
 
 void graphics::end_scene() {

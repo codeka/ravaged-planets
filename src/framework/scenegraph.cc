@@ -9,9 +9,10 @@
 #include <framework/camera.h>
 //#include <framework/effect.h>
 //#include <framework/shadows.h>
-//#include <framework/vertex_buffer.h>
-//#include <framework/index_buffer.h>
-//#include <framework/exception.h>
+#include <framework/vertex_buffer.h>
+#include <framework/index_buffer.h>
+#include <framework/logging.h>
+#include <framework/exception.h>
 #include <framework/misc.h>
 //#include <framework/gui/cegui.h>
 
@@ -78,9 +79,9 @@ std::shared_ptr<fw::effect> node::get_effect() const {
 void node::render(scenegraph *sg) {
   // if we're not a shadow caster, and we're rendering shadows, don't
   // render the node this time around
-//			if (is_rendering_shadow && !_cast_shadows)
-//				return;
-/*
+//  if (is_rendering_shadow && !_cast_shadows)
+//    return;
+
   if (_vb) {
     int num_primitives;
     if (!_ib) {
@@ -90,10 +91,8 @@ void node::render(scenegraph *sg) {
       else if (_primitive_type == primitive_linelist)
         num_primitives /= 2;
       else
-        BOOST_THROW_EXCEPTION(
-            fw::exception()
-                << fw::message_error_info(
-                    "given primitive_type is not yet supported."));
+        BOOST_THROW_EXCEPTION(fw::exception()
+            << fw::message_error_info("given primitive_type is not yet supported."));
     } else {
       num_primitives = _ib->get_num_indices();
       if (_primitive_type == primitive_trianglestrip)
@@ -105,13 +104,11 @@ void node::render(scenegraph *sg) {
       else if (_primitive_type == primitive_linelist)
         num_primitives /= 2;
       else
-        BOOST_THROW_EXCEPTION(
-            fw::exception()
-                << fw::message_error_info(
-                    "given primitive_type is not yet supported."));
+        BOOST_THROW_EXCEPTION(fw::exception()
+            << fw::message_error_info("given primitive_type is not yet supported."));
     }
 
-    boost::shared_ptr<fw::effect> fx = _fx;
+    std::shared_ptr<fw::effect> fx = _fx;
 //				if (is_rendering_shadow)
 //					fx = shadow_fx;
 
@@ -123,9 +120,9 @@ void node::render(scenegraph *sg) {
   }
 
   // render the children as well (todo: pass transformations)
-  BOOST_FOREACH(boost::shared_ptr<node> &child_node, _children) {
+  BOOST_FOREACH(std::shared_ptr<node> &child_node, _children) {
     child_node->render(sg);
-  }*/
+  }
 }
 
 // this is called when we're rendering a gvien effect
@@ -170,13 +167,13 @@ void node::render_fx(int num_primitives, std::shared_ptr<fw::effect> fx) {
 }
 
 void node::render_nofx(int num_primitives, scenegraph *) {
-/*  glMatrixMode(GL_MODELVIEW);
+  glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glMultMatrixf(_world.data());
 
   _vb->render(num_primitives, _primitive_type, _ib.get());
 
-  glPopMatrix(); */
+  glPopMatrix();
 }
 
 // called to set any additional parameters on the given effect
@@ -259,8 +256,8 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= 0*/,
 
   // now, render the main scene
   g->begin_scene(clear_colour);
-  for (auto nit = scenegraph.get_nodes().begin(); nit != scenegraph.get_nodes().end(); ++nit) {
-    (*nit)->render(&scenegraph);
+  BOOST_FOREACH(std::shared_ptr<fw::sg::node> node, scenegraph.get_nodes()) {
+    node->render(&scenegraph);
   }
 
   // make sure the shadowsrc is empty

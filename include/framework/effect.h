@@ -2,8 +2,8 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <framework/framework.h>
 #include <framework/graphics.h>
@@ -24,7 +24,7 @@ private:
   friend class effect;
   std::string _technique_name;
 
-  std::map<std::string, boost::shared_ptr<texture> > _textures;
+  std::map<std::string, std::shared_ptr<texture> > _textures;
   std::map<std::string, matrix> _matrices;
   std::map<std::string, vector> _vectors;
   std::map<std::string, colour> _colours;
@@ -37,13 +37,13 @@ public:
   ~effect_parameters();
 
   void set_technique_name(std::string const &name);
-  void set_texture(std::string const &name, boost::shared_ptr<texture> const &t);
+  void set_texture(std::string const &name, std::shared_ptr<texture> const &t);
   void set_matrix(std::string const &name, matrix const &m);
   void set_vector(std::string const &name, vector const &v);
   void set_colour(std::string const &name, colour const &c);
   void set_scalar(std::string const &name, float f);
 
-  boost::shared_ptr<effect_parameters> clone();
+  std::shared_ptr<effect_parameters> clone();
 };
 
 // this is returned by effect::begin() and is used to manage the state of a particular run of
@@ -66,7 +66,7 @@ private:
   friend class effect_parameters;
 
  // CGtechnique _technique;
-  boost::shared_ptr<effect_data> _data;
+  std::shared_ptr<effect_data> _data;
 
 public:
   effect();
@@ -77,7 +77,7 @@ public:
 
   // creates an effect_parameters that you'll pass to begin() in
   // order to set up the parameters for this rendering.
-  boost::shared_ptr<effect_parameters> create_parameters();
+  std::shared_ptr<effect_parameters> create_parameters();
 
   void set_texture(char const *name, texture const &t);
   void set_matrix(char const *name, matrix const &m);
@@ -85,7 +85,7 @@ public:
   void set_colour(char const *name, colour const &c);
   void set_scalar(char const *name, float f);
 
-  effect_pass *begin(boost::shared_ptr<effect_parameters> parameters);
+  effect_pass *begin(std::shared_ptr<effect_parameters> parameters);
   void end(effect_pass *pass);
 };
 

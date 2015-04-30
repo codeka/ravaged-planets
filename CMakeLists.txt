@@ -16,7 +16,7 @@ if(WIN32)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions(-std=c++14)
+    set(CMAKE_CXX_FLAGS -std=c++14)
     # Make sure we compile with -rdynamic so that stack traces can include method names.
     add_definitions(-rdynamic)
 endif()
@@ -40,6 +40,7 @@ include_directories(${GLEW_INCLUDE_DIR})
 #find_package(Cg REQUIRED)
 #include_directories(${CG_INCLUDE_DIR})
 
+add_subdirectory(src/soil)
 add_subdirectory(src/framework)
 add_subdirectory(src/game)
 
