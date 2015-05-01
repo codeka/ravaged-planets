@@ -5,7 +5,7 @@
 
 namespace fw {
 
-typedef cml::matrix44f_c matrix; // OpenGL is column-major.
+typedef cml::matrix44f_c matrix;
 typedef cml::quaternionf_p quaternion;
 typedef cml::vector3f vector;
 

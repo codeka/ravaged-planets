@@ -167,13 +167,13 @@ void node::render_fx(int num_primitives, std::shared_ptr<fw::effect> fx) {
 }
 
 void node::render_nofx(int num_primitives, scenegraph *) {
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glMultMatrixf(_world.data());
+  FW_CHECKED(glMatrixMode(GL_MODELVIEW));
+  FW_CHECKED(glPushMatrix());
+  FW_CHECKED(glMultMatrixf(_world.data()));
 
   _vb->render(num_primitives, _primitive_type, _ib.get());
 
-  glPopMatrix();
+  FW_CHECKED(glPopMatrix());
 }
 
 // called to set any additional parameters on the given effect

@@ -12,11 +12,7 @@
 namespace fw {
 std::string addr2line(std::string const &program, void *addr);
 
-
-/*
- * Adds a stacktrace_error_info to this exception, which contains a list of all the frames in the current stack.
- */
-void exception::populate_stacktrace() {
+std::vector<std::string> exception::generate_stack_trace() {
   const int MAX_TRACE_LEVEL = 16;
 
   void *trace[MAX_TRACE_LEVEL];
@@ -44,7 +40,7 @@ void exception::populate_stacktrace() {
   }
   free(messages);
 
-  (*this) << stacktrace_error_info(stacktrace);
+  return stacktrace;
 }
 
 std::string addr2line(std::string const &program, void *addr) {

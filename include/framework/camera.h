@@ -4,6 +4,8 @@
 #include <boost/signals2.hpp>
 
 #include "vector.h"
+#include "logging.h"
+#include "exception.h"
 
 namespace fw {
 
@@ -79,6 +81,8 @@ public:
   }
 
   matrix const & get_view_matrix() const {
+    fw::debug << "get_view_matrix" << std::endl;
+    fw::exception::log_stacktrace();
     return _view;
   }
 

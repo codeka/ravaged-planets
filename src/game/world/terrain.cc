@@ -142,20 +142,23 @@ void terrain::update() {
   fw::camera *camera = fw::framework::get_instance()->get_camera();
 
   // if the camera has moved off the edge of the map, wrap it back around
-  fw::vector loc = camera->get_location();
-  loc[0] = fw::constrain(loc[0], (float) _width);
-  loc[2] = fw::constrain(loc[2], (float) _length);
-  camera->set_location(loc);
+  fw::vector old_loc = camera->get_location();
+  fw::vector new_loc(fw::constrain(old_loc[0], (float) _width),
+      old_loc[1],
+      fw::constrain(old_loc[2], (float) _length));
+  if ((old_loc - new_loc).length_squared() > 0.001f) {
+    camera->set_location(new_loc);
 
-  // also, set the ground height so the camera follows the terrain
-  camera->set_ground_height(get_height(loc[0], loc[2]));
+    // also, set the ground height so the camera follows the terrain
+    camera->set_ground_height(get_height(new_loc[0], new_loc[2]));
+  }
 }
 
 void terrain::render(fw::sg::scenegraph &scenegraph) {
   if (_layers.size() == 0 || _ib == 0 || _effect == 0)
     return;
 
-  // we want to render the terrain centred on where the camera is looking
+  // we want to render the terrain centered on where the camera is looking
   fw::camera *camera = fw::framework::get_instance()->get_camera();
   fw::vector cam_loc = camera->get_position();
   fw::vector cam_dir = camera->get_direction();
@@ -164,10 +167,9 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
   int centre_patch_x = (int) (location[0] / PATCH_SIZE);
   int centre_patch_z = (int) (location[2] / PATCH_SIZE);
 
-  for (int patch_z = centre_patch_z - 1; patch_z <= centre_patch_z + 1;
-      patch_z++) {
-    for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1;
-        patch_x++) {
+  for (int patch_z = centre_patch_z - 1; patch_z <= centre_patch_z + 1; patch_z++) {
+    for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
+      if (patch_x != 0 || patch_z != 0) continue;
       int patch_index = get_patch_index(patch_x, patch_z);
 
       std::shared_ptr<terrain_patch> patch(_patches[patch_index]);

@@ -2,6 +2,7 @@
 #include <boost/foreach.hpp>
 
 #include <framework/camera.h>
+#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/logging.h>
@@ -21,6 +22,8 @@ camera::camera() {
   _up = vector(0, 1, 0);
   _right = vector(1, 0, 0);
   _forward = vector(0, 0, 1);
+
+  _view = fw::identity();
   set_projection_matrix(cml::constantsf::pi() / 3.0f, 1.3f, 1.0f, 100.0f);
 }
 
@@ -37,8 +40,9 @@ void camera::update(float dt) {
     _velocity = _velocity.normalize() * _max_speed;
   }
 
-  if (_velocity.length_squared() > 0.0f)
+  if (_velocity.length_squared() > 0.0f) {
     _updated = true;
+  }
 
   if (_updated) {
     // move the camera and decelerate
@@ -96,12 +100,20 @@ void camera::set_look_at(matrix &m, vector const &eye, vector const &look_at,
   cml::matrix_look_at_RH(m, eye, look_at, up);
 }
 
+int n = 0;
 void camera::update_transform(graphics *g) {
-  glMatrixMode(GL_MODELVIEW);
-  glLoadMatrixf(_view.data());
+  if (n > 3) return;
+  n++;
+  FW_CHECKED(glMatrixMode(GL_MODELVIEW));
+  fw::matrix m = _view;//fw::identity();
+  fw::debug << "world" << std::endl;
+  fw::debug << m << std::endl;
+//  FW_CHECKED(glLoadMatrixf(m.data()));
+  FW_CHECKED(glLoadIdentity());
+  FW_CHECKED(glMultMatrixf(m.data()));
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrixf(_projection.data());
+  FW_CHECKED(glMatrixMode(GL_PROJECTION));
+  FW_CHECKED(glLoadMatrixf(_projection.data()));
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -211,7 +223,7 @@ void lookat_camera::set_location(vector const &location) {
 }
 
 void lookat_camera::set_distance(float distance) {
-  fw::vector dir(_position - _centre);
+   fw::vector dir(_position - _centre);
   _position = _centre + (dir.normalize() * distance);
   _updated = true;
 }
@@ -328,7 +340,7 @@ void top_down_camera::update(float dt) {
   move(forward, right);
 
   float zoom_amount = inp->mouse_dwheel();
-  if (zoom_amount > 0.1f || zoom_amount < 0.1f) {
+  if (zoom_amount > 0.1f || zoom_amount < -0.1f) {
     zoom(zoom_amount);
   }
 
@@ -395,7 +407,6 @@ void top_down_camera::rotate(float around_up, float around_right) {
   if (around_right != 0.0f && allow_around_right) {
     matrix rotation = fw::rotate_axis_angle(_right, around_right);
     _position = cml::transform_vector(rotation, _position);
-
     _updated = true;
   }
   _position += _centre;
