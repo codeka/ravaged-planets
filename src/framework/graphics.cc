@@ -107,13 +107,13 @@ void graphics::after_gui() {
 void graphics::present() {
   sig_before_present();
 
-  SDL_GL_SwapWindow(_wnd);
-
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
     // this might happen in Release mode, where we don't actually check errors on every single call (it's expensive).
     BOOST_THROW_EXCEPTION(fw::exception() << fw::gl_error_info(err));
   }
+
+  SDL_GL_SwapWindow(_wnd);
 }
 
 void graphics::set_render_target(texture *tex) {

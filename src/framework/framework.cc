@@ -223,11 +223,6 @@ void framework::update(float dt) {
 }
 
 void framework::render() {
-  // update the camera first
-  if (_camera != nullptr) {
-    _camera->update_transform(_graphics);
-  }
-
   // populate the scene graph by calling into the application itself
   sg::scenegraph scenegraph;
   _app->render(scenegraph);

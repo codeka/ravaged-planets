@@ -9,7 +9,7 @@ class graphics;
 // An index buffer holds lists of indices into a vertex_buffer.
 class index_buffer: private boost::noncopyable {
 private:
-  GLuint _name;
+  GLuint _id;
   int _num_indices;
   bool _dynamic;
 
@@ -27,7 +27,7 @@ public:
     return _num_indices;
   }
 
-  // Called by the vertex_buffer (which controls the actual rendering) just before we render with this index buffer.
+  // Called by the effect (which controls the actual rendering) just before we render with this index buffer.
   void prepare();
 };
 

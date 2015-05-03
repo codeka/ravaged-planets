@@ -7,7 +7,7 @@
 #include <framework/graphics.h>
 #include <framework/framework.h>
 #include <framework/camera.h>
-//#include <framework/effect.h>
+#include <framework/effect.h>
 //#include <framework/shadows.h>
 #include <framework/vertex_buffer.h>
 #include <framework/index_buffer.h>
@@ -18,6 +18,7 @@
 
 // this is the effect file we'll use for rendering shadow map(s)
 //static boost::shared_ptr<fw::effect> shadow_fx;
+static std::shared_ptr<fw::effect> basic_fx;
 
 //static bool is_rendering_shadow = false;
 //static boost::shared_ptr<fw::shadow_source> shadowsrc;
@@ -64,7 +65,7 @@ void node::remove_child(std::shared_ptr<node> child) {
 // get the effect file to use. if we don't have one defined, look at our parent and keep looking up at our parents
 // until we find one.
 std::shared_ptr<fw::effect> node::get_effect() const {
-/*  boost::shared_ptr<fw::effect> fx = _fx;
+  std::shared_ptr<fw::effect> fx = _fx;
   if (!fx) {
     node *parent = _parent;
     while (!fx && parent != 0) {
@@ -73,7 +74,7 @@ std::shared_ptr<fw::effect> node::get_effect() const {
     }
   }
 
-  return fx;*/ return nullptr;
+  return fx;
 }
 
 void node::render(scenegraph *sg) {
@@ -113,7 +114,7 @@ void node::render(scenegraph *sg) {
 //					fx = shadow_fx;
 
     if (!fx) {
-      render_nofx(num_primitives, sg);
+      render_nofx(num_primitives);
     } else {
       render_fx(num_primitives, fx);
     }
@@ -125,18 +126,18 @@ void node::render(scenegraph *sg) {
   }
 }
 
-// this is called when we're rendering a gvien effect
+// this is called when we're rendering a given effect
 void node::render_fx(int num_primitives, std::shared_ptr<fw::effect> fx) {
-/*  boost::shared_ptr<fw::effect_parameters> parameters;
+  std::shared_ptr<fw::effect_parameters> parameters;
   if (_fx_params) {
     parameters = _fx_params;
   } else {
     parameters = fx->create_parameters();
   }
 
-  // add the worldview and worldviewproj parameters as well as shadow parameters
+  // add the world_view and world_view_proj parameters as well as shadow parameters
   fw::camera *cam = fw::framework::get_instance()->get_camera();
-  if (cam != 0) {
+  if (cam != nullptr) {
     fw::matrix worldview = cam->get_view_matrix();
     worldview = _world * worldview;
     fw::matrix worldviewproj = worldview * cam->get_projection_matrix();
@@ -156,24 +157,19 @@ void node::render_fx(int num_primitives, std::shared_ptr<fw::effect> fx) {
 //				}
   }
 
+  parameters->set_vertex_buffer("position", _vb);
+
   setup_effect(fx);
-  fw::effect_pass *passes = fx->begin(parameters);
-  while (passes && passes->valid()) {
-    passes->begin_pass();
-    _vb->render(num_primitives, _primitive_type, _ib.get());
-    passes->end_pass();
-  }
-  fx->end(passes);*/
+  fx->render(parameters, num_primitives, _primitive_type, _ib.get());
 }
 
-void node::render_nofx(int num_primitives, scenegraph *) {
-  FW_CHECKED(glMatrixMode(GL_MODELVIEW));
-  FW_CHECKED(glPushMatrix());
-  FW_CHECKED(glMultMatrixf(_world.data()));
+void node::render_nofx(int num_primitives) {
+  if (!basic_fx) {
+    basic_fx = std::shared_ptr<fw::effect>(new effect());
+    basic_fx->initialise("basic");
+  }
 
-  _vb->render(num_primitives, _primitive_type, _ib.get());
-
-  FW_CHECKED(glPopMatrix());
+  render_fx(num_primitives, basic_fx);
 }
 
 // called to set any additional parameters on the given effect
@@ -186,8 +182,8 @@ void node::populate_clone(std::shared_ptr<node> clone) {
   clone->_vb = _vb;
   clone->_ib = _ib;
   clone->_fx = _fx;
-//  if (_fx_params)
-//    clone->_fx_params = _fx_params->clone();
+  if (_fx_params)
+    clone->_fx_params = _fx_params->clone();
   clone->_parent = _parent;
   clone->_world = _world;
 

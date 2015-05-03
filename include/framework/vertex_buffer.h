@@ -16,7 +16,7 @@ public:
   typedef std::function<void()> setup_fn;
 
 private:
-  GLuint _name;
+  GLuint _id;
   int _num_vertices;
   size_t _vertex_size;
   bool _dynamic;
@@ -29,7 +29,6 @@ public:
 
   void create_buffer(int max_vertices, setup_fn setup, size_t vertex_size, bool dynamic = false);
   void set_data(int num_vertices, void *vertices, int flags = -1);
-  void render(int num_primitives, fw::sg::primitive_type primitive_type, index_buffer *idxbuf = 0);
 
   // this is a helper method that makes it easier to create vertex buffers by assuming that
   // you're passing a type defined in fw::vertex::xxx (or something compatible)
@@ -42,6 +41,8 @@ public:
   inline int get_num_vertices() const {
     return _num_vertices;
   }
+
+  void bind(GLint program_location);
 };
 
 template<typename T>

@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 #include <SDL_opengl.h>
 
+#include <framework/logging.h>
 #include <framework/colour.h>
 
 typedef void *SDL_GLContext;
@@ -22,12 +23,13 @@ typedef boost::error_info<struct tag_glerr, GLenum> gl_error_info;
 // converts a gl_error_info into a string
 std::string to_string(gl_error_info const & err_info);
 
-#if defined(_DEBUG)
+#if defined(DEBUG)
 #define FW_CHECKED(fn) \
+    fw::debug << "GRAPHICS: " << #fn << std::endl; \
     fn; \
     fw::graphics::check_error(#fn)
 #else
-// in release mode, we don't check errors on each call... but we'll still do it once per frame...
+// in release mode, we don't check errors on each call... but we'll still do it once per frame.
 #define FW_CHECKED(fn) \
     fn;
 #endif

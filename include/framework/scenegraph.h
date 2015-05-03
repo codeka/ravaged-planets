@@ -73,8 +73,8 @@ private:
   std::shared_ptr<fw::effect> _fx;
   std::shared_ptr<fw::effect_parameters> _fx_params;
 
-  // Renders the node if the effect file is null (basically does a fixed-function render)
-  void render_nofx(int num_primitives, scenegraph *sg);
+  // Renders the node if the effect file is null (basically just uses the basic effect).
+  void render_nofx(int num_primitives);
 
 protected:
   node *_parent;

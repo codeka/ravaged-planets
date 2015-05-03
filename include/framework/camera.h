@@ -48,7 +48,6 @@ public:
   void set_projection_matrix(float fov, float aspect, float near_plane, float far_plane);
   virtual void update(float dt);
   virtual void set_ground_height(float height);
-  void update_transform(graphics *g);
 
   // These are called when the camera is set as the game's current camera (this is a good opportunity to bind/unbind
   // your keys).
@@ -81,8 +80,6 @@ public:
   }
 
   matrix const & get_view_matrix() const {
-    fw::debug << "get_view_matrix" << std::endl;
-    fw::exception::log_stacktrace();
     return _view;
   }
 

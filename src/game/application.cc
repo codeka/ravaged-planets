@@ -33,7 +33,7 @@ bool application::initialize(fw::framework *frmwrk) {
   _framework->set_camera(cam);
 
   terrain = new ww::terrain();
-  terrain->create(1024, 1024, 1);
+  terrain->create(64, 64, 1);
   terrain->initialize();
 
   // start the simulation thread now, it'll always run even if there's

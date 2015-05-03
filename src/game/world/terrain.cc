@@ -35,7 +35,8 @@ void terrain::initialize() {
   _ib->set_data(_num_indices, &_index_data[0], 0);
 
   // load the effect file that we'll use for rendering
-  _effect->initialise("terrain.fx");
+  //_effect->initialise("terrain");
+  _effect = nullptr;
 
   // todo: load texture(s)
   std::shared_ptr<fw::texture> layer(new fw::texture());
@@ -155,7 +156,7 @@ void terrain::update() {
 }
 
 void terrain::render(fw::sg::scenegraph &scenegraph) {
-  if (_layers.size() == 0 || _ib == 0 || _effect == 0)
+  if (_layers.size() == 0 || _ib == 0)
     return;
 
   // we want to render the terrain centered on where the camera is looking
@@ -169,7 +170,6 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
 
   for (int patch_z = centre_patch_z - 1; patch_z <= centre_patch_z + 1; patch_z++) {
     for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
-      if (patch_x != 0 || patch_z != 0) continue;
       int patch_index = get_patch_index(patch_x, patch_z);
 
       std::shared_ptr<terrain_patch> patch(_patches[patch_index]);

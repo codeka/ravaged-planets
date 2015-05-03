@@ -100,22 +100,6 @@ void camera::set_look_at(matrix &m, vector const &eye, vector const &look_at,
   cml::matrix_look_at_RH(m, eye, look_at, up);
 }
 
-int n = 0;
-void camera::update_transform(graphics *g) {
-  if (n > 3) return;
-  n++;
-  FW_CHECKED(glMatrixMode(GL_MODELVIEW));
-  fw::matrix m = _view;//fw::identity();
-  fw::debug << "world" << std::endl;
-  fw::debug << m << std::endl;
-//  FW_CHECKED(glLoadMatrixf(m.data()));
-  FW_CHECKED(glLoadIdentity());
-  FW_CHECKED(glMultMatrixf(m.data()));
-
-  FW_CHECKED(glMatrixMode(GL_PROJECTION));
-  FW_CHECKED(glLoadMatrixf(_projection.data()));
-}
-
 //---------------------------------------------------------------------------------------------------------
 
 first_person_camera::first_person_camera() :

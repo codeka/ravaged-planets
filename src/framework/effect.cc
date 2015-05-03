@@ -1,4 +1,5 @@
 #include <string>
+#include <fstream>
 #include <sstream>
 #include <map>
 #include <boost/filesystem.hpp>
@@ -15,30 +16,34 @@
 #include <framework/paths.h>
 #include <framework/vector.h>
 #include <framework/exception.h>
-
-//#include <process.h>
+#include <framework/scenegraph.h>
+#include <framework/vertex_buffer.h>
+#include <framework/index_buffer.h>
 
 namespace fs = boost::filesystem;
 
-typedef void * CGeffect;
+static std::map<fw::sg::primitive_type, uint32_t> g_primitive_type_map;
 
+static void ensure_primitive_type_map() {
+  if (g_primitive_type_map.size() > 0)
+    return;
 
-#if defined(_DEBUG)
-#define CG_CHECKED(fn) \
-    fn; \
-    check_error(#fn)
-#else
-#define CG_CHECKED(fn) fn
-#endif
+  g_primitive_type_map[fw::sg::primitive_linestrip] = GL_LINE_STRIP;
+  g_primitive_type_map[fw::sg::primitive_linelist] = GL_LINES;
+  g_primitive_type_map[fw::sg::primitive_trianglelist] = GL_TRIANGLES;
+  g_primitive_type_map[fw::sg::primitive_trianglestrip] = GL_TRIANGLE_STRIP;
+}
 
 struct effect_data: boost::noncopyable {
   fs::path filename;
-  CGeffect fx;
+  GLuint program_id;
+
+  GLint worldviewproj_location;
+  GLint position_location;
 
   inline ~effect_data() {
-    if (fx != 0) {
-      //cgDestroyEffect(fx);
-    }
+    fw::debug << "effect_data::~effect_data()" << std::endl;
+    glDeleteProgram(program_id);
   }
 };
 
@@ -74,34 +79,10 @@ void effect_cache::clear_cache() {
 
 //-----------------------------------------------------------------------------
 
-//static CGerror g_last_error = CG_NO_ERROR;
-
-// This is called after every Cg function call (in debug mode) or at least every
-// now & then (in release mode) to check for errors
-void check_error(char const *fn) {
-//  CGerror err = cgGetError();
-//  if (err == CG_NO_ERROR)
-//    err = g_last_error;
-//
-//  if (err == CG_NO_ERROR)
-//    return;
-
-  BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(fn));
+namespace {
+effect_cache g_cache;
+std::shared_ptr<effect_data> load_effect(fw::graphics *g, fs::path const &full_path);
 }
-
-// this is called via cgSetErrorCallback() to 
-void error_callback() {
-//  CGerror err = cgGetError();
-//  fw::debug
-//      << boost::format("ERROR Cg generated error: %1%") % cgGetErrorString(err)
-//      << std::endl;
-}
-
-//-----------------------------------------------------------------------------
-
-static bool g_initialised = false;
-static effect_cache g_cache;
-static CGeffect load_effect(fw::graphics *g, fs::path const &full_path);
 
 namespace fw {
 //-------------------------------------------------------------------------
@@ -111,12 +92,12 @@ effect_parameters::effect_parameters() {
 effect_parameters::~effect_parameters() {
 }
 
-void effect_parameters::set_technique_name(std::string const &name) {
-  _technique_name = name;
-}
-
 void effect_parameters::set_texture(std::string const &name, std::shared_ptr<texture> const &tex) {
   _textures[name] = tex;
+}
+
+void effect_parameters::set_vertex_buffer(std::string const &name, std::shared_ptr<vertex_buffer> const &vb) {
+  _vertex_buffers[name] = vb;
 }
 
 void effect_parameters::set_matrix(std::string const &name, matrix const &m) {
@@ -142,7 +123,6 @@ std::shared_ptr<effect_parameters> effect_parameters::clone() {
   clone->_vectors = _vectors;
   clone->_colours = _colours;
   clone->_scalars = _scalars;
-  clone->_technique_name = _technique_name;
   return clone;
 }
 
@@ -150,46 +130,64 @@ void effect_parameters::apply(effect *e) const {
   if (e->_data == 0)
     return;
 
-  CGeffect fx = e->_data->fx;
-
-//		for(std::map<std::string, boost::shared_ptr<texture> >::const_iterator it = _textures.begin();
-//			it != _textures.end(); ++it)
-//		{
-//			CGparameter p = cgGetNamedEffectParameter(fx, it->first.c_str());
-//			if (p != 0)
-//			{
-//				cgGLSetTextureParameter(p, it->second->get_name());
-//			}
-//		}
-
-  for (std::map<std::string, matrix>::const_iterator it = _matrices.begin();
-      it != _matrices.end(); ++it) {
-    //CGparameter p = cgGetNamedEffectParameter(fx, it->first.c_str());
-    //if (p != 0) {
-    //  CG_CHECKED(cgSetParameterValuefc(p, 16, it->second.data()));
-    //}
+  for (auto it = _textures.begin(); it != _textures.end(); ++it) {
+    GLint id = glGetUniformLocation(e->_data->program_id, it->first.c_str());
+//    glTexture();
   }
 
-  for (std::map<std::string, vector>::const_iterator it = _vectors.begin();
-      it != _vectors.end(); ++it) {
+  for (auto it = _vertex_buffers.begin(); it != _vertex_buffers.end(); ++it) {
+    if (it->first == "position") {
+      it->second->bind(e->_data->position_location);
+      continue;
+    }
+
+    GLint id = glGetAttribLocation(e->_data->program_id, it->first.c_str());
+    if (id > 0) {
+      it->second->bind(id);
+    } else {
+      fw::debug << "Warning: No location for '" << it->first.c_str() << "' in " << e->_data->filename.filename()
+          << std::endl;
+    }
+  }
+
+  for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
+    if (it->first == "worldviewproj") {
+      FW_CHECKED(glUniformMatrix4fv(e->_data->worldviewproj_location, 1, GL_FALSE, it->second.data()));
+      continue;
+    }
+
+    GLint id = glGetUniformLocation(e->_data->program_id, it->first.c_str());
+    if (id > 0) {
+      FW_CHECKED(glUniformMatrix4fv(id, 1, GL_FALSE, it->second.data()));
+    } else {
+      fw::debug << "Warning: No location for '" << it->first.c_str() << "' in " << e->_data->filename.filename()
+          << std::endl;
+    }
+  }
+
+  for (std::map<std::string, vector>::const_iterator it = _vectors.begin(); it != _vectors.end(); ++it) {
+//    GLint id = glGetAttribLocation(e->_data->program_id, it->first.c_str());
+//    if (id > 0) {
+//      FW_CHECKED(glEnableVertexAttribArray(id));
+//      FW_CHECKED()
+//      FW_CHECKED(glVertexAttribPointer(id, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr));
+//    }
     //CGparameter p = cgGetNamedEffectParameter(fx, it->first.c_str());
     //if (p != 0) {
     //  CG_CHECKED(cgSetParameter3fv(p, it->second.data()));
     //}
   }
 
-  for (std::map<std::string, colour>::const_iterator it = _colours.begin();
-      it != _colours.end(); ++it) {
+  for (std::map<std::string, colour>::const_iterator it = _colours.begin(); it != _colours.end(); ++it) {
     //CGparameter p = cgGetNamedEffectParameter(fx, it->first.c_str());
     //if (p != 0) {
     //  CG_CHECKED(
     //      cgSetParameter4f(p, it->second.a, it->second.r, it->second.g,
-   //           it->second.b));
+    //           it->second.b));
     //}
   }
 
-  for (std::map<std::string, float>::const_iterator it = _scalars.begin();
-      it != _scalars.end(); ++it) {
+  for (std::map<std::string, float>::const_iterator it = _scalars.begin(); it != _scalars.end(); ++it) {
     //CGparameter p = cgGetNamedEffectParameter(fx, it->first.c_str());
     //if (p != 0) {
     //  CG_CHECKED(cgSetParameter1f(p, it->second));
@@ -206,93 +204,45 @@ effect::~effect() {
 }
 
 void effect::initialise(fs::path const &filename) {
-  if (!g_initialised) {
-    //cgSetErrorCallback(error_callback);
-  }
-
   fw::graphics *g = fw::framework::get_instance()->get_graphics();
 
-  bool loaded_from_cache = true;
   _data = g_cache.get_effect(filename);
   if (!_data) {
-    CGeffect fx = load_effect(g,
-        fw::resolve(
-            std::string("~/share/war-worlds/effects/") + filename.string()));
-    if (fx != 0) {
-      loaded_from_cache = false;
-
-      std::shared_ptr<effect_data> new_data(new effect_data());
-      new_data->fx = fx;
-      new_data->filename = filename;
-      _data = new_data;
-
-      g_cache.add_effect(filename, _data);
-    }
-  }
-
-  if (_data) {
-    // find the first valid technique in the file
-   // _technique = cgGetFirstTechnique(_data->fx);
-   // while (_technique) {
-  //    if (cgValidateTechnique (_technique)) {
-  //      if (!loaded_from_cache) {
-  //        fw::debug
-   //           << boost::format(" - loading technique \"%1%\" from effect.")
-  //                % cgGetTechniqueName(_technique) << std::endl;
-  //      }
-  //      break;
-  //    } else {
-  //      fw::debug
-   //         << boost::format(" - technique \"%1%\" is not valid, skipping.")
-  //              % cgGetTechniqueName(_technique) << std::endl;
-  //      _technique = cgGetNextTechnique(_technique);
-  //    }
-  //  }
-
-  //  if (!_technique) {
-  //    fw::debug
-  //        << boost::format("WARNING: no valid technique found in file: %1%")
-  //            % _data->filename << std::endl;
-  //  }
+    _data = load_effect(g, fw::resolve("share/ravaged-planets/shaders/" + filename.string()));
+    g_cache.add_effect(filename, _data);
   }
 }
 
-void effect::set_technique(std::string const &name) {
+void effect::render(std::shared_ptr<effect_parameters> parameters, int num_primitives,
+    fw::sg::primitive_type primitive_type, index_buffer *idx_buffer) {
   if (!_data)
     return;
+  ensure_primitive_type_map();
 
-//  CGtechnique new_technique = cgGetNamedTechnique(_data->fx, name.c_str());
-//  if (new_technique == 0) {
- //   debug
-//        << boost::format(
-//            "WARN: could not find technique for effect file \"%1%\": \"%2%\"")
-//            % _data->filename % name << std::endl;
-//  } else {
-//    _technique = new_technique;
-//  }
-}
-
-effect_pass *effect::begin(std::shared_ptr<effect_parameters> parameters) {
-  if (!_data)
-    return 0;
-
- // CGtechnique technique = _technique;
-//  if (parameters && parameters->_technique_name != "") {
- //   technique = cgGetNamedTechnique(_data->fx,
-//        parameters->_technique_name.c_str());
- //   if (technique == 0) {
- //     fw::debug
- //         << boost::format("WARN: could not set technique to: \"%1%\"")
- //             % parameters->_technique_name << std::endl;
- //     technique = _technique;
-//    }
-//  }
-
+  FW_CHECKED(glUseProgram(_data->program_id));
   if (parameters) {
     parameters->apply(this);
   }
 
-  return nullptr;// new effect_pass(cgGetFirstPass(technique));
+  idx_buffer->prepare();
+
+#ifdef DEBUG
+  GLint status;
+  FW_CHECKED(glValidateProgram(_data->program_id));
+  glGetProgramiv(_data->program_id, GL_VALIDATE_STATUS, &status);
+  if (status != GL_TRUE) {
+    GLint log_length;
+    glGetProgramiv(_data->program_id, GL_INFO_LOG_LENGTH, &log_length);
+    std::vector<char> error_message(log_length);
+    glGetProgramInfoLog(_data->program_id, log_length, nullptr, &error_message[0]);
+
+    fw::debug << "glValidateProgram error: " << &error_message[0] << std::endl;
+  }
+#endif
+
+  FW_CHECKED(glDrawElements(g_primitive_type_map[primitive_type], num_primitives, GL_UNSIGNED_SHORT, nullptr));
+
+  FW_CHECKED(glUseProgram(0));
 }
 
 std::shared_ptr<effect_parameters> effect::create_parameters() {
@@ -300,55 +250,94 @@ std::shared_ptr<effect_parameters> effect::create_parameters() {
   return params;
 }
 
-void effect::end(effect_pass *pass) {
-  if (pass != 0)
-    delete pass;
 }
 
 //-----------------------------------------------------------------------------
+namespace {
 
-effect_pass::effect_pass(/*CGpass pass*/) {// :
-  //  _curr_pass(pass) {
+std::string read_shader(std::string filename) {
+  std::stringstream lines;
+  std::ifstream stream(filename, std::ios::in);
+  if (stream.is_open()) {
+    std::string line;
+    while (std::getline(stream, line)) {
+      lines << line << std::endl;
+    }
+    stream.close();
+  } else {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(filename));
+  }
+  return lines.str();
 }
 
-bool effect_pass::valid() const {
-  return false;// (_curr_pass != 0);
+void compile_shader(GLuint shader_id, std::string filename) {
+  std::string lines = read_shader(filename);
+  char const *shader_source = lines.c_str();
+  FW_CHECKED(glShaderSource(shader_id, 1, &shader_source, nullptr));
+  FW_CHECKED(glCompileShader(shader_id));
+
+  GLint status;
+  glGetShaderiv(shader_id, GL_COMPILE_STATUS, &status);
+  if (status != GL_TRUE) {
+    GLint log_length;
+    glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_length);
+    std::vector<char> error_message(log_length);
+    glGetShaderInfoLog(shader_id, log_length, nullptr, &error_message[0]);
+
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string(&error_message[0])));
+  }
 }
 
-void effect_pass::begin_pass() {
- // CG_CHECKED(cgSetPassState(_curr_pass));
+void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id) {
+  FW_CHECKED(glAttachShader(program_id, vertex_shader_id));
+  FW_CHECKED(glAttachShader(program_id, fragment_shader_id));
+
+  FW_CHECKED(glBindAttribLocation(program_id, 0, "position"));
+  FW_CHECKED(glBindAttribLocation(program_id, 1, "normal"));
+
+  FW_CHECKED(glLinkProgram(program_id));
+
+  GLint status;
+  glGetProgramiv(program_id, GL_LINK_STATUS, &status);
+  if (status != GL_TRUE) {
+    GLint log_length;
+    glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_length);
+    std::vector<char> error_message(log_length);
+    glGetProgramInfoLog(program_id, log_length, nullptr, &error_message[0]);
+
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string(&error_message[0])));
+  }
+
+  FW_CHECKED(glDetachShader(program_id, vertex_shader_id));
+  FW_CHECKED(glDetachShader(program_id, fragment_shader_id));
 }
 
-void effect_pass::end_pass() {
-//  CG_CHECKED(cgResetPassState(_curr_pass));
-//  _curr_pass = cgGetNextPass(_curr_pass);
+std::shared_ptr<effect_data> load_effect(fw::graphics *g, fs::path const &full_path) {
+  std::shared_ptr<effect_data> data(new effect_data());
+  data->filename = full_path;
+  GLint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
+  GLint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
+  data->program_id = glCreateProgram();
+
+  compile_shader(vertex_shader_id, full_path.string() + ".vert");
+  compile_shader(fragment_shader_id, full_path.string() + ".frag");
+  link_shader(data->program_id, vertex_shader_id, fragment_shader_id);
+
+  FW_CHECKED(glDeleteShader(vertex_shader_id));
+  FW_CHECKED(glDeleteShader(fragment_shader_id));
+
+  data->worldviewproj_location = glGetUniformLocation(data->program_id, "worldviewproj");
+  if (data->worldviewproj_location < 0) {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for worldviewproj"));
+  }
+
+  data->position_location = glGetAttribLocation(data->program_id, "position");
+  if (data->position_location < 0) {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for position"));
+  }
+
+  fw::debug << "loaded effect from: " << full_path.string() << std::endl;
+  return data;
 }
 
-}
-
-//-----------------------------------------------------------------------------
-
-CGeffect load_effect(fw::graphics *g, fs::path const &full_path) {
-  // TODO: how to handle optimization, nVidia's nperfhud thingy, etc?
-
- // CGeffect fx = cgCreateEffectFromFile(g->get_cg(), full_path.c_str(), 0);
- // if (fx == 0) {
- //   fw::debug
-  //      << boost::format("ERROR loading effect file: %1%") % full_path.leaf()
-  //      << std::endl;
-  //  const char *listing = cgGetLastListing(g->get_cg());
-  //  if (listing != 0) {
- //     std::stringstream ss(listing);
- //     while (!ss.eof()) {
- //       char line[1024];
- //       ss.getline(line, sizeof(line));
-//        fw::debug << " > " << line << std::endl;
-//      }
-//    }
-//  } else {
-//    fw::debug << boost::format("loaded effect from: %1%") % full_path.string()
- //       << std::endl;
- // }
-
-  return nullptr;//fx;
 }

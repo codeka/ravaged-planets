@@ -6,6 +6,10 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 include_directories(include external/include)
 
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions(-DDEBUG)
+endif()
+
 if(WIN32)
     # The following command changes \ to / in the Program Files Path so
     # CMake will not complain about bad escape sequences.
