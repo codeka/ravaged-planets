@@ -1,10 +1,12 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.1)
 project (RavagedPlanets)
 
 # add our custom CMAKE modules...
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
-include_directories(include external/include)
+# Make sure we compile with C++14 features
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     add_definitions(-DDEBUG)
@@ -20,10 +22,11 @@ if(WIN32)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_CXX_FLAGS -std=c++14)
     # Make sure we compile with -rdynamic so that stack traces can include method names.
     add_definitions(-rdynamic)
 endif()
+
+include_directories(include external/include)
 
 # configure the config.h file
 configure_file(include/config.h.in include/config.h ESCAPE_QUOTES)
