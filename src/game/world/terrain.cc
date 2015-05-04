@@ -29,8 +29,7 @@ terrain::~terrain() {
 
 void terrain::initialize() {
   // generate indices
-  //_num_indices = generate_terrain_indices(&_index_data, PATCH_SIZE);
-  _num_indices = generate_terrain_indices_wireframe(_index_data, PATCH_SIZE);
+  _num_indices = generate_terrain_indices(&_index_data, PATCH_SIZE);
   _ib->create_buffer(_num_indices);
   _ib->set_data(_num_indices, &_index_data[0], 0);
 

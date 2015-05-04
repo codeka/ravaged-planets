@@ -40,6 +40,7 @@ void index_buffer::set_data(int num_indices, uint16_t const *indices,
   if (flags <= 0)
     flags = _dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
+  fw::debug << "binding index buffer, num_indices = " << _num_indices << std::endl;
   FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id));
   FW_CHECKED(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
       num_indices * sizeof(uint16_t), reinterpret_cast<void const *>(indices), flags));

@@ -152,7 +152,9 @@ void effect_parameters::apply(effect *e) const {
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
     if (it->first == "worldviewproj") {
-      FW_CHECKED(glUniformMatrix4fv(e->_data->worldviewproj_location, 1, GL_FALSE, it->second.data()));
+      if (e->_data->worldviewproj_location >= 0) {
+        FW_CHECKED(glUniformMatrix4fv(e->_data->worldviewproj_location, 1, GL_FALSE, it->second.data()));
+      }
       continue;
     }
 
@@ -241,8 +243,6 @@ void effect::render(std::shared_ptr<effect_parameters> parameters, int num_primi
 #endif
 
   FW_CHECKED(glDrawElements(g_primitive_type_map[primitive_type], num_primitives, GL_UNSIGNED_SHORT, nullptr));
-
-  FW_CHECKED(glUseProgram(0));
 }
 
 std::shared_ptr<effect_parameters> effect::create_parameters() {
@@ -308,8 +308,8 @@ void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_sha
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string(&error_message[0])));
   }
 
-  FW_CHECKED(glDetachShader(program_id, vertex_shader_id));
-  FW_CHECKED(glDetachShader(program_id, fragment_shader_id));
+ // FW_CHECKED(glDetachShader(program_id, vertex_shader_id));
+ // FW_CHECKED(glDetachShader(program_id, fragment_shader_id));
 }
 
 std::shared_ptr<effect_data> load_effect(fw::graphics *g, fs::path const &full_path) {
@@ -323,12 +323,12 @@ std::shared_ptr<effect_data> load_effect(fw::graphics *g, fs::path const &full_p
   compile_shader(fragment_shader_id, full_path.string() + ".frag");
   link_shader(data->program_id, vertex_shader_id, fragment_shader_id);
 
-  FW_CHECKED(glDeleteShader(vertex_shader_id));
-  FW_CHECKED(glDeleteShader(fragment_shader_id));
+ // FW_CHECKED(glDeleteShader(vertex_shader_id));
+ // FW_CHECKED(glDeleteShader(fragment_shader_id));
 
   data->worldviewproj_location = glGetUniformLocation(data->program_id, "worldviewproj");
   if (data->worldviewproj_location < 0) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for worldviewproj"));
+//    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for worldviewproj"));
   }
 
   data->position_location = glGetAttribLocation(data->program_id, "position");

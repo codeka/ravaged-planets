@@ -25,7 +25,7 @@ std::string to_string(gl_error_info const & err_info);
 
 #if defined(DEBUG)
 #define FW_CHECKED(fn) \
-    fw::debug << "GRAPHICS: " << #fn << std::endl; \
+    fw::debug << #fn << std::endl; \
     fn; \
     fw::graphics::check_error(#fn)
 #else

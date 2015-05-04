@@ -67,8 +67,8 @@ void graphics::initialize(char const *title) {
   fw::debug << "GL version: " << glGetString(GL_VERSION) << std::endl;
   fw::debug << "shading language version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
-  glEnable(GL_DEPTH_TEST);
-  glViewport(0, 0, _width, _height);
+  glDisable(GL_DEPTH_TEST);
+  FW_CHECKED(glViewport(0, 0, _width, _height));
 }
 
 void graphics::destroy() {
@@ -87,10 +87,8 @@ bool graphics::poll_events() {
 }
 
 void graphics::begin_scene(fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
-  glClearColor(static_cast<float>(clear_colour.r),
-      static_cast<float>(clear_colour.g), static_cast<float>(clear_colour.b),
-      static_cast<float>(clear_colour.a));
-  glClear(GL_COLOR_BUFFER_BIT);
+  FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
+  FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void graphics::end_scene() {

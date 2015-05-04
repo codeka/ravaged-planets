@@ -41,8 +41,7 @@ private:
 
   std::shared_ptr<fw::effect> _effect;
 
-  //uint16_t *_index_data;
-  std::vector<uint16_t> _index_data;
+  uint16_t *_index_data;
   int _num_indices;
 
 protected:

@@ -47,13 +47,14 @@ void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*
 
   _num_vertices = num_vertices;
 
+  fw::debug << "binding vertex buffer, num_vertices = " << _num_vertices << ", vertex_size = " << _vertex_size
+      << std::endl;
   FW_CHECKED(glBindVertexArray(_id));
   GLuint buffer_id;
   FW_CHECKED(glGenBuffers(1, &buffer_id));
   FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, buffer_id));
   FW_CHECKED(glBufferData(GL_ARRAY_BUFFER, _num_vertices * _vertex_size, vertices, flags));
   _setup();
-  FW_CHECKED(glDeleteBuffers(1, &buffer_id));
 }
 
 void vertex_buffer::bind(GLint program_location) {

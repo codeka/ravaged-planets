@@ -113,6 +113,7 @@ void node::render(scenegraph *sg) {
 //				if (is_rendering_shadow)
 //					fx = shadow_fx;
 
+    fw::debug << "rendering " << num_primitives << " primitives." << std::endl;
     if (!fx) {
       render_nofx(num_primitives);
     } else {
