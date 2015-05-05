@@ -10,8 +10,8 @@ namespace fw {
 class shadow_source;
 class vertex_buffer;
 class index_buffer;
-class effect;
-class effect_parameters;
+class shader;
+class shader_parameters;
 class texture;
 
 namespace sg {
@@ -70,22 +70,19 @@ private:
   primitive_type _primitive_type;
   std::shared_ptr<fw::vertex_buffer> _vb;
   std::shared_ptr<fw::index_buffer> _ib;
-  std::shared_ptr<fw::effect> _fx;
-  std::shared_ptr<fw::effect_parameters> _fx_params;
+  std::shared_ptr<fw::shader> _shader;
+  std::shared_ptr<fw::shader_parameters> _shader_params;
 
-  // Renders the node if the effect file is null (basically just uses the basic effect).
-  void render_nofx();
+  // Renders the node if the shader file is null (basically just uses the basic shader).
+  void render_noshader();
 
 protected:
   node *_parent;
   std::vector<std::shared_ptr<node> > _children;
   fw::matrix _world;
 
-  // this is called when we're rendering a given effect
-  virtual void render_fx(std::shared_ptr<fw::effect> fx);
-
-  // called to set any additional parameters on the given effect
-  virtual void setup_effect(std::shared_ptr<fw::effect> fx);
+  // this is called when we're rendering a given shader
+  virtual void render_shader(std::shared_ptr<fw::shader> shader);
 
   // called by clone() to populate the clone
   virtual void populate_clone(std::shared_ptr<node> clone);
@@ -123,17 +120,17 @@ public:
     return _ib;
   }
 
-  void set_effect(std::shared_ptr<fw::effect> fx) {
-    _fx = fx;
+  void set_shader(std::shared_ptr<fw::shader> shader) {
+    _shader = shader;
   }
-  std::shared_ptr<fw::effect> get_effect() const;
+  std::shared_ptr<fw::shader> get_shader() const;
 
-  void set_effect_parameters(
-      std::shared_ptr<fw::effect_parameters> fx_params) {
-    _fx_params = fx_params;
+  void set_shader_parameters(
+      std::shared_ptr<fw::shader_parameters> shader_params) {
+    _shader_params;
   }
-  std::shared_ptr<fw::effect_parameters> get_effect_parameters() const {
-    return _fx_params;
+  std::shared_ptr<fw::shader_parameters> get_shader_parameters() const {
+    return _shader_params;
   }
 
   void set_cast_shadows(bool cast_shadows) {
@@ -153,9 +150,8 @@ public:
   // this is called by the scenegraph itself when it's time to render
   virtual void render(scenegraph *sg);
 
-  // creates a clone of this node (it's a "shallow" clone in that the vertex_buffer,
-  // index_buffer and effect will be shared but matrix and effect_parameters will be
-  // new)
+  // Creates a clone of this node (it's a "shallow" clone in that the vertex_buffer, index_buffer and shader will be
+  // shared but matrix and shader_parameters will be new)
   virtual std::shared_ptr<node> clone();
 };
 

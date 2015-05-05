@@ -11,8 +11,8 @@ class texture;
 class vertex_buffer;
 class index_buffer;
 class bitmap;
-class effect;
-class effect_parameters;
+class shader;
+class shader_parameters;
 
 namespace sg {
 class scenegraph;
@@ -28,7 +28,7 @@ namespace ww {
 struct terrain_patch {
   std::shared_ptr<fw::vertex_buffer> vb;
   std::shared_ptr<fw::texture> texture;
-  std::shared_ptr<fw::effect_parameters> fx_params;
+  std::shared_ptr<fw::shader_parameters> shader_params;
 };
 
 class terrain {
@@ -38,7 +38,7 @@ public:
 private:
   std::vector<std::shared_ptr<terrain_patch> > _patches;
   std::shared_ptr<fw::index_buffer> _ib;
-  std::shared_ptr<fw::effect> _effect;
+  std::shared_ptr<fw::shader> _shader;
 
 protected:
   friend class ed::world_writer;

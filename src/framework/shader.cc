@@ -8,7 +8,6 @@
 #include <framework/misc.h>
 #include <framework/framework.h>
 #include <framework/colour.h>
-#include <framework/effect.h>
 #include <framework/graphics.h>
 #include <framework/texture.h>
 #include <framework/settings.h>
@@ -19,89 +18,78 @@
 #include <framework/scenegraph.h>
 #include <framework/vertex_buffer.h>
 #include <framework/index_buffer.h>
+#include <framework/shader.h>
 
 namespace fs = boost::filesystem;
 
-struct effect_data: boost::noncopyable {
-  fs::path filename;
-  GLuint program_id;
-
-  GLint worldviewproj_location;
-  GLint position_location;
-
-  inline ~effect_data() {
-    fw::debug << "effect_data::~effect_data()" << std::endl;
-    glDeleteProgram(program_id);
-  }
-};
-
 //-------------------------------------------------------------------------
-// This is a cache of .fx files, so we don't have to load them over and over...
-class effect_cache {
+// This is a cache of .shader files, so we don't have to load them over and over...
+class shader_cache {
 private:
-  typedef std::map<fs::path, std::shared_ptr<effect_data> > effect_map;
-  effect_map _effects;
+  typedef std::map<fs::path, std::shared_ptr<fw::shader> > shader_map;
+  shader_map _shaders;
 
 public:
-  std::shared_ptr<effect_data> get_effect(fs::path const &name);
-  void add_effect(fs::path const &name, std::shared_ptr<effect_data> data);
+  std::shared_ptr<fw::shader> get_shader(fs::path const &name);
+  void add_shader(fs::path const &name, std::shared_ptr<fw::shader> data);
 
   void clear_cache();
 };
 
-std::shared_ptr<effect_data> effect_cache::get_effect(fs::path const &name) {
-  effect_map::iterator it = _effects.find(name);
-  if (it == _effects.end())
-    return std::shared_ptr<effect_data>();
+std::shared_ptr<fw::shader> shader_cache::get_shader(fs::path const &name) {
+  shader_map::iterator it = _shaders.find(name);
+  if (it == _shaders.end())
+    return std::shared_ptr<fw::shader>();
 
   return it->second;
 }
 
-void effect_cache::add_effect(fs::path const &name, std::shared_ptr<effect_data> data) {
-  _effects[name] = data;
+void shader_cache::add_shader(fs::path const &name, std::shared_ptr<fw::shader> data) {
+  _shaders[name] = data;
 }
 
-void effect_cache::clear_cache() {
-  _effects.clear();
+void shader_cache::clear_cache() {
+  _shaders.clear();
 }
 
 //-----------------------------------------------------------------------------
 
 namespace {
-effect_cache g_cache;
-std::shared_ptr<effect_data> load_effect(fw::graphics *g, fs::path const &full_path);
+shader_cache g_cache;
+void compile_shader(GLuint shader_id, std::string filename);
+void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id);
 }
 
 namespace fw {
 //-------------------------------------------------------------------------
-effect_parameters::effect_parameters() {
+shader_parameters::shader_parameters() {
 }
 
-effect_parameters::~effect_parameters() {
+shader_parameters::~shader_parameters() {
 }
 
-void effect_parameters::set_texture(std::string const &name, std::shared_ptr<texture> const &tex) {
+void shader_parameters::set_texture(std::string const &name, std::shared_ptr<texture> const &tex) {
   _textures[name] = tex;
 }
 
-void effect_parameters::set_matrix(std::string const &name, matrix const &m) {
+void shader_parameters::set_matrix(std::string const &name, matrix const &m) {
   _matrices[name] = m;
 }
 
-void effect_parameters::set_vector(std::string const &name, vector const &v) {
+void shader_parameters::set_vector(std::string const &name, vector const &v) {
   _vectors[name] = v;
 }
 
-void effect_parameters::set_colour(std::string const &name, colour const &c) {
+void shader_parameters::set_colour(std::string const &name, colour const &c) {
   _colours[name] = c;
 }
 
-void effect_parameters::set_scalar(std::string const &name, float f) {
+void shader_parameters::set_scalar(std::string const &name, float f) {
   _scalars[name] = f;
 }
 
-std::shared_ptr<effect_parameters> effect_parameters::clone() {
-  std::shared_ptr<effect_parameters> clone(new effect_parameters());
+std::shared_ptr<shader_parameters> shader_parameters::clone() {
+  std::shared_ptr<shader_parameters> clone(new shader_parameters());
   clone->_textures = _textures;
   clone->_matrices = _matrices;
   clone->_vectors = _vectors;
@@ -110,22 +98,19 @@ std::shared_ptr<effect_parameters> effect_parameters::clone() {
   return clone;
 }
 
-void effect_parameters::apply(effect *e) const {
-  if (e->_data == 0)
-    return;
-
+void shader_parameters::apply(shader *e) const {
   for (auto it = _textures.begin(); it != _textures.end(); ++it) {
-    GLint id = glGetUniformLocation(e->_data->program_id, it->first.c_str());
+    GLint id = glGetUniformLocation(e->_program_id, it->first.c_str());
 //    glTexture();
   }
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
     if (it->first == "worldviewproj") {
-      FW_CHECKED(glUniformMatrix4fv(e->_data->worldviewproj_location, 1, GL_FALSE, it->second.data()));
+      FW_CHECKED(glUniformMatrix4fv(e->worldviewproj_location, 1, GL_FALSE, it->second.data()));
       continue;
     }
 
-    GLint id = glGetUniformLocation(e->_data->program_id, it->first.c_str());
+    GLint id = glGetUniformLocation(e->_program_id, it->first.c_str());
     if (id > 0) {
       FW_CHECKED(glUniformMatrix4fv(id, 1, GL_FALSE, it->second.data()));
     } else {
@@ -166,27 +151,27 @@ void effect_parameters::apply(effect *e) const {
 }
 
 //-------------------------------------------------------------------------
-effect::effect() {
+shader::shader() {
 }
 
-effect::~effect() {
+shader::~shader() {
 }
 
-void effect::initialise(fs::path const &filename) {
+std::shared_ptr<shader> shader::create(std::string const &filename) {
   fw::graphics *g = fw::framework::get_instance()->get_graphics();
 
-  _data = g_cache.get_effect(filename);
-  if (!_data) {
-    _data = load_effect(g, fw::resolve("share/ravaged-planets/shaders/" + filename.string()));
-    g_cache.add_effect(filename, _data);
+  std::shared_ptr<shader> shdr = g_cache.get_shader(filename);
+  if (!shdr) {
+    shdr = std::shared_ptr<shader>(new shader());
+    shdr->load(g, fw::resolve("share/ravaged-planets/shaders/" + filename));
+    g_cache.add_shader(filename, shdr);
   }
+
+  return shdr;
 }
 
-void effect::begin(std::shared_ptr<effect_parameters> parameters) {
-  if (!_data)
-    return;
-
-  FW_CHECKED(glUseProgram(_data->program_id));
+void shader::begin(std::shared_ptr<shader_parameters> parameters) {
+  FW_CHECKED(glUseProgram(_program_id));
   if (parameters) {
     parameters->apply(this);
   }
@@ -208,13 +193,37 @@ void effect::begin(std::shared_ptr<effect_parameters> parameters) {
 */
 }
 
-void effect::end() {
+void shader::end() {
   FW_CHECKED(glUseProgram(0));
 }
 
-std::shared_ptr<effect_parameters> effect::create_parameters() {
-  std::shared_ptr<effect_parameters> params(new effect_parameters());
+std::shared_ptr<shader_parameters> shader::create_parameters() {
+  std::shared_ptr<shader_parameters> params(new shader_parameters());
   return params;
+}
+
+void shader::load(fw::graphics *g, fs::path const &full_path) {
+  std::shared_ptr<shader> data(new shader());
+  _filename = full_path;
+  GLint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
+  GLint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
+  _program_id = glCreateProgram();
+
+  compile_shader(vertex_shader_id, full_path.string() + ".vert");
+  compile_shader(fragment_shader_id, full_path.string() + ".frag");
+  link_shader(_program_id, vertex_shader_id, fragment_shader_id);
+
+  worldviewproj_location = glGetUniformLocation(_program_id, "worldviewproj");
+  if (worldviewproj_location < 0) {
+//    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for worldviewproj"));
+  }
+
+  position_location = glGetAttribLocation(_program_id, "position");
+  if (position_location < 0) {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for position"));
+  }
+
+  fw::debug << "loaded shader from: " << full_path.string() << std::endl;
 }
 
 }
@@ -279,32 +288,5 @@ void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_sha
  // FW_CHECKED(glDetachShader(program_id, fragment_shader_id));
 }
 
-std::shared_ptr<effect_data> load_effect(fw::graphics *g, fs::path const &full_path) {
-  std::shared_ptr<effect_data> data(new effect_data());
-  data->filename = full_path;
-  GLint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
-  GLint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
-  data->program_id = glCreateProgram();
-
-  compile_shader(vertex_shader_id, full_path.string() + ".vert");
-  compile_shader(fragment_shader_id, full_path.string() + ".frag");
-  link_shader(data->program_id, vertex_shader_id, fragment_shader_id);
-
- // FW_CHECKED(glDeleteShader(vertex_shader_id));
- // FW_CHECKED(glDeleteShader(fragment_shader_id));
-
-  data->worldviewproj_location = glGetUniformLocation(data->program_id, "worldviewproj");
-  if (data->worldviewproj_location < 0) {
-//    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for worldviewproj"));
-  }
-
-  data->position_location = glGetAttribLocation(data->program_id, "position");
-  if (data->position_location < 0) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for position"));
-  }
-
-  fw::debug << "loaded effect from: " << full_path.string() << std::endl;
-  return data;
-}
 
 }

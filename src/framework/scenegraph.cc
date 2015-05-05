@@ -7,16 +7,15 @@
 #include <framework/graphics.h>
 #include <framework/framework.h>
 #include <framework/camera.h>
-#include <framework/effect.h>
 #include <framework/vertex_buffer.h>
 #include <framework/index_buffer.h>
 #include <framework/logging.h>
 #include <framework/exception.h>
 #include <framework/misc.h>
+#include <framework/shader.h>
 
-// this is the effect file we'll use for rendering shadow map(s)
-//static boost::shared_ptr<fw::effect> shadow_fx;
-static std::shared_ptr<fw::effect> basic_fx;
+//static boost::shared_ptr<fw::shader> shadow_shader;
+static std::shared_ptr<fw::shader> basic_shader;
 
 //static bool is_rendering_shadow = false;
 //static boost::shared_ptr<fw::shadow_source> shadowsrc;
@@ -72,19 +71,19 @@ void node::remove_child(std::shared_ptr<node> child) {
     _children.erase(it);
 }
 
-// get the effect file to use. if we don't have one defined, look at our parent and keep looking up at our parents
+// Get the shader file to use. if we don't have one defined, look at our parent and keep looking up at our parents
 // until we find one.
-std::shared_ptr<fw::effect> node::get_effect() const {
-  std::shared_ptr<fw::effect> fx = _fx;
-  if (!fx) {
+std::shared_ptr<fw::shader> node::get_shader() const {
+  std::shared_ptr<fw::shader> shader = _shader;
+  if (!shader) {
     node *parent = _parent;
-    while (!fx && parent != 0) {
-      fx = parent->_fx;
+    while (!shader && parent != 0) {
+      shader = parent->_shader;
       parent = parent->_parent;
     }
   }
 
-  return fx;
+  return shader;
 }
 
 void node::render(scenegraph *sg) {
@@ -94,14 +93,14 @@ void node::render(scenegraph *sg) {
 //    return;
 
   if (_vb) {
-    std::shared_ptr<fw::effect> fx = _fx;
+    std::shared_ptr<fw::shader> shader = get_shader();
 //				if (is_rendering_shadow)
 //					fx = shadow_fx;
 
-    if (!fx) {
-      render_nofx();
+    if (!shader) {
+      render_noshader();
     } else {
-      render_fx(fx);
+      render_shader(shader);
     }
   }
 
@@ -111,13 +110,13 @@ void node::render(scenegraph *sg) {
   }
 }
 
-// this is called when we're rendering a given effect
-void node::render_fx(std::shared_ptr<fw::effect> fx) {
-  std::shared_ptr<fw::effect_parameters> parameters;
-  if (_fx_params) {
-    parameters = _fx_params;
+// this is called when we're rendering a given shader
+void node::render_shader(std::shared_ptr<fw::shader> shader) {
+  std::shared_ptr<fw::shader_parameters> parameters;
+  if (_shader_params) {
+    parameters = _shader_params;
   } else {
-    parameters = fx->create_parameters();
+    parameters = shader->create_parameters();
   }
 
   // add the world_view and world_view_proj parameters as well as shadow parameters
@@ -142,27 +141,21 @@ void node::render_fx(std::shared_ptr<fw::effect> fx) {
 //				}
   }
 
-  setup_effect(fx);
   _vb->begin();
   _ib->begin();
-  fx->begin(parameters);
+  shader->begin(parameters);
   FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], _ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
-  fx->end();
+  shader->end();
   _ib->end();
   _vb->end();
 }
 
-void node::render_nofx() {
-  if (!basic_fx) {
-    basic_fx = std::shared_ptr<fw::effect>(new effect());
-    basic_fx->initialise("basic");
+void node::render_noshader() {
+  if (!basic_shader) {
+    basic_shader = fw::shader::create("basic");
   }
 
-  render_fx(basic_fx);
-}
-
-// called to set any additional parameters on the given effect
-void node::setup_effect(std::shared_ptr<fw::effect> fx) {
+  render_shader(basic_shader);
 }
 
 void node::populate_clone(std::shared_ptr<node> clone) {
@@ -170,9 +163,9 @@ void node::populate_clone(std::shared_ptr<node> clone) {
   clone->_primitive_type = _primitive_type;
   clone->_vb = _vb;
   clone->_ib = _ib;
-  clone->_fx = _fx;
-  if (_fx_params)
-    clone->_fx_params = _fx_params->clone();
+  clone->_shader = _shader;
+  if (_shader_params)
+    clone->_shader_params = _shader_params->clone();
   clone->_parent = _parent;
   clone->_world = _world;
 
@@ -200,8 +193,8 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= 0*/,
 
 //		if (shadow_fx == 0)
 //		{
-//			shadow_fx = shared_ptr<fw::effect>(new effect());
-//			shadow_fx->initialise("shadow.fx");
+//			shadow_shader = shared_ptr<fw::shader>(new shader());
+//			shadow_shader->initialise("shadow.fx");
 //		}
 
   if (render_target != 0)

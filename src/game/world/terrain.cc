@@ -6,19 +6,19 @@
 #include <framework/logging.h>
 #include <framework/camera.h>
 #include <framework/bitmap.h>
-#include <framework/effect.h>
 #include <framework/texture.h>
 #include <framework/vertex_formats.h>
 #include <framework/input.h>
 #include <framework/vector.h>
 #include <framework/scenegraph.h>
+#include <framework/shader.h>
 #include <game/world/terrain.h>
 #include <game/world/terrain_helper.h>
 
 namespace ww {
 
 terrain::terrain() :
-    _width(0), _length(0), _heights(0), _ib(new fw::index_buffer()), _effect(new fw::effect()) {
+    _width(0), _length(0), _heights(0), _ib(new fw::index_buffer()) {
 }
 
 terrain::~terrain() {
@@ -31,9 +31,9 @@ void terrain::initialize() {
   generate_terrain_indices_wireframe(index_data, PATCH_SIZE);
   _ib->set_data(index_data.size(), &index_data[0], 0);
 
-  // load the effect file that we'll use for rendering
-  //_effect->initialise("terrain");
-  _effect = nullptr;
+  // load the shader file that we'll use for rendering
+  //_shader = fw::shader::create("terrain");
+  _shader = nullptr;
 
   // todo: load texture(s)
   std::shared_ptr<fw::texture> layer(new fw::texture());
@@ -114,7 +114,7 @@ void terrain::bake_patch(int patch_x, int patch_z) {
   patch->vb->set_data(num_verts, vert_data, 0);
   delete[] vert_data;
 
-  patch->fx_params = _effect->create_parameters();/*
+  /*patch->fx_params = _shader->create_parameters();
   if (_layers.size() >= 1)
     patch->fx_params->set_texture("layer1", _layers[0]);
   if (_layers.size() >= 2)
@@ -181,8 +181,8 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
       // we have to set up the scenegraph node with these manually
       node->set_vertex_buffer(patch->vb);
       node->set_index_buffer(_ib);
-      //node->set_effect(_effect);
-      //node->set_effect_parameters(patch->fx_params);
+      //node->set_shader(_shader);
+      //node->set_shader_parameters(patch->shader_params);
       node->set_primitive_type(fw::sg::primitive_linelist);
       //node->set_primitive_type(fw::sg::primitive_trianglestrip);
 
