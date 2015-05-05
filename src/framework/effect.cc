@@ -5,10 +5,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
-#include <framework/effect.h>
 #include <framework/misc.h>
 #include <framework/framework.h>
 #include <framework/colour.h>
+#include <framework/effect.h>
 #include <framework/graphics.h>
 #include <framework/texture.h>
 #include <framework/settings.h>
@@ -21,18 +21,6 @@
 #include <framework/index_buffer.h>
 
 namespace fs = boost::filesystem;
-
-static std::map<fw::sg::primitive_type, uint32_t> g_primitive_type_map;
-
-static void ensure_primitive_type_map() {
-  if (g_primitive_type_map.size() > 0)
-    return;
-
-  g_primitive_type_map[fw::sg::primitive_linestrip] = GL_LINE_STRIP;
-  g_primitive_type_map[fw::sg::primitive_linelist] = GL_LINES;
-  g_primitive_type_map[fw::sg::primitive_trianglelist] = GL_TRIANGLES;
-  g_primitive_type_map[fw::sg::primitive_trianglestrip] = GL_TRIANGLE_STRIP;
-}
 
 struct effect_data: boost::noncopyable {
   fs::path filename;
@@ -96,10 +84,6 @@ void effect_parameters::set_texture(std::string const &name, std::shared_ptr<tex
   _textures[name] = tex;
 }
 
-void effect_parameters::set_vertex_buffer(std::string const &name, std::shared_ptr<vertex_buffer> const &vb) {
-  _vertex_buffers[name] = vb;
-}
-
 void effect_parameters::set_matrix(std::string const &name, matrix const &m) {
   _matrices[name] = m;
 }
@@ -133,21 +117,6 @@ void effect_parameters::apply(effect *e) const {
   for (auto it = _textures.begin(); it != _textures.end(); ++it) {
     GLint id = glGetUniformLocation(e->_data->program_id, it->first.c_str());
 //    glTexture();
-  }
-
-  for (auto it = _vertex_buffers.begin(); it != _vertex_buffers.end(); ++it) {
-    if (it->first == "position") {
-      it->second->bind(e->_data->position_location);
-      continue;
-    }
-
-    GLint id = glGetAttribLocation(e->_data->program_id, it->first.c_str());
-    if (id > 0) {
-      it->second->bind(id);
-    } else {
-      fw::debug << "Warning: No location for '" << it->first.c_str() << "' in " << e->_data->filename.filename()
-          << std::endl;
-    }
   }
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
@@ -213,19 +182,16 @@ void effect::initialise(fs::path const &filename) {
   }
 }
 
-void effect::render(std::shared_ptr<effect_parameters> parameters, fw::sg::primitive_type primitive_type,
-    index_buffer *idx_buffer) {
+void effect::begin(std::shared_ptr<effect_parameters> parameters) {
   if (!_data)
     return;
-  ensure_primitive_type_map();
 
   FW_CHECKED(glUseProgram(_data->program_id));
   if (parameters) {
     parameters->apply(this);
   }
 
-  idx_buffer->prepare();
-/*
+  /*
 #ifdef DEBUG
   GLint status;
   FW_CHECKED(glValidateProgram(_data->program_id));
@@ -240,8 +206,10 @@ void effect::render(std::shared_ptr<effect_parameters> parameters, fw::sg::primi
   }
 #endif
 */
-  FW_CHECKED(glDrawElements(g_primitive_type_map[primitive_type], idx_buffer->get_num_indices(),
-      GL_UNSIGNED_SHORT, nullptr));
+}
+
+void effect::end() {
+  FW_CHECKED(glUseProgram(0));
 }
 
 std::shared_ptr<effect_parameters> effect::create_parameters() {

@@ -28,8 +28,12 @@ void index_buffer::set_data(int num_indices, uint16_t const *indices,
       num_indices * sizeof(uint16_t), reinterpret_cast<void const *>(indices), flags));
 }
 
-void index_buffer::prepare() {
+void index_buffer::begin() {
   FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id));
+}
+
+void index_buffer::end() {
+  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
 }

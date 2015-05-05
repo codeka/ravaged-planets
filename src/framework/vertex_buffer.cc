@@ -30,9 +30,14 @@ void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*
   FW_CHECKED(glBufferData(GL_ARRAY_BUFFER, _num_vertices * _vertex_size, vertices, flags));
 }
 
-void vertex_buffer::bind(GLint program_location) {
+void vertex_buffer::begin() {
   FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
   _setup();
+}
+
+void vertex_buffer::end() {
+  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  // todo: opposite of _setup()?
 }
 
 }

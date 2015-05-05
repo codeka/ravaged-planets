@@ -8,7 +8,6 @@
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/vector.h>
-#include <framework/scenegraph.h>
 
 struct effect_data;
 
@@ -27,7 +26,6 @@ private:
   friend class effect;
 
   std::map<std::string, std::shared_ptr<texture> > _textures;
-  std::map<std::string, std::shared_ptr<vertex_buffer>> _vertex_buffers;
   std::map<std::string, matrix> _matrices;
   std::map<std::string, vector> _vectors;
   std::map<std::string, colour> _colours;
@@ -40,8 +38,6 @@ public:
   ~effect_parameters();
 
   void set_texture(std::string const &name, std::shared_ptr<texture> const &t);
-  void set_vertex_buffer(std::string const &name, std::shared_ptr<vertex_buffer> const &vb);
-  void set_index_buffer(std::string const &name, std::shared_ptr<index_buffer> const &ib);
   void set_matrix(std::string const &name, matrix const &m);
   void set_vector(std::string const &name, vector const &v);
   void set_colour(std::string const &name, colour const &c);
@@ -72,10 +68,8 @@ public:
   void set_colour(char const *name, colour const &c);
   void set_scalar(char const *name, float f);
 
-  void render(std::shared_ptr<effect_parameters> parameters, fw::sg::primitive_type primitive_type,
-      index_buffer *idx_buffer);
-//  void begin(std::shared_ptr<effect_parameters> parameters);
-//  void end();
+  void begin(std::shared_ptr<effect_parameters> parameters);
+  void end();
 };
 
 }

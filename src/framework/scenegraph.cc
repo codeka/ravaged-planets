@@ -8,13 +8,11 @@
 #include <framework/framework.h>
 #include <framework/camera.h>
 #include <framework/effect.h>
-//#include <framework/shadows.h>
 #include <framework/vertex_buffer.h>
 #include <framework/index_buffer.h>
 #include <framework/logging.h>
 #include <framework/exception.h>
 #include <framework/misc.h>
-//#include <framework/gui/cegui.h>
 
 // this is the effect file we'll use for rendering shadow map(s)
 //static boost::shared_ptr<fw::effect> shadow_fx;
@@ -22,6 +20,18 @@ static std::shared_ptr<fw::effect> basic_fx;
 
 //static bool is_rendering_shadow = false;
 //static boost::shared_ptr<fw::shadow_source> shadowsrc;
+
+static std::map<fw::sg::primitive_type, uint32_t> g_primitive_type_map;
+
+static void ensure_primitive_type_map() {
+  if (g_primitive_type_map.size() > 0)
+    return;
+
+  g_primitive_type_map[fw::sg::primitive_linestrip] = GL_LINE_STRIP;
+  g_primitive_type_map[fw::sg::primitive_linelist] = GL_LINES;
+  g_primitive_type_map[fw::sg::primitive_trianglelist] = GL_TRIANGLES;
+  g_primitive_type_map[fw::sg::primitive_trianglestrip] = GL_TRIANGLE_STRIP;
+}
 
 namespace fw {
 
@@ -132,10 +142,14 @@ void node::render_fx(std::shared_ptr<fw::effect> fx) {
 //				}
   }
 
-  parameters->set_vertex_buffer("position", _vb);
-
   setup_effect(fx);
-  fx->render(parameters, _primitive_type, _ib.get());
+  _vb->begin();
+  _ib->begin();
+  fx->begin(parameters);
+  FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], _ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
+  fx->end();
+  _ib->end();
+  _vb->end();
 }
 
 void node::render_nofx() {
@@ -180,6 +194,8 @@ std::shared_ptr<node> node::clone() {
 // renders the scene!
 void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= 0*/,
     fw::colour clear_colour /*= fw::colour(1, 0, 0, 0)*/) {
+  ensure_primitive_type_map();
+
   graphics *g = fw::framework::get_instance()->get_graphics();
 
 //		if (shadow_fx == 0)

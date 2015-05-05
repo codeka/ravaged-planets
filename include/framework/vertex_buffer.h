@@ -41,7 +41,8 @@ public:
     return _num_vertices;
   }
 
-  void bind(GLint program_location);
+  void begin();
+  void end();
 };
 
 }

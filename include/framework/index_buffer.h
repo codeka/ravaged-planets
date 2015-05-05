@@ -23,8 +23,9 @@ public:
     return _num_indices;
   }
 
-  // Called by the effect (which controls the actual rendering) just before we render with this index buffer.
-  void prepare();
+  // Called just before and just after we're going to render with this index buffer.
+  void begin();
+  void end();
 };
 
 }
