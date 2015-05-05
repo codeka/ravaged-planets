@@ -35,21 +35,22 @@ bool application::initialize(fw::framework *frmwrk) {
 //  _framework->get_input()->show_cursor();
 
   // set up the camera
-  fw::top_down_camera *cam = new fw::top_down_camera();
-  cam->set_mouse_move(false);
+  fw::lookat_camera *cam = new fw::lookat_camera();
+ // cam->set_mouse_move(false);
   _framework->set_camera(cam);
 
- // terrain = new ww::terrain();
-//  terrain->create(64, 64, 1);
- // terrain->initialize();
+  terrain = new ww::terrain();
+  terrain->create(64, 64, 1);
+  terrain->initialize();
 
+/*
   vtx_buffer = std::shared_ptr<fw::vertex_buffer>(new fw::vertex_buffer());
   vtx_buffer->create_buffer<fw::vertex::xyz_n>(4, false);
   fw::vertex::xyz_n data[4];
-  data[0] = fw::vertex::xyz_n(-1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-  data[1] = fw::vertex::xyz_n( 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-  data[2] = fw::vertex::xyz_n( 1.0f, 1.0f,  0.0f, 0.0f, 1.0f, 0.0f);
-  data[3] = fw::vertex::xyz_n(-1.0f, 1.0f,  0.0f, 0.0f, 1.0f, 0.0f);
+  data[0] = fw::vertex::xyz_n(-10.9f, 0.0f, -10.9f, 0.0f, 1.0f, 0.0f);
+  data[1] = fw::vertex::xyz_n( 10.9f, 0.0f, -10.9f, 0.0f, 1.0f, 0.0f);
+  data[2] = fw::vertex::xyz_n( 10.9f, 0.0f,  10.9f, 0.0f, 1.0f, 0.0f);
+  data[3] = fw::vertex::xyz_n(-10.9f, 0.0f,  10.9f, 0.0f, 1.0f, 0.0f);
   vtx_buffer->set_data(4, reinterpret_cast<void *>(&data));
 
   idx_buffer = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
@@ -59,10 +60,10 @@ bool application::initialize(fw::framework *frmwrk) {
   indices[1] = 1;
   indices[2] = 2;
   indices[3] = 0;
-  indices[4] = 3;
-  indices[5] = 2;
+  indices[4] = 2;
+  indices[5] = 3;
   idx_buffer->set_data(6, indices);
-
+*/
   // start the simulation thread now, it'll always run even if there's
   // no actual game running....
 //  simulation_thread::get_instance()->initialise();
@@ -93,13 +94,13 @@ void application::update(float dt) {
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {
- // terrain->render(scenegraph);
+  terrain->render(scenegraph);
 //  _screen->get_active_screen()->render(scenegraph);
-  std::shared_ptr<fw::sg::node> node(new fw::sg::node());
+/*  std::shared_ptr<fw::sg::node> node(new fw::sg::node());
   node->set_index_buffer(idx_buffer);
   node->set_vertex_buffer(vtx_buffer);
   node->set_primitive_type(fw::sg::primitive_trianglelist);
-  scenegraph.add_node(node);
+  scenegraph.add_node(node);*/
 }
 
 }

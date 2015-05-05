@@ -9,11 +9,11 @@ struct xyz_n;
 namespace ww {
 
 // generates a "patch" of indices for a terrain that's patch_size * patch_size big
-int generate_terrain_indices(uint16_t** indices, int patch_size);
+void generate_terrain_indices(std::vector<uint16_t> &indices, int patch_size);
 
 // similar to generate_terrain_indices, but we generate indices assuming a wire
 // mesh will be drawn
-int generate_terrain_indices_wireframe(std::vector<uint16_t> &indices, int patch_size);
+void generate_terrain_indices_wireframe(std::vector<uint16_t> &indices, int patch_size);
 
 // generates xyz_n vertices for a patch of terrain the of given size.
 //

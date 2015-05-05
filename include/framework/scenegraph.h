@@ -74,15 +74,15 @@ private:
   std::shared_ptr<fw::effect_parameters> _fx_params;
 
   // Renders the node if the effect file is null (basically just uses the basic effect).
-  void render_nofx(int num_primitives);
+  void render_nofx();
 
 protected:
   node *_parent;
   std::vector<std::shared_ptr<node> > _children;
   fw::matrix _world;
 
-  // this is called when we're rendering a gvien effect
-  virtual void render_fx(int num_primitives, std::shared_ptr<fw::effect> fx);
+  // this is called when we're rendering a given effect
+  virtual void render_fx(std::shared_ptr<fw::effect> fx);
 
   // called to set any additional parameters on the given effect
   virtual void setup_effect(std::shared_ptr<fw::effect> fx);

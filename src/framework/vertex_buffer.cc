@@ -25,10 +25,10 @@ void vertex_buffer::create_buffer(int max_vertices, setup_fn setup, size_t verte
   _setup = setup;
 
   if (_id != 0) {
-    FW_CHECKED(glDeleteVertexArrays(1, &_id));
+    FW_CHECKED(glDeleteBuffers(1, &_id));
     _id = 0;
   }
-  FW_CHECKED(glGenVertexArrays(1, &_id));
+  FW_CHECKED(glGenBuffers(1, &_id));
 
   _num_vertices = 0;
   _vertex_size = vertex_size;
@@ -47,21 +47,13 @@ void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*
 
   _num_vertices = num_vertices;
 
-  fw::debug << "binding vertex buffer, num_vertices = " << _num_vertices << ", vertex_size = " << _vertex_size
-      << std::endl;
-  FW_CHECKED(glBindVertexArray(_id));
-  GLuint buffer_id;
-  FW_CHECKED(glGenBuffers(1, &buffer_id));
-  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, buffer_id));
+  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
   FW_CHECKED(glBufferData(GL_ARRAY_BUFFER, _num_vertices * _vertex_size, vertices, flags));
-  _setup();
 }
 
 void vertex_buffer::bind(GLint program_location) {
-  FW_CHECKED(glBindVertexArray(_id));
-//  FW_CHECKED(glEnableVertexAttribArray(program_location));
-//  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
-//  FW_CHECKED(glVertexAttribPointer(program_location, 3, GL_FLOAT, GL_FALSE, _vertex_size, nullptr));
+  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
+  _setup();
 }
 
 }

@@ -7,11 +7,11 @@
 
 namespace ww {
 
-int generate_terrain_indices(uint16_t** indices, int patch_size) {
+void generate_terrain_indices(std::vector<uint16_t> &indices, int patch_size) {
   patch_size++;
 
   int num_indices = (patch_size * 2) * (patch_size - 1) + (patch_size - 2);
-  *indices = new uint16_t[num_indices];
+  indices.resize(num_indices);
 
   int index = 0;
   for (int z = 0; z < patch_size - 1; z++) {
@@ -19,34 +19,31 @@ int generate_terrain_indices(uint16_t** indices, int patch_size) {
     if (z % 2 == 0) {
       int x;
       for (x = 0; x < patch_size; x++) {
-        (*indices)[index++] = x + (z * patch_size);
-        (*indices)[index++] = x + (z * patch_size) + patch_size;
+        indices[index++] = x + (z * patch_size);
+        indices[index++] = x + (z * patch_size) + patch_size;
       }
 
       // insert degenerate vertex if this isn't the last row
       if (z != patch_size - 2) {
         x--;
-        (*indices)[index++] = x + (z * patch_size);
+        indices[index++] = x + (z * patch_size);
       }
     } else {
       int x;
       for (x = patch_size - 1; x >= 0; x--) {
-        (*indices)[index++] = x + (z * patch_size);
-        (*indices)[index++] = x + (z * patch_size) + patch_size;
+        indices[index++] = x + (z * patch_size);
+        indices[index++] = x + (z * patch_size) + patch_size;
       }
       // insert degenerate vertex if this isn't the last row
       if (z != patch_size - 2) {
         x++;
-        (*indices)[index++] = x + (z * patch_size);
+        indices[index++] = x + (z * patch_size);
       }
     }
   }
-
-  return num_indices;
 }
 
-int generate_terrain_indices_wireframe(std::vector<uint16_t> &indices,
-    int patch_size) {
+void generate_terrain_indices_wireframe(std::vector<uint16_t> &indices, int patch_size) {
   int num_indices = patch_size * patch_size * 4;
   indices.resize(num_indices);
 
@@ -59,8 +56,6 @@ int generate_terrain_indices_wireframe(std::vector<uint16_t> &indices,
       indices[index++] = ((z + 1) * (patch_size + 1)) + x;
     }
   }
-
-  return num_indices;
 }
 
 // gets the height of a vertex at the given (x,z) location, using fw::constrain() to

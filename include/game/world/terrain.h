@@ -38,11 +38,7 @@ public:
 private:
   std::vector<std::shared_ptr<terrain_patch> > _patches;
   std::shared_ptr<fw::index_buffer> _ib;
-
   std::shared_ptr<fw::effect> _effect;
-
-  uint16_t *_index_data;
-  int _num_indices;
 
 protected:
   friend class ed::world_writer;

@@ -90,13 +90,10 @@ void camera::disable() {
   _keybindings.clear();
 }
 
-void camera::set_projection_matrix(float fov, float aspect, float near_plane,
-    float far_plane) {
-  cml::matrix_perspective_xfov_RH(_projection, fov, aspect, near_plane,
-      far_plane, cml::z_clip_neg_one);
+void camera::set_projection_matrix(float fov, float aspect, float near_plane, float far_plane) {
+  cml::matrix_perspective_xfov_RH(_projection, fov, aspect, near_plane, far_plane, cml::z_clip_neg_one);
 }
-void camera::set_look_at(matrix &m, vector const &eye, vector const &look_at,
-    vector const &up) {
+void camera::set_look_at(matrix &m, vector const &eye, vector const &look_at, vector const &up) {
   cml::matrix_look_at_RH(m, eye, look_at, up);
 }
 
@@ -184,8 +181,7 @@ void first_person_camera::roll(float radians) {
 
 //---------------------------------------------------------------------------------------------------------
 
-lookat_camera::lookat_camera() :
-    _centre(0, 0, 0) {
+lookat_camera::lookat_camera() {
   _centre = _position;
   _position += vector(-15.0f, 15.0f, 0);
 }
@@ -207,7 +203,7 @@ void lookat_camera::set_location(vector const &location) {
 }
 
 void lookat_camera::set_distance(float distance) {
-   fw::vector dir(_position - _centre);
+  fw::vector dir(_position - _centre);
   _position = _centre + (dir.normalize() * distance);
   _updated = true;
 }
@@ -219,10 +215,8 @@ float lookat_camera::get_distance() const {
 //---------------------------------------------------------------------------------------------------------
 
 top_down_camera::top_down_camera() :
-    _enable_mouse_move(true), _move_left(false), _move_right(false), _move_forward(
-        false), _move_backward(false), _rotate_left(false), _rotate_right(
-        false), _rotate_mouse(false), _zoom_to(0, 0, 0), _zooming(false) {
-  _last_floor_height = 0.0f;
+    _enable_mouse_move(true), _move_left(false), _move_right(false), _move_forward(false), _move_backward(false), _rotate_left(
+        false), _rotate_right(false), _rotate_mouse(false), _zoom_to(0, 0, 0), _zooming(false), _last_floor_height(0.0f) {
 }
 
 top_down_camera::~top_down_camera() {
@@ -233,26 +227,17 @@ void top_down_camera::enable() {
 
   input *inp = framework::get_instance()->get_input();
   _keybindings.push_back(
-      inp->bind_function("cam-forward",
-          boost::bind(&top_down_camera::on_key_forward, this, _1, _2)));
+      inp->bind_function("cam-forward", boost::bind(&top_down_camera::on_key_forward, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-backward",
-          boost::bind(&top_down_camera::on_key_backward, this, _1, _2)));
+      inp->bind_function("cam-backward", boost::bind(&top_down_camera::on_key_backward, this, _1, _2)));
+  _keybindings.push_back(inp->bind_function("cam-left", boost::bind(&top_down_camera::on_key_left, this, _1, _2)));
+  _keybindings.push_back(inp->bind_function("cam-right", boost::bind(&top_down_camera::on_key_right, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-left",
-          boost::bind(&top_down_camera::on_key_left, this, _1, _2)));
+      inp->bind_function("cam-rot-mouse", boost::bind(&top_down_camera::on_key_mouserotate, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-right",
-          boost::bind(&top_down_camera::on_key_right, this, _1, _2)));
+      inp->bind_function("cam-rot-left", boost::bind(&top_down_camera::on_key_rotateleft, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-rot-mouse",
-          boost::bind(&top_down_camera::on_key_mouserotate, this, _1, _2)));
-  _keybindings.push_back(
-      inp->bind_function("cam-rot-left",
-          boost::bind(&top_down_camera::on_key_rotateleft, this, _1, _2)));
-  _keybindings.push_back(
-      inp->bind_function("cam-rot-right",
-          boost::bind(&top_down_camera::on_key_rotateright, this, _1, _2)));
+      inp->bind_function("cam-rot-right", boost::bind(&top_down_camera::on_key_rotateright, this, _1, _2)));
 }
 
 void top_down_camera::disable() {
@@ -270,8 +255,7 @@ void top_down_camera::update(float dt) {
     fw::vector dir = _zoom_to - start;
     fw::vector new_location = start + (dir * dt * 40.0f);
 
-    if ((new_location - start).length_squared() > dir.length_squared()
-        || dir.length_squared() < 0.5f) {
+    if ((new_location - start).length_squared() > dir.length_squared() || dir.length_squared() < 0.5f) {
       // if the new location is further away then we were before, it
       // means we've over-shot it so just set our location to the final
       // location and we're done zooming.
@@ -378,8 +362,7 @@ void top_down_camera::rotate(float around_up, float around_right) {
 
   // we don't rotate around the right axis if we're too "low". That way,
   // we don't have to worry about viewing in the distance!
-  bool allow_around_right = ((_position[1] - _centre[1]) > max_height
-      || around_right > 0.0f);
+  bool allow_around_right = ((_position[1] - _centre[1]) > max_height || around_right > 0.0f);
 
   _position -= _centre;
   if (around_up != 0.0f) {

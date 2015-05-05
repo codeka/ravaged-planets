@@ -152,9 +152,7 @@ void effect_parameters::apply(effect *e) const {
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
     if (it->first == "worldviewproj") {
-      if (e->_data->worldviewproj_location >= 0) {
-        FW_CHECKED(glUniformMatrix4fv(e->_data->worldviewproj_location, 1, GL_FALSE, it->second.data()));
-      }
+      FW_CHECKED(glUniformMatrix4fv(e->_data->worldviewproj_location, 1, GL_FALSE, it->second.data()));
       continue;
     }
 
@@ -162,8 +160,8 @@ void effect_parameters::apply(effect *e) const {
     if (id > 0) {
       FW_CHECKED(glUniformMatrix4fv(id, 1, GL_FALSE, it->second.data()));
     } else {
-      fw::debug << "Warning: No location for '" << it->first.c_str() << "' in " << e->_data->filename.filename()
-          << std::endl;
+     // fw::debug << "Warning: No location for '" << it->first.c_str() << "' in " << e->_data->filename.filename()
+     //     << std::endl;
     }
   }
 
@@ -215,8 +213,8 @@ void effect::initialise(fs::path const &filename) {
   }
 }
 
-void effect::render(std::shared_ptr<effect_parameters> parameters, int num_primitives,
-    fw::sg::primitive_type primitive_type, index_buffer *idx_buffer) {
+void effect::render(std::shared_ptr<effect_parameters> parameters, fw::sg::primitive_type primitive_type,
+    index_buffer *idx_buffer) {
   if (!_data)
     return;
   ensure_primitive_type_map();
@@ -227,7 +225,7 @@ void effect::render(std::shared_ptr<effect_parameters> parameters, int num_primi
   }
 
   idx_buffer->prepare();
-
+/*
 #ifdef DEBUG
   GLint status;
   FW_CHECKED(glValidateProgram(_data->program_id));
@@ -241,8 +239,9 @@ void effect::render(std::shared_ptr<effect_parameters> parameters, int num_primi
     fw::debug << "glValidateProgram error: " << &error_message[0] << std::endl;
   }
 #endif
-
-  FW_CHECKED(glDrawElements(g_primitive_type_map[primitive_type], num_primitives, GL_UNSIGNED_SHORT, nullptr));
+*/
+  FW_CHECKED(glDrawElements(g_primitive_type_map[primitive_type], idx_buffer->get_num_indices(),
+      GL_UNSIGNED_SHORT, nullptr));
 }
 
 std::shared_ptr<effect_parameters> effect::create_parameters() {
@@ -291,10 +290,10 @@ void compile_shader(GLuint shader_id, std::string filename) {
 void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id) {
   FW_CHECKED(glAttachShader(program_id, vertex_shader_id));
   FW_CHECKED(glAttachShader(program_id, fragment_shader_id));
-
+/*
   FW_CHECKED(glBindAttribLocation(program_id, 0, "position"));
   FW_CHECKED(glBindAttribLocation(program_id, 1, "normal"));
-
+*/
   FW_CHECKED(glLinkProgram(program_id));
 
   GLint status;

@@ -64,11 +64,7 @@ std::function<void()> xyz_n_uv::get_setup_function() {
 void xyz_n_setup() {
   FW_CHECKED(glEnableVertexAttribArray(0));
   FW_CHECKED(glEnableVertexAttribArray(1));
-  fw::debug << "glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, " << sizeof(fw::vertex::xyz_n) << ", "
-      << OFFSET_OF(xyz_n_uv, x) << ")" << std::endl;
   FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n), OFFSET_OF(xyz_n_uv, x)));
-  fw::debug << "glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, " << sizeof(fw::vertex::xyz_n) << ", "
-      << OFFSET_OF(xyz_n_uv, nx) << ")" << std::endl;
   FW_CHECKED(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n), OFFSET_OF(xyz_n_uv, nx)));
 }
 

@@ -35,11 +35,11 @@ void graphics::initialize(char const *title) {
   fw::debug << "Graphics initializing; window size=" << _width << "x" << _height << ", windowed=" << _windowed
       << std::endl;
 
-  SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
-  SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
-  SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-  _wnd = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480,
+  _wnd = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height,
       SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
   if (_wnd == nullptr) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::sdl_error_info(SDL_GetError()));
@@ -67,8 +67,12 @@ void graphics::initialize(char const *title) {
   fw::debug << "GL version: " << glGetString(GL_VERSION) << std::endl;
   fw::debug << "shading language version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
-  glDisable(GL_DEPTH_TEST);
-  FW_CHECKED(glViewport(0, 0, _width, _height));
+  GLuint VertexArrayID;
+  glGenVertexArrays(1, &VertexArrayID);
+  glBindVertexArray(VertexArrayID);
+
+  //glDisable(GL_DEPTH_TEST);
+  //FW_CHECKED(glViewport(0, 0, _width, _height));
 }
 
 void graphics::destroy() {

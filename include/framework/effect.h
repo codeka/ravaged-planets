@@ -72,7 +72,7 @@ public:
   void set_colour(char const *name, colour const &c);
   void set_scalar(char const *name, float f);
 
-  void render(std::shared_ptr<effect_parameters> parameters, int num_primitives, fw::sg::primitive_type primitive_type,
+  void render(std::shared_ptr<effect_parameters> parameters, fw::sg::primitive_type primitive_type,
       index_buffer *idx_buffer);
 //  void begin(std::shared_ptr<effect_parameters> parameters);
 //  void end();

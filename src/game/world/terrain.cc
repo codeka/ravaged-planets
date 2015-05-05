@@ -19,8 +19,7 @@
 namespace ww {
 
 terrain::terrain() :
-    _num_indices(0), _width(0), _length(0), _heights(0), _index_data(0), _ib(
-        new fw::index_buffer()), _effect(new fw::effect()) {
+    _width(0), _length(0), _heights(0), _ib(new fw::index_buffer()), _effect(new fw::effect()) {
 }
 
 terrain::~terrain() {
@@ -29,9 +28,10 @@ terrain::~terrain() {
 
 void terrain::initialize() {
   // generate indices
-  _num_indices = generate_terrain_indices(&_index_data, PATCH_SIZE);
-  _ib->create_buffer(_num_indices);
-  _ib->set_data(_num_indices, &_index_data[0], 0);
+  std::vector<uint16_t> index_data;
+  generate_terrain_indices_wireframe(index_data, PATCH_SIZE);
+  _ib->create_buffer(index_data.size());
+  _ib->set_data(index_data.size(), &index_data[0], 0);
 
   // load the effect file that we'll use for rendering
   //_effect->initialise("terrain");
@@ -186,7 +186,7 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
       //node->set_effect(_effect);
       //node->set_effect_parameters(patch->fx_params);
       node->set_primitive_type(fw::sg::primitive_linelist);
-      //node->set_primitive_type(fw::sg::primitive_trianglelist);
+      //node->set_primitive_type(fw::sg::primitive_trianglestrip);
 
       scenegraph.add_node(node);
     }

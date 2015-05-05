@@ -84,40 +84,14 @@ void node::render(scenegraph *sg) {
 //    return;
 
   if (_vb) {
-    int num_primitives;
-    if (!_ib) {
-      num_primitives = _vb->get_num_vertices();
-      if (_primitive_type == primitive_linestrip)
-        num_primitives -= 1;
-      else if (_primitive_type == primitive_linelist)
-        num_primitives /= 2;
-      else
-        BOOST_THROW_EXCEPTION(fw::exception()
-            << fw::message_error_info("given primitive_type is not yet supported."));
-    } else {
-      num_primitives = _ib->get_num_indices();
-      if (_primitive_type == primitive_trianglestrip)
-        num_primitives -= 2;
-      else if (_primitive_type == primitive_trianglelist)
-        num_primitives /= 3;
-      else if (_primitive_type == primitive_linestrip)
-        num_primitives -= 1;
-      else if (_primitive_type == primitive_linelist)
-        num_primitives /= 2;
-      else
-        BOOST_THROW_EXCEPTION(fw::exception()
-            << fw::message_error_info("given primitive_type is not yet supported."));
-    }
-
     std::shared_ptr<fw::effect> fx = _fx;
 //				if (is_rendering_shadow)
 //					fx = shadow_fx;
 
-    fw::debug << "rendering " << num_primitives << " primitives." << std::endl;
     if (!fx) {
-      render_nofx(num_primitives);
+      render_nofx();
     } else {
-      render_fx(num_primitives, fx);
+      render_fx(fx);
     }
   }
 
@@ -128,7 +102,7 @@ void node::render(scenegraph *sg) {
 }
 
 // this is called when we're rendering a given effect
-void node::render_fx(int num_primitives, std::shared_ptr<fw::effect> fx) {
+void node::render_fx(std::shared_ptr<fw::effect> fx) {
   std::shared_ptr<fw::effect_parameters> parameters;
   if (_fx_params) {
     parameters = _fx_params;
@@ -161,16 +135,16 @@ void node::render_fx(int num_primitives, std::shared_ptr<fw::effect> fx) {
   parameters->set_vertex_buffer("position", _vb);
 
   setup_effect(fx);
-  fx->render(parameters, num_primitives, _primitive_type, _ib.get());
+  fx->render(parameters, _primitive_type, _ib.get());
 }
 
-void node::render_nofx(int num_primitives) {
+void node::render_nofx() {
   if (!basic_fx) {
     basic_fx = std::shared_ptr<fw::effect>(new effect());
     basic_fx->initialise("basic");
   }
 
-  render_fx(num_primitives, basic_fx);
+  render_fx(basic_fx);
 }
 
 // called to set any additional parameters on the given effect
