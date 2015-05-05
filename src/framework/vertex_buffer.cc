@@ -10,37 +10,16 @@
 namespace fw {
 
 
-vertex_buffer::vertex_buffer() :
-    _num_vertices(0), _vertex_size(0), _id(0), _dynamic(false) {
+vertex_buffer::vertex_buffer(setup_fn setup, size_t vertex_size, bool dynamic /*= false */) :
+    _num_vertices(0), _vertex_size(vertex_size), _id(0), _dynamic(dynamic), _setup(setup) {
+  FW_CHECKED(glGenBuffers(1, &_id));
 }
 
 vertex_buffer::~vertex_buffer() {
-  if (_id != 0) {
-    glDeleteVertexArrays(1, &_id);
-    _id = 0;
-  }
-}
-
-void vertex_buffer::create_buffer(int max_vertices, setup_fn setup, size_t vertex_size, bool dynamic) {
-  _setup = setup;
-
-  if (_id != 0) {
-    FW_CHECKED(glDeleteBuffers(1, &_id));
-    _id = 0;
-  }
-  FW_CHECKED(glGenBuffers(1, &_id));
-
-  _num_vertices = 0;
-  _vertex_size = vertex_size;
-  _dynamic = dynamic;
+  FW_CHECKED(glDeleteVertexArrays(1, &_id));
 }
 
 void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*/) {
-  if (_id == 0) {
-    BOOST_THROW_EXCEPTION(fw::exception()
-        << fw::message_error_info("Cannot vertex_buffer::set_data() before create_buffer() is called."));
-  }
-
   if (flags <= 0) {
     flags = _dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
   }

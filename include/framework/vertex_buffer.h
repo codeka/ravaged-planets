@@ -24,30 +24,24 @@ private:
   setup_fn _setup;
 
 public:
-  vertex_buffer();
+  vertex_buffer(setup_fn setup, size_t vertex_size, bool dynamic = false);
   virtual ~vertex_buffer();
 
-  void create_buffer(int max_vertices, setup_fn setup, size_t vertex_size, bool dynamic = false);
+  // Helper function that makes it easier to create vertex buffers by assuming that you're passing a type
+  // defined in fw::vertex::xxx (or something compatible).
+  template<typename T>
+  static inline std::shared_ptr<vertex_buffer> create(bool dynamic = false) {
+    return std::shared_ptr<vertex_buffer>(new vertex_buffer(
+        T::get_setup_function(), sizeof(T), dynamic));
+  }
+
   void set_data(int num_vertices, void *vertices, int flags = -1);
 
-  // this is a helper method that makes it easier to create vertex buffers by assuming that
-  // you're passing a type defined in fw::vertex::xxx (or something compatible)
-  template<typename T>
-  inline void create_buffer(int num_vertices, bool dynamic = false);
-
-  inline int get_max_vertices() const {
-    return 0xffffff;
-  }
   inline int get_num_vertices() const {
     return _num_vertices;
   }
 
   void bind(GLint program_location);
 };
-
-template<typename T>
-void vertex_buffer::create_buffer(int num_vertices, bool dynamic /*= false*/) {
-  create_buffer(num_vertices, T::get_setup_function(), sizeof(T), dynamic);
-}
 
 }

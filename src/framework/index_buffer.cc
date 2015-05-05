@@ -7,34 +7,17 @@
 
 namespace fw {
 
-index_buffer::index_buffer() :
-    _num_indices(0), _id(0), _dynamic(false) {
+index_buffer::index_buffer(bool dynamic/*= false */) :
+    _num_indices(0), _id(0), _dynamic(dynamic) {
+  FW_CHECKED(glGenBuffers(1, &_id));
 }
 
 index_buffer::~index_buffer() {
-  if (_id != 0) {
-    FW_CHECKED(glDeleteBuffers(1, &_id));
-  }
-}
-
-void index_buffer::create_buffer(int max_indices, bool dynamic) {
-  if (_id != 0) {
-    FW_CHECKED(glDeleteBuffers(1, &_id));
-  }
-
-  _num_indices = 0;
-  _dynamic = dynamic;
-
-  FW_CHECKED(glGenBuffers(1, &_id));
+  FW_CHECKED(glDeleteBuffers(1, &_id));
 }
 
 void index_buffer::set_data(int num_indices, uint16_t const *indices,
     int flags) {
-  if (_id == 0) {
-    BOOST_THROW_EXCEPTION(fw::exception()
-        << fw::message_error_info("Cannot index_buffer::set_data() before create_buffer() is called."));
-  }
-
   _num_indices = num_indices;
 
   if (flags <= 0)

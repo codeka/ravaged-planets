@@ -30,7 +30,6 @@ void terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices_wireframe(index_data, PATCH_SIZE);
-  _ib->create_buffer(index_data.size());
   _ib->set_data(index_data.size(), &index_data[0], 0);
 
   // load the effect file that we'll use for rendering
@@ -103,7 +102,7 @@ void terrain::bake_patch(int patch_x, int patch_z) {
 
   // if we haven't created the vertex buffer for this patch yet, do it now
   if (_patches[index]->vb == std::shared_ptr<fw::vertex_buffer>()) {
-    _patches[index]->vb = std::shared_ptr<fw::vertex_buffer>(new fw::vertex_buffer());
+    _patches[index]->vb = fw::vertex_buffer::create<fw::vertex::xyz_n>();
   }
 
   fw::vertex::xyz_n *vert_data;
@@ -111,7 +110,7 @@ void terrain::bake_patch(int patch_x, int patch_z) {
       _length, PATCH_SIZE, patch_x, patch_z);
 
   std::shared_ptr<terrain_patch> patch(_patches[index]);
-  patch->vb->create_buffer<fw::vertex::xyz_n>(num_verts, true);
+  //patch->vb->create_buffer<fw::vertex::xyz_n>(num_verts, true);
 
   patch->vb->set_data(num_verts, vert_data, 0);
   delete[] vert_data;

@@ -14,15 +14,11 @@ private:
   bool _dynamic;
 
 public:
-  index_buffer();
+  index_buffer(bool dynamic = false);
   ~index_buffer();
 
-  void create_buffer(int max_indices, bool dynamic = false);
   void set_data(int num_indices, uint16_t const *indices, int flags = -1);
 
-  inline int get_max_indices() const {
-    return 0xffffffff;
-  }
   inline int get_num_indices() const {
     return _num_indices;
   }
