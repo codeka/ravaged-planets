@@ -1,7 +1,7 @@
 
 file(GLOB FRAMEWORK_FILES
     *.cc
-    soil/*.c
+    gui/*.cc
 )
 
 if(WIN32)

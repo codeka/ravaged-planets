@@ -7,9 +7,8 @@
 #include <framework/input.h>
 #include <framework/camera.h>
 #include <framework/logging.h>
-#include <framework/index_buffer.h>
-#include <framework/vertex_buffer.h>
-#include <framework/vertex_formats.h>
+#include <framework/gui/gui.h>
+#include <framework/gui/window.h>
 
 #include <game/application.h>
 #include <game/world/terrain.h>
@@ -27,8 +26,7 @@ application::~application() {
 }
 
 ww::terrain *terrain = nullptr;
-std::shared_ptr<fw::index_buffer> idx_buffer;
-std::shared_ptr<fw::vertex_buffer> vtx_buffer;
+fw::gui::window *wnd = nullptr;
 
 bool application::initialize(fw::framework *frmwrk) {
   _framework = frmwrk;
@@ -43,27 +41,7 @@ bool application::initialize(fw::framework *frmwrk) {
   terrain->create(64, 64, 1);
   terrain->initialize();
 
-/*
-  vtx_buffer = std::shared_ptr<fw::vertex_buffer>(new fw::vertex_buffer());
-  vtx_buffer->create_buffer<fw::vertex::xyz_n>(4, false);
-  fw::vertex::xyz_n data[4];
-  data[0] = fw::vertex::xyz_n(-10.9f, 0.0f, -10.9f, 0.0f, 1.0f, 0.0f);
-  data[1] = fw::vertex::xyz_n( 10.9f, 0.0f, -10.9f, 0.0f, 1.0f, 0.0f);
-  data[2] = fw::vertex::xyz_n( 10.9f, 0.0f,  10.9f, 0.0f, 1.0f, 0.0f);
-  data[3] = fw::vertex::xyz_n(-10.9f, 0.0f,  10.9f, 0.0f, 1.0f, 0.0f);
-  vtx_buffer->set_data(4, reinterpret_cast<void *>(&data));
-
-  idx_buffer = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
-  idx_buffer->create_buffer(6, false);
-  unsigned short indices[6];
-  indices[0] = 0;
-  indices[1] = 1;
-  indices[2] = 2;
-  indices[3] = 0;
-  indices[4] = 2;
-  indices[5] = 3;
-  idx_buffer->set_data(6, indices);
-*/
+  wnd = fw::framework::get_instance()->get_gui()->create_window();
   // start the simulation thread now, it'll always run even if there's
   // no actual game running....
 //  simulation_thread::get_instance()->initialise();
@@ -84,11 +62,12 @@ bool application::initialize(fw::framework *frmwrk) {
 
 void application::destroy() {
   fw::debug << "application shutting down." << std::endl;
+  fw::framework::get_instance()->get_gui()->destroy_window(wnd);
 //  simulation_thread::get_instance()->destroy();
 }
 
 void application::update(float dt) {
-//  terrain->update();
+  terrain->update();
 //  _screen->get_active_screen()->update(dt);
 //  session::get_instance()->update(dt);
 }
@@ -96,11 +75,6 @@ void application::update(float dt) {
 void application::render(fw::sg::scenegraph &scenegraph) {
   terrain->render(scenegraph);
 //  _screen->get_active_screen()->render(scenegraph);
-/*  std::shared_ptr<fw::sg::node> node(new fw::sg::node());
-  node->set_index_buffer(idx_buffer);
-  node->set_vertex_buffer(vtx_buffer);
-  node->set_primitive_type(fw::sg::primitive_trianglelist);
-  scenegraph.add_node(node);*/
 }
 
 }

@@ -13,6 +13,7 @@
 #include <framework/exception.h>
 #include <framework/misc.h>
 #include <framework/shader.h>
+#include <framework/gui/gui.h>
 
 //static boost::shared_ptr<fw::shader> shadow_shader;
 static std::shared_ptr<fw::shader> basic_shader;
@@ -246,12 +247,12 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= 0*/,
 //			shadowsrc.reset();
 //		}
 
-  if (render_target != 0) {
+  if (render_target != nullptr) {
     g->end_scene();
-    g->set_render_target(0);
+    g->set_render_target(nullptr);
   } else {
     // render the GUI now
-    //framework::get_instance()->get_gui()->render();
+    framework::get_instance()->get_gui()->render();
 
     g->end_scene();
     g->present();

@@ -18,6 +18,10 @@ class audio_manager;
 class lang;
 class input;
 
+namespace gui {
+class gui;
+}
+
 namespace sg {
 class scenegraph;
 }
@@ -58,7 +62,7 @@ private:
   base_app * _app;
   timer *_timer;
   camera *_camera;
-//  gui::cegui *_gui;
+  gui::gui *_gui;
   particle_manager *_particle_mgr;
   bool _paused;
   audio_manager *_audio;
@@ -132,9 +136,9 @@ public:
   graphics *get_graphics() const {
     return _graphics;
   }
-//  gui::cegui *get_gui() const {
- //   return _gui;
- // }
+  gui::gui *get_gui() const {
+    return _gui;
+  }
   base_app *get_app() const {
     return _app;
   }

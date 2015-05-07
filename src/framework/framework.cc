@@ -18,6 +18,7 @@
 #include <framework/lang.h>
 #include <framework/misc.h>
 #include <framework/input.h>
+#include <framework/gui/gui.h>
 
 namespace fw {
 struct screenshot_request {
@@ -32,19 +33,21 @@ static framework *only_instance = 0;
 framework::framework(base_app* app) :
     _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(nullptr),
     _graphics(nullptr), _timer(nullptr), _audio(nullptr), _input(nullptr), _lang(nullptr),
-    _running(true) {
+    _gui(nullptr), _running(true) {
   only_instance = this;
 }
 
 framework::~framework() {
-  if (_timer != nullptr)
-    delete _timer;
   if (_graphics != nullptr)
     delete _graphics;
+  if (_gui != nullptr)
+    delete _gui;
   if (_lang != nullptr)
     delete _lang;
   if (_input != nullptr)
     delete _input;
+  if (_timer != nullptr)
+    delete _timer;
 
   /*
    if (_particle_mgr != 0) delete _particle_mgr;
@@ -78,12 +81,15 @@ bool framework::initialize(char const *title) {
    // initialise audio
    _audio->initialise();
    */
+
   // initialise input
   _input = new input();
   _input->initialize();
+
   // initialise the gui subsystem
-  //_gui = new gui::cegui();
-  //_gui->initialise(_graphics);
+  _gui = new gui::gui();
+  _gui->initialize(_graphics);
+
   /*
    // initialise the particle manager
    _particle_mgr->initialise(_graphics);
@@ -208,7 +214,7 @@ void framework::update_proc() {
 
 void framework::update(float dt) {
   _input->update(dt);
-  // _gui->update(dt);
+  _gui->update(dt);
   /*
    _audio->update();
 
