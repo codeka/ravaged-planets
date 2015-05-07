@@ -36,7 +36,7 @@ void gui::render() {
 }
 
 window *gui::create_window() {
-  window *wnd = new window();
+  window *wnd = new window(this);
   _top_level_windows.push_back(wnd);
   return wnd;
 }

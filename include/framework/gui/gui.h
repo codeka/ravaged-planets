@@ -36,6 +36,10 @@ public:
 
   /** Destroys the given window, unhooks any signals and removes it from the screen. */
   void destroy_window(window *wnd);
+
+  inline drawable_manager *get_drawable_manager() const {
+    return _drawable_manager;
+  }
 };
 
 } }
