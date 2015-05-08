@@ -3,6 +3,13 @@
 #include <boost/lexical_cast.hpp>
 
 #include <framework/exception.h>
+#include <framework/graphics.h>
+#include <framework/index_buffer.h>
+#include <framework/paths.h>
+#include <framework/texture.h>
+#include <framework/vertex_buffer.h>
+#include <framework/vertex_formats.h>
+#include <framework/shader.h>
 #include <framework/xml.h>
 #include <framework/gui/drawable.h>
 
@@ -22,15 +29,56 @@ void parse_tuple_attribute(std::string attr_value, int &left, int &right) {
   right = boost::lexical_cast<int>(parts[1]);
 }
 
+// All drawables share the same vertex buffer, index buffer
+static std::shared_ptr<fw::shader> g_shader;
+static std::shared_ptr<fw::vertex_buffer> g_vertex_buffer;
+static std::shared_ptr<fw::index_buffer> g_index_buffer;
+static std::shared_ptr<fw::texture> g_texture;
+
 //-----------------------------------------------------------------------------
 
 drawable::drawable() :
-        _top(0), _left(0), _width(0), _height(0) {
+    _top(0), _left(0), _width(0), _height(0) {
+  if (g_vertex_buffer == nullptr) {
+    g_vertex_buffer = fw::vertex_buffer::create<fw::vertex::xyz_uv>(false);
+    fw::vertex::xyz_uv vertices[4];
+    vertices[0] = fw::vertex::xyz_uv(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    vertices[1] = fw::vertex::xyz_uv(0.0f, -1.0f, 0.0f, 0.0f, 1.0f);
+    vertices[2] = fw::vertex::xyz_uv(1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    vertices[3] = fw::vertex::xyz_uv(1.0f, -1.0f, 0.0f, 1.0f, 1.0f);
+    g_vertex_buffer->set_data(4, vertices);
+
+    g_index_buffer = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+    uint16_t indices[4];
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+    indices[3] = 3;
+    //indices[4] = 1;
+   // indices[5] = 3;
+    g_index_buffer->set_data(4, indices);
+
+    g_shader = fw::shader::create("gui");
+
+    g_texture = std::shared_ptr<fw::texture>(new fw::texture());
+    g_texture->create(fw::resolve("gui/drawables/elements.png"));
+  }
 }
 
 drawable::drawable(fw::xml::XMLElement *elem) : drawable() {
   parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
   parse_tuple_attribute(elem->Attribute("size"), _width, _height);
+  _shader_params = g_shader->create_parameters();
+}
+
+void drawable::render() {
+  g_vertex_buffer->begin();
+  g_index_buffer->begin();
+  g_shader->begin(_shader_params);
+  FW_CHECKED(glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr));
+  g_shader->end();
+  g_index_buffer->end();
+  g_vertex_buffer->end();
 }
 
 //-----------------------------------------------------------------------------

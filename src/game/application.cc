@@ -42,6 +42,7 @@ bool application::initialize(fw::framework *frmwrk) {
   terrain->initialize();
 
   wnd = fw::framework::get_instance()->get_gui()->create_window();
+  wnd->set_background("frame_simple");
   // start the simulation thread now, it'll always run even if there's
   // no actual game running....
 //  simulation_thread::get_instance()->initialise();

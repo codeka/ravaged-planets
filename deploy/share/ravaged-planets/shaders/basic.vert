@@ -6,6 +6,4 @@ layout (location = 1) in vec3 normal;
 
 void main() {
   gl_Position = worldviewproj * vec4(position, 1);
-  //gl_Position.xyz = position;
-  //gl_Position.w = 1.0;
 }

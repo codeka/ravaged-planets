@@ -39,6 +39,8 @@ public:
     return (!!_data);
   }
 
+  void bind();
+
   // gets the name of the file we were created from (or an empty string if we
   // weren't created from a file)
   boost::filesystem::path get_filename() const;

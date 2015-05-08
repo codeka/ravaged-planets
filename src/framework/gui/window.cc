@@ -17,6 +17,9 @@ void window::set_background(std::string const &drawable_name) {
 }
 
 void window::render() {
+  if (_background) {
+    _background->render();
+  }
 }
 
 } }

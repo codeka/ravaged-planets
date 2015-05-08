@@ -30,9 +30,10 @@ std::function<void()> xyz_c::get_setup_function() {
 }
 
 static void xyz_uv_setup() {
-  FW_CHECKED(glVertexPointer(3, GL_FLOAT, sizeof(xyz_uv), OFFSET_OF(xyz_uv, x)));
-  FW_CHECKED(glClientActiveTexture(GL_TEXTURE0));
-  FW_CHECKED(glTexCoordPointer(2, GL_FLOAT, sizeof(xyz_uv), OFFSET_OF(xyz_uv, u)));
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glEnableVertexAttribArray(1));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_uv), OFFSET_OF(xyz_uv, x)));
+  FW_CHECKED(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_uv), OFFSET_OF(xyz_uv, u)));
 }
 
 std::function<void()> xyz_uv::get_setup_function() {

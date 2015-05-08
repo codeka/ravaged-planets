@@ -105,6 +105,10 @@ void texture::create(int width, int height, bool dynamic /*= false*/) {
   _data = data;
 }
 
+void texture::bind() {
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
+}
+
 void texture::save_png(fs::path const &filename) {
 /*  HRESULT hr = ::D3DXSaveTextureToFile(wfilename.c_str(), D3DXIFF_PNG,
       _data->tex, 0);

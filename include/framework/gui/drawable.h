@@ -7,7 +7,10 @@
 
 #include <framework/xml.h>
 
-namespace fw { namespace gui {
+namespace fw {
+class shader_parameters;
+
+namespace gui {
 
 /**
  * A drawable is any object that appears on the screen. It's typically a nine-patch or image and is used at the
@@ -20,12 +23,16 @@ private:
   int _width;
   int _height;
 
+  std::shared_ptr<fw::shader_parameters> _shader_params;
+
 protected:
   friend class drawable_manager;
   drawable();
   drawable(fw::xml::XMLElement *elem);
 
 public:
+
+  void render();
 };
 
 /**

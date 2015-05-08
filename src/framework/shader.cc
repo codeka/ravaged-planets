@@ -100,8 +100,10 @@ std::shared_ptr<shader_parameters> shader_parameters::clone() {
 
 void shader_parameters::apply(shader *e) const {
   for (auto it = _textures.begin(); it != _textures.end(); ++it) {
-    GLint id = glGetUniformLocation(e->_program_id, it->first.c_str());
-//    glTexture();
+    std::shared_ptr<fw::texture> texture = it->second;
+    glActiveTexture(GL_TEXTURE0);
+    texture->bind();
+    glUniform1i(e->texsampler_location, 0);
   }
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
@@ -223,6 +225,9 @@ void shader::load(fw::graphics *g, fs::path const &full_path) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for position"));
   }
 
+  uv_location = glGetAttribLocation(_program_id, "uv");
+  texsampler_location = glGetAttribLocation(_program_id, "texsampler");
+
   fw::debug << "loaded shader from: " << full_path.string() << std::endl;
 }
 
@@ -267,10 +272,6 @@ void compile_shader(GLuint shader_id, std::string filename) {
 void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id) {
   FW_CHECKED(glAttachShader(program_id, vertex_shader_id));
   FW_CHECKED(glAttachShader(program_id, fragment_shader_id));
-/*
-  FW_CHECKED(glBindAttribLocation(program_id, 0, "position"));
-  FW_CHECKED(glBindAttribLocation(program_id, 1, "normal"));
-*/
   FW_CHECKED(glLinkProgram(program_id));
 
   GLint status;
@@ -283,9 +284,6 @@ void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_sha
 
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string(&error_message[0])));
   }
-
- // FW_CHECKED(glDetachShader(program_id, vertex_shader_id));
- // FW_CHECKED(glDetachShader(program_id, fragment_shader_id));
 }
 
 

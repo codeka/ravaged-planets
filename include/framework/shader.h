@@ -56,6 +56,8 @@ private:
 
   GLint worldviewproj_location;
   GLint position_location;
+  GLint uv_location;
+  GLint texsampler_location;
 
   void load(fw::graphics *g, boost::filesystem::path const &full_path);
 
