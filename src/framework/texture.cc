@@ -1,5 +1,7 @@
 #include <memory>
 
+#include <stb/stb_image.h>
+
 #include <framework/texture.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
@@ -14,23 +16,17 @@ namespace fw {
 
 //-------------------------------------------------------------------------
 struct texture_data: private boost::noncopyable {
+  GLuint texture_id;
   bool is_render_target;
   mutable int width, height;
   fs::path filename; // might be empty if we weren't created from a file
 
-  texture_data() {
-//    tex = 0;
-//    depth = 0;
-    is_render_target = false;
-    width = height = -1;
+  texture_data() : texture_id(0), is_render_target(false), width(-1), height(-1) {
+    FW_CHECKED(glGenTextures(1, &texture_id));
   }
 
   ~texture_data() {
-//    if (depth != 0)
-//      depth->Release();
-
-//    if (tex != 0)
-//      tex->Release();
+    FW_CHECKED(glDeleteTextures(1, &texture_id));
   }
 };
 
@@ -82,18 +78,19 @@ void texture::create(fs::path const &filename) {
     std::shared_ptr<texture_data> data(new texture_data());
     _data = data;
 
-    debug << boost::format("loading texture: \"%1%\"") % filename << std::endl;
+    debug << boost::format("loading texture: %1%") % filename << std::endl;
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
 
     _data->filename = filename;
-/*
-    std::wstring wfilename = to_unicode(filename.file_string());
-    HRESULT hr = ::D3DXCreateTextureFromFileEx(g->get_device(),
-        wfilename.c_str(), D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0,
-        D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL,
-        NULL, &_data->tex);
-    if (FAILED(hr))
-      BOOST_THROW_EXCEPTION(fw::exception(hr) << filename_error_info(filename));
-*/
+    int channels;
+    unsigned char *pixels = stbi_load(filename.string().c_str(), &_data->width, &_data->height, &channels, 4);
+    // TODO: pre-multiply alpha
+    // TODO: DXT compress
+    // TODO: mipmaps
+    FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _data->width, _data->height, 0, GL_RGBA,
+        GL_UNSIGNED_BYTE, pixels));
+    stbi_image_free(pixels);
+
     g_cache.add_texture(filename, _data);
   } else {
     debug << boost::format("got cached texture: \"%1%\"") % filename

@@ -2,6 +2,7 @@
 file(GLOB FRAMEWORK_FILES
     *.cc
     gui/*.cc
+    stb/*.cc
 )
 
 if(WIN32)
@@ -31,6 +32,5 @@ target_link_libraries(framework
     ${Boost_SIGNALS_LIBRARY}
     ${OPENGL_LIBRARY}
     ${GLEW_LIBRARY}
-    soil
 )
 

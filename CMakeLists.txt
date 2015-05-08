@@ -49,7 +49,6 @@ include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 
-add_subdirectory(src/soil)
 add_subdirectory(src/framework)
 add_subdirectory(src/game)
 

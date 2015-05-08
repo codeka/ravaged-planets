@@ -37,19 +37,19 @@ void terrain::initialize() {
 
   // todo: load texture(s)
   std::shared_ptr<fw::texture> layer(new fw::texture());
-  layer->create(fw::resolve("terrain/grass-01.dds"));
+  layer->create(fw::resolve("terrain/grass-01.jpg"));
   _layers.push_back(layer);
 
   layer = std::shared_ptr<fw::texture>(new fw::texture());
-  layer->create(fw::resolve("terrain/rock-01.dds"));
+  layer->create(fw::resolve("terrain/rock-01.jpg"));
   _layers.push_back(layer);
 
   layer = std::shared_ptr<fw::texture>(new fw::texture());
-  layer->create(fw::resolve("terrain/snow-01.dds"));
+  layer->create(fw::resolve("terrain/snow-01.jpg"));
   _layers.push_back(layer);
 
   layer = std::shared_ptr<fw::texture>(new fw::texture());
-  layer->create(fw::resolve("terrain/rock-snow-01.dds"));
+  layer->create(fw::resolve("terrain/rock-snow-01.jpg"));
   _layers.push_back(layer);
 
   // bake the patches into the vertex buffers that'll be used for rendering

@@ -6,13 +6,14 @@
 #include <framework/exception.h>
 #include <framework/texture.h>
 
-#include <soil/SOIL.h>
+#include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
 
 namespace fs = boost::filesystem;
 
 namespace fw {
 //-------------------------------------------------------------------------
-// This class contains the actual bitmap data, which is actually a Direct3D texture.
+// This class contains the actual bitmap data, which is an array of 32-bit ARGB pixels
 struct bitmap_data: private boost::noncopyable {
   int width;
   int height;
@@ -149,49 +150,43 @@ void bitmap::prepare_write(int width, int height) {
 }
 
 void bitmap::load_bitmap(fs::path const &filename) {
-  debug << boost::format("loading image: \"%1%\"") % filename << std::endl;
+  debug << boost::format("loading image: %1%") % filename << std::endl;
   prepare_write(0, 0);
 
   int channels;
-  unsigned char *pixels = SOIL_load_image(filename.string().c_str(),
-      &_data->width, &_data->height, &channels, SOIL_LOAD_RGBA);
-  if (pixels == 0) {
-    BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info(SOIL_last_result()));
+  unsigned char *pixels = stbi_load(filename.string().c_str(), &_data->width, &_data->height, &channels, 4);
+  if (pixels == nullptr) {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error reading image."));
   }
 
-  // copy pixels from what SOIL returned into our own buffer...
-  rgba_2_argb(reinterpret_cast<uint32_t *>(pixels), _data->argb,
-      _data->width * _data->height);
+  // copy pixels from what stb returned into our own buffer...
+  rgba_2_argb(reinterpret_cast<uint32_t *>(pixels), _data->argb, _data->width * _data->height);
 
   // don't need this anymore
-  SOIL_free_image_data(pixels);
+  stbi_image_free(pixels);
 }
 
 // Populates our bitmap_data with data from the given in-memory file
 void bitmap::load_bitmap(uint8_t const *data, size_t data_size) {
   int channels;
-  unsigned char *pixels = SOIL_load_image_from_memory(
-      reinterpret_cast<unsigned char const *>(data), data_size, &_data->width,
-      &_data->height, &channels, SOIL_LOAD_RGBA);
-  if (pixels == 0) {
-    BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info(SOIL_last_result()));
+  unsigned char *pixels = stbi_load_from_memory(
+      reinterpret_cast<unsigned char const *>(data), data_size, &_data->width, &_data->height, &channels, 4);
+  if (pixels == nullptr) {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error reading image."));
   }
 
-  // copy pixels from what SOIL returned into our own buffer...
-  rgba_2_argb(reinterpret_cast<uint32_t *>(pixels), _data->argb,
-      _data->width * _data->height);
+  // copy pixels from what stb returned into our own buffer...
+  rgba_2_argb(reinterpret_cast<uint32_t *>(pixels), _data->argb, _data->width * _data->height);
 
   // don't need this anymore
-  SOIL_free_image_data(pixels);
+  stbi_image_free(pixels);
 }
 
 void bitmap::save_bitmap(fs::path const &filename) const {
   if (_data == 0)
     return;
 
-  debug << boost::format("saving image: \"%1%\"") % filename << std::endl;
+  debug << boost::format("saving image: %1%") % filename << std::endl;
 
   fs::path path(filename);
   if (fs::exists(path)) {
@@ -201,11 +196,10 @@ void bitmap::save_bitmap(fs::path const &filename) const {
   std::vector<uint32_t> pixels;
   argb_2_rgba(_data->argb, pixels, _data->argb.size());
 
-  int res = SOIL_save_image(filename.c_str(), SOIL_SAVE_TYPE_BMP, _data->width,
-      _data->height, 4, reinterpret_cast<unsigned char *>(&pixels[0]));
+  int res = stbi_write_bmp(filename.c_str(), _data->width, _data->height, 4,
+      reinterpret_cast<unsigned char *>(&pixels[0]));
   if (res == 0) {
-    BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info(SOIL_last_result()));
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error writing file."));
   }
 }
 
