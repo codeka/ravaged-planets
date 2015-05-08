@@ -50,6 +50,7 @@ private:
   void on_destroy_device();
   void update(float dt);
   void render();
+  bool poll_events();
 
   bool _active;
 

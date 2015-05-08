@@ -4,6 +4,8 @@
 #include <functional>
 #include <boost/algorithm/string.hpp>
 
+union SDL_Event;
+
 namespace fw {
 class framework;
 
@@ -34,6 +36,7 @@ public:
 
   void initialize();
   void update(float dt);
+  void process_event(SDL_Event &event);
   void release();
 
   void set_cursor(int priority, std::string const &cursor_name);

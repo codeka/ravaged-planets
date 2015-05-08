@@ -90,16 +90,6 @@ void graphics::destroy() {
   _context = nullptr;
 }
 
-bool graphics::poll_events() {
-  SDL_Event e;
-  while (SDL_PollEvent(&e)) {
-    if (e.type == SDL_QUIT) {
-      return false;
-    }
-  }
-  return true;
-}
-
 void graphics::begin_scene(fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
   FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
   FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));

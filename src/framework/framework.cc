@@ -154,7 +154,7 @@ void framework::run() {
 
   // do the event/render loop
   while (_running) {
-    if (!_graphics->poll_events()) {
+    if (!poll_events()) {
       _running = false;
       break;
     }
@@ -207,7 +207,6 @@ void framework::update_proc() {
 }
 
 void framework::update(float dt) {
-  _input->update(dt);
   // _gui->update(dt);
   /*
    _audio->update();
@@ -220,6 +219,8 @@ void framework::update(float dt) {
    _particle_mgr->update();*/
   if (_camera != nullptr)
     _camera->update(dt);
+
+  _input->update(dt);
 }
 
 void framework::render() {
@@ -234,6 +235,17 @@ void framework::render() {
   //   take_screenshots(scenegraph);
 
   fw::render(scenegraph);
+}
+
+bool framework::poll_events() {
+  SDL_Event e;
+  while (SDL_PollEvent(&e)) {
+    _input->process_event(e);
+    if (e.type == SDL_QUIT) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void framework::take_screenshot(int width, int height,
