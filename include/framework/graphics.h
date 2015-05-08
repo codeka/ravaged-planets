@@ -48,7 +48,6 @@ public:
 
   void initialize(char const *title);
   void destroy();
-  bool poll_events();
 
   void begin_scene(fw::colour clear_colour = fw::colour(1, 0, 0, 0));
   void end_scene();

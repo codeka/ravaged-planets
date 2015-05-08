@@ -1,3 +1,5 @@
+#include <memory>
+
 #include <framework/texture.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>

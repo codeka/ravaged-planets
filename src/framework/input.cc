@@ -4,10 +4,7 @@
 #include <boost/foreach.hpp>
 #include <boost/unordered_set.hpp>
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
+#include <SDL.h>
 
 #include <framework/input.h>
 #include <framework/framework.h>
@@ -16,11 +13,11 @@
 #include <framework/logging.h>
 #include <framework/settings.h>
 
-// the XK_* values are used by X11 for keys on the keyboard, we'll borrow values
-// greater than the maximum possible XK for the mouse buttons as well
-#define XK_MBTNLEFT (0xffffff00 + 0)
-#define XK_MBTNMIDDLE (0xffffff00 + 1)
-#define XK_MBTNRIGHT (0xffffff00 + 2)
+// the SDLK_* values are used by SDL for keys on the keyboard, we'll borrow values
+// greater than the maximum possible SDLK for the mouse buttons as well
+#define KEY_MBTNLEFT (0xffffff00 + 0)
+#define KEY_MBTNMIDDLE (0xffffff00 + 1)
+#define KEY_MBTNRIGHT (0xffffff00 + 2)
 
 namespace fs = boost::filesystem;
 
@@ -53,7 +50,7 @@ static std::map<int, std::string> g_cursor_stack;
 //typedef std::map<std::string, HCURSOR> cursor_map;
 //static cursor_map g_cursors;
 
-// maps a key to a list of input bindings, we don't nessecarily call each binding on each
+// maps a key to a list of input bindings, we don't necessarily call each binding on each
 // key press, it depends on things like whether Ctrl or Shift is pressed, etc
 typedef std::map<int, std::map<int, fw::input_binding> > callback_map;
 static callback_map g_callbacks;
@@ -62,10 +59,6 @@ typedef std::map<int, std::vector<int> > multikey_binding_map;
 static multikey_binding_map g_multikey_bindings;
 
 namespace fw {
-
-// this is called by main_window when it gets a keyboard/mouse event. We need to fire off
-// the corresponding callbacks, inject it into CEGUI, etc
-void input_handle_event(XEvent &evnt);
 
 // sets up the key_names and key_codes which map string key "names" (that are platform-independent) with
 // keycodes (that are platform-specific)
@@ -79,7 +72,7 @@ int bind_key(int keycode, input_binding const &binding);
 bool get_key_state(int keycode);
 
 // fires the callbacks associated when the specified key is pressed/released
-void callback(int key, bool is_down);
+void callback(int key, Uint16 mod, bool is_down);
 
 input::input() {
   g_instance = this;
@@ -168,10 +161,8 @@ int input::bind_key(std::string const &keyname, input_bind_fn fn) {
     }
 
     if (key_no == 0) {
-      BOOST_THROW_EXCEPTION(
-          fw::exception()
-              << fw::message_error_info(
-                  "Invalid binding, no key name specified"));
+      BOOST_THROW_EXCEPTION(fw::exception()
+          << fw::message_error_info("Invalid binding, no key name specified"));
     }
 
     binding.fn = fn;
@@ -233,6 +224,54 @@ void input::update(float dt) {
   // don't get an on_mouse_move, it means the mouse didn't move!)
   g_mdx = g_mdy = 0.0f;
   g_mdw = 0.0f;
+}
+
+void input::process_event(SDL_Event &event) {
+  if (event.type == SDL_KEYDOWN) {
+    callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, true);
+  } else if (event.type == SDL_KEYUP) {
+    callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, false);
+  } else if (event.type == SDL_TEXTINPUT) {
+//    // now check whether it corresponds to a written character and pass that to CEGUI
+//    // as well (since CEGUI differentiates between characters and buttons)
+//    char buffer[30] = { 0 };
+//    XLookupString(&evnt.xkey, buffer, sizeof(buffer), 0, 0);
+//    if (buffer[0] != 0) {
+//      // todo: utf-8 to utf-32...
+//      CEGUI::System::getSingleton().injectChar(
+//          static_cast<CEGUI::utf32>(buffer[0]));
+//    }
+  } else if (event.type == SDL_MOUSEMOTION) {
+    g_mouse_inside = true;
+
+    // save the current difference and the current position
+    g_mdx =  event.motion.x - g_mx;
+    g_mdy = event.motion.y - g_my;
+    g_mx = event.motion.x;
+    g_my = event.motion.y;
+
+    // if the cursor is supposed to be hidden, we'll just put it back to the center of the window
+    if (g_hide_cursor) {
+//      main_window *wnd = framework::get_instance()->get_window();
+//      if (wnd != 0) {
+//        wnd->show_cursor(false);
+        /*
+         POINT pt = { wnd->get_width() / 2, wnd->get_height() / 2 };
+         ::ClientToScreen(_hwnd, &pt);
+         ::SetCursorPos(pt.x, pt.y);
+         */
+//      }
+    } else {
+//      CEGUI::System::getSingleton().injectMousePosition(evnt.xmotion.x,
+//          evnt.xmotion.y);
+    }
+  } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+    int keycode = 0xffffff00 + (event.button.button - 1);
+    callback(keycode, 0, true);
+  } else if (event.type == SDL_MOUSEBUTTONUP) {
+    int keycode = 0xffffff00 + (event.button.button - 1);
+    callback(keycode, 0, false);
+  }
 }
 
 void input::hide_cursor() {
@@ -301,98 +340,20 @@ input_binding &input_binding::operator =(input_binding const &copy) {
 
 //-------------------------------------------------------------------------
 
-void input_handle_event(XEvent &evnt) {
-  if (evnt.type == KeyPress) {
-    int keycode = XLookupKeysym(&evnt.xkey, 0);
-    if (keycode == NoSymbol)
-      return;
-
-    g_pressed_keys.emplace(keycode);
-    callback(keycode, true);
-  } else if (evnt.type == KeyRelease) {
-    int keycode = XLookupKeysym(&evnt.xkey, 0);
-    if (keycode == NoSymbol)
-      return;
-
-    g_pressed_keys.erase(keycode);
-    callback(keycode, false);
-
-    // now check whether it corresponds to a written character and pass that to CEGUI
-    // as well (since CEGUI differentiates between characters and buttons)
-    char buffer[30] = { 0 };
-    XLookupString(&evnt.xkey, buffer, sizeof(buffer), 0, 0);
-    if (buffer[0] != 0) {
-      // todo: utf-8 to utf-32...
-//      CEGUI::System::getSingleton().injectChar(
-//          static_cast<CEGUI::utf32>(buffer[0]));
-    }
-  } else if (evnt.type == KeymapNotify) {
-    // this is called in the (somewhat unlikely) event that someone changes the keymapping
-    XRefreshKeyboardMapping(&evnt.xmapping);
-  } else if (evnt.type == MotionNotify) {
-    g_mouse_inside = true;
-
-    // save the current difference and the current position
-    g_mdx = evnt.xmotion.x - g_mx;
-    g_mdy = evnt.xmotion.y - g_my;
-    g_mx = evnt.xmotion.x;
-    g_my = evnt.xmotion.y;
-
-    // if the cursor is supposed to be hidden, we'll just put it back to the center of the window
-    if (g_hide_cursor) {
-//      main_window *wnd = framework::get_instance()->get_window();
-//      if (wnd != 0) {
-//        wnd->show_cursor(false);
-        /*
-         POINT pt = { wnd->get_width() / 2, wnd->get_height() / 2 };
-         ::ClientToScreen(_hwnd, &pt);
-         ::SetCursorPos(pt.x, pt.y);
-         */
-//      }
-    } else {
-//      CEGUI::System::getSingleton().injectMousePosition(evnt.xmotion.x,
-//          evnt.xmotion.y);
-    }
-  } else if (evnt.type == ButtonPress) {
-    int keycode = 0xffffff00 + (evnt.xbutton.button - 1);
-    g_pressed_keys.emplace(keycode);
-
- //   CEGUI::MouseButton cegui_button = get_cegui_mousebutton(
- //       evnt.xbutton.button);
-//    if (cegui_button < 0
- //       || !CEGUI::System::getSingleton().injectMouseButtonDown(cegui_button)) {
-      callback(keycode, true);
- //   }
-  } else if (evnt.type == ButtonRelease) {
-    int keycode = 0xffffff00 + (evnt.xbutton.button - 1);
-    g_pressed_keys.erase(keycode);
-
-////    CEGUI::MouseButton cegui_button = get_cegui_mousebutton(
-  //      evnt.xbutton.button);
- //   if (cegui_button < 0
- //       || !CEGUI::System::getSingleton().injectMouseButtonUp(cegui_button)) {
-      callback(keycode, false);
- //   }
-  }
-}
-
-void callback(int key, bool is_down) {
+void callback(int key, Uint16 mod, bool is_down) {
   callback_map::const_iterator it = g_callbacks.find(key);
   if (it != g_callbacks.end()) {
     std::map<int, input_binding> const &list = (*it).second;
-    // todo: can we use std::for_each? I couldn't get it to compile...
     for (std::map<int, input_binding>::const_iterator it = list.begin();
         it != list.end(); ++it) {
       input_binding const &binding = it->second;
 
       // check that the correct ctrl/shift/alt combination is pressed as well
-      if (binding.ctrl && !get_key_state(XK_Control_L)
-          && !get_key_state(XK_Control_R))
+      if (binding.ctrl && (mod & KMOD_CTRL) != 0)
         continue;
-      if (binding.shift && !get_key_state(XK_Shift_L)
-          && !get_key_state(XK_Shift_R))
+      if (binding.shift && (mod & KMOD_SHIFT) != 0)
         continue;
-      if (binding.alt && !get_key_state(XK_Alt_L) && !get_key_state(XK_Alt_R))
+      if (binding.alt && (mod & KMOD_ALT) != 0)
         continue;
 
       binding.fn(g_key_codes[key], is_down);
@@ -404,10 +365,10 @@ bool get_key_state(int keycode) {
   return (g_pressed_keys.find(keycode) != g_pressed_keys.end());
 }
 
-// sets up the key_names map that maps string names to integer XK_* values that you'll find in X11/keysym.h
+// sets up the key_names map that maps string names to integer XKSLDK_* values that you'll find in SLD_keycode.h
 void setup_keynames() {
   // start off with simple ones in a loop
-  for (int key = static_cast<int>('A'); key <= static_cast<int>('Z'); key++) {
+  for (int key = static_cast<int>('a'); key <= static_cast<int>('z'); key++) {
     char buff[2] = { static_cast<char>(key), 0 };
     g_key_names[buff] = key;
   }
@@ -418,50 +379,50 @@ void setup_keynames() {
   for (int key = 0; key <= 9; key++) {
     std::string name = std::string("NP-")
         + boost::lexical_cast<std::string>(key);
-    g_key_names[name] = XK_KP_0 + key;
+    g_key_names[name] = SDLK_KP_0 + key;
   }
   for (int key = 0; key < 12; key++) {
     std::string name = "F" + boost::lexical_cast<std::string>(key + 1);
-    g_key_names[name] = XK_F1 + key;
+    g_key_names[name] = SDLK_F1 + key;
   }
 
-  g_key_names["Left-Mouse"] = XK_MBTNLEFT;
-  g_key_names["Middle-Mouse"] = XK_MBTNMIDDLE;
-  g_key_names["Right-Mouse"] = XK_MBTNRIGHT;
+  g_key_names["Left-Mouse"] = KEY_MBTNLEFT;
+  g_key_names["Middle-Mouse"] = KEY_MBTNMIDDLE;
+  g_key_names["Right-Mouse"] = KEY_MBTNRIGHT;
 
-  g_key_names["Tab"] = XK_Tab;
-  g_key_names["Return"] = XK_Return;
-  g_key_names["Enter"] = XK_Return;
-  g_key_names["Esc"] = XK_Escape;
-  g_key_names["Space"] = XK_space;
-  g_key_names["PgUp"] = XK_Page_Up;
-  g_key_names["PgDown"] = XK_Page_Down;
-  g_key_names["End"] = XK_End;
-  g_key_names["Home"] = XK_Home;
-  g_key_names["Del"] = XK_Delete;
-  g_key_names["Ins"] = XK_Insert;
+  g_key_names["Tab"] = SDLK_TAB;
+  g_key_names["Return"] = SDLK_RETURN;
+  g_key_names["Enter"] = SDLK_RETURN;
+  g_key_names["Esc"] = SDLK_ESCAPE;
+  g_key_names["Space"] = SDLK_SPACE;
+  g_key_names["PgUp"] = SDLK_PAGEUP;
+  g_key_names["PgDown"] = SDLK_PAGEDOWN;
+  g_key_names["End"] = SDLK_END;
+  g_key_names["Home"] = SDLK_HOME;
+  g_key_names["Del"] = SDLK_DELETE;
+  g_key_names["Ins"] = SDLK_INSERT;
 
-  g_key_names["Left"] = XK_Left;
-  g_key_names["Right"] = XK_Right;
-  g_key_names["Up"] = XK_Up;
-  g_key_names["Down"] = XK_Down;
+  g_key_names["Left"] = SDLK_LEFT;
+  g_key_names["Right"] = SDLK_RIGHT;
+  g_key_names["Up"] = SDLK_UP;
+  g_key_names["Down"] = SDLK_DOWN;
 
   // technically OEM keys, these are standard on all keyboards (apparently)
-  g_key_names["Comma"] = XK_comma;
-  g_key_names["Period"] = XK_period;
-  g_key_names["Dot"] = XK_period;
-  g_key_names["Plus"] = XK_plus;
-  g_key_names["Minus"] = XK_minus;
+  g_key_names["Comma"] = SDLK_COMMA;
+  g_key_names["Period"] = SDLK_PERIOD;
+  g_key_names["Dot"] = SDLK_PERIOD;
+  g_key_names["Plus"] = SDLK_PLUS;
+  g_key_names["Minus"] = SDLK_MINUS;
 
   // these are US-keyboard only entries, corresponding "OEM-n" values are there
   // as well
-  g_key_names["Colon"] = XK_colon;
-  g_key_names["Slash"] = XK_slash;
-  g_key_names["~"] = XK_asciitilde;
-  g_key_names["["] = XK_bracketleft;
-  g_key_names["Backslash"] = XK_backslash;
-  g_key_names["]"] = XK_bracketright;
-  g_key_names["Quote"] = XK_quotedbl;
+  g_key_names["Colon"] = SDLK_COLON;
+  g_key_names["Slash"] = SDLK_SLASH;
+  g_key_names["~"] = SDLK_BACKQUOTE;
+  g_key_names["["] = SDLK_LEFTBRACKET;
+  g_key_names["Backslash"] = SDLK_BACKSLASH;
+  g_key_names["]"] = SDLK_RIGHTBRACKET;
+  g_key_names["Quote"] = SDLK_QUOTEDBL;
 
   // now construct the reverse mapping, which is pretty easy...
   BOOST_FOREACH(key_names_map::value_type &key, g_key_names) {

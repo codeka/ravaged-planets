@@ -33,8 +33,8 @@ bool application::initialize(fw::framework *frmwrk) {
 //  _framework->get_input()->show_cursor();
 
   // set up the camera
-  fw::lookat_camera *cam = new fw::lookat_camera();
- // cam->set_mouse_move(false);
+  fw::top_down_camera *cam = new fw::top_down_camera();
+  cam->set_mouse_move(false);
   _framework->set_camera(cam);
 
   terrain = new ww::terrain();

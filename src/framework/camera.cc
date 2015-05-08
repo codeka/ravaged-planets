@@ -113,9 +113,9 @@ void first_person_camera::update(float dt) {
   pitch((float) inp->mouse_dy() * dt);
 
   if (inp->key("W"))
-    move_forward(-5.0f * dt);
-  if (inp->key("S"))
     move_forward(5.0f * dt);
+  if (inp->key("S"))
+    move_forward(-5.0f * dt);
   if (inp->key("A"))
     move_right(5.0f * dt);
   if (inp->key("D"))
@@ -269,14 +269,14 @@ void top_down_camera::update(float dt) {
   float rotate_around_up = 0.0f;
   float rotate_around_right = 0.0f;
   if (_rotate_mouse) {
-    rotate_around_up = inp->mouse_dx() * 0.0035f;
-    rotate_around_right = inp->mouse_dy() * 0.0035f;
+    rotate_around_up = inp->mouse_dx() * -0.0035f;
+    rotate_around_right = inp->mouse_dy() * -0.0035f;
   }
 
   if (_rotate_left)
-    rotate_around_up -= dt;
-  if (_rotate_right)
     rotate_around_up += dt;
+  if (_rotate_right)
+    rotate_around_up -= dt;
 
   rotate(rotate_around_up, rotate_around_right);
 
@@ -292,15 +292,15 @@ void top_down_camera::update(float dt) {
     if (mx >= framework::get_instance()->get_graphics()->get_width() - 1)
       right += 15.0f * dt;
     if (my <= 0)
-      forward += 15.0f * dt;
-    if (my >= framework::get_instance()->get_graphics()->get_height() - 1)
       forward -= 15.0f * dt;
+    if (my >= framework::get_instance()->get_graphics()->get_height() - 1)
+      forward += 15.0f * dt;
   }
 
   if (_move_forward)
-    forward += 15.0f * dt;
-  if (_move_backward)
     forward -= 15.0f * dt;
+  if (_move_backward)
+    forward += 15.0f * dt;
   if (_move_left)
     right -= 15.0f * dt;
   if (_move_right)
@@ -354,15 +354,13 @@ void top_down_camera::zoom(float amount) {
 
 void top_down_camera::rotate(float around_up, float around_right) {
   float max_height = 15.0f;
-#ifdef _DEBUG
-  // in debug mode, we let the camera more around a bit more, because it's sometimes
-  // useful...
-  max_height = -9999.0f;
+#ifndef DEBUG
+  // we don't rotate around the right axis if we're too "low". That way, we don't have to worry about viewing in the
+  // distance!
+  bool allow_around_right = ((_position[1] - _centre[1]) > max_height || around_right < 0.0f);
+#else
+  bool allow_around_right = true;
 #endif
-
-  // we don't rotate around the right axis if we're too "low". That way,
-  // we don't have to worry about viewing in the distance!
-  bool allow_around_right = ((_position[1] - _centre[1]) > max_height || around_right > 0.0f);
 
   _position -= _centre;
   if (around_up != 0.0f) {
