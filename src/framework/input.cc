@@ -29,16 +29,11 @@ typedef std::map<int, std::string> key_codes_map;
 static key_names_map g_key_names;
 static key_codes_map g_key_codes;
 
-static fw::input *g_instance = 0;
-
-static boost::unordered_set<int> g_pressed_keys;
-
 static volatile uint32_t g_next_token;
 
 static float g_mx, g_my;
 static float g_mdx, g_mdy;
 static float g_mw, g_mdw;
-static bool g_mbtns[3];
 static bool g_mouse_inside;
 static bool g_hide_cursor;
 
@@ -68,15 +63,10 @@ void setup_keynames();
 // collection)
 int bind_key(int keycode, input_binding const &binding);
 
-// determines whether the given key is currently pressed or not
-bool get_key_state(int keycode);
-
 // fires the callbacks associated when the specified key is pressed/released
 void callback(int key, Uint16 mod, bool is_down);
 
 input::input() {
-  g_instance = this;
-
   if (g_key_names.size() == 0) {
     setup_keynames();
   }
@@ -299,15 +289,6 @@ float input::mouse_wheel() const {
 float input::mouse_dwheel() const {
   return g_mdw;
 }
-bool input::mouse_left() const {
-  return g_mbtns[0];
-}
-bool input::mouse_middle() const {
-  return g_mbtns[1];
-}
-bool input::mouse_right() const {
-  return g_mbtns[2];
-}
 
 bool input::key(std::string keyname) const {
   return false;
@@ -359,10 +340,6 @@ void callback(int key, Uint16 mod, bool is_down) {
       binding.fn(g_key_codes[key], is_down);
     }
   }
-}
-
-bool get_key_state(int keycode) {
-  return (g_pressed_keys.find(keycode) != g_pressed_keys.end());
 }
 
 // sets up the key_names map that maps string names to integer XKSLDK_* values that you'll find in SLD_keycode.h
