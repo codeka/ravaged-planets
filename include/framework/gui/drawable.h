@@ -22,6 +22,7 @@ private:
 
 protected:
   friend class drawable_manager;
+  drawable();
   drawable(fw::xml::XMLElement *elem);
 
 public:

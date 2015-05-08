@@ -24,15 +24,18 @@ void parse_tuple_attribute(std::string attr_value, int &left, int &right) {
 
 //-----------------------------------------------------------------------------
 
-drawable::drawable(xml::XMLElement *elem) :
-    _top(0), _left(0), _width(0), _height(0) {
+drawable::drawable() :
+        _top(0), _left(0), _width(0), _height(0) {
+}
+
+drawable::drawable(fw::xml::XMLElement *elem) : drawable() {
   parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
   parse_tuple_attribute(elem->Attribute("size"), _width, _height);
 }
 
 //-----------------------------------------------------------------------------
 
-ninepatch_drawable::ninepatch_drawable(xml::XMLElement *elem) {
+ninepatch_drawable::ninepatch_drawable(fw::xml::XMLElement *elem) {
 }
 
 //-----------------------------------------------------------------------------
@@ -48,7 +51,7 @@ void drawable_manager::parse(boost::filesystem::path const &file) {
   XML_CHECK(doc.LoadFile(file.string().c_str()));
 
   xml::XMLElement *root_elem = doc.FirstChildElement("drawables");
-  for (xml::XMLElement *drawable_elem = root_elem->FirstChild(); drawable_elem != nullptr;
+  for (xml::XMLElement *drawable_elem = root_elem->FirstChildElement(); drawable_elem != nullptr;
       drawable_elem = drawable_elem->NextSiblingElement()) {
     parse_drawable_element(drawable_elem);
   }
@@ -59,14 +62,17 @@ std::shared_ptr<drawable> drawable_manager::get_drawable(std::string const &name
 }
 
 void drawable_manager::parse_drawable_element(fw::xml::XMLElement *elem) {
-  boost::shared_ptr<drawable> new_drawable;
+  std::shared_ptr<drawable> new_drawable;
+  if (elem->Name() == nullptr) {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string("Element has null name: ") + elem->Value()));
+  }
   std::string type_name(elem->Name());
   if (type_name == "drawable") {
-    new_drawable = new drawable(elem);
+    new_drawable = std::shared_ptr<drawable>(new drawable(elem));
   } else if (type_name == "ninepatch") {
-    new_drawable = new ninepatch_drawable(elem);
+    new_drawable = std::shared_ptr<drawable>(new ninepatch_drawable(elem));
   } else {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Unknown element: " + name));
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Unknown element: " + type_name));
   }
 
   if (elem->Attribute("name") == nullptr) {

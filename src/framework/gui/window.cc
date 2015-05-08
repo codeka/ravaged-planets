@@ -1,4 +1,5 @@
 
+#include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/window.h>
 

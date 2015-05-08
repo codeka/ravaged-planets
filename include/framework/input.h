@@ -67,9 +67,6 @@ public:
   float mouse_dy() const;
   float mouse_wheel() const;
   float mouse_dwheel() const;
-  bool mouse_left() const;
-  bool mouse_middle() const;
-  bool mouse_right() const;
   bool key(std::string keyname) const;
 };
 }
