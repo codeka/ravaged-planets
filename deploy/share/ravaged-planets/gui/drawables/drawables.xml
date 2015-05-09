@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<drawables>
+  <image src="background.png">
+    <drawable name="title_background" pos="0,0" size="1024,768" />
+  </image>
+
+  <image src="elements.png">
+    <drawable name="frame_simple" pos="1,1" size="20,20" />
+    <ninepatch name="frame">
+      <outer pos="1,1" size="20,20" />
+      <inner pos="2,2" size="18,19" />
+    </ninepatch>
+  </image>
+</drawables>

@@ -5,15 +5,17 @@
 
 namespace fw { namespace gui {
 
+void background_property::apply(window *wnd) {
+  wnd->_background = wnd->_gui->get_drawable_manager()->get_drawable(_drawable_name);
+}
+
+//-----------------------------------------------------------------------------
+
 window::window(gui *gui) :
   _gui(gui) {
 }
 
 window::~window() {
-}
-
-void window::set_background(std::string const &drawable_name) {
-  _background = _gui->get_drawable_manager()->get_drawable(drawable_name);
 }
 
 void window::render() {

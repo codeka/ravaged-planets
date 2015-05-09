@@ -33,12 +33,11 @@ void parse_tuple_attribute(std::string attr_value, int &left, int &right) {
 static std::shared_ptr<fw::shader> g_shader;
 static std::shared_ptr<fw::vertex_buffer> g_vertex_buffer;
 static std::shared_ptr<fw::index_buffer> g_index_buffer;
-static std::shared_ptr<fw::texture> g_texture;
 
 //-----------------------------------------------------------------------------
 
-drawable::drawable() :
-    _top(0), _left(0), _width(0), _height(0) {
+drawable::drawable(std::shared_ptr<fw::texture> texture) :
+    _top(0), _left(0), _width(0), _height(0), _texture(texture) {
   if (g_vertex_buffer == nullptr) {
     g_vertex_buffer = fw::vertex_buffer::create<fw::vertex::xyz_uv>(false);
     fw::vertex::xyz_uv vertices[4];
@@ -57,17 +56,15 @@ drawable::drawable() :
     g_index_buffer->set_data(4, indices);
 
     g_shader = fw::shader::create("gui");
-
-    g_texture = std::shared_ptr<fw::texture>(new fw::texture());
-    g_texture->create(fw::resolve("gui/drawables/elements.png"));
   }
 }
 
-drawable::drawable(fw::xml::XMLElement *elem) : drawable() {
+drawable::drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
+    drawable(texture) {
   parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
   parse_tuple_attribute(elem->Attribute("size"), _width, _height);
   _shader_params = g_shader->create_parameters();
-  _shader_params->set_texture("texsampler", g_texture);
+  _shader_params->set_texture("texsampler", _texture);
 }
 
 void drawable::render() {
@@ -82,7 +79,8 @@ void drawable::render() {
 
 //-----------------------------------------------------------------------------
 
-ninepatch_drawable::ninepatch_drawable(fw::xml::XMLElement *elem) {
+ninepatch_drawable::ninepatch_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
+  drawable(texture) {
 }
 
 //-----------------------------------------------------------------------------
@@ -95,29 +93,44 @@ drawable_manager::~drawable_manager() {
 
 void drawable_manager::parse(boost::filesystem::path const &file) {
   xml::XMLDocument doc;
-  XML_CHECK(doc.LoadFile(file.string().c_str()));
+  try {
+    XML_CHECK(doc.LoadFile(file.string().c_str()));
 
-  xml::XMLElement *root_elem = doc.FirstChildElement("drawables");
-  for (xml::XMLElement *drawable_elem = root_elem->FirstChildElement(); drawable_elem != nullptr;
-      drawable_elem = drawable_elem->NextSiblingElement()) {
-    parse_drawable_element(drawable_elem);
+    xml::XMLElement *root_elem = doc.FirstChildElement("drawables");
+    for (xml::XMLElement *image_elem = root_elem->FirstChildElement(); image_elem != nullptr;
+        image_elem = image_elem->NextSiblingElement()) {
+      // Parse <image src=""> element
+      std::string src(image_elem->Attribute("src"));
+      std::shared_ptr<fw::texture> texture(new fw::texture());
+      texture->create(fw::resolve(std::string("gui/drawables/") + src));
+
+      for (xml::XMLElement *drawable_elem = image_elem->FirstChildElement(); drawable_elem != nullptr;
+          drawable_elem = drawable_elem->NextSiblingElement()) {
+        parse_drawable_element(texture, drawable_elem);
+      }
+    }
+  } catch (fw::exception &e) {
+    // If we get an exception here, add the filename we were trying to parse.
+    e << fw::filename_error_info(file);
+    throw e;
   }
+
 }
 
 std::shared_ptr<drawable> drawable_manager::get_drawable(std::string const &name) {
   return _drawables[name];
 }
 
-void drawable_manager::parse_drawable_element(fw::xml::XMLElement *elem) {
+void drawable_manager::parse_drawable_element(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) {
   std::shared_ptr<drawable> new_drawable;
   if (elem->Name() == nullptr) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string("Element has null name: ") + elem->Value()));
   }
   std::string type_name(elem->Name());
   if (type_name == "drawable") {
-    new_drawable = std::shared_ptr<drawable>(new drawable(elem));
+    new_drawable = std::shared_ptr<drawable>(new drawable(texture, elem));
   } else if (type_name == "ninepatch") {
-    new_drawable = std::shared_ptr<drawable>(new ninepatch_drawable(elem));
+    new_drawable = std::shared_ptr<drawable>(new ninepatch_drawable(texture, elem));
   } else {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Unknown element: " + type_name));
   }

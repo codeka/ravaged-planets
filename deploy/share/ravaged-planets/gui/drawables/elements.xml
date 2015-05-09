@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<drawables>
-  <drawable name="frame_simple" pos="1,1" size="20,20" />
-  <ninepatch name="frame">
-    <outer pos="1,1" size="20,20" />
-    <inner pos="2,2" size="18,19" />
-  </ninepatch>
-</drawables>

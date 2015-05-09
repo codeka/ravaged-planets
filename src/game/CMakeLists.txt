@@ -1,6 +1,7 @@
 
 file(GLOB GAME_FILES
     *.cc
+    screens/*.cc
     world/*.cc
 )
 

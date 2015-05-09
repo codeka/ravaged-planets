@@ -23,7 +23,7 @@ void gui::initialize(fw::graphics *graphics) {
   _graphics = graphics;
 
   _drawable_manager = new drawable_manager();
-  _drawable_manager->parse(fw::resolve("gui/drawables/elements.xml"));
+  _drawable_manager->parse(fw::resolve("gui/drawables/drawables.xml"));
 }
 
 void gui::update(float dt) {

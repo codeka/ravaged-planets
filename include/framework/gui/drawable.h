@@ -8,6 +8,7 @@
 #include <framework/xml.h>
 
 namespace fw {
+class texture;
 class shader_parameters;
 
 namespace gui {
@@ -23,12 +24,13 @@ private:
   int _width;
   int _height;
 
+  std::shared_ptr<fw::texture> _texture;
   std::shared_ptr<fw::shader_parameters> _shader_params;
 
 protected:
   friend class drawable_manager;
-  drawable();
-  drawable(fw::xml::XMLElement *elem);
+  drawable(std::shared_ptr<fw::texture> texture);
+  drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem);
 
 public:
 
@@ -42,7 +44,7 @@ class ninepatch_drawable : public drawable {
 private:
 protected:
   friend class drawable_manager;
-  ninepatch_drawable(fw::xml::XMLElement *elem);
+  ninepatch_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem);
 
 public:
 };
@@ -54,7 +56,7 @@ class drawable_manager {
 private:
   std::map<std::string, std::shared_ptr<drawable>> _drawables;
 
-  void parse_drawable_element(fw::xml::XMLElement *elem);
+  void parse_drawable_element(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem);
 public:
   drawable_manager();
   ~drawable_manager();

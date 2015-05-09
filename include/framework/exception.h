@@ -10,8 +10,7 @@ namespace fw {
 // this can be added to an exception after a system call that sets errno
 typedef boost::error_info<struct tag_errno, int> errno_error_info;
 
-// this can be added to an exception if you know the "filename" we were accessing
-// at the time of the exception
+// this can be added to an exception if you know the "filename" we were accessing at the time of the exception
 typedef boost::error_info<struct tag_filename, boost::filesystem::path> filename_error_info;
 
 // this can be added to an exception to provide an error message as to what you were
