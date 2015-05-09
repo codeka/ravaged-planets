@@ -28,6 +28,8 @@ void title_screen::show() {
   fw::framework *frmwrk = fw::framework::get_instance();
 
   wnd = fw::gui::builder<fw::gui::window>()
+      << fw::gui::widget::position(fw::gui::px(10), fw::gui::px(10))
+      << fw::gui::widget::size(fw::gui::pct(100), fw::gui::pct(100))
       << fw::gui::window::background("title_background");
 
   /*

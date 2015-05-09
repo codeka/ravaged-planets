@@ -34,7 +34,7 @@ protected:
 
 public:
 
-  void render();
+  void render(float x, float y, float width, float height);
 };
 
 /**

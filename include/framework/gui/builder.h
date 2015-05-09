@@ -4,15 +4,11 @@
 
 #include <framework/framework.h>
 
+#include <framework/gui/widget.h>
+#include <framework/gui/window.h>
+#include <framework/gui/property.h>
+
 namespace fw { namespace gui {
-
-/** Base class for properties that can be added to buildable objects. */
-class property {
-public:
-  inline virtual ~property() { }
-
-  virtual void apply(window *wnd) = 0;
-};
 
 /**
  * This class can be used to build other GUI classes. It keeps a list of attribute definitions and child elements
@@ -24,10 +20,23 @@ private:
   std::vector<property *> _properties;
 
 public:
-  inline operator std::shared_ptr<buildable>();
+  inline builder();
+  inline ~builder();
 
+  inline operator std::shared_ptr<buildable>();
   inline builder &operator <<(property *prop);
 };
+
+template<class buildable>
+inline builder<buildable>::builder() {
+}
+
+template<class buildable>
+inline builder<buildable>::~builder() {
+  BOOST_FOREACH(property *prop, _properties) {
+    delete prop;
+  }
+}
 
 template<>
 inline builder<window>::operator std::shared_ptr<window>() {

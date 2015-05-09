@@ -42,9 +42,9 @@ drawable::drawable(std::shared_ptr<fw::texture> texture) :
     g_vertex_buffer = fw::vertex_buffer::create<fw::vertex::xyz_uv>(false);
     fw::vertex::xyz_uv vertices[4];
     vertices[0] = fw::vertex::xyz_uv(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-    vertices[1] = fw::vertex::xyz_uv(0.0f, -1.0f, 0.0f, 0.0f, 1.0f);
+    vertices[1] = fw::vertex::xyz_uv(0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
     vertices[2] = fw::vertex::xyz_uv(1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-    vertices[3] = fw::vertex::xyz_uv(1.0f, -1.0f, 0.0f, 1.0f, 1.0f);
+    vertices[3] = fw::vertex::xyz_uv(1.0f, 1.0f, 0.0f, 1.0f, 1.0f);
     g_vertex_buffer->set_data(4, vertices);
 
     g_index_buffer = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
@@ -67,7 +67,12 @@ drawable::drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *el
   _shader_params->set_texture("texsampler", _texture);
 }
 
-void drawable::render() {
+void drawable::render(float x, float y, float width, float height) {
+  fw::matrix orth;
+  cml::matrix_orthographic_RH(orth, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+  orth = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * orth;
+  _shader_params->set_matrix("transform", orth);
+
   g_vertex_buffer->begin();
   g_index_buffer->begin();
   g_shader->begin(_shader_params);
