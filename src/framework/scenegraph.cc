@@ -130,16 +130,15 @@ void node::render_shader(std::shared_ptr<fw::shader> shader) {
     parameters->set_matrix("worldviewproj", worldviewproj);
     parameters->set_matrix("worldview", worldview);
 
-//				if (!is_rendering_shadow && shadowsrc)
-//				{
-//					fw::matrix view_to_light = cam->get_view_matrix();
-//					view_to_light = view_to_light.inverse();
-//					view_to_light *= shadowsrc->get_camera().get_view_matrix();
-//					view_to_light *= shadowsrc->get_camera().get_projection_matrix();
-//
-//					fx->set_matrix("view_to_light", view_to_light);
-//					fx->set_texture("shadow_map", shadowsrc->get_shadowmap());
-//				}
+//    if (!is_rendering_shadow && shadowsrc) {
+//      fw::matrix view_to_light = cam->get_view_matrix();
+//      view_to_light = view_to_light.inverse();
+//      view_to_light *= shadowsrc->get_camera().get_view_matrix();
+//      view_to_light *= shadowsrc->get_camera().get_projection_matrix();
+
+ //     parameters->set_matrix("view_to_light", view_to_light);
+//      fx->set_texture("shadow_map", shadowsrc->get_shadowmap());
+//    }
   }
 
   _vb->begin();

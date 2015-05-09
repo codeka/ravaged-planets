@@ -47,6 +47,7 @@ public:
 /** Contains information about a shader variable in a complied shader program. */
 class shader_variable {
 public:
+  bool valid;
   GLint location;
   std::string name;
   GLint size;

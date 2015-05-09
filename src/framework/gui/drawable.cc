@@ -67,7 +67,7 @@ drawable::drawable(fw::xml::XMLElement *elem) : drawable() {
   parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
   parse_tuple_attribute(elem->Attribute("size"), _width, _height);
   _shader_params = g_shader->create_parameters();
-  _shader_params->set_texture("uv", g_texture);
+  _shader_params->set_texture("texsampler", g_texture);
 }
 
 void drawable::render() {

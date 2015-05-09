@@ -125,9 +125,8 @@ public:
   }
   std::shared_ptr<fw::shader> get_shader() const;
 
-  void set_shader_parameters(
-      std::shared_ptr<fw::shader_parameters> shader_params) {
-    _shader_params;
+  void set_shader_parameters(std::shared_ptr<fw::shader_parameters> shader_params) {
+    _shader_params = shader_params;
   }
   std::shared_ptr<fw::shader_parameters> get_shader_parameters() const {
     return _shader_params;

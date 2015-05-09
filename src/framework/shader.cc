@@ -102,43 +102,54 @@ void shader_parameters::apply(shader *e) const {
   int texture_unit = 0;
   for (auto it = _textures.begin(); it != _textures.end(); ++it) {
     shader_variable const &var = e->_shader_variables[it->first];
-
-    glActiveTexture(GL_TEXTURE0 + texture_unit);
-    std::shared_ptr<fw::texture> texture = it->second;
-    texture->bind();
-    FW_CHECKED(glUniform1i(var.location, 0));
-    texture_unit ++;
+    if (var.valid) {
+      glActiveTexture(GL_TEXTURE0 + texture_unit);
+      std::shared_ptr<fw::texture> texture = it->second;
+      texture->bind();
+      FW_CHECKED(glUniform1i(var.location, 0));
+      texture_unit ++;
+    } else {
+      fw::debug << "no texture named " << it->first << " found..." << std::endl;
+    }
   }
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
     shader_variable const &var = e->_shader_variables[it->first];
-    FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.data()));
+    if (var.valid) {
+      FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.data()));
+    }
   }
 
   for (std::map<std::string, vector>::const_iterator it = _vectors.begin(); it != _vectors.end(); ++it) {
     shader_variable const &var = e->_shader_variables[it->first];
-    FW_CHECKED(glUniform3fv(var.location, 1, it->second.data()));
+    if (var.valid) {
+      FW_CHECKED(glUniform3fv(var.location, 1, it->second.data()));
+    }
   }
 
   for (std::map<std::string, colour>::const_iterator it = _colours.begin(); it != _colours.end(); ++it) {
     shader_variable const &var = e->_shader_variables[it->first];
-    FW_CHECKED(glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a));
+    if (var.valid) {
+      FW_CHECKED(glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a));
+    }
   }
 
   for (std::map<std::string, float>::const_iterator it = _scalars.begin(); it != _scalars.end(); ++it) {
     shader_variable const &var = e->_shader_variables[it->first];
-    FW_CHECKED(glUniform1f(var.location, it->second));
+    if (var.valid) {
+      FW_CHECKED(glUniform1f(var.location, it->second));
+    }
   }
 }
 
 //-------------------------------------------------------------------------
 
 shader_variable::shader_variable() :
-  shader_variable(0, "", 0, 0) {
+  location(-1), name(""), size(0), type(0), valid(false) {
 }
 
 shader_variable::shader_variable(GLint location, std::string name, GLint size, GLenum type) :
-  location(location), name(name), size(size), type(type) {
+  location(location), name(name), size(size), type(type), valid(true) {
 }
 
 //-------------------------------------------------------------------------
@@ -212,6 +223,7 @@ void shader::load(fw::graphics *g, fs::path const &full_path) {
     FW_CHECKED(glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer));
     GLint location = glGetUniformLocation(_program_id, buffer);
     std::string name(buffer);
+    fw::debug << " found uniform: " << name << std::endl;
     _shader_variables[name] = shader_variable(location, name, size, type);
   }
 

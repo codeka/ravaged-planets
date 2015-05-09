@@ -28,14 +28,12 @@ terrain::~terrain() {
 void terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
-  generate_terrain_indices_wireframe(index_data, PATCH_SIZE);
+  generate_terrain_indices(index_data, PATCH_SIZE);
   _ib->set_data(index_data.size(), &index_data[0], 0);
 
   // load the shader file that we'll use for rendering
-  //_shader = fw::shader::create("terrain");
-  _shader = nullptr;
+  _shader = fw::shader::create("terrain");
 
-  // todo: load texture(s)
   std::shared_ptr<fw::texture> layer(new fw::texture());
   layer->create(fw::resolve("terrain/grass-01.jpg"));
   _layers.push_back(layer);
@@ -109,22 +107,19 @@ void terrain::bake_patch(int patch_x, int patch_z) {
       _length, PATCH_SIZE, patch_x, patch_z);
 
   std::shared_ptr<terrain_patch> patch(_patches[index]);
-  //patch->vb->create_buffer<fw::vertex::xyz_n>(num_verts, true);
-
   patch->vb->set_data(num_verts, vert_data, 0);
   delete[] vert_data;
 
-  /*patch->fx_params = _shader->create_parameters();
+  patch->shader_params = _shader->create_parameters();
   if (_layers.size() >= 1)
-    patch->fx_params->set_texture("layer1", _layers[0]);
+    patch->shader_params->set_texture("layer1", _layers[0]);
   if (_layers.size() >= 2)
-    patch->fx_params->set_texture("layer2", _layers[1]);
+    patch->shader_params->set_texture("layer2", _layers[1]);
   if (_layers.size() >= 3)
-    patch->fx_params->set_texture("layer3", _layers[2]);
+    patch->shader_params->set_texture("layer3", _layers[2]);
   if (_layers.size() >= 4)
-    patch->fx_params->set_texture("layer4", _layers[3]);
-  patch->fx_params->set_texture("splatt", patch->texture);
-  patch->fx_params->commit();*/
+    patch->shader_params->set_texture("layer4", _layers[3]);
+  //patch->shader_params->set_texture("splatt", patch->texture);
 }
 
 void terrain::ensure_patches() {
@@ -181,10 +176,9 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
       // we have to set up the scenegraph node with these manually
       node->set_vertex_buffer(patch->vb);
       node->set_index_buffer(_ib);
-      //node->set_shader(_shader);
-      //node->set_shader_parameters(patch->shader_params);
-      node->set_primitive_type(fw::sg::primitive_linelist);
-      //node->set_primitive_type(fw::sg::primitive_trianglestrip);
+      node->set_shader(_shader);
+      node->set_shader_parameters(patch->shader_params);
+      node->set_primitive_type(fw::sg::primitive_trianglestrip);
 
       scenegraph.add_node(node);
     }
@@ -229,8 +223,7 @@ float terrain::get_height(float x, float z) {
   float dz = z - z0;
   float dxdz = dx * dz;
 
-  return h00 * (1.0f - dz - dx + dxdz) + h10 * (dx - dxdz) + h11 * dxdz
-      + h01 * (dz - dxdz);
+  return h00 * (1.0f - dz - dx + dxdz) + h10 * (dx - dxdz) + h11 * dxdz + h01 * (dz - dxdz);
 }
 
 // gets the point on the terrain that the camera is currently looking at
@@ -269,8 +262,7 @@ fw::vector terrain::get_cursor_location() {
   return get_cursor_location(start, direction);
 }
 
-fw::vector terrain::get_cursor_location(fw::vector const &start,
-    fw::vector const &direction) {
+fw::vector terrain::get_cursor_location(fw::vector const &start, fw::vector const &direction) {
   fw::vector evec = start + (direction * 150.0f);
   fw::vector svec = start + (direction * 5.0f);
 
@@ -306,14 +298,10 @@ fw::vector terrain::get_cursor_location(fw::vector const &start,
         float z1 = static_cast<float>(oz);
         float z2 = static_cast<float>(oz + 1);
 
-        fw::vector p11(x1,
-            get_vertex_height(static_cast<int>(x1), static_cast<int>(z1)), z1);
-        fw::vector p21(x2,
-            get_vertex_height(static_cast<int>(x2), static_cast<int>(z1)), z1);
-        fw::vector p12(x1,
-            get_vertex_height(static_cast<int>(x1), static_cast<int>(z2)), z2);
-        fw::vector p22(x2,
-            get_vertex_height(static_cast<int>(x2), static_cast<int>(z2)), z2);
+        fw::vector p11(x1, get_vertex_height(static_cast<int>(x1), static_cast<int>(z1)), z1);
+        fw::vector p21(x2, get_vertex_height(static_cast<int>(x2), static_cast<int>(z1)), z1);
+        fw::vector p12(x1, get_vertex_height(static_cast<int>(x1), static_cast<int>(z2)), z2);
+        fw::vector p22(x2, get_vertex_height(static_cast<int>(x2), static_cast<int>(z2)), z2);
 
         fw::vector n1 = cml::cross(p12 - p11, p21 - p11);
         fw::vector n2 = cml::cross(p21 - p22, p12 - p22);
