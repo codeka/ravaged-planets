@@ -99,61 +99,50 @@ std::shared_ptr<shader_parameters> shader_parameters::clone() {
 }
 
 void shader_parameters::apply(shader *e) const {
+  int texture_unit = 0;
   for (auto it = _textures.begin(); it != _textures.end(); ++it) {
+    shader_variable const &var = e->_shader_variables[it->first];
+
+    glActiveTexture(GL_TEXTURE0 + texture_unit);
     std::shared_ptr<fw::texture> texture = it->second;
-    glActiveTexture(GL_TEXTURE0);
     texture->bind();
-    FW_CHECKED(glUniform1i(e->texsampler_location, 0));
+    FW_CHECKED(glUniform1i(var.location, 0));
+    texture_unit ++;
   }
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
-    if (it->first == "worldviewproj") {
-      FW_CHECKED(glUniformMatrix4fv(e->worldviewproj_location, 1, GL_FALSE, it->second.data()));
-      continue;
-    }
-
-    GLint id = glGetUniformLocation(e->_program_id, it->first.c_str());
-    if (id > 0) {
-      FW_CHECKED(glUniformMatrix4fv(id, 1, GL_FALSE, it->second.data()));
-    } else {
-     // fw::debug << "Warning: No location for '" << it->first.c_str() << "' in " << e->_data->filename.filename()
-     //     << std::endl;
-    }
+    shader_variable const &var = e->_shader_variables[it->first];
+    FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.data()));
   }
 
   for (std::map<std::string, vector>::const_iterator it = _vectors.begin(); it != _vectors.end(); ++it) {
-//    GLint id = glGetAttribLocation(e->_data->program_id, it->first.c_str());
-//    if (id > 0) {
-//      FW_CHECKED(glEnableVertexAttribArray(id));
-//      FW_CHECKED()
-//      FW_CHECKED(glVertexAttribPointer(id, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr));
-//    }
-    //CGparameter p = cgGetNamedEffectParameter(fx, it->first.c_str());
-    //if (p != 0) {
-    //  CG_CHECKED(cgSetParameter3fv(p, it->second.data()));
-    //}
+    shader_variable const &var = e->_shader_variables[it->first];
+    FW_CHECKED(glUniform3fv(var.location, 1, it->second.data()));
   }
 
   for (std::map<std::string, colour>::const_iterator it = _colours.begin(); it != _colours.end(); ++it) {
-    //CGparameter p = cgGetNamedEffectParameter(fx, it->first.c_str());
-    //if (p != 0) {
-    //  CG_CHECKED(
-    //      cgSetParameter4f(p, it->second.a, it->second.r, it->second.g,
-    //           it->second.b));
-    //}
+    shader_variable const &var = e->_shader_variables[it->first];
+    FW_CHECKED(glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a));
   }
 
   for (std::map<std::string, float>::const_iterator it = _scalars.begin(); it != _scalars.end(); ++it) {
-    //CGparameter p = cgGetNamedEffectParameter(fx, it->first.c_str());
-    //if (p != 0) {
-    //  CG_CHECKED(cgSetParameter1f(p, it->second));
-    //}
+    shader_variable const &var = e->_shader_variables[it->first];
+    FW_CHECKED(glUniform1f(var.location, it->second));
   }
-
 }
 
 //-------------------------------------------------------------------------
-shader::shader() {
+
+shader_variable::shader_variable() :
+  shader_variable(0, "", 0, 0) {
+}
+
+shader_variable::shader_variable(GLint location, std::string name, GLint size, GLenum type) :
+  location(location), name(name), size(size), type(type) {
+}
+
+//-------------------------------------------------------------------------
+shader::shader() : _program_id(0) {
 }
 
 shader::~shader() {
@@ -178,21 +167,19 @@ void shader::begin(std::shared_ptr<shader_parameters> parameters) {
     parameters->apply(this);
   }
 
-  /*
 #ifdef DEBUG
   GLint status;
-  FW_CHECKED(glValidateProgram(_data->program_id));
-  glGetProgramiv(_data->program_id, GL_VALIDATE_STATUS, &status);
+  FW_CHECKED(glValidateProgram(_program_id));
+  glGetProgramiv(_program_id, GL_VALIDATE_STATUS, &status);
   if (status != GL_TRUE) {
     GLint log_length;
-    glGetProgramiv(_data->program_id, GL_INFO_LOG_LENGTH, &log_length);
+    glGetProgramiv(_program_id, GL_INFO_LOG_LENGTH, &log_length);
     std::vector<char> error_message(log_length);
-    glGetProgramInfoLog(_data->program_id, log_length, nullptr, &error_message[0]);
+    glGetProgramInfoLog(_program_id, log_length, nullptr, &error_message[0]);
 
     fw::debug << "glValidateProgram error: " << &error_message[0] << std::endl;
   }
 #endif
-*/
 }
 
 void shader::end() {
@@ -215,18 +202,18 @@ void shader::load(fw::graphics *g, fs::path const &full_path) {
   compile_shader(fragment_shader_id, full_path.string() + ".frag");
   link_shader(_program_id, vertex_shader_id, fragment_shader_id);
 
-  worldviewproj_location = glGetUniformLocation(_program_id, "worldviewproj");
-  if (worldviewproj_location < 0) {
-//    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for worldviewproj"));
+  int num_uniforms;
+  FW_CHECKED(glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &num_uniforms));
+  GLchar buffer[1024];
+  for (int i = 0; i < num_uniforms; i++) {
+    GLint size;
+    GLint length;
+    GLenum type;
+    FW_CHECKED(glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer));
+    GLint location = glGetUniformLocation(_program_id, buffer);
+    std::string name(buffer);
+    _shader_variables[name] = shader_variable(location, name, size, type);
   }
-
-  position_location = glGetAttribLocation(_program_id, "position");
-  if (position_location < 0) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No location for position"));
-  }
-
-  uv_location = glGetAttribLocation(_program_id, "uv");
-  texsampler_location = glGetAttribLocation(_program_id, "texsampler");
 
   fw::debug << "loaded shader from: " << full_path.string() << std::endl;
 }

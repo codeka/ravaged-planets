@@ -44,6 +44,18 @@ public:
   std::shared_ptr<shader_parameters> clone();
 };
 
+/** Contains information about a shader variable in a complied shader program. */
+class shader_variable {
+public:
+  GLint location;
+  std::string name;
+  GLint size;
+  GLenum type;
+
+  shader_variable();
+  shader_variable(GLint location, std::string name, GLint size, GLenum type);
+};
+
 // this shader wraps shader files and allows us to automatically reload them, and so on.
 class shader {
 private:
@@ -53,11 +65,7 @@ private:
 
   boost::filesystem::path _filename;
   GLuint _program_id;
-
-  GLint worldviewproj_location;
-  GLint position_location;
-  GLint uv_location;
-  GLint texsampler_location;
+  std::map<std::string, shader_variable> _shader_variables;
 
   void load(fw::graphics *g, boost::filesystem::path const &full_path);
 
