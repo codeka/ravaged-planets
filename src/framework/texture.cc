@@ -107,6 +107,9 @@ void texture::create(int width, int height, bool dynamic /*= false*/) {
 
 void texture::bind() {
   FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
+  FW_CHECKED(glActiveTexture(GL_TEXTURE0));
+  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 }
 
 void texture::save_png(fs::path const &filename) {

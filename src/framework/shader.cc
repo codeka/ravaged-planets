@@ -103,7 +103,7 @@ void shader_parameters::apply(shader *e) const {
     std::shared_ptr<fw::texture> texture = it->second;
     glActiveTexture(GL_TEXTURE0);
     texture->bind();
-    glUniform1i(e->texsampler_location, 0);
+    FW_CHECKED(glUniform1i(e->texsampler_location, 0));
   }
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
