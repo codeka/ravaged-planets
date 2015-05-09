@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <drawables>
   <image src="background.png">
-    <drawable name="title_background" pos="0,0" size="1024,768" />
+    <drawable name="title_background" pos="0,0" size="1024,640" />
   </image>
 
   <image src="elements.png">

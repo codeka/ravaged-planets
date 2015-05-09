@@ -68,10 +68,17 @@ drawable::drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *el
 }
 
 void drawable::render(float x, float y, float width, float height) {
-  fw::matrix orth;
-  cml::matrix_orthographic_RH(orth, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
-  orth = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * orth;
-  _shader_params->set_matrix("transform", orth);
+  fw::matrix pos_transform;
+  cml::matrix_orthographic_RH(pos_transform, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+  pos_transform = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * pos_transform;
+  _shader_params->set_matrix("pos_transform", pos_transform);
+
+  x = static_cast<float>(_left) / static_cast<float>(_texture->get_width());
+  y = static_cast<float>(_top) / static_cast<float>(_texture->get_height());
+  width = static_cast<float>(_width) / static_cast<float>(_texture->get_width());
+  height = static_cast<float>(_height) / static_cast<float>(_texture->get_height());
+  fw::matrix uv_transform = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0));
+  _shader_params->set_matrix("uv_transform", uv_transform);
 
   g_vertex_buffer->begin();
   g_index_buffer->begin();
