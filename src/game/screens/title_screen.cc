@@ -10,13 +10,14 @@
 #include <framework/misc.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/static_widget.h>
 #include <framework/gui/window.h>
 #include <framework/lang.h>
 
 namespace rp {
 
 // These are the instances of the various windows that are displayed by the title screen.
-std::shared_ptr<fw::gui::window> wnd;
+fw::gui::window *wnd;
 
 title_screen::title_screen() {
 }
@@ -30,7 +31,12 @@ void title_screen::show() {
   wnd = fw::gui::builder<fw::gui::window>()
       << fw::gui::widget::position(fw::gui::px(0), fw::gui::px(0))
       << fw::gui::widget::size(fw::gui::pct(100), fw::gui::pct(100))
-      << fw::gui::window::background("title_background");
+      << fw::gui::window::background("title_background")
+      << (fw::gui::builder<fw::gui::static_widget>()
+          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(20))
+          << fw::gui::widget::size(fw::gui::px(413), fw::gui::px(56))
+          << fw::gui::static_widget::background("title_heading"));
+  frmwrk->get_gui()->attach_widget(wnd);
 
   /*
   frmwrk->get_gui()->set_active_layout("title");

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <framework/gui/property.h>
 
 namespace fw { namespace gui {
@@ -59,6 +60,8 @@ protected:
   friend class size_property;
 
   gui *_gui;
+  widget *_parent;
+  std::vector<widget *> _children;
   dimension _x;
   dimension _y;
   dimension _width;
@@ -74,6 +77,11 @@ public:
   static inline property *size(dimension const &width, dimension const &height) {
     return new size_property(width, height);
   }
+
+  void attach_child(widget *child);
+  void detach_child(widget *child);
+
+  virtual void render();
 
   float get_top();
   float get_left();

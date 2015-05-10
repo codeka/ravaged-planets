@@ -1,32 +1,29 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <framework/gui/property.h>
 #include <framework/gui/widget.h>
 
 namespace fw { namespace gui {
-class drawable;
 class gui;
+class drawable;
 
-
-/**
- * Represents a top-level window, complete with controls for moving and so on. All rendering happens inside a window.
- */
-class window : public widget {
+/** A static widget is just a simple static control, either text or a drawable that is non-interactive. */
+class static_widget : public widget {
 private:
-  friend class window_background_property;
+  friend class static_background_property;
 
   std::shared_ptr<drawable> _background;
 
 public:
-  window(gui *gui);
-  ~window();
+  static_widget(gui *gui);
+  virtual ~static_widget();
 
   static property *background(std::string const &drawable_name);
 
   void render();
 };
-
 
 } }

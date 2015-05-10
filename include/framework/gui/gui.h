@@ -6,7 +6,7 @@ namespace fw {
 class graphics;
 
 namespace gui {
-class window;
+class widget;
 class drawable_manager;
 
 /**
@@ -16,7 +16,7 @@ class gui {
 private:
   fw::graphics *_graphics;
   drawable_manager *_drawable_manager;
-  std::vector<window *> _top_level_windows;
+  std::vector<widget *> _top_level_widgets;
 
 public:
   gui();
@@ -31,11 +31,11 @@ public:
   /** Called on the render thread to actually render the GUI. */
   void render();
 
-  /** Creates a new top-level window, which you can add controls to. */
-  window *create_window();
+  /** Register a new top-level widget. */
+  void attach_widget(widget *widget);
 
-  /** Destroys the given window, unhooks any signals and removes it from the screen. */
-  void destroy_window(window *wnd);
+  /** Destroys the given top-level widget, unhooks any signals and removes it from the screen. */
+  void detach_widget(widget *widget);
 
   int get_width() const;
   int get_height() const;

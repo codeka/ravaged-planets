@@ -251,7 +251,9 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= 0*/,
     g->set_render_target(nullptr);
   } else {
     // render the GUI now
+    g->before_gui();
     framework::get_instance()->get_gui()->render();
+    g->after_gui();
 
     g->end_scene();
     g->present();

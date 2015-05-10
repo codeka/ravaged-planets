@@ -2,6 +2,7 @@
 <drawables>
   <image src="background.png">
     <drawable name="title_background" pos="0,0" size="1024,640" />
+    <drawable name="title_heading" pos="16,683" size="413,56" />
   </image>
 
   <image src="elements.png">

@@ -30,20 +30,18 @@ void gui::update(float dt) {
 }
 
 void gui::render() {
-  BOOST_FOREACH(window *wnd, _top_level_windows) {
-    wnd->render();
+  BOOST_FOREACH(widget *widget, _top_level_widgets) {
+    widget->render();
   }
 }
 
-window *gui::create_window() {
-  window *wnd = new window(this);
-  _top_level_windows.push_back(wnd);
-  return wnd;
+void gui::attach_widget(widget *widget) {
+  _top_level_widgets.push_back(widget);
 }
 
-void gui::destroy_window(window *wnd) {
-  _top_level_windows.erase(std::find(_top_level_windows.begin(), _top_level_windows.end(), wnd));
-  delete wnd;
+void gui::detach_widget(widget *widget) {
+  _top_level_widgets.erase(std::find(_top_level_widgets.begin(), _top_level_widgets.end(), widget));
+  delete widget;
 }
 
 int gui::get_width() const {
