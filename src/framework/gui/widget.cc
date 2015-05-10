@@ -1,4 +1,5 @@
 
+#include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
 
 namespace fw { namespace gui {
@@ -9,11 +10,6 @@ dimension::dimension() :
 
 dimension::dimension(kind kind, float value) :
     _kind(kind), _value(value) {
-}
-
-float dimension::resolve(widget *widget) {
-  // TODO: actually resolve.
-  return _value;
 }
 
 //-----------------------------------------------------------------------------
@@ -38,10 +34,46 @@ void size_property::apply(widget *widget) {
 
 //-----------------------------------------------------------------------------
 
-widget::widget() {
+widget::widget(gui *gui) : _gui(gui) {
 }
 
 widget::~widget() {
+}
+
+float widget::get_top() {
+  if (_y._kind == dimension::percent) {
+    // TODO: look at parent
+    return _gui->get_height() * _y._value / 100.0f;
+  } else {
+    return _y._value;
+  }
+}
+
+float widget::get_left() {
+  if (_x._kind == dimension::percent) {
+    // TODO: look at parent
+    return _gui->get_width() * _x._value / 100.0f;
+  } else {
+    return _x._value;
+  }
+}
+
+float widget::get_width() {
+  if (_width._kind == dimension::percent) {
+    // TODO: look at parent
+    return _gui->get_width() * _width._value / 100.0f;
+  } else {
+    return _width._value;
+  }
+}
+
+float widget::get_height() {
+  if (_height._kind == dimension::percent) {
+    // TODO: look at parent
+    return _gui->get_height() * _height._value / 100.0f;
+  } else {
+    return _height._value;
+  }
 }
 
 } }

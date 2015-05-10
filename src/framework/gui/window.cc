@@ -14,7 +14,7 @@ void background_property::apply(widget *widget) {
 //-----------------------------------------------------------------------------
 
 window::window(gui *gui) :
-  _gui(gui) {
+  widget(gui) {
 }
 
 window::~window() {
@@ -22,7 +22,7 @@ window::~window() {
 
 void window::render() {
   if (_background) {
-    _background->render(_x.resolve(this), _y.resolve(this), _width.resolve(this), _height.resolve(this));
+    _background->render(get_left(), get_top(), get_width(), get_height());
   }
 }
 

@@ -29,7 +29,6 @@ private:
   friend class background_property;
   window(gui *gui);
 
-  gui *_gui;
   std::shared_ptr<drawable> _background;
 
 public:

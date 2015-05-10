@@ -3,6 +3,7 @@
 #include <framework/gui/property.h>
 
 namespace fw { namespace gui {
+class gui;
 class widget;
 
 /**
@@ -15,18 +16,11 @@ public:
     percent
   };
 
-private:
-  kind _kind;
-  float _value;
-
-public:
   dimension();
   dimension(kind kind, float value);
 
-  /**
-   * Resolve the given dimension for the given widget. We make need to query the parent to get percents correct.
-   */
-  float resolve(widget *widget);
+  kind _kind;
+  float _value;
 };
 
 inline dimension px(float value) {
@@ -64,13 +58,14 @@ protected:
   friend class position_property;
   friend class size_property;
 
+  gui *_gui;
   dimension _x;
   dimension _y;
   dimension _width;
   dimension _height;
 
 public:
-  widget();
+  widget(gui *gui);
   virtual ~widget();
 
   static inline property *position(dimension const &x, dimension const &y) {
@@ -80,6 +75,10 @@ public:
     return new size_property(width, height);
   }
 
+  float get_top();
+  float get_left();
+  float get_width();
+  float get_height();
 };
 
 } }

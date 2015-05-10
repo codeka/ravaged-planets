@@ -46,4 +46,12 @@ void gui::destroy_window(window *wnd) {
   delete wnd;
 }
 
+int gui::get_width() const {
+  return _graphics->get_width();
+}
+
+int gui::get_height() const {
+  return _graphics->get_height();
+}
+
 } }
