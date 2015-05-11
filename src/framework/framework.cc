@@ -73,22 +73,26 @@ bool framework::initialize(char const *title) {
 
   _timer = new timer();
 
-  // initialise graphics
-  _graphics = new graphics();
-  _graphics->initialize(title);
+  // initialize graphics
+  if (_app->wants_graphics()) {
+    _graphics = new graphics();
+    _graphics->initialize(title);
+  }
 
   /*
    // initialise audio
    _audio->initialise();
    */
 
-  // initialise input
+  // initialize input
   _input = new input();
   _input->initialize();
 
-  // initialise the gui subsystem
-  _gui = new gui::gui();
-  _gui->initialize(_graphics);
+  // initialize the gui subsystem
+  if (_app->wants_graphics()) {
+    _gui = new gui::gui();
+    _gui->initialize(_graphics);
+  }
 
   /*
    // initialise the particle manager
@@ -132,7 +136,9 @@ void framework::destroy() {
 
   debug << "framework is shutting down..." << std::endl;
 
-  _graphics->destroy();
+  if (_graphics != nullptr) {
+    _graphics->destroy();
+  }
   /*
    http::destroy();
    net::destroy();
@@ -158,14 +164,19 @@ void framework::run() {
   // kick off the update thread
   boost::thread update_thread(boost::bind(&framework::update_proc, this));
 
-  // do the event/render loop
-  while (_running) {
-    if (!poll_events()) {
-      _running = false;
-      break;
-    }
+  if (_graphics == nullptr) {
+    wait_events();
+    _running = false;
+  } else {
+    // do the event/render loop
+    while (_running) {
+      if (!poll_events()) {
+        _running = false;
+        break;
+      }
 
-    render();
+      render();
+    }
   }
 
   // wait for the update thread to exit (once we set _running to false, it'll
@@ -213,7 +224,9 @@ void framework::update_proc() {
 }
 
 void framework::update(float dt) {
-  _gui->update(dt);
+  if (_gui != nullptr) {
+    _gui->update(dt);
+  }
   /*
    _audio->update();
 
@@ -230,6 +243,10 @@ void framework::update(float dt) {
 }
 
 void framework::render() {
+  if (_graphics == nullptr) {
+    return;
+  }
+
   // populate the scene graph by calling into the application itself
   sg::scenegraph scenegraph;
   _app->render(scenegraph);
@@ -246,6 +263,17 @@ void framework::render() {
 bool framework::poll_events() {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
+    _input->process_event(e);
+    if (e.type == SDL_QUIT) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool framework::wait_events() {
+  SDL_Event e;
+  while (SDL_WaitEvent(&e)) {
     _input->process_event(e);
     if (e.type == SDL_QUIT) {
       return false;

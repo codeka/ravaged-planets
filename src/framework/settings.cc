@@ -4,9 +4,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-//#include <framework/exception.h>
-#include "framework/settings.h"
-#include "framework/paths.h"
+#include <framework/exception.h>
+#include <framework/settings.h>
+#include <framework/paths.h>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -18,7 +18,7 @@ namespace fw {
 
   settings::settings() {
     if (!is_initialized) {
-      //BOOST_THROW_EXCEPTION(fw::exception() << message_error_info("settings::initialise() has not been called."));
+      BOOST_THROW_EXCEPTION(fw::exception() << message_error_info("settings::initialize() has not been called."));
     }
   }
 
@@ -32,8 +32,8 @@ namespace fw {
   po::variable_value const &settings::get_variable_value(std::string const &name) const {
     po::variable_value const &val = vm[name];
     if (val.empty()) {
-      //BOOST_THROW_EXCEPTION(fw::exception()
-      //<< fw::message_error_info("specified option does not exist, or has no value: " + name));
+      BOOST_THROW_EXCEPTION(fw::exception()
+          << fw::message_error_info("specified option does not exist, or has no value: " + name));
     }
 
     return val;
@@ -61,7 +61,7 @@ namespace fw {
     po::options_description debugging_options("Debugging options");
     debugging_options.add_options()
         ("debug-logfile", po::value<std::string>()->default_value(""), "Name of the file to do debug logging to. If not specified, does not log.")
-        ("debug-console", "If set, we'll log to the console as well as the log file.")
+        ("debug-console", po::value<bool>()->default_value(true), "If set, we'll log to the console as well as the log file.")
       ;
 
     po::options_description other_options("Other options");

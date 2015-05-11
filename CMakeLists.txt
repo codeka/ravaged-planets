@@ -53,6 +53,7 @@ include_directories(${GLEW_INCLUDE_DIR})
 
 add_subdirectory(src/framework)
 add_subdirectory(src/game)
+add_subdirectory(src/font-test)
 
 # Be sure to install the "data" directory into /share/war-worlds
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data/"

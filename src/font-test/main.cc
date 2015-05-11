@@ -1,30 +1,29 @@
 #include <iostream>
 
-#include <SDL.h>
+#include <boost/program_options.hpp>
 
 #include "framework/settings.h"
+#include "framework/framework.h"
 #include "framework/logging.h"
 #include "framework/misc.h"
 
-#include "game/application.h"
+namespace po = boost::program_options;
 
-namespace rp {
-  void settings_initialize(int argc, char** argv);
-}
-
+void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
+
+//-----------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
   try {
-    rp::settings_initialize(argc, argv);
+    settings_initialize(argc, argv);
 
-    rp::application app;
+    fw::tool_application app;
     new fw::framework(&app);
-    fw::framework::get_instance()->initialize("Ravaged Planet");
+    fw::framework::get_instance()->initialize("Font Test");
 
     fw::debug << "Hello World!" << std::endl;
 
-    fw::framework::get_instance()->run();
   } catch(std::exception &e) {
     std::string msg = boost::diagnostic_information(e);
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;
@@ -47,5 +46,13 @@ void display_exception(std::string const &msg) {
   ss << fw::debug.get_filename() << std::endl;
   ss << std::endl;
   ss << msg;
-  SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", ss.str().c_str(), nullptr);
+}
+
+void settings_initialize(int argc, char** argv) {
+  po::options_description options("Additional options");
+  options.add_options()
+      ("font-file", po::value<std::string>()->default_value("gui/SaccoVanzetti.ttf"), "Name of the font to load, we assume it can be fw::resolve'd.")
+    ;
+
+  fw::settings::initialize(options, argc, argv, "font-test.conf");
 }

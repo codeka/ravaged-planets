@@ -19,7 +19,7 @@ namespace fw {
     settings();
     ~settings();
 
-    // you must call this at program startup (*before* you call the framework::initialise()
+    // you must call this at program startup (*before* you call the framework::initialize()
     // method!) it'll parse the command-line options and so on.
     static void initialize(boost::program_options::options_description const &additional_options,
         int argc, char **argv, std::string const &options_file = "default.conf");

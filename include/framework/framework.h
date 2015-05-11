@@ -32,18 +32,41 @@ public:
   virtual ~base_app() {
   }
 
+  /** Override and return false if you don't want graphics to be initialized. */
+  virtual bool wants_graphics() {
+    return true;
+  }
+
   // This is called to initialise the application
-  virtual bool initialize(framework *frmwrk) = 0;
+  virtual bool initialize(framework *frmwrk) {
+    return false;
+  }
 
   // This is called when the application is exiting.
-  virtual void destroy() = 0;
+  virtual void destroy() {
+  }
 
   // This is called each frame to perform the "update" phase
-  virtual void update(float dt) = 0;
+  virtual void update(float dt) {
+  }
 
   // This is called each frame to perform the "render" phase - we need to basically add
   // nodes to the given scenegraph object
-  virtual void render(sg::scenegraph &scenegraph) = 0;
+  virtual void render(sg::scenegraph &scenegraph) {
+  }
+};
+
+/** A \ref base_app class that you can use when you don't want graphics. */
+class tool_application: public fw::base_app {
+public:
+  tool_application() {
+  }
+  ~tool_application() {
+  }
+
+  virtual bool wants_graphics() {
+    return false;
+  }
 };
 
 // This is the main "framework" class, which contains the interface for working with windows and so on.
@@ -54,6 +77,7 @@ private:
   void on_destroy_device();
   void update(float dt);
   void render();
+  bool wait_events();
   bool poll_events();
 
   bool _active;
