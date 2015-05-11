@@ -8,7 +8,7 @@
 namespace fw {
 class graphics;
 class framework;
-class font;
+class font_manager;
 class timer;
 class camera;
 class bitmap;
@@ -92,6 +92,7 @@ private:
   bool _paused;
   audio_manager *_audio;
   lang *_lang;
+  font_manager *_font_manager;
   volatile bool _running;
 
   // game updates happen (synchronized) on this thread in constant timestep
@@ -166,6 +167,9 @@ public:
   }
   base_app *get_app() const {
     return _app;
+  }
+  font_manager *get_font_manager() const {
+    return _font_manager;
   }
   particle_manager *get_particle_mgr() const {
     return _particle_mgr;

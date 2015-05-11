@@ -2,10 +2,11 @@
 
 #include <boost/program_options.hpp>
 
-#include "framework/settings.h"
-#include "framework/framework.h"
-#include "framework/logging.h"
-#include "framework/misc.h"
+#include <framework/settings.h>
+#include <framework/framework.h>
+#include <framework/font.h>
+#include <framework/logging.h>
+#include <framework/misc.h>
 
 namespace po = boost::program_options;
 
@@ -22,6 +23,7 @@ int main(int argc, char** argv) {
     new fw::framework(&app);
     fw::framework::get_instance()->initialize("Font Test");
 
+    std::shared_ptr<fw::font_face> font_face = fw::framework::get_instance()->get_font_manager()->get_face();
     fw::debug << "Hello World!" << std::endl;
 
   } catch(std::exception &e) {

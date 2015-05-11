@@ -32,5 +32,10 @@ target_link_libraries(framework
     ${Boost_SIGNALS_LIBRARY}
     ${OPENGL_LIBRARY}
     ${GLEW_LIBRARY}
+    freetype
+    png
+    z
+    SDL2_static_2.0.3
+    dl # not sure why SDL needs this
 )
 

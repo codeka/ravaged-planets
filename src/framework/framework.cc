@@ -13,6 +13,7 @@
 #include <framework/exception.h>
 #include <framework/settings.h>
 #include <framework/graphics.h>
+#include <framework/font.h>
 #include <framework/scenegraph.h>
 #include <framework/timer.h>
 #include <framework/lang.h>
@@ -87,6 +88,9 @@ bool framework::initialize(char const *title) {
   // initialize input
   _input = new input();
   _input->initialize();
+
+  _font_manager = new font_manager();
+  _font_manager->initialize();
 
   // initialize the gui subsystem
   if (_app->wants_graphics()) {
