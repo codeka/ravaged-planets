@@ -10,7 +10,6 @@ add_executable(rp
 )
 
 target_link_libraries(rp
-    ${SDL2_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
@@ -19,6 +18,8 @@ target_link_libraries(rp
     ${Boost_SIGNALS_LIBRARY}
     ${OPENGL_LIBRARY}
     ${GLEW_LIBRARY}
+    SDL2_static_2.0.3
+    dl # not sure why SDL needs this
     framework
 )
 

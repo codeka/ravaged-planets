@@ -27,6 +27,9 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 include_directories(include external/include)
+if (UNIX)
+    link_directories(external/lib/linux)
+endif()
 
 # Configure the config.h file
 configure_file(include/config.h.in include/config.h ESCAPE_QUOTES)
@@ -34,7 +37,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Look for the various libraries we depend on.
 find_package(Boost COMPONENTS filesystem iostreams program_options signals system thread REQUIRED)
-find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
