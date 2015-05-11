@@ -35,7 +35,11 @@ void title_screen::show() {
       << (fw::gui::builder<fw::gui::static_widget>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(20))
           << fw::gui::widget::size(fw::gui::px(413), fw::gui::px(56))
-          << fw::gui::static_widget::background("title_heading"));
+          << fw::gui::static_widget::background("title_heading"))
+      << (fw::gui::builder<fw::gui::static_widget>()
+          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(100))
+          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
+          << fw::gui::static_widget::background("button_normal"));
   frmwrk->get_gui()->attach_widget(wnd);
 
   /*

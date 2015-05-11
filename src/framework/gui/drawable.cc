@@ -30,7 +30,6 @@ void parse_tuple_attribute(std::string attr_value, int &left, int &right) {
 }
 
 // All drawables share the same vertex buffer, index buffer
-static std::shared_ptr<fw::shader> g_shader;
 static std::shared_ptr<fw::vertex_buffer> g_vertex_buffer;
 static std::shared_ptr<fw::index_buffer> g_index_buffer;
 
@@ -54,8 +53,6 @@ drawable::drawable(std::shared_ptr<fw::texture> texture) :
     indices[2] = 2;
     indices[3] = 3;
     g_index_buffer->set_data(4, indices);
-
-    g_shader = fw::shader::create("gui");
   }
 }
 
@@ -63,8 +60,12 @@ drawable::drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *el
     drawable(texture) {
   parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
   parse_tuple_attribute(elem->Attribute("size"), _width, _height);
-  _shader_params = g_shader->create_parameters();
+  _shader = fw::shader::create("gui");
+  _shader_params = _shader->create_parameters();
   _shader_params->set_texture("texsampler", _texture);
+}
+
+drawable::~drawable() {
 }
 
 void drawable::render(float x, float y, float width, float height) {
@@ -82,9 +83,9 @@ void drawable::render(float x, float y, float width, float height) {
 
   g_vertex_buffer->begin();
   g_index_buffer->begin();
-  g_shader->begin(_shader_params);
+  _shader->begin(_shader_params);
   FW_CHECKED(glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr));
-  g_shader->end();
+  _shader->end();
   g_index_buffer->end();
   g_vertex_buffer->end();
 }
@@ -93,6 +94,48 @@ void drawable::render(float x, float y, float width, float height) {
 
 ninepatch_drawable::ninepatch_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
   drawable(texture) {
+  for (xml::XMLElement *child_elem = elem->FirstChildElement(); child_elem != nullptr;
+      child_elem = child_elem->NextSiblingElement()) {
+    if (std::string(child_elem->Name()) == "inner") {
+      parse_tuple_attribute(child_elem->Attribute("pos"), _inner_left, _inner_top);
+      parse_tuple_attribute(child_elem->Attribute("size"), _inner_width, _inner_height);
+    } else if (std::string(child_elem->Name()) == "outer") {
+      parse_tuple_attribute(child_elem->Attribute("pos"), _left, _top);
+      parse_tuple_attribute(child_elem->Attribute("size"), _width, _height);
+    }
+  }
+
+  _shader = fw::shader::create("gui_ninepatch");
+  _shader_params = _shader->create_parameters();
+  _shader_params->set_texture("texsampler", _texture);
+}
+
+void ninepatch_drawable::render(float x, float y, float width, float height) {
+  float pixel_width = 1.0f / static_cast<float>(_texture->get_width());
+  float pixel_height = 1.0f / static_cast<float>(_texture->get_height());
+  float width_scale = width / static_cast<float>(_width);
+  float height_scale = height / static_cast<float>(_height);
+
+  float inner_top = (static_cast<float>(_top) + static_cast<float>(_inner_top - _top) / height_scale) * pixel_height;
+  float inner_left = (static_cast<float>(_left) + static_cast<float>(_inner_left - _left) / width_scale) * pixel_width;
+  float inner_bottom = (static_cast<float>(_top + _height) - (static_cast<float>(_top + _height - _inner_top - _inner_height) / height_scale)) * pixel_height;
+  float inner_right = (static_cast<float>(_left + _width) - (static_cast<float>(_left + _width - _inner_left - _inner_width) / width_scale)) * pixel_width;
+  _shader_params->set_scalar("inner_top", inner_top);
+  _shader_params->set_scalar("inner_left", inner_left);
+  _shader_params->set_scalar("inner_bottom", inner_bottom);
+  _shader_params->set_scalar("inner_right", inner_right);
+  _shader_params->set_scalar("inner_top_v", static_cast<float>(_inner_top) * pixel_height);
+  _shader_params->set_scalar("inner_left_u", static_cast<float>(_inner_left) * pixel_width);
+  _shader_params->set_scalar("inner_bottom_v", static_cast<float>(_inner_top + _inner_height) * pixel_height);
+  _shader_params->set_scalar("inner_right_u", static_cast<float>(_inner_left + _inner_width) * pixel_width);
+  _shader_params->set_scalar("fraction_width", width_scale);
+  _shader_params->set_scalar("fraction_height", height_scale);
+  _shader_params->set_scalar("fraction_width2", width / static_cast<float>(_inner_width));
+  _shader_params->set_scalar("fraction_height2", height / static_cast<float>(_inner_height));
+  _shader_params->set_scalar("pixel_width", pixel_width);
+  _shader_params->set_scalar("pixel_height", pixel_height);
+
+  drawable::render(x, y, width, height);
 }
 
 //-----------------------------------------------------------------------------

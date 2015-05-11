@@ -9,6 +9,7 @@
 
 namespace fw {
 class texture;
+class shader;
 class shader_parameters;
 
 namespace gui {
@@ -18,23 +19,24 @@ namespace gui {
  * background of widgets and windows.
  */
 class drawable {
-private:
+protected:
   int _top;
   int _left;
   int _width;
   int _height;
 
-  std::shared_ptr<fw::texture> _texture;
-  std::shared_ptr<fw::shader_parameters> _shader_params;
-
-protected:
   friend class drawable_manager;
   drawable(std::shared_ptr<fw::texture> texture);
   drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem);
 
-public:
+  std::shared_ptr<fw::texture> _texture;
+  std::shared_ptr<fw::shader> _shader;
+  std::shared_ptr<fw::shader_parameters> _shader_params;
 
-  void render(float x, float y, float width, float height);
+public:
+  virtual ~drawable();
+
+  virtual void render(float x, float y, float width, float height);
 };
 
 /**
@@ -42,11 +44,19 @@ public:
  */
 class ninepatch_drawable : public drawable {
 private:
+  int _inner_top;
+  int _inner_left;
+  int _inner_width;
+  int _inner_height;
+
 protected:
   friend class drawable_manager;
   ninepatch_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem);
 
 public:
+
+  virtual void render(float x, float y, float width, float height);
+
 };
 
 /**

@@ -9,7 +9,22 @@
     <drawable name="frame_simple" pos="1,1" size="20,20" />
     <ninepatch name="frame">
       <outer pos="1,1" size="20,20" />
-      <inner pos="2,2" size="18,19" />
+      <inner pos="4,4" size="14,14" />
+    </ninepatch>
+    <ninepatch name="button_normal">
+      <outer pos="27,1" size="26,26" />
+      <inner pos="33,7" size="14,14" />
+    </ninepatch>
+    <ninepatch name="button_hover">
+      <outer pos="53,1" size="26,26" />
+      <inner pos="59,7" size="14,14" />
+    </ninepatch>
+    </image>
+
+  <image src="test.png">
+    <ninepatch name="test">
+      <outer pos="11,11" size="232,185" />
+      <inner pos="20,20" size="216,167" />
     </ninepatch>
   </image>
 </drawables>

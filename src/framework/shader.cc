@@ -108,8 +108,6 @@ void shader_parameters::apply(shader *e) const {
       texture->bind();
       FW_CHECKED(glUniform1i(var.location, 0));
       texture_unit ++;
-    } else {
-      fw::debug << "no texture named " << it->first << " found..." << std::endl;
     }
   }
 
