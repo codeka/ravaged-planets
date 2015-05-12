@@ -51,6 +51,7 @@ void widget::attach_child(widget *child) {
   }
   child->_parent = this;
   _children.push_back(child);
+  child->on_attached_to_parent(this);
 }
 
 void widget::detach_child(widget *child) {
@@ -58,10 +59,36 @@ void widget::detach_child(widget *child) {
   child->_parent = nullptr;
 }
 
+void widget::on_attached_to_parent(widget *parent) {
+}
+
 void widget::render() {
   BOOST_FOREACH(widget *child, _children) {
     child->render();
   }
+}
+
+widget *widget::get_child_at(float x, float y) {
+  float left = get_left();
+  float top = get_top();
+  float right = left + get_width();
+  float bottom = top + get_height();
+
+  // If we're outside the given (x,y) then return null.
+  if (x < left || y < top || x >= right || y >= bottom) {
+    return nullptr;
+  }
+
+  // If one of our children is within the (x,y) then return that.
+  BOOST_FOREACH(widget *child, _children) {
+    widget *found = child->get_child_at(x, y);
+    if (found != nullptr) {
+      return found;
+    }
+  }
+
+  // Otherwise, return ourselves.
+  return this;
 }
 
 float widget::get_top() {

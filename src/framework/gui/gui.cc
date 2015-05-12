@@ -1,6 +1,8 @@
 
 #include <boost/foreach.hpp>
 
+#include <framework/framework.h>
+#include <framework/input.h>
 #include <framework/graphics.h>
 #include <framework/paths.h>
 #include <framework/gui/gui.h>
@@ -10,7 +12,7 @@
 namespace fw { namespace gui {
 
 gui::gui() :
-  _graphics(nullptr), _drawable_manager(nullptr) {
+  _graphics(nullptr), _drawable_manager(nullptr), _widget_under_mouse(nullptr) {
 }
 
 gui::~gui() {
@@ -27,12 +29,34 @@ void gui::initialize(fw::graphics *graphics) {
 }
 
 void gui::update(float dt) {
+  input *inp = fw::framework::get_instance()->get_input();
+  widget *wdgt = get_widget_at(inp->mouse_x(), inp->mouse_y());
+  if (wdgt != _widget_under_mouse) {
+    if (_widget_under_mouse != nullptr) {
+      _widget_under_mouse->on_mouse_out();
+    }
+    _widget_under_mouse = wdgt;
+    if (_widget_under_mouse != nullptr) {
+      _widget_under_mouse->on_mouse_over();
+    }
+  }
 }
 
 void gui::render() {
   BOOST_FOREACH(widget *widget, _top_level_widgets) {
     widget->render();
   }
+}
+
+widget *gui::get_widget_at(float x, float y) {
+  BOOST_FOREACH(widget *wdgt, _top_level_widgets) {
+    widget *child = wdgt->get_child_at(x, y);
+    if (child != nullptr) {
+      return child;
+    }
+  }
+
+  return nullptr;
 }
 
 void gui::attach_widget(widget *widget) {

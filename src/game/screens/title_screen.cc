@@ -10,6 +10,7 @@
 #include <framework/misc.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/button.h>
 #include <framework/gui/static_widget.h>
 #include <framework/gui/window.h>
 #include <framework/lang.h>
@@ -36,10 +37,9 @@ void title_screen::show() {
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(20))
           << fw::gui::widget::size(fw::gui::px(413), fw::gui::px(56))
           << fw::gui::static_widget::background("title_heading"))
-      << (fw::gui::builder<fw::gui::static_widget>()
+      << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(100))
-          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
-          << fw::gui::static_widget::background("button_normal"));
+          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30)));
   frmwrk->get_gui()->attach_widget(wnd);
 
   /*

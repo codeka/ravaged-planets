@@ -35,7 +35,18 @@ static std::shared_ptr<fw::index_buffer> g_index_buffer;
 
 //-----------------------------------------------------------------------------
 
-drawable::drawable(std::shared_ptr<fw::texture> texture) :
+drawable::drawable() {
+}
+
+drawable::~drawable() {
+}
+
+void drawable::render(float x, float y, float width, float height) {
+}
+
+//-----------------------------------------------------------------------------
+
+bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture) :
     _top(0), _left(0), _width(0), _height(0), _texture(texture) {
   if (g_vertex_buffer == nullptr) {
     g_vertex_buffer = fw::vertex_buffer::create<fw::vertex::xyz_uv>(false);
@@ -56,8 +67,8 @@ drawable::drawable(std::shared_ptr<fw::texture> texture) :
   }
 }
 
-drawable::drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
-    drawable(texture) {
+bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
+    bitmap_drawable(texture) {
   parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
   parse_tuple_attribute(elem->Attribute("size"), _width, _height);
   _shader = fw::shader::create("gui");
@@ -65,10 +76,10 @@ drawable::drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *el
   _shader_params->set_texture("texsampler", _texture);
 }
 
-drawable::~drawable() {
+bitmap_drawable::~bitmap_drawable() {
 }
 
-void drawable::render(float x, float y, float width, float height) {
+void bitmap_drawable::render(float x, float y, float width, float height) {
   fw::matrix pos_transform;
   cml::matrix_orthographic_RH(pos_transform, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
   pos_transform = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * pos_transform;
@@ -93,7 +104,7 @@ void drawable::render(float x, float y, float width, float height) {
 //-----------------------------------------------------------------------------
 
 ninepatch_drawable::ninepatch_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
-  drawable(texture) {
+    bitmap_drawable(texture) {
   for (xml::XMLElement *child_elem = elem->FirstChildElement(); child_elem != nullptr;
       child_elem = child_elem->NextSiblingElement()) {
     if (std::string(child_elem->Name()) == "inner") {
@@ -135,7 +146,35 @@ void ninepatch_drawable::render(float x, float y, float width, float height) {
   _shader_params->set_scalar("pixel_width", pixel_width);
   _shader_params->set_scalar("pixel_height", pixel_height);
 
-  drawable::render(x, y, width, height);
+  bitmap_drawable::render(x, y, width, height);
+}
+
+//-----------------------------------------------------------------------------
+
+state_drawable::state_drawable() :
+  _curr_state(normal) {
+}
+
+state_drawable::~state_drawable() {
+}
+
+void state_drawable::add_drawable(state state, std::shared_ptr<drawable> drawable) {
+  _drawable_map[state] = drawable;
+}
+
+void state_drawable::set_current_state(state state) {
+  _curr_state = state;
+}
+
+void state_drawable::render(float x, float y, float width, float height) {
+  std::shared_ptr<drawable> curr_drawable = _drawable_map[_curr_state];
+  if (!curr_drawable) {
+    curr_drawable = _drawable_map[normal];
+  }
+
+  if (curr_drawable) {
+    curr_drawable->render(x, y, width, height);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -152,16 +191,18 @@ void drawable_manager::parse(boost::filesystem::path const &file) {
     XML_CHECK(doc.LoadFile(file.string().c_str()));
 
     xml::XMLElement *root_elem = doc.FirstChildElement("drawables");
-    for (xml::XMLElement *image_elem = root_elem->FirstChildElement(); image_elem != nullptr;
-        image_elem = image_elem->NextSiblingElement()) {
+    for (xml::XMLElement *child_elem = root_elem->FirstChildElement(); child_elem != nullptr;
+        child_elem = child_elem->NextSiblingElement()) {
       // Parse <image src=""> element
-      std::string src(image_elem->Attribute("src"));
-      std::shared_ptr<fw::texture> texture(new fw::texture());
-      texture->create(fw::resolve(std::string("gui/drawables/") + src));
+      if (std::string(child_elem->Name()) == "image") {
+        std::string src(child_elem->Attribute("src"));
+        std::shared_ptr<fw::texture> texture(new fw::texture());
+        texture->create(fw::resolve(std::string("gui/drawables/") + src));
 
-      for (xml::XMLElement *drawable_elem = image_elem->FirstChildElement(); drawable_elem != nullptr;
-          drawable_elem = drawable_elem->NextSiblingElement()) {
-        parse_drawable_element(texture, drawable_elem);
+        for (xml::XMLElement *drawable_elem = child_elem->FirstChildElement(); drawable_elem != nullptr;
+            drawable_elem = drawable_elem->NextSiblingElement()) {
+          parse_drawable_element(texture, drawable_elem);
+        }
       }
     }
   } catch (fw::exception &e) {
@@ -183,7 +224,7 @@ void drawable_manager::parse_drawable_element(std::shared_ptr<fw::texture> textu
   }
   std::string type_name(elem->Name());
   if (type_name == "drawable") {
-    new_drawable = std::shared_ptr<drawable>(new drawable(texture, elem));
+    new_drawable = std::shared_ptr<drawable>(new bitmap_drawable(texture, elem));
   } else if (type_name == "ninepatch") {
     new_drawable = std::shared_ptr<drawable>(new ninepatch_drawable(texture, elem));
   } else {
