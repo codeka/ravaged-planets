@@ -80,8 +80,23 @@ public:
 
   void attach_child(widget *child);
   void detach_child(widget *child);
+  virtual void on_attached_to_parent(widget *parent);
 
   virtual void render();
+
+  /** Called when the mouse moves out of this widget. */
+  virtual void on_mouse_out() {
+  }
+
+  /** Called when the mouse moves over this widget. */
+  virtual void on_mouse_over() {
+  }
+
+  /**
+   * Gets the child widget at the given (x,y). If the point is outside our bounding box, the null is returned. If
+   * none of our children are contained within the given (x,y) then \code this is returned.
+   */
+  widget *get_child_at(float x, float y);
 
   float get_top();
   float get_left();

@@ -17,6 +17,10 @@ private:
   fw::graphics *_graphics;
   drawable_manager *_drawable_manager;
   std::vector<widget *> _top_level_widgets;
+  widget *_widget_under_mouse;
+
+  /** Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget. */
+  widget *get_widget_at(float x, float y);
 
 public:
   gui();
