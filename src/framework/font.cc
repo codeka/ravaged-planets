@@ -5,6 +5,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <framework/bitmap.h>
 #include <framework/exception.h>
 #include <framework/font.h>
 #include <framework/logging.h>
@@ -32,7 +33,7 @@ font_face::font_face(font_manager *manager, fs::path const &filename) :
   fw::debug << "  " << _face->num_faces << " face(s) " << _face->num_glyphs << " glyph(s)" << std::endl;
 
   // Set the size to 12px (todo: allow multiple sizes?)
-  FT_CHECK(FT_Set_Pixel_Sizes(_face, 0, 12));
+  FT_CHECK(FT_Set_Pixel_Sizes(_face, 0, 16));
 
   // TODO: allow us to resize the bitmap?
   _bitmap = std::shared_ptr<fw::bitmap>(new fw::bitmap(256, 256));
@@ -41,7 +42,6 @@ font_face::font_face(font_manager *manager, fs::path const &filename) :
 }
 
 font_face::~font_face() {
-
 }
 
 void font_face::cache_string(std::string const &str) {
@@ -54,16 +54,13 @@ void font_face::cache_string(std::string const &str) {
       // TODO: FT_RENDER_MODE_LCD?
       FT_CHECK(FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL));
     }
-/*
-    // now, draw to our target surface
-    my_draw_bitmap( &slot->bitmap,
-                    pen_x + slot->bitmap_left,
-                    pen_y - slot->bitmap_top );
 
-    // increment pen position
-    pen_x += slot->advance.x >> 6;
-    pen_y += slot->advance.y >> 6;
- */
+    for (int y = 0; y < _face->glyph->bitmap.rows; y++) {
+      for (int x = 0; x < _face->glyph->bitmap.width; x++) {
+        float value = static_cast<float>(_face->glyph->bitmap.buffer[y * _face->glyph->bitmap.width + x]) / 255.0f;
+        _bitmap->set_pixel(x, y, fw::colour(1.0f, 1.0f, 1.0f, value));
+      }
+    }
   }
 }
 

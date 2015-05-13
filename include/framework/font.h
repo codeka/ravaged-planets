@@ -9,6 +9,7 @@ typedef struct FT_LibraryRec_ *FT_Library;
 typedef struct FT_FaceRec_*  FT_Face;
 
 namespace fw {
+class bitmap;
 class font_manager;
 class texture;
 
