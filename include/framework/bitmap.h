@@ -11,7 +11,7 @@ class bitmap;
 // Blit the given bitmap to the given texture
 void blit(bitmap const &src, texture &dest);
 
-// Represents a bitmap
+// Represents a bitmap, always RGBA.
 class bitmap {
 private:
   bitmap_data *_data;
@@ -60,15 +60,15 @@ public:
   int get_width() const;
   int get_height() const;
 
-  // Gets or sets the actual pixel data. We assume the format of the pixels is ARGB and that the given data is big
+  // Gets or sets the actual pixel data. We assume the format of the pixels is RGBA and that the given data is big
   // enough to fix this bitmap
   std::vector<uint32_t> const &get_pixels() const;
-  void get_pixels(std::vector<uint32_t> &argb) const;
-  void set_pixels(std::vector<uint32_t> const &argb);
+  void get_pixels(std::vector<uint32_t> &rgba) const;
+  void set_pixels(std::vector<uint32_t> const &rgba);
 
-  // Helper method to get the colour of a single pixel (this is MUCH slower than using get_pixels() and doing it all
-  // at once...)
+  // Helper methods to get/set the colour of a single pixel.
   fw::colour get_pixel(int x, int y);
+  void set_pixel(int x, int y, fw::colour colour);
 
   // Copies the bitmap data from the given source image to our buffer.
   void copy(fw::bitmap const &src);

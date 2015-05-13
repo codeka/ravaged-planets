@@ -17,7 +17,7 @@ namespace fw {
 struct bitmap_data: private boost::noncopyable {
   int width;
   int height;
-  std::vector<uint32_t> argb;
+  std::vector<uint32_t> rgba;
 
   // This is the number of bitmaps that have a reference to us.
   int ref_count;
@@ -28,26 +28,6 @@ struct bitmap_data: private boost::noncopyable {
     ref_count = 1;
   }
 };
-
-static void argb_2_rgba(std::vector<uint32_t> const &src,
-    std::vector<uint32_t> &dest, int size);
-static void rgba_2_argb(uint32_t const *src, std::vector<uint32_t> &dest,
-    int size);
-
-void argb_2_rgba(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest,
-    int size) {
-  dest.resize(size);
-  for (int i = 0; i < size; i++) {
-    dest[i] = ((src[i] & 0xff000000) >> 24) || ((src[i] & 0x00ffffff) << 8);
-  }
-}
-
-void rgba_2_argb(uint32_t const *src, std::vector<uint32_t> &dest, int size) {
-  dest.resize(size);
-  for (int i = 0; i < size; i++) {
-    dest[i] = ((src[i] & 0xffffff00) >> 8) || ((src[i] & 0xff) << 24);
-  }
-}
 
 //-------------------------------------------------------------------------
 void blit(fw::bitmap const &src, fw::texture &dest) {
@@ -82,7 +62,7 @@ bitmap::bitmap(int width, int height, uint32_t *argb /*= 0*/) :
   prepare_write(width, height);
 
   if (argb != 0) {
-    memcpy(&_data->argb[0], argb, width * height * sizeof(uint32_t));
+    memcpy(&_data->rgba[0], argb, width * height * sizeof(uint32_t));
   }
 }
 
@@ -144,7 +124,7 @@ void bitmap::prepare_write(int width, int height) {
   }
 
   // make sure the pixel buffer is big enough to hold the required width/height
-  _data->argb.resize(width * height);
+  _data->rgba.resize(width * height);
   _data->width = width;
   _data->height = height;
 }
@@ -159,8 +139,8 @@ void bitmap::load_bitmap(fs::path const &filename) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error reading image."));
   }
 
-  // copy pixels from what stb returned into our own buffer...
-  rgba_2_argb(reinterpret_cast<uint32_t *>(pixels), _data->argb, _data->width * _data->height);
+  // copy pixels from what stb returned into our own buffer
+  memcpy(_data->rgba.data(), reinterpret_cast<uint32_t const *>(pixels), _data->width * _data->height);
 
   // don't need this anymore
   stbi_image_free(pixels);
@@ -175,8 +155,8 @@ void bitmap::load_bitmap(uint8_t const *data, size_t data_size) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error reading image."));
   }
 
-  // copy pixels from what stb returned into our own buffer...
-  rgba_2_argb(reinterpret_cast<uint32_t *>(pixels), _data->argb, _data->width * _data->height);
+  // copy pixels from what stb returned into our own buffer
+  memcpy(_data->rgba.data(), reinterpret_cast<uint32_t const *>(pixels), _data->width * _data->height);
 
   // don't need this anymore
   stbi_image_free(pixels);
@@ -193,11 +173,8 @@ void bitmap::save_bitmap(fs::path const &filename) const {
     fs::remove(path);
   }
 
-  std::vector<uint32_t> pixels;
-  argb_2_rgba(_data->argb, pixels, _data->argb.size());
-
   int res = stbi_write_bmp(filename.c_str(), _data->width, _data->height, 4,
-      reinterpret_cast<unsigned char *>(&pixels[0]));
+      reinterpret_cast<unsigned char *>(_data->rgba.data()));
   if (res == 0) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error writing file."));
   }
@@ -218,10 +195,10 @@ int bitmap::get_height() const {
 }
 
 std::vector<uint32_t> const &bitmap::get_pixels() const {
-  return _data->argb;
+  return _data->rgba;
 }
 
-void bitmap::get_pixels(std::vector<uint32_t> &argb) const {
+void bitmap::get_pixels(std::vector<uint32_t> &rgba) const {
   if (_data == 0)
     return;
 
@@ -229,27 +206,24 @@ void bitmap::get_pixels(std::vector<uint32_t> &argb) const {
   int height = get_height();
 
   // make sure it's big enough to hold the data
-  argb.resize(width * height);
-  memcpy(&argb[0], &_data->argb[0], width * height * sizeof(uint32_t));
+  rgba.resize(width * height);
+  memcpy(rgba.data(), _data->rgba.data(), width * height * sizeof(uint32_t));
 }
 
-void bitmap::set_pixels(std::vector<uint32_t> const &argb) {
+void bitmap::set_pixels(std::vector<uint32_t> const &rgba) {
   int width = get_width();
   int height = get_height();
 
   prepare_write(width, height);
-  memcpy(&_data->argb[0], &argb[0], width * height * sizeof(uint32_t));
+  memcpy(_data->rgba.data(), rgba.data(), width * height * sizeof(uint32_t));
 }
 
 fw::colour bitmap::get_pixel(int x, int y) {
-  // this is currently built on top of get_pixels, which is a bit of a pain...
+  return fw::colour::from_rgba(_data->rgba[(get_width() * y) + x]);
+}
 
-  if (_data->argb.size() == 0) {
-    get_pixels(_data->argb);
-  }
-
-  int width = get_width();
-  return fw::colour::from_rgba(_data->argb[(width * y) + x]);
+void bitmap::set_pixel(int x, int y, fw::colour colour) {
+  _data->rgba[(get_width() * y) + x] = colour.to_rgba();
 }
 
 void bitmap::resize(int new_width, int new_height, int quality) {
@@ -260,9 +234,7 @@ void bitmap::resize(int new_width, int new_height, int quality) {
     return;
 
   if (new_width > curr_width || new_height > curr_height) {
-    BOOST_THROW_EXCEPTION(
-        fw::exception()
-            << fw::message_error_info("up-scaling is not supported"));
+    BOOST_THROW_EXCEPTION(fw::exception()<< fw::message_error_info("up-scaling is not supported"));
   }
 
   int scale_x = curr_width / new_width;
@@ -289,7 +261,7 @@ void bitmap::resize(int new_width, int new_height, int quality) {
           if (x1 >= curr_width)
             break;
 
-          average += fw::colour::from_argb(_data->argb[(y1 * curr_width) + x1]);
+          average += fw::colour::from_rgba(_data->rgba[(y1 * curr_width) + x1]);
           n++;
         }
       }
