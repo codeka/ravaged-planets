@@ -1,4 +1,7 @@
 
+#include <boost/foreach.hpp>
+#include <boost/locale.hpp>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -6,8 +9,12 @@
 #include <framework/font.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
+#include <framework/texture.h>
+
+typedef std::basic_string<uint32_t> utf32string;
 
 namespace fs = boost::filesystem;
+namespace conv = boost::locale::conv;
 
 #define FT_CHECK(fn) { \
   FT_Error err = fn; \
@@ -23,10 +30,41 @@ font_face::font_face(font_manager *manager, fs::path const &filename) :
   FT_CHECK(FT_New_Face(_manager->_library, filename.string().c_str(), 0, &_face));
   fw::debug << "Loaded " << filename << std::endl;
   fw::debug << "  " << _face->num_faces << " face(s) " << _face->num_glyphs << " glyph(s)" << std::endl;
+
+  // Set the size to 12px (todo: allow multiple sizes?)
+  FT_CHECK(FT_Set_Pixel_Sizes(_face, 0, 12));
+
+  // TODO: allow us to resize the bitmap?
+  _bitmap = std::shared_ptr<fw::bitmap>(new fw::bitmap(256, 256));
+  _texture = std::shared_ptr<fw::texture>(new fw::texture());
+  _texture_dirty = true;
 }
 
 font_face::~font_face() {
 
+}
+
+void font_face::cache_string(std::string const &str) {
+  BOOST_FOREACH(uint32_t ch, conv::utf_to_utf<uint32_t>(str)) {
+    int glyph_index = FT_Get_Char_Index(_face, ch);
+
+    // Load the glyph into the glyph slot and render it if it's not a bitmap
+    FT_CHECK(FT_Load_Glyph(_face, glyph_index, FT_LOAD_DEFAULT));
+    if (_face->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
+      // TODO: FT_RENDER_MODE_LCD?
+      FT_CHECK(FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL));
+    }
+/*
+    // now, draw to our target surface
+    my_draw_bitmap( &slot->bitmap,
+                    pen_x + slot->bitmap_left,
+                    pen_y - slot->bitmap_top );
+
+    // increment pen position
+    pen_x += slot->advance.x >> 6;
+    pen_y += slot->advance.y >> 6;
+ */
+  }
 }
 
 //-----------------------------------------------------------------------------
