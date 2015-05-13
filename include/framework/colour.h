@@ -88,8 +88,8 @@ public:
 
   // clamps the colour to the valid range 0..1
   inline colour clamp() const {
-    return colour(fw::clamp(a, 1.0f, 0.0f), fw::clamp(r, 1.0f, 0.0f),
-        fw::clamp(g, 1.0f, 0.0f), fw::clamp(b, 1.0f, 0.0f));
+    return colour(
+        fw::clamp(a, 1.0f, 0.0f), fw::clamp(r, 1.0f, 0.0f), fw::clamp(g, 1.0f, 0.0f), fw::clamp(b, 1.0f, 0.0f));
   }
 
   inline float grayscale() const {
@@ -102,8 +102,7 @@ public:
     uint32_t g_ = static_cast<uint32_t>(g * 255.0);
     uint32_t b_ = static_cast<uint32_t>(b * 255.0);
 
-    return static_cast<uint32_t>(((r_ & 0xff) << 24) | ((g_ & 0xff) << 16)
-        | ((b_ & 0xff) << 8) | (a_ & 0xff));
+    return static_cast<uint32_t>(((r_ & 0xff) << 24) | ((g_ & 0xff) << 16) | ((b_ & 0xff) << 8) | (a_ & 0xff));
   }
 
   inline static colour from_rgba(uint32_t rgba) {
@@ -120,8 +119,7 @@ public:
     uint32_t g_ = static_cast<uint32_t>(g * 255.0);
     uint32_t b_ = static_cast<uint32_t>(b * 255.0);
 
-    return static_cast<uint32_t>((a_ << 24) | (b_ << 16) | (g_ << 8)
-        | (r_ & 0xff));
+    return static_cast<uint32_t>((a_ << 24) | (b_ << 16) | (g_ << 8) | (r_ & 0xff));
   }
 
   inline static colour from_abgr(uint32_t abgr) {
@@ -138,8 +136,7 @@ public:
     uint32_t g_ = static_cast<uint32_t>(g * 255.0);
     uint32_t b_ = static_cast<uint32_t>(b * 255.0);
 
-    return static_cast<uint32_t>((a_ << 24) | (r_ << 16) | (g_ << 8)
-        | (b_ & 0xff));
+    return static_cast<uint32_t>((a_ << 24) | (r_ << 16) | (g_ << 8) | (b_ & 0xff));
   }
 
   inline static colour from_argb(uint32_t argb) {

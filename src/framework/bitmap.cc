@@ -173,8 +173,14 @@ void bitmap::save_bitmap(fs::path const &filename) const {
     fs::remove(path);
   }
 
-  int res = stbi_write_bmp(filename.c_str(), _data->width, _data->height, 4,
-      reinterpret_cast<unsigned char *>(_data->rgba.data()));
+  int res;
+  if (filename.extension() == ".png") {
+    res = stbi_write_png(filename.c_str(), _data->width, _data->height, 4,
+        reinterpret_cast<unsigned char *>(_data->rgba.data()), 0);
+  } else if (filename.extension() == ".bmp") {
+    res = stbi_write_bmp(filename.c_str(), _data->width, _data->height, 4,
+        reinterpret_cast<unsigned char *>(_data->rgba.data()));
+  }
   if (res == 0) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error writing file."));
   }
@@ -223,7 +229,7 @@ fw::colour bitmap::get_pixel(int x, int y) {
 }
 
 void bitmap::set_pixel(int x, int y, fw::colour colour) {
-  _data->rgba[(get_width() * y) + x] = colour.to_rgba();
+  _data->rgba[(get_width() * y) + x] = colour.to_argb();
 }
 
 void bitmap::resize(int new_width, int new_height, int quality) {

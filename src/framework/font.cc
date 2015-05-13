@@ -58,7 +58,7 @@ void font_face::cache_string(std::string const &str) {
     for (int y = 0; y < _face->glyph->bitmap.rows; y++) {
       for (int x = 0; x < _face->glyph->bitmap.width; x++) {
         float value = static_cast<float>(_face->glyph->bitmap.buffer[y * _face->glyph->bitmap.width + x]) / 255.0f;
-        _bitmap->set_pixel(x, y, fw::colour(1.0f, 1.0f, 1.0f, value));
+        _bitmap->set_pixel(x, y, fw::colour(value, 1.0f, 1.0f, 1.0f));
       }
     }
   }
