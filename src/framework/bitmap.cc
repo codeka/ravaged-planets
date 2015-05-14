@@ -18,14 +18,14 @@ static void rgba_2_argb(std::vector<uint32_t> const &src, std::vector<uint32_t> 
 void argb_2_rgba(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest) {
   dest.resize(src.size());
   for (int i = 0; i < src.size(); i++) {
-    dest[i] = ((src[i] & 0xff000000) >> 24) || ((src[i] & 0x00ffffff) << 8);
+    dest[i] = ((src[i] & 0xff000000) >> 24) | ((src[i] & 0x00ffffff) << 8);
   }
 }
 
 void rgba_2_argb(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest) {
   dest.resize(src.size());
   for (int i = 0; i < src.size(); i++) {
-    dest[i] = ((src[i] & 0xffffff00) >> 8) || ((src[i] & 0xff) << 24);
+    dest[i] = ((src[i] & 0xffffff00) >> 8) | ((src[i] & 0xff) << 24);
   }
 }
 
