@@ -69,6 +69,7 @@ public:
   // Helper methods to get/set the colour of a single pixel.
   fw::colour get_pixel(int x, int y);
   void set_pixel(int x, int y, fw::colour colour);
+  void set_pixel(int x, int y, uint32_t rgba);
 
   // Copies the bitmap data from the given source image to our buffer.
   void copy(fw::bitmap const &src);

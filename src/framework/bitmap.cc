@@ -12,6 +12,23 @@
 namespace fs = boost::filesystem;
 
 namespace fw {
+static void argb_2_rgba(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest);
+static void rgba_2_argb(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest);
+
+void argb_2_rgba(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest) {
+  dest.resize(src.size());
+  for (int i = 0; i < src.size(); i++) {
+    dest[i] = ((src[i] & 0xff000000) >> 24) || ((src[i] & 0x00ffffff) << 8);
+  }
+}
+
+void rgba_2_argb(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest) {
+  dest.resize(src.size());
+  for (int i = 0; i < src.size(); i++) {
+    dest[i] = ((src[i] & 0xffffff00) >> 8) || ((src[i] & 0xff) << 24);
+  }
+}
+
 //-------------------------------------------------------------------------
 // This class contains the actual bitmap data, which is an array of 32-bit ARGB pixels
 struct bitmap_data: private boost::noncopyable {
@@ -173,13 +190,17 @@ void bitmap::save_bitmap(fs::path const &filename) const {
     fs::remove(path);
   }
 
+  // Saving assumes ARGB format for some reason
+  std::vector<uint32_t> argb;
+  rgba_2_argb(_data->rgba, argb);
+
   int res;
   if (filename.extension() == ".png") {
     res = stbi_write_png(filename.c_str(), _data->width, _data->height, 4,
-        reinterpret_cast<unsigned char *>(_data->rgba.data()), 0);
+        reinterpret_cast<unsigned char *>(argb.data()), 0);
   } else if (filename.extension() == ".bmp") {
     res = stbi_write_bmp(filename.c_str(), _data->width, _data->height, 4,
-        reinterpret_cast<unsigned char *>(_data->rgba.data()));
+        reinterpret_cast<unsigned char *>(argb.data()));
   }
   if (res == 0) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error writing file."));
@@ -229,7 +250,11 @@ fw::colour bitmap::get_pixel(int x, int y) {
 }
 
 void bitmap::set_pixel(int x, int y, fw::colour colour) {
-  _data->rgba[(get_width() * y) + x] = colour.to_argb();
+  _data->rgba[(get_width() * y) + x] = colour.to_rgba();
+}
+
+void bitmap::set_pixel(int x, int y, uint32_t rgba) {
+  _data->rgba[(get_width() * y) + x] = rgba;
 }
 
 void bitmap::resize(int new_width, int new_height, int quality) {
