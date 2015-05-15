@@ -8,9 +8,6 @@ struct bitmap_data;
 class texture;
 class bitmap;
 
-// Blit the given bitmap to the given texture
-void blit(bitmap const &src, texture &dest);
-
 // Represents a bitmap, always RGBA.
 class bitmap {
 private:

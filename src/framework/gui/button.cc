@@ -3,6 +3,10 @@
 #include <framework/gui/gui.h>
 #include <framework/gui/button.h>
 
+#include <framework/framework.h>
+#include <framework/font.h>
+
+
 namespace fw { namespace gui {
 
 /** Property that sets the background of the button. */
@@ -71,6 +75,9 @@ void button::render() {
   if (_background) {
     _background->render(get_left(), get_top(), get_width(), get_height());
   }
+
+  fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+      get_left() + 10.0f, get_top() + get_height() / 2 + 4, "Hello World!");
 }
 
 } }

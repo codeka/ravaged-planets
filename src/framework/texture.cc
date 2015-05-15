@@ -4,6 +4,7 @@
 
 #include <framework/texture.h>
 #include <framework/framework.h>
+#include <framework/bitmap.h>
 #include <framework/graphics.h>
 #include <framework/misc.h>
 #include <framework/paths.h>
@@ -98,11 +99,20 @@ void texture::create(fs::path const &filename) {
   }
 }
 
-void texture::create(int width, int height, bool dynamic /*= false*/) {
+void texture::create(std::shared_ptr<fw::bitmap> bmp, bool dynamic) {
+  create(*bmp, dynamic);
+}
+
+void texture::create(fw::bitmap const &bmp, bool dynamic) {
   graphics *g = fw::framework::get_instance()->get_graphics();
 
-  std::shared_ptr<texture_data> data(new texture_data());
-  _data = data;
+  _data = std::shared_ptr<texture_data>(new texture_data());
+  _data->width = bmp.get_width();
+  _data->height = bmp.get_height();
+
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
+  FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _data->width, _data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+      bmp.get_pixels().data()));
 }
 
 void texture::bind() {

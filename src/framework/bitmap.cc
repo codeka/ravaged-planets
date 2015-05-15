@@ -47,29 +47,6 @@ struct bitmap_data: private boost::noncopyable {
 };
 
 //-------------------------------------------------------------------------
-void blit(fw::bitmap const &src, fw::texture &dest) {
-  /*
-   int width = src.get_width();
-   int height = src.get_height();
-
-   if (dest.get_width() != width || dest.get_height() != height)
-   {
-   // we want the texture to be exactly the same width/height as us, so
-   // if it's not, resize it (log a warning though, cause we should try
-   // to avoid this as much as possible - the caller can resize the texture
-   // if they really need to)
-   debug << boost::format("warning: resizing texture to fix bitmap size: (%1%, %2%), original texture size was: (%3%, %4%)")
-   % width % height % dest.get_width() % dest.get_height() << std::endl;
-   dest.create(0, width, height);
-   }
-
-   // grab the image data from the bitmap in a nice, easy to use format (RGBA, 8 bits per pixel)
-   std::vector<uint32_t> const &buffer = src.get_pixels();
-   copy_pixels(dest.get_d3dtexture(), &buffer[0], width, height);
-   */
-}
-
-//-------------------------------------------------------------------------
 bitmap::bitmap() :
     _data(0) {
 }
@@ -190,17 +167,13 @@ void bitmap::save_bitmap(fs::path const &filename) const {
     fs::remove(path);
   }
 
-  // Saving assumes ARGB format for some reason
-  std::vector<uint32_t> argb;
-  rgba_2_argb(_data->rgba, argb);
-
   int res;
   if (filename.extension() == ".png") {
     res = stbi_write_png(filename.c_str(), _data->width, _data->height, 4,
-        reinterpret_cast<unsigned char *>(argb.data()), 0);
+        reinterpret_cast<unsigned char *>(_data->rgba.data()), 0);
   } else if (filename.extension() == ".bmp") {
     res = stbi_write_bmp(filename.c_str(), _data->width, _data->height, 4,
-        reinterpret_cast<unsigned char *>(argb.data()));
+        reinterpret_cast<unsigned char *>(_data->rgba.data()));
   }
   if (res == 0) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error writing file."));
