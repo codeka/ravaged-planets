@@ -34,7 +34,7 @@ static framework *only_instance = 0;
 framework::framework(base_app* app) :
     _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(nullptr),
     _graphics(nullptr), _timer(nullptr), _audio(nullptr), _input(nullptr), _lang(nullptr),
-    _gui(nullptr), _running(true) {
+    _gui(nullptr), _font_manager(nullptr), _running(true) {
   only_instance = this;
 }
 
@@ -49,6 +49,8 @@ framework::~framework() {
     delete _input;
   if (_timer != nullptr)
     delete _timer;
+  if (_font_manager != nullptr)
+    delete _font_manager;
 
   /*
    if (_particle_mgr != 0) delete _particle_mgr;
@@ -231,6 +233,7 @@ void framework::update(float dt) {
   if (_gui != nullptr) {
     _gui->update(dt);
   }
+  _font_manager->update(dt);
   /*
    _audio->update();
 

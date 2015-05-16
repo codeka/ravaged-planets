@@ -1,4 +1,6 @@
 
+#include <mutex>
+
 #include <boost/foreach.hpp>
 #include <boost/locale.hpp>
 
@@ -63,6 +65,7 @@ glyph::~glyph() {
 
 class string_cache_entry {
 public:
+  float time_since_use;
   std::shared_ptr<vertex_buffer> vb;
   std::shared_ptr<index_buffer> ib;
   std::shared_ptr<fw::shader> shader;
@@ -76,7 +79,7 @@ public:
 string_cache_entry::string_cache_entry(std::shared_ptr<vertex_buffer> vb,
     std::shared_ptr<index_buffer> ib, std::shared_ptr<fw::shader> shader,
     std::shared_ptr<shader_parameters> shader_params) :
-      vb(vb), ib(ib), shader(shader), shader_params(shader_params) {
+      vb(vb), ib(ib), shader(shader), shader_params(shader_params), time_since_use(0) {
 }
 
 string_cache_entry::~string_cache_entry() {
@@ -104,6 +107,21 @@ font_face::~font_face() {
   }
   BOOST_FOREACH(auto entry, _string_cache) {
     delete entry.second;
+  }
+}
+
+void font_face::update(float dt) {
+  std::unique_lock<std::mutex> lock(_mutex);
+  for (auto it = _string_cache.begin(); it != _string_cache.end(); ++it) {
+    // Note we update the time_since_use after adding dt. This ensures that if the thread time is really
+    // long (e.g. if there's been some delay) we'll go through at least one update loop before destroying
+    // the string.
+    if (it->second->time_since_use > 1.0f) {
+      delete it->second;
+      it = _string_cache.erase(it);
+    } else {
+      it->second->time_since_use += dt;
+    }
   }
 }
 
@@ -154,10 +172,14 @@ void font_face::draw_string(int x, int y, std::string const &str) {
 }
 
 void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str) {
-  string_cache_entry *data = _string_cache[str];
-  if (data == nullptr) {
-    data = create_cache_entry(str);
-    _string_cache[str] = data;
+  string_cache_entry *data;
+  {
+    std::unique_lock<std::mutex> lock(_mutex);
+    data = _string_cache[str];
+    if (data == nullptr) {
+      data = create_cache_entry(str);
+      _string_cache[str] = data;
+    }
   }
 
   if (_texture_dirty) {
@@ -179,6 +201,9 @@ void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str
   data->shader->end();
   data->ib->end();
   data->vb->end();
+
+  // Reset the timer so we keep this string cached.
+  data->time_since_use = 0.0f;
 }
 
 string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> const &str) {
@@ -229,6 +254,12 @@ string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> co
 
 void font_manager::initialize() {
   FT_CHECK(FT_Init_FreeType(&_library));
+}
+
+void font_manager::update(float dt) {
+  BOOST_FOREACH(auto it, _faces) {
+    it.second->update(dt);
+  }
 }
 
 std::shared_ptr<font_face> font_manager::get_face() {

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <map>
+#include <mutex>
 #include <string>
 #include <boost/filesystem.hpp>
 
@@ -21,6 +22,7 @@ private:
   font_manager *_manager;
   FT_Face _face;
   int _size; //<! Size in pixels of this font.
+  std::mutex _mutex;
 
   // Glyphs are rendered into a bitmap and then copied to a texture as required, before we render
   // when draw is called.
@@ -43,6 +45,9 @@ private:
 public:
   font_face(font_manager *manager, boost::filesystem::path const &filename);
   ~font_face();
+
+  /** Called by the font_managed every update frame. */
+  void update(float dt);
 
   // Only useful for debugging, gets the atlas bitmap we're using to hold rendered glyphs
   std::shared_ptr<fw::bitmap> get_bitmap() const {
@@ -70,6 +75,7 @@ private:
 
 public:
   void initialize();
+  void update(float dt);
 
   /** Gets the default \ref font_face. */
   std::shared_ptr<font_face> get_face();
