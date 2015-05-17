@@ -1,0 +1,363 @@
+//
+// Copyright (c) 2008-2011, Dean Harding. All rights reserved.
+//
+#include "stdafx.h"
+#include "particle_renderer.h"
+#include "particle_manager.h"
+#include "particle.h"
+#include "particle_config.h"
+#include "graphics.h"
+#include "effect.h"
+#include "texture.h"
+#include "camera.h"
+#include "logging.h"
+#include "vector.h"	
+#include "vertex_buffer.h"
+#include "index_buffer.h"
+#include "vertex_formats.h"
+#include "misc.h"
+#include "scenegraph.h"
+#include "exception.h"
+
+//-----------------------------------------------------------------------------
+// This structure is used to sort particles first by texture and then by
+// z-order (to avoid state changes and ordering issues)
+struct particle_sorter
+{
+	fw::vector _cam_pos;
+
+	particle_sorter(fw::vector camera_pos)
+		: _cam_pos(camera_pos)
+	{
+	}
+
+	bool operator()(fw::particle const *lhs, fw::particle const *rhs)
+	{
+		if (lhs->config->billboard.texture != rhs->config->billboard.texture)
+		{
+			// it doesn't matter which order we choose for the textures,
+			// as long TextureA always appears on the "same side" of TextureB.
+			return (lhs->config->billboard.texture.get() > rhs->config->billboard.texture.get());
+		}
+
+		if (lhs->config->billboard.mode != rhs->config->billboard.mode)
+		{
+			return (lhs->config->billboard.mode > rhs->config->billboard.mode);
+		}
+
+		return (lhs->pos - _cam_pos).length_squared() > (rhs->pos - _cam_pos).length_squared();
+	}
+};
+
+//-----------------------------------------------------------------------------
+
+const int batch_size = 1024;
+const int max_vertices = batch_size * 4;
+const int max_indices = batch_size * 6;
+
+struct render_state
+{
+	fw::sg::scenegraph &scenegraph;
+	int particle_num;
+	std::vector<fw::vertex::xyz_c_uv> vertices;
+	std::vector<short> indices;
+	shared_ptr<fw::texture> texture;
+	fw::particle_emitter_config::billboard_mode mode;
+	fw::particle_renderer::particle_list &particles;
+	shared_ptr<fw::effect> fx;
+
+	std::vector< shared_ptr<fw::vertex_buffer> > vertex_buffers;
+	std::vector< shared_ptr<fw::index_buffer> > index_buffers;
+
+	inline render_state(fw::sg::scenegraph &sg, fw::particle_renderer::particle_list &particles)
+		: scenegraph(sg), particles(particles)
+	{
+	}
+};
+
+//-----------------------------------------------------------------------------
+// This class holds the index and vertex buffer(s) while we're not using them...
+// so that we don't have to continually create/destroy them
+class buffer_cache
+{
+private:
+	std::vector< shared_ptr<fw::vertex_buffer> > _vertex_buffers;
+	std::vector< shared_ptr<fw::index_buffer> > _index_buffers;
+
+public:
+	shared_ptr<fw::vertex_buffer> get_vertex_buffer();
+	shared_ptr<fw::index_buffer> get_index_buffer();
+
+	void release_vertex_buffer(shared_ptr<fw::vertex_buffer> vb);
+	void release_index_buffer(shared_ptr<fw::index_buffer> ib);
+};
+
+shared_ptr<fw::vertex_buffer> buffer_cache::get_vertex_buffer()
+{
+	if (_vertex_buffers.size() > 0)
+	{
+		shared_ptr<fw::vertex_buffer> vb(_vertex_buffers.back());
+		_vertex_buffers.pop_back();
+		return vb;
+	}
+	else
+	{
+		shared_ptr<fw::vertex_buffer> vb(new fw::vertex_buffer());
+		vb->create_buffer<fw::vertex::xyz_c_uv>(max_vertices, true);
+		return vb;
+	}
+}
+
+shared_ptr<fw::index_buffer> buffer_cache::get_index_buffer()
+{
+	if (_index_buffers.size() > 0)
+	{
+		shared_ptr<fw::index_buffer> ib(_index_buffers.back());
+		_index_buffers.pop_back();
+		return ib;
+	}
+	else
+	{
+		shared_ptr<fw::index_buffer> ib(new fw::index_buffer());
+		ib->create_buffer(max_indices, D3DFMT_INDEX16);
+		return ib;
+	}
+}
+
+void buffer_cache::release_vertex_buffer(shared_ptr<fw::vertex_buffer> vb)
+{
+	_vertex_buffers.push_back(vb);
+}
+
+void buffer_cache::release_index_buffer(shared_ptr<fw::index_buffer> ib)
+{
+	_index_buffers.push_back(ib);
+}
+
+static buffer_cache g_buffer_cache;
+
+//-----------------------------------------------------------------------------
+
+namespace fw {
+
+	particle_renderer::particle_renderer(particle_manager *mgr)
+		: _fx(new fw::effect()), _mgr(mgr), _draw_frame(1)
+		, _colour_texture(new fw::texture())
+	{
+	}
+
+	particle_renderer::~particle_renderer()
+	{
+	}
+
+	void particle_renderer::initialise(graphics *g)
+	{
+		_graphics = g;
+
+		_colour_texture->create(fw::installed_data_path() / "particles/colours.png");
+		_fx->initialise("particle.fx");
+		_fx->set_texture("colour_texture", *_colour_texture.get());
+	}
+
+	// gets the name of the technique in the particle.fx file we'll use for the given
+	// billboard_mode
+	std::string get_technique_name(particle_emitter_config::billboard_mode mode)
+	{
+		switch(mode)
+		{
+		case particle_emitter_config::normal:
+			return "ParticleNormal";
+		case particle_emitter_config::additive:
+			return "ParticleAdditive";
+		default:
+			BOOST_THROW_EXCEPTION(fw::exception()
+				<< fw::message_error_info("Unknown billboard_mode!"));
+
+			return ""; // never gets here...
+		}
+	}
+
+	void generate_scenegraph_node(render_state &rs)
+	{
+		shared_ptr<fw::vertex_buffer> vb = g_buffer_cache.get_vertex_buffer();
+		vb->set_data(rs.vertices.size(), &rs.vertices[0]);
+		rs.vertices.clear();
+		rs.vertex_buffers.push_back(vb);
+
+		shared_ptr<fw::index_buffer> ib = g_buffer_cache.get_index_buffer();
+		ib->set_data(rs.indices.size(), &rs.indices[0]);
+		rs.indices.clear();
+		rs.index_buffers.push_back(ib);
+
+		shared_ptr<fw::effect_parameters> params = rs.fx->create_parameters();
+		params->set_technique_name(get_technique_name(rs.mode));
+		params->set_texture("particle_texture", rs.texture);
+		params->commit();
+
+		shared_ptr<sg::node> node(new sg::node());
+		node->set_vertex_buffer(vb);
+		node->set_index_buffer(ib);
+		node->set_effect(rs.fx);
+		node->set_effect_parameters(params);
+		node->set_primitive_type(D3DPT_TRIANGLELIST);
+		node->set_cast_shadows(false);
+		rs.scenegraph.add_node(node);
+	}
+
+	bool particle_renderer::add_particle(render_state &rs, int base_index, particle *p, float offset_x, float offset_z)
+	{
+		fw::camera *cam = fw::framework::get_instance()->get_camera();
+		fw::vector pos(p->pos[0] + offset_x, p->pos[1], p->pos[2] + offset_z);
+
+		// only render if the (absolute, not wrapped) distance to the camera is < 50
+		fw::vector dir_to_cam = (cam->get_position() - pos);
+		if (dir_to_cam.length_squared() > (50.0f * 50.0f))
+			return false;
+
+		// if we've already drawn the particle this frame, don't do it again.
+		if (p->draw_frame == _draw_frame)
+			return false;
+		p->draw_frame = _draw_frame;
+
+		// the colour_row is divided by this value to get the value between 0 and 1.
+		float colour_texture_factor = 1.0f / this->_colour_texture->get_height();
+
+		fw::colour colour(p->alpha, (static_cast<float>(p->colour1) + 0.5f) * colour_texture_factor,
+			(static_cast<float>(p->colour2) + 0.5f) * colour_texture_factor, p->colour_factor);
+
+		matrix m = fw::scale(p->size);
+		if (p->rotation_kind != rotation_kind::direction)
+		{
+			m *= fw::rotate_axis_angle(vector(0,0,1), p->angle);
+
+			matrix m2;
+			cml::matrix_rotation_align(m2, dir_to_cam);
+			m *= m2;
+		}
+		else
+		{
+			matrix m2;
+			cml::matrix_rotation_vec_to_vec(m2, vector(-1,0,0), p->direction);
+			m *= m2;
+		}
+		m *= fw::translation(pos);
+
+		float aspect = (p->rect.bottom - p->rect.top) / (p->rect.right - p->rect.left);
+
+		fw::vector v = cml::transform_point(m, fw::vector(-0.5f, -0.5f * aspect, 0));
+		rs.vertices.push_back(fw::vertex::xyz_c_uv(
+			v[0], v[1], v[2],
+			colour.to_d3dcolor(),
+			p->rect.left, p->rect.bottom));
+		v = cml::transform_point(m, fw::vector(-0.5f, 0.5f * aspect, 0));
+		rs.vertices.push_back(fw::vertex::xyz_c_uv(
+			v[0], v[1], v[2],
+			colour.to_d3dcolor(),
+			p->rect.left, p->rect.top));
+		v = cml::transform_point(m, fw::vector(0.5f, 0.5f * aspect, 0));
+		rs.vertices.push_back(fw::vertex::xyz_c_uv(
+			v[0], v[1], v[2],
+			colour.to_d3dcolor(),
+			p->rect.right, p->rect.top));
+		v = cml::transform_point(m, fw::vector(0.5f, -0.5f * aspect, 0));
+		rs.vertices.push_back(fw::vertex::xyz_c_uv(
+			v[0], v[1], v[2],
+			colour.to_d3dcolor(),
+			p->rect.right, p->rect.bottom));
+
+		rs.indices.push_back(base_index);
+		rs.indices.push_back(base_index + 1);
+		rs.indices.push_back(base_index + 2);
+		rs.indices.push_back(base_index);
+		rs.indices.push_back(base_index + 2);
+		rs.indices.push_back(base_index + 3);
+
+		return true;
+	}
+
+	void particle_renderer::render_particles(render_state &rs, float offset_x, float offset_z)
+	{
+		for(particle_renderer::particle_list::iterator it = rs.particles.begin(); it != rs.particles.end(); ++it)
+		{
+			particle *p = *it;
+
+			if (rs.texture != p->config->billboard.texture || rs.particle_num >= batch_size ||
+				rs.mode != p->config->billboard.mode)
+			{
+				if (rs.texture && rs.particle_num > 0)
+				{
+					generate_scenegraph_node(rs);
+				}
+
+				rs.particle_num = 0;
+				rs.texture = p->config->billboard.texture;
+				rs.mode = p->config->billboard.mode;
+			}
+
+			int base_index = rs.particle_num * 4;
+			if (add_particle(rs, base_index, p, offset_x, offset_z))
+				rs.particle_num ++;
+		}
+	}
+
+	void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::particle_list &particles)
+	{
+		if (particles.size() == 0)
+			return;
+
+		// sort the particles by texture, then by z-order
+		sort_particles(particles);
+
+		// create the render state that'll hold all our state variables
+		render_state rs(scenegraph, particles);
+		rs.fx = _fx;
+		rs.particle_num = 0;
+		rs.mode = particle_emitter_config::normal;
+
+		if (_mgr->get_wrap_x() > 1.0f && _mgr->get_wrap_z() > 1.0f)
+		{
+			for(int z = -1; z <= 1; z++)
+			{
+				for(int x = -1; x <= 1; x++)
+				{
+					float offset_x = x * _mgr->get_wrap_x();
+					float offset_z = z * _mgr->get_wrap_z();
+					render_particles(rs, offset_x, offset_z);
+				}
+			}
+		}
+		else
+		{
+			render_particles(rs, 0, 0);
+		}
+
+		if (rs.particle_num > 0)
+		{
+			generate_scenegraph_node(rs);
+		}
+
+		// release the vertex and index buffers back into the cache (even though
+		// they're still technically in use by the scene graph, we won't need them
+		// again until the next frame so we can do this here)
+		BOOST_FOREACH(shared_ptr<fw::vertex_buffer> vb, rs.vertex_buffers)
+		{
+			g_buffer_cache.release_vertex_buffer(vb);
+		}
+		BOOST_FOREACH(shared_ptr<fw::index_buffer> ib, rs.index_buffers)
+		{
+			g_buffer_cache.release_index_buffer(ib);
+		}
+
+		// now this frame is over record it so we'll continue to draw particles next frame
+		_draw_frame ++;
+	}
+
+	void particle_renderer::sort_particles(particle_renderer::particle_list &particles)
+	{
+		fw::camera *cam = fw::framework::get_instance()->get_camera();
+		fw::vector const &cam_pos = cam->get_position();
+
+		particles.sort(particle_sorter(cam_pos));
+	}
+
+}

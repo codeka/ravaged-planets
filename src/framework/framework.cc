@@ -14,6 +14,7 @@
 #include <framework/settings.h>
 #include <framework/graphics.h>
 #include <framework/font.h>
+#include <framework/particle_manager.h>
 #include <framework/scenegraph.h>
 #include <framework/timer.h>
 #include <framework/lang.h>
@@ -51,9 +52,10 @@ framework::~framework() {
     delete _timer;
   if (_font_manager != nullptr)
     delete _font_manager;
+  if (_particle_mgr != nullptr)
+    delete _particle_mgr;
 
   /*
-   if (_particle_mgr != 0) delete _particle_mgr;
    if (_audio != 0) delete _audio;
    */
 }
@@ -80,6 +82,9 @@ bool framework::initialize(char const *title) {
   if (_app->wants_graphics()) {
     _graphics = new graphics();
     _graphics->initialize(title);
+
+    _particle_mgr = new particle_manager();
+    _particle_mgr->initialise(_graphics);
   }
 
   /*
@@ -87,14 +92,12 @@ bool framework::initialize(char const *title) {
    _audio->initialise();
    */
 
-  // initialize input
   _input = new input();
   _input->initialize();
 
   _font_manager = new font_manager();
   _font_manager->initialize();
 
-  // initialize the gui subsystem
   if (_app->wants_graphics()) {
     _gui = new gui::gui();
     _gui->initialize(_graphics);
@@ -102,7 +105,6 @@ bool framework::initialize(char const *title) {
 
   /*
    // initialise the particle manager
-   _particle_mgr->initialise(_graphics);
 
    // initialise the host (ENet) and HTTP module (libcurl)
    net::initialise();
@@ -241,8 +243,7 @@ void framework::update(float dt) {
    return;
    */
   _app->update(dt);
-  /*
-   _particle_mgr->update();*/
+  _particle_mgr->update();
   if (_camera != nullptr)
     _camera->update(dt);
 
@@ -257,7 +258,7 @@ void framework::render() {
   // populate the scene graph by calling into the application itself
   sg::scenegraph scenegraph;
   _app->render(scenegraph);
-//		_particle_mgr->render(scenegraph);
+  _particle_mgr->render(scenegraph);
 
   // if we've been asked for some screenshots, take them before we do the
   // normal render.
