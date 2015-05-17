@@ -23,14 +23,31 @@ public:
   }
 
   void apply(widget *widget) {
-    button *wdgt = dynamic_cast<button *>(widget);
+    button *btn = dynamic_cast<button *>(widget);
     if (_drawable) {
-      wdgt->_background = _drawable;
+      btn->_background = _drawable;
     } else {
-      wdgt->_background = wdgt->_gui->get_drawable_manager()->get_drawable(_drawable_name);
+      btn->_background = btn->_gui->get_drawable_manager()->get_drawable(_drawable_name);
     }
   }
 };
+
+/** Property that sets the text of the button. */
+class button_text_property : public property {
+private:
+  std::string _text;
+public:
+  button_text_property(std::string const &text) :
+      _text(text) {
+  }
+
+  void apply(widget *widget) {
+    button *btn = dynamic_cast<button *>(widget);
+    btn->_text = _text;
+  }
+};
+
+//-----------------------------------------------------------------------------
 
 button::button(gui *gui) : widget(gui) {
 }
@@ -44,6 +61,10 @@ property *button::background(std::string const &drawable_name) {
 
 property *button::background(std::shared_ptr<drawable> drawable) {
   return new button_background_property(drawable);
+}
+
+property *button::text(std::string const &text) {
+  return new button_text_property(text);
 }
 
 void button::on_attached_to_parent(widget *parent) {
@@ -70,17 +91,16 @@ void button::on_mouse_over() {
   }
 }
 
-
 void button::render() {
   if (_background) {
     _background->render(get_left(), get_top(), get_width(), get_height());
   }
 
-  fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-      static_cast<int>(get_left() + get_width() / 2),
-      static_cast<int>(get_top() + get_height() / 2),
-      "Everything is awesome",
-      static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
+  if (_text.length() > 0) {
+    fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+        get_left() + get_width() / 2, get_top() + get_height() / 2, _text,
+        static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
+  }
 }
 
 } }

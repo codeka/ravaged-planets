@@ -39,7 +39,24 @@ void title_screen::show() {
           << fw::gui::static_widget::background("title_heading"))
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(100))
-          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30)));
+          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
+          << fw::gui::button::text("New Game"))
+      << (fw::gui::builder<fw::gui::button>()
+          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(140))
+          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
+          << fw::gui::button::text("Join Game"))
+      << (fw::gui::builder<fw::gui::button>()
+          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(180))
+          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
+          << fw::gui::button::text("Options"))
+      << (fw::gui::builder<fw::gui::button>()
+          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(220))
+          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
+          << fw::gui::button::text("Editor"))
+      << (fw::gui::builder<fw::gui::button>()
+          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(260))
+          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
+          << fw::gui::button::text("Quit"));
   frmwrk->get_gui()->attach_widget(wnd);
 
   /*
