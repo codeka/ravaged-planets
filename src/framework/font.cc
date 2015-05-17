@@ -45,17 +45,22 @@ public:
   int bitmap_top;
   int bitmap_width;
   int bitmap_height;
+  float distance_from_baseline_to_top;
+  float distance_from_baseline_to_bottom;
 
   glyph(uint32_t ch, int glyph_index, int offset_x, int offset_y, float advance_x,
-      float advance_y, int bitmap_left, int bitmap_top, int bitmap_width, int bitmap_height);
+      float advance_y, int bitmap_left, int bitmap_top, int bitmap_width, int bitmap_height,
+      float distance_from_baseline_to_top, float distance_from_baseline_to_bottom);
   ~glyph();
 };
 
 glyph::glyph(uint32_t ch, int glyph_index, int offset_x, int offset_y, float advance_x,
-    float advance_y, int bitmap_left, int bitmap_top, int bitmap_width, int bitmap_height) :
+    float advance_y, int bitmap_left, int bitmap_top, int bitmap_width, int bitmap_height,
+    float distance_from_baseline_to_top, float distance_from_baseline_to_bottom) :
     ch(ch), glyph_index(glyph_index), offset_x(offset_x), offset_y(offset_y), advance_x(advance_x),
     advance_y(advance_y), bitmap_left(bitmap_left), bitmap_top(bitmap_top), bitmap_width(bitmap_width),
-    bitmap_height(bitmap_height) {
+    bitmap_height(bitmap_height), distance_from_baseline_to_top(distance_from_baseline_to_top),
+    distance_from_baseline_to_bottom(distance_from_baseline_to_bottom) {
 }
 
 glyph::~glyph() {
@@ -70,16 +75,22 @@ public:
   std::shared_ptr<index_buffer> ib;
   std::shared_ptr<fw::shader> shader;
   std::shared_ptr<shader_parameters> shader_params;
+  fw::point size;
+  float distance_to_top;
+  float distance_to_bottom;
 
   string_cache_entry(std::shared_ptr<vertex_buffer> vb, std::shared_ptr<index_buffer> ib,
-      std::shared_ptr<fw::shader> shader, std::shared_ptr<shader_parameters> shader_params);
+      std::shared_ptr<fw::shader> shader, std::shared_ptr<shader_parameters> shader_params,
+      fw::point size, float distance_to_top, float distance_to_bottom);
   ~string_cache_entry();
 };
 
 string_cache_entry::string_cache_entry(std::shared_ptr<vertex_buffer> vb,
     std::shared_ptr<index_buffer> ib, std::shared_ptr<fw::shader> shader,
-    std::shared_ptr<shader_parameters> shader_params) :
-      vb(vb), ib(ib), shader(shader), shader_params(shader_params), time_since_use(0) {
+    std::shared_ptr<shader_parameters> shader_params, fw::point size,
+    float distance_to_top, float distance_to_bottom) :
+      vb(vb), ib(ib), shader(shader), shader_params(shader_params), time_since_use(0), size(size),
+      distance_to_top(distance_to_top), distance_to_bottom(distance_to_bottom) {
 }
 
 string_cache_entry::~string_cache_entry() {
@@ -160,30 +171,52 @@ void font_face::ensure_glyphs(std::basic_string<uint32_t> const &str) {
       }
     }
 
+    std::string chstr = conv::utf_to_utf<char>(std::basic_string<uint32_t>({ch, 0}));
+    fw::debug << "Glyph: ch=" << chstr << std::endl;
+    fw::debug << " horiBearingX=" << (_face->glyph->metrics.horiBearingX / 64.0f)
+        << " horiBearingY=" << (_face->glyph->metrics.horiBearingY / 64.0f)
+        << " height=" << (_face->glyph->metrics.height / 64.0f)
+        << std::endl;
     _glyphs[ch] = new glyph(ch, glyph_index, offset_x, offset_y,
         _face->glyph->advance.x / 64.0f, _face->glyph->advance.y / 64.0f, _face->glyph->bitmap_left,
-        _face->glyph->bitmap_top, _face->glyph->bitmap.width, _face->glyph->bitmap.rows);
+        _face->glyph->bitmap_top, _face->glyph->bitmap.width, _face->glyph->bitmap.rows,
+        _face->glyph->metrics.horiBearingY / 64.0f,
+        (_face->glyph->metrics.height - _face->glyph->metrics.horiBearingY) / 64.0f);
     _texture_dirty = true;
   }
 }
 
-void font_face::draw_string(int x, int y, std::string const &str) {
-  draw_string(x, y, conv::utf_to_utf<uint32_t>(str));
+fw::point font_face::measure_string(std::string const &str) {
+  return measure_string(conv::utf_to_utf<uint32_t>(str));
 }
 
-void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str) {
-  string_cache_entry *data;
-  {
-    std::unique_lock<std::mutex> lock(_mutex);
-    data = _string_cache[str];
-    if (data == nullptr) {
-      data = create_cache_entry(str);
-      _string_cache[str] = data;
-    }
-  }
+fw::point font_face::measure_string(std::basic_string<uint32_t> const &str) {
+  string_cache_entry *data = get_or_create_cache_entry(str);
+  return data->size;
+}
+
+void font_face::draw_string(int x, int y, std::string const &str, draw_flags flags /*= 0*/) {
+  draw_string(x, y, conv::utf_to_utf<uint32_t>(str), flags);
+}
+
+void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags /*= 0*/) {
+  string_cache_entry *data = get_or_create_cache_entry(str);
 
   if (_texture_dirty) {
     _texture->create(_bitmap);
+  }
+
+  if ((flags & align_centre) != 0) {
+    x -= data->size[0] / 2;
+  } else if (( flags & align_right) != 0) {
+    x -= data->size[0];
+  }
+  if ((flags & align_top) != 0) {
+    y += data->distance_to_top;
+  } else if ((flags & align_middle) != 0) {
+    y += (data->distance_to_top - data->distance_to_bottom) / 2;
+  } else if ((flags & align_bottom) != 0) {
+    y -= data->distance_to_bottom;
   }
 
   fw::matrix pos_transform;
@@ -206,6 +239,16 @@ void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str
   data->time_since_use = 0.0f;
 }
 
+string_cache_entry *font_face::get_or_create_cache_entry(std::basic_string<uint32_t> const &str) {
+  std::unique_lock<std::mutex> lock(_mutex);
+  string_cache_entry *data = _string_cache[str];
+  if (data == nullptr) {
+    data = create_cache_entry(str);
+    _string_cache[str] = data;
+  }
+  return data;
+}
+
 string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> const &str) {
   ensure_glyphs(str);
 
@@ -215,6 +258,8 @@ string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> co
   indices.reserve(str.size() * 6);
   float x = 0;
   float y = 0;
+  float max_distance_to_top = 0.0f;
+  float max_distance_to_bottom = 0.0f;
   BOOST_FOREACH(uint32_t ch, str) {
     glyph *g = _glyphs[ch];
     uint16_t index_offset = verts.size();
@@ -236,6 +281,12 @@ string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> co
 
     x += g->advance_x;
     y += g->advance_y;
+    if (max_distance_to_top < g->distance_from_baseline_to_top) {
+      max_distance_to_top = g->distance_from_baseline_to_top;
+    }
+    if (max_distance_to_bottom < g->distance_from_baseline_to_bottom) {
+      max_distance_to_bottom = g->distance_from_baseline_to_bottom;
+    }
   }
 
   std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_uv>();
@@ -247,7 +298,10 @@ string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> co
   std::shared_ptr<fw::shader> shader = fw::shader::create("gui");
   std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
 
-  return new string_cache_entry(vb, ib, shader, shader_params);
+  fw::debug << "metrics: distance_to_top=" << max_distance_to_top << "distance_to_bottom=" << max_distance_to_bottom
+      << std::endl;
+  return new string_cache_entry(vb, ib, shader, shader_params,
+      fw::point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom);
 }
 
 //-----------------------------------------------------------------------------

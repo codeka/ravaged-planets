@@ -6,6 +6,8 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
+#include <framework/vector.h>
+
 /* Cut'n'pasted from the freetype.h header so we don't have to include that whole thing. */
 typedef struct FT_LibraryRec_ *FT_Library;
 typedef struct FT_FaceRec_*  FT_Face;
@@ -18,6 +20,19 @@ class string_cache_entry;
 class texture;
 
 class font_face {
+public:
+  /** Flags we use to control how the string is drawn. */
+  enum draw_flags {
+    draw_default   = 0x0000,
+    align_baseline = 0x0000,
+    align_left     = 0x0000,
+    align_top      = 0x0001,
+    align_bottom   = 0x0002,
+    align_middle   = 0x0004,
+    align_centre   = 0x0008,
+    align_right    = 0x0010,
+  };
+
 private:
   font_manager *_manager;
   FT_Face _face;
@@ -40,7 +55,9 @@ private:
   std::map<std::basic_string<uint32_t>, string_cache_entry *> _string_cache;
 
   void ensure_glyphs(std::basic_string<uint32_t> const &str);
-  void draw_string(int x, int y, std::basic_string<uint32_t> const &str);
+  void draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags);
+  fw::point measure_string(std::basic_string<uint32_t> const &str);
+  string_cache_entry *get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
   string_cache_entry *create_cache_entry(std::basic_string<uint32_t> const &str);
 public:
   font_face(font_manager *manager, boost::filesystem::path const &filename);
@@ -60,10 +77,13 @@ public:
    */
   void ensure_glyphs(std::string const &str);
 
+  /** Measures the given string and returns the width/height of the final rendered string. */
+  fw::point measure_string(std::string const &str);
+
   /**
    * Draws the given string on the screen at the given (x,y) coordinates.
    */
-  void draw_string(int x, int y, std::string const &str);
+  void draw_string(int x, int y, std::string const &str, draw_flags flags = draw_default);
 };
 
 class font_manager {

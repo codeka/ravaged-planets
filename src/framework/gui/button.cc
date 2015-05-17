@@ -77,7 +77,10 @@ void button::render() {
   }
 
   fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-      get_left() + 10.0f, get_top() + get_height() / 2 + 4, "Hello World!");
+      static_cast<int>(get_left() + get_width() / 2),
+      static_cast<int>(get_top() + get_height() / 2),
+      "Everything is awesome",
+      static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
 }
 
 } }

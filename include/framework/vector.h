@@ -8,6 +8,7 @@ namespace fw {
 typedef cml::matrix44f_r matrix;
 typedef cml::quaternionf_p quaternion;
 typedef cml::vector3f vector;
+typedef cml::vector2f point;
 
 inline matrix identity() {
   matrix m;
