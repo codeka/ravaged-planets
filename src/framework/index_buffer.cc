@@ -16,8 +16,7 @@ index_buffer::~index_buffer() {
   FW_CHECKED(glDeleteBuffers(1, &_id));
 }
 
-void index_buffer::set_data(int num_indices, uint16_t const *indices,
-    int flags) {
+void index_buffer::set_data(int num_indices, uint16_t const *indices, int flags) {
   _num_indices = num_indices;
 
   if (flags <= 0)

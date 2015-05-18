@@ -243,7 +243,7 @@ void framework::update(float dt) {
    return;
    */
   _app->update(dt);
-  _particle_mgr->update();
+  _particle_mgr->update(dt);
   if (_camera != nullptr)
     _camera->update(dt);
 

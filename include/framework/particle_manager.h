@@ -10,7 +10,6 @@ class particle;
 class particle_emitter;
 class particle_effect;
 class particle_renderer;
-class effect;
 class texture;
 
 namespace sg {
@@ -40,7 +39,7 @@ public:
   ~particle_manager();
 
   void initialise(graphics *g);
-  void update();
+  void update(float dt);
   void render(sg::scenegraph &scenegraph);
 
   // created the named effect (we load the properties from the given .wwpart file)
