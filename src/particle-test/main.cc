@@ -7,6 +7,10 @@
 #include <framework/settings.h>
 #include <framework/framework.h>
 #include <framework/font.h>
+#include <framework/gui/gui.h>
+#include <framework/gui/builder.h>
+#include <framework/gui/button.h>
+#include <framework/gui/window.h>
 #include <framework/logging.h>
 #include <framework/particle_manager.h>
 #include <framework/particle_effect.h>
@@ -31,9 +35,19 @@ bool application::initialize(fw::framework *frmwrk) {
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
 
+  fw::gui::window *wnd;
+  wnd = fw::gui::builder<fw::gui::window>()
+      << fw::gui::widget::position(fw::gui::px(20), fw::gui::px(20))
+      << fw::gui::widget::size(fw::gui::px(150), fw::gui::px(100))
+      << fw::gui::window::background("frame")
+      << (fw::gui::builder<fw::gui::button>()
+          << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(30))
+          << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::button::text("Restart"));
+  frmwrk->get_gui()->attach_widget(wnd);
+
   std::shared_ptr<fw::particle_effect> effect =
       frmwrk->get_particle_mgr()->create_effect("explosion-01");
-  //effect->
   return true;
 }
 
