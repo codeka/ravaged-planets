@@ -52,8 +52,9 @@ include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 
 add_subdirectory(src/framework)
-add_subdirectory(src/game)
 add_subdirectory(src/font-test)
+add_subdirectory(src/game)
+add_subdirectory(src/particle-test)
 
 # Be sure to install the "data" directory into /share/war-worlds
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data/"

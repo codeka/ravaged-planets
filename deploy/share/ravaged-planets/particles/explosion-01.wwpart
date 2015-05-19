@@ -1,0 +1,204 @@
+<!-- This effect is for explosions that you get when you blow up smaller tanks/vehicles -->
+<wwparticle version="1">
+	<!-- First, we have the main part of the explosion, the fire which fades into smoke -->
+	<emitter initial="15">
+		<position offset="0 0 0"
+				  radius="0.75"
+				  falloff="linear" />
+		<billboard texture="explosion.png"
+				   mode="additive">
+			<area rect="0 0 0.25 0.25" />
+			<area rect="0.25 0 0.5 0.25" />
+			<area rect="0 0.25 0.25 0.5" />
+			<area rect="0.25 0.25 0.5 0.5" />
+		</billboard>
+		<emit policy="none" />
+		<age min="0.6" max="0.8" />
+
+		<life>
+			<state age="0">
+				<size min="0.2" max="0.4" />
+				<rotation min="-1.57" max="1.57" />
+				<colour row="0" alpha="1" />
+				<speed min="0.1" max="0.2" />
+			</state>
+			<state age="0.1">
+				<size min="1.0" max="1.2" />
+			</state>
+
+			<state age="0.6">
+				<size min="1.7" max="1.8" />
+				<colour row="0" alpha="1" />
+				<speed min="0.4" max="0.8" />
+			</state>
+
+			<state age="1">
+				<size min="1.7" max="1.8" />
+				<colour row="2" alpha="0" />
+			</state>
+		</life>
+	</emitter>
+
+	<!-- This is bright flash that you get very briefly at the beginning of the explosion. -->
+	<emitter initial="5">
+		<position offset="0 0 0"
+				  radius="0.5"
+				  falloff="linear" />
+		<billboard texture="explosion.png"
+				   mode="additive">
+			<area rect="0.5 0 0.75 0.25" />
+			<area rect="0.75 0 1 0.25" />
+			<area rect="0.5 0.25 0.75 0.5" />
+			<area rect="0.75 0.25 1 0.5" />
+		</billboard>
+		<emit policy="none" />
+		<age min="0.3" max="0.4" />
+
+		<life>
+			<state age="0">
+				<size min="0.1" max="0.2" />
+				<rotation min="0" max="2" />
+				<colour row="3" alpha="1" />
+				<speed min="0" max="0.2" />
+			</state>
+			<state age="0.6">
+				<size min="2.0" max="2.4" />
+			</state>
+			<state age="1">
+				<size min="3.0" max="3.4" />
+				<colour row="3" alpha="0" />
+			</state>
+		</life>
+	</emitter>
+
+	<!-- This emitter is a bunch of sparks that radiate outwards. -->
+	<emitter initial="25">
+		<position offset="0 0 0"
+				  radius="0.1"
+				  falloff="linear" />
+		<billboard texture="explosion.png"
+				   mode="additive">
+			<area rect="0.75 0.85 1.0 0.9" />
+		</billboard>
+		<emit policy="none" />
+		<age min="0.5" max="0.7" />
+
+		<life>
+			<state age="0">
+				<size min="1.0" max="1.2" />
+				<rotation kind="direction" />
+				<gravity min="0.3" max="0.7" />
+				<colour row="0" alpha="1" />
+				<speed min="10.0" max="12.0" />
+			</state>
+			<state age="0.6">
+				<speed min="7.0" max="8.0" />
+			</state>
+			<state age="1">
+				<colour row="0" alpha="0" />
+			</state>
+		</life>
+	</emitter>
+
+	<!-- This emitter represents the "smoke trails" that radiate outwards. -->
+	<emitter initial="10">
+		<position offset="0 0 0"
+				  radius="0.1"
+				  falloff="linear" />
+		<billboard texture="explosion.png"
+				   mode="additive">
+			<area rect="0.0 0.5 0.5 0.625" />
+			<area rect="0.0 0.625 0.5 0.75" />
+			<area rect="0.0 0.75 0.5 0.825" />
+			<area rect="0.0 0.825 0.5 1" />
+		</billboard>
+		<emit policy="none" />
+		<age min="1.0" max="1.1" />
+
+		<life>
+			<state age="0">
+				<size min="0.1" max="0.4" />
+				<rotation kind="direction" />
+				<colour row="4" alpha="0.6" />
+				<speed min="5.0" max="6.0" />
+			</state>
+			<state age="0.6">
+				<size min="1.5" max="2.0" />
+			</state>
+			<state age="1">
+				<colour row="4" alpha="0" />
+				<speed min="0.0" max="0.1" />
+			</state>
+		</life>
+	</emitter>
+
+	<!-- This emitter represents the debris that radiates and spins outwards. -->
+	<emitter initial="10">
+		<position offset="0 0 0"
+				  radius="0.1"
+				  falloff="linear" />
+		<billboard texture="explosion.png"
+				   mode="additive">
+			<area rect="0.500 0.500 0.582 0.590" />
+			<area rect="0.500 0.586 0.582 0.664" />
+			<area rect="0.500 0.668 0.582 0.750" />
+			<area rect="0.582 0.504 0.660 0.582" />
+			<area rect="0.582 0.578 0.668 0.668" />
+			<area rect="0.582 0.678 0.667 0.734" />
+			<area rect="0.672 0.512 0.750 0.570" />
+			<area rect="0.672 0.597 0.746 0.660" />
+			<area rect="0.672 0.664 0.746 0.750" />
+		</billboard>
+		<emit policy="none" />
+		<age min="1.5" max="1.6" />
+
+		<life>
+			<state age="0">
+				<size min="0.2" max="0.3" />
+				<rotation kind="random" min="-12" max="12" />
+				<gravity min="0.9" max="1.0" />
+				<colour row="5" alpha="1" />
+				<speed min="4.0" max="5.0" />
+			</state>
+			<state age="0.6">
+				<rotation kind="random" min="-12" max="12" />
+				<colour row="1" alpha="1" />
+			</state>
+			<state age="1">
+				<rotation kind="random" min="-12" max="12" />
+				<colour row="1" alpha="0" />
+			</state>
+		</life>
+	</emitter>
+
+	<!-- This emitter represents the debris that radiates and spins outwards. -->
+	<emitter initial="5">
+		<position offset="0 0 0"
+				  radius="1.0"
+				  falloff="linear" />
+		<billboard texture="explosion.png"
+				   mode="additive">
+			<area rect="0.5 0.75 0.75 1" />
+		</billboard>
+		<emit policy="none" />
+		<age min="1.5" max="1.6" />
+
+		<life>
+			<state age="0">
+				<size min="1.3" max="1.6" />
+				<gravity min="-1.0" max="-0.9" />
+				<rotation kind="random" />
+				<colour row="4" alpha="1" />
+				<speed min="0.3" max="0.6" />
+			</state>
+			<state age="0.6">
+				<rotation kind="random" />
+			</state>
+			<state age="1">
+				<rotation kind="random" />
+				<colour row="1" alpha="0" />
+			</state>
+		</life>
+	</emitter>
+
+</wwparticle>
