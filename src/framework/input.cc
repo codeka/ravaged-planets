@@ -6,6 +6,7 @@
 
 #include <SDL.h>
 
+#include <framework/gui/gui.h>
 #include <framework/input.h>
 #include <framework/framework.h>
 #include <framework/misc.h>
@@ -257,10 +258,14 @@ void input::process_event(SDL_Event &event) {
     }
   } else if (event.type == SDL_MOUSEBUTTONDOWN) {
     int keycode = 0xffffff00 + (event.button.button - 1);
-    callback(keycode, 0, true);
+    if (!fw::framework::get_instance()->get_gui()->inject_mouse(event.button.button, true)) {
+      callback(keycode, 0, true);
+    }
   } else if (event.type == SDL_MOUSEBUTTONUP) {
     int keycode = 0xffffff00 + (event.button.button - 1);
-    callback(keycode, 0, false);
+    if (!fw::framework::get_instance()->get_gui()->inject_mouse(event.button.button, false)) {
+      callback(keycode, 0, false);
+    }
   }
 }
 

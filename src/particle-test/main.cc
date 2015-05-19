@@ -30,6 +30,12 @@ public:
   void render(fw::sg::scenegraph &scenegraph);
 };
 
+bool click_handler(fw::gui::widget *wdgt) {
+  std::shared_ptr<fw::particle_effect> effect =
+      fw::framework::get_instance()->get_particle_mgr()->create_effect("explosion-01");
+  return true;
+}
+
 bool application::initialize(fw::framework *frmwrk) {
   fw::top_down_camera *cam = new fw::top_down_camera();
   cam->set_mouse_move(false);
@@ -43,7 +49,8 @@ bool application::initialize(fw::framework *frmwrk) {
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(30))
           << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::button::text("Restart"));
+          << fw::gui::button::text("Restart")
+          << fw::gui::widget::click(std::bind<bool>(click_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
   std::shared_ptr<fw::particle_effect> effect =

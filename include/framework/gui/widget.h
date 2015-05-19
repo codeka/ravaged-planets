@@ -58,6 +58,7 @@ class widget {
 protected:
   friend class position_property;
   friend class size_property;
+  friend class widget_click_property;
 
   gui *_gui;
   widget *_parent;
@@ -66,6 +67,7 @@ protected:
   dimension _y;
   dimension _width;
   dimension _height;
+  std::function<bool(widget *)> _on_click;
 
 public:
   widget(gui *gui);
@@ -77,6 +79,7 @@ public:
   static inline property *size(dimension const &width, dimension const &height) {
     return new size_property(width, height);
   }
+  static property *click(std::function<bool(widget *)> on_click);
 
   void attach_child(widget *child);
   void detach_child(widget *child);
@@ -91,6 +94,9 @@ public:
   /** Called when the mouse moves over this widget. */
   virtual void on_mouse_over() {
   }
+
+  virtual bool on_mouse_down();
+  virtual bool on_mouse_up();
 
   /**
    * Gets the child widget at the given (x,y). If the point is outside our bounding box, the null is returned. If

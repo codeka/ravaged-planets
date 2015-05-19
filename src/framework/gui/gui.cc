@@ -42,6 +42,23 @@ void gui::update(float dt) {
   }
 }
 
+bool gui::inject_mouse(int button, bool is_down) {
+  if (button != 1 || (is_down && _widget_under_mouse == nullptr)
+      || (!is_down && _widget_mouse_down == nullptr)) {
+    return false;
+  }
+
+  bool handled;
+  if (is_down) {
+    _widget_mouse_down = _widget_under_mouse;
+    handled = _widget_mouse_down->on_mouse_down();
+  } else {
+    handled = _widget_mouse_down->on_mouse_up();
+    _widget_mouse_down = nullptr;
+  }
+  return handled;
+}
+
 void gui::render() {
   BOOST_FOREACH(widget *widget, _top_level_widgets) {
     widget->render();

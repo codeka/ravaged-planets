@@ -37,12 +37,30 @@ void size_property::apply(widget *widget) {
 }
 
 //-----------------------------------------------------------------------------
+class widget_click_property : public property {
+private:
+  std::function<bool(widget *)> _on_click;
+public:
+  widget_click_property(std::function<bool(widget *)> on_click)
+      : _on_click(on_click) {
+  }
+
+  void apply(widget *widget) {
+    widget->_on_click = _on_click;
+  }
+};
+
+//-----------------------------------------------------------------------------
 
 widget::widget(gui *gui) :
     _gui(gui), _parent(nullptr) {
 }
 
 widget::~widget() {
+}
+
+property *widget::click(std::function<bool(widget *)> on_click) {
+  return new widget_click_property(on_click);
 }
 
 void widget::attach_child(widget *child) {
@@ -66,6 +84,17 @@ void widget::render() {
   BOOST_FOREACH(widget *child, _children) {
     child->render();
   }
+}
+
+bool widget::on_mouse_down() {
+  return _on_click != nullptr;
+}
+
+bool widget::on_mouse_up() {
+  if (_on_click) {
+    return _on_click(this);
+  }
+  return false;
 }
 
 widget *widget::get_child_at(float x, float y) {

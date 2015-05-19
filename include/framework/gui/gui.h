@@ -18,6 +18,7 @@ private:
   drawable_manager *_drawable_manager;
   std::vector<widget *> _top_level_widgets;
   widget *_widget_under_mouse;
+  widget *_widget_mouse_down;
 
   /** Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget. */
   widget *get_widget_at(float x, float y);
@@ -43,6 +44,9 @@ public:
 
   int get_width() const;
   int get_height() const;
+
+  /** Injects a mouse button up/down event, returns true if we handled it or false if it should be passed through. */
+  bool inject_mouse(int button, bool is_down);
 
   inline drawable_manager *get_drawable_manager() const {
     return _drawable_manager;
