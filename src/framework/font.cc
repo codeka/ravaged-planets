@@ -101,8 +101,8 @@ string_cache_entry::~string_cache_entry() {
 font_face::font_face(font_manager *manager, fs::path const &filename) :
     _manager(manager), _size(16) {
   FT_CHECK(FT_New_Face(_manager->_library, filename.string().c_str(), 0, &_face));
-  fw::debug << "Loaded " << filename << std::endl;
-  fw::debug << "  " << _face->num_faces << " face(s) " << _face->num_glyphs << " glyph(s)" << std::endl;
+  fw::debug << "Loaded " << filename << ": " << _face->num_faces << " face(s) "
+      << _face->num_glyphs << " glyph(s)" << std::endl;
 
   FT_CHECK(FT_Set_Pixel_Sizes(_face, 0, _size));
 
@@ -172,11 +172,6 @@ void font_face::ensure_glyphs(std::basic_string<uint32_t> const &str) {
     }
 
     std::string chstr = conv::utf_to_utf<char>(std::basic_string<uint32_t>({ch, 0}));
-    fw::debug << "Glyph: ch=" << chstr << std::endl;
-    fw::debug << " horiBearingX=" << (_face->glyph->metrics.horiBearingX / 64.0f)
-        << " horiBearingY=" << (_face->glyph->metrics.horiBearingY / 64.0f)
-        << " height=" << (_face->glyph->metrics.height / 64.0f)
-        << std::endl;
     _glyphs[ch] = new glyph(ch, glyph_index, offset_x, offset_y,
         _face->glyph->advance.x / 64.0f, _face->glyph->advance.y / 64.0f, _face->glyph->bitmap_left,
         _face->glyph->bitmap_top, _face->glyph->bitmap.width, _face->glyph->bitmap.rows,
@@ -298,8 +293,6 @@ string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> co
   std::shared_ptr<fw::shader> shader = fw::shader::create("gui");
   std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
 
-  fw::debug << "metrics: distance_to_top=" << max_distance_to_top << "distance_to_bottom=" << max_distance_to_bottom
-      << std::endl;
   return new string_cache_entry(vb, ib, shader, shader_params,
       fw::point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom);
 }

@@ -93,9 +93,6 @@ void texture::create(fs::path const &filename) {
     stbi_image_free(pixels);
 
     g_cache.add_texture(filename, _data);
-  } else {
-    debug << boost::format("got cached texture: \"%1%\"") % filename
-        << std::endl;
   }
 }
 

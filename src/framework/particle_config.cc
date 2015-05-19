@@ -49,7 +49,6 @@ std::shared_ptr<particle_effect_config> particle_effect_config::load(std::string
     // first check whether the effect has been cached
     std::shared_ptr<particle_effect_config> config = g_cache.get_config(name);
     if (config) {
-      fw::debug << boost::format("got cached wwparticle: \"%1%\"") % name << std::endl;
       return config;
     }
 

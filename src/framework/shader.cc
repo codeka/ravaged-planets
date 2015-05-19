@@ -221,7 +221,6 @@ void shader::load(fw::graphics *g, fs::path const &full_path) {
     FW_CHECKED(glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer));
     GLint location = glGetUniformLocation(_program_id, buffer);
     std::string name(buffer);
-    fw::debug << " found uniform: " << name << std::endl;
     _shader_variables[name] = shader_variable(location, name, size, type);
   }
 
