@@ -10,6 +10,8 @@ out vec4 colour;
 
 // this is the pixel shader used by the "additive" particle effect
 void main() {
+  colour = vec4(in_uv.x, in_uv.y, 1, 1);
+/*
   // get the colour from the texture
   vec4 a = texture(particle_texture, in_uv);
 
@@ -22,5 +24,6 @@ void main() {
   // the final colour is multiplied by the intensity
   colour.rgb = colour.rgb * a.r * in_colour.a;
   colour.a = a.r * in_colour.a;
+*/
 }
 

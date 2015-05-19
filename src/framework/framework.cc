@@ -239,11 +239,12 @@ void framework::update(float dt) {
   /*
    _audio->update();
 
-   if (_paused)
-   return;
    */
-  _app->update(dt);
-  _particle_mgr->update(dt);
+  if (!_paused) {
+    _app->update(dt);
+    _particle_mgr->update(dt);
+  }
+
   if (_camera != nullptr)
     _camera->update(dt);
 

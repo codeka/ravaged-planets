@@ -23,7 +23,7 @@ namespace po = boost::program_options;
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 
-class application : public fw::base_app {
+class application: public fw::base_app {
 public:
   bool initialize(fw::framework *frmwrk);
   void update(float dt);
@@ -33,6 +33,20 @@ public:
 bool click_handler(fw::gui::widget *wdgt) {
   std::shared_ptr<fw::particle_effect> effect =
       fw::framework::get_instance()->get_particle_mgr()->create_effect("explosion-01");
+  return true;
+}
+
+bool pause_handler(fw::gui::widget *wdgt) {
+  fw::gui::button *btn = dynamic_cast<fw::gui::button *>(wdgt);
+  fw::framework *framework = fw::framework::get_instance();
+  if (framework->is_paused()) {
+    framework->unpause();
+    btn->set_text("Pause");
+  } else {
+    framework->pause();
+    btn->set_text("Unpause");
+  }
+
   return true;
 }
 
@@ -50,7 +64,12 @@ bool application::initialize(fw::framework *frmwrk) {
           << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(30))
           << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
           << fw::gui::button::text("Restart")
-          << fw::gui::widget::click(std::bind<bool>(click_handler, std::placeholders::_1)));
+          << fw::gui::widget::click(std::bind<bool>(click_handler, std::placeholders::_1)))
+      << (fw::gui::builder<fw::gui::button>()
+          << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(70))
+          << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::button::text("Pause")
+          << fw::gui::widget::click(std::bind<bool>(pause_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
   std::shared_ptr<fw::particle_effect> effect =
@@ -64,7 +83,6 @@ void application::update(float dt) {
 void application::render(fw::sg::scenegraph &scenegraph) {
 }
 
-
 //-----------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
@@ -75,15 +93,19 @@ int main(int argc, char** argv) {
     new fw::framework(&app);
     fw::framework::get_instance()->initialize("Particle Test");
     fw::framework::get_instance()->run();
-  } catch(std::exception &e) {
+  } catch (std::exception &e) {
     std::string msg = boost::diagnostic_information(e);
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
+    fw::debug
+        << "--------------------------------------------------------------------------------"
+        << std::endl;
     fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
     fw::debug << msg << std::endl;
 
     display_exception(e.what());
   } catch (...) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
+    fw::debug
+        << "--------------------------------------------------------------------------------"
+        << std::endl;
     fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
   }
 
@@ -92,7 +114,9 @@ int main(int argc, char** argv) {
 
 void display_exception(std::string const &msg) {
   std::stringstream ss;
-  ss << "An error has occurred. Please send your log file (below) to dean@codeka.com.au for diagnostics." << std::endl;
+  ss
+      << "An error has occurred. Please send your log file (below) to dean@codeka.com.au for diagnostics."
+      << std::endl;
   ss << std::endl;
   ss << fw::debug.get_filename() << std::endl;
   ss << std::endl;
@@ -101,9 +125,9 @@ void display_exception(std::string const &msg) {
 
 void settings_initialize(int argc, char** argv) {
   po::options_description options("Additional options");
-  options.add_options()
-      ("particle-file", po::value<std::string>()->default_value("explosion-01"), "Name of the particle file to load, we assume it can be fw::resolve'd.")
-    ;
+  options.add_options()("particle-file",
+      po::value<std::string>()->default_value("explosion-01"),
+      "Name of the particle file to load, we assume it can be fw::resolve'd.");
 
   fw::settings::initialize(options, argc, argv, "font-test.conf");
 }

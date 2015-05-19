@@ -31,6 +31,13 @@ public:
   void on_mouse_out();
   void on_mouse_over();
   void render();
+
+  inline void set_text(std::string const &new_text) {
+    _text = new_text;
+  }
+  inline std::string get_text() const {
+    return _text;
+  }
 };
 
 } }
