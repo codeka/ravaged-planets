@@ -393,7 +393,7 @@ void setup_keynames() {
   g_key_names["Comma"] = SDLK_COMMA;
   g_key_names["Period"] = SDLK_PERIOD;
   g_key_names["Dot"] = SDLK_PERIOD;
-  g_key_names["Plus"] = SDLK_PLUS;
+  g_key_names["Plus"] = SDLK_EQUALS;
   g_key_names["Minus"] = SDLK_MINUS;
 
   // these are US-keyboard only entries, corresponding "OEM-n" values are there

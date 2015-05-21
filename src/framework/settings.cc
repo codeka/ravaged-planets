@@ -77,6 +77,8 @@ namespace fw {
         ("bind.cam-backward", po::value<std::string>()->default_value("Down"))
         ("bind.cam-rot-left", po::value<std::string>()->default_value("["))
         ("bind.cam-rot-right", po::value<std::string>()->default_value("]"))
+        ("bind.cam-zoom-in", po::value<std::string>()->default_value("Plus"))
+        ("bind.cam-zoom-out", po::value<std::string>()->default_value("Minus"))
         ("bind.cam-rot-mouse", po::value<std::string>()->default_value("Middle-Mouse"))
       ;
 

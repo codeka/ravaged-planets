@@ -171,6 +171,8 @@ private:
   bool _move_backward;
   bool _rotate_left;
   bool _rotate_right;
+  bool _zoom_in;
+  bool _zoom_out;
   bool _rotate_mouse;
 
   fw::vector _zoom_to;
@@ -187,6 +189,8 @@ private:
   void on_key_mouserotate(std::string keyname, bool is_down);
   void on_key_rotateleft(std::string keyname, bool is_down);
   void on_key_rotateright(std::string keyname, bool is_down);
+  void on_key_zoomin(std::string keyname, bool is_down);
+  void on_key_zoomout(std::string keyname, bool is_down);
 
 public:
   top_down_camera();

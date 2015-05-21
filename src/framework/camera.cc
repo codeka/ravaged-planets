@@ -238,6 +238,10 @@ void top_down_camera::enable() {
       inp->bind_function("cam-rot-left", boost::bind(&top_down_camera::on_key_rotateleft, this, _1, _2)));
   _keybindings.push_back(
       inp->bind_function("cam-rot-right", boost::bind(&top_down_camera::on_key_rotateright, this, _1, _2)));
+  _keybindings.push_back(
+      inp->bind_function("cam-zoom-in", boost::bind(&top_down_camera::on_key_zoomin, this, _1, _2)));
+  _keybindings.push_back(
+      inp->bind_function("cam-zoom-out", boost::bind(&top_down_camera::on_key_zoomout, this, _1, _2)));
 }
 
 void top_down_camera::disable() {
@@ -308,7 +312,13 @@ void top_down_camera::update(float dt) {
   move(forward, right);
 
   float zoom_amount = inp->mouse_dwheel();
-  if (zoom_amount > 0.1f || zoom_amount < -0.1f) {
+  if (_zoom_in) {
+    zoom_amount += 5.0f * dt;
+  }
+  if (_zoom_out) {
+    zoom_amount -= 5.0f * dt;
+  }
+  if (zoom_amount > 0.001f || zoom_amount < -0.001f) {
     zoom(zoom_amount);
   }
 
@@ -346,6 +356,14 @@ void top_down_camera::on_key_rotateleft(std::string, bool is_down) {
 
 void top_down_camera::on_key_rotateright(std::string, bool is_down) {
   _rotate_right = is_down;
+}
+
+void top_down_camera::on_key_zoomin(std::string keyname, bool is_down) {
+  _zoom_in = is_down;
+}
+
+void top_down_camera::on_key_zoomout(std::string keyname, bool is_down) {
+  _zoom_out = is_down;
 }
 
 void top_down_camera::zoom(float amount) {
