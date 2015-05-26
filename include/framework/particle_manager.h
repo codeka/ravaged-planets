@@ -2,6 +2,7 @@
 
 #include <list>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 namespace fw {
@@ -27,6 +28,8 @@ private:
   particle_renderer *_renderer;
   effect_list _effects;
   particle_list _particles;
+  particle_list _to_add;
+  std::mutex _mutex;
   float _wrap_x;
   float _wrap_z;
 
@@ -57,10 +60,8 @@ public:
     return _wrap_z;
   }
 
-  // this is called by the particle_emitter to add a new particle or
-  // remove an existing particle
+  // this is called by the particle_emitter to add a new particle
   void add_particle(particle *p);
-  void remove_particle(particle *p);
 };
 
 }

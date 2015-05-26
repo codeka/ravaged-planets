@@ -1,4 +1,6 @@
 
+#include <boost/foreach.hpp>
+
 #include <framework/particle_manager.h>
 #include <framework/particle_emitter.h>
 #include <framework/particle_effect.h>
@@ -48,7 +50,18 @@ void particle_manager::update(float dt) {
 }
 
 void particle_manager::render(sg::scenegraph &scenegraph) {
+  {
+    std::unique_lock<std::mutex> lock(_mutex);
+    BOOST_FOREACH(particle *p, _to_add) {
+      _particles.push_back(p);
+    }
+    _to_add.clear();
+  }
+
   _renderer->render(scenegraph, _particles);
+
+  // remove any dead particles
+  std::remove_if(_particles.begin(), _particles.end(), [](particle *p) { return p->age >= 1.0f; });
 }
 
 std::shared_ptr<particle_effect> particle_manager::create_effect(std::string const &name) {
@@ -63,16 +76,12 @@ void particle_manager::remove_effect(particle_effect *effect) {
   _dead_effects.push_back(effect);
 }
 
+/**
+ * Because this is called on the update thread, we don't add directly to the _particles list until the render thread.
+ */
 void particle_manager::add_particle(particle *p) {
-  _particles.push_back(p);
-}
-
-void particle_manager::remove_particle(particle *p) {
-  // this is not very efficient...
-  particle_list::iterator it = std::find(_particles.begin(), _particles.end(), p);
-  if (it != _particles.end()) {
-    _particles.erase(it);
-  }
+  std::unique_lock<std::mutex> lock(_mutex);
+  _to_add.push_back(p);
 }
 
 }

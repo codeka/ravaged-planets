@@ -58,7 +58,6 @@ bool particle_emitter::update(float dt) {
 
   // remove any particles that are too old
   for (std::vector<particle_list::iterator>::iterator it = to_remove.begin(); it != to_remove.end(); ++it) {
-    _mgr->remove_particle(*(*it));
     _particles.erase(*it);
   }
 

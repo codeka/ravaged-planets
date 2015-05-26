@@ -102,8 +102,8 @@ void graphics::before_gui() {
   FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
   FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, 0));
   FW_CHECKED(glDisable(GL_DEPTH_TEST));
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_BLEND);
+  FW_CHECKED(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+  FW_CHECKED(glEnable(GL_BLEND));
 }
 
 void graphics::after_gui() {

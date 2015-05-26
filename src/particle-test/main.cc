@@ -83,8 +83,10 @@ void application::update(float dt) {
 
 void application::render(fw::sg::scenegraph &scenegraph) {
   scenegraph.set_clear_colour(fw::colour(1, 0, 0.0, 0));
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+  FW_CHECKED(glDisable(GL_DEPTH_TEST));
+  FW_CHECKED(glBlendFunc(GL_ONE, GL_ONE));
+
 }
 
 //-----------------------------------------------------------------------------
