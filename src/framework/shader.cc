@@ -103,10 +103,10 @@ void shader_parameters::apply(shader *e) const {
   for (auto it = _textures.begin(); it != _textures.end(); ++it) {
     shader_variable const &var = e->_shader_variables[it->first];
     if (var.valid) {
-      glActiveTexture(GL_TEXTURE0 + texture_unit);
+      FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
       std::shared_ptr<fw::texture> texture = it->second;
       texture->bind();
-      FW_CHECKED(glUniform1i(var.location, 0));
+      FW_CHECKED(glUniform1i(var.location, texture_unit));
       texture_unit ++;
     }
   }

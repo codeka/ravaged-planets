@@ -1,29 +1,36 @@
 #version 330
 
-in vec4 in_colour;
-in vec2 in_uv;
+in vec4 colour;
+in vec2 uv;
 
 uniform sampler2D particle_texture;
 uniform sampler2D colour_texture;
 
-out vec4 colour;
+out vec4 out_colour;
 
 // this is the pixel shader used by the "additive" particle effect
 void main() {
-  colour = vec4(in_uv.x, in_uv.y, 1, 1);
-/*
+/* Non-additive:
   // get the colour from the texture
-  vec4 a = texture(particle_texture, in_uv);
+  vec4 c = texture(particle_texture, uv);
 
-  // the actual colour we use is based off the "colour_v" parameter and the 
-  // "intensity" of the pixel
-  vec4 c1 = texture(colour_texture, vec2(a.r, in_colour.r));
-  vec4 c2 = texture(colour_texture, vec2(a.r, in_colour.g));
-  colour = mix(c1, c2, vec4(in_colour.b, in_colour.b, in_colour.b, in_colour.b));
+  // and blend the texture colour with the vertex colour
+  c.rgb = (c.rgb * colour.a) + (colour.rgb * (1 - colour.a));
+  c.a = c.a * colour.a;
+
+  out_colour = c;
+*/
+  // get the "intensity" from the particle texture
+  vec4 a = texture(particle_texture, uv);
+
+  // look up the colour for that intensity for the two colours we are blending, then
+  // combine the two colours based on whatever value of colour.b we have.
+  vec4 c1 = texture(colour_texture, vec2(a.r, colour.r));
+  vec4 c2 = texture(colour_texture, vec2(a.r, colour.g));
+  out_colour = mix(c1, c2, vec4(colour.b, colour.b, colour.b, colour.b));
 
   // the final colour is multiplied by the intensity
-  colour.rgb = colour.rgb * a.r * in_colour.a;
-  colour.a = a.r * in_colour.a;
-*/
+  out_colour.rgb = out_colour.rgb * a.r * colour.a;
+  out_colour.a = a.r * colour.b;
 }
 

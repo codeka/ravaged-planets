@@ -211,13 +211,13 @@ bool particle_renderer::add_particle(render_state &rs, int base_index, particle 
   float aspect = (p->rect.bottom - p->rect.top) / (p->rect.right - p->rect.left);
 
   fw::vector v = cml::transform_point(m, fw::vector(-0.5f, -0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_rgba(), p->rect.left, p->rect.bottom));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.left, p->rect.bottom));
   v = cml::transform_point(m, fw::vector(-0.5f, 0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_rgba(), p->rect.left, p->rect.top));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.left, p->rect.top));
   v = cml::transform_point(m, fw::vector(0.5f, 0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_rgba(), p->rect.right, p->rect.top));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.right, p->rect.top));
   v = cml::transform_point(m, fw::vector(0.5f, -0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_rgba(), p->rect.right, p->rect.bottom));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.right, p->rect.bottom));
 
   rs.indices.push_back(base_index);
   rs.indices.push_back(base_index + 1);

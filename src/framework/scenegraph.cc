@@ -181,12 +181,20 @@ std::shared_ptr<node> node::clone() {
   return clone;
 }
 
+//-----------------------------------------------------------------------------------------
+
+scenegraph::scenegraph()
+    : _clear_colour(fw::colour(1, 0, 0, 0)) {
+}
+
+scenegraph::~scenegraph() {
+}
+
 }
 
 //-----------------------------------------------------------------------------------------
 // renders the scene!
-void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= 0*/,
-    fw::colour clear_colour /*= fw::colour(1, 0, 0, 0)*/) {
+void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/) {
   ensure_primitive_type_map();
 
   graphics *g = fw::framework::get_instance()->get_graphics();
@@ -235,7 +243,7 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= 0*/,
 //		is_rendering_shadow = false;
 
   // now, render the main scene
-  g->begin_scene(clear_colour);
+  g->begin_scene(scenegraph.get_clear_colour());
   BOOST_FOREACH(std::shared_ptr<fw::sg::node> node, scenegraph.get_nodes()) {
     node->render(&scenegraph);
   }

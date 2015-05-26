@@ -13,7 +13,8 @@ namespace vertex {
   reinterpret_cast<void const *>(offsetof(struct, member))
 
 static void xyz_setup() {
-  FW_CHECKED(glVertexPointer(3, GL_FLOAT, sizeof(xyz), OFFSET_OF(xyz, x)));
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz), OFFSET_OF(xyz, x)));
 }
 
 std::function<void()> xyz::get_setup_function() {
@@ -21,8 +22,10 @@ std::function<void()> xyz::get_setup_function() {
 }
 
 static void xyz_c_setup() {
-  FW_CHECKED(glVertexPointer(3, GL_FLOAT, sizeof(xyz_c), OFFSET_OF(xyz_c, x)));
-  FW_CHECKED(glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(xyz_c), OFFSET_OF(xyz_c, colour)));
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glEnableVertexAttribArray(1));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, x)));
+  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, colour)));
 }
 
 std::function<void()> xyz_c::get_setup_function() {
@@ -45,7 +48,7 @@ void xyz_c_uv_setup() {
   FW_CHECKED(glEnableVertexAttribArray(1));
   FW_CHECKED(glEnableVertexAttribArray(2));
   FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, colour)));
+  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, colour)));
   FW_CHECKED(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, u)));
 }
 
@@ -54,10 +57,12 @@ std::function<void()> xyz_c_uv::get_setup_function() {
 }
 
 void xyz_n_uv_setup() {
-  FW_CHECKED(glVertexPointer(3, GL_FLOAT, sizeof(xyz_n_uv), OFFSET_OF(xyz_n_uv, x)));
-  FW_CHECKED(glNormalPointer(GL_FLOAT, sizeof(xyz_n_uv), OFFSET_OF(xyz_n_uv, nx)));
-  FW_CHECKED(glClientActiveTexture(GL_TEXTURE0));
-  FW_CHECKED(glTexCoordPointer(2, GL_FLOAT, sizeof(xyz_n_uv), OFFSET_OF(xyz_n_uv, u)));
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glEnableVertexAttribArray(1));
+  FW_CHECKED(glEnableVertexAttribArray(2));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, x)));
+  FW_CHECKED(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, nx)));
+  FW_CHECKED(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, u)));
 }
 
 std::function<void()> xyz_n_uv::get_setup_function() {

@@ -6,6 +6,7 @@
 #include <framework/camera.h>
 #include <framework/settings.h>
 #include <framework/framework.h>
+#include <framework/graphics.h>
 #include <framework/font.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
@@ -81,6 +82,9 @@ void application::update(float dt) {
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {
+  scenegraph.set_clear_colour(fw::colour(1, 0, 0.0, 0));
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 }
 
 //-----------------------------------------------------------------------------

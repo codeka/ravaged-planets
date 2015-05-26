@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "vector.h"
-#include "colour.h"
+#include <framework/vector.h>
+#include <framework/colour.h>
 
 namespace fw {
 
@@ -163,8 +163,12 @@ public:
 private:
   light_coll _lights;
   node_coll _root_nodes;
+  fw::colour _clear_colour;
 
 public:
+  scenegraph();
+  ~scenegraph();
+
   // add a light to the scene. the pointer must be valid for the
   void add_light(std::shared_ptr<light> &l) {
     _lights.push_back(l);
@@ -179,9 +183,15 @@ public:
   node_coll const &get_nodes() const {
     return _root_nodes;
   }
+
+  void set_clear_colour(fw::colour colour) {
+    _clear_colour = colour;
+  }
+  fw::colour get_clear_colour() const {
+    return _clear_colour;
+  }
 };
 }
 
-void render(fw::sg::scenegraph &sg, fw::texture *render_target = 0,
-    fw::colour clear_colour = fw::colour(1, 0, 0, 0));
+void render(fw::sg::scenegraph &sg, fw::texture *render_target = nullptr);
 }
