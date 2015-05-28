@@ -100,12 +100,14 @@
     <vertex-shader source="vertex" />
     <fragment-shader source="fragment-normal" />
     <state name="z-write" value="off" />
+    <state name="z-test" value="off" />
     <state name="blend" value="alpha" />
   </program>
   <program name="ninepatch">
     <vertex-shader source="vertex" />
     <fragment-shader source="fragment-ninepatch" />
     <state name="z-write" value="off" />
+    <state name="z-test" value="off" />
     <state name="blend" value="alpha" />
   </program>
 </shader>

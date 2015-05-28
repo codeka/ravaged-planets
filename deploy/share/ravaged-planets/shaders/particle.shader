@@ -66,12 +66,14 @@
     <vertex-shader source="vertex" />
     <fragment-shader source="fragment-additive" />
     <state name="z-write" value="off" />
+    <state name="z-test" value="on" />
     <state name="blend" value="additive" />
   </program>
   <program name="particle-normal">
     <vertex-shader source="vertex" />
     <fragment-shader source="fragment-normal" />
     <state name="z-write" value="off" />
+    <state name="z-test" value="on" />
     <state name="blend" value="alpha" />
   </program>
 </shader>
