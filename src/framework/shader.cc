@@ -1,5 +1,4 @@
 #include <string>
-#include <fstream>
 #include <sstream>
 #include <map>
 #include <boost/filesystem.hpp>
@@ -19,11 +18,12 @@
 #include <framework/vertex_buffer.h>
 #include <framework/index_buffer.h>
 #include <framework/shader.h>
+#include <framework/xml.h>
 
 namespace fs = boost::filesystem;
 
 //-------------------------------------------------------------------------
-// This is a cache of .shader files, so we don't have to load them over and over...
+// This is a cache of .shader files, so we don't have to load them over and over.
 class shader_cache {
 private:
   typedef std::map<fs::path, std::shared_ptr<fw::shader> > shader_map;
@@ -58,14 +58,145 @@ namespace {
 shader_cache g_cache;
 void compile_shader(GLuint shader_id, std::string filename);
 void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id);
+std::string find_source(fw::xml_element const &root_elem, std::string source_name);
+
+std::string find_source(fw::xml_element const &root_elem, std::string source_name) {
+  for (fw::xml_element child_elem = root_elem.get_first_child();
+      child_elem.is_valid(); child_elem = child_elem.get_next_sibling()) {
+    if (child_elem.get_name() == "source" && child_elem.get_attribute("name") == source_name) {
+      return "#version 330\n\n" + child_elem.get_text();
+    }
+  }
+  BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No source named '" + source_name + "' found."));
+  return ""; // Just to shut up the warning.
+}
+
+void compile_shader(GLuint shader_id, std::string source) {
+  char const *shader_str = source.c_str();
+  FW_CHECKED(glShaderSource(shader_id, 1, &shader_str, nullptr));
+  FW_CHECKED(glCompileShader(shader_id));
+
+  GLint status;
+  glGetShaderiv(shader_id, GL_COMPILE_STATUS, &status);
+  if (status != GL_TRUE) {
+    GLint log_length;
+    glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_length);
+    std::vector<char> error_message(log_length);
+    glGetShaderInfoLog(shader_id, log_length, nullptr, &error_message[0]);
+
+    std::stringstream msg;
+    msg << "Error: " << error_message.data() << std::endl;
+    msg << "Source:" << std::endl << source << std::endl;
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(msg.str()));
+  }
+}
+
+void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id) {
+  FW_CHECKED(glAttachShader(program_id, vertex_shader_id));
+  FW_CHECKED(glAttachShader(program_id, fragment_shader_id));
+  FW_CHECKED(glLinkProgram(program_id));
+
+  GLint status;
+  glGetProgramiv(program_id, GL_LINK_STATUS, &status);
+  if (status != GL_TRUE) {
+    GLint log_length;
+    glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_length);
+    std::vector<char> error_message(log_length);
+    glGetProgramInfoLog(program_id, log_length, nullptr, &error_message[0]);
+
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string(&error_message[0])));
+  }
+}
+
 }
 
 namespace fw {
+//-------------------------------------------------------------------------
+/**
+ * A shader_program represents the details of a shader program within a .shader file.
+ * It refers to the fragment/vertex shader code + OpenGL states they correspond to.
+ */
+class shader_program {
+private:
+  friend class fw::shader_parameters;
+
+  std::string _name;
+  std::map<std::string, std::string> _states;
+  GLuint _program_id;
+  std::map<std::string, fw::shader_variable> _shader_variables;
+
+public:
+  shader_program(fw::xml_element &program_elem);
+  ~shader_program();
+
+  void begin();
+};
+
+shader_program::shader_program(fw::xml_element &program_elem) : _program_id(0) {
+  GLint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
+  GLint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
+  _program_id = glCreateProgram();
+
+  std::string vertex_shader_source;
+  std::string fragment_shader_source;
+  for (fw::xml_element child_elem = program_elem.get_first_child();
+      child_elem.is_valid(); child_elem = child_elem.get_next_sibling()) {
+    if (child_elem.get_name() == "vertex-shader") {
+      vertex_shader_source = find_source(program_elem.get_root(), child_elem.get_attribute("source"));
+    } else if (child_elem.get_name() == "fragment-shader") {
+      fragment_shader_source = find_source(program_elem.get_root(), child_elem.get_attribute("source"));
+    } else if (child_elem.get_name() == "state") {
+      _states[child_elem.get_attribute("name")] = child_elem.get_attribute("value");
+    }
+  }
+  compile_shader(vertex_shader_id, vertex_shader_source);
+  compile_shader(fragment_shader_id, fragment_shader_source);
+  link_shader(_program_id, vertex_shader_id, fragment_shader_id);
+
+  int num_uniforms;
+  FW_CHECKED(glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &num_uniforms));
+  GLchar buffer[1024];
+  for (int i = 0; i < num_uniforms; i++) {
+    GLint size;
+    GLint length;
+    GLenum type;
+    FW_CHECKED(glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer));
+    GLint location = glGetUniformLocation(_program_id, buffer);
+    std::string name(buffer);
+    _shader_variables[name] = fw::shader_variable(location, name, size, type);
+  }
+}
+
+shader_program::~shader_program() {
+}
+
+void shader_program::begin() {
+  FW_CHECKED(glUseProgram(_program_id));
+
+#ifdef DEBUG
+  GLint status;
+  FW_CHECKED(glValidateProgram(_program_id));
+  glGetProgramiv(_program_id, GL_VALIDATE_STATUS, &status);
+  if (status != GL_TRUE) {
+    GLint log_length;
+    glGetProgramiv(_program_id, GL_INFO_LOG_LENGTH, &log_length);
+    std::vector<char> error_message(log_length);
+    glGetProgramInfoLog(_program_id, log_length, nullptr, &error_message[0]);
+
+    fw::debug << "glValidateProgram error: " << &error_message[0] << std::endl;
+  }
+#endif
+}
+
 //-------------------------------------------------------------------------
 shader_parameters::shader_parameters() {
 }
 
 shader_parameters::~shader_parameters() {
+}
+
+void shader_parameters::set_program_name(std::string const &name) {
+  _program_name = name;
 }
 
 void shader_parameters::set_texture(std::string const &name, std::shared_ptr<texture> const &tex) {
@@ -98,10 +229,10 @@ std::shared_ptr<shader_parameters> shader_parameters::clone() {
   return clone;
 }
 
-void shader_parameters::apply(shader *e) const {
+void shader_parameters::apply(shader_program *prog) const {
   int texture_unit = 0;
   for (auto it = _textures.begin(); it != _textures.end(); ++it) {
-    shader_variable const &var = e->_shader_variables[it->first];
+    shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
       std::shared_ptr<fw::texture> texture = it->second;
@@ -112,28 +243,28 @@ void shader_parameters::apply(shader *e) const {
   }
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
-    shader_variable const &var = e->_shader_variables[it->first];
+    shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.data()));
     }
   }
 
   for (std::map<std::string, vector>::const_iterator it = _vectors.begin(); it != _vectors.end(); ++it) {
-    shader_variable const &var = e->_shader_variables[it->first];
+    shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform3fv(var.location, 1, it->second.data()));
     }
   }
 
   for (std::map<std::string, colour>::const_iterator it = _colours.begin(); it != _colours.end(); ++it) {
-    shader_variable const &var = e->_shader_variables[it->first];
+    shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a));
     }
   }
 
   for (std::map<std::string, float>::const_iterator it = _scalars.begin(); it != _scalars.end(); ++it) {
-    shader_variable const &var = e->_shader_variables[it->first];
+    shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform1f(var.location, it->second));
     }
@@ -151,7 +282,7 @@ shader_variable::shader_variable(GLint location, std::string name, GLint size, G
 }
 
 //-------------------------------------------------------------------------
-shader::shader() : _program_id(0) {
+shader::shader() {
 }
 
 shader::~shader() {
@@ -171,24 +302,16 @@ std::shared_ptr<shader> shader::create(std::string const &filename) {
 }
 
 void shader::begin(std::shared_ptr<shader_parameters> parameters) {
-  FW_CHECKED(glUseProgram(_program_id));
+  shader_program *prog;
+  if (!parameters || parameters->_program_name == "") {
+    prog = _programs[_default_program_name];
+  } else {
+    prog = _programs[parameters->_program_name];
+  }
+  prog->begin();
   if (parameters) {
-    parameters->apply(this);
+    parameters->apply(prog);
   }
-
-#ifdef DEBUG
-  GLint status;
-  FW_CHECKED(glValidateProgram(_program_id));
-  glGetProgramiv(_program_id, GL_VALIDATE_STATUS, &status);
-  if (status != GL_TRUE) {
-    GLint log_length;
-    glGetProgramiv(_program_id, GL_INFO_LOG_LENGTH, &log_length);
-    std::vector<char> error_message(log_length);
-    glGetProgramInfoLog(_program_id, log_length, nullptr, &error_message[0]);
-
-    fw::debug << "glValidateProgram error: " << &error_message[0] << std::endl;
-  }
-#endif
 }
 
 void shader::end() {
@@ -201,86 +324,20 @@ std::shared_ptr<shader_parameters> shader::create_parameters() {
 }
 
 void shader::load(fw::graphics *g, fs::path const &full_path) {
-  std::shared_ptr<shader> data(new shader());
   _filename = full_path;
-  GLint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
-  GLint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
-  _program_id = glCreateProgram();
-
-  compile_shader(vertex_shader_id, full_path.string() + ".vert");
-  compile_shader(fragment_shader_id, full_path.string() + ".frag");
-  link_shader(_program_id, vertex_shader_id, fragment_shader_id);
-
-  int num_uniforms;
-  FW_CHECKED(glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &num_uniforms));
-  GLchar buffer[1024];
-  for (int i = 0; i < num_uniforms; i++) {
-    GLint size;
-    GLint length;
-    GLenum type;
-    FW_CHECKED(glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer));
-    GLint location = glGetUniformLocation(_program_id, buffer);
-    std::string name(buffer);
-    _shader_variables[name] = shader_variable(location, name, size, type);
-  }
-
-  fw::debug << "loaded shader from: " << full_path.string() << std::endl;
-}
-
-}
-
-//-----------------------------------------------------------------------------
-namespace {
-
-std::string read_shader(std::string filename) {
-  std::stringstream lines;
-  std::ifstream stream(filename, std::ios::in);
-  if (stream.is_open()) {
-    std::string line;
-    while (std::getline(stream, line)) {
-      lines << line << std::endl;
+  xml_element root_elem = fw::load_xml(full_path, "shader", 1);
+  for (xml_element child = root_elem.get_first_child();
+      child.is_valid(); child = child.get_next_sibling()) {
+    if (child.get_name() != "program") {
+      continue;
     }
-    stream.close();
-  } else {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(filename));
-  }
-  return lines.str();
-}
-
-void compile_shader(GLuint shader_id, std::string filename) {
-  std::string lines = read_shader(filename);
-  char const *shader_source = lines.c_str();
-  FW_CHECKED(glShaderSource(shader_id, 1, &shader_source, nullptr));
-  FW_CHECKED(glCompileShader(shader_id));
-
-  GLint status;
-  glGetShaderiv(shader_id, GL_COMPILE_STATUS, &status);
-  if (status != GL_TRUE) {
-    GLint log_length;
-    glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &log_length);
-    std::vector<char> error_message(log_length);
-    glGetShaderInfoLog(shader_id, log_length, nullptr, &error_message[0]);
-
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string(&error_message[0])));
+    shader_program *program = new shader_program(child);
+    std::string program_name = child.get_attribute("name");
+    if (_default_program_name == "") {
+      _default_program_name = program_name;
+    }
+    _programs[program_name] = program;
   }
 }
-
-void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id) {
-  FW_CHECKED(glAttachShader(program_id, vertex_shader_id));
-  FW_CHECKED(glAttachShader(program_id, fragment_shader_id));
-  FW_CHECKED(glLinkProgram(program_id));
-
-  GLint status;
-  glGetProgramiv(program_id, GL_LINK_STATUS, &status);
-  if (status != GL_TRUE) {
-    GLint log_length;
-    glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_length);
-    std::vector<char> error_message(log_length);
-    glGetProgramInfoLog(program_id, log_length, nullptr, &error_message[0]);
-
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string(&error_message[0])));
-  }
-}
-
 
 }

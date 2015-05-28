@@ -66,7 +66,8 @@ xml_element load_xml(fs::path const &filepath, std::string const & format_name, 
   std::shared_ptr<xml::XMLDocument> doc(new xml::XMLDocument());
   doc->LoadFile(filepath.string().c_str());
   if (doc->Error()) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(filepath.string()));
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(filepath.string())
+        << fw::message_error_info(doc->ErrorName()));
   }
 
   xml::XMLHandle doch(doc.get());
@@ -122,12 +123,20 @@ std::shared_ptr<xml::XMLDocument> xml_element::get_document() const {
   return _doc;
 }
 
+xml_element xml_element::get_root() const {
+  return xml_element(_doc, _doc->FirstChildElement());
+}
+
 xml::XMLElement *xml_element::get_element() const {
   return _elem;
 }
 
 bool xml_element::is_valid() const {
   return (_elem != nullptr);
+}
+
+std::string xml_element::get_name() const {
+  return std::string(_elem->Name());
 }
 
 std::string xml_element::get_value() const {

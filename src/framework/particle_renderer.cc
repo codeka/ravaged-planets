@@ -130,18 +130,18 @@ void particle_renderer::initialize(graphics *g) {
   _graphics = g;
 
   _colour_texture->create(fw::resolve("particles/colours.png"));
-  _shader = fw::shader::create("particle");
+  _shader = fw::shader::create("particle.shader");
   _shader_params = _shader->create_parameters();
   _shader_params->set_texture("colour_texture", _colour_texture);
 }
 
-/** Gets the name of the technique in the particle.fx file we'll use for the given billboard_mode. */
-std::string get_technique_name(particle_emitter_config::billboard_mode mode) {
+/** Gets the name of the program in the particle.shader file we'll use for the given billboard_mode. */
+std::string get_program_name(particle_emitter_config::billboard_mode mode) {
   switch (mode) {
   case particle_emitter_config::normal:
-    return "ParticleNormal";
+    return "particle-normal";
   case particle_emitter_config::additive:
-    return "ParticleAdditive";
+    return "particle-additive";
   default:
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Unknown billboard_mode!"));
 
@@ -161,7 +161,7 @@ void generate_scenegraph_node(render_state &rs) {
   rs.index_buffers.push_back(ib);
 
   std::shared_ptr<fw::shader_parameters> shader_params = rs.shader_parameters->clone();
-  //shader_params->set_technique_name(get_technique_name(rs.mode));
+  shader_params->set_program_name(get_program_name(rs.mode));
   shader_params->set_texture("particle_texture", rs.texture);
 
   std::shared_ptr<sg::node> node(new sg::node());

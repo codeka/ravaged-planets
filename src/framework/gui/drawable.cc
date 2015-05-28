@@ -71,7 +71,7 @@ bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture, fw::xml::
     bitmap_drawable(texture) {
   parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
   parse_tuple_attribute(elem->Attribute("size"), _width, _height);
-  _shader = fw::shader::create("gui");
+  _shader = fw::shader::create("gui.shader");
   _shader_params = _shader->create_parameters();
   _shader_params->set_texture("texsampler", _texture);
 }
@@ -116,8 +116,9 @@ ninepatch_drawable::ninepatch_drawable(std::shared_ptr<fw::texture> texture, fw:
     }
   }
 
-  _shader = fw::shader::create("gui_ninepatch");
+  _shader = fw::shader::create("gui.shader");
   _shader_params = _shader->create_parameters();
+  _shader_params->set_program_name("ninepatch");
   _shader_params->set_texture("texsampler", _texture);
 }
 

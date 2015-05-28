@@ -290,7 +290,7 @@ string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> co
   std::shared_ptr<fw::index_buffer> ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
   ib->set_data(indices.size(), indices.data());
 
-  std::shared_ptr<fw::shader> shader = fw::shader::create("gui");
+  std::shared_ptr<fw::shader> shader = fw::shader::create("gui.shader");
   std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
 
   return new string_cache_entry(vb, ib, shader, shader_params,

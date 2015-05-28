@@ -35,9 +35,11 @@ public:
   xml_element &operator =(xml_element const &copy);
 
   std::shared_ptr<xml::XMLDocument> get_document() const;
+  xml_element get_root() const;
   xml::XMLElement *get_element() const;
   bool is_valid() const;
 
+  std::string get_name() const;
   std::string get_value() const;
   std::string get_text() const;
   std::string get_attribute(std::string const &name) const;

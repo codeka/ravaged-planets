@@ -17,12 +17,14 @@ class shader;
 class colour;
 class vertex_buffer;
 class index_buffer;
+class shader_program;
 
 // you can pass this to a shader to set a bunch of parameters all at once
 class shader_parameters: private boost::noncopyable {
 private:
   friend class shader;
 
+  std::string _program_name;
   std::map<std::string, std::shared_ptr<texture> > _textures;
   std::map<std::string, matrix> _matrices;
   std::map<std::string, vector> _vectors;
@@ -30,11 +32,12 @@ private:
   std::map<std::string, float> _scalars;
 
   shader_parameters();
-  void apply(shader *e) const;
+  void apply(shader_program *prog) const;
 
 public:
   ~shader_parameters();
 
+  void set_program_name(std::string const &name);
   void set_texture(std::string const &name, std::shared_ptr<texture> const &t);
   void set_matrix(std::string const &name, matrix const &m);
   void set_vector(std::string const &name, vector const &v);
@@ -60,14 +63,11 @@ public:
 // this shader wraps shader files and allows us to automatically reload them, and so on.
 class shader {
 private:
-  shader();
-
-  friend class shader_parameters;
-
   boost::filesystem::path _filename;
-  GLuint _program_id;
-  std::map<std::string, shader_variable> _shader_variables;
+  std::map<std::string, shader_program *> _programs;
+  std::string _default_program_name;
 
+  shader();
   void load(fw::graphics *g, boost::filesystem::path const &full_path);
 
 public:
