@@ -215,8 +215,9 @@ float lookat_camera::get_distance() const {
 //---------------------------------------------------------------------------------------------------------
 
 top_down_camera::top_down_camera() :
-    _enable_mouse_move(true), _move_left(false), _move_right(false), _move_forward(false), _move_backward(false), _rotate_left(
-        false), _rotate_right(false), _rotate_mouse(false), _zoom_to(0, 0, 0), _zooming(false), _last_floor_height(0.0f) {
+    _enable_mouse_move(true), _move_left(false), _move_right(false), _move_forward(false), _move_backward(false),
+    _rotate_left(false), _rotate_right(false), _rotate_mouse(false), _zoom_to(0, 0, 0), _zooming(false),
+    _last_floor_height(0.0f), _zoom_out(false), _zoom_in(false) {
 }
 
 top_down_camera::~top_down_camera() {
