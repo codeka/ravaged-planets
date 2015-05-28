@@ -2,6 +2,7 @@
 #include <sstream>
 #include <map>
 #include <boost/filesystem.hpp>
+#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 
 #include <framework/misc.h>
@@ -125,6 +126,13 @@ private:
   GLuint _program_id;
   std::map<std::string, fw::shader_variable> _shader_variables;
 
+  /**
+   * Called during begin to set the given GL state to the given value.
+   *
+   * The names and values of the states are just strings, which we need to translate into actual GL function calls.
+   */
+  void apply_state(std::string const &name, std::string const &value);
+
 public:
   shader_program(fw::xml_element &program_elem);
   ~shader_program();
@@ -186,6 +194,38 @@ void shader_program::begin() {
     fw::debug << "glValidateProgram error: " << &error_message[0] << std::endl;
   }
 #endif
+
+  BOOST_FOREACH(auto it, _states) {
+    apply_state(it.first, it.second);
+  }
+}
+
+void shader_program::apply_state(std::string const &name, std::string const &value) {
+  // TODO: we could probably do something better than this (e.g. at load time rather than
+  // at run time)
+  if (name == "z-write") {
+    if (value == "on") {
+      FW_CHECKED(glEnable(GL_DEPTH_WRITE));
+    } else {
+      FW_CHECKED(glDisable(GL_DEPTH_WRITE));
+    }
+  } else if (name == "z-test") {
+    if (value == "on") {
+      FW_CHECKED(glEnable(GL_DEPTH_TEST));
+    } else {
+      FW_CHECKED(glDisable(GL_DEPTH_TEST));
+    }
+  } else if (name == "blend") {
+    if (value == "alpha") {
+      FW_CHECKED(glEnable(GL_BLEND));
+      FW_CHECKED(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    } else if (value == "additive") {
+      FW_CHECKED(glEnable(GL_BLEND));
+      FW_CHECKED(glBlendFunc(GL_ONE, GL_ONE));
+    } else {
+      FW_CHECKED(glDisable(GL_BLEND));
+    }
+  }
 }
 
 //-------------------------------------------------------------------------

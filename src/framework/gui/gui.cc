@@ -12,7 +12,7 @@
 namespace fw { namespace gui {
 
 gui::gui() :
-  _graphics(nullptr), _drawable_manager(nullptr), _widget_under_mouse(nullptr) {
+  _graphics(nullptr), _drawable_manager(nullptr), _widget_under_mouse(nullptr), _widget_mouse_down(nullptr) {
 }
 
 gui::~gui() {
