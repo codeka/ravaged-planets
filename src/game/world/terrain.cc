@@ -32,7 +32,7 @@ void terrain::initialize() {
   _ib->set_data(index_data.size(), &index_data[0], 0);
 
   // load the shader file that we'll use for rendering
-  _shader = fw::shader::create("terrain");
+  _shader = fw::shader::create("terrain.shader");
 
   std::shared_ptr<fw::texture> layer(new fw::texture());
   layer->create(fw::resolve("terrain/grass-01.jpg"));

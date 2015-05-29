@@ -152,7 +152,7 @@ void node::render_shader(std::shared_ptr<fw::shader> shader) {
 
 void node::render_noshader() {
   if (!basic_shader) {
-    basic_shader = fw::shader::create("basic");
+    basic_shader = fw::shader::create("basic.shader");
   }
 
   render_shader(basic_shader);

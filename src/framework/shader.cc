@@ -205,13 +205,14 @@ void shader_program::apply_state(std::string const &name, std::string const &val
   // at run time)
   if (name == "z-write") {
     if (value == "on") {
-      FW_CHECKED(glEnable(GL_DEPTH_WRITE));
+      FW_CHECKED(glDepthMask(GL_TRUE));
     } else {
-      FW_CHECKED(glDisable(GL_DEPTH_WRITE));
+      FW_CHECKED(glDepthMask(GL_FALSE));
     }
   } else if (name == "z-test") {
     if (value == "on") {
       FW_CHECKED(glEnable(GL_DEPTH_TEST));
+      FW_CHECKED(glDepthFunc(GL_LEQUAL));
     } else {
       FW_CHECKED(glDisable(GL_DEPTH_TEST));
     }
