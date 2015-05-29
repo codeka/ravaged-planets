@@ -1,5 +1,7 @@
 
 #include <algorithm>
+#include <functional>
+#include <memory>
 
 #include <boost/foreach.hpp>
 

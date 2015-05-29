@@ -4,8 +4,8 @@ project (RavagedPlanets)
 # Add our custom CMAKE modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
-# Make sure we compile with C++14 features
-set(CMAKE_CXX_STANDARD 14)
+# Make sure we compile with C++11 features
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
