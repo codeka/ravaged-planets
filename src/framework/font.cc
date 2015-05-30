@@ -116,9 +116,6 @@ font_face::~font_face() {
   BOOST_FOREACH(auto entry, _glyphs) {
     delete entry.second;
   }
-  BOOST_FOREACH(auto entry, _string_cache) {
-    delete entry.second;
-  }
 }
 
 void font_face::update(float dt) {
@@ -128,7 +125,6 @@ void font_face::update(float dt) {
     // long (e.g. if there's been some delay) we'll go through at least one update loop before destroying
     // the string.
     if (it->second->time_since_use > 1.0f) {
-      delete it->second;
       it = _string_cache.erase(it);
     } else {
       it->second->time_since_use += dt;
@@ -186,7 +182,7 @@ fw::point font_face::measure_string(std::string const &str) {
 }
 
 fw::point font_face::measure_string(std::basic_string<uint32_t> const &str) {
-  string_cache_entry *data = get_or_create_cache_entry(str);
+  std::shared_ptr<string_cache_entry> data = get_or_create_cache_entry(str);
   return data->size;
 }
 
@@ -195,7 +191,7 @@ void font_face::draw_string(int x, int y, std::string const &str, draw_flags fla
 }
 
 void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags /*= 0*/) {
-  string_cache_entry *data = get_or_create_cache_entry(str);
+  std::shared_ptr<string_cache_entry> data = get_or_create_cache_entry(str);
 
   if (_texture_dirty) {
     _texture->create(_bitmap);
@@ -234,9 +230,9 @@ void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str
   data->time_since_use = 0.0f;
 }
 
-string_cache_entry *font_face::get_or_create_cache_entry(std::basic_string<uint32_t> const &str) {
+std::shared_ptr<string_cache_entry> font_face::get_or_create_cache_entry(std::basic_string<uint32_t> const &str) {
   std::unique_lock<std::mutex> lock(_mutex);
-  string_cache_entry *data = _string_cache[str];
+  std::shared_ptr<string_cache_entry> data = _string_cache[str];
   if (data == nullptr) {
     data = create_cache_entry(str);
     _string_cache[str] = data;
@@ -244,7 +240,7 @@ string_cache_entry *font_face::get_or_create_cache_entry(std::basic_string<uint3
   return data;
 }
 
-string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> const &str) {
+std::shared_ptr<string_cache_entry> font_face::create_cache_entry(std::basic_string<uint32_t> const &str) {
   ensure_glyphs(str);
 
   std::vector<fw::vertex::xyz_uv> verts;
@@ -293,8 +289,8 @@ string_cache_entry *font_face::create_cache_entry(std::basic_string<uint32_t> co
   std::shared_ptr<fw::shader> shader = fw::shader::create("gui.shader");
   std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
 
-  return new string_cache_entry(vb, ib, shader, shader_params,
-      fw::point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom);
+  return std::shared_ptr<string_cache_entry>(new string_cache_entry(vb, ib, shader, shader_params,
+      fw::point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom));
 }
 
 //-----------------------------------------------------------------------------

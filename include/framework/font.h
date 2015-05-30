@@ -52,13 +52,13 @@ private:
    * Mapping of UTF-32 strings to a \ref string_cache_entry which caches the data we need to draw the
    * given string.
    */
-  std::map<std::basic_string<uint32_t>, string_cache_entry *> _string_cache;
+  std::map<std::basic_string<uint32_t>, std::shared_ptr<string_cache_entry>> _string_cache;
 
   void ensure_glyphs(std::basic_string<uint32_t> const &str);
   void draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags);
   fw::point measure_string(std::basic_string<uint32_t> const &str);
-  string_cache_entry *get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
-  string_cache_entry *create_cache_entry(std::basic_string<uint32_t> const &str);
+  std::shared_ptr<string_cache_entry> get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
+  std::shared_ptr<string_cache_entry> create_cache_entry(std::basic_string<uint32_t> const &str);
 public:
   font_face(font_manager *manager, boost::filesystem::path const &filename);
   ~font_face();
