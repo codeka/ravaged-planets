@@ -33,6 +33,13 @@ std::string to_string(gl_error_info const & err_info);
   fn;
 #endif
 
+#if defined(DEBUG)
+#define FW_ENSURE_RENDER_THREAD() \
+  fw::graphics::ensure_render_thread()
+#else
+#define FW_ENSURE_RENDER_THREAD()
+#endif
+
 class graphics {
 private:
   SDL_Window *_wnd;
@@ -73,6 +80,9 @@ public:
 
   // Checks glGetError() and throws an exception if it detects something.
   static void check_error(char const *msg);
+
+  /** For things that must run on the render thread, this can be sure to enforce it. */
+  static void ensure_render_thread();
 };
 
 /** An index buffer holds lists of indices into a vertex_buffer. */

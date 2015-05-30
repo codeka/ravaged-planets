@@ -104,8 +104,6 @@ bool framework::initialize(char const *title) {
   }
 
   /*
-   // initialise the particle manager
-
    // initialise the host (ENet) and HTTP module (libcurl)
    net::initialise();
    http::initialise();
@@ -140,7 +138,7 @@ void framework::language_initialize() {
 }
 
 void framework::destroy() {
-//  _app->destroy();
+  _app->destroy();
 
   debug << "framework is shutting down..." << std::endl;
 

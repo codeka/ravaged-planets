@@ -1,5 +1,6 @@
 #include <string>
 #include <list>
+#include <thread>
 
 #include <boost/foreach.hpp>
 
@@ -11,6 +12,9 @@
 #include <framework/logging.h>
 
 namespace fw {
+
+// The render thread is the thread we start on, so this is right.
+static std::thread::id render_thread_id = std::this_thread::get_id();
 
 std::string to_string(gl_error_info const &err_info) {
   GLenum err = err_info.value();
@@ -146,6 +150,13 @@ void graphics::check_error(char const *msg) {
   BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(msg) << fw::gl_error_info(err));
 }
 
+void graphics::ensure_render_thread() {
+  std::thread::id this_thread_id = std::this_thread::get_id();
+  if (this_thread_id != render_thread_id) {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Expected to be running on the render thread."));
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 index_buffer::index_buffer(bool dynamic/*= false */) :
@@ -154,10 +165,12 @@ index_buffer::index_buffer(bool dynamic/*= false */) :
 }
 
 index_buffer::~index_buffer() {
+  FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glDeleteBuffers(1, &_id));
 }
 
 void index_buffer::set_data(int num_indices, uint16_t const *indices, int flags) {
+  FW_ENSURE_RENDER_THREAD();
   _num_indices = num_indices;
 
   if (flags <= 0)
@@ -169,10 +182,12 @@ void index_buffer::set_data(int num_indices, uint16_t const *indices, int flags)
 }
 
 void index_buffer::begin() {
+  FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id));
 }
 
 void index_buffer::end() {
+  FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
@@ -184,10 +199,12 @@ vertex_buffer::vertex_buffer(setup_fn setup, size_t vertex_size, bool dynamic /*
 }
 
 vertex_buffer::~vertex_buffer() {
+  FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glDeleteBuffers(1, &_id));
 }
 
 void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*/) {
+  FW_ENSURE_RENDER_THREAD();
   if (flags <= 0) {
     flags = _dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
   }
@@ -199,11 +216,13 @@ void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*
 }
 
 void vertex_buffer::begin() {
+  FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
   _setup();
 }
 
 void vertex_buffer::end() {
+  FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, 0));
   // todo: opposite of _setup()?
 }
