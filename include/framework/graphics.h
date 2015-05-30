@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <mutex>
 
 #include <boost/signals2.hpp>
 
@@ -36,6 +37,8 @@ class graphics {
 private:
   SDL_Window *_wnd;
   SDL_GLContext _context;
+  std::mutex _run_queue_mutex;
+  std::vector<std::function<void()>> _run_queue;
 
   int _width;
   int _height;
@@ -64,6 +67,9 @@ public:
 
   // This signal is fired just before the graphics present().
   boost::signals2::signal<void()> sig_before_present;
+
+  /** Schedules the given function to run on the render thread, just after the scene has finished drawing. */
+  void run_on_render_thread(std::function<void()> fn);
 
   // Checks glGetError() and throws an exception if it detects something.
   static void check_error(char const *msg);

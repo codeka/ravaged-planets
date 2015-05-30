@@ -116,17 +116,21 @@ font_face::~font_face() {
 }
 
 void font_face::update(float dt) {
-  std::unique_lock<std::mutex> lock(_mutex);
-  for (auto it = _string_cache.begin(); it != _string_cache.end(); ++it) {
-    // Note we update the time_since_use after adding dt. This ensures that if the thread time is really
-    // long (e.g. if there's been some delay) we'll go through at least one update loop before destroying
-    // the string.
-    if (it->second->time_since_use > 1.0f) {
-      it = _string_cache.erase(it);
-    } else {
-      it->second->time_since_use += dt;
+  // We actually want this to run on the render thread, some drivers don't like running glDeleteBuffers on a different
+  // thread for some reason.
+  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    std::unique_lock<std::mutex> lock(_mutex);
+    for (auto it = _string_cache.begin(); it != _string_cache.end(); ++it) {
+      // Note we update the time_since_use after adding dt. This ensures that if the thread time is really
+      // long (e.g. if there's been some delay) we'll go through at least one update loop before destroying
+      // the string.
+      if (it->second->time_since_use > 1.0f) {
+        it = _string_cache.erase(it);
+      } else {
+        it->second->time_since_use += dt;
+      }
     }
-  }
+  });
 }
 
 void font_face::ensure_glyphs(std::string const &str) {
@@ -234,6 +238,7 @@ std::shared_ptr<string_cache_entry> font_face::get_or_create_cache_entry(std::ba
     data = create_cache_entry(str);
     _string_cache[str] = data;
   }
+
   return data;
 }
 

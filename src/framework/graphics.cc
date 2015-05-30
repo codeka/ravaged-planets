@@ -1,6 +1,8 @@
 #include <string>
 #include <list>
 
+#include <boost/foreach.hpp>
+
 #include <SDL.h>
 
 #include <framework/exception.h>
@@ -110,6 +112,15 @@ void graphics::after_gui() {
 void graphics::present() {
   sig_before_present();
 
+  // Run any functions that were scheduled to run on the render thread
+  {
+    std::unique_lock<std::mutex>(_run_queue_mutex);
+    BOOST_FOREACH(std::function<void()> fn, _run_queue) {
+      fn();
+    }
+    _run_queue.clear();
+  }
+
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
     // this might happen in Release mode, where we don't actually check errors on every single call (it's expensive).
@@ -117,6 +128,11 @@ void graphics::present() {
   }
 
   SDL_GL_SwapWindow(_wnd);
+}
+
+void graphics::run_on_render_thread(std::function<void()> fn) {
+  std::unique_lock<std::mutex>(_run_queue_mutex);
+  _run_queue.push_back(fn);
 }
 
 void graphics::set_render_target(texture *tex) {
@@ -168,7 +184,7 @@ vertex_buffer::vertex_buffer(setup_fn setup, size_t vertex_size, bool dynamic /*
 }
 
 vertex_buffer::~vertex_buffer() {
-  FW_CHECKED(glDeleteVertexArrays(1, &_id));
+  FW_CHECKED(glDeleteBuffers(1, &_id));
 }
 
 void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*/) {

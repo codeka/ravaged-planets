@@ -88,7 +88,7 @@ std::shared_ptr<fw::vertex_buffer> buffer_cache::get_vertex_buffer() {
     _vertex_buffers.pop_back();
     return vb;
   } else {
-    return fw::vertex_buffer::create<fw::vertex::xyz_c_uv>();
+    return fw::vertex_buffer::create<fw::vertex::xyz_c_uv>(true);
   }
 }
 
@@ -98,7 +98,7 @@ std::shared_ptr<fw::index_buffer> buffer_cache::get_index_buffer() {
     _index_buffers.pop_back();
     return ib;
   } else {
-    return std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+    return std::shared_ptr<fw::index_buffer>(new fw::index_buffer(true));
   }
 }
 

@@ -116,9 +116,7 @@ int main(int argc, char** argv) {
 
 void display_exception(std::string const &msg) {
   std::stringstream ss;
-  ss
-      << "An error has occurred. Please send your log file (below) to dean@codeka.com.au for diagnostics."
-      << std::endl;
+  ss << "An error has occurred. Please send your log file (below) to dean@codeka.com.au for diagnostics." << std::endl;
   ss << std::endl;
   ss << fw::debug.get_filename() << std::endl;
   ss << std::endl;
