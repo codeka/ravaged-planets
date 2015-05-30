@@ -7,8 +7,6 @@
 #include <framework/graphics.h>
 #include <framework/framework.h>
 #include <framework/camera.h>
-#include <framework/vertex_buffer.h>
-#include <framework/index_buffer.h>
 #include <framework/logging.h>
 #include <framework/exception.h>
 #include <framework/misc.h>

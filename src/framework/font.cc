@@ -11,13 +11,10 @@
 #include <framework/exception.h>
 #include <framework/font.h>
 #include <framework/graphics.h>
-#include <framework/index_buffer.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
-#include <framework/vertex_buffer.h>
-#include <framework/vertex_formats.h>
 
 typedef std::basic_string<uint32_t> utf32string;
 

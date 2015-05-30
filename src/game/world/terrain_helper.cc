@@ -1,7 +1,7 @@
 
 #include <framework/misc.h>
 #include <framework/exception.h>
-#include <framework/vertex_formats.h>
+#include <framework/graphics.h>
 
 #include <game/world/terrain_helper.h>
 

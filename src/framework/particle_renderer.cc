@@ -12,9 +12,6 @@
 #include <framework/logging.h>
 #include <framework/paths.h>
 #include <framework/vector.h>
-#include <framework/vertex_buffer.h>
-#include <framework/index_buffer.h>
-#include <framework/vertex_formats.h>
 #include <framework/misc.h>
 #include <framework/scenegraph.h>
 #include <framework/exception.h>

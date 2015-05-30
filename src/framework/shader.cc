@@ -16,8 +16,6 @@
 #include <framework/vector.h>
 #include <framework/exception.h>
 #include <framework/scenegraph.h>
-#include <framework/vertex_buffer.h>
-#include <framework/index_buffer.h>
 #include <framework/shader.h>
 #include <framework/xml.h>
 

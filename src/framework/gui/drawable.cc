@@ -4,11 +4,8 @@
 
 #include <framework/exception.h>
 #include <framework/graphics.h>
-#include <framework/index_buffer.h>
 #include <framework/paths.h>
 #include <framework/texture.h>
-#include <framework/vertex_buffer.h>
-#include <framework/vertex_formats.h>
 #include <framework/shader.h>
 #include <framework/xml.h>
 #include <framework/gui/drawable.h>

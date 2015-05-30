@@ -3,7 +3,8 @@
 #include <list>
 #include <memory>
 
-#include <framework/vertex_formats.h>
+#include <framework/graphics.h>
+
 struct render_state;
 
 namespace fw {

@@ -1,5 +1,4 @@
-#include <framework/vertex_buffer.h>
-#include <framework/index_buffer.h>
+
 #include <framework/graphics.h>
 #include <framework/misc.h>
 #include <framework/paths.h>
@@ -7,7 +6,6 @@
 #include <framework/camera.h>
 #include <framework/bitmap.h>
 #include <framework/texture.h>
-#include <framework/vertex_formats.h>
 #include <framework/input.h>
 #include <framework/vector.h>
 #include <framework/scenegraph.h>

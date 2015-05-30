@@ -58,10 +58,10 @@ void graphics::initialize(char const *title) {
   }
   GLenum err = glGetError();
   if (err == GL_INVALID_ENUM) {
-	// Some versions of glew can cause this, we can ignore it.
-	// See: https://www.opengl.org/wiki/OpenGL_Loading_Library
+    // Some versions of glew can cause this, we can ignore it.
+    // See: https://www.opengl.org/wiki/OpenGL_Loading_Library
   } else if (err != GL_NO_ERROR) {
-	// Something else happened!
+    // Something else happened!
     BOOST_THROW_EXCEPTION(fw::exception() << fw::gl_error_info(err));
   }
 
@@ -130,4 +130,142 @@ void graphics::check_error(char const *msg) {
   BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(msg) << fw::gl_error_info(err));
 }
 
+//-----------------------------------------------------------------------------
+
+index_buffer::index_buffer(bool dynamic/*= false */) :
+    _num_indices(0), _id(0), _dynamic(dynamic) {
+  FW_CHECKED(glGenBuffers(1, &_id));
+}
+
+index_buffer::~index_buffer() {
+  FW_CHECKED(glDeleteBuffers(1, &_id));
+}
+
+void index_buffer::set_data(int num_indices, uint16_t const *indices, int flags) {
+  _num_indices = num_indices;
+
+  if (flags <= 0)
+    flags = _dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+
+  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id));
+  FW_CHECKED(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+      num_indices * sizeof(uint16_t), reinterpret_cast<void const *>(indices), flags));
+}
+
+void index_buffer::begin() {
+  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id));
+}
+
+void index_buffer::end() {
+  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+}
+
+//-----------------------------------------------------------------------------
+
+vertex_buffer::vertex_buffer(setup_fn setup, size_t vertex_size, bool dynamic /*= false */) :
+    _num_vertices(0), _vertex_size(vertex_size), _id(0), _dynamic(dynamic), _setup(setup) {
+  FW_CHECKED(glGenBuffers(1, &_id));
+}
+
+vertex_buffer::~vertex_buffer() {
+  FW_CHECKED(glDeleteVertexArrays(1, &_id));
+}
+
+void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*/) {
+  if (flags <= 0) {
+    flags = _dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+  }
+
+  _num_vertices = num_vertices;
+
+  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
+  FW_CHECKED(glBufferData(GL_ARRAY_BUFFER, _num_vertices * _vertex_size, vertices, flags));
+}
+
+void vertex_buffer::begin() {
+  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
+  _setup();
+}
+
+void vertex_buffer::end() {
+  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  // todo: opposite of _setup()?
+}
+
+//-----------------------------------------------------------------------------
+
+namespace vertex {
+
+#define OFFSET_OF(struct, member) \
+  reinterpret_cast<void const *>(offsetof(struct, member))
+
+static void xyz_setup() {
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz), OFFSET_OF(xyz, x)));
+}
+
+std::function<void()> xyz::get_setup_function() {
+  return &xyz_setup;
+}
+
+static void xyz_c_setup() {
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glEnableVertexAttribArray(1));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, x)));
+  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, colour)));
+}
+
+std::function<void()> xyz_c::get_setup_function() {
+  return &xyz_c_setup;
+}
+
+static void xyz_uv_setup() {
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glEnableVertexAttribArray(1));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_uv), OFFSET_OF(xyz_uv, x)));
+  FW_CHECKED(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_uv), OFFSET_OF(xyz_uv, u)));
+}
+
+std::function<void()> xyz_uv::get_setup_function() {
+  return &xyz_uv_setup;
+}
+
+void xyz_c_uv_setup() {
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glEnableVertexAttribArray(1));
+  FW_CHECKED(glEnableVertexAttribArray(2));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, x)));
+  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, colour)));
+  FW_CHECKED(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, u)));
+}
+
+std::function<void()> xyz_c_uv::get_setup_function() {
+  return &xyz_c_uv_setup;
+}
+
+void xyz_n_uv_setup() {
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glEnableVertexAttribArray(1));
+  FW_CHECKED(glEnableVertexAttribArray(2));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, x)));
+  FW_CHECKED(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, nx)));
+  FW_CHECKED(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, u)));
+}
+
+std::function<void()> xyz_n_uv::get_setup_function() {
+  return &xyz_n_uv_setup;
+}
+
+void xyz_n_setup() {
+  FW_CHECKED(glEnableVertexAttribArray(0));
+  FW_CHECKED(glEnableVertexAttribArray(1));
+  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n), OFFSET_OF(xyz_n_uv, x)));
+  FW_CHECKED(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n), OFFSET_OF(xyz_n_uv, nx)));
+}
+
+std::function<void()> xyz_n::get_setup_function() {
+  return &xyz_n_setup;
+}
+
+}
 }
