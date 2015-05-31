@@ -14,7 +14,8 @@ namespace fs = boost::filesystem;
 namespace fw {
 
   static bool is_initialized = false;
-  static po::variables_map vm;
+  static po::variables_map g_variables_map;
+  static po::options_description g_option_descriptions;
 
   settings::settings() {
     if (!is_initialized) {
@@ -26,17 +27,21 @@ namespace fw {
   }
 
   po::variables_map& settings::get_variables() const {
-    return vm;
+    return g_variables_map;
   }
 
   po::variable_value const &settings::get_variable_value(std::string const &name) const {
-    po::variable_value const &val = vm[name];
+    po::variable_value const &val = g_variables_map[name];
     if (val.empty()) {
       BOOST_THROW_EXCEPTION(fw::exception()
           << fw::message_error_info("specified option does not exist, or has no value: " + name));
     }
 
     return val;
+  }
+
+  void settings::print_help() {
+    std::cerr << g_option_descriptions << std::endl;
   }
 
   // you must call this at program startup (*before* you call the framework::initialise() method!) it'll parse the
@@ -66,6 +71,7 @@ namespace fw {
 
     po::options_description other_options("Other options");
     other_options.add_options()
+        ("help", "Prints this help message.")
         ("lang", po::value<std::string>()->default_value("en"), "Name of the language we'll use for display and UI, etc. Default is 'en' (English)")
       ;
 
@@ -82,26 +88,24 @@ namespace fw {
         ("bind.cam-rot-mouse", po::value<std::string>()->default_value("Middle-Mouse"))
       ;
 
-    po::options_description all_options;
-    all_options.add(graphics_options)
+    g_option_descriptions.add(graphics_options)
         .add(audio_options)
         .add(debugging_options)
         .add(other_options)
         .add(additional_options)
         .add(keybinding_options);
 
-    po::store(po::parse_command_line(argc, argv, all_options), vm);
+    po::store(po::parse_command_line(argc, argv, g_option_descriptions), g_variables_map);
 
     std::ifstream default_ini((fw::install_base_path() / "etc" / options_file).string().c_str());
-    po::store(po::parse_config_file(default_ini, all_options), vm);
+    po::store(po::parse_config_file(default_ini, g_option_descriptions), g_variables_map);
     default_ini.close();
 
     std::ifstream custom_ini((fw::user_base_path() / options_file).string().c_str());
-    po::store(po::parse_config_file(custom_ini, all_options), vm);
+    po::store(po::parse_config_file(custom_ini, g_option_descriptions), g_variables_map);
     custom_ini.close();
 
-    po::notify(vm);
-
+    po::notify(g_variables_map);
     is_initialized = true;
   }
 }

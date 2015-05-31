@@ -18,11 +18,16 @@
 #include <framework/misc.h>
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
+#include <framework/vector.h>
 
 namespace po = boost::program_options;
 
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
+
+static std::shared_ptr<fw::particle_effect> g_effect;
+static bool is_moving = false;
+static float angle;
 
 class application: public fw::base_app {
 public:
@@ -51,6 +56,20 @@ bool pause_handler(fw::gui::widget *wdgt) {
   return true;
 }
 
+bool movement_handler(fw::gui::widget *wdgt) {
+  fw::gui::button *btn = dynamic_cast<fw::gui::button *>(wdgt);
+  if (is_moving) {
+    is_moving = false;
+    btn->set_text("Moving");
+    g_effect->set_position(fw::vector(0, 0, 0));
+  } else {
+    is_moving = true;
+    btn->set_text("Stationary");
+  }
+
+  return true;
+}
+
 bool application::initialize(fw::framework *frmwrk) {
   fw::top_down_camera *cam = new fw::top_down_camera();
   cam->set_mouse_move(false);
@@ -59,7 +78,7 @@ bool application::initialize(fw::framework *frmwrk) {
   fw::gui::window *wnd;
   wnd = fw::gui::builder<fw::gui::window>()
       << fw::gui::widget::position(fw::gui::px(20), fw::gui::px(20))
-      << fw::gui::widget::size(fw::gui::px(150), fw::gui::px(100))
+      << fw::gui::widget::size(fw::gui::px(150), fw::gui::px(130))
       << fw::gui::window::background("frame")
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(30))
@@ -70,15 +89,26 @@ bool application::initialize(fw::framework *frmwrk) {
           << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(70))
           << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
           << fw::gui::button::text("Pause")
-          << fw::gui::widget::click(std::bind<bool>(pause_handler, std::placeholders::_1)));
+          << fw::gui::widget::click(std::bind<bool>(pause_handler, std::placeholders::_1)))
+      << (fw::gui::builder<fw::gui::button>()
+          << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(110))
+          << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::button::text("Stationary")
+          << fw::gui::widget::click(std::bind<bool>(movement_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
-  std::shared_ptr<fw::particle_effect> effect =
-      frmwrk->get_particle_mgr()->create_effect("explosion-01");
+  fw::settings stg;
+  g_effect = frmwrk->get_particle_mgr()->create_effect(stg.get_value<std::string>("particle-file"));
   return true;
 }
 
 void application::update(float dt) {
+  if (is_moving) {
+    angle += 3.1415f * dt;
+    fw::matrix m = fw::rotate_axis_angle(fw::vector(0, 1, 0), angle);
+    cml::vector4f pos = m * cml::vector4f(10.0f, 0, 0, 1);
+    //g_effect->set_position(pos);
+  }
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {

@@ -38,5 +38,7 @@ namespace fw {
     inline bool is_set(std::string const &name) {
       return (get_variables().count(name) > 0);
     }
+
+    void print_help();
   };
 }

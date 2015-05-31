@@ -66,13 +66,16 @@ framework *framework::get_instance() {
 
 bool framework::initialize(char const *title) {
   settings stg;
+  if (stg.is_set("help")) {
+    stg.print_help();
+    return false;
+  }
 
   random_initialize();
   logging_initialize();
   language_initialize();
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
     BOOST_THROW_EXCEPTION(fw::exception() << fw::sdl_error_info(SDL_GetError()));
   }
 
