@@ -36,9 +36,18 @@ public:
   void render(fw::sg::scenegraph &scenegraph);
 };
 
-bool click_handler(fw::gui::widget *wdgt) {
-  std::shared_ptr<fw::particle_effect> effect =
-      fw::framework::get_instance()->get_particle_mgr()->create_effect("explosion-01");
+void update_effect_position() {
+  fw::matrix m = fw::rotate_axis_angle(fw::vector(0, 1, 0), angle);
+  cml::vector4f pos = m * cml::vector4f(10.0f, 0, 0, 1);
+  g_effect->set_position(fw::vector(pos[0], pos[1], pos[2]));
+}
+
+bool restart_handler(fw::gui::widget *wdgt) {
+  fw::settings stg;
+  g_effect->destroy();
+  g_effect = fw::framework::get_instance()->get_particle_mgr()->create_effect(
+      stg.get_value<std::string>("particle-file"));
+  update_effect_position();
   return true;
 }
 
@@ -60,11 +69,11 @@ bool movement_handler(fw::gui::widget *wdgt) {
   fw::gui::button *btn = dynamic_cast<fw::gui::button *>(wdgt);
   if (is_moving) {
     is_moving = false;
-    btn->set_text("Moving");
+    btn->set_text("Stationary");
     g_effect->set_position(fw::vector(0, 0, 0));
   } else {
     is_moving = true;
-    btn->set_text("Stationary");
+    btn->set_text("Moving");
   }
 
   return true;
@@ -84,7 +93,7 @@ bool application::initialize(fw::framework *frmwrk) {
           << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(30))
           << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
           << fw::gui::button::text("Restart")
-          << fw::gui::widget::click(std::bind<bool>(click_handler, std::placeholders::_1)))
+          << fw::gui::widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(30), fw::gui::px(70))
           << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
@@ -105,9 +114,7 @@ bool application::initialize(fw::framework *frmwrk) {
 void application::update(float dt) {
   if (is_moving) {
     angle += 3.1415f * dt;
-    fw::matrix m = fw::rotate_axis_angle(fw::vector(0, 1, 0), angle);
-    cml::vector4f pos = m * cml::vector4f(10.0f, 0, 0, 1);
-    //g_effect->set_position(pos);
+    update_effect_position();
   }
 }
 
