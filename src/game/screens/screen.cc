@@ -3,7 +3,7 @@
 
 #include <game/screens/screen.h>
 #include <game/screens/title_screen.h>
-//#include "../../editor/editor_screen.h"
+#include <game/editor/editor_screen.h>
 #include <framework/exception.h>
 
 namespace rp {
@@ -32,7 +32,7 @@ screen_stack::screen_stack() :
     _active(-1) {
   _screens.push_back(new title_screen());
 //  _screens.push_back(new game_screen());
-//  _screens.push_back(new ed::editor_screen());
+  _screens.push_back(new ed::editor_screen());
 }
 
 screen_stack::~screen_stack() {
@@ -50,7 +50,7 @@ void screen_stack::set_active_screen(std::string const &name,
   else if (name == "game")
     index = 1;
   else if (name == "editor")
-    index = 2;
+    index = 1;
   else {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("invalid screen name!"));
     index = -1; // never gets here

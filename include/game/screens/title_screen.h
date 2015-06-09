@@ -2,6 +2,12 @@
 
 #include <game/screens/screen.h>
 
+namespace fw {
+namespace gui {
+class widget;
+}
+}
+
 namespace rp {
 
 /**
@@ -9,6 +15,10 @@ namespace rp {
  * save game, joining a multiplayer game and so on.
  */
 class title_screen: public screen {
+private:
+  bool quit_clicked(fw::gui::widget *w);
+  bool editor_clicked(fw::gui::widget *w);
+
 public:
   title_screen();
   virtual ~title_screen();

@@ -6,7 +6,7 @@ struct xyz_n;
 }
 }
 
-namespace ww {
+namespace rp {
 
 // generates a "patch" of indices for a terrain that's patch_size * patch_size big
 void generate_terrain_indices(std::vector<uint16_t> &indices, int patch_size);

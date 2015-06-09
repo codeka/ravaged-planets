@@ -13,7 +13,7 @@
 #include <game/world/terrain.h>
 #include <game/world/terrain_helper.h>
 
-namespace ww {
+namespace rp {
 
 terrain::terrain() :
     _width(0), _length(0), _heights(0), _ib(new fw::index_buffer()) {

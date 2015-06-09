@@ -194,6 +194,7 @@ void framework::run() {
 }
 
 void framework::exit() {
+  _running = false;
   SDL_Quit();
 }
 

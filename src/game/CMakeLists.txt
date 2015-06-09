@@ -1,6 +1,9 @@
 
 file(GLOB GAME_FILES
     *.cc
+    editor/*.cc
+    editor/tools/*.cc
+    editor/windows/*.cc
     screens/*.cc
     world/*.cc
 )
