@@ -14,6 +14,7 @@
 #include <framework/gui/window.h>
 #include <framework/lang.h>
 #include <framework/logging.h>
+#include <framework/version.h>
 
 #include <game/application.h>
 #include <game/screens/screen.h>
@@ -78,7 +79,7 @@ void title_screen::show() {
       << (fw::gui::builder<fw::gui::static_widget>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(300))
           << fw::gui::widget::size(fw::gui::px(500), fw::gui::px(16))
-          << fw::gui::static_widget::text("v0.1 build 3 (debug)"));
+          << fw::gui::static_widget::text(fw::version_str));
   frmwrk->get_gui()->attach_widget(wnd);
 
   /*
