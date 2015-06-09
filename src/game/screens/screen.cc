@@ -28,45 +28,41 @@ void screen::render(fw::sg::scenegraph &) {
 
 //-------------------------------------------------------------------------
 
-screen_stack::screen_stack() :
-    _active(-1) {
-  _screens.push_back(new title_screen());
+screen_stack::screen_stack() {
+  _screens["title"] = new title_screen();
 //  _screens.push_back(new game_screen());
-  _screens.push_back(new ed::editor_screen());
+  _screens["editor"] = new ed::editor_screen();
 }
 
 screen_stack::~screen_stack() {
   BOOST_FOREACH(auto screen, _screens) {
-    delete screen;
+    delete screen.second;
   }
 }
 
 void screen_stack::set_active_screen(std::string const &name,
     std::shared_ptr<screen_options> options /*= std::shared_ptr<screen_options>()*/) {
-  // todo: is this the best way? I don't think so...
-  int index;
-  if (name == "title")
-    index = 0;
-  else if (name == "game")
-    index = 1;
-  else if (name == "editor")
-    index = 1;
-  else {
+  auto it = _screens.find(name);
+  if (it == _screens.end()) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("invalid screen name!"));
-    index = -1; // never gets here
   }
 
-  if (_active != index) {
-    if (_active >= 0 && _active < static_cast<int>(_screens.size()))
+  if (_active != name) {
+    if (_active != "") {
       _screens[_active]->hide();
+    }
 
-    _active = index;
-    _screens[index]->set_options(options);
-    _screens[index]->show();
+    _active = name;
+    _screens[name]->set_options(options);
+    _screens[name]->show();
   }
 }
 
 screen *screen_stack::get_active_screen() {
+  if (_active == "") {
+    return nullptr;
+  }
+
   return _screens[_active];
 }
 

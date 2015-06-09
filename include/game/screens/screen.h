@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <map>
 
 namespace fw {
 namespace sg {
@@ -57,6 +57,10 @@ public:
  * This class represents the "stack" of screens. the top-most screen is the one that's currently being displayed.
  */
 class screen_stack {
+private:
+  std::map<std::string, screen *> _screens;
+  std::string _active;
+
 public:
   screen_stack();
   ~screen_stack();
@@ -64,10 +68,6 @@ public:
   void set_active_screen(std::string const &name,
       std::shared_ptr<screen_options> options = std::shared_ptr<screen_options>());
   screen *get_active_screen();
-
-private:
-  std::vector<screen *> _screens;
-  int _active;
 };
 
 }

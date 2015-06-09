@@ -14,7 +14,9 @@ class drawable;
 class static_widget : public widget {
 private:
   friend class static_background_property;
+  friend class static_text_property;
 
+  std::string _text;
   std::shared_ptr<drawable> _background;
 
 public:
@@ -22,6 +24,7 @@ public:
   virtual ~static_widget();
 
   static property *background(std::string const &drawable_name);
+  static property *text(std::string const &text);
 
   void render();
 };

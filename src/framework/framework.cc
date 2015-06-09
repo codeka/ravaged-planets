@@ -194,6 +194,7 @@ void framework::run() {
 }
 
 void framework::exit() {
+  fw::debug << "Exiting." << std::endl;
   _running = false;
   SDL_Quit();
 }
@@ -276,6 +277,7 @@ bool framework::poll_events() {
   while (SDL_PollEvent(&e)) {
     _input->process_event(e);
     if (e.type == SDL_QUIT) {
+      fw::debug << "Got quit signal, exiting." << std::endl;
       return false;
     }
   }
@@ -287,6 +289,7 @@ bool framework::wait_events() {
   while (SDL_WaitEvent(&e)) {
     _input->process_event(e);
     if (e.type == SDL_QUIT) {
+      fw::debug << "Got quit signal, exiting." << std::endl;
       return false;
     }
   }

@@ -1,11 +1,13 @@
 
+#include <framework/framework.h>
+#include <framework/font.h>
 #include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/static_widget.h>
 
 namespace fw { namespace gui {
 
-/** Property that sets the background of the window. */
+/** Property that sets the background of the widget. */
 class static_background_property : public property {
 private:
   std::string _drawable_name;
@@ -20,6 +22,21 @@ public:
   }
 };
 
+/** Property that sets the text of the widget. */
+class static_text_property : public property {
+private:
+  std::string _text;
+public:
+  static_text_property(std::string const &text) :
+    _text(text) {
+  }
+
+  void apply(widget *widget) {
+    static_widget *wdgt = dynamic_cast<static_widget *>(widget);
+    wdgt->_text = _text;
+  }
+};
+
 static_widget::static_widget(gui *gui) : widget(gui) {
 }
 
@@ -30,9 +47,18 @@ property *static_widget::background(std::string const &drawable_name) {
   return new static_background_property(drawable_name);
 }
 
+property *static_widget::text(std::string const &text) {
+  return new static_text_property(text);
+}
+
 void static_widget::render() {
   if (_background) {
     _background->render(get_left(), get_top(), get_width(), get_height());
+  }
+  if (_text != "") {
+    fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+        get_left(), get_top() + get_height() / 2, _text,
+        static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
   }
 }
 

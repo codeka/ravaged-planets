@@ -37,32 +37,48 @@ void title_screen::show() {
       << fw::gui::widget::position(fw::gui::px(0), fw::gui::px(0))
       << fw::gui::widget::size(fw::gui::pct(100), fw::gui::pct(100))
       << fw::gui::window::background("title_background")
+      // Title "Ravaged Planets"
       << (fw::gui::builder<fw::gui::static_widget>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(20))
-          << fw::gui::widget::size(fw::gui::px(413), fw::gui::px(56))
+          << fw::gui::widget::size(fw::gui::px(417), fw::gui::px(49))
           << fw::gui::static_widget::background("title_heading"))
+      // "A game by Dean Harding (dean@codeka.com.au)" text
+      << (fw::gui::builder<fw::gui::static_widget>()
+          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(70))
+          << fw::gui::widget::size(fw::gui::px(500), fw::gui::px(16))
+          << fw::gui::static_widget::text("A game by Dean Harding (dean@codeka.com.au)"))
+      // "New Game" button
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(100))
           << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
           << fw::gui::button::text("New Game"))
+      // "Join Game" button
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(140))
           << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
           << fw::gui::button::text("Join Game"))
+      // "Options" button
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(180))
           << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
           << fw::gui::button::text("Options"))
+      // "Editor" button
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(220))
           << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
           << fw::gui::button::text("Editor")
           << fw::gui::widget::click(std::bind(&title_screen::editor_clicked, this, std::placeholders::_1)))
+      // "Quit" button
       << (fw::gui::builder<fw::gui::button>()
           << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(260))
           << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
           << fw::gui::button::text("Quit")
-          << fw::gui::widget::click(std::bind(&title_screen::quit_clicked, this, std::placeholders::_1)));
+          << fw::gui::widget::click(std::bind(&title_screen::quit_clicked, this, std::placeholders::_1)))
+      // "v1.2.3"
+      << (fw::gui::builder<fw::gui::static_widget>()
+          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(300))
+          << fw::gui::widget::size(fw::gui::px(500), fw::gui::px(16))
+          << fw::gui::static_widget::text("v0.1 build 3 (debug)"));
   frmwrk->get_gui()->attach_widget(wnd);
 
   /*
@@ -88,6 +104,7 @@ bool title_screen::quit_clicked(fw::gui::widget *w) {
 bool title_screen::editor_clicked(fw::gui::widget *w) {
   rp::application *app = dynamic_cast<rp::application *>(fw::framework::get_instance()->get_app());
   app->get_screen()->set_active_screen("editor");
+  return true;
 }
 
 void title_screen::hide() {
