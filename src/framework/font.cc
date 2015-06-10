@@ -120,14 +120,16 @@ void font_face::update(float dt) {
   // thread for some reason.
   fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     std::unique_lock<std::mutex> lock(_mutex);
-    for (auto it = _string_cache.begin(); it != _string_cache.end(); ++it) {
+    auto it = _string_cache.begin();
+    while (it != _string_cache.end()) {
       // Note we update the time_since_use after adding dt. This ensures that if the thread time is really
       // long (e.g. if there's been some delay) we'll go through at least one update loop before destroying
       // the string.
       if (it->second->time_since_use > 1.0f) {
-        it = _string_cache.erase(it);
+        _string_cache.erase(it++);
       } else {
         it->second->time_since_use += dt;
+        ++it;
       }
     }
   });
