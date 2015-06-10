@@ -15,6 +15,9 @@
 
 namespace rp {
 
+using namespace fw::gui;
+using namespace std::placeholders;
+
 // These are the instances of the various windows that are displayed by the title screen.
 fw::gui::window *wnd;
 
@@ -27,53 +30,22 @@ title_screen::~title_screen() {
 void title_screen::show() {
   fw::framework *frmwrk = fw::framework::get_instance();
 
-  wnd = fw::gui::builder<fw::gui::window>()
-      << fw::gui::widget::position(fw::gui::px(0), fw::gui::px(0))
-      << fw::gui::widget::size(fw::gui::pct(100), fw::gui::pct(100))
-      << fw::gui::window::background("title_background")
+  wnd = builder<window>(px(0), px(0), pct(100), pct(100)) << window::background("title_background")
       // Title "Ravaged Planets"
-      << (fw::gui::builder<fw::gui::static_widget>()
-          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(20))
-          << fw::gui::widget::size(fw::gui::px(417), fw::gui::px(49))
-          << fw::gui::static_widget::background("title_heading"))
+      << (builder<static_widget>(px(40), px(20), px(417), px(49)) << static_widget::background("title_heading"))
       // "A game by Dean Harding (dean@codeka.com.au)" text
-      << (fw::gui::builder<fw::gui::static_widget>()
-          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(70))
-          << fw::gui::widget::size(fw::gui::px(500), fw::gui::px(16))
-          << fw::gui::static_widget::text("A game by Dean Harding (dean@codeka.com.au)"))
-      // "New Game" button
-      << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(100))
-          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
-          << fw::gui::button::text("New Game"))
-      // "Join Game" button
-      << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(140))
-          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
-          << fw::gui::button::text("Join Game"))
-      // "Options" button
-      << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(180))
-          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
-          << fw::gui::button::text("Options"))
-      // "Editor" button
-      << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(220))
-          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
-          << fw::gui::button::text("Editor")
-          << fw::gui::widget::click(std::bind(&title_screen::editor_clicked, this, std::placeholders::_1)))
-      // "Quit" button
-      << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(260))
-          << fw::gui::widget::size(fw::gui::px(180), fw::gui::px(30))
-          << fw::gui::button::text("Quit")
-          << fw::gui::widget::click(std::bind(&title_screen::quit_clicked, this, std::placeholders::_1)))
+      << (builder<static_widget>(px(40), px(70), px(500), px(16))
+          << static_widget::text("A game by Dean Harding (dean@codeka.com.au)"))
+      << (builder<button>(px(40), px(100), px(180), px(30)) << button::text("New Game"))
+      << (builder<button>(px(40), px(140), px(180), px(30)) << button::text("Join Game"))
+      << (builder<button>(px(40), px(180), px(180), px(30)) << button::text("Options"))
+      << (builder<button>(px(40), px(220), px(180), px(30)) << button::text("Editor")
+          << widget::click(std::bind(&title_screen::editor_clicked, this, _1)))
+      << (builder<button>(px(40), px(260), px(180), px(30)) << button::text("Quit")
+          << widget::click(std::bind(&title_screen::quit_clicked, this, _1)))
       // "v1.2.3"
-      << (fw::gui::builder<fw::gui::static_widget>()
-          << fw::gui::widget::position(fw::gui::sum(fw::gui::pct(50.0f), fw::gui::px(100)),
-              fw::gui::sum(fw::gui::pct(100), fw::gui::px(-20)))
-          << fw::gui::widget::size(fw::gui::px(500), fw::gui::px(16))
-          << fw::gui::static_widget::text(fw::version_str));
+      << (builder<static_widget>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
+          << static_widget::text(fw::version_str));
   frmwrk->get_gui()->attach_widget(wnd);
 }
 
