@@ -8,45 +8,77 @@ class gui;
 class widget;
 
 /**
- * Represents either an absolute (pixel) or relative (percent) dimension. Used to position and measure widgets.
+ * Represents a dimension: either an (x,y) coordinate or a width/height.
  */
 class dimension {
 public:
-  enum kind {
-    pixels,
-    percent
-  };
-
   dimension();
-  dimension(kind kind, float value);
+  virtual ~dimension();
 
-  kind _kind;
-  float _value;
+  virtual float get_value(float parent_value) = 0;
 };
 
-inline dimension px(float value) {
-  return dimension(dimension::pixels, value);
+class pixel_dimension : public dimension {
+private:
+  float _value;
+
+public:
+  pixel_dimension(float value);
+  virtual ~pixel_dimension();
+
+  float get_value(float parent_value);
+};
+
+class percent_dimension : public dimension {
+private:
+  float _value;
+
+public:
+  percent_dimension(float value);
+  virtual ~percent_dimension();
+
+  float get_value(float parent_value);
+};
+
+class sum_dimension : public dimension {
+private:
+  std::shared_ptr<dimension> _one;
+  std::shared_ptr<dimension> _two;
+
+public:
+  sum_dimension(std::shared_ptr<dimension> one, std::shared_ptr<dimension> two);
+  virtual ~sum_dimension();
+
+  float get_value(float parent_value);
+};
+
+inline std::shared_ptr<dimension> px(float value) {
+  return std::shared_ptr<dimension>(new pixel_dimension(value));
 }
 
-inline dimension pct(float value) {
-  return dimension(dimension::percent, value);
+inline std::shared_ptr<dimension> pct(float value) {
+  return std::shared_ptr<dimension>(new percent_dimension(value));
+}
+
+inline std::shared_ptr<dimension> sum(std::shared_ptr<dimension> one, std::shared_ptr<dimension> two) {
+  return std::shared_ptr<dimension>(new sum_dimension(one, two));
 }
 
 class position_property : public property {
 private:
-  dimension _x;
-  dimension _y;
+  std::shared_ptr<dimension> _x;
+  std::shared_ptr<dimension> _y;
 public:
-  position_property(dimension const &x, dimension const &y);
+  position_property(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y);
   void apply(widget *widget);
 };
 
 class size_property : public property {
 private:
-  dimension _width;
-  dimension _height;
+  std::shared_ptr<dimension> _width;
+  std::shared_ptr<dimension> _height;
 public:
-  size_property(dimension const &width, dimension const &height);
+  size_property(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height);
   void apply(widget *widget);
 };
 
@@ -63,20 +95,20 @@ protected:
   gui *_gui;
   widget *_parent;
   std::vector<widget *> _children;
-  dimension _x;
-  dimension _y;
-  dimension _width;
-  dimension _height;
+  std::shared_ptr<dimension> _x;
+  std::shared_ptr<dimension> _y;
+  std::shared_ptr<dimension> _width;
+  std::shared_ptr<dimension> _height;
   std::function<bool(widget *)> _on_click;
 
 public:
   widget(gui *gui);
   virtual ~widget();
 
-  static inline property *position(dimension const &x, dimension const &y) {
+  static inline property *position(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y) {
     return new position_property(x, y);
   }
-  static inline property *size(dimension const &width, dimension const &height) {
+  static inline property *size(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height) {
     return new size_property(width, height);
   }
   static property *click(std::function<bool(widget *)> on_click);

@@ -10,17 +10,48 @@
 
 namespace fw { namespace gui {
 
-dimension::dimension() :
-    _kind(pixels), _value(0) {
+dimension::dimension() {
 }
 
-dimension::dimension(kind kind, float value) :
-    _kind(kind), _value(value) {
+dimension::~dimension() {
+}
+
+pixel_dimension::pixel_dimension(float value) :
+    _value(value) {
+}
+
+pixel_dimension::~pixel_dimension() {
+}
+
+float pixel_dimension::get_value(float parent_value) {
+  return _value;
+}
+
+percent_dimension::percent_dimension(float value) :
+    _value(value) {
+}
+
+percent_dimension::~percent_dimension() {
+}
+
+float percent_dimension::get_value(float parent_value) {
+  return parent_value * (_value / 100.0f);
+}
+
+sum_dimension::sum_dimension(std::shared_ptr<dimension> one, std::shared_ptr<dimension> two) :
+    _one(one), _two(two) {
+}
+
+sum_dimension::~sum_dimension() {
+}
+
+float sum_dimension::get_value(float parent_value) {
+  return _one->get_value(parent_value) + _two->get_value(parent_value);
 }
 
 //-----------------------------------------------------------------------------
 
-position_property::position_property(dimension const &x, dimension const &y) :
+position_property::position_property(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y) :
     _x(x), _y(y) {
 }
 
@@ -29,7 +60,7 @@ void position_property::apply(widget *widget) {
   widget->_y = _y;
 }
 
-size_property::size_property(dimension const &width, dimension const &height) :
+size_property::size_property(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height) :
     _width(width), _height(height) {
 }
 
@@ -123,39 +154,25 @@ widget *widget::get_child_at(float x, float y) {
 }
 
 float widget::get_top() {
-  if (_y._kind == dimension::percent) {
-    float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();
-    return parent_size * _y._value / 100.0f;
-  } else {
-    return _y._value;
-  }
+  float parent_top = (_parent != nullptr) ? _parent->get_top() : 0;
+  float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();
+  return parent_top + _y->get_value(parent_size);
 }
 
 float widget::get_left() {
-  if (_x._kind == dimension::percent) {
-    float parent_size = (_parent != nullptr) ? _parent->get_width() : _gui->get_width();
-    return parent_size * _x._value / 100.0f;
-  } else {
-    return _x._value;
-  }
+  float parent_left = (_parent != nullptr) ? _parent->get_left() : 0;
+  float parent_size = (_parent != nullptr) ? _parent->get_width() : _gui->get_width();
+  return parent_left + _x->get_value(parent_size);
 }
 
 float widget::get_width() {
-  if (_width._kind == dimension::percent) {
-    float parent_size = (_parent != nullptr) ? _parent->get_width() : _gui->get_width();
-    return parent_size * _width._value / 100.0f;
-  } else {
-    return _width._value;
-  }
+  float parent_size = (_parent != nullptr) ? _parent->get_width() : _gui->get_width();
+  return _width->get_value(parent_size);
 }
 
 float widget::get_height() {
-  if (_height._kind == dimension::percent) {
-    float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();
-    return parent_size * _height._value / 100.0f;
-  } else {
-    return _height._value;
-  }
+  float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();
+  return _height->get_value(parent_size);
 }
 
 } }

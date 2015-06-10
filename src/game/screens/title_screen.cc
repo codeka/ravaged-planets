@@ -77,7 +77,8 @@ void title_screen::show() {
           << fw::gui::widget::click(std::bind(&title_screen::quit_clicked, this, std::placeholders::_1)))
       // "v1.2.3"
       << (fw::gui::builder<fw::gui::static_widget>()
-          << fw::gui::widget::position(fw::gui::px(40), fw::gui::px(300))
+          << fw::gui::widget::position(fw::gui::sum(fw::gui::pct(50.0f), fw::gui::px(100)),
+              fw::gui::sum(fw::gui::pct(100), fw::gui::px(-20)))
           << fw::gui::widget::size(fw::gui::px(500), fw::gui::px(16))
           << fw::gui::static_widget::text(fw::version_str));
   frmwrk->get_gui()->attach_widget(wnd);
