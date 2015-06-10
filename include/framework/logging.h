@@ -5,7 +5,6 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
 
 namespace fw {
 
@@ -34,11 +33,8 @@ namespace fw {
   class log_wrapper {
   private:
     boost::filesystem::path _filename;
-    boost::thread_specific_ptr<std::ostream> _log;
+    thread_local static std::ostream *_log;
     log_sink _sink;
-
-    // this is the cleanup function we'll use for when our thread exits
-    static void cleanup(std::ostream *stream);
 
   public:
     log_wrapper();
@@ -60,11 +56,11 @@ namespace fw {
   // to do the *actual* work...
   template<typename T>
   inline std::ostream &log_wrapper::operator <<(T const &t) {
-    std::ostream *log = _log.get();
+    std::ostream *log = _log;
     if (log == nullptr) {
       boost::iostreams::stream_buffer<log_sink> *buffer = new boost::iostreams::stream_buffer<log_sink>(_sink);
       log = new std::ostream(buffer);
-      _log.reset(log);
+      _log = log;
     }
 
     return (*log) << t;

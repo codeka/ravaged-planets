@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <boost/foreach.hpp>
 
 #include <framework/framework.h>
@@ -22,6 +23,9 @@ private:
 
 public:
   inline builder();
+  // Helper constructor which auto-adds a position and size property for the specified (x, y) and (width, height).
+  inline builder(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y, std::shared_ptr<dimension> width,
+      std::shared_ptr<dimension> height);
   inline ~builder();
 
   inline operator widget_type *();
@@ -31,6 +35,13 @@ public:
 
 template<class widget_type>
 inline builder<widget_type>::builder() {
+}
+
+template<class widget_type>
+inline builder<widget_type>::builder(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y,
+    std::shared_ptr<dimension> width, std::shared_ptr<dimension> height) {
+  _properties.push_back(widget::position(x, y));
+  _properties.push_back(widget::size(width, height));
 }
 
 template<class widget_type>

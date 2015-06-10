@@ -1,8 +1,8 @@
 #include <functional>
 #include <iostream>
 #include <stdint.h>
+#include <thread>
 #include <vector>
-#include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 
 #include <SDL.h>
@@ -171,7 +171,7 @@ void framework::reactivate() {/*
 
 void framework::run() {
   // kick off the update thread
-  boost::thread update_thread(boost::bind(&framework::update_proc, this));
+  std::thread update_thread(std::bind(&framework::update_proc, this));
 
   if (_graphics == nullptr) {
     wait_events();
@@ -230,7 +230,7 @@ void framework::update_proc() {
     }
 
     // TODO: should we yield or sleep for a while?
-    boost::this_thread::yield();
+    std::this_thread::yield();
   }
 }
 
@@ -296,8 +296,7 @@ bool framework::wait_events() {
   return true;
 }
 
-void framework::take_screenshot(int width, int height,
-    boost::function<void(fw::bitmap const &)> callback_fn) {
+void framework::take_screenshot(int width, int height, std::function<void(fw::bitmap const &)> callback_fn) {
   if (width == 0 || height == 0) {
     width = 640; // TODO
     height = 480; // TODO
@@ -361,7 +360,7 @@ void framework::take_screenshots(sg::scenegraph &scenegraph) {
   }
 
   // create a thread to finish the job
-  boost::thread t(boost::bind(&call_callacks_thread_proc, requests));
+  std::thread t(std::bind(&call_callacks_thread_proc, requests));
 
   _screenshots.clear();
 }

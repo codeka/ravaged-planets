@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <mutex>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -13,8 +14,10 @@ namespace fs = boost::filesystem;
 namespace fw {
 
   log_wrapper debug;
-  static boost::mutex mutex;
+  static std::mutex mutex;
   static bool log_to_console = false;
+
+  thread_local std::ostream *log_wrapper::_log;
 
   void logging_initialize() {
     settings stg;
@@ -36,8 +39,7 @@ namespace fw {
   }
 
   //-------------------------------------------------------------------------
-  log_wrapper::log_wrapper()
-    : _log(&log_wrapper::cleanup) {
+  log_wrapper::log_wrapper() {
   }
 
   void log_wrapper::initialize(fs::path const &filename) {
@@ -45,10 +47,6 @@ namespace fw {
     if (_filename != fs::path()) {
       _sink.open(_filename);
     }
-  }
-
-  void log_wrapper::cleanup(std::ostream *stream) {
-    delete stream;
   }
 
   //-------------------------------------------------------------------------
@@ -73,7 +71,7 @@ namespace fw {
     boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
 
     {
-      boost::lock_guard<boost::mutex> lock(mutex);
+      std::unique_lock<std::mutex> lock(mutex);
       if (_open) {
         (*_outs) << now << " : ";
         _outs->write(s, n);
