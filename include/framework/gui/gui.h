@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <vector>
 
 namespace fw {
@@ -16,7 +17,9 @@ class gui {
 private:
   fw::graphics *_graphics;
   drawable_manager *_drawable_manager;
+  std::mutex _top_level_widget_mutex;
   std::vector<widget *> _top_level_widgets;
+  std::vector<widget *> _pending_remove;
   widget *_widget_under_mouse;
   widget *_widget_mouse_down;
 

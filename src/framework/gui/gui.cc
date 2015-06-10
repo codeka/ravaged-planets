@@ -40,6 +40,13 @@ void gui::update(float dt) {
       _widget_under_mouse->on_mouse_over();
     }
   }
+
+  std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
+  BOOST_FOREACH(widget *wdgt, _pending_remove) {
+    _top_level_widgets.erase(std::find(_top_level_widgets.begin(), _top_level_widgets.end(), wdgt));
+    delete wdgt;
+  }
+  _pending_remove.clear();
 }
 
 bool gui::inject_mouse(int button, bool is_down) {
@@ -60,12 +67,14 @@ bool gui::inject_mouse(int button, bool is_down) {
 }
 
 void gui::render() {
+  std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
   BOOST_FOREACH(widget *widget, _top_level_widgets) {
     widget->render();
   }
 }
 
 widget *gui::get_widget_at(float x, float y) {
+  std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
   BOOST_FOREACH(widget *wdgt, _top_level_widgets) {
     widget *child = wdgt->get_child_at(x, y);
     if (child != nullptr) {
@@ -77,12 +86,12 @@ widget *gui::get_widget_at(float x, float y) {
 }
 
 void gui::attach_widget(widget *widget) {
+  std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
   _top_level_widgets.push_back(widget);
 }
 
 void gui::detach_widget(widget *widget) {
-  _top_level_widgets.erase(std::find(_top_level_widgets.begin(), _top_level_widgets.end(), widget));
-  delete widget;
+  _pending_remove.push_back(widget);
 }
 
 int gui::get_width() const {

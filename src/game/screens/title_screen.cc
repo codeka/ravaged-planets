@@ -1,10 +1,3 @@
-//#include "title/main_menu_window.h"
-//#include "title/new_game_window.h"
-//#include "title/join_game_window.h"
-//#include "title/new_ai_player_window.h"
-//#include "title/player_properties_window.h"
-//#include "title/login_box_window.h"
-
 #include <framework/framework.h>
 #include <framework/misc.h>
 #include <framework/gui/gui.h>
@@ -82,20 +75,6 @@ void title_screen::show() {
           << fw::gui::widget::size(fw::gui::px(500), fw::gui::px(16))
           << fw::gui::static_widget::text(fw::version_str));
   frmwrk->get_gui()->attach_widget(wnd);
-
-  /*
-  frmwrk->get_gui()->set_active_layout("title");
-
-  frmwrk->get_gui()->get_window("Title")->setVisible(true);
-  CEGUI::Window *version = frmwrk->get_gui()->get_window("Title/VersionText");
-  version->setText(fw::get_version_str().c_str());
-
-  CEGUI::Window *subtitle = frmwrk->get_gui()->get_window("Title/SubtitleText");
-  fw::gui::set_text(subtitle, (boost::format(fw::text("title.sub-title")) % "Dean Harding" % "dean@codeka.com").str());
-
-  login_box->show(); // always visible
-  main_menu->show();
-*/
 }
 
 bool title_screen::quit_clicked(fw::gui::widget *w) {
