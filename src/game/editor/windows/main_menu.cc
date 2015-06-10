@@ -3,6 +3,8 @@
 
 #include <framework/framework.h>
 #include <framework/gui/gui.h>
+#include <framework/gui/builder.h>
+#include <framework/gui/window.h>
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
 
@@ -18,6 +20,8 @@ namespace ed {
 
 main_menu_window *main_menu = nullptr;
 
+fw::gui::window *wnd;
+
 main_menu_window::main_menu_window() {
 }
 
@@ -25,6 +29,13 @@ main_menu_window::~main_menu_window() {
 }
 
 void main_menu_window::initialize() {
+  wnd = fw::gui::builder<fw::gui::window>()
+      << fw::gui::widget::position(fw::gui::px(0), fw::gui::px(0))
+      << fw::gui::widget::size(fw::gui::pct(100), fw::gui::px(20))
+      << fw::gui::window::background("frame");
+  fw::framework *frmwrk = fw::framework::get_instance();
+  frmwrk->get_gui()->attach_widget(wnd);
+
 /*
   subscribe("TopMenu/File/New", CEGUI::MenuItem::EventClicked,
       CEGUI::SubscriberSlot(&main_menu_window::file_new_clicked, this));
