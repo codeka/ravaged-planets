@@ -19,7 +19,9 @@
       <outer pos="53,1" size="26,26" />
       <inner pos="59,7" size="14,14" />
     </ninepatch>
-    </image>
+    <drawable name="menu_normal" pos="3,100" size="16,16" />
+    <drawable name="menu_hover" pos="55,31" size="16,16" />
+  </image>
 
   <image src="test.png">
     <ninepatch name="test">

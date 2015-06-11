@@ -47,9 +47,24 @@ public:
   }
 };
 
+/** Property that sets the alignment of text on the button. */
+class button_text_align_property : public property {
+private:
+  button::alignment _text_align;
+public:
+  button_text_align_property(button::alignment text_align) :
+      _text_align(text_align) {
+  }
+
+  void apply(widget *widget) {
+    button *btn = dynamic_cast<button *>(widget);
+    btn->_text_align = _text_align;
+  }
+};
+
 //-----------------------------------------------------------------------------
 
-button::button(gui *gui) : widget(gui) {
+button::button(gui *gui) : widget(gui), _text_align(center) {
 }
 
 button::~button() {
@@ -65,6 +80,10 @@ property *button::background(std::shared_ptr<drawable> drawable) {
 
 property *button::text(std::string const &text) {
   return new button_text_property(text);
+}
+
+property *button::text_align(button::alignment align) {
+  return new button_text_align_property(align);
 }
 
 void button::on_attached_to_parent(widget *parent) {
@@ -97,9 +116,15 @@ void button::render() {
   }
 
   if (_text.length() > 0) {
-    fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        get_left() + get_width() / 2, get_top() + get_height() / 2, _text,
-        static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
+    if (_text_align == left) {
+      fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+          get_left() + 4, get_top() + get_height() / 2, _text,
+          static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
+    } else if (_text_align == center) {
+      fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+          get_left() + get_width() / 2, get_top() + get_height() / 2, _text,
+          static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
+    }
   }
 }
 

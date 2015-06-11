@@ -4,6 +4,8 @@
 #include <framework/framework.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/button.h>
+#include <framework/gui/drawable.h>
 #include <framework/gui/window.h>
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
@@ -18,23 +20,51 @@
 
 namespace ed {
 
+using namespace fw::gui;
+
+/**
+ * We implement the menu item logic here, since there's only one place in the whole game that uses
+ * a menu item like this.
+ */
+class menu_item : public button {
+public:
+  menu_item(gui *gui);
+  virtual ~menu_item();
+
+  void on_attached_to_parent(widget *parent);
+};
+
+menu_item::menu_item(gui *gui) : button(gui) {
+}
+
+menu_item::~menu_item() {
+}
+
+void menu_item::on_attached_to_parent(widget *parent) {
+  state_drawable *bkgnd = new state_drawable();
+  bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("menu_normal"));
+  bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("menu_hover"));
+  _background = std::shared_ptr<drawable>(bkgnd);
+
+  _text_align = button::left;
+}
+
+//-----------------------------------------------------------------------------
+
 main_menu_window *main_menu = nullptr;
 
-fw::gui::window *wnd;
-
-main_menu_window::main_menu_window() {
+main_menu_window::main_menu_window() : _wnd(nullptr) {
 }
 
 main_menu_window::~main_menu_window() {
 }
 
 void main_menu_window::initialize() {
-  wnd = fw::gui::builder<fw::gui::window>()
-      << fw::gui::widget::position(fw::gui::px(0), fw::gui::px(0))
-      << fw::gui::widget::size(fw::gui::pct(100), fw::gui::px(20))
-      << fw::gui::window::background("frame");
+  _wnd = builder<window>(px(0), px(0), pct(100), px(20)) << window::background("frame")
+      << (builder<menu_item>(px(0), px(0), px(50), px(20)) << button::text("File"))
+      << (builder<menu_item>(px(50), px(0), px(50), px(20)) << button::text("Tool"));
   fw::framework *frmwrk = fw::framework::get_instance();
-  frmwrk->get_gui()->attach_widget(wnd);
+  frmwrk->get_gui()->attach_widget(_wnd);
 
 /*
   subscribe("TopMenu/File/New", CEGUI::MenuItem::EventClicked,
