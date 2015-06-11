@@ -1,4 +1,13 @@
 cmake_minimum_required (VERSION 3.1)
+
+# The eclipse generator still doesn't generate the correct values for __cplusplus unless I also do this.
+# We need to run this BEFORE project() because the command project() runs to determine compiler support
+# will not run it otherwise.
+if(${CMAKE_EXTRA_GENERATOR} MATCHES "Eclipse CDT4")
+    set(CMAKE_CXX_COMPILER_ARG1 "-std=c++11" CACHE STRING "C++ version for eclipse" FORCE)
+    set(CMAKE_ECLIPSE_VERSION "4.4" CACHE STRING "Eclipse version" FORCE)
+endif()
+
 project (RavagedPlanets)
 
 # Add our custom CMAKE modules
@@ -26,7 +35,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
     add_definitions(-rdynamic)
 endif()
 
-include_directories(include external/include)
+include_directories(include external/include external/include/SDL)
 if (UNIX)
     link_directories(external/lib/linux)
 endif()
@@ -43,7 +52,7 @@ find_package(GLEW REQUIRED)
 if(UNIX)
     # I don't know why, but libSDL is importing symbols from libX11.
     find_package(X11 REQUIRED)
-    list(APPEND SDL2_LIBRARY ${X11_LIBRARIES})
+    list(APPEND SDL2_LIBRARY ${X11_LIBRARIES} pthread)
 endif()
 
 include_directories(${Boost_INCLUDE_DIR})

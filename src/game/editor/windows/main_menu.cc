@@ -53,7 +53,7 @@ void menu_item::on_attached_to_parent(widget *parent) {
 
 main_menu_window *main_menu = nullptr;
 
-main_menu_window::main_menu_window() : _wnd(nullptr) {
+main_menu_window::main_menu_window() : _wnd(nullptr), _file_menu(nullptr) {
 }
 
 main_menu_window::~main_menu_window() {

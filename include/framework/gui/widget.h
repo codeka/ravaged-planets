@@ -64,32 +64,14 @@ inline std::shared_ptr<dimension> sum(std::shared_ptr<dimension> one, std::share
   return std::shared_ptr<dimension>(new sum_dimension(one, two));
 }
 
-class position_property : public property {
-private:
-  std::shared_ptr<dimension> _x;
-  std::shared_ptr<dimension> _y;
-public:
-  position_property(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y);
-  void apply(widget *widget);
-};
-
-class size_property : public property {
-private:
-  std::shared_ptr<dimension> _width;
-  std::shared_ptr<dimension> _height;
-public:
-  size_property(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height);
-  void apply(widget *widget);
-};
-
 /**
  * This is the base class of all widgets in the GUI. A widget has a specific position within it's parent, size and
  * so on.
  */
 class widget {
 protected:
-  friend class position_property;
-  friend class size_property;
+  friend class widget_position_property;
+  friend class widget_size_property;
   friend class widget_click_property;
 
   gui *_gui;
@@ -99,18 +81,15 @@ protected:
   std::shared_ptr<dimension> _y;
   std::shared_ptr<dimension> _width;
   std::shared_ptr<dimension> _height;
+  bool _visible;
   std::function<bool(widget *)> _on_click;
 
 public:
   widget(gui *gui);
   virtual ~widget();
 
-  static inline property *position(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y) {
-    return new position_property(x, y);
-  }
-  static inline property *size(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height) {
-    return new size_property(width, height);
-  }
+  static property *position(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y);
+  static property *size(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height);
   static property *click(std::function<bool(widget *)> on_click);
 
   void attach_child(widget *child);
@@ -140,6 +119,13 @@ public:
   float get_left();
   float get_width();
   float get_height();
+
+  bool is_visible() const {
+    return _visible;
+  }
+  void set_visible(bool visible) {
+    _visible = visible;
+  }
 };
 
 } }

@@ -16,6 +16,7 @@ class editor_screen;
 class main_menu_window {
 private:
   fw::gui::window *_wnd;
+  fw::gui::window *_file_menu;
 
   bool file_new_clicked(fw::gui::widget *w);
   bool file_save_clicked(fw::gui::widget *w);

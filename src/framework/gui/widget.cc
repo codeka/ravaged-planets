@@ -51,25 +51,43 @@ float sum_dimension::get_value(float parent_value) {
 
 //-----------------------------------------------------------------------------
 
-position_property::position_property(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y) :
+//-----------------------------------------------------------------------------
+class widget_position_property : public property {
+private:
+  std::shared_ptr<dimension> _x;
+  std::shared_ptr<dimension> _y;
+public:
+  widget_position_property(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y);
+  void apply(widget *widget);
+};
+
+widget_position_property::widget_position_property(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y) :
     _x(x), _y(y) {
 }
 
-void position_property::apply(widget *widget) {
+void widget_position_property::apply(widget *widget) {
   widget->_x = _x;
   widget->_y = _y;
 }
 
-size_property::size_property(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height) :
+class widget_size_property : public property {
+private:
+  std::shared_ptr<dimension> _width;
+  std::shared_ptr<dimension> _height;
+public:
+  widget_size_property(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height);
+  void apply(widget *widget);
+};
+
+widget_size_property::widget_size_property(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height) :
     _width(width), _height(height) {
 }
 
-void size_property::apply(widget *widget) {
+void widget_size_property::apply(widget *widget) {
   widget->_width = _width;
   widget->_height = _height;
 }
 
-//-----------------------------------------------------------------------------
 class widget_click_property : public property {
 private:
   std::function<bool(widget *)> _on_click;
@@ -86,10 +104,18 @@ public:
 //-----------------------------------------------------------------------------
 
 widget::widget(gui *gui) :
-    _gui(gui), _parent(nullptr) {
+    _gui(gui), _parent(nullptr), _visible(true) {
 }
 
 widget::~widget() {
+}
+
+property *widget::position(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y) {
+  return new widget_position_property(x, y);
+}
+
+property *widget::size(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height) {
+  return new widget_size_property(width, height);
 }
 
 property *widget::click(std::function<bool(widget *)> on_click) {
