@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <boost/exception/all.hpp>
 #include <boost/program_options.hpp>
 
 #include <framework/bitmap.h>
