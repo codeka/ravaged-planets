@@ -112,10 +112,13 @@ public:
   virtual bool on_mouse_up();
 
   /**
-   * Gets the child widget at the given (x,y). If the point is outside our bounding box, the null is returned. If
+   * Gets the child widget at the given (x,y). If the point is outside our bounding box, then null is returned. If
    * none of our children are contained within the given (x,y) then \code this is returned.
    */
   widget *get_child_at(float x, float y);
+
+  /** Returns true if the given widget is a child (or a child of a child...) of us. */
+  bool is_child(widget *w);
 
   float get_top();
   float get_left();

@@ -72,7 +72,8 @@ void main_menu_window::initialize() {
       << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("New"))
       << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Open"))
       << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Save"))
-      << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit"));
+      << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit")
+          << widget::click(std::bind(&main_menu_window::file_quit_clicked, this, _1)));
   fw::framework *frmwrk = fw::framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
   frmwrk->get_gui()->attach_widget(_file_menu);
@@ -118,7 +119,9 @@ void main_menu_window::initialize() {
  * of our menus (or you clicked on blank space) then we need to hide the menus.
  */
 void main_menu_window::global_click_handler(int button, bool is_down, fw::gui::widget *w) {
-  _file_menu->set_visible(false);
+  if (_file_menu->is_visible() && !_file_menu->is_child(w)) {
+    _file_menu->set_visible(false);
+  }
 }
 
 bool main_menu_window::file_clicked(fw::gui::widget *w) {

@@ -197,6 +197,18 @@ widget *widget::get_child_at(float x, float y) {
   return this;
 }
 
+bool widget::is_child(widget *w) {
+  BOOST_FOREACH(widget *child, _children) {
+    if (w == child) {
+      return true;
+    } else if (child->is_child(w)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 float widget::get_top() {
   float parent_top = (_parent != nullptr) ? _parent->get_top() : 0;
   float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();
