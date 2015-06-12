@@ -11,6 +11,7 @@
 
 #include <game/application.h>
 #include <game/screens/screen.h>
+#include <game/screens/game_screen.h>
 #include <game/screens/title_screen.h>
 
 namespace rp {
@@ -57,7 +58,7 @@ bool title_screen::quit_clicked(fw::gui::widget *w) {
 
 bool title_screen::newgame_clicked(fw::gui::widget *w) {
   rp::application *app = dynamic_cast<rp::application *>(fw::framework::get_instance()->get_app());
-  app->get_screen()->set_active_screen("game");
+  app->get_screen()->set_active_screen("game", std::shared_ptr<screen_options>(new game_screen_options()));
   return true;
 }
 

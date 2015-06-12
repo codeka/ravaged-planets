@@ -41,6 +41,7 @@ private:
   std::string _description;
   std::string _name;
   std::string _author;
+  bool _initialized;
 
   static world *_instance;
 

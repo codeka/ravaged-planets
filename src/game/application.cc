@@ -55,12 +55,18 @@ void application::destroy() {
 }
 
 void application::update(float dt) {
-  _screen->get_active_screen()->update();
+  screen *active = _screen->get_active_screen();
+  if (active != nullptr) {
+    active->update();
+  }
 //  session::get_instance()->update(dt);
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {
-  _screen->get_active_screen()->render(scenegraph);
+  screen *active = _screen->get_active_screen();
+  if (active != nullptr) {
+    active->render(scenegraph);
+  }
 }
 
 }

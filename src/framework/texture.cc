@@ -103,7 +103,7 @@ void texture::create(std::shared_ptr<fw::bitmap> bmp, bool dynamic) {
 void texture::create(fw::bitmap const &bmp, bool dynamic) {
   graphics *g = fw::framework::get_instance()->get_graphics();
 
-  if (_data == nullptr) {
+  if (!_data) {
     _data = std::shared_ptr<texture_data>(new texture_data());
   }
   _data->width = bmp.get_width();
@@ -115,6 +115,11 @@ void texture::create(fw::bitmap const &bmp, bool dynamic) {
 }
 
 void texture::bind() {
+  if (!_data) {
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
+    return;
+  }
+
   FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));

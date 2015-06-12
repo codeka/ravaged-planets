@@ -35,7 +35,7 @@ namespace rp {
 world *world::_instance = nullptr;
 
 world::world(std::shared_ptr<world_reader> reader) :
-    _reader(reader), /*_entities(0),*/ _terrain(nullptr)/*, _pathing(0)*/ {
+    _reader(reader), /*_entities(0),*/ _terrain(nullptr)/*, _pathing(0)*/, _initialized(false) {
   //_cursor = new cursor_handler();
   world::set_instance(this);
 }
@@ -78,6 +78,7 @@ void world::initialize() {
             boost::bind(&world::on_key_pause, this, _1, _2)));
   }*/
   _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
+  _initialized = true;
 }
 
 void world::destroy() {
@@ -166,6 +167,10 @@ void world::update() {
 }
 
 void world::render(fw::sg::scenegraph &scenegraph) {
+  if (!_initialized) {
+    return;
+  }
+
   _terrain->render(scenegraph);
 
  // if (_entities != nullptr) {

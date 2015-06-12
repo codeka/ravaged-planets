@@ -50,12 +50,13 @@ void screen_stack::set_active_screen(std::string const &name,
 
   if (_active != name) {
     if (_active != "") {
-      _screens[_active]->hide();
+      std::string old_active = _active;
+      _active = "";
+      _screens[old_active]->hide();
     }
-
-    _active = name;
     _screens[name]->set_options(options);
     _screens[name]->show();
+    _active = name;
   }
 }
 

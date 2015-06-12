@@ -30,6 +30,7 @@ public:
   world_create() : _width(0), _height(0) {
   }
   world_create(int width, int height) : _width(width), _height(height) {
+    _terrain = create_terrain(width, height);
   }
 };
 
@@ -89,6 +90,10 @@ void game_screen::update() {
 }
 
 void game_screen::render(fw::sg::scenegraph &scenegraph) {
+  if (_world == nullptr) {
+    return;
+  }
+
   // set up the properties of the sun that we'll use to light and also cast shadows
   fw::vector sun(0.485f, 0.485f, 0.727f);
   fw::camera *old_cam = fw::framework::get_instance()->get_camera();

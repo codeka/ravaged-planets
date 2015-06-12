@@ -116,7 +116,7 @@ void terrain::bake_patch(int patch_x, int patch_z) {
     patch->shader_params->set_texture("layer3", _layers[2]);
   if (_layers.size() >= 4)
     patch->shader_params->set_texture("layer4", _layers[3]);
-  patch->shader_params->set_texture("splatt", patch->texture);
+ // patch->shader_params->set_texture("splatt", patch->texture);
 }
 
 void terrain::ensure_patches() {
