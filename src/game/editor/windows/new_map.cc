@@ -6,6 +6,7 @@
 #include <framework/gui/gui.h>
 #include <framework/gui/window.h>
 #include <framework/gui/button.h>
+#include <framework/gui/textedit.h>
 #include <framework/gui/static_widget.h>
 #include <game/application.h>
 #include <game/screens/screen.h>
@@ -32,7 +33,9 @@ void new_map_window::initialize() {
   _wnd = builder<window>(sum(pct(50), px(-100)), sum(pct(50), px(-100)), px(200), px(100))
           << window::background("frame") << widget::visible(false)
       << (builder<static_widget>(px(10), px(10), sum(pct(100), px(-20)), px(18)) << static_widget::text("Size:"))
+      << (builder<textedit>(px(10), px(30), sum(pct(50), px(-20)), px(20)) << textedit::text("4"))
       << (builder<static_widget>(sum(pct(50), px(-8)), px(30), px(16), px(20)) << static_widget::text("x"))
+      << (builder<textedit>(sum(pct(50), px(10)), px(30), sum(pct(50), px(-20)), px(20)) << textedit::text("4"))
       << (builder<button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) << button::text("Create")
           << widget::click(std::bind(&new_map_window::ok_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20)) << button::text("Cancel")

@@ -6,6 +6,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
+#include <framework/colour.h>
 #include <framework/vector.h>
 
 /* Cut'n'pasted from the freetype.h header so we don't have to include that whole thing. */
@@ -54,9 +55,9 @@ private:
    */
   std::map<std::basic_string<uint32_t>, std::shared_ptr<string_cache_entry>> _string_cache;
 
+  void ensure_glyph(uint32_t ch);
   void ensure_glyphs(std::basic_string<uint32_t> const &str);
-  void draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags);
-  fw::point measure_string(std::basic_string<uint32_t> const &str);
+  void draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags, fw::colour colour);
   std::shared_ptr<string_cache_entry> get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
   std::shared_ptr<string_cache_entry> create_cache_entry(std::basic_string<uint32_t> const &str);
 public:
@@ -79,11 +80,16 @@ public:
 
   /** Measures the given string and returns the width/height of the final rendered string. */
   fw::point measure_string(std::string const &str);
+  fw::point measure_string(std::basic_string<uint32_t> const &str);
+
+  /** Measures a single glyph. */
+  fw::point measure_glyph(uint32_t ch);
 
   /**
    * Draws the given string on the screen at the given (x,y) coordinates.
    */
-  void draw_string(int x, int y, std::string const &str, draw_flags flags = draw_default);
+  void draw_string(int x, int y, std::string const &str, draw_flags flags = draw_default,
+      fw::colour colour = fw::colour::WHITE());
 };
 
 class font_manager {

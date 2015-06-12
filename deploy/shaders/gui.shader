@@ -24,6 +24,16 @@
       color = texture(texsampler, tex);
     }
   ]]></source>
+  <source name="fragment-font"><![CDATA[
+    uniform vec4 colour;
+    uniform sampler2D texsampler;
+    in vec2 tex;
+    out vec4 color;
+
+    void main() {
+      color = texture(texsampler, tex) * colour;
+    }
+  ]]></source>
   <source name="fragment-ninepatch"><![CDATA[
     in vec2 tex;
     uniform sampler2D texsampler;
@@ -99,6 +109,13 @@
   <program name="default">
     <vertex-shader source="vertex" />
     <fragment-shader source="fragment-normal" />
+    <state name="z-write" value="off" />
+    <state name="z-test" value="off" />
+    <state name="blend" value="alpha" />
+  </program>
+  <program name="font">
+    <vertex-shader source="vertex" />
+    <fragment-shader source="fragment-font" />
     <state name="z-write" value="off" />
     <state name="z-test" value="off" />
     <state name="blend" value="alpha" />

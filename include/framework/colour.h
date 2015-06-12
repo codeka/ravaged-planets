@@ -164,6 +164,13 @@ public:
     float a = (bgra & 0x000000FF) / 255.0;
     return colour(a, r, g, b);
   }
+
+  static colour WHITE() {
+    return fw::colour(1.0f, 1.0f, 1.0f, 1.0f);
+  }
+  static colour BLACK() {
+    return fw::colour(1.0f, 0.0f, 0.0f, 0.0f);
+  }
 };
 
 inline bool operator ==(fw::colour const &lhs, fw::colour const &rhs) {

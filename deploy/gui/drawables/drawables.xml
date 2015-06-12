@@ -21,6 +21,10 @@
     </ninepatch>
     <drawable name="menu_normal" pos="3,100" size="16,16" />
     <drawable name="menu_hover" pos="55,31" size="16,16" />
+    <ninepatch name="textedit">
+      <outer pos="130,31" size="14,14" />
+      <inner pos="132,33" size="10,10" />
+    </ninepatch>
   </image>
 
   <image src="test.png">

@@ -139,44 +139,48 @@ void font_face::ensure_glyphs(std::string const &str) {
   ensure_glyphs(conv::utf_to_utf<uint32_t>(str));
 }
 
+void font_face::ensure_glyph(uint32_t ch) {
+  if (_glyphs.find(ch) != _glyphs.end()) {
+    // Already cached.
+    return;
+  }
+
+  int glyph_index = FT_Get_Char_Index(_face, ch);
+
+  // Load the glyph into the glyph slot and render it if it's not a bitmap
+  FT_CHECK(FT_Load_Glyph(_face, glyph_index, FT_LOAD_DEFAULT));
+  if (_face->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
+    // TODO: FT_RENDER_MODE_LCD?
+    FT_CHECK(FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL));
+  }
+
+  // TODO: better bitmap packing than just a straight grid
+  int glyphs_per_row = _bitmap->get_width() / _size;
+  int offset_y = _glyphs.size() / glyphs_per_row;
+  int offset_x = (_glyphs.size() - (offset_y * glyphs_per_row));
+  offset_y *= _size;
+  offset_x *= _size;
+
+  for (int y = 0; y < _face->glyph->bitmap.rows; y++) {
+    for (int x = 0; x < _face->glyph->bitmap.width; x++) {
+      uint32_t rgba = 0x00ffffff | (
+          _face->glyph->bitmap.buffer[y * _face->glyph->bitmap.width + x] << 24);
+      _bitmap->set_pixel(offset_x + x, offset_y + y, rgba);
+    }
+  }
+
+  std::string chstr = conv::utf_to_utf<char>(std::basic_string<uint32_t>({ch, 0}));
+  _glyphs[ch] = new glyph(ch, glyph_index, offset_x, offset_y,
+      _face->glyph->advance.x / 64.0f, _face->glyph->advance.y / 64.0f, _face->glyph->bitmap_left,
+      _face->glyph->bitmap_top, _face->glyph->bitmap.width, _face->glyph->bitmap.rows,
+      _face->glyph->metrics.horiBearingY / 64.0f,
+      (_face->glyph->metrics.height - _face->glyph->metrics.horiBearingY) / 64.0f);
+  _texture_dirty = true;
+}
+
 void font_face::ensure_glyphs(std::basic_string<uint32_t> const &str) {
   BOOST_FOREACH(uint32_t ch, str) {
-    if (_glyphs.find(ch) != _glyphs.end()) {
-      // Already cached.
-      continue;
-    }
-
-    int glyph_index = FT_Get_Char_Index(_face, ch);
-
-    // Load the glyph into the glyph slot and render it if it's not a bitmap
-    FT_CHECK(FT_Load_Glyph(_face, glyph_index, FT_LOAD_DEFAULT));
-    if (_face->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
-      // TODO: FT_RENDER_MODE_LCD?
-      FT_CHECK(FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL));
-    }
-
-    // TODO: better bitmap packing than just a straight grid
-    int glyphs_per_row = _bitmap->get_width() / _size;
-    int offset_y = _glyphs.size() / glyphs_per_row;
-    int offset_x = (_glyphs.size() - (offset_y * glyphs_per_row));
-    offset_y *= _size;
-    offset_x *= _size;
-
-    for (int y = 0; y < _face->glyph->bitmap.rows; y++) {
-      for (int x = 0; x < _face->glyph->bitmap.width; x++) {
-        uint32_t rgba = 0x00ffffff | (
-            _face->glyph->bitmap.buffer[y * _face->glyph->bitmap.width + x] << 24);
-        _bitmap->set_pixel(offset_x + x, offset_y + y, rgba);
-      }
-    }
-
-    std::string chstr = conv::utf_to_utf<char>(std::basic_string<uint32_t>({ch, 0}));
-    _glyphs[ch] = new glyph(ch, glyph_index, offset_x, offset_y,
-        _face->glyph->advance.x / 64.0f, _face->glyph->advance.y / 64.0f, _face->glyph->bitmap_left,
-        _face->glyph->bitmap_top, _face->glyph->bitmap.width, _face->glyph->bitmap.rows,
-        _face->glyph->metrics.horiBearingY / 64.0f,
-        (_face->glyph->metrics.height - _face->glyph->metrics.horiBearingY) / 64.0f);
-    _texture_dirty = true;
+    ensure_glyph(ch);
   }
 }
 
@@ -189,11 +193,19 @@ fw::point font_face::measure_string(std::basic_string<uint32_t> const &str) {
   return data->size;
 }
 
-void font_face::draw_string(int x, int y, std::string const &str, draw_flags flags /*= 0*/) {
-  draw_string(x, y, conv::utf_to_utf<uint32_t>(str), flags);
+fw::point font_face::measure_glyph(uint32_t ch) {
+  ensure_glyph(ch);
+  glyph *g = _glyphs[ch];
+  float y = g->distance_from_baseline_to_top + g->distance_from_baseline_to_bottom;
+  return fw::point(g->advance_x, y);
 }
 
-void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags /*= 0*/) {
+void font_face::draw_string(int x, int y, std::string const &str, draw_flags flags /*= 0*/,
+    fw::colour colour /*= fw::colour::WHITE*/) {
+  draw_string(x, y, conv::utf_to_utf<uint32_t>(str), flags, colour);
+}
+
+void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags, fw::colour colour) {
   std::shared_ptr<string_cache_entry> data = get_or_create_cache_entry(str);
 
   if (_texture_dirty) {
@@ -219,6 +231,7 @@ void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str
 
   data->shader_params->set_matrix("pos_transform", pos_transform);
   data->shader_params->set_matrix("uv_transform", fw::identity());
+  data->shader_params->set_colour("colour", colour);
 
   _texture->bind();
   data->vb->begin();
@@ -292,6 +305,7 @@ std::shared_ptr<string_cache_entry> font_face::create_cache_entry(std::basic_str
 
   std::shared_ptr<fw::shader> shader = fw::shader::create("gui.shader");
   std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
+  shader_params->set_program_name("font");
 
   return std::shared_ptr<string_cache_entry>(new string_cache_entry(vb, ib, shader, shader_params,
       fw::point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom));
