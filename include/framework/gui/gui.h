@@ -25,6 +25,7 @@ private:
   std::vector<widget *> _pending_remove;
   widget *_widget_under_mouse;
   widget *_widget_mouse_down;
+  widget *_focused;
 
   /** Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget. */
   widget *get_widget_at(float x, float y);
@@ -48,11 +49,17 @@ public:
   /** Destroys the given top-level widget, unhooks any signals and removes it from the screen. */
   void detach_widget(widget *widget);
 
+  /** Give the specified widget input focus. Keystrokes will be sent to this widget only. */
+  void focus(widget *widget);
+
   int get_width() const;
   int get_height() const;
 
   /** Injects a mouse button up/down event, returns true if we handled it or false if it should be passed through. */
-  bool inject_mouse(int button, bool is_down);
+  bool inject_mouse(int button, bool is_down, float x, float y);
+
+  /** Injects a key press, returns true if we handled it or false if it should be passed through. */
+  bool inject_key(int key, bool is_down);
 
   /** Global 'click' signal, fired whenever you click the mouse. Widget may be null if you clicked on no widget. */
   boost::signals2::signal<void(int button, bool is_down, widget *widget)> sig_click;

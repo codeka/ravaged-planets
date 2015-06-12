@@ -157,17 +157,31 @@ void widget::detach_child(widget *child) {
 void widget::on_attached_to_parent(widget *parent) {
 }
 
+void widget::on_focus_gained() {
+  _focused = true;
+}
+
+void widget::on_focus_lost() {
+  _focused = false;
+}
+
+void widget::update(float dt) {
+  BOOST_FOREACH(widget *child, _children) {
+    child->update(dt);
+  }
+}
+
 void widget::render() {
   BOOST_FOREACH(widget *child, _children) {
     child->render();
   }
 }
 
-bool widget::on_mouse_down() {
+bool widget::on_mouse_down(float x, float y) {
   return _on_click != nullptr;
 }
 
-bool widget::on_mouse_up() {
+bool widget::on_mouse_up(float x, float y) {
   if (_on_click) {
     return _on_click(this);
   }

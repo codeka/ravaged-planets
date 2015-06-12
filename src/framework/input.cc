@@ -213,10 +213,15 @@ void input::update(float dt) {
 
 /** Called on the render thread when an event is received. We queue it up to actually run on the update thread. */
 void input::process_event(SDL_Event &event) {
+  fw::gui::gui *gui = fw::framework::get_instance()->get_gui();
   if (event.type == SDL_KEYDOWN) {
-    callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, true);
+    if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), true)) {
+      callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, true);
+    }
   } else if (event.type == SDL_KEYUP) {
-    callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, false);
+    if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), false)) {
+      callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, false);
+    }
   } else if (event.type == SDL_TEXTINPUT) {
     // TODO
   } else if (event.type == SDL_MOUSEMOTION) {
@@ -245,12 +250,12 @@ void input::process_event(SDL_Event &event) {
     }
   } else if (event.type == SDL_MOUSEBUTTONDOWN) {
     int keycode = 0xffffff00 + (event.button.button - 1);
-    if (!fw::framework::get_instance()->get_gui()->inject_mouse(event.button.button, true)) {
+    if (!gui->inject_mouse(event.button.button, true, g_mx, g_my)) {
       callback(keycode, 0, true);
     }
   } else if (event.type == SDL_MOUSEBUTTONUP) {
     int keycode = 0xffffff00 + (event.button.button - 1);
-    if (!fw::framework::get_instance()->get_gui()->inject_mouse(event.button.button, false)) {
+    if (!gui->inject_mouse(event.button.button, false, g_mx, g_my)) {
       callback(keycode, 0, false);
     }
   }

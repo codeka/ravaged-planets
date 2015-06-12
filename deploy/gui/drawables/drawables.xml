@@ -25,6 +25,8 @@
       <outer pos="130,31" size="14,14" />
       <inner pos="132,33" size="10,10" />
     </ninepatch>
+    <drawable name="textedit_selection" pos="55,31" size="16,16" />
+    <drawable name="textedit_cursor" pos="176,3" size="2,19" />
   </image>
 
   <image src="test.png">

@@ -193,6 +193,21 @@ fw::point font_face::measure_string(std::basic_string<uint32_t> const &str) {
   return data->size;
 }
 
+fw::point font_face::measure_substring(std::basic_string<uint32_t> const &str, int pos, int num_chars) {
+  ensure_glyphs(str);
+
+  fw::point size(0, 0);
+  for (int i = pos; i < pos + num_chars; i++) {
+    fw::point glyph_size = measure_glyph(str[i]);
+    size[0] += glyph_size[0];
+    if (size[1] < glyph_size[1]) {
+      size[1] = glyph_size[1];
+    }
+  }
+
+  return size;
+}
+
 fw::point font_face::measure_glyph(uint32_t ch) {
   ensure_glyph(ch);
   glyph *g = _glyphs[ch];

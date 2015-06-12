@@ -6,6 +6,8 @@
 #include <framework/gui/property.h>
 #include <framework/gui/widget.h>
 
+class textedit_buffer;
+
 namespace fw { namespace gui {
 class gui;
 class drawable;
@@ -15,8 +17,12 @@ class textedit : public widget {
 private:
   friend class textedit_text_property;
 
-  std::string _text;
+  textedit_buffer *_buffer;
   std::shared_ptr<drawable> _background;
+  std::shared_ptr<drawable> _selection_background;
+  std::shared_ptr<drawable> _cursor;
+  bool _draw_cursor;
+  float _cursor_flip_time;
 
 public:
   textedit(gui *gui);
@@ -24,7 +30,20 @@ public:
 
   static property *text(std::string const &text);
 
-  void render();
+  virtual void on_focus_gained();
+  virtual void on_focus_lost();
+  virtual bool on_key(int key, bool is_down);
+  virtual bool on_mouse_down(float x, float y);
+  virtual bool on_mouse_up(float x, float y);
+
+  virtual bool can_focus() const {
+    return true;
+  }
+
+  void select_all();
+
+  virtual void update(float dt);
+  virtual void render();
 };
 
 } }

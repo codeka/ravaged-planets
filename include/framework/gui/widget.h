@@ -83,6 +83,7 @@ protected:
   std::shared_ptr<dimension> _width;
   std::shared_ptr<dimension> _height;
   bool _visible;
+  bool _focused;
   std::function<bool(widget *)> _on_click;
 
 public:
@@ -98,6 +99,20 @@ public:
   void detach_child(widget *child);
   virtual void on_attached_to_parent(widget *parent);
 
+  virtual void on_focus_gained();
+  virtual void on_focus_lost();
+
+  /** Called when a key is pressed. Only called when this widget has focus. */
+  virtual bool on_key(int key, bool is_down) {
+    return false;
+  }
+
+  /** Override this if you want your widget to accept input focus. */
+  virtual bool can_focus() const {
+    return false;
+  }
+
+  virtual void update(float dt);
   virtual void render();
 
   /** Called when the mouse moves out of this widget. */
@@ -108,8 +123,11 @@ public:
   virtual void on_mouse_over() {
   }
 
-  virtual bool on_mouse_down();
-  virtual bool on_mouse_up();
+  /** Called when the mouse is pressed down, (x,y) is relative to this widget's origin. */
+  virtual bool on_mouse_down(float x, float y);
+
+  /** Called when the mouse is released, (x,y) is relative to this widget's origin. */
+  virtual bool on_mouse_up(float x, float y);
 
   /**
    * Gets the child widget at the given (x,y). If the point is outside our bounding box, then null is returned. If

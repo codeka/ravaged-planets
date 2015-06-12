@@ -12,7 +12,8 @@
 namespace fw { namespace gui {
 
 gui::gui() :
-  _graphics(nullptr), _drawable_manager(nullptr), _widget_under_mouse(nullptr), _widget_mouse_down(nullptr) {
+  _graphics(nullptr), _drawable_manager(nullptr), _widget_under_mouse(nullptr), _widget_mouse_down(nullptr),
+  _focused(nullptr) {
 }
 
 gui::~gui() {
@@ -47,25 +48,52 @@ void gui::update(float dt) {
     delete wdgt;
   }
   _pending_remove.clear();
+
+  BOOST_FOREACH(widget *widget, _top_level_widgets) {
+    if (widget->is_visible()) {
+      widget->update(dt);
+    }
+  }
 }
 
-bool gui::inject_mouse(int button, bool is_down) {
+bool gui::inject_mouse(int button, bool is_down, float x, float y) {
   if (button != 1 || (is_down && _widget_under_mouse == nullptr)
       || (!is_down && _widget_mouse_down == nullptr)) {
     sig_click(button, is_down, nullptr);
+    if (_focused != nullptr) {
+      _focused->on_focus_lost();
+      _focused = nullptr;
+    }
     return false;
   }
+
+  x -= _widget_under_mouse->get_left();
+  y -= _widget_under_mouse->get_top();
 
   bool handled;
   sig_click(button, is_down, _widget_under_mouse);
   if (is_down) {
     _widget_mouse_down = _widget_under_mouse;
-    handled = _widget_mouse_down->on_mouse_down();
+    if (_widget_under_mouse->can_focus()) {
+      if (_focused != nullptr) {
+        _focused->on_focus_lost();
+      }
+      _focused = _widget_under_mouse;
+      _focused->on_focus_gained();
+    }
+    handled = _widget_mouse_down->on_mouse_down(x, y);
   } else {
-    handled = _widget_mouse_down->on_mouse_up();
+    handled = _widget_mouse_down->on_mouse_up(x, y);
     _widget_mouse_down = nullptr;
   }
   return handled;
+}
+
+bool gui::inject_key(int key, bool is_down) {
+  if (_focused != nullptr) {
+    return _focused->on_key(key, is_down);
+  }
+  return false;
 }
 
 void gui::render() {
