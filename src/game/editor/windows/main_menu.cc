@@ -6,6 +6,7 @@
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
 #include <framework/gui/drawable.h>
+#include <framework/gui/widget.h>
 #include <framework/gui/window.h>
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
@@ -21,6 +22,7 @@
 namespace ed {
 
 using namespace fw::gui;
+using namespace std::placeholders;
 
 /**
  * We implement the menu item logic here, since there's only one place in the whole game that uses
@@ -61,11 +63,21 @@ main_menu_window::~main_menu_window() {
 
 void main_menu_window::initialize() {
   _wnd = builder<window>(px(0), px(0), pct(100), px(20)) << window::background("frame")
-      << (builder<menu_item>(px(0), px(0), px(50), px(20)) << button::text("File"))
+      << (builder<menu_item>(px(0), px(0), px(50), px(20)) << button::text("File")
+          << widget::click(std::bind(&main_menu_window::file_clicked, this, _1)))
       << (builder<menu_item>(px(50), px(0), px(50), px(20)) << button::text("Tool"));
+
+  _file_menu = builder<window>(px(0), px(20), px(100), px(80))
+      << window::background("frame") << widget::visible(false)
+      << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("New"))
+      << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Open"))
+      << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Save"))
+      << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit"));
   fw::framework *frmwrk = fw::framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
+  frmwrk->get_gui()->attach_widget(_file_menu);
 
+  frmwrk->get_gui()->sig_click.connect(std::bind(&main_menu_window::global_click_handler, this, _1, _2, _3));
 /*
   subscribe("TopMenu/File/New", CEGUI::MenuItem::EventClicked,
       CEGUI::SubscriberSlot(&main_menu_window::file_new_clicked, this));
@@ -99,6 +111,19 @@ void main_menu_window::initialize() {
   wnd->setUserString("tool", "pathing");
   subscribe(wnd, CEGUI::MenuItem::EventClicked,
       CEGUI::SubscriberSlot(&main_menu_window::tool_clicked, this));*/
+}
+
+/**
+ * This is attached to the global GUI 'click' signal. If you've clicked on a widget that's not one
+ * of our menus (or you clicked on blank space) then we need to hide the menus.
+ */
+void main_menu_window::global_click_handler(int button, bool is_down, fw::gui::widget *w) {
+  _file_menu->set_visible(false);
+}
+
+bool main_menu_window::file_clicked(fw::gui::widget *w) {
+  _file_menu->set_visible(true);
+  return true;
 }
 
 // when they click "File->New", we just show the "new map" window, which'll

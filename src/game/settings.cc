@@ -26,6 +26,6 @@ namespace rp {
 
     po::options_description options;
     options.add(additional_options).add(keybinding_options);
-    fw::settings::initialize(options, argc, argv, "ravaged-planets.conf");
+    fw::settings::initialize(options, argc, argv, "default.conf");
   }
 }

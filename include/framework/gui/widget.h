@@ -73,6 +73,7 @@ protected:
   friend class widget_position_property;
   friend class widget_size_property;
   friend class widget_click_property;
+  friend class widget_visible_property;
 
   gui *_gui;
   widget *_parent;
@@ -91,6 +92,7 @@ public:
   static property *position(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y);
   static property *size(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height);
   static property *click(std::function<bool(widget *)> on_click);
+  static property *visible(bool visible);
 
   void attach_child(widget *child);
   void detach_child(widget *child);

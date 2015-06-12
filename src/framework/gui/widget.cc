@@ -101,6 +101,20 @@ public:
   }
 };
 
+class widget_visible_property : public property {
+private:
+  bool _visible;
+public:
+  widget_visible_property(bool visible)
+      : _visible(visible) {
+  }
+
+  void apply(widget *widget) {
+    widget->_visible = _visible;
+  }
+};
+
+
 //-----------------------------------------------------------------------------
 
 widget::widget(gui *gui) :
@@ -120,6 +134,10 @@ property *widget::size(std::shared_ptr<dimension> width, std::shared_ptr<dimensi
 
 property *widget::click(std::function<bool(widget *)> on_click) {
   return new widget_click_property(on_click);
+}
+
+property *widget::visible(bool visible) {
+  return new widget_visible_property(visible);
 }
 
 void widget::attach_child(widget *child) {
