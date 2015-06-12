@@ -103,7 +103,9 @@ void texture::create(std::shared_ptr<fw::bitmap> bmp, bool dynamic) {
 void texture::create(fw::bitmap const &bmp, bool dynamic) {
   graphics *g = fw::framework::get_instance()->get_graphics();
 
-  _data = std::shared_ptr<texture_data>(new texture_data());
+  if (_data == nullptr) {
+    _data = std::shared_ptr<texture_data>(new texture_data());
+  }
   _data->width = bmp.get_width();
   _data->height = bmp.get_height();
 

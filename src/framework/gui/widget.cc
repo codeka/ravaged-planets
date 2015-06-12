@@ -198,6 +198,10 @@ widget *widget::get_child_at(float x, float y) {
 }
 
 bool widget::is_child(widget *w) {
+  if (w == nullptr) {
+    return false;
+  }
+
   BOOST_FOREACH(widget *child, _children) {
     if (w == child) {
       return true;

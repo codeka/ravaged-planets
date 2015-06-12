@@ -57,7 +57,7 @@ bool gui::inject_mouse(int button, bool is_down) {
   }
 
   bool handled;
-  sig_click(button, true, _widget_under_mouse);
+  sig_click(button, is_down, _widget_under_mouse);
   if (is_down) {
     _widget_mouse_down = _widget_under_mouse;
     handled = _widget_mouse_down->on_mouse_down();

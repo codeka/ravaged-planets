@@ -1,10 +1,9 @@
 #pragma once
 
-#include <framework/gui/widget.h>
-
 namespace fw {
 namespace gui {
 class window;
+class widget;
 }
 class bitmap;
 }

@@ -14,8 +14,7 @@ namespace ed {
 // this subclass of rp::terrain allows us to edit the actual heightfield data, textures, and so on.
 class editor_terrain: public rp::terrain {
 private:
-  typedef std::vector<std::tuple<int, int>> patch_list;
-  patch_list _patches_to_bake;
+  std::vector<std::tuple<int, int>> _patches_to_bake;
 
   // we keep a separate vector of the splatt bitmaps for easy editing
   std::vector<fw::bitmap> _splatt_bitmaps;
@@ -32,7 +31,7 @@ public:
   void set_layer(int number, std::shared_ptr<fw::texture> texture);
 
   // creates all of the splatt textures and sets them up initially
-  void initialise_splatt();
+  void initialize_splatt();
 
   // sets the splat texture for the given patch to the given bitmap
   virtual void set_splatt(int patch_x, int patch_z, fw::bitmap &bmp);

@@ -10,6 +10,7 @@
 #include <framework/gui/window.h>
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
+#include <framework/logging.h>
 
 #include <game/editor/editor_screen.h>
 #include <game/editor/editor_world.h>
@@ -18,6 +19,7 @@
 #include <game/application.h>
 
 #include <game/editor/windows/main_menu.h>
+#include <game/editor/windows/new_map.h>
 
 namespace ed {
 
@@ -69,7 +71,8 @@ void main_menu_window::initialize() {
 
   _file_menu = builder<window>(px(0), px(20), px(100), px(80))
       << window::background("frame") << widget::visible(false)
-      << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("New"))
+      << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("New")
+          << widget::click(std::bind(&main_menu_window::file_new_clicked, this, _1)))
       << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Open"))
       << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Save"))
       << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit")
@@ -119,7 +122,11 @@ void main_menu_window::initialize() {
  * of our menus (or you clicked on blank space) then we need to hide the menus.
  */
 void main_menu_window::global_click_handler(int button, bool is_down, fw::gui::widget *w) {
-  if (_file_menu->is_visible() && !_file_menu->is_child(w)) {
+  if (is_down && _file_menu->is_visible() && !_file_menu->is_child(w)) {
+    _file_menu->set_visible(false);
+  }
+
+  if (!is_down && _file_menu->is_visible()) {
     _file_menu->set_visible(false);
   }
 }
@@ -132,7 +139,7 @@ bool main_menu_window::file_clicked(fw::gui::widget *w) {
 // when they click "File->New", we just show the "new map" window, which'll
 // actually create the new map (assuming they click "OK" and that)
 bool main_menu_window::file_new_clicked(fw::gui::widget *w) {
-  //new_map->show();
+  new_map->show();
   return true;
 }
 

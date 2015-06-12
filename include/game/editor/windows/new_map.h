@@ -1,20 +1,30 @@
 #pragma once
 
+namespace fw {
+namespace gui {
+class window;
+class widget;
+}
+}
+
 namespace ed {
-/*
-	class new_map_window : public fw::gui::window
-	{
-	private:
-		bool ok_clicked(CEGUI::EventArgs const &e);
-		bool cancel_clicked(CEGUI::EventArgs const &e);
 
-	public:
-		new_map_window();
-		virtual ~new_map_window();
+class new_map_window {
+private:
+  fw::gui::window *_wnd;
 
-		virtual void initialise();
-	};
+  bool ok_clicked(fw::gui::widget *w);
+  bool cancel_clicked(fw::gui::widget *w);
 
-	extern new_map_window *new_map;
-*/
+public:
+  new_map_window();
+  ~new_map_window();
+
+  void initialize();
+  void show();
+  void hide();
+};
+
+extern new_map_window *new_map;
+
 }
