@@ -52,10 +52,12 @@ void gui::update(float dt) {
 bool gui::inject_mouse(int button, bool is_down) {
   if (button != 1 || (is_down && _widget_under_mouse == nullptr)
       || (!is_down && _widget_mouse_down == nullptr)) {
+    sig_click(button, is_down, nullptr);
     return false;
   }
 
   bool handled;
+  sig_click(button, true, _widget_under_mouse);
   if (is_down) {
     _widget_mouse_down = _widget_under_mouse;
     handled = _widget_mouse_down->on_mouse_down();

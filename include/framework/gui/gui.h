@@ -3,6 +3,9 @@
 #include <mutex>
 #include <vector>
 
+#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
+#include <boost/signals2.hpp>
+
 namespace fw {
 class graphics;
 
@@ -50,6 +53,9 @@ public:
 
   /** Injects a mouse button up/down event, returns true if we handled it or false if it should be passed through. */
   bool inject_mouse(int button, bool is_down);
+
+  /** Global 'click' signal, fired whenever you click the mouse. Widget may be null if you clicked on no widget. */
+  boost::signals2::signal<void(int button, bool is_down, widget *widget)> sig_click;
 
   inline drawable_manager *get_drawable_manager() const {
     return _drawable_manager;

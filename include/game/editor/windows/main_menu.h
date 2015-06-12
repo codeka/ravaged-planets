@@ -18,6 +18,7 @@ private:
   fw::gui::window *_wnd;
   fw::gui::window *_file_menu;
 
+  void global_click_handler(int button, bool is_down, fw::gui::widget *w);
   bool file_clicked(fw::gui::widget *w);
   bool file_new_clicked(fw::gui::widget *w);
   bool file_save_clicked(fw::gui::widget *w);
