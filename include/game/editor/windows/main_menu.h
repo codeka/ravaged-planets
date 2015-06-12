@@ -16,14 +16,16 @@ class main_menu_window {
 private:
   fw::gui::window *_wnd;
   fw::gui::window *_file_menu;
+  fw::gui::window *_tool_menu;
 
   void global_click_handler(int button, bool is_down, fw::gui::widget *w);
-  bool file_clicked(fw::gui::widget *w);
+  bool file_menu_clicked(fw::gui::widget *w);
+  bool tool_menu_clicked(fw::gui::widget *w);
   bool file_new_clicked(fw::gui::widget *w);
   bool file_save_clicked(fw::gui::widget *w);
   bool file_open_clicked(fw::gui::widget *w);
   bool file_quit_clicked(fw::gui::widget *w);
-  bool tool_clicked(fw::gui::widget *w);
+  bool tool_clicked(fw::gui::widget *w, std::string tool_name);
 
   void map_screenshot_clicked_finished(fw::bitmap const &bmp);
   bool map_screenshot_clicked(fw::gui::widget *w);

@@ -83,7 +83,7 @@ void editor_terrain::initialize_splatt() {
   }
 }
 
-void editor_terrain::set_splatt(int patch_x, int patch_z, fw::bitmap &bmp) {
+void editor_terrain::set_splatt(int patch_x, int patch_z, fw::bitmap const &bmp) {
   std::shared_ptr<fw::texture> splatt = get_patch_splatt(patch_x, patch_z);
   if (splatt == std::shared_ptr<fw::texture>()) {
     splatt = std::shared_ptr<fw::texture>(new fw::texture());

@@ -57,7 +57,7 @@ void menu_item::on_attached_to_parent(widget *parent) {
 
 main_menu_window *main_menu = nullptr;
 
-main_menu_window::main_menu_window() : _wnd(nullptr), _file_menu(nullptr) {
+main_menu_window::main_menu_window() : _wnd(nullptr), _file_menu(nullptr), _tool_menu(nullptr) {
 }
 
 main_menu_window::~main_menu_window() {
@@ -66,8 +66,9 @@ main_menu_window::~main_menu_window() {
 void main_menu_window::initialize() {
   _wnd = builder<window>(px(0), px(0), pct(100), px(20)) << window::background("frame")
       << (builder<menu_item>(px(0), px(0), px(50), px(20)) << button::text("File")
-          << widget::click(std::bind(&main_menu_window::file_clicked, this, _1)))
-      << (builder<menu_item>(px(50), px(0), px(50), px(20)) << button::text("Tool"));
+          << widget::click(std::bind(&main_menu_window::file_menu_clicked, this, _1)))
+      << (builder<menu_item>(px(50), px(0), px(50), px(20)) << button::text("Tool")
+          << widget::click(std::bind(&main_menu_window::tool_menu_clicked, this, _1)));
 
   _file_menu = builder<window>(px(0), px(20), px(100), px(80))
       << window::background("frame") << widget::visible(false)
@@ -77,9 +78,18 @@ void main_menu_window::initialize() {
       << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Save"))
       << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit")
           << widget::click(std::bind(&main_menu_window::file_quit_clicked, this, _1)));
+
+  _tool_menu = builder<window>(px(50), px(20), px(100), px(40))
+      << window::background("frame") << widget::visible(false)
+      << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("Heightfield")
+          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "heightfield")))
+      << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Texture")
+          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "texture")));
+
   fw::framework *frmwrk = fw::framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
   frmwrk->get_gui()->attach_widget(_file_menu);
+  frmwrk->get_gui()->attach_widget(_tool_menu);
 
   frmwrk->get_gui()->sig_click.connect(std::bind(&main_menu_window::global_click_handler, this, _1, _2, _3));
 /*
@@ -122,17 +132,25 @@ void main_menu_window::initialize() {
  * of our menus (or you clicked on blank space) then we need to hide the menus.
  */
 void main_menu_window::global_click_handler(int button, bool is_down, fw::gui::widget *w) {
-  if (is_down && _file_menu->is_visible() && !_file_menu->is_child(w)) {
-    _file_menu->set_visible(false);
-  }
+  std::vector<window *> menus = {_file_menu, _tool_menu};
+  BOOST_FOREACH(window *menu, menus) {
+    if (is_down && menu->is_visible() && !menu->is_child(w)) {
+      menu->set_visible(false);
+    }
 
-  if (!is_down && _file_menu->is_visible()) {
-    _file_menu->set_visible(false);
+    if (!is_down && menu->is_visible()) {
+      menu->set_visible(false);
+    }
   }
 }
 
-bool main_menu_window::file_clicked(fw::gui::widget *w) {
+bool main_menu_window::file_menu_clicked(fw::gui::widget *w) {
   _file_menu->set_visible(true);
+  return true;
+}
+
+bool main_menu_window::tool_menu_clicked(fw::gui::widget *w) {
+  _tool_menu->set_visible(true);
   return true;
 }
 
@@ -188,10 +206,8 @@ bool main_menu_window::map_screenshot_clicked(fw::gui::widget *w) {
 
 // This is called when you click one of the "Tool" menu items. We figure out which
 // one you clicked on and switch to that tool as appropriate.
-bool main_menu_window::tool_clicked(fw::gui::widget *w) {
-//  std::string name = wnd->getUserString("tool").c_str();
-//  editor_screen::get_instance()->set_active_tool(name);
-
+bool main_menu_window::tool_clicked(fw::gui::widget *w, std::string tool_name) {
+  editor_screen::get_instance()->set_active_tool(tool_name);
   return true;
 }
 

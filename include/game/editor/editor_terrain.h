@@ -34,7 +34,7 @@ public:
   void initialize_splatt();
 
   // sets the splat texture for the given patch to the given bitmap
-  virtual void set_splatt(int patch_x, int patch_z, fw::bitmap &bmp);
+  virtual void set_splatt(int patch_x, int patch_z, fw::bitmap const &bmp);
   fw::bitmap &get_splatt(int patch_x, int patch_z);
 
   float *get_height_data() const {
