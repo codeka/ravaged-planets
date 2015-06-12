@@ -101,6 +101,19 @@ public:
   }
 };
 
+class widget_id_property : public property {
+private:
+  int _id;
+public:
+  widget_id_property(int id)
+      : _id(id) {
+  }
+
+  void apply(widget *widget) {
+    widget->_id = _id;
+  }
+};
+
 class widget_visible_property : public property {
 private:
   bool _visible;
@@ -118,7 +131,7 @@ public:
 //-----------------------------------------------------------------------------
 
 widget::widget(gui *gui) :
-    _gui(gui), _parent(nullptr), _visible(true) {
+    _gui(gui), _parent(nullptr), _id(-1), _visible(true), _focused(false) {
 }
 
 widget::~widget() {
@@ -138,6 +151,10 @@ property *widget::click(std::function<bool(widget *)> on_click) {
 
 property *widget::visible(bool visible) {
   return new widget_visible_property(visible);
+}
+
+property *widget::id(int id) {
+  return new widget_id_property(id);
 }
 
 void widget::attach_child(widget *child) {
@@ -210,6 +227,20 @@ widget *widget::get_child_at(float x, float y) {
   // Otherwise, return ourselves.
   return this;
 }
+
+widget *widget::find(int id) {
+  if (_id == id) {
+    return this;
+  }
+  BOOST_FOREACH(widget *child, _children) {
+    widget *found = child->find(id);
+    if (found != nullptr) {
+      return found;
+    }
+  }
+  return nullptr;
+}
+
 
 bool widget::is_child(widget *w) {
   if (w == nullptr) {

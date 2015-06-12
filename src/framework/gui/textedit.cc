@@ -175,6 +175,10 @@ void textedit::select_all() {
   _buffer->state.cursor = _buffer->state.select_end = _buffer->codepoints.size();
 }
 
+std::string textedit::get_text() const {
+  return conv::utf_to_utf<char>(_buffer->codepoints);
+}
+
 void textedit::update(float dt) {
   if (_focused) {
     _cursor_flip_time += dt;

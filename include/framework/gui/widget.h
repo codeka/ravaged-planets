@@ -74,9 +74,11 @@ protected:
   friend class widget_size_property;
   friend class widget_click_property;
   friend class widget_visible_property;
+  friend class widget_id_property;
 
   gui *_gui;
   widget *_parent;
+  int _id;
   std::vector<widget *> _children;
   std::shared_ptr<dimension> _x;
   std::shared_ptr<dimension> _y;
@@ -94,6 +96,7 @@ public:
   static property *size(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height);
   static property *click(std::function<bool(widget *)> on_click);
   static property *visible(bool visible);
+  static property *id(int id);
 
   void attach_child(widget *child);
   void detach_child(widget *child);
@@ -134,6 +137,14 @@ public:
    * none of our children are contained within the given (x,y) then \code this is returned.
    */
   widget *get_child_at(float x, float y);
+
+  /** Searches the heirarchy for the widget with the given id. */
+  widget *find(int id);
+
+  template<typename T>
+  inline T *find(int id) {
+    return dynamic_cast<T *>(find(id));
+  }
 
   /** Returns true if the given widget is a child (or a child of a child...) of us. */
   bool is_child(widget *w);

@@ -41,6 +41,7 @@ public:
   }
 
   void select_all();
+  std::string get_text() const;
 
   virtual void update(float dt);
   virtual void render();
