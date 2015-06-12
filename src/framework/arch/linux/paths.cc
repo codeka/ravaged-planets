@@ -31,19 +31,12 @@ namespace fw {
     return fs::path(INSTALL_PREFIX);
   }
 
-  fs::path data_path() {
-    return fs::path(INSTALL_PREFIX) / "share/ravaged-planets";
-  }
-
   fs::path resolve(std::string const &path, bool for_write /*=false*/) {
     fs::path absolute_path(path);
     if (!absolute_path.is_absolute()) {
       absolute_path = user_base_path() / path;
-      if (!for_write && !fs::is_regular_file(absolute_path)) {
-        absolute_path = data_path() / path;
-        if (!fs::is_regular_file(absolute_path)) {
-          absolute_path = install_base_path() / path;
-        }
+      if (!for_write && !fs::exists(absolute_path)) {
+        absolute_path = install_base_path() / path;
       }
     }
 

@@ -333,7 +333,7 @@ std::shared_ptr<shader> shader::create(std::string const &filename) {
   std::shared_ptr<shader> shdr = g_cache.get_shader(filename);
   if (!shdr) {
     shdr = std::shared_ptr<shader>(new shader());
-    shdr->load(g, fw::resolve("share/ravaged-planets/shaders/" + filename));
+    shdr->load(g, fw::resolve("shaders/" + filename));
     g_cache.add_shader(filename, shdr);
   }
 
