@@ -97,7 +97,7 @@ namespace fw {
 
     po::store(po::parse_command_line(argc, argv, g_option_descriptions), g_variables_map);
 
-    std::ifstream default_ini((fw::install_base_path() / "etc" / options_file).string().c_str());
+    std::ifstream default_ini((fw::install_base_path() / options_file).string().c_str());
     po::store(po::parse_config_file(default_ini, g_option_descriptions), g_variables_map);
     default_ini.close();
 
