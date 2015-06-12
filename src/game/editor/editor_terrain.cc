@@ -66,7 +66,7 @@ void editor_terrain::initialize_splatt() {
   std::vector<uint32_t> buffer(splatt_width * splatt_height);
   for (int y = 0; y < splatt_height; y++) {
     for (int x = 0; x < splatt_width; x++) {
-      buffer[(y * splatt_width) + x] = 0x00FF0000;
+      buffer[(y * splatt_width) + x] = 0x000000ff;
     }
   }
 

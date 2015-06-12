@@ -17,6 +17,7 @@ namespace rp {
 class title_screen: public screen {
 private:
   bool quit_clicked(fw::gui::widget *w);
+  bool newgame_clicked(fw::gui::widget *w);
   bool editor_clicked(fw::gui::widget *w);
 
 public:

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <functional>
+#include <mutex>
 #include <boost/algorithm/string.hpp>
 
 union SDL_Event;
@@ -26,8 +27,23 @@ struct input_binding {
   input_binding &operator =(input_binding const &copy);
 };
 
+/**
+ * Represents an input event. We pick these up off the render thread, then actually process them on the update thread.
+ */
+struct input_event {
+  int type;
+  int dx;
+  int dy;
+  int button;
+  bool is_down;
+  uint16_t key_mod;
+  int key_code;
+};
+
 class input {
 private:
+  std::mutex _pending_events_mutex;
+  std::vector<input_event> _pending_events;
   void update_cursor();
 
 public:

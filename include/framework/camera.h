@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
 #include <boost/signals2.hpp>
 
 #include "vector.h"

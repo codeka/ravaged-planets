@@ -215,58 +215,80 @@ void input::update(float dt) {
   // don't get an on_mouse_move, it means the mouse didn't move!)
   g_mdx = g_mdy = 0.0f;
   g_mdw = 0.0f;
-}
 
-void input::process_event(SDL_Event &event) {
-  if (event.type == SDL_KEYDOWN) {
-    callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, true);
-  } else if (event.type == SDL_KEYUP) {
-    callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, false);
-  } else if (event.type == SDL_TEXTINPUT) {
-//    // now check whether it corresponds to a written character and pass that to CEGUI
-//    // as well (since CEGUI differentiates between characters and buttons)
-//    char buffer[30] = { 0 };
-//    XLookupString(&evnt.xkey, buffer, sizeof(buffer), 0, 0);
-//    if (buffer[0] != 0) {
-//      // todo: utf-8 to utf-32...
-//      CEGUI::System::getSingleton().injectChar(
-//          static_cast<CEGUI::utf32>(buffer[0]));
-//    }
-  } else if (event.type == SDL_MOUSEMOTION) {
-    g_mouse_inside = true;
+  std::unique_lock<std::mutex> lock(_pending_events_mutex);
+  BOOST_FOREACH(input_event event, _pending_events) {
+    if (event.type == SDL_KEYDOWN) {
+      callback(event.key_code, event.key_mod, true);
+    } else if (event.type == SDL_KEYUP) {
+      callback(event.key_code, event.key_mod, false);
+    } else if (event.type == SDL_TEXTINPUT) {
+      // TODO
+    } else if (event.type == SDL_MOUSEMOTION) {
+      g_mouse_inside = true;
 
-    // save the current difference and the current position
-    g_mdx =  event.motion.x - g_mx;
-    g_mdy = event.motion.y - g_my;
-    g_mx = event.motion.x;
-    g_my = event.motion.y;
+      // save the current difference and the current position
+      g_mdx =  event.dx - g_mx;
+      g_mdy = event.dy - g_my;
+      g_mx = event.dx;
+      g_my = event.dy;
 
-    // if the cursor is supposed to be hidden, we'll just put it back to the center of the window
-    if (g_hide_cursor) {
-//      main_window *wnd = framework::get_instance()->get_window();
-//      if (wnd != 0) {
-//        wnd->show_cursor(false);
-        /*
-         POINT pt = { wnd->get_width() / 2, wnd->get_height() / 2 };
-         ::ClientToScreen(_hwnd, &pt);
-         ::SetCursorPos(pt.x, pt.y);
-         */
-//      }
-    } else {
-//      CEGUI::System::getSingleton().injectMousePosition(evnt.xmotion.x,
-//          evnt.xmotion.y);
-    }
-  } else if (event.type == SDL_MOUSEBUTTONDOWN) {
-    int keycode = 0xffffff00 + (event.button.button - 1);
-    if (!fw::framework::get_instance()->get_gui()->inject_mouse(event.button.button, true)) {
-      callback(keycode, 0, true);
-    }
-  } else if (event.type == SDL_MOUSEBUTTONUP) {
-    int keycode = 0xffffff00 + (event.button.button - 1);
-    if (!fw::framework::get_instance()->get_gui()->inject_mouse(event.button.button, false)) {
-      callback(keycode, 0, false);
+      // if the cursor is supposed to be hidden, we'll just put it back to the center of the window
+      if (g_hide_cursor) {
+  //      main_window *wnd = framework::get_instance()->get_window();
+  //      if (wnd != 0) {
+  //        wnd->show_cursor(false);
+          /*
+           POINT pt = { wnd->get_width() / 2, wnd->get_height() / 2 };
+           ::ClientToScreen(_hwnd, &pt);
+           ::SetCursorPos(pt.x, pt.y);
+           */
+  //      }
+      } else {
+  //      CEGUI::System::getSingleton().injectMousePosition(evnt.xmotion.x,
+  //          evnt.xmotion.y);
+      }
+    } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+      int keycode = 0xffffff00 + (event.button - 1);
+      if (!fw::framework::get_instance()->get_gui()->inject_mouse(event.button, true)) {
+        callback(keycode, 0, true);
+      }
+    } else if (event.type == SDL_MOUSEBUTTONUP) {
+      int keycode = 0xffffff00 + (event.button - 1);
+      if (!fw::framework::get_instance()->get_gui()->inject_mouse(event.button, false)) {
+        callback(keycode, 0, false);
+      }
     }
   }
+  _pending_events.clear();
+}
+
+/** Called on the render thread when an event is received. We queue it up to actually run on the update thread. */
+void input::process_event(SDL_Event &event) {
+  std::unique_lock<std::mutex> lock(_pending_events_mutex);
+
+  input_event ie;
+  ie.type = event.type;
+  if (event.type == SDL_KEYDOWN) {
+    ie.key_code = static_cast<int>(event.key.keysym.sym);
+    ie.key_mod = event.key.keysym.mod;
+  } else if (event.type == SDL_KEYUP) {
+    ie.key_code = static_cast<int>(event.key.keysym.sym);
+    ie.key_mod = event.key.keysym.mod;
+  } else if (event.type == SDL_TEXTINPUT) {
+    // TODO
+  } else if (event.type == SDL_MOUSEMOTION) {
+    ie.dx = event.motion.x;
+    ie.dy = event.motion.y;
+  } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+    ie.button = event.button.button;
+  } else if (event.type == SDL_MOUSEBUTTONUP) {
+    ie.button = event.button.button;
+  } else {
+    // Unknown event, we want to ignore it.
+    return;
+  }
+  _pending_events.push_back(ie);
 }
 
 void input::hide_cursor() {

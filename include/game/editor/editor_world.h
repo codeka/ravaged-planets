@@ -15,8 +15,7 @@ class terrain;
 
 namespace ed {
 
-// this is a specialization of world_reader that creates a brand new world from
-// scratch. this, obviously, is only useful to the editor!
+/** This is a specialization of world_reader that creates a brand new world from scratch. */
 class world_create: public rp::world_reader {
 private:
   int _width;

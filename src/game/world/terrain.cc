@@ -182,8 +182,7 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
   }
 }
 
-int terrain::get_patch_index(int patch_x, int patch_z, int *new_patch_x,
-    int *new_patch_z) {
+int terrain::get_patch_index(int patch_x, int patch_z, int *new_patch_x, int *new_patch_z) {
   patch_x = fw::constrain(patch_x, get_patches_width());
   patch_z = fw::constrain(patch_z, get_patches_length());
 

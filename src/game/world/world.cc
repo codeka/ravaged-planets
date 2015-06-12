@@ -27,11 +27,12 @@
 //#include "../ai/pathing_thread.h"
 
 namespace fs = boost::filesystem;
+using namespace std::placeholders;
 
 namespace rp {
 
 //-------------------------------------------------------------------------
-world *world::_instance = 0;
+world *world::_instance = nullptr;
 
 world::world(std::shared_ptr<world_reader> reader) :
     _reader(reader), /*_entities(0),*/ _terrain(nullptr)/*, _pathing(0)*/ {
@@ -76,9 +77,7 @@ void world::initialize() {
         input->bind_function("pause",
             boost::bind(&world::on_key_pause, this, _1, _2)));
   }*/
-  _keybind_tokens.push_back(
-      input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this,
-          std::placeholders::_1, std::placeholders::_2)));
+  _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
 }
 
 void world::destroy() {

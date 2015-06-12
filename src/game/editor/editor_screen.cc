@@ -49,16 +49,16 @@ void editor_screen::show() {
 }
 
 void editor_screen::update() {
-  if (_world != 0)
+  if (_world != nullptr)
     _world->update();
-  if (_tool != 0)
+  if (_tool != nullptr)
     _tool->update();
 }
 
 void editor_screen::render(fw::sg::scenegraph &scenegraph) {
-  if (_world != 0)
+  if (_world != nullptr)
     _world->render(scenegraph);
-  if (_tool != 0)
+  if (_tool != nullptr)
     _tool->render(scenegraph);
 }
 
@@ -66,10 +66,11 @@ void editor_screen::new_map(int width, int height) {
   // unset the current tool
   set_active_tool("");
 
-  delete _world;
+  if (_world != nullptr) {
+    delete _world;
+  }
   std::shared_ptr<world_create> creator(new world_create(width, height));
   _world = new editor_world(creator);
-
   _world->initialize();
   dynamic_cast<editor_world *>(_world)->set_name("New Map");
   set_active_tool("heightfield");

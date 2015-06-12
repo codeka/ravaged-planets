@@ -235,6 +235,8 @@ void framework::update_proc() {
 }
 
 void framework::update(float dt) {
+  _input->update(dt);
+
   if (_gui != nullptr) {
     _gui->update(dt);
   }
@@ -250,8 +252,6 @@ void framework::update(float dt) {
 
   if (_camera != nullptr)
     _camera->update(dt);
-
-  _input->update(dt);
 }
 
 void framework::render() {

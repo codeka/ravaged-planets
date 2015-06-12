@@ -36,7 +36,8 @@ void title_screen::show() {
       // "A game by Dean Harding (dean@codeka.com.au)" text
       << (builder<static_widget>(px(40), px(70), px(500), px(16))
           << static_widget::text("A game by Dean Harding (dean@codeka.com.au)"))
-      << (builder<button>(px(40), px(100), px(180), px(30)) << button::text("New Game"))
+      << (builder<button>(px(40), px(100), px(180), px(30)) << button::text("New Game")
+          << widget::click(std::bind(&title_screen::newgame_clicked, this, _1)))
       << (builder<button>(px(40), px(140), px(180), px(30)) << button::text("Join Game"))
       << (builder<button>(px(40), px(180), px(180), px(30)) << button::text("Options"))
       << (builder<button>(px(40), px(220), px(180), px(30)) << button::text("Editor")
@@ -51,6 +52,12 @@ void title_screen::show() {
 
 bool title_screen::quit_clicked(fw::gui::widget *w) {
   fw::framework::get_instance()->exit();
+  return true;
+}
+
+bool title_screen::newgame_clicked(fw::gui::widget *w) {
+  rp::application *app = dynamic_cast<rp::application *>(fw::framework::get_instance()->get_app());
+  app->get_screen()->set_active_screen("game");
   return true;
 }
 

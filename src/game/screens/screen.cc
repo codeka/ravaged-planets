@@ -3,6 +3,7 @@
 
 #include <game/screens/screen.h>
 #include <game/screens/title_screen.h>
+#include <game/screens/game_screen.h>
 #include <game/editor/editor_screen.h>
 #include <framework/exception.h>
 
@@ -30,7 +31,7 @@ void screen::render(fw::sg::scenegraph &) {
 
 screen_stack::screen_stack() {
   _screens["title"] = new title_screen();
-//  _screens.push_back(new game_screen());
+  _screens["game"] = new game_screen();
   _screens["editor"] = new ed::editor_screen();
 }
 
