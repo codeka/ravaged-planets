@@ -37,10 +37,12 @@ inline T constrain(T value, T max_value, T min_value = 0) {
   T tmp = value;
   T range = max_value - min_value;
 
-  while (tmp < min_value)
+  while (tmp < min_value) {
     tmp += range;
-  while (tmp >= max_value)
+  }
+  while (tmp >= max_value) {
     tmp -= range;
+  }
 
   return tmp;
 }

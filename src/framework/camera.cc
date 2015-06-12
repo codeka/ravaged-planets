@@ -55,6 +55,8 @@ void camera::update(float dt) {
 
     // get the camera axes from the view matrix
     cml::matrix_get_transposed_basis_vectors(_view, _right, _up, _forward);
+    _forward *= -1.0f; // TODO: why do these have to be multipled by -1?
+    _right *= -1.0f;
 
     // we've been updated now, so no need to do it again
     _updated = false;
@@ -275,7 +277,7 @@ void top_down_camera::update(float dt) {
   float rotate_around_right = 0.0f;
   if (_rotate_mouse) {
     rotate_around_up = inp->mouse_dx() * -0.0035f;
-    rotate_around_right = inp->mouse_dy() * -0.0035f;
+    rotate_around_right = inp->mouse_dy() * 0.0035f;
   }
 
   if (_rotate_left)
@@ -303,13 +305,13 @@ void top_down_camera::update(float dt) {
   }
 
   if (_move_forward)
-    forward -= 15.0f * dt;
-  if (_move_backward)
     forward += 15.0f * dt;
+  if (_move_backward)
+    forward -= 15.0f * dt;
   if (_move_left)
-    right -= 15.0f * dt;
-  if (_move_right)
     right += 15.0f * dt;
+  if (_move_right)
+    right -= 15.0f * dt;
   move(forward, right);
 
   float zoom_amount = inp->mouse_dwheel();

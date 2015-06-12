@@ -133,26 +133,26 @@ void terrain::update() {
 
   // if the camera has moved off the edge of the map, wrap it back around
   fw::vector old_loc = camera->get_location();
-  fw::vector new_loc(fw::constrain(old_loc[0], (float) _width),
+  fw::vector new_loc(
+      fw::constrain(old_loc[0], (float) _width),
       old_loc[1],
       fw::constrain(old_loc[2], (float) _length));
   if ((old_loc - new_loc).length_squared() > 0.001f) {
+    fw::debug << "updating camera: old_loc=" << old_loc << ", new_loc=" << new_loc << std::endl;
     camera->set_location(new_loc);
-
-    // also, set the ground height so the camera follows the terrain
-    camera->set_ground_height(get_height(new_loc[0], new_loc[2]));
   }
+
+  // also, set the ground height so the camera follows the terrain
+  camera->set_ground_height(get_height(new_loc[0], new_loc[2]));
 }
 
 void terrain::render(fw::sg::scenegraph &scenegraph) {
-  if (_layers.size() == 0 || _ib == 0)
+  if (_layers.size() == 0)
     return;
 
   // we want to render the terrain centered on where the camera is looking
   fw::camera *camera = fw::framework::get_instance()->get_camera();
-  fw::vector cam_loc = camera->get_position();
-  fw::vector cam_dir = camera->get_direction();
-  fw::vector location = get_cursor_location(cam_loc, cam_dir);
+  fw::vector location = get_cursor_location(camera->get_position(), camera->get_direction());
 
   int centre_patch_x = (int) (location[0] / PATCH_SIZE);
   int centre_patch_z = (int) (location[2] / PATCH_SIZE);
