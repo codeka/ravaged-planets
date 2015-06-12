@@ -69,13 +69,18 @@ bool gui::inject_mouse(int button, bool is_down) {
 void gui::render() {
   std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
   BOOST_FOREACH(widget *widget, _top_level_widgets) {
-    widget->render();
+    if (widget->is_visible()) {
+      widget->render();
+    }
   }
 }
 
 widget *gui::get_widget_at(float x, float y) {
   std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
   BOOST_FOREACH(widget *wdgt, _top_level_widgets) {
+    if (!wdgt->is_visible()) {
+      continue;
+    }
     widget *child = wdgt->get_child_at(x, y);
     if (child != nullptr) {
       return child;

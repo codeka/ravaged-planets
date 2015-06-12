@@ -6,6 +6,7 @@
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
 #include <framework/gui/drawable.h>
+#include <framework/gui/widget.h>
 #include <framework/gui/window.h>
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
@@ -53,7 +54,7 @@ void menu_item::on_attached_to_parent(widget *parent) {
 
 main_menu_window *main_menu = nullptr;
 
-main_menu_window::main_menu_window() : _wnd(nullptr) {
+main_menu_window::main_menu_window() : _wnd(nullptr), _file_menu(nullptr) {
 }
 
 main_menu_window::~main_menu_window() {
@@ -61,10 +62,19 @@ main_menu_window::~main_menu_window() {
 
 void main_menu_window::initialize() {
   _wnd = builder<window>(px(0), px(0), pct(100), px(20)) << window::background("frame")
-      << (builder<menu_item>(px(0), px(0), px(50), px(20)) << button::text("File"))
+      << (builder<menu_item>(px(0), px(0), px(50), px(20)) << button::text("File")
+          << widget::click(std::bind(&main_menu_window::file_clicked, this, std::placeholders::_1)))
       << (builder<menu_item>(px(50), px(0), px(50), px(20)) << button::text("Tool"));
+
+  _file_menu = builder<window>(px(0), px(20), px(100), px(80))
+      << window::background("frame") << widget::visible(false)
+      << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("New"))
+      << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Open"))
+      << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Save"))
+      << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit"));
   fw::framework *frmwrk = fw::framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
+  frmwrk->get_gui()->attach_widget(_file_menu);
 
 /*
   subscribe("TopMenu/File/New", CEGUI::MenuItem::EventClicked,
@@ -99,6 +109,11 @@ void main_menu_window::initialize() {
   wnd->setUserString("tool", "pathing");
   subscribe(wnd, CEGUI::MenuItem::EventClicked,
       CEGUI::SubscriberSlot(&main_menu_window::tool_clicked, this));*/
+}
+
+bool main_menu_window::file_clicked(fw::gui::widget *w) {
+  _file_menu->set_visible(true);
+  return true;
 }
 
 // when they click "File->New", we just show the "new map" window, which'll
