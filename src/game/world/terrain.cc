@@ -138,12 +138,15 @@ void terrain::update() {
       old_loc[1],
       fw::constrain(old_loc[2], (float) _length));
   if ((old_loc - new_loc).length_squared() > 0.001f) {
-    fw::debug << "updating camera: old_loc=" << old_loc << ", new_loc=" << new_loc << std::endl;
     camera->set_location(new_loc);
   }
 
   // also, set the ground height so the camera follows the terrain
-  camera->set_ground_height(get_height(new_loc[0], new_loc[2]));
+  float new_height = get_height(new_loc[0], new_loc[2]);
+  float height_diff = camera->get_ground_height() - new_height;
+  if (height_diff > 0.001f || height_diff < -0.001f) {
+    camera->set_ground_height(new_height);
+  }
 }
 
 void terrain::render(fw::sg::scenegraph &scenegraph) {

@@ -22,8 +22,10 @@ editor_terrain::~editor_terrain() {
 }
 
 void editor_terrain::render(fw::sg::scenegraph &scenegraph) {
+  int num_baked = 0;
   BOOST_FOREACH(auto patch, _patches_to_bake) {
     bake_patch(std::get<0>(patch), std::get<1>(patch));
+    num_baked ++;
   }
   _patches_to_bake.clear();
 

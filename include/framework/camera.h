@@ -49,6 +49,7 @@ public:
   void set_projection_matrix(float fov, float aspect, float near_plane, float far_plane);
   virtual void update(float dt);
   virtual void set_ground_height(float height);
+  virtual float get_ground_height() const;
 
   // These are called when the camera is set as the game's current camera (this is a good opportunity to bind/unbind
   // your keys).

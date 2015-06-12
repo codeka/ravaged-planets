@@ -114,11 +114,11 @@ void editor_screen::set_active_tool(std::string const &name) {
   if (name == "")
     return;
 
- // tool *t = tool_factory::create_tool(name, _world);
- // if (t != 0) {
- //   _tool = t;
- //   _tool->activate();
- // }
+  tool *t = tool_factory::create_tool(name, _world);
+  if (t != nullptr) {
+    _tool = t;
+    _tool->activate();
+  }
 }
 
 editor_screen *editor_screen::get_instance() {

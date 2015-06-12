@@ -1,0 +1,104 @@
+
+#include <framework/framework.h>
+#include <framework/input.h>
+#include <framework/scenegraph.h>
+#include <framework/graphics.h>
+#include <game/application.h>
+#include <game/world/world.h>
+#include <game/editor/editor_terrain.h>
+#include <game/editor/editor_screen.h>
+#include <game/editor/tools/tools.h>
+
+using namespace std::placeholders;
+
+namespace ed {
+
+tool::tool(rp::world *wrld) :
+    _world(wrld), _terrain(0), _editor(0) {
+}
+
+tool::~tool() {
+}
+
+void tool::activate() {
+  rp::application *app = dynamic_cast<rp::application *>(fw::framework::get_instance()->get_app());
+  _editor = dynamic_cast<editor_screen *>(app->get_screen()->get_active_screen());
+  _terrain = dynamic_cast<editor_terrain *>(_world->get_terrain());
+}
+
+void tool::deactivate() {
+  // Loop through the keybind tokens and unbind them all
+  fw::input *input = fw::framework::get_instance()->get_input();
+  std::for_each(_keybind_tokens.begin(), _keybind_tokens.end(), std::bind(&fw::input::unbind_key, input, _1));
+}
+
+void tool::update() {
+}
+
+void tool::render(fw::sg::scenegraph &) {
+}
+
+// This is used by a number of of the tools for giving a basic indication of
+// it's area of effect.
+void draw_circle(fw::sg::scenegraph &scenegraph, rp::terrain *terrain, fw::vector const &centre, float radius) {
+  // the number of segments is basically the diameter of our circle. That means
+  // we'll have one segment per unit, approximately.
+  int num_segments = (int) (2.0f * M_PI * radius);
+
+  // at least 8 segments, though...
+  if (num_segments < 8)
+    num_segments = 8;
+
+  std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz>();
+  fw::vertex::xyz *vertices = new fw::vertex::xyz[num_segments + 1];
+  for (int i = 0; i < num_segments; i++) {
+    float factor = 2.0f * (float) M_PI * (i / (float) num_segments);
+    vertices[i].x = centre[0] + radius * sin(factor);
+    vertices[i].z = centre[2] + radius * cos(factor);
+    vertices[i].y = terrain->get_height(vertices[i].x, vertices[i].z) + 0.5f;
+  }
+  vertices[num_segments].x = vertices[0].x;
+  vertices[num_segments].y = vertices[0].y;
+  vertices[num_segments].z = vertices[0].z;
+  vb->set_data(num_segments + 1, vertices);
+  delete[] vertices;
+
+  std::shared_ptr<fw::index_buffer> ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+  uint16_t *indices = new uint16_t[num_segments + 1];
+  for (int i = 0; i < num_segments + 1; i++) {
+    indices[i] = i;
+  }
+  ib->set_data(num_segments + 1, indices);
+  delete[] indices;
+
+  std::shared_ptr<fw::sg::node> node(new fw::sg::node());
+  node->set_vertex_buffer(vb);
+  node->set_index_buffer(ib);
+  node->set_primitive_type(fw::sg::primitive_linestrip);
+  scenegraph.add_node(node);
+}
+
+//-------------------------------------------------------------------------
+typedef std::map<std::string, create_tool_fn> tool_map;
+static tool_map *g_tools = nullptr;
+
+tool_factory_registrar::tool_factory_registrar(std::string const &name, create_tool_fn fn) {
+  if (g_tools == 0) {
+    g_tools = new tool_map();
+  }
+
+  (*g_tools)[name] = fn;
+}
+
+tool *tool_factory::create_tool(std::string const &name, rp::world *world) {
+  if (g_tools == nullptr)
+    return nullptr;
+
+  tool_map::iterator it = g_tools->find(name);
+  if (it == g_tools->end())
+    return nullptr;
+
+  return (*it).second(world);
+}
+
+}

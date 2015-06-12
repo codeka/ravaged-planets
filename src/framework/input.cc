@@ -14,12 +14,6 @@
 #include <framework/logging.h>
 #include <framework/settings.h>
 
-// the SDLK_* values are used by SDL for keys on the keyboard, we'll borrow values
-// greater than the maximum possible SDLK for the mouse buttons as well
-#define KEY_MBTNLEFT (0xffffff00 + 0)
-#define KEY_MBTNMIDDLE (0xffffff00 + 1)
-#define KEY_MBTNRIGHT (0xffffff00 + 2)
-
 namespace fs = boost::filesystem;
 
 // in order to keep the header clean of platform-specific details, and also since keyboard/mouse input

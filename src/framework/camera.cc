@@ -32,7 +32,13 @@ camera::~camera() {
 
 void camera::set_ground_height(float height) {
   _floor_height = height;
+  _updated = true;
 }
+
+float camera::get_ground_height() const {
+  return _floor_height;
+}
+
 
 void camera::update(float dt) {
   // cap speed to max speed
