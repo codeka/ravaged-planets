@@ -1,7 +1,7 @@
 
 #include <boost/locale.hpp>
 
-#include <SDL_keycode.h>
+#include <SDL.h>
 
 #include <framework/framework.h>
 #include <framework/gui/drawable.h>
@@ -52,7 +52,15 @@ float STB_TEXTEDIT_GETWIDTH(textedit_buffer *buffer, int line_start_idx, int cha
 }
 
 int STB_TEXTEDIT_KEYTOTEXT(int key) {
-  return key >= 0x10000 ? 0 : key;
+  if (key >= 0x10000) {
+    return -1;
+  }
+
+  SDL_Keymod mod = SDL_GetModState();
+  if ((mod & KMOD_SHIFT) != 0) {
+    key = std::toupper(key);
+  }
+  return key;
 }
 
 void STB_TEXTEDIT_LAYOUTROW(StbTexteditRow *r, textedit_buffer *buffer, int line_start_idx) {
@@ -97,7 +105,7 @@ bool STB_TEXTEDIT_INSERTCHARS(textedit_buffer *buffer, int pos, const uint32_t* 
 #define STB_TEXTEDIT_K_REDO         (1<<29 | 8) // TODO
 #define STB_TEXTEDIT_K_WORDLEFT     (1<<29 | 16) // TODO
 #define STB_TEXTEDIT_K_WORDRIGHT    (1<<29 | 32) // TODO
-#define STB_TEXTEDIT_K_SHIFT        (1<<28) // TODO
+#define STB_TEXTEDIT_K_SHIFT        (1<<28) // This is combined with the other key codes, so must be unique bit.
 
 #include <stb/stb_textedit.h>
 
@@ -149,6 +157,11 @@ void textedit::on_focus_lost() {
 }
 
 bool textedit::on_key(int key, bool is_down) {
+  // stb_textedit only supports one shift key, so if it's right-shift just translate to left
+  if (key == SDLK_RSHIFT || key == SDLK_LSHIFT) {
+    key = STB_TEXTEDIT_K_SHIFT;
+  }
+
   if (is_down) {
     stb_textedit_key(_buffer, &_buffer->state, key);
   }
