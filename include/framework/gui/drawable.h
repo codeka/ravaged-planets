@@ -74,7 +74,8 @@ public:
   enum state {
     normal,
     hover,
-    pressed
+    pressed,
+    selected
   };
 
 private:

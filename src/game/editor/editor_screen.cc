@@ -25,7 +25,7 @@ editor_screen::editor_screen() :
 
 editor_screen::~editor_screen() {
   delete ed::main_menu;
- // delete ed::open_map;
+  delete ed::open_map;
   delete ed::new_map;
 //  delete ed::message_box;
   delete ed::save_map;
@@ -38,7 +38,7 @@ void editor_screen::show() {
 
 //  ed::statusbar = new statusbar_window();
   ed::main_menu = new main_menu_window();
-//  ed::open_map = new open_map_window();
+  ed::open_map = new open_map_window();
   ed::new_map = new new_map_window();
 //  ed::message_box = new message_box_window();
   ed::save_map = new save_map_window();
@@ -47,6 +47,7 @@ void editor_screen::show() {
   ed::main_menu->initialize();
   ed::new_map->initialize();
   ed::save_map->initialize();
+  ed::open_map->initialize();
 //  statusbar->show();
 }
 
@@ -82,12 +83,12 @@ void editor_screen::open_map(std::string const &name) {
   // unset the current tool
   set_active_tool("");
 
- // std::shared_ptr<rp::world_reader> reader(new world_create());
-//  reader->read(name);
+  std::shared_ptr<rp::world_reader> reader(new rp::world_reader());
+  reader->read(name);
 
   delete _world;
-//  _world = new editor_world(reader);
- // _world->initialize();
+  _world = new editor_world(reader);
+  _world->initialize();
   set_active_tool("heightfield");
 }
 

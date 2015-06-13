@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <boost/filesystem.hpp>
 
 namespace fw {
 class bitmap;

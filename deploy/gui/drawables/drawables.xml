@@ -27,6 +27,24 @@
     </ninepatch>
     <drawable name="textedit_selection" pos="55,31" size="16,16" />
     <drawable name="textedit_cursor" pos="176,3" size="2,19" />
+    <ninepatch name="listbox_background">
+      <outer pos="29,29" size="20,20" />
+      <inner pos="31,31" size="16,16" />
+    </ninepatch>
+    <drawable name="listbox_up_normal" pos="27,84" size="19,19" />
+    <drawable name="listbox_up_hover" pos="27,104" size="19,19" />
+    <drawable name="listbox_down_normal" pos="47,84" size="19,19" />
+    <drawable name="listbox_down_hover" pos="47,104" size="19,19" />
+    <ninepatch name="listbox_thumb_normal">
+      <outer pos="108,84" size="19,19" />
+      <inner pos="110,86" size="15,15" />
+    </ninepatch>
+    <ninepatch name="listbox_thumb_hover">
+      <outer pos="108,104" size="19,19" />
+      <inner pos="114,110" size="7,7" />
+    </ninepatch>
+    <drawable name="listbox_item_normal" pos="3,100" size="16,16" />
+    <drawable name="listbox_item_selected" pos="55,31" size="16,16" />
   </image>
 
   <image src="test.png">

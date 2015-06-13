@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <framework/gui/property.h>
 
 namespace fw { namespace gui {
 class gui;
@@ -63,6 +62,14 @@ inline std::shared_ptr<dimension> pct(float value) {
 inline std::shared_ptr<dimension> sum(std::shared_ptr<dimension> one, std::shared_ptr<dimension> two) {
   return std::shared_ptr<dimension>(new sum_dimension(one, two));
 }
+
+/** Base class for properties that can be added to buildable objects. */
+class property {
+public:
+  inline virtual ~property() { }
+
+  virtual void apply(widget *widget) = 0;
+};
 
 /**
  * This is the base class of all widgets in the GUI. A widget has a specific position within it's parent, size and

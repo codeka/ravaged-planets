@@ -3,7 +3,6 @@
 #include <memory>
 #include <string>
 
-#include <framework/gui/property.h>
 #include <framework/gui/widget.h>
 
 namespace fw { namespace gui {

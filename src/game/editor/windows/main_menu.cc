@@ -20,6 +20,7 @@
 
 #include <game/editor/windows/main_menu.h>
 #include <game/editor/windows/new_map.h>
+#include <game/editor/windows/open_map.h>
 #include <game/editor/windows/save_map.h>
 
 namespace ed {
@@ -75,7 +76,8 @@ void main_menu_window::initialize() {
       << window::background("frame") << widget::visible(false)
       << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("New")
           << widget::click(std::bind(&main_menu_window::file_new_clicked, this, _1)))
-      << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Open"))
+      << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Open")
+          << widget::click(std::bind(&main_menu_window::file_open_clicked, this, _1)))
       << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Save")
           << widget::click(std::bind(&main_menu_window::file_save_clicked, this, _1)))
       << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit")
@@ -169,7 +171,7 @@ bool main_menu_window::file_save_clicked(fw::gui::widget *w) {
 }
 
 bool main_menu_window::file_open_clicked(fw::gui::widget *w) {
- // open_map->show();
+  open_map->show();
   return true;
 }
 

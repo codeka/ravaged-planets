@@ -7,7 +7,6 @@
 
 #include <framework/gui/widget.h>
 #include <framework/gui/window.h>
-#include <framework/gui/property.h>
 
 namespace fw { namespace gui {
 
