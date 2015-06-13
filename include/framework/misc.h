@@ -36,6 +36,16 @@ vector point_plane_intersect(vector const &plane_pt, vector const &plane_normal,
  */
 std::string get_user_name();
 
+template<typename T>
+inline T max(T a, T b) {
+  return (a > b ? a : b);
+}
+
+template<typename T>
+inline T min(T a, T b) {
+  return (a < b ? a : b);
+}
+
 // constrain the given value to the given max/min. If it's outside, we'll wrap back (not clamp)
 template<typename T>
 inline T constrain(T value, T max_value, T min_value = 0) {
@@ -122,6 +132,41 @@ struct ihash: public std::unary_function<T, std::size_t> {
     }
 
     return seed;
+  }
+};
+
+/** Small utility class which represents a rectangle (x,y plus width,height). */
+template<typename T>
+class rectangle {
+public:
+  T left;
+  T top;
+  T width;
+  T height;
+
+  inline rectangle() : left(0), top(0), width(0), height(0) {
+  }
+
+  inline rectangle(T left, T top, T width, T height) : left(left), top(top), width(width), height(height) {
+  }
+
+  /** Returns the intersection of the two given rectangle. */
+  static inline rectangle intersect(rectangle const &one, rectangle const &two) {
+    const T x1 = one.left;
+    const T x2 = one.left + one.width;
+    const T x3 = two.left;
+    const T x4 = two.left + two.width;
+    const T y1 = one.top;
+    const T y2 = one.top + one.height;
+    const T y3 = two.top;
+    const T y4 = two.top + two.height;
+
+    const T x5 = max(x1, x3);
+    const T x6 = min(x2, x4);
+    const T y5 = max(y1, y3);
+    const T y6 = min(y2, y4);
+
+    return rectangle(x5, y5, x6-x5, y6-y5);
   }
 };
 

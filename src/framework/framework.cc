@@ -172,25 +172,29 @@ void framework::reactivate() {/*
 void framework::run() {
   // kick off the update thread
   std::thread update_thread(std::bind(&framework::update_proc, this));
+  try {
+    if (_graphics == nullptr) {
+      wait_events();
+      _running = false;
+    } else {
+      // do the event/render loop
+      while (_running) {
+        if (!poll_events()) {
+          _running = false;
+          break;
+        }
 
-  if (_graphics == nullptr) {
-    wait_events();
-    _running = false;
-  } else {
-    // do the event/render loop
-    while (_running) {
-      if (!poll_events()) {
-        _running = false;
-        break;
+        render();
       }
-
-      render();
     }
-  }
 
-  // wait for the update thread to exit (once we set _running to false, it'll
-  // stop as well)
-  update_thread.join();
+    // wait for the update thread to exit (once we set _running to false, it'll
+    // stop as well)
+    update_thread.join();
+  } catch(...) {
+    update_thread.detach();
+    throw;
+  }
 }
 
 void framework::exit() {
@@ -210,27 +214,37 @@ void framework::set_camera(camera *cam) {
 }
 
 void framework::update_proc() {
-  int64_t accum_micros = 0;
-  int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
-  while (_running) {
-    _timer->update();
-    accum_micros += std::chrono::duration_cast<std::chrono::microseconds>(
-        _timer->get_frame_duration()).count();
+  try {
+    int64_t accum_micros = 0;
+    int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
+    while (_running) {
+      _timer->update();
+      accum_micros += std::chrono::duration_cast<std::chrono::microseconds>(
+          _timer->get_frame_duration()).count();
 
-    int64_t remaining_micros = timestep_micros - accum_micros;
-    if (remaining_micros > 1000) {
-      usleep(remaining_micros);
-      continue;
+      int64_t remaining_micros = timestep_micros - accum_micros;
+      if (remaining_micros > 1000) {
+        usleep(remaining_micros);
+        continue;
+      }
+
+      while (accum_micros > timestep_micros && _running) {
+        float dt = static_cast<float>(timestep_micros) / 1000000.f;
+        update(dt);
+        accum_micros -= timestep_micros;
+      }
+
+      // TODO: should we yield or sleep for a while?
+      std::this_thread::yield();
     }
-
-    while (accum_micros > timestep_micros && _running) {
-      float dt = static_cast<float>(timestep_micros) / 1000000.f;
-      update(dt);
-      accum_micros -= timestep_micros;
-    }
-
-    // TODO: should we yield or sleep for a while?
-    std::this_thread::yield();
+  }catch(std::exception &e) {
+    std::string msg = boost::diagnostic_information(e);
+    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
+    fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
+    fw::debug << msg << std::endl;
+  } catch (...) {
+    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
+    fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
   }
 }
 

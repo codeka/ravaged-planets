@@ -2,12 +2,15 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <stack>
+#include <vector>
 
 #include <boost/foreach.hpp>
 
 #include <framework/graphics.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
+#include <framework/misc.h>
 
 namespace fw { namespace gui {
 
@@ -189,14 +192,37 @@ void widget::update(float dt) {
   }
 }
 
-void widget::prerender() {
-  FW_CHECKED(glScissor(get_left(), _gui->get_height() - get_top() - get_height(), get_width(), get_height()));
+std::stack<fw::rectangle<float>> scissor_rectangles;
+
+bool widget::prerender() {
+  fw::rectangle<float> rect(get_left(), get_top(), get_width(), get_height());
+  if (!scissor_rectangles.empty()) {
+    fw::rectangle<float> const &top = scissor_rectangles.top();
+    rect = fw::rectangle<float>::intersect(top, rect);
+  }
+  if (rect.width <= 0 || rect.height <= 0) {
+    return false;
+  }
+
+  scissor_rectangles.push(rect);
+  FW_CHECKED(glScissor(rect.left, _gui->get_height() - rect.top - rect.height, rect.width, rect.height));
+  return true;
 }
 
 void widget::render() {
   BOOST_FOREACH(widget *child, _children) {
-    child->prerender();
-    child->render();
+    if (child->is_visible() && child->prerender()) {
+      child->render();
+      child->postrender();
+    }
+  }
+}
+
+void widget::postrender() {
+  scissor_rectangles.pop();
+  if (!scissor_rectangles.empty()) {
+    fw::rectangle<float> const &top = scissor_rectangles.top();
+    FW_CHECKED(glScissor(top.left, _gui->get_height() - top.top - top.height, top.width, top.height));
   }
 }
 

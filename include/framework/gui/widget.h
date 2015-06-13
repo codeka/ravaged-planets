@@ -125,8 +125,10 @@ public:
   virtual void update(float dt);
 
   /** Called just before render. You should not override this, it define the scissor rectangle and stuff like that. */
-  void prerender();
+  bool prerender();
   virtual void render();
+  /** Called just after render. You should not override this, it define the scissor rectangle and stuff like that. */
+  void postrender();
 
   /** Called when the mouse moves out of this widget. */
   virtual void on_mouse_out() {

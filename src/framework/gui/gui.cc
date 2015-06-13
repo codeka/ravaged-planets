@@ -100,10 +100,10 @@ void gui::render() {
   FW_CHECKED(glEnable(GL_SCISSOR_TEST));
   std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
   BOOST_FOREACH(widget *widget, _top_level_widgets) {
-    if (widget->is_visible()) {
-      widget->prerender();
+    if (widget->is_visible() && widget->prerender()) {
       widget->render();
-    }
+      widget->postrender();
+   }
   }
   FW_CHECKED(glDisable(GL_SCISSOR_TEST));
 }
