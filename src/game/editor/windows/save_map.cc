@@ -2,10 +2,12 @@
 #include <framework/texture.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/label.h>
+#include <framework/gui/textedit.h>
 #include <framework/gui/window.h>
 #include <framework/gui/button.h>
 #include <framework/bitmap.h>
-#include <framework/paths.h>
+#include <framework/misc.h>
 
 #include <game/world/world.h>
 #include <game/editor/editor_screen.h>
@@ -20,6 +22,12 @@ namespace ed {
 
 save_map_window *save_map = nullptr;
 
+enum ids {
+  NAME,
+  AUTHOR,
+  DESCRIPTION,
+};
+
 save_map_window::save_map_window() : _wnd(nullptr) {
 }
 
@@ -27,8 +35,14 @@ save_map_window::~save_map_window() {
 }
 
 void save_map_window::initialize() {
-  _wnd = builder<window>(sum(pct(50), px(-150)), sum(pct(50), px(-75)), px(300), px(100))
+  _wnd = builder<window>(sum(pct(50), px(-150)), sum(pct(50), px(-75)), px(300), px(140))
       << window::background("frame") << widget::visible(false)
+      << (builder<label>(px(10), px(10), px(80), px(20)) << label::text("Name:"))
+      << (builder<textedit>(px(90), px(10), px(140), px(20)) << widget::id(NAME))
+      << (builder<label>(px(10), px(40), px(80), px(20)) << label::text("Author:"))
+      << (builder<textedit>(px(90), px(40), px(140), px(20)) << widget::id(AUTHOR))
+      << (builder<label>(px(10), px(70), px(80), px(20)) << label::text("Description:"))
+      << (builder<textedit>(px(90), px(70), px(140), px(20)) << widget::id(DESCRIPTION))
       << (builder<button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) << button::text("Save")
           << widget::click(std::bind(&save_map_window::save_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20)) << button::text("Cancel")
@@ -43,13 +57,13 @@ void save_map_window::show() {
 
   auto world = dynamic_cast<editor_world *>(rp::world::get_instance());
 
-//  _name->setText(world->get_name());
-//  _description->setText(world->get_description());
-//  if (world->get_author() == "") {
-//    _author->setText(fw::get_local_username());
-//  } else {
-//    _author->setText(world->get_author());
-//  }
+  _wnd->find<textedit>(NAME)->set_text(world->get_name());
+  _wnd->find<textedit>(DESCRIPTION)->set_text(world->get_description());
+  if (world->get_author() == "") {
+    _wnd->find<textedit>(AUTHOR)->set_text(fw::get_user_name());
+  } else {
+    _wnd->find<textedit>(AUTHOR)->set_text(world->get_author());
+  }
   update_screenshot();
 }
 
@@ -63,15 +77,13 @@ void save_map_window::update_screenshot() {
 }
 
 bool save_map_window::save_clicked(widget *w) {
-//  std::string name = _name->getText().c_str();
-
   auto world = dynamic_cast<editor_world *>(rp::world::get_instance());
-  world->set_name("New World");
-  world->set_description("New World description");
-  world->set_author("Dean Harding");
+  world->set_name(_wnd->find<textedit>(NAME)->get_text());
+  world->set_author(_wnd->find<textedit>(AUTHOR)->get_text());
+  world->set_description(_wnd->find<textedit>(DESCRIPTION)->get_text());
 
   world_writer writer(world);
-  writer.write("New World");
+  writer.write(world->get_name());
 
   _wnd->set_visible(false);
   return true;

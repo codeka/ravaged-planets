@@ -31,6 +31,11 @@ float angle_between(vector const &a, vector const &b);
 vector point_plane_intersect(vector const &plane_pt, vector const &plane_normal,
     vector const &p_start, vector const &p_dir);
 
+/**
+ * Gets the name of the current user. Sometimes we may be able to return first name/last name, others just a username.
+ */
+std::string get_user_name();
+
 // constrain the given value to the given max/min. If it's outside, we'll wrap back (not clamp)
 template<typename T>
 inline T constrain(T value, T max_value, T min_value = 0) {

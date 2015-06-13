@@ -179,6 +179,10 @@ std::string textedit::get_text() const {
   return conv::utf_to_utf<char>(_buffer->codepoints);
 }
 
+void textedit::set_text(std::string const &text) {
+  _buffer->codepoints = conv::utf_to_utf<uint32_t>(text);
+}
+
 void textedit::update(float dt) {
   if (_focused) {
     _cursor_flip_time += dt;
