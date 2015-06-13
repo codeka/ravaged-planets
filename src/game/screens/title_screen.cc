@@ -3,7 +3,7 @@
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
-#include <framework/gui/static_widget.h>
+#include <framework/gui/label.h>
 #include <framework/gui/window.h>
 #include <framework/lang.h>
 #include <framework/logging.h>
@@ -33,10 +33,10 @@ void title_screen::show() {
 
   wnd = builder<window>(px(0), px(0), pct(100), pct(100)) << window::background("title_background")
       // Title "Ravaged Planets"
-      << (builder<static_widget>(px(40), px(20), px(417), px(49)) << static_widget::background("title_heading"))
+      << (builder<label>(px(40), px(20), px(417), px(49)) << label::background("title_heading"))
       // "A game by Dean Harding (dean@codeka.com.au)" text
-      << (builder<static_widget>(px(40), px(70), px(500), px(16))
-          << static_widget::text("A game by Dean Harding (dean@codeka.com.au)"))
+      << (builder<label>(px(40), px(70), px(500), px(16))
+          << label::text("A game by Dean Harding (dean@codeka.com.au)"))
       << (builder<button>(px(40), px(100), px(180), px(30)) << button::text("New Game")
           << widget::click(std::bind(&title_screen::newgame_clicked, this, _1)))
       << (builder<button>(px(40), px(140), px(180), px(30)) << button::text("Join Game"))
@@ -46,8 +46,8 @@ void title_screen::show() {
       << (builder<button>(px(40), px(260), px(180), px(30)) << button::text("Quit")
           << widget::click(std::bind(&title_screen::quit_clicked, this, _1)))
       // "v1.2.3"
-      << (builder<static_widget>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
-          << static_widget::text(fw::version_str));
+      << (builder<label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
+          << label::text(fw::version_str));
   frmwrk->get_gui()->attach_widget(wnd);
 }
 

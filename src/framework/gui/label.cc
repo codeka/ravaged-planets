@@ -3,7 +3,7 @@
 #include <framework/font.h>
 #include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
-#include <framework/gui/static_widget.h>
+#include <framework/gui/label.h>
 
 namespace fw { namespace gui {
 
@@ -17,7 +17,7 @@ public:
   }
 
   void apply(widget *widget) {
-    static_widget *wdgt = dynamic_cast<static_widget *>(widget);
+    label *wdgt = dynamic_cast<label *>(widget);
     wdgt->_background = wdgt->_gui->get_drawable_manager()->get_drawable(_drawable_name);
   }
 };
@@ -32,26 +32,26 @@ public:
   }
 
   void apply(widget *widget) {
-    static_widget *wdgt = dynamic_cast<static_widget *>(widget);
+    label *wdgt = dynamic_cast<label *>(widget);
     wdgt->_text = _text;
   }
 };
 
-static_widget::static_widget(gui *gui) : widget(gui) {
+label::label(gui *gui) : widget(gui) {
 }
 
-static_widget::~static_widget() {
+label::~label() {
 }
 
-property *static_widget::background(std::string const &drawable_name) {
+property *label::background(std::string const &drawable_name) {
   return new static_background_property(drawable_name);
 }
 
-property *static_widget::text(std::string const &text) {
+property *label::text(std::string const &text) {
   return new static_text_property(text);
 }
 
-void static_widget::render() {
+void label::render() {
   if (_background) {
     _background->render(get_left(), get_top(), get_width(), get_height());
   }

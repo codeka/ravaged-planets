@@ -10,8 +10,8 @@ namespace fw { namespace gui {
 class gui;
 class drawable;
 
-/** A static widget is just a simple static control, either text or a drawable that is non-interactive. */
-class static_widget : public widget {
+/** A label is just a simple static control, either text or a drawable that is non-interactive. */
+class label : public widget {
 private:
   friend class static_background_property;
   friend class static_text_property;
@@ -20,8 +20,8 @@ private:
   std::shared_ptr<drawable> _background;
 
 public:
-  static_widget(gui *gui);
-  virtual ~static_widget();
+  label(gui *gui);
+  virtual ~label();
 
   static property *background(std::string const &drawable_name);
   static property *text(std::string const &text);
