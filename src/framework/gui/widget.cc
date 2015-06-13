@@ -5,6 +5,7 @@
 
 #include <boost/foreach.hpp>
 
+#include <framework/graphics.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
 
@@ -188,8 +189,13 @@ void widget::update(float dt) {
   }
 }
 
+void widget::prerender() {
+  FW_CHECKED(glScissor(get_left(), _gui->get_height() - get_top() - get_height(), get_width(), get_height()));
+}
+
 void widget::render() {
   BOOST_FOREACH(widget *child, _children) {
+    child->prerender();
     child->render();
   }
 }
