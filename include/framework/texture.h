@@ -31,7 +31,7 @@ public:
     return (!!_data);
   }
 
-  void bind();
+  void bind() const;
 
   // gets the name of the file we were created from (or an empty string if we
   // weren't created from a file)

@@ -114,7 +114,7 @@ void texture::create(fw::bitmap const &bmp, bool dynamic) {
       bmp.get_pixels().data()));
 }
 
-void texture::bind() {
+void texture::bind() const {
   if (!_data) {
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
     return;

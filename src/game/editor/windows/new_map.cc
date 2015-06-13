@@ -45,7 +45,7 @@ void new_map_window::initialize() {
       << (builder<button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) << button::text("Create")
           << widget::click(std::bind(&new_map_window::ok_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20)) << button::text("Cancel")
-  << widget::click(std::bind(&new_map_window::cancel_clicked, this, _1)));
+          << widget::click(std::bind(&new_map_window::cancel_clicked, this, _1)));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 

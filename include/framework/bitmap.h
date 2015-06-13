@@ -25,6 +25,9 @@ private:
   // Populates our bitmap_data with data from the given in-memory file
   void load_bitmap(uint8_t const *data, size_t data_size);
 
+  // Populates our bitmap data from the given texture.
+  void load_bitmap(texture const &tex);
+
 public:
   // Constructs a blank bitmap.
   bitmap();

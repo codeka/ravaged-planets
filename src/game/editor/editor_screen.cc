@@ -13,6 +13,7 @@
 #include <game/editor/windows/save_map.h>
 #include <game/editor/windows/open_map.h>
 #include <game/editor/windows/new_map.h>
+#include <game/editor/windows/save_map.h>
 #include <game/editor/windows/message_box.h>
 #include <game/editor/windows/open_file.h>
 
@@ -27,7 +28,7 @@ editor_screen::~editor_screen() {
  // delete ed::open_map;
   delete ed::new_map;
 //  delete ed::message_box;
-//  delete ed::save_map;
+  delete ed::save_map;
 //  delete ed::open_file;
 //  delete ed::statusbar;
 }
@@ -40,11 +41,12 @@ void editor_screen::show() {
 //  ed::open_map = new open_map_window();
   ed::new_map = new new_map_window();
 //  ed::message_box = new message_box_window();
-//  ed::save_map = new save_map_window();
+  ed::save_map = new save_map_window();
 //  ed::open_file = new open_file_window();
 
   ed::main_menu->initialize();
   ed::new_map->initialize();
+  ed::save_map->initialize();
 //  statusbar->show();
 }
 

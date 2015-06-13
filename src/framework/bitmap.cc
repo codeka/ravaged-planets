@@ -1,3 +1,5 @@
+
+#include <framework/framework.h>
 #include <framework/bitmap.h>
 #include <framework/misc.h>
 #include <framework/colour.h>
@@ -48,32 +50,31 @@ struct bitmap_data: private boost::noncopyable {
 
 //-------------------------------------------------------------------------
 bitmap::bitmap() :
-    _data(0) {
+    _data(nullptr) {
 }
 
 bitmap::bitmap(int width, int height, uint32_t *argb /*= 0*/) :
-    _data(0) {
+    _data(nullptr) {
   prepare_write(width, height);
 
-  if (argb != 0) {
+  if (argb != nullptr) {
     memcpy(&_data->rgba[0], argb, width * height * sizeof(uint32_t));
   }
 }
 
 bitmap::bitmap(fs::path const &filename) :
-    _data(0) {
+    _data(nullptr) {
   load_bitmap(filename);
 }
 
 bitmap::bitmap(uint8_t const *data, size_t data_size) :
-    _data(0) {
+    _data(nullptr) {
   load_bitmap(data, data_size);
 }
 
 bitmap::bitmap(texture const &tex) :
-    _data(0) {
-//		IDirect3DTexture9 *texture = tex.get_d3dtexture();
-//		load_bitmap(texture);
+    _data(nullptr) {
+  load_bitmap(tex);
 }
 
 bitmap::bitmap(bitmap const &copy) {
@@ -108,10 +109,10 @@ void bitmap::release() {
 }
 
 void bitmap::prepare_write(int width, int height) {
-  if (_data == 0 || _data->ref_count > 1) {
+  if (_data == nullptr || _data->ref_count > 1) {
     // we'll have to create a new bitmap_data if there's currently no data or
     // the ref_count is > 1
-    if (_data != 0)
+    if (_data != nullptr)
       _data->ref_count--;
 
     _data = new bitmap_data();
@@ -154,6 +155,14 @@ void bitmap::load_bitmap(uint8_t const *data, size_t data_size) {
 
   // don't need this anymore
   stbi_image_free(pixels);
+}
+
+void bitmap::load_bitmap(texture const &tex) {
+  FW_ENSURE_RENDER_THREAD();
+
+  prepare_write(tex.get_width(), tex.get_height());
+  tex.bind();
+  FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data->rgba.data()));
 }
 
 void bitmap::save_bitmap(fs::path const &filename) const {

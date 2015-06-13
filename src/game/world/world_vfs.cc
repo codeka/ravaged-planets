@@ -142,7 +142,7 @@ void world_file_entry::ensure_open(bool throw_on_error) {
     return;
   }
 
-  _stream.open(_full_path.c_str(), std::ios::in | std::ios::out);
+  _stream.open(_full_path.c_str(), std::ios::out);
   if (_stream.fail()) {
     // try again read-only
     _stream.open(_full_path.c_str(), std::ios::in);
