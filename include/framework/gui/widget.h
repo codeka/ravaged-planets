@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <boost/any.hpp>
 
 namespace fw { namespace gui {
 class gui;
@@ -82,6 +83,7 @@ protected:
   friend class widget_click_property;
   friend class widget_visible_property;
   friend class widget_id_property;
+  friend class widget_data_property;
 
   gui *_gui;
   widget *_parent;
@@ -94,6 +96,7 @@ protected:
   bool _visible;
   bool _focused;
   std::function<bool(widget *)> _on_click;
+  boost::any _data;
 
 public:
   widget(gui *gui);
@@ -104,6 +107,7 @@ public:
   static property *click(std::function<bool(widget *)> on_click);
   static property *visible(bool visible);
   static property *id(int id);
+  static property *data(boost::any const &data);
 
   void attach_child(widget *child);
   void detach_child(widget *child);
@@ -171,6 +175,9 @@ public:
   void set_width(std::shared_ptr<dimension> width);
   float get_height();
   void set_height(std::shared_ptr<dimension> height);
+
+  boost::any const &get_data() const;
+  void set_data(boost::any const &data);
 
   bool is_visible() const {
     return _visible;

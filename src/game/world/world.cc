@@ -37,11 +37,10 @@ world *world::_instance = nullptr;
 world::world(std::shared_ptr<world_reader> reader) :
     _reader(reader), /*_entities(0),*/ _terrain(nullptr)/*, _pathing(0)*/, _initialized(false) {
   //_cursor = new cursor_handler();
-  world::set_instance(this);
 }
 
 world::~world() {
-  world::set_instance(0);
+  world::set_instance(nullptr);
  // delete _cursor;
  // if (_pathing != nullptr)
  //   delete _pathing;
@@ -79,6 +78,8 @@ void world::initialize() {
   }*/
   _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
   _initialized = true;
+
+  world::set_instance(this);
 }
 
 void world::destroy() {
@@ -155,6 +156,9 @@ void world::screenshot_callback(fw::bitmap const &screenshot) {
 }
 
 void world::update() {
+  if (!_initialized) {
+    return;
+  }
   // if update is called, we can't be paused so hide the "pause" menu...
 //  if (hud_pause != 0 && hud_pause->is_visible())
 //    hud_pause->hide();

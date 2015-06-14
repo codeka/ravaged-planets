@@ -31,7 +31,7 @@ void world_reader::read(std::string name) {
   int trn_width;
   int trn_length;
 
-  world_file_entry wfe = wf.get_entry("heightfield");
+  world_file_entry wfe = wf.get_entry("heightfield", false /* for_write */);
   wfe.read(&version, sizeof(int));
   if (version != 1) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("unknown terrain version"));
@@ -50,14 +50,14 @@ void world_reader::read(std::string name) {
   for (int patch_z = 0; patch_z < _terrain->get_patches_length(); patch_z++) {
     for (int patch_x = 0; patch_x < _terrain->get_patches_width(); patch_x++) {
       std::string name = (boost::format("splatt-%1%-%2%.png") % patch_x % patch_z).str();
-      wfe = wf.get_entry(name);
+      wfe = wf.get_entry(name, false /* for_write */);
 
       fw::bitmap splatt(wfe.get_full_path().c_str());
       _terrain->set_splatt(patch_x, patch_z, splatt);
     }
   }
 
-  wfe = wf.get_entry("minimap.png");
+  wfe = wf.get_entry("minimap.png", false /* for_write */);
   if (wfe.exists()) {
     wfe.close();
 
@@ -66,7 +66,7 @@ void world_reader::read(std::string name) {
     _minimap_background = tex;
   }
 
-  wfe = wf.get_entry(name + ".wwmap");
+  wfe = wf.get_entry(name + ".wwmap", false /* for_write */);
   if (wfe.exists()) {
     wfe.close();
 
@@ -74,7 +74,7 @@ void world_reader::read(std::string name) {
     read_wwmap(root);
   }
 
-  wfe = wf.get_entry("collision_data");
+  wfe = wf.get_entry("collision_data", false /* for_write */);
   if (wfe.exists()) {
     read_collision_data(wfe);
   }

@@ -83,7 +83,7 @@ void editor_screen::open_map(std::string const &name) {
   // unset the current tool
   set_active_tool("");
 
-  std::shared_ptr<rp::world_reader> reader(new rp::world_reader());
+  std::shared_ptr<world_create> reader(new world_create());
   reader->read(name);
 
   delete _world;
@@ -119,8 +119,8 @@ void editor_screen::set_active_tool(std::string const &name) {
 
   tool *t = tool_factory::create_tool(name, _world);
   if (t != nullptr) {
+    t->activate();
     _tool = t;
-    _tool->activate();
   }
 }
 

@@ -126,14 +126,8 @@ void texture::bind() const {
 }
 
 void texture::save_png(fs::path const &filename) {
-/*  HRESULT hr = ::D3DXSaveTextureToFile(wfilename.c_str(), D3DXIFF_PNG,
-      _data->tex, 0);
-  if (FAILED(hr)) {
-    debug
-        << boost::format(
-            "WARN: could not save texture to file: \"%1%\": 0x%2$x") % filename
-            % hr << std::endl;
-  }*/
+  bitmap bmp(*this);
+  bmp.save_bitmap(filename);
 }
 
 void texture::calculate_size() const {

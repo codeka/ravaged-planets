@@ -54,8 +54,6 @@ float sum_dimension::get_value(float parent_value) {
 }
 
 //-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 class widget_position_property : public property {
 private:
   std::shared_ptr<dimension> _x;
@@ -131,6 +129,18 @@ public:
   }
 };
 
+class widget_data_property : public property {
+private:
+  boost::any _data;
+public:
+  widget_data_property(boost::any const &data)
+      : _data(data) {
+  }
+
+  void apply(widget *widget) {
+    widget->_data = _data;
+  }
+};
 
 //-----------------------------------------------------------------------------
 
@@ -159,6 +169,10 @@ property *widget::visible(bool visible) {
 
 property *widget::id(int id) {
   return new widget_id_property(id);
+}
+
+property *widget::data(boost::any const &data) {
+  return new widget_data_property(data);
 }
 
 void widget::attach_child(widget *child) {
@@ -277,6 +291,13 @@ widget *widget::find(int id) {
   return nullptr;
 }
 
+boost::any const &widget::get_data() const {
+  return _data;
+}
+
+void widget::set_data(boost::any const &data) {
+  _data = data;
+}
 
 bool widget::is_child(widget *w) {
   if (w == nullptr) {

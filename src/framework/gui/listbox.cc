@@ -30,6 +30,7 @@ public:
   void setup(listbox *listbox, int index);
   int get_index() const;
   void set_selected(bool selected);
+  widget *get_widget();
 
   void render();
 };
@@ -56,6 +57,10 @@ void listbox_item::setup(listbox *listbox, int index) {
 
 int listbox_item::get_index() const {
   return _index;
+}
+
+widget *listbox_item::get_widget() {
+  return _children[0];
 }
 
 void listbox_item::set_selected(bool selected) {
@@ -168,7 +173,6 @@ bool listbox::on_up_button_click(widget *w) {
   return true;
 }
 
-
 void listbox::select_item(int index) {
   if (_selected_item != nullptr) {
     _selected_item->set_selected(false);
@@ -176,6 +180,24 @@ void listbox::select_item(int index) {
   _selected_item = _items[index];
   _selected_item->set_selected(true);
   sig_item_selected(index);
+}
+
+int listbox::get_selected_index() {
+  if (_selected_item == nullptr) {
+    return -1;
+  }
+  return _selected_item->get_index();
+}
+
+widget *listbox::get_item(int index) {
+  if (index < 0 || index >= _items.size()) {
+    return nullptr;
+  }
+  return _items[index]->get_widget();
+}
+
+widget *listbox::get_selected_item() {
+  return _selected_item == nullptr ? nullptr : _selected_item->get_widget();
 }
 
 void listbox::render() {

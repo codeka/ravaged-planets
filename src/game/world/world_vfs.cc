@@ -113,11 +113,11 @@ world_file world_vfs::open_file(std::string name, bool for_writing /*= false*/) 
 
 //-------------------------------------------------------------------------
 
-world_file_entry::world_file_entry(std::string full_path) {
-  _full_path = full_path;
+world_file_entry::world_file_entry(std::string full_path, bool for_write) :
+    _full_path(full_path), _for_write(for_write) {
 }
 
-world_file_entry::world_file_entry(world_file_entry const &copy) {
+world_file_entry::world_file_entry(world_file_entry const &copy) : _for_write(false) {
   this->copy(copy);
 }
 
@@ -135,6 +135,7 @@ void world_file_entry::copy(world_file_entry const &copy) {
 
   _full_path = copy._full_path;
   _stream.copyfmt(copy._stream);
+  _for_write = copy._for_write;
 }
 
 void world_file_entry::ensure_open(bool throw_on_error) {
@@ -142,14 +143,14 @@ void world_file_entry::ensure_open(bool throw_on_error) {
     return;
   }
 
-  _stream.open(_full_path.c_str(), std::ios::out);
-  if (_stream.fail()) {
-    // try again read-only
+  if (_for_write) {
+    _stream.open(_full_path.c_str(), std::ios::out);
+  } else {
     _stream.open(_full_path.c_str(), std::ios::in);
-    if (_stream.fail()) {
-      if (throw_on_error) {
-        BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(_full_path));
-      }
+  }
+  if (_stream.fail()) {
+    if (throw_on_error) {
+      BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(_full_path));
     }
   }
 }
@@ -188,9 +189,9 @@ world_file::world_file(std::string path) :
     _path(path) {
 }
 
-world_file_entry world_file::get_entry(std::string name) {
+world_file_entry world_file::get_entry(std::string name, bool for_write) {
   fs::path file_path = fs::path(_path) / name;
-  return world_file_entry(file_path.string());
+  return world_file_entry(file_path.string(), for_write);
 }
 }
 

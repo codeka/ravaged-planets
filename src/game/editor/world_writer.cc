@@ -38,7 +38,7 @@ void world_writer::write(std::string name) {
 
   // write the screenshot as well, which is pretty simple...
   if (_world->get_screenshot()) {
-    rp::world_file_entry wfe = wf.get_entry("screenshot.png");
+    rp::world_file_entry wfe = wf.get_entry("screenshot.png", true /* for_write */);
     _world->get_screenshot()->save_bitmap(wfe.get_full_path());
   }
 }
@@ -49,7 +49,7 @@ void world_writer::write_terrain(rp::world_file &wf) {
   int trn_width = trn->get_width();
   int trn_length = trn->get_length();
 
-  rp::world_file_entry wfe = wf.get_entry("heightfield");
+  rp::world_file_entry wfe = wf.get_entry("heightfield", true /* for_write */);
   wfe.write(&version, sizeof(int));
   wfe.write(&trn_width, sizeof(int));
   wfe.write(&trn_length, sizeof(int));
@@ -60,14 +60,14 @@ void world_writer::write_terrain(rp::world_file &wf) {
       std::shared_ptr<fw::texture> tex = trn->get_patch_splatt(patch_x, patch_z);
 
       std::string name = (boost::format("splatt-%1%-%2%.png") % patch_x % patch_z).str();
-      wfe = wf.get_entry(name);
+      wfe = wf.get_entry(name, true /* for_write */);
       tex->save_png(wfe.get_full_path());
     }
   }
 }
 
 void world_writer::write_mapdesc(rp::world_file &wf) {
-  rp::world_file_entry wfe = wf.get_entry(_name + ".mapdesc");
+  rp::world_file_entry wfe = wf.get_entry(_name + ".mapdesc", true /* for_write */);
   wfe.write("<mapdesc version=\"1\">");
   wfe.write((boost::format("  <description>%1%</description>") % _world->get_description()).str());
   wfe.write((boost::format("  <author>%1%</author>") % _world->get_author()).str());
@@ -137,7 +137,7 @@ void world_writer::write_minimap_background(rp::world_file &wf) {
   fw::bitmap img(width, height);
   img.set_pixels(pixels);
 
-  rp::world_file_entry wfe = wf.get_entry("minimap.png");
+  rp::world_file_entry wfe = wf.get_entry("minimap.png", true /* for_write */);
   img.save_bitmap(wfe.get_full_path());
 }
 
@@ -193,7 +193,7 @@ void world_writer::write_collision_data(rp::world_file &wf) {
 
   int version = 1;
 
-  rp::world_file_entry wfe = wf.get_entry("collision_data");
+  rp::world_file_entry wfe = wf.get_entry("collision_data", true /* for_write */);
   wfe.write(&version, sizeof(int));
   wfe.write(&width, sizeof(int));
   wfe.write(&length, sizeof(int));

@@ -3,6 +3,7 @@
 #include <framework/framework.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/gui.h>
+#include <framework/gui/widget.h>
 #include <framework/gui/window.h>
 #include <framework/gui/button.h>
 #include <framework/gui/label.h>
@@ -43,14 +44,21 @@ void open_map_window::initialize() {
 
   rp::world_vfs vfs;
   std::vector<rp::world_summary> map_list = vfs.list_maps();
-  BOOST_FOREACH(rp::world_summary & ws, map_list) {
+  BOOST_FOREACH(rp::world_summary &ws, map_list) {
     std::string title = ws.get_name();
-    _wnd->find<listbox>(MAP_LIST)->add_item(builder<label>(px(0), px(0), pct(100), px(20)) << label::text(title));
+    _wnd->find<listbox>(MAP_LIST)->add_item(
+        builder<label>(px(0), px(0), pct(100), px(20)) << label::text(title) << widget::data(ws));
   }
 }
 
 bool open_map_window::open_clicked(widget *w) {
-  //editor_screen::get_instance()->open_map(map_name);
+  widget *selected_widget = _wnd->find<listbox>(MAP_LIST)->get_selected_item();
+  if (selected_widget == nullptr) {
+    return true;
+  }
+
+  rp::world_summary const &ws = boost::any_cast<rp::world_summary const &>(selected_widget->get_data());
+  editor_screen::get_instance()->open_map(ws.get_name());
 
   hide();
   return true;

@@ -38,7 +38,11 @@ public:
   /** Select the item with the given index. */
   void select_item(int index);
 
-  /** Signalled when an item is selected. */
+  int get_selected_index();
+  widget *get_item(int index);
+  widget *get_selected_item();
+
+  /** Signaled when an item is selected. */
   boost::signals2::signal<void(int index)> sig_item_selected;
 
   void render();

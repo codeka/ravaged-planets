@@ -38,7 +38,7 @@ public:
   // initialize our properties from the given map file (or directory)
   void initialize(std::string map_file);
 
-  std::string get_name() {
+  std::string get_name() const {
     return _name;
   }
   std::string get_description() {
@@ -70,12 +70,13 @@ class world_file_entry {
 private:
   std::string _full_path;
   std::fstream _stream;
+  bool _for_write;
 
   void copy(world_file_entry const &copy);
   void ensure_open(bool throw_on_error = true);
 
 public:
-  world_file_entry(std::string full_path);
+  world_file_entry(std::string full_path, bool for_write);
   world_file_entry(world_file_entry const &copy);
   ~world_file_entry();
 
@@ -112,7 +113,7 @@ private:
 public:
   world_file(std::string path);
 
-  world_file_entry get_entry(std::string name);
+  world_file_entry get_entry(std::string name, bool for_write);
 };
 
 /**

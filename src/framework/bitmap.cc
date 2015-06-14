@@ -135,6 +135,7 @@ void bitmap::load_bitmap(fs::path const &filename) {
   }
 
   // copy pixels from what stb returned into our own buffer
+  _data->rgba.resize(_data->width * _data->height);
   memcpy(_data->rgba.data(), reinterpret_cast<uint32_t const *>(pixels), _data->width * _data->height);
 
   // don't need this anymore
