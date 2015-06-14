@@ -5,7 +5,15 @@
 #include <framework/gui/drawable.h>
 #include <framework/gui/listbox.h>
 
+using namespace std::placeholders;
+
 namespace fw { namespace gui {
+
+enum ids {
+  THUMB = 56756
+};
+
+//-----------------------------------------------------------------------------
 
 /** A special widget that we add children to. This item handles the selection colours and positioning of the item. */
 class listbox_item : public widget {
@@ -72,17 +80,17 @@ listbox::listbox(gui *gui) : widget(gui), _selected_item(nullptr) {
   bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("listbox_up_normal"));
   bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("listbox_up_hover"));
   attach_child(builder<button>(sum(pct(100), px(-19)), px(0), px(19), px(19))
-      << button::background(bkgnd));
+      << button::background(bkgnd) << button::click(std::bind(&listbox::on_up_button_click, this, _1)));
   bkgnd = std::shared_ptr<state_drawable>(new state_drawable());
   bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("listbox_down_normal"));
   bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("listbox_down_hover"));
   attach_child(builder<button>(sum(pct(100), px(-19)), sum(pct(100), px(-19)), px(19), px(19))
-      << button::background(bkgnd));
+      << button::background(bkgnd) << button::click(std::bind(&listbox::on_down_button_click, this, _1)));
   bkgnd = std::shared_ptr<state_drawable>(new state_drawable());
   bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("listbox_thumb_normal"));
   bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("listbox_thumb_hover"));
   attach_child(builder<button>(sum(pct(100), px(-19)), px(19), px(19), sum(pct(100), px(-38)))
-      << button::background(bkgnd));
+      << button::background(bkgnd) << widget::id(THUMB));
 
   _item_container = builder<widget>(px(0), px(0), sum(pct(100), px(-20)), px(0));
   attach_child(_item_container);
@@ -99,7 +107,67 @@ void listbox::add_item(widget *w) {
   _item_container->attach_child(item);
   _item_container->set_height(px(_item_container->get_height() + w->get_height()));
   _items.push_back(item);
+  update_thumb_button(true);
 }
+
+void listbox::update_thumb_button(bool adjust_height) {
+  float widget_height = get_height();
+  float content_height = _item_container->get_height();
+  float thumb_max_height = widget_height - 38.0f; // the up/down buttons
+  float thumb_height;
+  button *thumb = find<button>(THUMB);
+
+  if (adjust_height) {
+    if (content_height <= widget_height) {
+      thumb_height = thumb_max_height;
+    } else {
+      // This will be 0.5 when content_height is twice widget height,
+      float ratio = widget_height / content_height;
+      thumb_height = thumb_max_height * ratio;
+      if (thumb_height < 30) {
+        thumb_height = 30;
+      }
+      if (thumb_height >= thumb_max_height) {
+        thumb_height = thumb_max_height;
+      }
+    }
+    thumb->set_height(px(thumb_height));
+  } else {
+    thumb_height = thumb->get_height();
+  }
+
+  float offset = get_top() - _item_container->get_top();
+  float max_offset = _item_container->get_height() - get_height();
+  float offset_ratio = offset / max_offset;
+
+  float max_thumb_offset = thumb_max_height - thumb_height;
+  float thumb_offset = max_thumb_offset * offset_ratio;
+  thumb->set_top(px(19 + thumb_offset));
+}
+
+bool listbox::on_down_button_click(widget *w) {
+  float current_top = _item_container->get_top() - get_top();
+  current_top -= get_height() / 4.0f;
+  float max_offset = _item_container->get_height() - get_height();
+  if (current_top < -max_offset) {
+    current_top = -max_offset;
+  }
+  _item_container->set_top(px(current_top));
+  update_thumb_button(false);
+  return true;
+}
+
+bool listbox::on_up_button_click(widget *w) {
+  float current_top = _item_container->get_top() - get_top();
+  current_top += get_height() / 4.0f;
+  if (current_top > 0) {
+    current_top = 0.0f;
+  }
+  _item_container->set_top(px(current_top));
+  update_thumb_button(false);
+  return true;
+}
+
 
 void listbox::select_item(int index) {
   if (_selected_item != nullptr) {

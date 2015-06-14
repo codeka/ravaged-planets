@@ -21,6 +21,9 @@ private:
   std::vector<listbox_item *> _items;
   listbox_item *_selected_item;
 
+  void update_thumb_button(bool adjust_height);
+  bool on_down_button_click(widget *w);
+  bool on_up_button_click(widget *w);
 public:
   listbox(gui *gui);
   virtual ~listbox();
