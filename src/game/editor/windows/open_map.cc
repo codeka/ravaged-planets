@@ -1,3 +1,4 @@
+#include <vector>
 
 #include <framework/framework.h>
 #include <framework/gui/builder.h>
@@ -40,26 +41,12 @@ void open_map_window::initialize() {
           << widget::click(std::bind(&open_map_window::cancel_clicked, this, _1)));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 
-  for (int i = 0; i < 20; i++) {
-    std::string title = "Item # " + std::to_string(i);
+  rp::world_vfs vfs;
+  std::vector<rp::world_summary> map_list = vfs.list_maps();
+  BOOST_FOREACH(rp::world_summary & ws, map_list) {
+    std::string title = ws.get_name();
     _wnd->find<listbox>(MAP_LIST)->add_item(builder<label>(px(0), px(0), pct(100), px(20)) << label::text(title));
   }
-
-/*
-  _maps = get_child < CEGUI::ItemListbox > ("OpenMap/MapList");
-  CEGUI::WindowManager &wndmgr = CEGUI::WindowManager::getSingleton();
-
-  ww::world_vfs vfs;
-  std::vector<ww::world_summary> map_list = vfs.list_maps();
-
-  _maps->resetList();
-  BOOST_FOREACH(ww::world_summary & ws, map_list)
-  {
-    CEGUI::ItemEntry *entry = dynamic_cast<CEGUI::ItemEntry *>(wndmgr.createWindow("ww/ListboxItem",
-        ("OpenMap/MapList/" + ws.get_name()).c_str()));
-    entry->setText(ws.get_name().c_str());
-    _maps->addItem(entry);
-  }*/
 }
 
 bool open_map_window::open_clicked(widget *w) {
