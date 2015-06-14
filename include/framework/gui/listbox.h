@@ -15,6 +15,7 @@ class listbox : public widget {
 private:
   std::shared_ptr<drawable> _background;
   std::vector<listbox_item *> _items;
+  listbox_item *_selected_item;
 
 public:
   listbox(gui *gui);
@@ -26,6 +27,9 @@ public:
    * (x,y) of (0,0) and a width of 100%.
    */
   void add_item(widget *w);
+
+  /** Select the item with the given index. */
+  void select_item(int index);
 
   void render();
 };

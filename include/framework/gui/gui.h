@@ -30,6 +30,8 @@ private:
   /** Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget. */
   widget *get_widget_at(float x, float y);
 
+  void propagate_mouse_event(widget *w, bool is_down, float x, float y);
+
 public:
   gui();
   ~gui();

@@ -178,6 +178,10 @@ void widget::detach_child(widget *child) {
 void widget::on_attached_to_parent(widget *parent) {
 }
 
+widget *widget::get_parent() {
+  return _parent;
+}
+
 void widget::on_focus_gained() {
   _focused = true;
 }

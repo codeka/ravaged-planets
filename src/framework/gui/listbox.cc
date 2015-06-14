@@ -10,21 +10,52 @@ namespace fw { namespace gui {
 /** A special widget that we add children to. This item handles the selection colours and positioning of the item. */
 class listbox_item : public widget {
 private:
+  listbox *_listbox;
+  int _index;
   std::shared_ptr<state_drawable> _background;
 public:
   listbox_item(gui *gui);
   virtual ~listbox_item();
 
+  virtual bool on_mouse_down(float x, float y);
+
+  void setup(listbox *listbox, int index);
+  int get_index() const;
+  void set_selected(bool selected);
+
   void render();
 };
 
-listbox_item::listbox_item(gui *gui) : widget(gui) {
+listbox_item::listbox_item(gui *gui) : widget(gui), _listbox(nullptr), _index(-1) {
   _background = std::shared_ptr<state_drawable>(new state_drawable());
   _background->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("listbox_item_normal"));
   _background->add_drawable(state_drawable::selected, _gui->get_drawable_manager()->get_drawable("listbox_item_selected"));
 }
 
 listbox_item::~listbox_item() {
+}
+
+/** When you click a listbox item, we want to make sure it's the selected one. */
+bool listbox_item::on_mouse_down(float x, float y) {
+  _listbox->select_item(_index);
+  return true;
+}
+
+void listbox_item::setup(listbox *listbox, int index) {
+  _listbox = listbox;
+  _index = index;
+}
+
+int listbox_item::get_index() const {
+  return _index;
+}
+
+void listbox_item::set_selected(bool selected) {
+  if (selected) {
+    _background->set_current_state(state_drawable::selected);
+  } else {
+    _background->set_current_state(state_drawable::normal);
+  }
 }
 
 void listbox_item::render() {
@@ -34,7 +65,7 @@ void listbox_item::render() {
 
 //-----------------------------------------------------------------------------
 
-listbox::listbox(gui *gui) : widget(gui) {
+listbox::listbox(gui *gui) : widget(gui), _selected_item(nullptr) {
   _background = gui->get_drawable_manager()->get_drawable("listbox_background");
 
   std::shared_ptr<state_drawable> bkgnd = std::shared_ptr<state_drawable>(new state_drawable());
@@ -65,10 +96,18 @@ void listbox::add_item(widget *w) {
   }
   listbox_item *item = builder<listbox_item>(px(0), px(top), sum(pct(100), px(-20)), px(w->get_height()));
   item->attach_child(w);
+  item->setup(this, _items.size());
   attach_child(item);
   _items.push_back(item);
 }
 
+void listbox::select_item(int index) {
+  if (_selected_item != nullptr) {
+    _selected_item->set_selected(false);
+  }
+  _selected_item = _items[index];
+  _selected_item->set_selected(true);
+}
 
 void listbox::render() {
   _background->render(get_left(), get_top(), get_width(), get_height());

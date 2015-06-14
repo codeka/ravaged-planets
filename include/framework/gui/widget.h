@@ -153,6 +153,8 @@ public:
   /** Searches the heirarchy for the widget with the given id. */
   widget *find(int id);
 
+  widget *get_parent();
+
   template<typename T>
   inline T *find(int id) {
     return dynamic_cast<T *>(find(id));

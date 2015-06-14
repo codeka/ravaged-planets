@@ -80,12 +80,19 @@ bool gui::inject_mouse(int button, bool is_down, float x, float y) {
       _focused = _widget_under_mouse;
       _focused->on_focus_gained();
     }
-    _widget_mouse_down->on_mouse_down(x, y);
+    propagate_mouse_event(_widget_mouse_down, true, x, y);
   } else {
-    _widget_mouse_down->on_mouse_up(x, y);
+    propagate_mouse_event(_widget_mouse_down, false, x, y);
     _widget_mouse_down = nullptr;
   }
   return true;
+}
+
+void gui::propagate_mouse_event(widget *w, bool is_down, float x, float y) {
+  bool handled = (is_down ? w->on_mouse_down(x, y) : w->on_mouse_up(x, y));
+  if (!handled && w->get_parent() != nullptr) {
+    propagate_mouse_event(w->get_parent(), is_down, x, y);
+  }
 }
 
 bool gui::inject_key(int key, bool is_down) {
