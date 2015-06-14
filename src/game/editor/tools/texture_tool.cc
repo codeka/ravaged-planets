@@ -5,17 +5,22 @@
 #include <framework/input.h>
 #include <framework/timer.h>
 #include <framework/scenegraph.h>
+#include <framework/gui/gui.h>
+#include <framework/gui/builder.h>
 #include <framework/gui/window.h>
+#include <framework/gui/button.h>
 
 #include <game/editor/editor_terrain.h>
 #include <game/editor/tools/texture_tool.h>
 
+using namespace fw::gui;
 using namespace std::placeholders;
 
 //-----------------------------------------------------------------------------
 class texture_tool_window {
 private:
   ed::texture_tool *_tool;
+  window *_wnd;
 
   bool radius_slider_value_changed(fw::gui::widget *widget);
   void refresh_texture_icon(fw::gui::window *wnd, int layer_num);
@@ -27,26 +32,21 @@ public:
   // get the index of the layer we're currently painting (0 through 3)
   int get_paint_layer();
 
-  void initialize();
   void show();
   void hide();
 };
 
 texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
+  _wnd = builder<window>(px(10), px(30), px(80), px(100)) << window::background("frame");
+  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 texture_tool_window::~texture_tool_window() {
-}
-
-void texture_tool_window::initialize() {
-/*
-  _radius_slider = get_child < CEGUI::Slider > ("ToolTexture/Radius");
-  subscribe(_radius_slider, CEGUI::Slider::EventValueChanged,
-      CEGUI::SubscriberSlot(&texture_tool_window::radius_slider_value_changed, this));
-*/
+  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void texture_tool_window::show() {
+  _wnd->set_visible(true);
 /*
   _radius_slider->setCurrentValue((float) (_tool->get_radius() - 1) / ed::texture_tool::max_radius);
 
@@ -67,6 +67,7 @@ void texture_tool_window::show() {
 }
 
 void texture_tool_window::hide() {
+  _wnd->set_visible(false);
 }
 
 int texture_tool_window::get_paint_layer() {
