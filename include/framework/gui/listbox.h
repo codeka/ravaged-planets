@@ -3,6 +3,9 @@
 #include <memory>
 #include <string>
 
+#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
+#include <boost/signals2.hpp>
+
 #include <framework/gui/widget.h>
 
 namespace fw { namespace gui {
@@ -30,6 +33,9 @@ public:
 
   /** Select the item with the given index. */
   void select_item(int index);
+
+  /** Signalled when an item is selected. */
+  boost::signals2::signal<void(int index)> sig_item_selected;
 
   void render();
 };

@@ -107,6 +107,7 @@ void listbox::select_item(int index) {
   }
   _selected_item = _items[index];
   _selected_item->set_selected(true);
+  sig_item_selected(index);
 }
 
 void listbox::render() {
