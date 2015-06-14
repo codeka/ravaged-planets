@@ -11,8 +11,8 @@ class texture;
 
 namespace ed {
 
-// this subclass of rp::terrain allows us to edit the actual heightfield data, textures, and so on.
-class editor_terrain: public rp::terrain {
+// this subclass of game::terrain allows us to edit the actual heightfield data, textures, and so on.
+class editor_terrain: public game::terrain {
 private:
   std::vector<std::tuple<int, int>> _patches_to_bake;
 

@@ -5,7 +5,7 @@
 
 #include <game/world/terrain_helper.h>
 
-namespace rp {
+namespace game {
 
 void generate_terrain_indices(std::vector<uint16_t> &indices, int patch_size) {
   patch_size++;

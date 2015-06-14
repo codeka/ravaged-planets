@@ -7,7 +7,7 @@ namespace fw {
 class bitmap;
 }
 
-namespace rp {
+namespace game {
 
 /**
  * A "summary" of a single map file. Things like the name, size and so on, useful for displaying

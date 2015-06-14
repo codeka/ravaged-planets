@@ -13,12 +13,12 @@
 namespace fs = boost::filesystem;
 
 // populate the given world summary based on the maps found in the given path
-void populate_maps(std::vector<rp::world_summary> &list, fs::path path);
+void populate_maps(std::vector<game::world_summary> &list, fs::path path);
 
 // looks for the full path to the map with the given name
 fs::path find_map(std::string name);
 
-namespace rp {
+namespace game {
 
 world_summary::world_summary() :
     _name(""), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0) {
@@ -195,7 +195,7 @@ world_file_entry world_file::get_entry(std::string name, bool for_write) {
 }
 }
 
-void populate_maps(std::vector<rp::world_summary> &list, fs::path path) {
+void populate_maps(std::vector<game::world_summary> &list, fs::path path) {
   fw::debug << boost::format("populating maps from: %1%") % path.string()
       << std::endl;
 
@@ -206,7 +206,7 @@ void populate_maps(std::vector<rp::world_summary> &list, fs::path path) {
     fs::path p(*it);
     fw::debug << boost::format("  - %1%") % p.string() << std::endl;
     if (fs::is_directory(p)) {
-      rp::world_summary ws;
+      game::world_summary ws;
       ws.initialize(p.leaf().string());
 
       // todo: see if it already exists before adding it

@@ -125,7 +125,7 @@ void editor_screen::set_active_tool(std::string const &name) {
 }
 
 editor_screen *editor_screen::get_instance() {
-  rp::application *app = dynamic_cast<rp::application *>(fw::framework::get_instance()->get_app());
+  game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
   return dynamic_cast<editor_screen *>(app->get_screen()->get_active_screen());
 }
 

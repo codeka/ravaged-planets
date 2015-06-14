@@ -271,7 +271,7 @@ REGISTER_TOOL("heightfield", heightfield_tool);
 
 float heightfield_tool::max_radius = 6;
 
-heightfield_tool::heightfield_tool(rp::world *wrld) :
+heightfield_tool::heightfield_tool(game::world *wrld) :
     tool(wrld), _radius(4), _brush(nullptr) {
   _wnd = new heightfield_tool_window(this);
 }

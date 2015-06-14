@@ -13,7 +13,7 @@ using namespace std::placeholders;
 
 namespace ed {
 
-tool::tool(rp::world *wrld) :
+tool::tool(game::world *wrld) :
     _world(wrld), _terrain(0), _editor(0) {
 }
 
@@ -21,7 +21,7 @@ tool::~tool() {
 }
 
 void tool::activate() {
-  rp::application *app = dynamic_cast<rp::application *>(fw::framework::get_instance()->get_app());
+  game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
   _editor = dynamic_cast<editor_screen *>(app->get_screen()->get_active_screen());
   _terrain = dynamic_cast<editor_terrain *>(_world->get_terrain());
 }
@@ -40,7 +40,7 @@ void tool::render(fw::sg::scenegraph &) {
 
 // This is used by a number of of the tools for giving a basic indication of
 // it's area of effect.
-void draw_circle(fw::sg::scenegraph &scenegraph, rp::terrain *terrain, fw::vector const &centre, float radius) {
+void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::vector const &centre, float radius) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * M_PI * radius);
@@ -90,7 +90,7 @@ tool_factory_registrar::tool_factory_registrar(std::string const &name, create_t
   (*g_tools)[name] = fn;
 }
 
-tool *tool_factory::create_tool(std::string const &name, rp::world *world) {
+tool *tool_factory::create_tool(std::string const &name, game::world *world) {
   if (g_tools == nullptr)
     return nullptr;
 

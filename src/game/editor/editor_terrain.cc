@@ -132,7 +132,7 @@ void editor_terrain::build_collision_data(std::vector<bool> &vertices) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("vertices vector is too small!"));
   }
 
-  rp::build_collision_data(vertices, _heights, _width, _length);
+  game::build_collision_data(vertices, _heights, _width, _length);
 }
 
 }

@@ -13,7 +13,7 @@
 //#include <warworlds/session/session.h>
 //#include <warworlds/simulation/simulation_thread.h>
 
-namespace rp {
+namespace game {
 
 application::application()
   : _framework(nullptr), _screen(nullptr) {

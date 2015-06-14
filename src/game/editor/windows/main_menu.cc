@@ -177,8 +177,8 @@ bool main_menu_window::file_open_clicked(fw::gui::widget *w) {
 
 bool main_menu_window::file_quit_clicked(fw::gui::widget *w) {
   // we don't actually "exit" the whole application, just go back to the title screen
-  rp::application *app = dynamic_cast<rp::application *>(fw::framework::get_instance()->get_app());
-  rp::screen_stack *ss = app->get_screen();
+  game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
+  game::screen_stack *ss = app->get_screen();
   ss->set_active_screen("title");
   return true;
 }

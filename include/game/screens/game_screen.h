@@ -9,7 +9,7 @@ class scenegraph;
 }
 }
 
-namespace rp {
+namespace game {
 class world;
 
 /** This is the options screen for specifying the options for the game we're about to play. */

@@ -2,7 +2,7 @@
 
 #include <framework/framework.h>
 
-namespace rp {
+namespace game {
 class world;
 class screen_stack;
 

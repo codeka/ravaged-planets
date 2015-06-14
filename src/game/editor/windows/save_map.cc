@@ -55,7 +55,7 @@ void save_map_window::initialize() {
 void save_map_window::show() {
   _wnd->set_visible(true);
 
-  auto world = dynamic_cast<editor_world *>(rp::world::get_instance());
+  auto world = dynamic_cast<editor_world *>(game::world::get_instance());
 
   _wnd->find<textedit>(NAME)->set_text(world->get_name());
   _wnd->find<textedit>(DESCRIPTION)->set_text(world->get_description());
@@ -69,7 +69,7 @@ void save_map_window::show() {
 
 // updates the screenshot that we're displaying whenever it changes.
 void save_map_window::update_screenshot() {
-  auto world = dynamic_cast<editor_world *>(rp::world::get_instance());
+  auto world = dynamic_cast<editor_world *>(game::world::get_instance());
   if (world->get_screenshot() == nullptr || world->get_screenshot()->get_width() == 0)
     return;
 
@@ -77,7 +77,7 @@ void save_map_window::update_screenshot() {
 }
 
 bool save_map_window::save_clicked(widget *w) {
-  auto world = dynamic_cast<editor_world *>(rp::world::get_instance());
+  auto world = dynamic_cast<editor_world *>(game::world::get_instance());
   world->set_name(_wnd->find<textedit>(NAME)->get_text());
   world->set_author(_wnd->find<textedit>(AUTHOR)->get_text());
   world->set_description(_wnd->find<textedit>(DESCRIPTION)->get_text());

@@ -100,7 +100,7 @@ REGISTER_TOOL("texture", texture_tool);
 
 float texture_tool::max_radius = 10;
 
-texture_tool::texture_tool(rp::world *wrld) :
+texture_tool::texture_tool(game::world *wrld) :
     tool(wrld), _radius(4), _is_painting(false) {
   _wnd = new texture_tool_window(this);
 }
@@ -132,23 +132,23 @@ void texture_tool::update() {
     fw::vector cursor_loc = _terrain->get_cursor_location();
 
     // patch_x and patch_z are the patch number(s) we're inside of
-    int patch_x = static_cast<int>(cursor_loc[0] / rp::terrain::PATCH_SIZE);
-    int patch_z = static_cast<int>(cursor_loc[2] / rp::terrain::PATCH_SIZE);
+    int patch_x = static_cast<int>(cursor_loc[0] / game::terrain::PATCH_SIZE);
+    int patch_z = static_cast<int>(cursor_loc[2] / game::terrain::PATCH_SIZE);
 
     // get the splatt texture at the current cursor location
     fw::bitmap &splatt = _terrain->get_splatt(patch_x, patch_z);
 
     // scale_x and scale_y represent the number of pixels in the splatt texture
     // per game unit of the terrain
-    float scale_x = static_cast<float>(splatt.get_width()) / rp::terrain::PATCH_SIZE;
-    float scale_y = static_cast<float>(splatt.get_height()) / rp::terrain::PATCH_SIZE;
+    float scale_x = static_cast<float>(splatt.get_width()) / game::terrain::PATCH_SIZE;
+    float scale_y = static_cast<float>(splatt.get_height()) / game::terrain::PATCH_SIZE;
 
     // centre_u and centre_v are the texture coordinates (in the range [0..1])
     // of what the cursor is currently pointing at
-    float centre_u = (cursor_loc[0] - (patch_x * rp::terrain::PATCH_SIZE))
-        / static_cast<float>(rp::terrain::PATCH_SIZE);
-    float centre_v = (cursor_loc[2] - (patch_z * rp::terrain::PATCH_SIZE))
-        / static_cast<float>(rp::terrain::PATCH_SIZE);
+    float centre_u = (cursor_loc[0] - (patch_x * game::terrain::PATCH_SIZE))
+        / static_cast<float>(game::terrain::PATCH_SIZE);
+    float centre_v = (cursor_loc[2] - (patch_z * game::terrain::PATCH_SIZE))
+        / static_cast<float>(game::terrain::PATCH_SIZE);
 
     // cetre_x and centre_y are the (x,y) corrdinates (in texture space)
     // of the splatt texture where the cursor is currently pointing.

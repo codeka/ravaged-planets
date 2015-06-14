@@ -8,7 +8,7 @@ class widget;
 }
 }
 
-namespace rp {
+namespace game {
 
 /**
  * The title screen is the first screen we load up in the game. It contains the UI for starting a new game, loading a

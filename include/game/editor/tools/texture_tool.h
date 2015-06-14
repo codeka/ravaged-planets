@@ -26,7 +26,7 @@ private:
   uint32_t get_selected_splatt_mask();
 
 public:
-  texture_tool(rp::world *wrld);
+  texture_tool(game::world *wrld);
   virtual ~texture_tool();
 
   virtual void activate();

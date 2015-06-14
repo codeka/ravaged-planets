@@ -18,7 +18,7 @@ namespace ent {
 class entity_manager;
 }
 
-namespace rp {
+namespace game {
 class terrain;
 class world_reader;
 class cursor_handler;

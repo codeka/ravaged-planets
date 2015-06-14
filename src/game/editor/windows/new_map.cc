@@ -70,7 +70,7 @@ bool new_map_window::ok_clicked(widget *w) {
     return true;
   }
 
-  editor_screen::get_instance()->new_map(width * rp::terrain::PATCH_SIZE, width * rp::terrain::PATCH_SIZE);
+  editor_screen::get_instance()->new_map(width * game::terrain::PATCH_SIZE, width * game::terrain::PATCH_SIZE);
   return true;
 }
 

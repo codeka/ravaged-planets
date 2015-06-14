@@ -9,7 +9,7 @@ class scenegraph;
 }
 }
 
-namespace rp {
+namespace game {
 
 /**
  * This is the base class for the "screen options" classes, which can be passed to a screen when you set it as the

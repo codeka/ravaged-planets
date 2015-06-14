@@ -5,7 +5,7 @@
 
 namespace po = boost::program_options;
 
-namespace rp {
+namespace game {
 
   void settings_initialize(int argc, char** argv) {
     po::options_description additional_options("Additional options");

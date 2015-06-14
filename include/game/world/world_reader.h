@@ -9,7 +9,7 @@ class texture;
 class xml_element;
 }
 
-namespace rp {
+namespace game {
 
 class terrain;
 class world;

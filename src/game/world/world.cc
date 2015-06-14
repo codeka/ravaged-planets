@@ -29,7 +29,7 @@
 namespace fs = boost::filesystem;
 using namespace std::placeholders;
 
-namespace rp {
+namespace game {
 
 //-------------------------------------------------------------------------
 world *world::_instance = nullptr;

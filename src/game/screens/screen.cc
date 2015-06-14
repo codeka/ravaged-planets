@@ -7,7 +7,7 @@
 #include <game/editor/editor_screen.h>
 #include <framework/exception.h>
 
-namespace rp {
+namespace game {
 
 screen::screen() {
 }

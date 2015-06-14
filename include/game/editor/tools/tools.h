@@ -7,14 +7,14 @@ class scenegraph;
 }
 }
 
-namespace rp {
+namespace game {
 class world;
 class terrain;
 }
 
 // Use this macro to register a tool with the tool_factory
 #define REGISTER_TOOL(name, type) \
-	tool *create_ ## type (rp::world *wrld) { return new type(wrld); } \
+	tool *create_ ## type (game::world *wrld) { return new type(wrld); } \
 	tool_factory_registrar reg_create_ ## type(name, create_ ## type)
 
 namespace ed {
@@ -27,7 +27,7 @@ class editor_application;
 // put up various bits of UI for controlling it, etc.
 class tool {
 protected:
-  rp::world *_world;
+  game::world *_world;
   editor_terrain *_terrain;
   editor_screen *_editor;
 
@@ -37,13 +37,13 @@ protected:
   std::vector<int> _keybind_tokens;
 
 public:
-  tool(rp::world *wrld);
+  tool(game::world *wrld);
   virtual ~tool();
 
   editor_terrain *get_terrain() const {
     return _terrain;
   }
-  rp::world *get_world() const {
+  game::world *get_world() const {
     return _world;
   }
 
@@ -55,7 +55,7 @@ public:
   virtual void render(fw::sg::scenegraph &scenegraph);
 };
 
-typedef tool *(*create_tool_fn)(rp::world *wrld);
+typedef tool *(*create_tool_fn)(game::world *wrld);
 
 // This class is used by the REGISTER_TOOL macro to register a tool
 // at application startup.
@@ -68,12 +68,12 @@ public:
 // REGISTER_TOOL macro and allows you to create instances of the tool at runtime
 class tool_factory {
 public:
-  static tool *create_tool(std::string const &name, rp::world *world);
+  static tool *create_tool(std::string const &name, game::world *world);
 };
 
 // draws a circle, centred at the given point, with the given radius. The circle will be
 // in the x/z plane
-void draw_circle(fw::sg::scenegraph &scenegraph, rp::terrain *terrain,
+void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain,
     fw::vector const &centre, float radius);
 
 }

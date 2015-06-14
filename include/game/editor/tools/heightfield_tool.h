@@ -24,7 +24,7 @@ private:
   void on_key(std::string keyname, bool is_down);
 
 public:
-  heightfield_tool(rp::world *wrld);
+  heightfield_tool(game::world *wrld);
   virtual ~heightfield_tool();
 
   virtual void activate();

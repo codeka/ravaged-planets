@@ -10,7 +10,7 @@
 
 #include "game/application.h"
 
-namespace rp {
+namespace game {
   void settings_initialize(int argc, char** argv);
 }
 
@@ -18,9 +18,9 @@ void display_exception(std::string const &msg);
 
 int main(int argc, char** argv) {
   try {
-    rp::settings_initialize(argc, argv);
+    game::settings_initialize(argc, argv);
 
-    rp::application app;
+    game::application app;
     new fw::framework(&app);
     fw::framework::get_instance()->initialize("Ravaged Planet");
 

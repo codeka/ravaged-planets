@@ -2,7 +2,7 @@
 
 #include <framework/colour.h>
 
-namespace rp {
+namespace game {
 class world_file;
 }
 
@@ -21,10 +21,10 @@ private:
   fw::colour get_terrain_colour(int x, int z);
   void calculate_base_minimap_colours();
 
-  void write_terrain(rp::world_file &wf);
-  void write_mapdesc(rp::world_file &wf);
-  void write_minimap_background(rp::world_file &wf);
-  void write_collision_data(rp::world_file &wf);
+  void write_terrain(game::world_file &wf);
+  void write_mapdesc(game::world_file &wf);
+  void write_minimap_background(game::world_file &wf);
+  void write_collision_data(game::world_file &wf);
 
 public:
   world_writer(editor_world *wrld);

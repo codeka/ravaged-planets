@@ -14,14 +14,14 @@
 
 #include <game/screens/game_screen.h>
 
-class world_create: public rp::world_reader {
+class world_create: public game::world_reader {
 private:
   int _width;
   int _height;
 
 protected:
-  virtual rp::terrain *create_terrain(int width, int length) {
-    rp::terrain *terrain = new rp::terrain();
+  virtual game::terrain *create_terrain(int width, int length) {
+    game::terrain *terrain = new game::terrain();
     terrain->create(width, length);
     return terrain;
   }
@@ -36,7 +36,7 @@ public:
 
 
 
-namespace rp {
+namespace game {
 
 game_screen::game_screen() : _world(nullptr) {
 }

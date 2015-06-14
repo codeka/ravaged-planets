@@ -2,7 +2,7 @@
 
 #include <game/screens/screen.h>
 
-namespace rp {
+namespace game {
 class world;
 }
 
@@ -10,10 +10,10 @@ namespace ed {
 class tool;
 class editor_terrain;
 
-class editor_screen: public rp::screen {
+class editor_screen: public game::screen {
 private:
   tool *_tool;
-  rp::world *_world;
+  game::world *_world;
 
 public:
   editor_screen();

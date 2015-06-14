@@ -14,7 +14,7 @@
 #include <game/world/world_vfs.h>
 #include <game/world/terrain.h>
 
-namespace rp {
+namespace game {
 
 world_reader::world_reader() :
     _terrain(nullptr) {

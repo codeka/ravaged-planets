@@ -23,7 +23,7 @@ namespace ed {
 class world_writer;
 }
 
-namespace rp {
+namespace game {
 
 struct terrain_patch {
   std::shared_ptr<fw::vertex_buffer> vb;
