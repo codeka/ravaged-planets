@@ -9,6 +9,8 @@ class widget;
 }
 
 namespace game {
+class main_menu_window;
+class new_game_window;
 
 /**
  * The title screen is the first screen we load up in the game. It contains the UI for starting a new game, loading a
@@ -16,9 +18,8 @@ namespace game {
  */
 class title_screen: public screen {
 private:
-  bool quit_clicked(fw::gui::widget *w);
-  bool newgame_clicked(fw::gui::widget *w);
-  bool editor_clicked(fw::gui::widget *w);
+  main_menu_window *_main_menu_window;
+  new_game_window *_new_game_window;
 
 public:
   title_screen();

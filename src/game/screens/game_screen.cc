@@ -14,28 +14,6 @@
 
 #include <game/screens/game_screen.h>
 
-class world_create: public game::world_reader {
-private:
-  int _width;
-  int _height;
-
-protected:
-  virtual game::terrain *create_terrain(int width, int length) {
-    game::terrain *terrain = new game::terrain();
-    terrain->create(width, length);
-    return terrain;
-  }
-
-public:
-  world_create() : _width(0), _height(0) {
-  }
-  world_create(int width, int height) : _width(width), _height(height) {
-    _terrain = create_terrain(width, height);
-  }
-};
-
-
-
 namespace game {
 
 game_screen::game_screen() : _world(nullptr) {
@@ -55,10 +33,9 @@ void game_screen::show() {
         fw::exception() << fw::message_error_info("no game_screen_options has been set, cannot start new game!"));
   }
 
-//  std::shared_ptr<world_reader> reader(new world_reader());
-//  reader->read(_options->map_name);
-//  _world = new world(reader);
-  _world = new world(std::shared_ptr<world_reader>(new world_create(4 * terrain::PATCH_SIZE, 4 * terrain::PATCH_SIZE)));
+  std::shared_ptr<world_reader> reader(new world_reader());
+  reader->read(_options->map_name);
+  _world = new world(reader);
 
 //  gui->set_active_layout("hud");
 //  if (hud_chat == nullptr) {

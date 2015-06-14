@@ -1,18 +1,13 @@
 #include <framework/framework.h>
 #include <framework/misc.h>
-#include <framework/gui/gui.h>
-#include <framework/gui/builder.h>
-#include <framework/gui/button.h>
-#include <framework/gui/label.h>
-#include <framework/gui/window.h>
-#include <framework/lang.h>
 #include <framework/logging.h>
-#include <framework/version.h>
 
 #include <game/application.h>
 #include <game/screens/screen.h>
 #include <game/screens/game_screen.h>
 #include <game/screens/title_screen.h>
+#include <game/screens/title/main_menu_window.h>
+#include <game/screens/title/new_game_window.h>
 
 namespace game {
 
@@ -22,58 +17,30 @@ using namespace std::placeholders;
 // These are the instances of the various windows that are displayed by the title screen.
 fw::gui::window *wnd;
 
-title_screen::title_screen() {
+title_screen::title_screen() : _main_menu_window(nullptr), _new_game_window(nullptr) {
 }
 
 title_screen::~title_screen() {
 }
 
 void title_screen::show() {
-  fw::framework *frmwrk = fw::framework::get_instance();
+  _main_menu_window = new main_menu_window();
+  _new_game_window = new new_game_window();
+  _main_menu_window->initialize(_new_game_window);
+  _new_game_window->initialize(_main_menu_window);
 
-  wnd = builder<window>(px(0), px(0), pct(100), pct(100)) << window::background("title_background")
-      // Title "Ravaged Planets"
-      << (builder<label>(px(40), px(20), px(417), px(49)) << label::background("title_heading"))
-      // "A game by Dean Harding (dean@codeka.com.au)" text
-      << (builder<label>(px(40), px(70), px(500), px(16))
-          << label::text("A game by Dean Harding (dean@codeka.com.au)"))
-      << (builder<button>(px(40), px(100), px(180), px(30)) << button::text("New Game")
-          << widget::click(std::bind(&title_screen::newgame_clicked, this, _1)))
-      << (builder<button>(px(40), px(140), px(180), px(30)) << button::text("Join Game"))
-      << (builder<button>(px(40), px(180), px(180), px(30)) << button::text("Options"))
-      << (builder<button>(px(40), px(220), px(180), px(30)) << button::text("Editor")
-          << widget::click(std::bind(&title_screen::editor_clicked, this, _1)))
-      << (builder<button>(px(40), px(260), px(180), px(30)) << button::text("Quit")
-          << widget::click(std::bind(&title_screen::quit_clicked, this, _1)))
-      // "v1.2.3"
-      << (builder<label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
-          << label::text(fw::version_str));
-  frmwrk->get_gui()->attach_widget(wnd);
-}
-
-bool title_screen::quit_clicked(fw::gui::widget *w) {
-  fw::framework::get_instance()->exit();
-  return true;
-}
-
-bool title_screen::newgame_clicked(fw::gui::widget *w) {
-  game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
-  app->get_screen()->set_active_screen("game", std::shared_ptr<screen_options>(new game_screen_options()));
-  return true;
-}
-
-bool title_screen::editor_clicked(fw::gui::widget *w) {
-  game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
-  app->get_screen()->set_active_screen("editor");
-  return true;
+  _main_menu_window->show();
 }
 
 void title_screen::hide() {
-  fw::framework *frmwrk = fw::framework::get_instance();
-  frmwrk->get_gui()->detach_widget(wnd);
+  delete _main_menu_window;
+  _main_menu_window = nullptr;
+  delete _new_game_window;
+  _new_game_window = nullptr;
 }
 
 void title_screen::update() {
+  _main_menu_window->update();
 }
 
 }

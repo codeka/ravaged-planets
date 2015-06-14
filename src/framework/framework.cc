@@ -200,7 +200,6 @@ void framework::run() {
 void framework::exit() {
   fw::debug << "Exiting." << std::endl;
   _running = false;
-  SDL_Quit();
 }
 
 void framework::set_camera(camera *cam) {

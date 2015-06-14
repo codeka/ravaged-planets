@@ -1,0 +1,119 @@
+#include <functional>
+
+#include <framework/framework.h>
+#include <framework/lang.h>
+#include <framework/gui/gui.h>
+#include <framework/gui/builder.h>
+#include <framework/gui/widget.h>
+#include <framework/gui/window.h>
+#include <framework/gui/button.h>
+#include <framework/gui/label.h>
+#include <framework/version.h>
+
+#include <game/screens/title/main_menu_window.h>
+#include <game/screens/title/new_game_window.h>
+#include <game/screens/title/join_game_window.h>
+#include <game/screens/screen.h>
+#include <game/application.h>
+//#include <game/session/session.h>
+
+using namespace std::placeholders;
+using namespace fw::gui;
+
+namespace game {
+
+main_menu_window::main_menu_window() : _exiting(false), _new_game_window(nullptr), _wnd(nullptr) {
+}
+
+main_menu_window::~main_menu_window() {
+  if (_wnd != nullptr) {
+    fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  }
+}
+
+void main_menu_window::initialize(new_game_window *new_game_window) {
+  _new_game_window = new_game_window;
+  _wnd = builder<window>(px(0), px(0), pct(100), pct(100)) << window::background("title_background")
+      << widget::visible(false)
+      // Title "Ravaged Planets"
+      << (builder<label>(px(40), px(20), px(417), px(49)) << label::background("title_heading"))
+      // "A game by Dean Harding (dean@codeka.com.au)" text
+      << (builder<label>(px(40), px(70), px(500), px(16))
+          << label::text("A game by Dean Harding (dean@codeka.com.au)"))
+      << (builder<button>(px(40), px(100), px(180), px(30)) << button::text("New game")
+          << widget::click(std::bind(&main_menu_window::new_game_clicked, this, _1)))
+      << (builder<button>(px(40), px(140), px(180), px(30)) << button::text("Join game"))
+      << (builder<button>(px(40), px(180), px(180), px(30)) << button::text("Options"))
+      << (builder<button>(px(40), px(220), px(180), px(30)) << button::text("Editor")
+          << widget::click(std::bind(&main_menu_window::editor_clicked, this, _1)))
+      << (builder<button>(px(40), px(260), px(180), px(30)) << button::text("Quit")
+          << widget::click(std::bind(&main_menu_window::quit_clicked, this, _1)))
+      // "v1.2.3"
+      << (builder<label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
+          << label::text(fw::version_str));
+  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+}
+
+void main_menu_window::show() {
+  _wnd->set_visible(true);
+}
+
+void main_menu_window::hide() {
+  _wnd->set_visible(false);
+}
+
+void main_menu_window::update() {
+  // if they've clicked "quit" and we're now logged out, then exit
+  if (_exiting) {
+ //     && (session::get_instance()->get_state() == session::disconnected
+ //         || session::get_instance()->get_state() == session::in_error)) {
+    fw::framework::get_instance()->exit();
+  }
+}
+
+bool main_menu_window::new_game_clicked(widget *w) {
+  hide();
+  _new_game_window->show();
+  return true;
+}
+
+bool main_menu_window::join_game_clicked(widget *w) {
+  hide();
+  //join_game->show();
+  return true;
+}
+
+bool main_menu_window::editor_clicked(widget *w) {
+  application *app = dynamic_cast<application *>(fw::framework::get_instance()->get_app());
+  screen_stack *ss = app->get_screen();
+
+  ss->set_active_screen("editor");
+  return true;
+}
+
+// This is called when you click "Quit", we need to exit...
+bool main_menu_window::quit_clicked(widget *w) {
+  _exiting = true;
+/*
+  if (session::get_instance()->get_state() != ww::session::disconnected) {
+    // if we're logged in, we want to log out before we quit
+    session::get_instance()->logout();
+    _exiting = true;
+
+    // make sure they don't try to click "quit" more than once...
+    CEGUI::Window *quit_game_btn = get_child("MainMenu/QuitBtn");
+    quit_game_btn->setEnabled(false);
+
+    // display a brief "please wait" message so they know what's happening
+    CEGUI::Window *overlay = get_parent()->getChild("PleaseWaitOverlay");
+    fw::gui::set_text(overlay->getChild("PleaseWaitOverlay/Message"), fw::text("please-wait.logging-out"));
+    overlay->setVisible(true);
+    overlay->moveToFront();
+  } else {
+    // if we're not logged in, just quit
+    fw::framework::get_instance()->exit();
+  }
+*/
+  return true;
+}
+}
