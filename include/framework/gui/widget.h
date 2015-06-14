@@ -164,9 +164,13 @@ public:
   bool is_child(widget *w);
 
   float get_top();
+  void set_top(std::shared_ptr<dimension> top);
   float get_left();
+  void set_left(std::shared_ptr<dimension> left);
   float get_width();
+  void set_width(std::shared_ptr<dimension> width);
   float get_height();
+  void set_height(std::shared_ptr<dimension> height);
 
   bool is_visible() const {
     return _visible;

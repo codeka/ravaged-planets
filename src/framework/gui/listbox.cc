@@ -83,21 +83,21 @@ listbox::listbox(gui *gui) : widget(gui), _selected_item(nullptr) {
   bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("listbox_thumb_hover"));
   attach_child(builder<button>(sum(pct(100), px(-19)), px(19), px(19), sum(pct(100), px(-38)))
       << button::background(bkgnd));
+
+  _item_container = builder<widget>(px(0), px(0), sum(pct(100), px(-20)), px(0));
+  attach_child(_item_container);
 }
 
 listbox::~listbox() {
 }
 
 void listbox::add_item(widget *w) {
-  int top = 0;
-  if (_items.size() > 0) {
-    listbox_item *last_item = _items[_items.size() - 1];
-    top = last_item->get_top() + last_item->get_height() - _items[0]->get_top();
-  }
-  listbox_item *item = builder<listbox_item>(px(0), px(top), sum(pct(100), px(-20)), px(w->get_height()));
+  int top = _item_container->get_height();
+  listbox_item *item = builder<listbox_item>(px(0), px(top), pct(100), px(w->get_height()));
   item->attach_child(w);
   item->setup(this, _items.size());
-  attach_child(item);
+  _item_container->attach_child(item);
+  _item_container->set_height(px(_item_container->get_height() + w->get_height()));
   _items.push_back(item);
 }
 

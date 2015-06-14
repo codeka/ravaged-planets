@@ -17,6 +17,7 @@ class listbox_item;
 class listbox : public widget {
 private:
   std::shared_ptr<drawable> _background;
+  widget *_item_container;
   std::vector<listbox_item *> _items;
   listbox_item *_selected_item;
 

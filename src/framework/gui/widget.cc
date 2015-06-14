@@ -300,10 +300,18 @@ float widget::get_top() {
   return parent_top + _y->get_value(parent_size);
 }
 
+void widget::set_top(std::shared_ptr<dimension> top) {
+  _y = top;
+}
+
 float widget::get_left() {
   float parent_left = (_parent != nullptr) ? _parent->get_left() : 0;
   float parent_size = (_parent != nullptr) ? _parent->get_width() : _gui->get_width();
   return parent_left + _x->get_value(parent_size);
+}
+
+void widget::set_left(std::shared_ptr<dimension> left) {
+  _x = left;
 }
 
 float widget::get_width() {
@@ -311,9 +319,17 @@ float widget::get_width() {
   return _width->get_value(parent_size);
 }
 
+void widget::set_width(std::shared_ptr<dimension> width) {
+  _width = width;
+}
+
 float widget::get_height() {
   float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();
   return _height->get_value(parent_size);
+}
+
+void widget::set_height(std::shared_ptr<dimension> height) {
+  _height = height;
 }
 
 } }
