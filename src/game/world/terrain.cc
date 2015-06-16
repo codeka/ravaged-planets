@@ -83,7 +83,7 @@ void terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::tex
   _patches[index]->texture = texture;
 }
 
-void terrain::set_splatt(int patch_x, int patch_z, fw::bitmap &bmp) {
+void terrain::set_splatt(int patch_x, int patch_z, fw::bitmap const &bmp) {
   std::shared_ptr<fw::texture> splatt(new fw::texture());
   splatt->create(bmp);
 

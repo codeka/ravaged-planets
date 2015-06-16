@@ -97,7 +97,7 @@ public:
     return _length;
   }
 
-  virtual void set_splatt(int patch_x, int patch_z, fw::bitmap &bmp);
+  virtual void set_splatt(int patch_x, int patch_z, fw::bitmap const &bmp);
 
   // gets the collision data for the map
   std::vector<bool> const &get_collision_data() const {
