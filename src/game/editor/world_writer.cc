@@ -44,7 +44,7 @@ void world_writer::write(std::string name) {
 }
 
 void world_writer::write_terrain(game::world_file &wf) {
-  game::terrain *trn = _world->get_terrain();
+  editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
   int version = 1;
   int trn_width = trn->get_width();
   int trn_length = trn->get_length();
@@ -57,11 +57,11 @@ void world_writer::write_terrain(game::world_file &wf) {
 
   for (int patch_z = 0; patch_z < trn->get_patches_length(); patch_z++) {
     for (int patch_x = 0; patch_x < trn->get_patches_width(); patch_x++) {
-      std::shared_ptr<fw::texture> tex = trn->get_patch_splatt(patch_x, patch_z);
+      fw::bitmap &splatt = trn->get_splatt(patch_x, patch_z);
 
       std::string name = (boost::format("splatt-%1%-%2%.png") % patch_x % patch_z).str();
       wfe = wf.get_entry(name, true /* for_write */);
-      tex->save_png(wfe.get_full_path());
+      splatt.save_bitmap(wfe.get_full_path());
     }
   }
 }

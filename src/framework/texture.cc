@@ -110,8 +110,8 @@ void texture::create(fw::bitmap const &bmp, bool dynamic) {
   _data->height = bmp.get_height();
 
   FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
-  FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _data->width, _data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-      bmp.get_pixels().data()));
+  FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _data->width, _data->height, 0, GL_RGBA,
+      GL_UNSIGNED_BYTE, bmp.get_pixels().data()));
 }
 
 void texture::bind() const {

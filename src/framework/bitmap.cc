@@ -136,7 +136,8 @@ void bitmap::load_bitmap(fs::path const &filename) {
 
   // copy pixels from what stb returned into our own buffer
   _data->rgba.resize(_data->width * _data->height);
-  memcpy(_data->rgba.data(), reinterpret_cast<uint32_t const *>(pixels), _data->width * _data->height);
+  memcpy(_data->rgba.data(), reinterpret_cast<uint32_t const *>(pixels),
+      _data->width * _data->height * sizeof(uint32_t));
 
   // don't need this anymore
   stbi_image_free(pixels);
@@ -163,7 +164,7 @@ void bitmap::load_bitmap(texture const &tex) {
 
   prepare_write(tex.get_width(), tex.get_height());
   tex.bind();
-  FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data->rgba.data()));
+  FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, _data->rgba.data()));
 }
 
 void bitmap::save_bitmap(fs::path const &filename) const {
