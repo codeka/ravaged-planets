@@ -1,0 +1,21 @@
+
+syntax = "proto3";
+
+// A mesh consists of vertices and indices.
+message Mesh {
+  
+}
+
+// A node is a reference to a mesh, a transformation and some other information.
+message Node {
+  int32 mesh_index = 1;
+  repeated float transformation = 2;
+  string name = 3;
+  repeated Node children = 4;
+}
+
+message Model {
+  string name = 1;
+  repeated Mesh meshes = 2;
+  Node root_node = 3;
+}
