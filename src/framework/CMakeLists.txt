@@ -13,13 +13,27 @@ elseif(UNIX)
     file(GLOB ARCH_FILES
         arch/linux/*.cc
     )
+    set(PROTOC_COMMAND
+        LD_LIBRARY_PATH=${CMAKE_CURRENT_SOURCE_DIR}/../../external/lib/linux
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bin/linux/protoc)
 else()
     message(FATAL_ERROR "Your platform is not supported at the moment.")
 endif()
 
+add_custom_command(
+    OUTPUT model_file.pb.h model_file.pb.cc
+    COMMAND ${PROTOC_COMMAND} --cpp_out=. --proto_path=${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/model_file.proto
+    MAIN_DEPENDENCY model_file.proto
+)
+set_source_files_properties(
+    model_file.pb.h model_file_pb.cc
+    PROPERTIES GENERATED TRUE
+)
+
 add_library(framework
     ${FRAMEWORK_FILES}
     ${ARCH_FILES}
+    model_file.pb.cc
 )
 
 target_link_libraries(framework 

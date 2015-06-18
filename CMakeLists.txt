@@ -42,7 +42,10 @@ endif()
 
 # Configure the config.h file
 configure_file(include/config.h.in include/config.h ESCAPE_QUOTES)
+
+# Make sure generated files are #includable.
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 # Look for the various libraries we depend on.
 find_package(Boost COMPONENTS filesystem iostreams program_options signals system REQUIRED)

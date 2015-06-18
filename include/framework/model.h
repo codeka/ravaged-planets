@@ -7,7 +7,7 @@
 namespace fw {
 class vertex_buffer;
 class index_buffer;
-class effect;
+class shader;
 class model_node;
 class texture;
 namespace sg {
@@ -20,7 +20,7 @@ class model_mesh {
 protected:
   std::shared_ptr<vertex_buffer> _vb;
   std::shared_ptr<index_buffer> _ib;
-  std::shared_ptr<effect> _fx;
+  std::shared_ptr<shader> _shader;
 
   virtual void setup_buffers() = 0;
 
@@ -36,9 +36,9 @@ public:
     setup_buffers();
     return _ib;
   }
-  std::shared_ptr<effect> get_effect() {
+  std::shared_ptr<shader> get_shader() {
     setup_buffers();
-    return _fx;
+    return _shader;
   }
 };
 
@@ -65,9 +65,9 @@ public:
   model();
   ~model();
 
-  std::vector<std::shared_ptr<model_mesh>> meshes;
-  std::shared_ptr<model_node> root_node;
-  std::shared_ptr<texture> texture;
+  std::vector<std::shared_ptr<fw::model_mesh>> meshes;
+  std::shared_ptr<fw::model_node> root_node;
+  std::shared_ptr<fw::texture> texture;
 
   /** Sets a value which indicates whether we want to render in wireframe mode or not. */
   void set_wireframe(bool value);

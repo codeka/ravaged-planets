@@ -1,16 +1,14 @@
-//
-// Copyright (c) 2008-2011, Dean Harding. All rights reserved.
-//
 #pragma once
 
-namespace fw {
-	class mode;
+#include <boost/filesystem.hpp>
 
-	// this class is used to read models in from .wwmesh files
-	class model_reader
-	{
-	public:
-		shared_ptr<model> read(boost::filesystem::path const &filename);
-	};
+namespace fw {
+class model;
+
+/** This class is used to read models in from .mesh files. */
+class model_reader {
+public:
+  std::shared_ptr<model> read(boost::filesystem::path const &filename);
+};
 
 }

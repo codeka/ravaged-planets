@@ -1,9 +1,10 @@
 
 syntax = "proto3";
 
-// A mesh consists of vertices and indices.
+// A mesh consists of vertices (in xyz_n_uv format) and 16-bit indices.
 message Mesh {
-  
+  bytes vertices = 1;
+  bytes indices = 2;
 }
 
 // A node is a reference to a mesh, a transformation and some other information.
@@ -11,7 +12,8 @@ message Node {
   int32 mesh_index = 1;
   repeated float transformation = 2;
   string name = 3;
-  repeated Node children = 4;
+  uint32 colour = 4;
+  repeated Node children = 5;
 }
 
 message Model {
