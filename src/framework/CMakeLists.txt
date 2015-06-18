@@ -50,6 +50,7 @@ target_link_libraries(framework
     png
     z
     SDL2_static_2.0.3
+    protobuf
     dl # not sure why SDL needs this
 )
 
