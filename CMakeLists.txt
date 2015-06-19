@@ -51,6 +51,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 find_package(Boost COMPONENTS filesystem iostreams program_options signals system REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(Protobuf REQUIRED)
 
 if(UNIX)
     # I don't know why, but libSDL is importing symbols from libX11.
@@ -62,6 +63,7 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
+include_directories(${PROTOBUF_INCLUDE_DIR})
 
 add_subdirectory(src/version-number)
 add_subdirectory(src/framework)

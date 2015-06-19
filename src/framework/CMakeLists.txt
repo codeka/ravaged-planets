@@ -20,20 +20,12 @@ else()
     message(FATAL_ERROR "Your platform is not supported at the moment.")
 endif()
 
-add_custom_command(
-    OUTPUT model_file.pb.h model_file.pb.cc
-    COMMAND ${PROTOC_COMMAND} --cpp_out=. --proto_path=${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/model_file.proto
-    MAIN_DEPENDENCY model_file.proto
-)
-set_source_files_properties(
-    model_file.pb.h model_file_pb.cc
-    PROPERTIES GENERATED TRUE
-)
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS model_file.proto)
 
 add_library(framework
     ${FRAMEWORK_FILES}
     ${ARCH_FILES}
-    model_file.pb.cc
+    ${PROTO_SRCS}
 )
 
 target_link_libraries(framework 
@@ -46,11 +38,11 @@ target_link_libraries(framework
     ${Boost_SIGNALS_LIBRARY}
     ${OPENGL_LIBRARY}
     ${GLEW_LIBRARY}
+    ${PROTOBUF_LIBRARY}
     freetype
     png
     z
     SDL2_static_2.0.3
-    protobuf
     dl # not sure why SDL needs this
 )
 
