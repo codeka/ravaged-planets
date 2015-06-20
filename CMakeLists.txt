@@ -52,6 +52,7 @@ find_package(Boost COMPONENTS filesystem iostreams program_options signals syste
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Protobuf REQUIRED)
+find_package(Assimp REQUIRED)
 
 if(UNIX)
     # I don't know why, but libSDL is importing symbols from libX11.
