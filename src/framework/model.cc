@@ -32,7 +32,7 @@ void model_mesh_noanim::setup_buffers() {
   _ib = std::shared_ptr<index_buffer>(new index_buffer());
   _ib->set_data(indices.size(), &indices[0]);
 
-  _shader = shader::create("entity.fx");
+  _shader = shader::create("entity.shader");
 }
 
 //-------------------------------------------------------------------------

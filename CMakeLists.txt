@@ -68,9 +68,10 @@ include_directories(${PROTOBUF_INCLUDE_DIR})
 
 add_subdirectory(src/version-number)
 add_subdirectory(src/framework)
+add_subdirectory(src/meshexp)
 add_subdirectory(src/font-test)
 add_subdirectory(src/particle-test)
-add_subdirectory(src/meshexp)
+add_subdirectory(src/mesh-test)
 add_subdirectory(src/game)
 
 # Be sure to install the "data" directory into /share/war-worlds

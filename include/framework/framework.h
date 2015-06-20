@@ -7,6 +7,7 @@ namespace fw {
 class graphics;
 class framework;
 class font_manager;
+class model_manager;
 class timer;
 class camera;
 class bitmap;
@@ -89,6 +90,7 @@ private:
   particle_manager *_particle_mgr;
   bool _paused;
   audio_manager *_audio;
+  model_manager *_model_manager;
   lang *_lang;
   font_manager *_font_manager;
   volatile bool _running;
@@ -167,6 +169,9 @@ public:
   }
   font_manager *get_font_manager() const {
     return _font_manager;
+  }
+  model_manager *get_model_manager() const {
+    return _model_manager;
   }
   particle_manager *get_particle_mgr() const {
     return _particle_mgr;

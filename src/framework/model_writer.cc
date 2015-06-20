@@ -34,11 +34,15 @@ void model_writer::write(std::string const &filename, model &mdl) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(filename));
   }
   pb_model.SerializeToOstream(&outs);
+  outs.close();
 }
 
 void add_node(Node *pb_node, std::shared_ptr<model_node> node) {
   pb_node->set_mesh_index(node->mesh_index);
   pb_node->set_name(node->node_name);
+  for (int i = 0; i < 16; i++) {
+    pb_node->mutable_transformation()->Add(node->transform.data()[i]);
+  }
   pb_node->set_colour(node->colour.to_argb());
 
   for (int i = 0; i < node->get_num_children(); i++) {
