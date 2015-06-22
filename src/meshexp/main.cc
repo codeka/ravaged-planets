@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <framework/bitmap.h>
 #include <framework/settings.h>
@@ -11,12 +12,14 @@
 #include <framework/model_node.h>
 #include <framework/model_writer.h>
 
-#include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
+#include <assimp/DefaultLogger.hpp>
 
 namespace po = boost::program_options;
+
+//-----------------------------------------------------------------------------
 
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
@@ -46,10 +49,10 @@ void meshexp(std::string input_filename, std::string output_filename) {
   // import the scene!
   aiScene const *scene = importer.ReadFile(input_filename.c_str(),
       aiProcess_Triangulate | aiProcess_JoinIdenticalVertices /*aiProcess_LimitBoneWeights */
-      | aiProcess_SortByPType | aiProcess_MakeLeftHanded | aiProcess_RemoveComponent | aiProcess_SplitLargeMeshes
+      | aiProcess_SortByPType | aiProcess_RemoveComponent | aiProcess_SplitLargeMeshes
           | aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials | aiProcess_GenUVCoords
           | aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph | aiProcess_GenNormals | aiProcess_FlipWindingOrder
-          | /*aiProcess_ValidateDataStructure | aiProcess_FindInvalidData | */aiProcess_FindInstances);
+          | aiProcess_ValidateDataStructure | aiProcess_FindInvalidData);
 
   if (scene == nullptr) {
     fw::debug << "-- ERROR --" << std::endl;
@@ -58,7 +61,6 @@ void meshexp(std::string input_filename, std::string output_filename) {
   }
 
   export_scene(scene, output_filename);
-
 }
 
 bool export_scene(aiScene const *scene, std::string const &filename) {
@@ -90,7 +92,7 @@ bool export_scene(aiScene const *scene, std::string const &filename) {
 
 // adds the given aiMesh to the given fw::model
 bool add_mesh(fw::model &mdl, aiMesh *mesh) {
-  fw::debug << "  adding mesh (" << mesh->mNumBones << " bone(s), " << mesh->mNumVertices << " vertice(s), "
+  fw::debug << "  adding mesh (" << mesh->mNumBones << " bone(s), " << mesh->mNumVertices << " vertex(es), "
       << mesh->mNumFaces << " face(s))" << std::endl;
 
   // create a vector of xyz_n_uv vertices and set it to zero initially
@@ -185,9 +187,23 @@ std::shared_ptr<fw::model_node> add_node(fw::model &mdl, aiNode *node, int level
 
 //-----------------------------------------------------------------------------
 
+class LogStream : public Assimp::LogStream {
+public:
+  void write(const char* message) {
+    std::string msg(message);
+    boost::trim(msg);
+    fw::debug << " assimp : " << msg << std::endl;
+  }
+};
+
+//-----------------------------------------------------------------------------
+
 int main(int argc, char** argv) {
   try {
     settings_initialize(argc, argv);
+
+    Assimp::DefaultLogger::create(nullptr, Assimp::Logger::VERBOSE, 0, nullptr);
+    Assimp::DefaultLogger::get()->attachStream(new LogStream());
 
     fw::tool_application app;
     new fw::framework(&app);
