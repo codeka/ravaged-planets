@@ -1,6 +1,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
@@ -58,16 +59,51 @@ shader_cache g_cache;
 void compile_shader(GLuint shader_id, std::string filename);
 void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id);
 std::string find_source(fw::xml_element const &root_elem, std::string source_name);
+std::string process_includes(std::string source);
+std::string load_include(std::string const &file, std::string const &function_name);
 
 std::string find_source(fw::xml_element const &root_elem, std::string source_name) {
   for (fw::xml_element child_elem = root_elem.get_first_child();
       child_elem.is_valid(); child_elem = child_elem.get_next_sibling()) {
     if (child_elem.get_name() == "source" && child_elem.get_attribute("name") == source_name) {
-      return "#version 330\n\n" + child_elem.get_text();
+      return "#version 330\n\n" + process_includes(child_elem.get_text());
     }
   }
   BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No source named '" + source_name + "' found."));
   return ""; // Just to shut up the warning.
+}
+
+std::string process_includes(std::string source) {
+  std::istringstream ins(source);
+  std::string line;
+  std::ostringstream outs;
+
+  while(std::getline(ins, line)) {
+     boost::trim(line);
+     if (line.find("#include") == 0) {
+       std::vector<std::string> tokens;
+       boost::split(tokens, line, boost::is_any_of(" "));
+       if (tokens.size() == 3) {
+         std::string file = tokens[1];
+         boost::trim_if(file, boost::is_any_of("\""));
+         std::string function_name = tokens[2];
+         line = load_include(file, function_name);
+       }
+     }
+     outs << line << std::endl;
+  }
+  return outs.str();
+}
+
+std::string load_include(std::string const &file, std::string const &function_name) {
+  fw::xml_element root_elem = fw::load_xml(fw::resolve("shaders/" + file), "shader", 1);
+  for (fw::xml_element child = root_elem.get_first_child();
+      child.is_valid(); child = child.get_next_sibling()) {
+    if (child.get_name() == "function" && child.get_attribute("name") == function_name) {
+      return process_includes(child.get_text());
+    }
+  }
+  return "";
 }
 
 void compile_shader(GLuint shader_id, std::string source) {

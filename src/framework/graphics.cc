@@ -10,6 +10,7 @@
 #include <framework/graphics.h>
 #include <framework/settings.h>
 #include <framework/logging.h>
+#include <framework/texture.h>
 
 namespace fw {
 
@@ -44,6 +45,7 @@ void graphics::initialize(char const *title) {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   _wnd = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height,
       SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
@@ -96,9 +98,15 @@ void graphics::destroy() {
   _context = nullptr;
 }
 
-void graphics::begin_scene(fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
-  FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
-  FW_CHECKED(glDepthMask(GL_TRUE));
+void graphics::begin_scene(bool depth_only, fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
+  if (depth_only) {
+    FW_CHECKED(glViewport(0, 0, 1024, 1024));
+    FW_CHECKED(glClearColor(0, 0, 0, 0));
+    FW_CHECKED(glClearDepth(1.0));
+  } else {
+    FW_CHECKED(glViewport(0, 0, _width, _height));
+    FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
+  }
   FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
@@ -140,6 +148,13 @@ void graphics::run_on_render_thread(std::function<void()> fn) {
 }
 
 void graphics::set_render_target(texture *tex) {
+  if (tex != nullptr) {
+    tex->bind_framebuffer();
+  } else {
+    FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0));
+    FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+    FW_CHECKED(glDrawBuffer(GL_BACK));
+  }
 }
 
 void graphics::check_error(char const *msg) {

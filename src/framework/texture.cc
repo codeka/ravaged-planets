@@ -18,16 +18,20 @@ namespace fw {
 //-------------------------------------------------------------------------
 struct texture_data: private boost::noncopyable {
   GLuint texture_id;
+  GLuint fbo_id;
   bool is_render_target;
   mutable int width, height;
   fs::path filename; // might be empty if we weren't created from a file
 
-  texture_data() : texture_id(0), is_render_target(false), width(-1), height(-1) {
+  texture_data() : texture_id(0), is_render_target(false), width(-1), height(-1), fbo_id(0) {
     FW_CHECKED(glGenTextures(1, &texture_id));
   }
 
   ~texture_data() {
     FW_CHECKED(glDeleteTextures(1, &texture_id));
+    if (fbo_id != 0) {
+      FW_CHECKED(glDeleteFramebuffers(1, &fbo_id));
+    }
   }
 };
 
@@ -96,11 +100,11 @@ void texture::create(fs::path const &filename) {
   }
 }
 
-void texture::create(std::shared_ptr<fw::bitmap> bmp, bool dynamic) {
-  create(*bmp, dynamic);
+void texture::create(std::shared_ptr<fw::bitmap> bmp) {
+  create(*bmp);
 }
 
-void texture::create(fw::bitmap const &bmp, bool dynamic) {
+void texture::create(fw::bitmap const &bmp) {
   graphics *g = fw::framework::get_instance()->get_graphics();
 
   if (!_data) {
@@ -114,6 +118,25 @@ void texture::create(fw::bitmap const &bmp, bool dynamic) {
       GL_UNSIGNED_BYTE, bmp.get_pixels().data()));
 }
 
+void texture::create(int width, int height, bool is_shadowmap) {
+  graphics *g = fw::framework::get_instance()->get_graphics();
+
+  if (!_data) {
+    _data = std::shared_ptr<texture_data>(new texture_data());
+  }
+  _data->width = width;
+  _data->height = height;
+
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
+  if (is_shadowmap) {
+    FW_CHECKED(glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, _data->width, _data->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr));
+  } else {
+    FW_CHECKED(glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA, _data->width, _data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+  }
+}
+
 void texture::bind() const {
   if (!_data) {
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
@@ -123,6 +146,30 @@ void texture::bind() const {
   FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+}
+
+void texture::bind_framebuffer() {
+  if (!_data) {
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
+    FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+    return;
+  }
+
+  if (_data->fbo_id == 0) {
+    FW_CHECKED(glGenFramebuffers(1, &_data->fbo_id));
+  }
+
+  FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, _data->fbo_id));
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
+  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+ // FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL));
+ // FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE));
+
+  FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _data->texture_id, 0));
+  FW_CHECKED(glDrawBuffer(GL_NONE));
 }
 
 void texture::save_png(fs::path const &filename) {

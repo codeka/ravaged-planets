@@ -18,8 +18,9 @@ public:
   ~texture();
 
   void create(boost::filesystem::path const &filename);
-  void create(std::shared_ptr<fw::bitmap> bmp, bool dynamic = false);
-  void create(fw::bitmap const &bmp, bool dynamic = false);
+  void create(std::shared_ptr<fw::bitmap> bmp);
+  void create(fw::bitmap const &bmp);
+  void create(int width, int height, bool is_shadowmap = false);
 
   // save the contents of this texture to a .png file with the given name
   void save_png(boost::filesystem::path const &filename);
@@ -32,6 +33,9 @@ public:
   }
 
   void bind() const;
+
+  /** Bind this texture as the current frame buffer. */
+  void bind_framebuffer();
 
   // gets the name of the file we were created from (or an empty string if we
   // weren't created from a file)
