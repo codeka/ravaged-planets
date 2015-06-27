@@ -25,14 +25,14 @@ public:
   entity_component_template();
   virtual ~entity_component_template();
 
-  virtual bool entity_component_template::load(fw::xml_element const &elem);
+  virtual bool load(fw::xml_element const &elem);
 
   std::string name;
   int identifier;
   std::map<std::string, std::string> properties;
 };
 
-// this class contains the parsed .wwentity file which we'll use for creating (and describing)
+// this class contains the parsed .entity file which we'll use for creating (and describing)
 // entities so we can create them (via the entity_factory)
 class entity_template {
 public:

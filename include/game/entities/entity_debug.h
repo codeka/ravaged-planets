@@ -1,7 +1,7 @@
 #pragma once
 
-#include <framework\vector.h>
-#include <framework\colour.h>
+#include <framework/vector.h>
+#include <framework/colour.h>
 
 namespace fw {
 namespace gui {
@@ -37,7 +37,7 @@ private:
 
   bool _just_shown;
 
-  void on_key_press(int key, bool is_down);
+  void on_key_press(std::string keyname, bool is_down);
   bool on_show_steering_changed(fw::gui::widget *w);
 
 public:

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <game/entities/entity_attribute.h>
+#include <game/entities/entity_debug.h>
 
 namespace fw {
 class graphics;
@@ -12,7 +13,6 @@ class scenegraph;
 }
 
 namespace ent {
-enum entity_debug_flags;
 class entity_debug_view;
 class entity;
 class entity_manager;

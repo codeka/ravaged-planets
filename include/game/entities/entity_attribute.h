@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/any.hpp>
+#include <boost/signals2/signal.hpp>
 
 namespace ent {
 

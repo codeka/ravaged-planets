@@ -7,8 +7,6 @@ namespace fw {
 class vertex_buffer;
 class index_buffer;
 class texture;
-class effect;
-class effect_parameters;
 }
 
 namespace ent {
