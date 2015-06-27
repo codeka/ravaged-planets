@@ -89,7 +89,13 @@ void application::update(float dt) {
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {
-  scenegraph.set_clear_colour(fw::colour(1, 0, 0.0, 0));
+  scenegraph.set_clear_colour(fw::colour(1, 0, 1, 0));
+
+  // set up the properties of the sun that we'll use to light and also cast shadows
+  fw::vector sun(0.485f, 0.485f, 0.727f);
+  fw::vector lookat(0, 0, 0);
+  std::shared_ptr <fw::sg::light> light(new fw::sg::light(lookat + sun * 300.0f, sun * -1, true));
+  scenegraph.add_light(light);
 
   if (g_show_ground) {
     scenegraph.add_node(g_ground);
@@ -128,6 +134,7 @@ void initialize_ground(std::shared_ptr<fw::sg::node> node) {
   node->set_index_buffer(ib);
   node->set_shader(shader);
   node->set_shader_parameters(params);
+  node->set_cast_shadows(false);
   node->set_primitive_type(fw::sg::primitive_trianglelist);
 }
 

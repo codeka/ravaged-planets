@@ -3,7 +3,7 @@
   <source name="vertex"><![CDATA[
     uniform mat4 worldviewproj;
     uniform mat4 worldview;
-    uniform mat4 view_to_light;
+    uniform mat4 lightviewproj;
 
     out vec2 tex;
     out vec4 light_pos;
@@ -21,28 +21,26 @@
       tex = uv;
 
       // transform the position to light projection space
-      vec4 view_pos = worldview * vec4(position, 1);
-      light_pos = view_to_light * view_pos;
+      light_pos = lightviewproj * vec4(position, 1);
     }
   ]]></source>
   <source name="fragment"><![CDATA[
     in vec2 tex;
+    in vec4 light_pos;
     in float NdotL;
-
     out vec4 colour;
-
     uniform sampler2D tex_sampler;
+    uniform sampler2DShadow shadow_map;
 
     void main() {
-      // work out how much this pixel is being affected by shadow(s)
-      float light_amount = 1.0f;//calculate_shadow_factor(inp.light_pos);
+      vec2 uv = 0.5 * (light_pos.xy / light_pos.w) + 0.5;
+      float light_amount = texture(shadow_map, vec3(uv, light_pos.z / light_pos.w));
 
       // get the "base" colour from the texture
       vec4 base_colour = texture(tex_sampler, tex);
 
       // then figure out the "real" colour by applying the light calculation
-      float ambient = 0.5;
-      float diffuse = (clamp(NdotL, 0.0, 1.0) * light_amount * ambient) + ambient;
+      float diffuse = clamp(NdotL, 0.0, 1.0) * light_amount;
 
       colour = base_colour * diffuse;
     }

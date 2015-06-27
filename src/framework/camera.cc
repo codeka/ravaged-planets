@@ -1,4 +1,4 @@
-#include <boost/bind.hpp>
+#include <functional>
 #include <boost/foreach.hpp>
 
 #include <framework/camera.h>
@@ -9,6 +9,8 @@
 #include <framework/input.h>
 #include <framework/vector.h>
 #include <framework/timer.h>
+
+using namespace std::placeholders;
 
 namespace fw {
 
@@ -24,7 +26,7 @@ camera::camera() {
   _forward = vector(0, 0, 1);
 
   _view = fw::identity();
-  set_projection_matrix(cml::constantsf::pi() / 3.0f, 1.3f, 1.0f, 100.0f);
+  set_projection_matrix(cml::constantsf::pi() / 3.0f, 1.3f, 1.0f, 500.0f);
 }
 
 camera::~camera() {
@@ -38,7 +40,6 @@ void camera::set_ground_height(float height) {
 float camera::get_ground_height() const {
   return _floor_height;
 }
-
 
 void camera::update(float dt) {
   // cap speed to max speed
@@ -191,7 +192,7 @@ void first_person_camera::roll(float radians) {
 
 lookat_camera::lookat_camera() {
   _centre = _position;
-  _position += vector(-15.0f, 15.0f, 0);
+  _position += vector(-15.0f, 15.0f, 0.0f);
 }
 
 lookat_camera::~lookat_camera() {
@@ -236,21 +237,21 @@ void top_down_camera::enable() {
 
   input *inp = framework::get_instance()->get_input();
   _keybindings.push_back(
-      inp->bind_function("cam-forward", boost::bind(&top_down_camera::on_key_forward, this, _1, _2)));
+      inp->bind_function("cam-forward", std::bind(&top_down_camera::on_key_forward, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-backward", boost::bind(&top_down_camera::on_key_backward, this, _1, _2)));
-  _keybindings.push_back(inp->bind_function("cam-left", boost::bind(&top_down_camera::on_key_left, this, _1, _2)));
-  _keybindings.push_back(inp->bind_function("cam-right", boost::bind(&top_down_camera::on_key_right, this, _1, _2)));
+      inp->bind_function("cam-backward", std::bind(&top_down_camera::on_key_backward, this, _1, _2)));
+  _keybindings.push_back(inp->bind_function("cam-left", std::bind(&top_down_camera::on_key_left, this, _1, _2)));
+  _keybindings.push_back(inp->bind_function("cam-right", std::bind(&top_down_camera::on_key_right, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-rot-mouse", boost::bind(&top_down_camera::on_key_mouserotate, this, _1, _2)));
+      inp->bind_function("cam-rot-mouse", std::bind(&top_down_camera::on_key_mouserotate, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-rot-left", boost::bind(&top_down_camera::on_key_rotateleft, this, _1, _2)));
+      inp->bind_function("cam-rot-left", std::bind(&top_down_camera::on_key_rotateleft, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-rot-right", boost::bind(&top_down_camera::on_key_rotateright, this, _1, _2)));
+      inp->bind_function("cam-rot-right", std::bind(&top_down_camera::on_key_rotateright, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-zoom-in", boost::bind(&top_down_camera::on_key_zoomin, this, _1, _2)));
+      inp->bind_function("cam-zoom-in", std::bind(&top_down_camera::on_key_zoomin, this, _1, _2)));
   _keybindings.push_back(
-      inp->bind_function("cam-zoom-out", boost::bind(&top_down_camera::on_key_zoomout, this, _1, _2)));
+      inp->bind_function("cam-zoom-out", std::bind(&top_down_camera::on_key_zoomout, this, _1, _2)));
 }
 
 void top_down_camera::disable() {

@@ -59,7 +59,7 @@ public:
   void initialize(char const *title);
   void destroy();
 
-  void begin_scene(fw::colour clear_colour = fw::colour(1, 0, 0, 0));
+  void begin_scene(bool depth_only = false, fw::colour clear_colour = fw::colour(1, 0, 0, 0));
   void end_scene();
   void present();
 

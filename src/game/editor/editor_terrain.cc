@@ -98,7 +98,7 @@ void editor_terrain::set_splatt(int patch_x, int patch_z, fw::bitmap const &bmp)
   }
 
   _splatt_bitmaps[index] = bmp;
-  splatt->create(bmp, true);
+  splatt->create(bmp);
 }
 
 fw::bitmap &editor_terrain::get_splatt(int patch_x, int patch_z) {
