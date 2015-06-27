@@ -4,6 +4,7 @@ file(GLOB GAME_FILES
     editor/*.cc
     editor/tools/*.cc
     editor/windows/*.cc
+    entities/*.cc
     screens/*.cc
     screens/title/*.cc
     world/*.cc
