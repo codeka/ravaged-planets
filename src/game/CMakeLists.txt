@@ -1,12 +1,15 @@
 
 file(GLOB GAME_FILES
     *.cc
+    ai/*.cc
     editor/*.cc
     editor/tools/*.cc
     editor/windows/*.cc
     entities/*.cc
     screens/*.cc
     screens/title/*.cc
+    session/*.cc
+    simulation/*.cc
     world/*.cc
 )
 

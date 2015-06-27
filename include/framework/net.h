@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <boost/noncopyable.hpp>
 #include <enet/enet.h>
 
 namespace fw {

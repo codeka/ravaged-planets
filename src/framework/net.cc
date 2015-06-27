@@ -33,7 +33,7 @@ peer::~peer() {
 
 void peer::send(packet &pkt, int channel /*= 0*/) {
   packet_buffer buff(pkt.get_identifier());
-  pkt.serialise(buff);
+  pkt.serialize(buff);
 
   enet_uint32 flags = 0;
   if (pkt.is_essential()) {

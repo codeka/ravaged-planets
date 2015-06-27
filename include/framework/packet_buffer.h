@@ -1,5 +1,9 @@
 #pragma once
 
+#include <sstream>
+#include <framework/colour.h>
+#include <framework/vector.h>
+
 namespace fw {
 namespace net {
 
@@ -98,12 +102,12 @@ inline packet_buffer &operator >>(packet_buffer &lhs, uint8_t &rhs) {
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, vector const &rhs) {
+inline packet_buffer &operator <<(packet_buffer &lhs, fw::vector const &rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(rhs.data()), 0, sizeof(float) * 3);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, vector &rhs) {
+inline packet_buffer &operator >>(packet_buffer &lhs, fw::vector &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(rhs.data()), 0, sizeof(float) * 3);
   return lhs;
 }

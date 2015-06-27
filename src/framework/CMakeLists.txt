@@ -39,6 +39,8 @@ target_link_libraries(framework
     ${OPENGL_LIBRARY}
     ${GLEW_LIBRARY}
     ${PROTOBUF_LIBRARY}
+    ${LUABIND_LIBRARY}
+    ${ENET_LIBRARY}
     freetype
     png
     z
