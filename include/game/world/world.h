@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <memory>
 
 #include <framework/vector.h>
@@ -31,8 +32,8 @@ class world {
 private:
   std::shared_ptr<world_reader> _reader;
   terrain *_terrain;
-//  ent::entity_manager *_entities;
-//  pathing_thread *_pathing;
+  ent::entity_manager *_entities;
+  pathing_thread *_pathing;
   std::vector<int> _keybind_tokens;
 //  cursor_handler *_cursor;
 //  std::shared_ptr<fw::texture> _minimap_background;
@@ -86,12 +87,12 @@ public:
   terrain *get_terrain() const {
     return _terrain;
   }
-//  ent::entity_manager *get_entity_manager() const {
-//    return _entities;
-//  }
-//  pathing_thread *get_pathing() const {
-//    return _pathing;
-//  }
+  ent::entity_manager *get_entity_manager() const {
+    return _entities;
+  }
+  pathing_thread *get_pathing() const {
+    return _pathing;
+  }
 
   std::string get_description() const {
     return _description;

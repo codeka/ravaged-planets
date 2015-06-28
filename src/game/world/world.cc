@@ -12,19 +12,20 @@
 #include <framework/camera.h>
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
+
+#include <game/ai/pathing_thread.h>
+#include <game/entities/entity_manager.h>
 #include <game/world/world.h>
 #include <game/world/world_reader.h>
 #include <game/world/terrain.h>
 //#include "../entities/entity.h"
 //#include "../entities/entity_factory.h"
-//#include "../entities/entity_manager.h"
 //#include "../entities/moveable_component.h"
 //#include "../entities/position_component.h"
 //#include "../entities/weapon_component.h"
 //#include "../simulation/simulation_thread.h"
 //#include "../screens/hud/pause_window.h"
 //#include "../session/session.h"
-//#include "../ai/pathing_thread.h"
 
 namespace fs = boost::filesystem;
 using namespace std::placeholders;
@@ -35,15 +36,15 @@ namespace game {
 world *world::_instance = nullptr;
 
 world::world(std::shared_ptr<world_reader> reader) :
-    _reader(reader), /*_entities(0),*/ _terrain(nullptr)/*, _pathing(0)*/, _initialized(false) {
+    _reader(reader), _entities(nullptr), _terrain(nullptr), _pathing(nullptr), _initialized(false) {
   //_cursor = new cursor_handler();
 }
 
 world::~world() {
   world::set_instance(nullptr);
  // delete _cursor;
- // if (_pathing != nullptr)
- //   delete _pathing;
+  if (_pathing != nullptr)
+    delete _pathing;
 }
 
 void world::initialize() {
@@ -68,14 +69,12 @@ void world::initialize() {
       _terrain->get_width(), _terrain->get_length());
 
   fw::input *input = fw::framework::get_instance()->get_input();
-/*
-  if (_entities != nullptr) {
-    _cursor->initialise();
 
-    _keybind_tokens.push_back(
-        input->bind_function("pause",
-            boost::bind(&world::on_key_pause, this, _1, _2)));
-  }*/
+  if (_entities != nullptr) {
+    //_cursor->initialize();
+
+    _keybind_tokens.push_back(input->bind_function("pause", std::bind(&world::on_key_pause, this, _1, _2)));
+  }
   _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
   _initialized = true;
 
@@ -83,7 +82,7 @@ void world::initialize() {
 }
 
 void world::destroy() {
-//  _pathing->stop();
+  _pathing->stop();
 
   // unbind all the keys we had bound
   fw::input *input = fw::framework::get_instance()->get_input();
@@ -95,13 +94,13 @@ void world::destroy() {
 }
 
 void world::initialize_pathing() {
-//  _pathing = new pathing_thread();
-//  _pathing->start();
+  _pathing = new pathing_thread();
+  _pathing->start();
 }
 
 void world::initialize_entities() {
-//  _entities = new ent::entity_manager();
-//  _entities->initialise();
+  _entities = new ent::entity_manager();
+  _entities->initialize();
 }
 
 // this is called when the "pause" button is pressed (usually "ESC")
@@ -166,8 +165,8 @@ void world::update() {
 // _cursor->update();
   _terrain->update();
 
- // if (_entities != 0)
- //   _entities->update();
+  if (_entities != nullptr])
+    _entities->update();
 }
 
 void world::render(fw::sg::scenegraph &scenegraph) {
@@ -177,9 +176,9 @@ void world::render(fw::sg::scenegraph &scenegraph) {
 
   _terrain->render(scenegraph);
 
- // if (_entities != nullptr) {
- //   _entities->render(scenegraph);
-  // }
+  if (_entities != nullptr) {
+    _entities->render(scenegraph);
+  }
 }
 
 }
