@@ -165,7 +165,7 @@ void world::update() {
 // _cursor->update();
   _terrain->update();
 
-  if (_entities != nullptr])
+  if (_entities != nullptr)
     _entities->update();
 }
 

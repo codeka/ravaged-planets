@@ -1,7 +1,8 @@
 #pragma once
 
 #include <boost/any.hpp>
-#include <boost/signals2/signal.hpp>
+#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
+#include <boost/signals2.hpp>
 
 namespace ent {
 

@@ -3,7 +3,9 @@
 #include <memory>
 #include <mutex>
 #include <queue>
-#include <boost/signals2/signal.hpp>
+
+#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
+#include <boost/signals2.hpp>
 
 namespace fw {
 class http;
@@ -17,9 +19,7 @@ class session {
 public:
   // these are the different states the session can be in
   enum session_state {
-    disconnected, in_error, logging_in, logged_in, logging_out,
-
-    joining_lobby,
+    disconnected, in_error, logging_in, logged_in, logging_out, joining_lobby,
   };
 
 private:
@@ -70,7 +70,7 @@ public:
 
   // gets the list of remote games that we can connect to. when the list is refreshed (may
   // take some time) we'll call the given callback with the list
-  std::shared_ptr<session_request> get_games_list(boost::function<void(std::vector<remote_game> const &)> callback);
+  std::shared_ptr<session_request> get_games_list(std::function<void(std::vector<remote_game> const &)> callback);
 
   // confirm that the given player has joined this game
   std::shared_ptr<session_request> confirm_player(uint64_t game_id, uint32_t user_id);

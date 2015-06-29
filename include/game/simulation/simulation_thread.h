@@ -1,5 +1,6 @@
 #pragma once
 
+#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <thread>
@@ -31,8 +32,11 @@ public:
 private:
   static simulation_thread *instance;
 
+  std::thread _thread;
+  bool _stopped;
+  std::condition_variable _stopped_cond;
+
   fw::net::host *_host;
-  std::thread *_thread;
   local_player *_local_player;
   std::vector<player *> _players;
   std::string _map_name;

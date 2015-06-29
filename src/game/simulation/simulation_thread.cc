@@ -1,11 +1,13 @@
 
+#include <thread>
 #include <boost/foreach.hpp>
-#include <boost/thread.hpp>
 
 #include <framework/logging.h>
+#include <framework/lua.h>
 #include <framework/net.h>
 #include <framework/settings.h>
 #include <framework/exception.h>
+#include <framework/timer.h>
 
 #include <game/simulation/simulation_thread.h>
 #include <game/simulation/player.h>
@@ -19,12 +21,11 @@ namespace game {
 simulation_thread *simulation_thread::instance = new simulation_thread();
 
 simulation_thread::simulation_thread() :
-    _host(nullptr), _thread(nullptr), _turn(0), _game_id(0), _local_player(nullptr) {
+    _host(nullptr), _turn(0), _game_id(0), _local_player(nullptr), _stopped(false) {
 }
 
 simulation_thread::~simulation_thread() {
   delete _host;
-  delete _thread;
   delete _local_player;
 }
 
@@ -34,12 +35,13 @@ void simulation_thread::initialize() {
   _players.push_back(_local_player);
 
   _host = new fw::net::host();
-  _thread = new boost::thread(boost::bind(&simulation_thread::thread_proc, this));
+  _thread = std::thread(std::bind(&simulation_thread::thread_proc, this));
 }
 
 void simulation_thread::destroy() {
-  _thread->interrupt();
-  _thread->join();
+  _stopped = true;
+  _stopped_cond.notify_all();
+  _thread.join();
 }
 
 void simulation_thread::connect(uint64_t game_id, std::string address, uint8_t player_no) {
@@ -135,8 +137,10 @@ void simulation_thread::thread_proc() {
         << fw::message_error_info("could not listen on port(s): " + stg.get_value<std::string>("listen-port")));
   }
 
-  for (;;) {
-    boost::posix_time::ptime start(boost::get_system_time());
+  std::mutex mutex;
+
+  while (!_stopped) {
+    fw::chrono_clock::time_point start(fw::chrono_clock::now());
     _host->update();
     _turn++;
 
@@ -168,15 +172,8 @@ void simulation_thread::thread_proc() {
       plyr->update();
     }
 
-    try {
-      // we want to make sure each "iteration" is 200 milliseconds, so it's actually
-      // 200ms minus the time taken for the above code
-      boost::thread::sleep(start + boost::posix_time::millisec(200));
-    } catch (boost::thread_interrupted const &) {
-      // we'll get a boost::thread_interrupted when it's time to quit
-      fw::debug << "simulation thread got stop signal, shutting down." << std::endl;
-      return;
-    }
+    std::unique_lock<std::mutex> lock(mutex);
+    _stopped_cond.wait_until(lock, start + std::chrono::milliseconds(200));
   }
 }
 

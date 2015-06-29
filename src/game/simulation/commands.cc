@@ -103,7 +103,7 @@ void connect_player_command::execute() {
 }
 
 //-------------------------------------------------------------------------
-static volatile std::atomic<ent::entity_id> g_next_entity_number = 0;
+static volatile std::atomic<ent::entity_id> g_next_entity_number;
 
 ent::entity_id generate_entity_id() {
   uint32_t entity_id = ++g_next_entity_number;
@@ -162,7 +162,7 @@ void create_entity_command::execute() {
 
 //-------------------------------------------------------------------------
 order_command::order_command(uint8_t player_no) :
-    command(player_no), entity(nullptr) {
+    command(player_no), entity(0) {
 }
 
 order_command::~order_command() {

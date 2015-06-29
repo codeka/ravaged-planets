@@ -90,7 +90,7 @@ void remote_player::pkt_join_req(std::shared_ptr<fw::net::packet> pkt) {
   // call the session and confirm the fact that this player is valid and that.
   std::shared_ptr<game::session_request> sess_req = session::get_instance()->confirm_player(
       simulation_thread::get_instance()->get_game_id(), _user_id);
-  sess_req->set_complete_handler(boost::bind(&remote_player::join_complete, this, _1));
+  sess_req->set_complete_handler(std::bind(&remote_player::join_complete, this, _1));
 
   simulation_thread::get_instance()->sig_players_changed();
 }
@@ -135,7 +135,7 @@ void remote_player::pkt_join_resp(std::shared_ptr<fw::net::packet> pkt) {
         // call the session and confirm the fact that this player is valid and that, then connect to them
         std::shared_ptr<game::session_request> sess_req = session::get_instance()->confirm_player(
             simulation_thread::get_instance()->get_game_id(), other_user_id);
-        sess_req->set_complete_handler(boost::bind(&remote_player::new_player_confirmed, this, _1));
+        sess_req->set_complete_handler(std::bind(&remote_player::new_player_confirmed, this, _1));
       }
     }
   }
