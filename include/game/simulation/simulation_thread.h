@@ -1,11 +1,9 @@
 #pragma once
 
 #include <functional>
+#include <memory>
+#include <thread>
 #include <boost/signals2/signal.hpp>
-
-namespace boost {
-class thread;
-}
 
 namespace fw {
 namespace net {
@@ -34,7 +32,7 @@ private:
   static simulation_thread *instance;
 
   fw::net::host *_host;
-  boost::thread *_thread;
+  std::thread *_thread;
   local_player *_local_player;
   std::vector<player *> _players;
   std::string _map_name;
@@ -106,7 +104,7 @@ public:
    */
   template<typename T>
   inline void post_command(std::shared_ptr<T> &cmd) {
-    std::shared_ptr<command> real_cmd(boost::dynamic_pointer_cast<command>(cmd));
+    std::shared_ptr<command> real_cmd(std::dynamic_pointer_cast<command>(cmd));
     post_command(real_cmd);
   }
 

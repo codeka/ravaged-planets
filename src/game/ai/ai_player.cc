@@ -1,3 +1,4 @@
+#include <functional>
 #include <boost/bind/arg.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
@@ -18,6 +19,7 @@
 #include <game/entities/ownable_component.h>
 #include <game/entities/orderable_component.h>
 
+#include <luabind/adopt_policy.hpp>
 #include <luabind/raw_policy.hpp>
 
 namespace fs = boost::filesystem;
@@ -36,10 +38,15 @@ ai_player::ai_player(std::string const &name, script_desc *desc, uint8_t player_
   // functions and so on to it
   std::shared_ptr<fw::lua_context> script(new fw::lua_context());
 
-  luabind::module(*script)[luabind::class_<ai_player>("ai_player").def("set_ready", &ai_player::l_set_ready).def("say",
-      &ai_player::l_say).def("local_say", &ai_player::l_local_say).def("timer", &ai_player::l_timer).def("event",
-      &ai_player::l_event).def("register_unit", &ai_player::l_register_unit).def("find_units", &ai_player::l_find_units,
-      luabind::raw(boost::arg<3>())).def("issue_order", &ai_player::l_issue_order)];
+  luabind::module(*script)[luabind::class_<ai_player>("ai_player")
+      .def("set_ready", &ai_player::l_set_ready)
+      .def("say", &ai_player::l_say)
+      .def("local_say", &ai_player::l_local_say)
+      .def("timer", &ai_player::l_timer)
+      .def("event", &ai_player::l_event)
+      .def("register_unit", &ai_player::l_register_unit)
+      .def("find_units", &ai_player::l_find_units, luabind::raw(boost::arg<3>()))
+      .def("issue_order", &ai_player::l_issue_order)];
   unit_wrapper::register_class(*script);
   luabind::globals(*script)["self"] = this;
   //player->self = luabind::get_globals(state)["player"];
@@ -84,7 +91,7 @@ void ai_player::l_timer(float dt, luabind::object obj) {
     return;
   }
 
-  _upd_queue.push(dt, boost::bind<void>(obj));
+  _upd_queue.push(dt, std::bind<void>(obj));
 }
 
 void ai_player::fire_event(std::string const &event_name, std::map<std::string, std::string> const &parameters) {
