@@ -40,7 +40,7 @@ void orderable_component::update(float dt) {
 
       std::shared_ptr<game::order_command> cmd(game::create_command<game::order_command>());
       cmd->order = next_order;
-      cmd->entity = shared_ptr<ent::entity>(_entity)->get_id();
+      cmd->entity = std::shared_ptr<ent::entity>(_entity)->get_id();
       game::simulation_thread::get_instance()->post_command(cmd);
 
       // mark that we've got an order pending, it'll take a few frames
