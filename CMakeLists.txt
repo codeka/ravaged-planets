@@ -54,6 +54,7 @@ find_package(GLEW REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Luabind REQUIRED)
 find_package(ENet REQUIRED)
+find_package(CURL REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
 
 if(UNIX)
@@ -69,6 +70,7 @@ include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${PROTOBUF_INCLUDE_DIR})
 include_directories(${LUABIND_INCLUDE_DIR})
 include_directories(${ENET_INCLUDE_DIR})
+include_directories(${CURL_INCLUDE_DIR})
 
 add_subdirectory(src/version-number)
 add_subdirectory(src/framework)

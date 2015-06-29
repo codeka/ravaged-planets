@@ -53,6 +53,12 @@ public:
 
   xml_element get_first_child() const;
   xml_element get_next_sibling() const;
+
+  /** Converts this whole XML element and all it's children into a string. */
+  std::string to_string() const;
+
+  /** Converts this whole XML element and all it's children into a "pretty" string (with indenting and whatnot). */
+  std::string to_pretty_string() const;
 };
 
 /**

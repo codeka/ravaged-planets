@@ -18,6 +18,8 @@
 #include <framework/particle_manager.h>
 #include <framework/model_manager.h>
 #include <framework/scenegraph.h>
+#include <framework/net.h>
+#include <framework/http.h>
 #include <framework/timer.h>
 #include <framework/lang.h>
 #include <framework/misc.h>
@@ -112,11 +114,9 @@ bool framework::initialize(char const *title) {
     _gui->initialize(_graphics);
   }
 
-  /*
-   // initialise the host (ENet) and HTTP module (libcurl)
-   net::initialise();
-   http::initialise();
-   */
+  net::initialize();
+  http::initialize();
+
   debug << "framework initialization complete, application initialization starting..." << std::endl;
   if (!_app->initialize(this))
     return false;
@@ -154,9 +154,9 @@ void framework::destroy() {
   if (_graphics != nullptr) {
     _graphics->destroy();
   }
-  /*
-   http::destroy();
-   net::destroy();
+  http::destroy();
+  net::destroy();
+   /*
    _audio->destroy();*/
 }
 
@@ -164,14 +164,7 @@ void framework::deactivate() {
   _active = false;
 }
 
-void framework::reactivate() {/*
- if (_graphics->get_device() != 0)
- {
- _graphics->sig_device_lost();
- _graphics->reset();
- _graphics->sig_device_reset();
- }
- */
+void framework::reactivate() {
   _active = true;
 }
 

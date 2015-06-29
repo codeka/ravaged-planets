@@ -41,6 +41,7 @@ target_link_libraries(framework
     ${PROTOBUF_LIBRARY}
     ${LUABIND_LIBRARY}
     ${ENET_LIBRARY}
+    ${CURL_LIBRARY}
     freetype
     png
     z

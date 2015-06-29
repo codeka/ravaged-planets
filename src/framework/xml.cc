@@ -174,4 +174,16 @@ xml_element xml_element::get_next_sibling() const {
   return xml_element(_doc, _elem->NextSiblingElement());
 }
 
+std::string xml_element::to_string() const {
+  xml::XMLPrinter printer(nullptr, true);
+  _elem->Accept(&printer);
+  return printer.CStr();
+}
+
+std::string xml_element::to_pretty_string() const {
+  xml::XMLPrinter printer(nullptr, false);
+  _elem->Accept(&printer);
+  return printer.CStr();
+}
+
 }
