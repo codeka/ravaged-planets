@@ -19,7 +19,7 @@ void http::initialize() {
 
   curl_version_info_data *curl_version = curl_version_info(CURLVERSION_NOW);
   if (curl_version->age >= 0) {
-    debug << boost::format("libcurl (%1%) initialised") % curl_version->version << std::endl;
+    debug << boost::format("libcurl (%1%) initialized") % curl_version->version << std::endl;
   }
 
 #if defined(_DEBUG)

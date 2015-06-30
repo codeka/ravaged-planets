@@ -27,7 +27,7 @@ public:
 // to the server to update our session state.
 class session_request {
 public:
-  typedef boost::function<void(session_request &req)> complete_handler_fn;
+  typedef std::function<void(session_request &req)> complete_handler_fn;
 
   // what we can return from the update() method
   enum update_result {
@@ -149,7 +149,7 @@ public:
 // this is a request to refresh the list of lobbies that are available to connect to.
 class list_games_session_request: public session_request {
 public:
-  typedef boost::function<void(std::vector<remote_game> const &games)> callback_fn;
+  typedef std::function<void(std::vector<remote_game> const &games)> callback_fn;
 
 protected:
   virtual std::string get_request_xml();
