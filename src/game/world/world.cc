@@ -54,15 +54,11 @@ void world::initialize() {
   _description = _reader->get_description();
   _author = _reader->get_author();
 
-  initialize_pathing();
-
   _terrain->initialize();
 
   BOOST_FOREACH(auto it, _reader->get_player_starts()) {
     _player_starts[it.first] = it.second;
   }
-
-  initialize_entities();
 
   // tell the particle manager to wrap particles at the world boundary
   fw::framework::get_instance()->get_particle_mgr()->set_world_wrap(
@@ -79,6 +75,9 @@ void world::initialize() {
   _initialized = true;
 
   world::set_instance(this);
+
+  initialize_entities();
+  initialize_pathing();
 }
 
 void world::destroy() {

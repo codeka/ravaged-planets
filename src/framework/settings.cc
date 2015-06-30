@@ -67,6 +67,7 @@ namespace fw {
     debugging_options.add_options()
         ("debug-logfile", po::value<std::string>()->default_value(""), "Name of the file to do debug logging to. If not specified, does not log.")
         ("debug-console", po::value<bool>()->default_value(true), "If set, we'll log to the console as well as the log file.")
+        ("debug-libcurl", po::value<bool>()->default_value(false), "If true, debug HTTP requests and responses.")
       ;
 
     po::options_description other_options("Other options");
