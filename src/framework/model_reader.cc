@@ -34,11 +34,13 @@ std::shared_ptr<model> model_reader::read(fs::path const &filename) {
         pb_mesh.vertices().size() / sizeof(vertex::xyz_n_uv),
         pb_mesh.indices().size() / sizeof(uint16_t)));
     vertex::xyz_n_uv const *vertex_begin = reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data());
-    vertex::xyz_n_uv const *vertex_end = reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data() + pb_mesh.vertices().size());
+    vertex::xyz_n_uv const *vertex_end =
+        reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data() + pb_mesh.vertices().size());
     mesh_noanim->vertices.assign(vertex_begin, vertex_end);
 
     uint16_t const *indices_begin = reinterpret_cast<uint16_t const *>(pb_mesh.indices().data());
-    uint16_t const *indices_end = reinterpret_cast<uint16_t const *>(pb_mesh.indices().data() + pb_mesh.indices().size());
+    uint16_t const *indices_end =
+        reinterpret_cast<uint16_t const *>(pb_mesh.indices().data() + pb_mesh.indices().size());
     mesh_noanim->indices.assign(indices_begin, indices_end);
     model->meshes.push_back(mesh_noanim);
   }

@@ -1,4 +1,4 @@
-<wwentity version="1">
+<entity version="1">
 	<components>
 		<component type="ownable" />
 		<component type="orderable" />
@@ -15,7 +15,7 @@
 		</component>
 
 		<component type="mesh">
-			<property name="FileName">tank-tracks.wwmesh</property>
+			<property name="FileName">tank-tracks</property>
 		</component>
 
 		<component type="selectable">
@@ -39,4 +39,4 @@
 	<attributes>
 		<attribute name="health" value="100" type="int" />
 	</attributes>
-</wwentity>
+</entity>

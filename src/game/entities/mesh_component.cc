@@ -1,9 +1,10 @@
 #include <functional>
 #include <boost/foreach.hpp>
 
+#include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/model.h>
-#include <framework/model_reader.h>
+#include <framework/model_manager.h>
 #include <framework/paths.h>
 #include <framework/logging.h>
 #include <framework/scenegraph.h>
@@ -49,9 +50,7 @@ void mesh_component::owner_changed(ownable_component *ownable) {
 void mesh_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
   BOOST_FOREACH(auto & kvp, comp_template->properties) {
     if (kvp.first == "FileName") {
-      fs::path file_name = fw::resolve("meshes/" + kvp.second);
-      fw::model_reader mdl_reader;
-      std::shared_ptr<fw::model> model = mdl_reader.read(file_name);
+      std::shared_ptr<fw::model> model = fw::framework::get_instance()->get_model_manager()->get_model(kvp.second);
       set_model(model);
     }
   }

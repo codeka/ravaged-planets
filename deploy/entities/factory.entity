@@ -1,4 +1,4 @@
-<wwentity version="1">
+<entity version="1">
 	<components>
 		<component type="ownable" />
 		<component type="orderable" />
@@ -9,7 +9,7 @@
 		</component>
 
 		<component type="mesh">
-			<property name="FileName">factory.wwmesh</property>
+			<property name="FileName">factory</property>
 		</component>
 
 		<component type="selectable">
@@ -28,4 +28,4 @@
 	<attributes>
 		<attribute name="health" value="300" type="int" />
 	</attributes>
-</wwentity>
+</entity>

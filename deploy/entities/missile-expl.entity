@@ -1,4 +1,4 @@
-<wwentity version="1">
+<entity version="1">
 	<components>
 		<component type="position" />
 
@@ -7,4 +7,4 @@
 			<property name="DestroyEntityOnComplete">1</property>
 		</component>
 	</components>
-</wwentity>
+</entity>

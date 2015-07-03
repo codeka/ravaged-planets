@@ -1,9 +1,9 @@
-<wwentity version="1">
+<entity version="1">
 	<components>
 		<component type="position" />
 
 		<component type="mesh">
-			<property name="FileName">missile.wwmesh</property>
+			<property name="FileName">missile</property>
 		</component>
 
 		<component type="moveable">
@@ -28,4 +28,4 @@
 	<attributes>
 		<attribute name="health" value="1" type="int" />
 	</attributes>
-</wwentity>
+</entity>

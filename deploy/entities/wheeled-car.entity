@@ -1,4 +1,4 @@
-<wwentity version="1">
+<entity version="1">
 	<components>
 		<component type="buildable">
 			<property name="BuildGroup">vehicles</property>
@@ -9,7 +9,7 @@
 		</component>
 
 		<component type="mesh">
-			<property name="FileName">wheeled-car.wwmesh</property>
+			<property name="FileName">wheeled-car</property>
 		</component>
 
 		<component type="moveable" />
@@ -31,4 +31,4 @@
 			<sound name="Fire" wavebank="Weapons.xwb" soundbank="Weapons.xsb" cue="missile-fire" />
 		</component>
 	</components>
-</wwentity>
+</entity>
