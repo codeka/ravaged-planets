@@ -3,6 +3,7 @@
 
 #include <framework/xml.h>
 #include <framework/logging.h>
+#include <framework/paths.h>
 
 #include <game/entities/entity.h>
 #include <game/entities/entity_factory.h>
@@ -88,7 +89,7 @@ void entity_factory::get_buildable_templates(std::string const &build_group,
 void entity_factory::load_entities() {
   entity_templates = new entity_template_map();
 
-  fs::path base_path = fs::initial_path() / "data/entities";
+  fs::path base_path = fw::install_base_path() / "entities";
   fs::directory_iterator end_it;
   for (fs::directory_iterator it(base_path); it != end_it; ++it) {
     if (fs::is_regular_file(it->status()) && it->path().extension() == ".entity") {

@@ -1,0 +1,31 @@
+<wwentity version="1">
+	<components>
+		<component type="ownable" />
+		<component type="orderable" />
+		<component type="minimap-visible" />
+
+		<component type="position">
+			<property name="SitOnTerrain">1</property>
+		</component>
+
+		<component type="mesh">
+			<property name="FileName">factory.wwmesh</property>
+		</component>
+
+		<component type="selectable">
+			<property name="SelectionRadius">1.5</property>
+		</component>
+
+		<component type="builder">
+			<property name="BuildGroup">vehicles</property>
+		</component>
+
+		<component type="damageable">
+			<property name="Explosion">missile-expl</property>
+		</component>
+	</components>
+
+	<attributes>
+		<attribute name="health" value="300" type="int" />
+	</attributes>
+</wwentity>

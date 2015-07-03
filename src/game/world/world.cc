@@ -99,6 +99,9 @@ void world::initialize_pathing() {
 void world::initialize_entities() {
   _entities = new ent::entity_manager();
   _entities->initialize();
+
+  std::shared_ptr<ent::entity> entity = _entities->create_entity("simple-tank", 1);
+
 }
 
 // this is called when the "pause" button is pressed (usually "ESC")
