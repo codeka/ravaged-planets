@@ -14,6 +14,7 @@
 #include <framework/exception.h>
 #include <framework/settings.h>
 #include <framework/graphics.h>
+#include <framework/cursor.h>
 #include <framework/font.h>
 #include <framework/particle_manager.h>
 #include <framework/model_manager.h>
@@ -39,7 +40,8 @@ static framework *only_instance = 0;
 framework::framework(base_app* app) :
     _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(nullptr),
     _graphics(nullptr), _timer(nullptr), _audio(nullptr), _input(nullptr), _lang(nullptr),
-    _gui(nullptr), _font_manager(nullptr), _model_manager(nullptr), _running(true) {
+    _gui(nullptr), _font_manager(nullptr), _model_manager(nullptr), _cursor(nullptr),
+    _running(true) {
   only_instance = this;
 }
 
@@ -58,6 +60,8 @@ framework::~framework() {
     delete _font_manager;
   if (_particle_mgr != nullptr)
     delete _particle_mgr;
+  if (_cursor != nullptr)
+    delete _cursor;
   if (_model_manager != nullptr)
     delete _model_manager;
 
@@ -96,6 +100,9 @@ bool framework::initialize(char const *title) {
     _particle_mgr->initialise(_graphics);
 
     _model_manager = new model_manager();
+
+    _cursor = new cursor();
+    _cursor->initialize();
   }
 
   /*
@@ -156,6 +163,9 @@ void framework::destroy() {
   }
   http::destroy();
   net::destroy();
+  if (_cursor != nullptr) {
+    _cursor->destroy();
+  }
    /*
    _audio->destroy();*/
 }

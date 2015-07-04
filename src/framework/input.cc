@@ -30,15 +30,6 @@ static float g_mx, g_my;
 static float g_mdx, g_mdy;
 static float g_mw, g_mdw;
 static bool g_mouse_inside;
-static bool g_hide_cursor;
-
-// we keep the current cursor in a "stack". When you set the cursor, you pass your
-// "priority" and we display the one with the highest priority.
-static std::map<int, std::string> g_cursor_stack;
-
-//todo: cursors
-//typedef std::map<std::string, HCURSOR> cursor_map;
-//static cursor_map g_cursors;
 
 // maps a key to a list of input bindings, we don't necessarily call each binding on each
 // key press, it depends on things like whether Ctrl or Shift is pressed, etc
@@ -68,46 +59,6 @@ input::input() {
 }
 
 input::~input() {
-}
-
-void input::set_cursor(int priority, std::string const &cursor_name) {
-  if (cursor_name == "") {
-    std::map<int, std::string>::iterator it = g_cursor_stack.find(priority);
-    if (it != g_cursor_stack.end()) {
-      g_cursor_stack.erase(it);
-    }
-  } else {
-    g_cursor_stack[priority] = cursor_name;
-  }
-
-  update_cursor();
-}
-
-void input::update_cursor() {
-  std::map<int, std::string>::reverse_iterator cit = g_cursor_stack.rbegin();
-  if (cit != g_cursor_stack.rend()) {
-    /*
-     std::string cursor_name = cit->second;
-     cursor_map::iterator it = g_cursors.find(cursor_name);
-     if (it == g_cursors.end())
-     {
-     fs::path full_path = fs::initial_path() / "data/cursors" / (cursor_name + ".cur");
-     std::wstring wfull_path = to_unicode(full_path.file_string());
-
-     fw::debug << boost::format("loading cursor: \"%1%\"") % full_path << std::endl;
-     HCURSOR hcur = ::LoadCursorFromFile(wfull_path.c_str());
-     if (hcur == 0)
-     {
-     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Could not load cursor: " + full_path.string()));
-     }
-
-     _cursors[cursor_name] = hcur;
-     it = _cursors.find(cursor_name);
-     }
-
-     fw::framework::get_instance()->get_window()->set_cursor(it->second);
-     */
-  }
 }
 
 int input::bind_function(std::string const &name, input_bind_fn fn) {
@@ -201,7 +152,6 @@ void input::unbind_key(int token) {
 }
 
 void input::initialize() {
-  set_cursor(0, "arrow");
 }
 
 void input::update(float dt) {
@@ -232,22 +182,6 @@ void input::process_event(SDL_Event &event) {
     g_mdy = event.motion.y - g_my;
     g_mx = event.motion.x;
     g_my = event.motion.y;
-
-    // if the cursor is supposed to be hidden, we'll just put it back to the center of the window
-    if (g_hide_cursor) {
-//      main_window *wnd = framework::get_instance()->get_window();
-//      if (wnd != 0) {
-//        wnd->show_cursor(false);
-        /*
-         POINT pt = { wnd->get_width() / 2, wnd->get_height() / 2 };
-         ::ClientToScreen(_hwnd, &pt);
-         ::SetCursorPos(pt.x, pt.y);
-         */
-//      }
-    } else {
-//      CEGUI::System::getSingleton().injectMousePosition(evnt.xmotion.x,
-//          evnt.xmotion.y);
-    }
   } else if (event.type == SDL_MOUSEBUTTONDOWN) {
     int keycode = 0xffffff00 + (event.button.button - 1);
     if (!gui->inject_mouse(event.button.button, true, g_mx, g_my)) {
@@ -259,13 +193,6 @@ void input::process_event(SDL_Event &event) {
       callback(keycode, 0, false);
     }
   }
-}
-
-void input::hide_cursor() {
-  g_hide_cursor = true;
-}
-void input::show_cursor() {
-  g_hide_cursor = false;
 }
 
 float input::mouse_x() const {

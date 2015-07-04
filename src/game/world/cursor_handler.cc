@@ -1,6 +1,7 @@
 #include <functional>
 #include <boost/foreach.hpp>
 
+#include <framework/cursor.h>
 #include <framework/input.h>
 #include <framework/framework.h>
 
@@ -72,7 +73,7 @@ void cursor_handler::update() {
     }
   }
 
-  fw::framework::get_instance()->get_input()->set_cursor(1, cursor_name);
+  fw::framework::get_instance()->get_cursor()->set_cursor(1, cursor_name);
 
   std::shared_ptr<ent::entity> last_highlighted = _last_highlighted.lock();
   if (last_highlighted) {

@@ -15,6 +15,7 @@ class particle_manager;
 struct screenshot_request;
 class audio_manager;
 class lang;
+class cursor;
 class input;
 
 namespace gui {
@@ -91,6 +92,7 @@ private:
   bool _paused;
   audio_manager *_audio;
   model_manager *_model_manager;
+  cursor *_cursor;
   lang *_lang;
   font_manager *_font_manager;
   volatile bool _running;
@@ -175,6 +177,9 @@ public:
   }
   particle_manager *get_particle_mgr() const {
     return _particle_mgr;
+  }
+  cursor *get_cursor() const {
+    return _cursor;
   }
   audio_manager *get_audio() const {
     return _audio;

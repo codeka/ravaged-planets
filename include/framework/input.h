@@ -46,10 +46,6 @@ public:
   void process_event(SDL_Event &event);
   void release();
 
-  void set_cursor(int priority, std::string const &cursor_name);
-  void hide_cursor();
-  void show_cursor();
-
   // bind the specified function to be called when the given key (or mouse button)
   // is pressed/released. When you call bind_key, you get back an integer token
   // which you can later pass to unbind_key to unbind that key/function. It's a bit
