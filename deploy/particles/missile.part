@@ -1,4 +1,4 @@
-<wwparticle version="1">
+<particle version="1">
 	<!-- This emitter is for the smoke part which hangs around for a bit
 		 longer before dissipating -->
 	<emitter start="0.2">
@@ -91,4 +91,4 @@
 			</state>
 		</life>
 	</emitter>
-</wwparticle>
+</particle>

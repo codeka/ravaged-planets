@@ -52,9 +52,9 @@ std::shared_ptr<particle_effect_config> particle_effect_config::load(std::string
       return config;
     }
 
-    filepath = fw::resolve("particles/" + name + ".wwpart").string();
+    filepath = fw::resolve("particles/" + name + ".part").string();
   }
-  fw::xml_element xmldoc = fw::load_xml(filepath, "wwparticle", 1);
+  fw::xml_element xmldoc = fw::load_xml(filepath, "particle", 1);
 
   std::shared_ptr<particle_effect_config> config(new particle_effect_config());
   if (config->load_document(xmldoc)) {

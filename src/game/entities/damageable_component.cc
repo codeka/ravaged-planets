@@ -1,6 +1,9 @@
 #include <functional>
 #include <boost/foreach.hpp>
 
+#include <framework/framework.h>
+#include <framework/graphics.h>
+
 #include <game/entities/entity_factory.h>
 #include <game/entities/entity_attribute.h>
 #include <game/entities/entity_manager.h>
@@ -31,7 +34,7 @@ void damageable_component::apply_template(std::shared_ptr<entity_component_templ
 void damageable_component::initialize() {
   std::shared_ptr<entity> entity(_entity);
   entity_attribute *health = entity->get_attribute("health");
-  if (health != 0) {
+  if (health != nullptr) {
     health->sig_value_changed.connect(std::bind(&damageable_component::check_explode, this, _2));
   }
 }
@@ -63,28 +66,30 @@ void apply_damage(std::shared_ptr<entity> ent, float amt) {
 }
 
 void damageable_component::explode() {
-  std::shared_ptr<entity> entity(_entity); // entity is always valid while we're valid...
-  entity->get_manager()->destroy(_entity);
+  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    std::shared_ptr<entity> entity(_entity); // entity is always valid while we're valid...
+    entity->get_manager()->destroy(_entity);
 
-  if (_expl_name != "") {
-    // create an explosion entity
-    entity->get_manager()->create_entity(entity, _expl_name, 0);
-  }
+    if (_expl_name != "") {
+      // create an explosion entity
+      entity->get_manager()->create_entity(entity, _expl_name, 0);
+    }
 
-  position_component *our_position = entity->get_component<position_component>();
-  if (our_position != 0) {
-    std::list<std::weak_ptr<ent::entity>> entities;
-    our_position->get_entities_within_radius(5.0f, std::back_inserter(entities));
-  BOOST_FOREACH(std::weak_ptr<ent::entity> const &wp, entities) {
-    std::shared_ptr<ent::entity> ent = wp.lock();
+    position_component *our_position = entity->get_component<position_component>();
+    if (our_position != nullptr) {
+      std::list<std::weak_ptr<ent::entity>> entities;
+      our_position->get_entities_within_radius(5.0f, std::back_inserter(entities));
+      BOOST_FOREACH(std::weak_ptr<ent::entity> const &wp, entities) {
+        std::shared_ptr<ent::entity> ent = wp.lock();
 
-    // don't damange ourselves...
-    if (!ent || ent == entity)
-    continue;
+        // don't damange ourselves...
+        if (!ent || ent == entity)
+          continue;
 
-    ent::apply_damage(ent, (5.0f - our_position->get_direction_to(ent).length()));
-  }
-}
+        ent::apply_damage(ent, (5.0f - our_position->get_direction_to(ent).length()));
+      }
+    }
+  });
 }
 
 }

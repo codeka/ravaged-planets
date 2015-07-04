@@ -23,7 +23,7 @@ ENT_COMPONENT_REGISTER("ballistic-projectile", ballistic_projectile_component);
 
 //-------------------------------------------------------------------------
 projectile_component::projectile_component() :
-    _our_moveable(0), _our_position(0), _target_position(0) {
+    _our_moveable(0), _our_position(nullptr), _target_position(nullptr) {
 }
 
 projectile_component::~projectile_component() {

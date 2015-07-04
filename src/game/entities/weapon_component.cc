@@ -1,5 +1,7 @@
 #include <boost/foreach.hpp>
 
+#include <framework/framework.h>
+#include <framework/graphics.h>
 #include <framework/misc.h>
 
 #include <game/entities/entity.h>
@@ -74,24 +76,26 @@ void weapon_component::update(float dt) {
 }
 
 void weapon_component::fire() {
-  std::shared_ptr<ent::entity> entity(_entity);
-  // TODO: entity_id
-  std::shared_ptr<ent::entity> ent = entity->get_manager()->create_entity(entity, _fire_entity_name, 0);
+  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    std::shared_ptr<ent::entity> entity(_entity);
+    // TODO: entity_id
+    std::shared_ptr<ent::entity> ent = entity->get_manager()->create_entity(entity, _fire_entity_name, 0);
 
-  // it should face our "fire_direction"
-  position_component *position = ent->get_component<position_component>();
-  if (position != nullptr) {
-    position->set_direction(_fire_direction);
-  }
+    // it should face our "fire_direction"
+    position_component *position = ent->get_component<position_component>();
+    if (position != nullptr) {
+      position->set_direction(_fire_direction);
+    }
 
-  // set the projectile's target to our target
-  projectile_component *projectile = ent->get_component<projectile_component>();
-  if (projectile != nullptr) {
-    projectile->set_target(_target);
-  }
+    // set the projectile's target to our target
+    projectile_component *projectile = ent->get_component<projectile_component>();
+    if (projectile != nullptr) {
+      projectile->set_target(_target);
+    }
+  });
 
   // fire our "Fire" audio cue
-  //audio_component *our_audio = entity->get_component<audio_component>();
+  //audio_component *our_audio = _entity->get_component<audio_component>();
   //if (our_audio != nullptr) {
   //  our_audio->play_cue("Fire");
   //}

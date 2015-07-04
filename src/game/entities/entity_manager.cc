@@ -47,6 +47,8 @@ std::shared_ptr<entity> entity_manager::create_entity(std::string const &templat
 
 std::shared_ptr<entity> entity_manager::create_entity(std::shared_ptr<entity> created_by,
     std::string const &template_name, entity_id id) {
+  FW_ENSURE_RENDER_THREAD();
+
   std::shared_ptr<entity> ent(new entity(this, id));
   ent->_name = template_name;
   ent->_creator = created_by;

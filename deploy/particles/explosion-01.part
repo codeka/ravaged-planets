@@ -1,5 +1,5 @@
 <!-- This effect is for explosions that you get when you blow up smaller tanks/vehicles -->
-<wwparticle version="1">
+<particle version="1">
 	<!-- First, we have the main part of the explosion, the fire which fades into smoke -->
 	<emitter initial="15">
 		<position offset="0 0 0"
@@ -201,4 +201,4 @@
 		</life>
 	</emitter>
 
-</wwparticle>
+</particle>

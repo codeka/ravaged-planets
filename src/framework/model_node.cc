@@ -25,12 +25,12 @@ void model_node::initialize(model &mdl) {
     set_shader(mesh->get_shader());
     set_primitive_type(sg::primitive_trianglelist);
 
+    std::shared_ptr<shader_parameters> params = get_shader()->create_parameters();
     if (mdl.texture) {
-      std::shared_ptr<shader_parameters> params = get_shader()->create_parameters();
       params->set_texture("entity_texture", mdl.texture);
-      params->set_colour("mesh_colour", fw::colour(1, 1, 1));
-      set_shader_parameters(params);
     }
+    params->set_colour("mesh_colour", fw::colour(1, 1, 1));
+    set_shader_parameters(params);
   }
 
   BOOST_FOREACH(std::shared_ptr<node> node, _children) {
@@ -47,7 +47,9 @@ void model_node::render(sg::scenegraph *sg) {
   fw::matrix old_world = _world;
   _world = transform * _world;
 
-  get_shader_parameters()->set_colour("mesh_colour", colour);
+  if (mesh_index >= 0) {
+    get_shader_parameters()->set_colour("mesh_colour", colour);
+  }
 
   node::render(sg);
 
