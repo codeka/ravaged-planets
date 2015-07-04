@@ -15,18 +15,13 @@
 
 #include <game/ai/pathing_thread.h>
 #include <game/entities/entity_manager.h>
+#include <game/entities/ownable_component.h>
 #include <game/world/cursor_handler.h>
 #include <game/world/world.h>
 #include <game/world/world_reader.h>
 #include <game/world/terrain.h>
-//#include "../entities/entity.h"
-//#include "../entities/entity_factory.h"
-//#include "../entities/moveable_component.h"
-//#include "../entities/position_component.h"
-//#include "../entities/weapon_component.h"
-//#include "../simulation/simulation_thread.h"
-//#include "../screens/hud/pause_window.h"
-//#include "../session/session.h"
+#include <game/simulation/simulation_thread.h>
+#include <game/simulation/local_player.h>
 
 namespace fs = boost::filesystem;
 using namespace std::placeholders;
@@ -66,17 +61,18 @@ void world::initialize() {
 
   fw::input *input = fw::framework::get_instance()->get_input();
 
+  world::set_instance(this);
+
+  initialize_entities();
   if (_entities != nullptr) {
     _cursor->initialize();
     _keybind_tokens.push_back(input->bind_function("pause", std::bind(&world::on_key_pause, this, _1, _2)));
   }
   _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
-  _initialized = true;
 
-  world::set_instance(this);
-
-  initialize_entities();
   initialize_pathing();
+
+  _initialized = true;
 }
 
 void world::destroy() {
@@ -101,7 +97,8 @@ void world::initialize_entities() {
   _entities->initialize();
 
   std::shared_ptr<ent::entity> entity = _entities->create_entity("simple-tank", 1);
-
+  entity->get_component<ent::ownable_component>()->set_owner(
+      simulation_thread::get_instance()->get_local_player());
 }
 
 // this is called when the "pause" button is pressed (usually "ESC")

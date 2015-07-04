@@ -39,9 +39,22 @@ SDL_Cursor *cursor::load_cursor(std::string const &name) {
     hot_x = hot_y = 0;
   }
 
+  // Well this is a bit annoying.
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    int rmask = 0xff000000;
+    int gmask = 0x00ff0000;
+    int bmask = 0x0000ff00;
+    int amask = 0x000000ff;
+#else
+    int rmask = 0x000000ff;
+    int gmask = 0x0000ff00;
+    int bmask = 0x00ff0000;
+    int amask = 0xff000000;
+#endif
+
   SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(
       const_cast<void *>(reinterpret_cast<void const *>(bmp.get_pixels().data())),
-      bmp.get_width(), bmp.get_height(), 32, bmp.get_width() * 4, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
+      bmp.get_width(), bmp.get_height(), 32, bmp.get_width() * 4, rmask, gmask, bmask, amask);
   SDL_Cursor *cursor = SDL_CreateColorCursor(surface, hot_x, hot_y);
   SDL_FreeSurface(surface);
   return cursor;

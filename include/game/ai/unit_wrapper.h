@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <luabind/wrapper_base.hpp>
+
 struct lua_State;
 
 namespace ent {

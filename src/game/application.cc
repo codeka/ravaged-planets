@@ -5,13 +5,14 @@
 #include <framework/graphics.h>
 #include <framework/timer.h>
 #include <framework/input.h>
+#include <framework/cursor.h>
 #include <framework/camera.h>
 #include <framework/logging.h>
 
 #include <game/application.h>
 #include <game/screens/screen.h>
-//#include <warworlds/session/session.h>
-//#include <warworlds/simulation/simulation_thread.h>
+#include <game/session/session.h>
+#include <game/simulation/simulation_thread.h>
 
 namespace game {
 
@@ -24,7 +25,7 @@ application::~application() {
 
 bool application::initialize(fw::framework *frmwrk) {
   _framework = frmwrk;
-//  _framework->get_input()->show_cursor();
+  _framework->get_cursor()->set_visible(true);
 
   // set up the camera
   fw::top_down_camera *cam = new fw::top_down_camera();
@@ -33,7 +34,7 @@ bool application::initialize(fw::framework *frmwrk) {
 
   // start the simulation thread now, it'll always run even if there's
   // no actual game running....
-//  simulation_thread::get_instance()->initialise();
+  simulation_thread::get_instance()->initialize();
   /*
    // attach our GUI sounds to the various events
    fw::audio_manager *audio_mgr = _framework->get_audio();
@@ -51,7 +52,7 @@ bool application::initialize(fw::framework *frmwrk) {
 
 void application::destroy() {
   fw::debug << "application shutting down." << std::endl;
-//  simulation_thread::get_instance()->destroy();
+  simulation_thread::get_instance()->destroy();
 }
 
 void application::update(float dt) {
@@ -59,7 +60,7 @@ void application::update(float dt) {
   if (active != nullptr) {
     active->update();
   }
-//  session::get_instance()->update(dt);
+  session::get_instance()->update();
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {

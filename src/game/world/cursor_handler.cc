@@ -43,8 +43,9 @@ void cursor_handler::update() {
   fw::colour highlight_colour;
   std::string cursor_name = "arrow";
 
-  if (_entities == 0)
+  if (_entities == nullptr) {
     return;
+  }
 
   _entity_under_cursor = _entities->get_entity_at_cursor();
   std::shared_ptr<ent::entity> entity_under_cursor = _entity_under_cursor.lock();
@@ -52,7 +53,7 @@ void cursor_handler::update() {
     local_player *lplyr = game::simulation_thread::get_instance()->get_local_player();
 
     ent::ownable_component *ownable = entity_under_cursor->get_component<ent::ownable_component>();
-    if (ownable != 0) {
+    if (ownable != nullptr) {
       if (ownable->get_owner() == lplyr) {
         //highlight = true;
         //highlight_colour = fw::colour(1, 1, 1);
@@ -64,6 +65,8 @@ void cursor_handler::update() {
         highlight_colour = fw::colour(1, 0, 0);
         cursor_name = "attack";
       }
+    } else {
+      cursor_name = "i-beam";
     }
   } else {
     // if we don't have an entity under our cursor, but we *do* have one selected, then we want
