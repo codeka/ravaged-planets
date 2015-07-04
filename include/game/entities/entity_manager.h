@@ -38,7 +38,7 @@ public:
   entity_manager();
   ~entity_manager();
 
-  // initialise the entity_manager. this should be called after the
+  // initialize the entity_manager. this should be called after the
   // world has been created and the terrain is available as well..
   void initialize();
 

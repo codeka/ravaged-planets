@@ -32,7 +32,7 @@ public:
   virtual ~selectable_component();
 
   // this is called after the entity loads all of it's components
-  virtual void initialise();
+  virtual void initialize();
 
   virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
 

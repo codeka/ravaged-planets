@@ -27,7 +27,7 @@ public:
 
   virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
 
-  virtual void initialise();
+  virtual void initialize();
   virtual void update(float dt);
 
   virtual int get_identifier() {

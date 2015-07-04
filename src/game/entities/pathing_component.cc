@@ -23,7 +23,7 @@ pathing_component::pathing_component() :
 pathing_component::~pathing_component() {
 }
 
-void pathing_component::initialise() {
+void pathing_component::initialize() {
   std::shared_ptr<entity> ent = _entity.lock();
   if (ent) {
     _position = ent->get_component<position_component>();

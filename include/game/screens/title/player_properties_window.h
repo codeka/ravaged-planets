@@ -25,7 +25,7 @@ namespace ww {
 		player_properties_window();
 		virtual ~player_properties_window();
 
-		virtual void initialise();
+		virtual void initialize();
 	};
 
 	extern player_properties_window *player_properties;

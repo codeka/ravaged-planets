@@ -33,7 +33,7 @@ namespace ww {
 		join_game_window();
 		virtual ~join_game_window();
 
-		virtual void initialise();
+		virtual void initialize();
 		virtual void show();
 		virtual void update();
 	};

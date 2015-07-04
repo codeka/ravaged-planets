@@ -44,7 +44,7 @@ namespace fw {
     std::cerr << g_option_descriptions << std::endl;
   }
 
-  // you must call this at program startup (*before* you call the framework::initialise() method!) it'll parse the
+  // you must call this at program startup (*before* you call the framework::initialize() method!) it'll parse the
   // command-line options and so on.
   void settings::initialize(po::options_description const &additional_options, int argc, char **argv,
       std::string const &options_file/* = "default.conf"*/) {

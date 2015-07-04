@@ -27,7 +27,7 @@ namespace ww {
 		virtual ~new_ai_player_window();
 
 		virtual void show();
-		virtual void initialise();
+		virtual void initialize();
 	};
 
 	extern new_ai_player_window *new_ai_player;

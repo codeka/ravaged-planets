@@ -37,7 +37,7 @@ public:
     return true;
   }
 
-  // This is called to initialise the application
+  // This is called to initialize the application
   virtual bool initialize(framework *frmwrk) {
     return false;
   }

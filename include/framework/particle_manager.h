@@ -41,7 +41,7 @@ public:
   particle_manager();
   ~particle_manager();
 
-  void initialise(graphics *g);
+  void initialize(graphics *g);
   void update(float dt);
   void render(sg::scenegraph &scenegraph);
 

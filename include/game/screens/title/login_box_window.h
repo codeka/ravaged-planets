@@ -32,7 +32,7 @@ namespace ww {
 		login_box_window();
 		virtual ~login_box_window();
 
-		virtual void initialise();
+		virtual void initialize();
 		virtual void show();
 		virtual void hide();
 		virtual void update();

@@ -97,7 +97,7 @@ bool framework::initialize(char const *title) {
     _graphics->initialize(title);
 
     _particle_mgr = new particle_manager();
-    _particle_mgr->initialise(_graphics);
+    _particle_mgr->initialize(_graphics);
 
     _model_manager = new model_manager();
 
@@ -107,7 +107,7 @@ bool framework::initialize(char const *title) {
 
   /*
    // initialise audio
-   _audio->initialise();
+   _audio->initialize();
    */
 
   _input = new input();

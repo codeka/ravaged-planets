@@ -27,7 +27,7 @@ public:
   pathing_component();
   ~pathing_component();
 
-  virtual void initialise();
+  virtual void initialize();
   virtual void update(float dt);
 
   // sets the path that we're to follow until we reach the goal

@@ -30,7 +30,7 @@ namespace ed {
 		open_file_window();
 		~open_file_window();
 
-		virtual void initialise();
+		virtual void initialize();
 		virtual void show();
 		virtual void hide();
 

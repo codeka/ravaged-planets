@@ -12,7 +12,7 @@ public:
   message_box_window();
   virtual ~message_box_window();
 
-  virtual void initialise();
+  virtual void initialize();
   void show(std::string const &caption, std::string const &message);
 };
 

@@ -30,7 +30,7 @@ selectable_component::selectable_component() :
 selectable_component::~selectable_component() {
 }
 
-void selectable_component::initialise() {
+void selectable_component::initialize() {
   // grab a reference to the ownable component of our entity so we can refer to it
   // later on.
   std::shared_ptr<entity> entity(_entity);
