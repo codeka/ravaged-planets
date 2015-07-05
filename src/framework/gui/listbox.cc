@@ -15,6 +15,21 @@ enum ids {
 
 //-----------------------------------------------------------------------------
 
+class listbox_item_selected_property : public property {
+private:
+  std::function<void(int index)> _item_selected;
+public:
+  listbox_item_selected_property(std::function<void(int index)> item_selected)
+      : _item_selected(item_selected) {
+  }
+
+  void apply(widget *widget) {
+    dynamic_cast<listbox *>(widget)->sig_item_selected.connect(_item_selected);
+  }
+};
+
+//-----------------------------------------------------------------------------
+
 /** A special widget that we add children to. This item handles the selection colours and positioning of the item. */
 class listbox_item : public widget {
 private:
@@ -104,6 +119,11 @@ listbox::listbox(gui *gui) : widget(gui), _selected_item(nullptr) {
 listbox::~listbox() {
 }
 
+property *listbox::item_selected(std::function<void(int index)> on_click) {
+  return new listbox_item_selected_property(on_click);
+}
+
+
 void listbox::add_item(widget *w) {
   int top = _item_container->get_height();
   listbox_item *item = builder<listbox_item>(px(0), px(top), pct(100), px(w->get_height()));
@@ -113,6 +133,11 @@ void listbox::add_item(widget *w) {
   _item_container->set_height(px(_item_container->get_height() + w->get_height()));
   _items.push_back(item);
   update_thumb_button(true);
+}
+
+void listbox::clear() {
+  _item_container->clear_children();
+  _items.clear();
 }
 
 void listbox::update_thumb_button(bool adjust_height) {

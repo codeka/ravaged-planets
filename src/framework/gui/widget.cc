@@ -189,6 +189,13 @@ void widget::detach_child(widget *child) {
   child->_parent = nullptr;
 }
 
+void widget::clear_children() {
+  BOOST_FOREACH(widget *child, _children) {
+    child->_parent = nullptr;
+  }
+  _children.clear();
+}
+
 void widget::on_attached_to_parent(widget *parent) {
 }
 

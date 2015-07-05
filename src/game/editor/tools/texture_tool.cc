@@ -11,6 +11,7 @@
 #include <framework/gui/button.h>
 
 #include <game/editor/editor_terrain.h>
+#include <game/editor/editor_world.h>
 #include <game/editor/tools/texture_tool.h>
 
 using namespace fw::gui;
@@ -100,7 +101,7 @@ REGISTER_TOOL("texture", texture_tool);
 
 float texture_tool::max_radius = 10;
 
-texture_tool::texture_tool(game::world *wrld) :
+texture_tool::texture_tool(editor_world *wrld) :
     tool(wrld), _radius(4), _is_painting(false) {
   _wnd = new texture_tool_window(this);
 }

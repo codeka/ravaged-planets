@@ -4,7 +4,6 @@
 #include <framework/camera.h>
 
 #include <game/application.h>
-#include <game/world/world.h>
 
 #include <game/editor/editor_screen.h>
 #include <game/editor/editor_terrain.h>
@@ -120,10 +119,10 @@ void editor_screen::hide() {
 }
 
 void editor_screen::set_active_tool(std::string const &name) {
-  if (_world == 0)
+  if (_world == nullptr)
     return;
 
-  if (_tool != 0) {
+  if (_tool != nullptr) {
     _tool->deactivate();
     delete _tool;
   }

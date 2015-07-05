@@ -10,8 +10,8 @@
 #include <framework/gui/window.h>
 #include <framework/misc.h>
 
-#include <game/world/world.h>
 #include <game/editor/editor_terrain.h>
+#include <game/editor/editor_world.h>
 #include <game/editor/windows/open_file.h>
 #include <game/editor/windows/message_box.h>
 #include <game/editor/tools/heightfield_tool.h>
@@ -271,7 +271,7 @@ REGISTER_TOOL("heightfield", heightfield_tool);
 
 float heightfield_tool::max_radius = 6;
 
-heightfield_tool::heightfield_tool(game::world *wrld) :
+heightfield_tool::heightfield_tool(editor_world *wrld) :
     tool(wrld), _radius(4), _brush(nullptr) {
   _wnd = new heightfield_tool_window(this);
 }

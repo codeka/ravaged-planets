@@ -45,6 +45,7 @@
     </ninepatch>
     <drawable name="listbox_item_normal" pos="3,100" size="16,16" />
     <drawable name="listbox_item_selected" pos="55,31" size="16,16" />
+    <drawable name="filler" pos="55,31" size="16,16" />
   </image>
 
   <image src="test.png">

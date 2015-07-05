@@ -11,6 +11,7 @@ class scenegraph;
 }
 
 namespace ed {
+class editor_world;
 
 /** This tool lets you draw the texture on the terrain. */
 class texture_tool: public tool {
@@ -26,7 +27,7 @@ private:
   uint32_t get_selected_splatt_mask();
 
 public:
-  texture_tool(game::world *wrld);
+  texture_tool(editor_world *wrld);
   virtual ~texture_tool();
 
   virtual void activate();

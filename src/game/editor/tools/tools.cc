@@ -7,14 +7,15 @@
 #include <game/world/world.h>
 #include <game/editor/editor_terrain.h>
 #include <game/editor/editor_screen.h>
+#include <game/editor/editor_world.h>
 #include <game/editor/tools/tools.h>
 
 using namespace std::placeholders;
 
 namespace ed {
 
-tool::tool(game::world *wrld) :
-    _world(wrld), _terrain(0), _editor(0) {
+tool::tool(editor_world *wrld) :
+    _world(wrld), _terrain(nullptr), _editor(nullptr) {
 }
 
 tool::~tool() {
@@ -90,7 +91,7 @@ tool_factory_registrar::tool_factory_registrar(std::string const &name, create_t
   (*g_tools)[name] = fn;
 }
 
-tool *tool_factory::create_tool(std::string const &name, game::world *world) {
+tool *tool_factory::create_tool(std::string const &name, editor_world *world) {
   if (g_tools == nullptr)
     return nullptr;
 

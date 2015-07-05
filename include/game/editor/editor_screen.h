@@ -2,18 +2,15 @@
 
 #include <game/screens/screen.h>
 
-namespace game {
-class world;
-}
-
 namespace ed {
 class tool;
 class editor_terrain;
+class editor_world;
 
 class editor_screen: public game::screen {
 private:
   tool *_tool;
-  game::world *_world;
+  editor_world *_world;
 
 public:
   editor_screen();

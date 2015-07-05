@@ -111,6 +111,7 @@ public:
 
   void attach_child(widget *child);
   void detach_child(widget *child);
+  void clear_children();
   virtual void on_attached_to_parent(widget *parent);
 
   virtual void on_focus_gained();

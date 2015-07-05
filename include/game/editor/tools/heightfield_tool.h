@@ -10,6 +10,7 @@ class bitmap;
 }
 
 namespace ed {
+class editor_world;
 
 /** This tool modifies the heightfield, letting to raise/lower it via the mouse. */
 class heightfield_tool: public tool {
@@ -24,7 +25,7 @@ private:
   void on_key(std::string keyname, bool is_down);
 
 public:
-  heightfield_tool(game::world *wrld);
+  heightfield_tool(editor_world *wrld);
   virtual ~heightfield_tool();
 
   virtual void activate();
