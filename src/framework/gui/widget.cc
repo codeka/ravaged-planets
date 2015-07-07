@@ -322,6 +322,14 @@ bool widget::is_child(widget *w) {
   return false;
 }
 
+void widget::set_visible(bool visible) {
+  _visible = visible;
+  if (_parent == nullptr) {
+    // if it's a top-level widget, move it to the front of the z-order
+    _gui->bring_to_top(this);
+  }
+}
+
 float widget::get_top() {
   float parent_top = (_parent != nullptr) ? _parent->get_top() : 0;
   float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();

@@ -183,9 +183,7 @@ public:
   bool is_visible() const {
     return _visible;
   }
-  void set_visible(bool visible) {
-    _visible = visible;
-  }
+  void set_visible(bool visible);
 };
 
 } }

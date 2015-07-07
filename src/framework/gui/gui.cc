@@ -116,7 +116,8 @@ void gui::render() {
 
 widget *gui::get_widget_at(float x, float y) {
   std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
-  BOOST_FOREACH(widget *wdgt, _top_level_widgets) {
+  // We want to make sure we pick the top-most widget at this position, so search in reverse.
+  BOOST_REVERSE_FOREACH(widget *wdgt, _top_level_widgets) {
     if (!wdgt->is_visible()) {
       continue;
     }
@@ -136,6 +137,12 @@ void gui::attach_widget(widget *widget) {
 
 void gui::detach_widget(widget *widget) {
   _pending_remove.push_back(widget);
+}
+
+void gui::bring_to_top(widget *widget) {
+  std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
+  _top_level_widgets.erase(std::find(_top_level_widgets.begin(), _top_level_widgets.end(), widget));
+  _top_level_widgets.push_back(widget);
 }
 
 int gui::get_width() const {

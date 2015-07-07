@@ -51,6 +51,9 @@ public:
   /** Destroys the given top-level widget, unhooks any signals and removes it from the screen. */
   void detach_widget(widget *widget);
 
+  /** Bring the given widget to the top. */
+  void bring_to_top(widget *widget);
+
   /** Give the specified widget input focus. Keystrokes will be sent to this widget only. */
   void focus(widget *widget);
 
