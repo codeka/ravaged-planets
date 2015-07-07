@@ -27,8 +27,8 @@ protected:
   std::string _description;
   std::string _author;
 
-  void read_wwmap(fw::xml_element root);
-  void read_wwmap_players(fw::xml_element players_node);
+  void read_mapdesc(fw::xml_element root);
+  void read_mapdesc_players(fw::xml_element players_node);
   void read_collision_data(world_file_entry &wfe);
 
 public:

@@ -66,12 +66,12 @@ void world_reader::read(std::string name) {
     _minimap_background = tex;
   }
 
-  wfe = wf.get_entry(name + ".wwmap", false /* for_write */);
+  wfe = wf.get_entry(name + ".mapdesc", false /* for_write */);
   if (wfe.exists()) {
     wfe.close();
 
     fw::xml_element root(fw::load_xml(wfe.get_full_path(), "mapdesc", 1));
-    read_wwmap(root);
+    read_mapdesc(root);
   }
 
   wfe = wf.get_entry("collision_data", false /* for_write */);
@@ -99,7 +99,7 @@ void world_reader::read_collision_data(world_file_entry &wfe) {
   }
 }
 
-void world_reader::read_wwmap(fw::xml_element root) {
+void world_reader::read_mapdesc(fw::xml_element root) {
   for (fw::xml_element child = root.get_first_child(); child.is_valid(); child =
       child.get_next_sibling()) {
     if (child.get_value() == "description") {
@@ -108,7 +108,7 @@ void world_reader::read_wwmap(fw::xml_element root) {
       _author = child.get_text();
     } else if (child.get_value() == "size") {
     } else if (child.get_value() == "players") {
-      read_wwmap_players(child);
+      read_mapdesc_players(child);
     } else {
       BOOST_THROW_EXCEPTION(fw::exception()
           << fw::message_error_info("Unknown child element of <mapdesc> node!"));
@@ -116,7 +116,7 @@ void world_reader::read_wwmap(fw::xml_element root) {
   }
 }
 
-void world_reader::read_wwmap_players(fw::xml_element players_node) {
+void world_reader::read_mapdesc_players(fw::xml_element players_node) {
   for (fw::xml_element child = players_node.get_first_child(); child.is_valid();
       child = child.get_next_sibling()) {
     if (child.get_value() != "player") {
