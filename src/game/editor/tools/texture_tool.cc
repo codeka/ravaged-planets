@@ -7,6 +7,7 @@
 #include <framework/scenegraph.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/slider.h>
 #include <framework/gui/window.h>
 #include <framework/gui/button.h>
 
@@ -38,7 +39,8 @@ public:
 };
 
 texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
-  _wnd = builder<window>(px(10), px(30), px(80), px(100)) << window::background("frame");
+  _wnd = builder<window>(px(10), px(30), px(80), px(100)) << window::background("frame")
+      << builder<slider>(px(4), px(4), sum(pct(100), px(-8)), px(18));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
