@@ -143,6 +143,10 @@ public:
   virtual void on_mouse_over() {
   }
 
+  /** Called when the mouse moves over us. (x,y) is relative to this widget's origin. */
+  virtual void on_mouse_move(float x, float y) {
+  }
+
   /** Called when the mouse is pressed down, (x,y) is relative to this widget's origin. */
   virtual bool on_mouse_down(float x, float y);
 

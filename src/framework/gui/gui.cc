@@ -41,6 +41,11 @@ void gui::update(float dt) {
       _widget_under_mouse->on_mouse_over();
     }
   }
+  if (_widget_under_mouse != nullptr && (inp->mouse_dx() != 0.0f || inp->mouse_dy() != 0.0f)) {
+    float mx = inp->mouse_x() - _widget_under_mouse->get_left();
+    float my = inp->mouse_y() - _widget_under_mouse->get_top();
+    _widget_under_mouse->on_mouse_move(mx, my);
+  }
 
   std::unique_lock<std::mutex> lock(_top_level_widget_mutex);
   BOOST_FOREACH(widget *wdgt, _pending_remove) {
@@ -64,6 +69,10 @@ bool gui::inject_mouse(int button, bool is_down, float x, float y) {
       _focused->on_focus_lost();
       _focused = nullptr;
     }
+    return false;
+  }
+
+  if (_widget_under_mouse == nullptr) {
     return false;
   }
 

@@ -37,7 +37,7 @@ private:
   ed::texture_tool *_tool;
   window *_wnd;
 
-  bool radius_slider_value_changed(fw::gui::widget *widget);
+  bool on_radius_updated(int new_radius);
   void on_texture_selected(int index);
   void refresh_texture_icon(fw::gui::window *wnd, int layer_num);
 
@@ -52,7 +52,9 @@ public:
 texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
   _wnd = builder<window>(px(10), px(30), px(100), px(262)) << window::background("frame")
       << (builder<label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << label::text("Size:"))
-      << (builder<slider>(px(4), px(26), sum(pct(100), px(-8)), px(18)))
+      << (builder<slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
+          << slider::limits(10, 100) << slider::on_update(std::bind(&texture_tool_window::on_radius_updated, this, _1))
+          << slider::value(40))
       << (builder<listbox>(px(4), px(48), sum(pct(100), px(-8)), px(80)) << widget::id(TEXTURES_ID)
           << listbox::item_selected(std::bind(&texture_tool_window::on_texture_selected, this, _1)))
       << (builder<label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << widget::id(TEXTURE_PREVIEW_ID))
@@ -90,9 +92,9 @@ void texture_tool_window::on_texture_selected(int index) {
   _tool->set_layer(index);
 }
 
-bool texture_tool_window::radius_slider_value_changed(fw::gui::widget *widget) {
-//  int radius = (int) (_radius_slider->getCurrentValue() * ed::texture_tool::max_radius);
-//  _tool->set_radius(radius + 1);
+bool texture_tool_window::on_radius_updated(int value) {
+  int radius = value / 10;
+  _tool->set_radius(radius);
   return true;
 }
 
