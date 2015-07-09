@@ -8,6 +8,11 @@
 #include <framework/logging.h>
 #include <framework/scenegraph.h>
 #include <framework/gui/window.h>
+#include <framework/gui/gui.h>
+#include <framework/gui/builder.h>
+#include <framework/gui/button.h>
+#include <framework/gui/slider.h>
+#include <framework/gui/label.h>
 #include <framework/misc.h>
 
 #include <game/editor/editor_terrain.h>
@@ -16,10 +21,7 @@
 #include <game/editor/windows/message_box.h>
 #include <game/editor/tools/heightfield_tool.h>
 
-namespace ed {
-class open_file_window;
-}
-
+using namespace fw::gui;
 using namespace std::placeholders;
 
 //-----------------------------------------------------------------------------
@@ -183,58 +185,49 @@ void level_brush::update(fw::vector const &cursor_loc) {
 //-----------------------------------------------------------------------------
 class heightfield_tool_window {
 private:
+  window *_wnd;
   ed::heightfield_tool *_tool;
 
-  bool radius_slider_value_changed(fw::gui::widget *w);
+  bool on_radius_updated(int value);
   bool import_clicked(fw::gui::widget *w);
   bool brush_raise_lower_selected(fw::gui::widget *w);
   bool brush_level_selected(fw::gui::widget *w);
-  void open_file_file_selected(ed::open_file_window *open_file);
 
 public:
   heightfield_tool_window(ed::heightfield_tool *tool);
   ~heightfield_tool_window();
 
-  void initialize();
   void show();
   void hide();
 };
 
 heightfield_tool_window::heightfield_tool_window(ed::heightfield_tool *tool) :
     _tool(tool) {
+  _wnd = builder<window>(px(10), px(30), px(100), px(262)) << window::background("frame")
+      << (builder<button>(px(4), px(4), px(44), px(44)) << button::icon("editor_hightfield_raiselower"))
+      << (builder<button>(px(52), px(4), px(44), px(44)) << button::icon("editor_hightfield_level"))
+      << (builder<label>(px(4), px(52), sum(pct(100), px(-8)), px(18)) << label::text("Size:"))
+      << (builder<slider>(px(4), px(74), sum(pct(100), px(-8)), px(18))
+          << slider::limits(20, 100) << slider::value(40)
+          << slider::on_update(std::bind(&heightfield_tool_window::on_radius_updated, this, _1)));
+  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 heightfield_tool_window::~heightfield_tool_window() {
-}
-
-void heightfield_tool_window::initialize() {
-/*
-  _radius_slider = get_child < CEGUI::Slider > ("ToolHeightfield/Radius");
-  _radius_slider->setCurrentValue((float) _tool->get_radius() / ed::heightfield_tool::max_radius);
-  subscribe(_radius_slider, CEGUI::Slider::EventValueChanged,
-      CEGUI::SubscriberSlot(&heightfield_tool_window::radius_slider_value_changed, this));
-
-  subscribe("ToolHeightfield/ImportFromFile", CEGUI::PushButton::EventClicked,
-      CEGUI::SubscriberSlot(&heightfield_tool_window::import_clicked, this));
-  subscribe("ToolHeightfield/BrushRaiseLower", CEGUI::RadioButton::EventSelectStateChanged,
-      CEGUI::SubscriberSlot(&heightfield_tool_window::brush_raise_lower_selected, this));
-  subscribe("ToolHeightfield/BrushLevel", CEGUI::RadioButton::EventSelectStateChanged,
-      CEGUI::SubscriberSlot(&heightfield_tool_window::brush_level_selected, this));*/
+  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void heightfield_tool_window::show() {
-/*
-  CEGUI::RadioButton *btn = get_child < CEGUI::RadioButton > ("ToolHeightfield/BrushRaiseLower");
-  btn->setSelected(true);
-  _tool->set_brush(new raise_lower_brush());*/
+  _wnd->set_visible(true);
 }
 
 void heightfield_tool_window::hide() {
+  _wnd->set_visible(false);
 }
 
-bool heightfield_tool_window::radius_slider_value_changed(fw::gui::widget *w) {
-  //int radius = (int) (_radius_slider->getCurrentValue() * ed::heightfield_tool::max_radius);
-  //_tool->set_radius(radius);
+bool heightfield_tool_window::on_radius_updated(int value) {
+  int radius = value / 10;
+  _tool->set_radius(radius);
   return true;
 }
 
@@ -258,11 +251,6 @@ bool heightfield_tool_window::brush_level_selected(fw::gui::widget *w) {
   //  _tool->set_brush(new level_brush());
   //}
   return true;
-}
-
-void heightfield_tool_window::open_file_file_selected(ed::open_file_window *open_file) {
-  //fw::bitmap bm(open_file->get_full_path().c_str());
-  //_tool->import_heightfield(bm);
 }
 
 //-----------------------------------------------------------------------------

@@ -32,6 +32,29 @@ public:
   }
 };
 
+/** Property that sets the icon of the button. */
+class button_icon_property : public property {
+private:
+  std::string _drawable_name;
+  std::shared_ptr<drawable> _drawable;
+public:
+  button_icon_property(std::string const &drawable_name) :
+      _drawable_name(drawable_name) {
+  }
+  button_icon_property(std::shared_ptr<drawable> drawable) :
+      _drawable(drawable) {
+  }
+
+  void apply(widget *widget) {
+    button *btn = dynamic_cast<button *>(widget);
+    if (_drawable) {
+      btn->_icon = _drawable;
+    } else {
+      btn->_icon = btn->_gui->get_drawable_manager()->get_drawable(_drawable_name);
+    }
+  }
+};
+
 /** Property that sets the text of the button. */
 class button_text_property : public property {
 private:
@@ -78,6 +101,14 @@ property *button::background(std::shared_ptr<drawable> drawable) {
   return new button_background_property(drawable);
 }
 
+property *button::icon(std::string const &drawable_name) {
+  return new button_icon_property(drawable_name);
+}
+
+property *button::icon(std::shared_ptr<drawable> drawable) {
+  return new button_icon_property(drawable);
+}
+
 property *button::text(std::string const &text) {
   return new button_text_property(text);
 }
@@ -111,18 +142,37 @@ void button::on_mouse_over() {
 }
 
 void button::render() {
+  float left = get_left();
+  float top = get_top();
+  float width = get_width();
+  float height = get_height();
+
   if (_background) {
-    _background->render(get_left(), get_top(), get_width(), get_height());
+    _background->render(left, top, width, height);
+  }
+
+  if (_icon) {
+    float icon_width = _icon->get_intrinsic_width();
+    float icon_height = _icon->get_intrinsic_height();
+    if (icon_width == 0.0f) {
+      icon_width = width * 0.75f;
+    }
+    if (icon_height == 0.0f) {
+      icon_height = height * 0.75f;
+    }
+    float x = left + (width / 2.0f) - (icon_width / 2.0f);
+    float y = top + (height / 2.0f) - (icon_height / 2.0f);
+    _icon->render(x, y, icon_width, icon_height);
   }
 
   if (_text.length() > 0) {
-    if (_text_align == left) {
+    if (_text_align == button::left) {
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          get_left() + 4, get_top() + get_height() / 2, _text,
+          left + 4, top + height / 2, _text,
           static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
-    } else if (_text_align == center) {
+    } else if (_text_align == button::center) {
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          get_left() + get_width() / 2, get_top() + get_height() / 2, _text,
+          left + width / 2, top + height / 2, _text,
           static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
     }
   }

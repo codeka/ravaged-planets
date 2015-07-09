@@ -25,6 +25,13 @@ protected:
 public:
   virtual ~drawable();
   virtual void render(float x, float y, float width, float height);
+
+  virtual float get_intrinsic_width() const {
+    return 0.0f;
+  }
+  virtual float get_intrinsic_height() const {
+    return 0.0f;
+  }
 };
 
 /**
@@ -49,6 +56,13 @@ public:
   virtual ~bitmap_drawable();
 
   virtual void render(float x, float y, float width, float height);
+
+  float get_intrinsic_width() const {
+    return _width;
+  }
+  float get_intrinsic_height() const {
+    return _height;
+  }
 };
 
 /**

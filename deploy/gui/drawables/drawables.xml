@@ -49,5 +49,8 @@
     <drawable name="slider_line" pos="55,31" size="16,16" />
     <drawable name="slider_thumb_normal" pos="84,3" size="9,18" />
     <drawable name="slider_thumb_hover" pos="99,3" size="9,18" />
+
+    <drawable name="editor_hightfield_raiselower" pos="166,82" size="16,15" />
+    <drawable name="editor_hightfield_level" pos="183,82" size="16,15" />
   </image>
 </drawables>

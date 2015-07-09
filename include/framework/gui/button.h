@@ -22,8 +22,10 @@ protected:
   friend class button_background_property;
   friend class button_text_property;
   friend class button_text_align_property;
+  friend class button_icon_property;
 
   std::shared_ptr<drawable> _background;
+  std::shared_ptr<drawable> _icon;
   std::string _text;
   alignment _text_align;
 
@@ -33,6 +35,8 @@ public:
 
   static property *background(std::string const &drawable_name);
   static property *background(std::shared_ptr<drawable> drawable);
+  static property *icon(std::string const &drawable_name);
+  static property *icon(std::shared_ptr<drawable> drawable);
   static property *text(std::string const &text);
   static property *text_align(alignment align);
 

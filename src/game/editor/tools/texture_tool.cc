@@ -16,7 +16,6 @@
 #include <framework/gui/label.h>
 #include <framework/gui/listbox.h>
 #include <framework/gui/window.h>
-#include <framework/gui/button.h>
 
 #include <game/editor/editor_terrain.h>
 #include <game/editor/editor_world.h>
