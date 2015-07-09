@@ -183,15 +183,19 @@ void level_brush::update(fw::vector const &cursor_loc) {
 }
 
 //-----------------------------------------------------------------------------
+enum IDS {
+  RAISE_LOWER_BRUSH_ID,
+  LEVEL_BRUSH_ID
+};
+
 class heightfield_tool_window {
 private:
   window *_wnd;
   ed::heightfield_tool *_tool;
 
   bool on_radius_updated(int value);
+  bool on_tool_clicked(fw::gui::widget *w);
   bool import_clicked(fw::gui::widget *w);
-  bool brush_raise_lower_selected(fw::gui::widget *w);
-  bool brush_level_selected(fw::gui::widget *w);
 
 public:
   heightfield_tool_window(ed::heightfield_tool *tool);
@@ -204,8 +208,12 @@ public:
 heightfield_tool_window::heightfield_tool_window(ed::heightfield_tool *tool) :
     _tool(tool) {
   _wnd = builder<window>(px(10), px(30), px(100), px(262)) << window::background("frame")
-      << (builder<button>(px(4), px(4), px(44), px(44)) << button::icon("editor_hightfield_raiselower"))
-      << (builder<button>(px(52), px(4), px(44), px(44)) << button::icon("editor_hightfield_level"))
+      << (builder<button>(px(8), px(8), px(36), px(36)) << widget::id(RAISE_LOWER_BRUSH_ID)
+          << button::icon("editor_hightfield_raiselower")
+          << button::click(std::bind(&heightfield_tool_window::on_tool_clicked, this, _1)))
+      << (builder<button>(px(56), px(8), px(36), px(36)) << widget::id(LEVEL_BRUSH_ID)
+          << button::icon("editor_hightfield_level")
+          << button::click(std::bind(&heightfield_tool_window::on_tool_clicked, this, _1)))
       << (builder<label>(px(4), px(52), sum(pct(100), px(-8)), px(18)) << label::text("Size:"))
       << (builder<slider>(px(4), px(74), sum(pct(100), px(-8)), px(18))
           << slider::limits(20, 100) << slider::value(40)
@@ -237,19 +245,20 @@ bool heightfield_tool_window::import_clicked(fw::gui::widget *w) {
   return true;
 }
 
-bool heightfield_tool_window::brush_raise_lower_selected(fw::gui::widget *w) {
-  //CEGUI::RadioButton *btn = get_child < CEGUI::RadioButton > ("ToolHeightfield/BrushRaiseLower");
-  //if (btn->isSelected()) {
-  //  _tool->set_brush(new raise_lower_brush());
-  //}
-  return true;
-}
+bool heightfield_tool_window::on_tool_clicked(fw::gui::widget *w) {
+  button *raise_lower = _wnd->find<button>(RAISE_LOWER_BRUSH_ID);
+  button *level = _wnd->find<button>(LEVEL_BRUSH_ID);
 
-bool heightfield_tool_window::brush_level_selected(fw::gui::widget *w) {
-  ///CEGUI::RadioButton *btn = get_child < CEGUI::RadioButton > ("ToolHeightfield/BrushLevel");
-  //if (btn->isSelected()) {
-  //  _tool->set_brush(new level_brush());
-  //}
+  raise_lower->set_pressed(false);
+  level->set_pressed(false);
+  dynamic_cast<button *>(w)->set_pressed(true);
+
+  if (w == raise_lower) {
+    _tool->set_brush(new raise_lower_brush());
+  } else if (w == level) {
+    _tool->set_brush(new level_brush());
+  }
+
   return true;
 }
 

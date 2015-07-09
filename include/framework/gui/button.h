@@ -28,6 +28,10 @@ protected:
   std::shared_ptr<drawable> _icon;
   std::string _text;
   alignment _text_align;
+  bool _is_pressed;
+  bool _is_mouse_over;
+
+  void update_drawable_state();
 
 public:
   button(gui *gui);
@@ -50,6 +54,11 @@ public:
   }
   inline std::string get_text() const {
     return _text;
+  }
+
+  void set_pressed(bool is_pressed);
+  bool is_pressed() {
+    return _is_pressed;
   }
 };
 

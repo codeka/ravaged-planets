@@ -172,6 +172,10 @@ public:
   /** Returns true if the given widget is a child (or a child of a child...) of us. */
   bool is_child(widget *w);
 
+  int get_id() {
+    return _id;
+  }
+
   float get_top();
   void set_top(std::shared_ptr<dimension> top);
   float get_left();

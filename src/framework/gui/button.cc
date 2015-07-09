@@ -87,7 +87,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-button::button(gui *gui) : widget(gui), _text_align(center) {
+button::button(gui *gui) : widget(gui), _text_align(center), _is_pressed(false), _is_mouse_over(false) {
 }
 
 button::~button() {
@@ -123,21 +123,38 @@ void button::on_attached_to_parent(widget *parent) {
     state_drawable *bkgnd = new state_drawable();
     bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("button_normal"));
     bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("button_hover"));
+    bkgnd->add_drawable(state_drawable::pressed, _gui->get_drawable_manager()->get_drawable("button_hover"));
     _background = std::shared_ptr<drawable>(bkgnd);
   }
 }
 
 void button::on_mouse_out() {
-  state_drawable *drawable = dynamic_cast<state_drawable *>(_background.get());
-  if (drawable != nullptr) {
-    drawable->set_current_state(state_drawable::normal);
-  }
+  _is_mouse_over = false;
+  update_drawable_state();
 }
 
 void button::on_mouse_over() {
+  _is_mouse_over = true;
+  update_drawable_state();
+}
+
+void button::set_pressed(bool is_pressed) {
+  _is_pressed = is_pressed;
+  update_drawable_state();
+}
+
+void button::update_drawable_state() {
   state_drawable *drawable = dynamic_cast<state_drawable *>(_background.get());
-  if (drawable != nullptr) {
+  if (drawable == nullptr) {
+    return;
+  }
+
+  if (_is_pressed) {
+    drawable->set_current_state(state_drawable::pressed);
+  } else if (_is_mouse_over) {
     drawable->set_current_state(state_drawable::hover);
+  } else {
+    drawable->set_current_state(state_drawable::normal);
   }
 }
 
