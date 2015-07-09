@@ -380,10 +380,13 @@ std::shared_ptr<shader> shader::create(std::string const &filename) {
 
 void shader::begin(std::shared_ptr<shader_parameters> parameters) {
   shader_program *prog;
-  if (!parameters || parameters->_program_name == "") {
+  std::string program_name = _default_program_name;
+  if (parameters && parameters->_program_name != "") {
+    program_name = parameters->_program_name;
+  }
+  prog = _programs[program_name];
+  if (prog == nullptr) {
     prog = _programs[_default_program_name];
-  } else {
-    prog = _programs[parameters->_program_name];
   }
   prog->begin();
   if (parameters) {

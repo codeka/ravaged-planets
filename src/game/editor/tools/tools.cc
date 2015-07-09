@@ -2,6 +2,7 @@
 #include <framework/framework.h>
 #include <framework/input.h>
 #include <framework/scenegraph.h>
+#include <framework/shader.h>
 #include <framework/graphics.h>
 #include <game/application.h>
 #include <game/world/world.h>
@@ -76,6 +77,11 @@ void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::vec
   node->set_vertex_buffer(vb);
   node->set_index_buffer(ib);
   node->set_primitive_type(fw::sg::primitive_linestrip);
+  std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
+  std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
+  shader_params->set_program_name("notexture");
+  node->set_shader(shader);
+  node->set_shader_parameters(shader_params);
   scenegraph.add_node(node);
 }
 

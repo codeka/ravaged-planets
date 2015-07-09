@@ -45,9 +45,23 @@
       colour = base_colour * diffuse;
     }
   ]]></source>
+  <source name="fragment-notexture"><![CDATA[
+    out vec4 colour;
+
+    void main() {
+      colour = vec4(1, 1, 1, 1);
+    }
+  ]]></source>
   <program name="default">
     <vertex-shader source="vertex" />
     <fragment-shader source="fragment" />
+    <state name="z-write" value="on" />
+    <state name="z-test" value="on" />
+    <state name="blend" value="off" />
+  </program>
+  <program name="notexture">
+    <vertex-shader source="vertex" />
+    <fragment-shader source="fragment-notexture" />
     <state name="z-write" value="on" />
     <state name="z-test" value="on" />
     <state name="blend" value="off" />
