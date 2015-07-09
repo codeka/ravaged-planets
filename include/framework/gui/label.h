@@ -26,6 +26,9 @@ public:
   static property *text(std::string const &text);
 
   void render();
+
+  void set_text(std::string const &text);
+  void set_background(std::shared_ptr<drawable> background);
 };
 
 } }

@@ -62,4 +62,12 @@ void label::render() {
   }
 }
 
+void label::set_text(std::string const &text) {
+  _text = text;
+}
+
+void label::set_background(std::shared_ptr<drawable> background) {
+  _background = background;
+}
+
 } }

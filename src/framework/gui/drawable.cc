@@ -62,15 +62,16 @@ bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture) :
     indices[3] = 3;
     g_index_buffer->set_data(4, indices);
   }
+
+  _shader = fw::shader::create("gui.shader");
+  _shader_params = _shader->create_parameters();
+  _shader_params->set_texture("texsampler", _texture);
 }
 
 bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
     bitmap_drawable(texture) {
   parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
   parse_tuple_attribute(elem->Attribute("size"), _width, _height);
-  _shader = fw::shader::create("gui.shader");
-  _shader_params = _shader->create_parameters();
-  _shader_params->set_texture("texsampler", _texture);
 }
 
 bitmap_drawable::~bitmap_drawable() {
@@ -234,6 +235,16 @@ void drawable_manager::parse_drawable_element(std::shared_ptr<fw::texture> textu
   }
   std::string name(elem->Attribute("name"));
   _drawables[name] = new_drawable;
+}
+
+std::shared_ptr<drawable> drawable_manager::build_drawable(std::shared_ptr<fw::texture> texture,
+    float top, float left, float width, float height) {
+  std::shared_ptr<bitmap_drawable> new_drawable(new bitmap_drawable(texture));
+  new_drawable->_top = top;
+  new_drawable->_left = left;
+  new_drawable->_width = width;
+  new_drawable->_height = height;
+  return new_drawable;
 }
 
 }

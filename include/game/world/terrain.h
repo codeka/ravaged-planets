@@ -44,7 +44,7 @@ protected:
   friend class ed::world_writer;
   friend class world_reader;
 
-  std::vector<std::shared_ptr<fw::texture> > _layers;
+  std::vector<std::shared_ptr<fw::texture>> _layers;
   std::vector<bool> _collision_data;
 
   int _width;

@@ -20,6 +20,7 @@ public:
 
 private:
   int _radius;
+  int _layer;
   texture_tool_window *_wnd;
   bool _is_painting;
 
@@ -38,6 +39,12 @@ public:
   }
   int get_radius() const {
     return _radius;
+  }
+  void set_layer(int layer) {
+    _layer = layer;
+  }
+  int get_layer() const {
+    return _layer;
   }
 
   virtual void update();

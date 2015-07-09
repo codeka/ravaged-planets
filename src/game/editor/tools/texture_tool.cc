@@ -1,3 +1,6 @@
+#include <functional>
+#include <boost/filesystem.hpp>
+
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
@@ -7,7 +10,11 @@
 #include <framework/scenegraph.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/button.h>
+#include <framework/gui/drawable.h>
 #include <framework/gui/slider.h>
+#include <framework/gui/label.h>
+#include <framework/gui/listbox.h>
 #include <framework/gui/window.h>
 #include <framework/gui/button.h>
 
@@ -15,8 +22,14 @@
 #include <game/editor/editor_world.h>
 #include <game/editor/tools/texture_tool.h>
 
+namespace fs = boost::filesystem;
 using namespace fw::gui;
 using namespace std::placeholders;
+
+enum IDS {
+  TEXTURES_ID = 1,
+  TEXTURE_PREVIEW_ID,
+};
 
 //-----------------------------------------------------------------------------
 class texture_tool_window {
@@ -25,22 +38,25 @@ private:
   window *_wnd;
 
   bool radius_slider_value_changed(fw::gui::widget *widget);
+  void on_texture_selected(int index);
   void refresh_texture_icon(fw::gui::window *wnd, int layer_num);
 
 public:
   texture_tool_window(ed::texture_tool *tool);
   virtual ~texture_tool_window();
 
-  // get the index of the layer we're currently painting (0 through 3)
-  int get_paint_layer();
-
   void show();
   void hide();
 };
 
 texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
-  _wnd = builder<window>(px(10), px(30), px(80), px(100)) << window::background("frame")
-      << builder<slider>(px(4), px(4), sum(pct(100), px(-8)), px(18));
+  _wnd = builder<window>(px(10), px(30), px(100), px(262)) << window::background("frame")
+      << (builder<label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << label::text("Size:"))
+      << (builder<slider>(px(4), px(26), sum(pct(100), px(-8)), px(18)))
+      << (builder<listbox>(px(4), px(48), sum(pct(100), px(-8)), px(80)) << widget::id(TEXTURES_ID)
+          << listbox::item_selected(std::bind(&texture_tool_window::on_texture_selected, this, _1)))
+      << (builder<label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << widget::id(TEXTURE_PREVIEW_ID))
+      << (builder<button>(px(4), px(228), sum(pct(100), px(-8)), px(30)) << button::text("Change"));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
@@ -50,41 +66,28 @@ texture_tool_window::~texture_tool_window() {
 
 void texture_tool_window::show() {
   _wnd->set_visible(true);
-/*
-  _radius_slider->setCurrentValue((float) (_tool->get_radius() - 1) / ed::texture_tool::max_radius);
 
-  _layer1_image = get_child("ToolTexture/Layer1Image");
-  _layer1_paint = get_child < CEGUI::RadioButton > ("ToolTexture/Layer1Select");
-  _layer1_paint->setSelected(true);
-  refresh_texture_icon(_layer1_image, 0);
-  _layer2_image = get_child("ToolTexture/Layer2Image");
-  _layer2_paint = get_child < CEGUI::RadioButton > ("ToolTexture/Layer2Select");
-  refresh_texture_icon(_layer2_image, 1);
-  _layer3_image = get_child("ToolTexture/Layer3Image");
-  _layer3_paint = get_child < CEGUI::RadioButton > ("ToolTexture/Layer3Select");
-  refresh_texture_icon(_layer3_image, 2);
-  _layer4_image = get_child("ToolTexture/Layer4Image");
-  _layer4_paint = get_child < CEGUI::RadioButton > ("ToolTexture/Layer4Select");
-  refresh_texture_icon(_layer4_image, 3);
-*/
+  listbox *lbx = _wnd->find<listbox>(TEXTURES_ID);
+  lbx->clear();
+  for (int i = 0; i < _tool->get_terrain()->get_num_layers(); i++) {
+    std::shared_ptr<fw::texture> layer = _tool->get_terrain()->get_layer(i);
+    fs::path filename = layer->get_filename();
+    lbx->add_item(builder<label>(px(0), px(0), pct(100), px(18)) << label::text(filename.stem().string()));
+  }
+  lbx->select_item(0);
 }
 
 void texture_tool_window::hide() {
   _wnd->set_visible(false);
 }
 
-int texture_tool_window::get_paint_layer() {
-/*  if (_layer1_paint->isSelected())
-    return 0;
-  if (_layer2_paint->isSelected())
-    return 1;
-  if (_layer3_paint->isSelected())
-    return 2;
-  if (_layer4_paint->isSelected())
-    return 3;
+void texture_tool_window::on_texture_selected(int index) {
+  std::shared_ptr<fw::texture> layer = _tool->get_terrain()->get_layer(index);
+  std::shared_ptr<drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
+      layer, 0, 0, layer->get_width(), layer->get_height());
+  _wnd->find<label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
 
-  // huh?*/
-  return 0;
+  _tool->set_layer(index);
 }
 
 bool texture_tool_window::radius_slider_value_changed(fw::gui::widget *widget) {
@@ -104,7 +107,7 @@ REGISTER_TOOL("texture", texture_tool);
 float texture_tool::max_radius = 10;
 
 texture_tool::texture_tool(editor_world *wrld) :
-    tool(wrld), _radius(4), _is_painting(false) {
+    tool(wrld), _radius(4), _is_painting(false), _layer(0) {
   _wnd = new texture_tool_window(this);
 }
 
@@ -197,14 +200,13 @@ void texture_tool::on_key(std::string keyname, bool is_down) {
 }
 
 uint32_t texture_tool::get_selected_splatt_mask() {
-  int layer = _wnd->get_paint_layer();
-  switch (layer) {
+  switch (_layer) {
   case 0:
-    return 0x00FF0000;
+    return 0x000000FF;
   case 1:
     return 0x0000FF00;
   case 2:
-    return 0x000000FF;
+    return 0x00FF0000;
   case 3:
     return 0xFF000000;
   default:

@@ -27,6 +27,7 @@ public:
   void set_vertex_height(int x, int y, float height);
 
   // gets and sets the texture of the given layer.
+  int get_num_layers() const;
   std::shared_ptr<fw::texture> get_layer(int number);
   void set_layer(int number, std::shared_ptr<fw::texture> texture);
 

@@ -108,6 +108,8 @@ public:
   void parse(boost::filesystem::path const &file);
 
   std::shared_ptr<drawable> get_drawable(std::string const &name);
+  std::shared_ptr<drawable> build_drawable(std::shared_ptr<fw::texture> texture,
+      float top, float left, float width, float height);
 };
 
 } }

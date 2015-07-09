@@ -106,6 +106,10 @@ fw::bitmap &editor_terrain::get_splatt(int patch_x, int patch_z) {
   return _splatt_bitmaps[index];
 }
 
+int editor_terrain::get_num_layers() const {
+  return _layers.size();
+}
+
 std::shared_ptr<fw::texture> editor_terrain::get_layer(int number) {
   if (number < 0 || number >= static_cast<int>(_layers.size()))
     return std::shared_ptr<fw::texture>();
