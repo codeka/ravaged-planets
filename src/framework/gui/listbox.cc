@@ -10,7 +10,9 @@ using namespace std::placeholders;
 namespace fw { namespace gui {
 
 enum ids {
-  THUMB = 56756
+  THUMB = 56756,
+  UP_BUTTON = 56757,
+  DOWN_BUTTON = 56758
 };
 
 //-----------------------------------------------------------------------------
@@ -93,26 +95,28 @@ void listbox_item::render() {
 
 //-----------------------------------------------------------------------------
 
-listbox::listbox(gui *gui) : widget(gui), _selected_item(nullptr) {
+listbox::listbox(gui *gui) : widget(gui), _selected_item(nullptr), _scrollbar_visible(false) {
   _background = gui->get_drawable_manager()->get_drawable("listbox_background");
 
   std::shared_ptr<state_drawable> bkgnd = std::shared_ptr<state_drawable>(new state_drawable());
   bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("listbox_up_normal"));
   bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("listbox_up_hover"));
   attach_child(builder<button>(sum(pct(100), px(-19)), px(0), px(19), px(19))
-      << button::background(bkgnd) << button::click(std::bind(&listbox::on_up_button_click, this, _1)));
+      << button::background(bkgnd) << widget::id(UP_BUTTON) << widget::visible(false)
+      << button::click(std::bind(&listbox::on_up_button_click, this, _1)));
   bkgnd = std::shared_ptr<state_drawable>(new state_drawable());
   bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("listbox_down_normal"));
   bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("listbox_down_hover"));
   attach_child(builder<button>(sum(pct(100), px(-19)), sum(pct(100), px(-19)), px(19), px(19))
-      << button::background(bkgnd) << button::click(std::bind(&listbox::on_down_button_click, this, _1)));
+      << button::background(bkgnd) << widget::id(DOWN_BUTTON) << widget::visible(false)
+      << button::click(std::bind(&listbox::on_down_button_click, this, _1)));
   bkgnd = std::shared_ptr<state_drawable>(new state_drawable());
   bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("listbox_thumb_normal"));
   bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("listbox_thumb_hover"));
   attach_child(builder<button>(sum(pct(100), px(-19)), px(19), px(19), sum(pct(100), px(-38)))
-      << button::background(bkgnd) << widget::id(THUMB));
+      << button::background(bkgnd) << widget::id(THUMB) << widget::visible(false));
 
-  _item_container = builder<widget>(px(0), px(0), sum(pct(100), px(-20)), px(0));
+  _item_container = builder<widget>(px(0), px(0), pct(100), px(0));
   attach_child(_item_container);
 }
 
@@ -150,6 +154,7 @@ void listbox::update_thumb_button(bool adjust_height) {
   if (adjust_height) {
     if (content_height <= widget_height) {
       thumb_height = thumb_max_height;
+      _scrollbar_visible = false;
     } else {
       // This will be 0.5 when content_height is twice widget height,
       float ratio = widget_height / content_height;
@@ -159,6 +164,9 @@ void listbox::update_thumb_button(bool adjust_height) {
       }
       if (thumb_height >= thumb_max_height) {
         thumb_height = thumb_max_height;
+        _scrollbar_visible = false;
+      } else {
+        _scrollbar_visible = true;
       }
     }
     thumb->set_height(px(thumb_height));
@@ -173,6 +181,20 @@ void listbox::update_thumb_button(bool adjust_height) {
   float max_thumb_offset = thumb_max_height - thumb_height;
   float thumb_offset = max_thumb_offset * offset_ratio;
   thumb->set_top(px(19 + thumb_offset));
+
+  button *up_button = find<button>(UP_BUTTON);
+  button *down_button = find<button>(DOWN_BUTTON);
+  if (_scrollbar_visible) {
+    _item_container->set_width(sum(pct(100), px(-20)));
+    thumb->set_visible(true);
+    up_button->set_visible(true);
+    down_button->set_visible(true);
+  } else {
+    _item_container->set_width(pct(100));
+    thumb->set_visible(false);
+    up_button->set_visible(false);
+    down_button->set_visible(false);
+  }
 }
 
 bool listbox::on_down_button_click(widget *w) {

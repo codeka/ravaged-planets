@@ -22,6 +22,7 @@ private:
   widget *_item_container;
   std::vector<listbox_item *> _items;
   listbox_item *_selected_item;
+  bool _scrollbar_visible;
 
   void update_thumb_button(bool adjust_height);
   bool on_down_button_click(widget *w);
