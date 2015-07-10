@@ -27,13 +27,15 @@ private:
   boost::filesystem::path _curr_directory;
   file_selected_handler _file_selected_handler;
   std::vector<std::string> _items;
+  bool _show_hidden;
 
   bool on_ok_clicked(fw::gui::widget *w);
   bool on_cancel_clicked(fw::gui::widget *w);
   void on_item_selected(int index);
   void on_item_activated(int index);
+  bool on_show_hidden_clicked(fw::gui::widget *w);
 
-  void refresh_filelist();
+  void refresh();
   void navigate_to_directory(boost::filesystem::path const &new_directory);
   void add_row(fw::gui::listbox *lbx, std::string const &name);
 
