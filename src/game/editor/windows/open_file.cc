@@ -189,6 +189,11 @@ void open_file_window::on_item_selected(int index) {
         fw::debug << "Error loading image. " << e.what() << std::endl;
       }
     }
+
+    if (!is_image) {
+      label *preview = _wnd->find<label>(IMAGE_PREVIEW_ID);
+      preview->set_background(std::shared_ptr<drawable>());
+    }
   }
 }
 
