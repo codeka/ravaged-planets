@@ -79,7 +79,7 @@ void pathing_tool_window::hide() {
 }
 
 bool pathing_tool_window::on_start_click(widget *w) {
-//  ed::statusbar->set_message("Set test start...");
+  ed::statusbar->set_message("Set test start...");
   _tool->set_test_start();
   _wnd->find<button>(START_ID)->set_pressed(true);
   _wnd->find<button>(END_ID)->set_pressed(false);
@@ -87,7 +87,7 @@ bool pathing_tool_window::on_start_click(widget *w) {
 }
 
 bool pathing_tool_window::on_end_click(widget *w) {
-//  ed::statusbar->set_message("Set test end...");
+  ed::statusbar->set_message("Set test end...");
   _tool->set_test_end();
   _wnd->find<button>(START_ID)->set_pressed(false);
   _wnd->find<button>(END_ID)->set_pressed(true);
@@ -317,13 +317,14 @@ void pathing_tool::find_path() {
 
   std::vector<fw::vector> full_path;
   if (!_path_find->find(full_path, _start_pos, _end_pos)) {
-    //statusbar->set_message((boost::format("No path found after %1%ms") % (_path_find->total_time * 1000.0f)).str());
+    statusbar->set_message((boost::format("No path found after %1%ms") % (_path_find->total_time * 1000.0f)).str());
   } else {
     std::vector<fw::vector> path;
     _path_find->simplify_path(full_path, path);
-    //statusbar->set_message(
-    //    (boost::format("Path found in %1%ms, %2% nodes, %3% nodes (simplified)") % (_path_find->total_time * 1000.0f)
-    //        % full_path.size() % path.size()).str());
+    statusbar->set_message((boost::format("Path found in %1%ms, %2% nodes, %3% nodes (simplified)")
+        % (_path_find->total_time * 1000.0f)
+        % full_path.size()
+        % path.size()).str());
 
     std::vector<fw::vertex::xyz_c> buffer;
 

@@ -32,25 +32,25 @@ private:
 
 public:
   main_menu_window();
-  virtual ~main_menu_window();
+  ~main_menu_window();
 
-  virtual void initialize();
+  void initialize();
 };
-/*
- // represents the statusbar
- class statusbar_window
- {
- private:
- public:
- statusbar_window();
- virtual ~statusbar_window();
 
- virtual void initialize();
+// represents the statusbar
+class statusbar_window {
+private:
+  fw::gui::window *_wnd;
+public:
+  statusbar_window();
+  ~statusbar_window();
 
- void set_message(std::string const &msg);
- };
- */
+  void initialize();
+
+  void set_message(std::string const &msg);
+};
+
 extern main_menu_window *main_menu;
-//	extern statusbar_window *statusbar;
+extern statusbar_window *statusbar;
 
 }

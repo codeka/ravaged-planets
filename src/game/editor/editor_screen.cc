@@ -30,13 +30,13 @@ editor_screen::~editor_screen() {
 //  delete ed::message_box;
   delete ed::save_map;
   delete ed::open_file;
-//  delete ed::statusbar;
+  delete ed::statusbar;
 }
 
 void editor_screen::show() {
   fw::gui::gui *gui = fw::framework::get_instance()->get_gui();
 
-//  ed::statusbar = new statusbar_window();
+  ed::statusbar = new statusbar_window();
   ed::main_menu = new main_menu_window();
   ed::open_map = new open_map_window();
   ed::new_map = new new_map_window();
@@ -49,7 +49,7 @@ void editor_screen::show() {
   ed::save_map->initialize();
   ed::open_map->initialize();
   ed::open_file->initialize();
-//  statusbar->show();
+  ed::statusbar->initialize();
 }
 
 void editor_screen::update() {

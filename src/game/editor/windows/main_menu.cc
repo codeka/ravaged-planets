@@ -6,6 +6,7 @@
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
 #include <framework/gui/drawable.h>
+#include <framework/gui/label.h>
 #include <framework/gui/widget.h>
 #include <framework/gui/window.h>
 #include <framework/graphics.h>
@@ -27,6 +28,11 @@ namespace ed {
 
 using namespace fw::gui;
 using namespace std::placeholders;
+
+//-----------------------------------------------------------------------------
+enum IDS {
+  STATUS_MESSAGE_ID,
+};
 
 /**
  * We implement the menu item logic here, since there's only one place in the whole game that uses
@@ -100,39 +106,6 @@ void main_menu_window::initialize() {
   frmwrk->get_gui()->attach_widget(_tool_menu);
 
   frmwrk->get_gui()->sig_click.connect(std::bind(&main_menu_window::global_click_handler, this, _1, _2, _3));
-/*
-  subscribe("TopMenu/File/New", CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::file_new_clicked, this));
-  subscribe("TopMenu/File/Save", CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::file_save_clicked, this));
-  subscribe("TopMenu/File/Open", CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::file_open_clicked, this));
-  subscribe("TopMenu/File/Exit", CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::file_quit_clicked, this));
-  subscribe("TopMenu/Map/Screenshot", CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::map_screenshot_clicked, this));
-
-  CEGUI::Window *wnd;
-
-  wnd = get_child("TopMenu/Tool/Terrain");
-  wnd->setUserString("tool", "heightfield");
-  subscribe(wnd, CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::tool_clicked, this));
-
-  wnd = get_child("TopMenu/Tool/TerrainTexture");
-  wnd->setUserString("tool", "texture");
-  subscribe(wnd, CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::tool_clicked, this));
-
-  wnd = get_child("TopMenu/Tool/Players");
-  wnd->setUserString("tool", "players");
-  subscribe(wnd, CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::tool_clicked, this));
-
-  wnd = get_child("TopMenu/Tool/Pathing");
-  wnd->setUserString("tool", "pathing");
-  subscribe(wnd, CEGUI::MenuItem::EventClicked,
-      CEGUI::SubscriberSlot(&main_menu_window::tool_clicked, this));*/
 }
 
 /**
@@ -220,22 +193,23 @@ bool main_menu_window::tool_clicked(fw::gui::widget *w, std::string tool_name) {
 }
 
 //-------------------------------------------------------------------------
-/*
-statusbar_window *statusbar = 0;
+statusbar_window *statusbar = nullptr;
 
-statusbar_window::statusbar_window() :
-    fw::gui::window("Statusbar") {
+statusbar_window::statusbar_window() : _wnd(nullptr) {
 }
 
 statusbar_window::~statusbar_window() {
 }
 
-void statusbar_window::initialise() {
-  fw::gui::window::initialise();
+void statusbar_window::initialize() {
+  _wnd = builder<window>(px(0), sum(pct(100), px(-20)), pct(100), px(20)) << window::background("frame")
+      << (builder<label>(px(0), px(0), pct(100), pct(100)) << widget::id(STATUS_MESSAGE_ID));
+  fw::framework *frmwrk = fw::framework::get_instance();
+  frmwrk->get_gui()->attach_widget(_wnd);
 }
 
 void statusbar_window::set_message(std::string const &msg) {
-  fw::gui::set_text(get_child("Statusbar/Message"), msg);
+  _wnd->find<label>(STATUS_MESSAGE_ID)->set_text(msg);
 }
-*/
+
 }
