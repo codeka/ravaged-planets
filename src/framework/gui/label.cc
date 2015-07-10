@@ -74,7 +74,21 @@ property *label::text_align(label::alignment text_alignment) {
 
 void label::render() {
   if (_background) {
-    _background->render(get_left(), get_top(), get_width(), get_height());
+    if (_background_centred) {
+      float background_width = _background->get_intrinsic_width();
+      float background_height = _background->get_intrinsic_height();
+      if (background_width == 0.0f) {
+        background_width = get_width();
+      }
+      if (background_height == 0.0f) {
+        background_height = get_height();
+      }
+      float x = get_left() + (get_width() / 2.0f) - (background_width / 2.0f);
+      float y = get_top() + (get_height() / 2.0f) - (background_height / 2.0f);
+      _background->render(x, y, background_width, background_height);
+    } else {
+      _background->render(get_left(), get_top(), get_width(), get_height());
+    }
   }
   if (_text != "") {
     if (_text_alignment == label::left) {
@@ -97,8 +111,9 @@ void label::set_text(std::string const &text) {
   _text = text;
 }
 
-void label::set_background(std::shared_ptr<drawable> background) {
+void label::set_background(std::shared_ptr<drawable> background, bool centred /*= false */) {
   _background = background;
+  _background_centred = centred;
 }
 
 } }

@@ -10,6 +10,7 @@
 
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
+#include <stb/stb_image_resize.h>
 
 namespace fs = boost::filesystem;
 
@@ -245,47 +246,13 @@ void bitmap::resize(int new_width, int new_height) {
   int curr_width = get_width();
   int curr_height = get_height();
 
-  if (curr_width == new_width && curr_height == new_height)
+  if (curr_width == new_width && curr_height == new_height) {
     return;
-
-  if (new_width > curr_width || new_height > curr_height) {
-    BOOST_THROW_EXCEPTION(fw::exception()<< fw::message_error_info("up-scaling is not supported"));
   }
-
-  int scale_x = curr_width / new_width;
-  if (scale_x < 1)
-    scale_x = 1;
-
-  int scale_y = curr_height / new_height;
-  if (scale_y < 1)
-    scale_y = 1;
 
   std::vector<uint32_t> resized(new_width * new_height);
-  for (int y = 0; y < new_height; y++) {
-    for (int x = 0; x < new_width; x++) {
-      // we get the average colour of the pixels in the rectangle
-      // that the current pixel occupies
-
-      fw::colour average(0, 0, 0, 0);
-      int n = 0;
-      for (int y1 = (y * scale_y); y1 < (y + 1) * scale_y; y1++) {
-        if (y1 >= curr_height)
-          break;
-
-        for (int x1 = (x * scale_x); x1 < (x + 1) * scale_x; x1++) {
-          if (x1 >= curr_width)
-            break;
-
-          average += fw::colour::from_rgba(_data->rgba[(y1 * curr_width) + x1]);
-          n++;
-        }
-      }
-
-      average /= static_cast<double>(n);
-      average = average.clamp();
-      resized[(y * new_width) + x] = average.to_argb();
-    }
-  }
+  stbir_resize_uint8(reinterpret_cast<unsigned char const *>(_data->rgba.data()), curr_width, curr_height, 0,
+      reinterpret_cast<unsigned char *>(resized.data()), new_width, new_height, 0, 4);
 
   prepare_write(new_width, new_height);
   set_pixels(resized);

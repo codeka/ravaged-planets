@@ -183,7 +183,7 @@ void open_file_window::on_item_selected(int index) {
         texture->create(bmp);
         std::shared_ptr<drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
             ->build_drawable(texture, 0, 0, bmp_width, bmp_height);
-        preview->set_background(drawable);
+        preview->set_background(drawable, true);
       } catch (fw::exception &e) {
         // couldn't load image, just ignore
         fw::debug << "Error loading image. " << e.what() << std::endl;
