@@ -333,8 +333,8 @@ void heightfield_tool::import_heightfield(fw::bitmap &bm) {
   int terrain_width = _terrain->get_width();
   int terrain_length = _terrain->get_length();
 
-  // resize the bitmap so it's the same size as our terrain (use high quality == 2)
-  bm.resize(terrain_width, terrain_length, 2);
+  // resize the bitmap so it's the same size as our terrain
+  bm.resize(terrain_width, terrain_length);
 
   // get the pixel data from the bitmap
   std::vector<uint32_t> const &pixels = bm.get_pixels();

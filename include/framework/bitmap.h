@@ -74,9 +74,8 @@ public:
   // Copies the bitmap data from the given source image to our buffer.
   void copy(fw::bitmap const &src);
 
-  // Resizes the bitmap to the new width/height, quality is a value from 0 (lowest) to 2 (highest) and determines
-  // what "quality level" we use when resizing the image
-  void resize(int new_width, int new_height, int quality);
+  // Resizes the bitmap to the new width/height
+  void resize(int new_width, int new_height);
 };
 
 }

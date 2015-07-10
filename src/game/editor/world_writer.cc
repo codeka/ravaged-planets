@@ -178,7 +178,7 @@ void world_writer::calculate_base_minimap_colours() {
     fw::bitmap layer_bmp(*layer_texture.get());
 
     // resize the bitmap to 1x1 - this will be our average colour!
-    layer_bmp.resize(1, 1, 2);
+    layer_bmp.resize(1, 1);
     _base_minimap_colours[i] = layer_bmp.get_pixel(0, 0);
   }
 }

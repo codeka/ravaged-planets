@@ -241,7 +241,7 @@ void bitmap::set_pixel(int x, int y, uint32_t rgba) {
   _data->rgba[(get_width() * y) + x] = rgba;
 }
 
-void bitmap::resize(int new_width, int new_height, int quality) {
+void bitmap::resize(int new_width, int new_height) {
   int curr_width = get_width();
   int curr_height = get_height();
 

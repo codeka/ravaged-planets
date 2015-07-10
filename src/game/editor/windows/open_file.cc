@@ -5,16 +5,20 @@
 #include <boost/lexical_cast.hpp>
 
 #include <framework/exception.h>
-#include <framework/paths.h>
+#include <framework/bitmap.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
 #include <framework/gui/checkbox.h>
+#include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/label.h>
 #include <framework/gui/listbox.h>
 #include <framework/gui/textedit.h>
 #include <framework/gui/widget.h>
 #include <framework/gui/window.h>
+#include <framework/logging.h>
+#include <framework/paths.h>
+#include <framework/texture.h>
 
 #include <game/editor/windows/open_file.h>
 
@@ -29,7 +33,8 @@ namespace ed {
 enum IDS {
   FILE_LIST_ID,
   FILENAME_ID,
-  OK_ID
+  OK_ID,
+  IMAGE_PREVIEW_ID
 };
 
 open_file_window *open_file = nullptr;
@@ -48,6 +53,7 @@ void open_file_window::initialize() {
       << (builder<listbox>(px(8), px(30), sum(pct(66), px(-12)), sum(pct(100), px(-76))) << widget::id(FILE_LIST_ID)
           << listbox::item_selected(std::bind(&open_file_window::on_item_selected, this, _1))
           << listbox::item_activated(std::bind(&open_file_window::on_item_activated, this, _1)))
+      << (builder<label>(sum(pct(66), px(4)), px(30), sum(pct(33), px(-12)), px(100)) << widget::id(IMAGE_PREVIEW_ID))
       << (builder<button>(sum(pct(100), px(-176)), sum(pct(100), px(-38)), px(80), px(30))
           << button::text("OK") << widget::id(OK_ID)
           << button::click(std::bind(&open_file_window::on_ok_clicked, this, _1)))
@@ -145,7 +151,45 @@ void open_file_window::on_item_selected(int index) {
   fs::path item_path = _curr_directory / _items[index];
   _wnd->find<textedit>(FILENAME_ID)->set_text(item_path.string());
 
-  // TODO: show info about the file
+  if (fs::is_regular_file(item_path)) {
+    std::string ext = item_path.extension().string();
+    bool is_image = false;
+    if (ext == ".jpg" || ext == ".png") {
+      // we only support JPG and PNG image formats
+      try {
+        fw::bitmap bmp(item_path);
+        is_image = true; // if we loaded it, then we know it's an image
+
+        label *preview = _wnd->find<label>(IMAGE_PREVIEW_ID);
+        float width = preview->get_width();
+        float height = preview->get_height();
+        float bmp_width = bmp.get_width();
+        float bmp_height = bmp.get_height();
+        if (bmp_width > width || bmp_height > height) {
+          float bmp_ratio = bmp_width / bmp_height;
+          if (bmp_width > width) {
+            bmp_width = width;
+            bmp_height = width / bmp_ratio;
+          }
+          if (bmp_height > height) {
+            bmp_height = height;
+            bmp_width = height * bmp_ratio;
+          }
+
+          bmp.resize(bmp_width, bmp_height);
+        }
+
+        std::shared_ptr<fw::texture> texture = std::shared_ptr<fw::texture>(new fw::texture());
+        texture->create(bmp);
+        std::shared_ptr<drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
+            ->build_drawable(texture, 0, 0, bmp_width, bmp_height);
+        preview->set_background(drawable);
+      } catch (fw::exception &e) {
+        // couldn't load image, just ignore
+        fw::debug << "Error loading image. " << e.what() << std::endl;
+      }
+    }
+  }
 }
 
 void open_file_window::on_item_activated(int index) {
