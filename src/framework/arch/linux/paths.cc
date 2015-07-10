@@ -41,4 +41,9 @@ fs::path resolve(std::string const &path, bool for_write /*=false*/) {
 
   return absolute_path;
 }
+
+bool is_hidden(fs::path const &path) {
+  return path.filename().string()[0] == '.';
+}
+
 }

@@ -99,6 +99,9 @@ void open_file_window::refresh_filelist() {
   // Add them all to a directory so that we can sort them.
   std::vector<fs::path> paths;
   for (fs::directory_iterator it(_curr_directory); it != fs::directory_iterator(); ++it) {
+    if (fw::is_hidden(it->path())) {
+      continue;
+    }
     paths.push_back(it->path());
   }
 
