@@ -16,7 +16,7 @@
 namespace game {
 
 terrain::terrain() :
-    _width(0), _length(0), _heights(0), _ib(new fw::index_buffer()) {
+    _width(0), _length(0), _heights(nullptr), _ib(new fw::index_buffer()) {
 }
 
 terrain::~terrain() {
@@ -65,7 +65,7 @@ void terrain::create(int width, int length, bool create_height_data /*= true */)
     for (int i = 0; i < _width * _length; i++)
       _heights[i] = 0.0f;
   } else {
-    _heights = 0;
+    _heights = nullptr;
   }
 }
 
@@ -100,8 +100,7 @@ void terrain::bake_patch(int patch_x, int patch_z) {
   }
 
   fw::vertex::xyz_n *vert_data;
-  int num_verts = generate_terrain_vertices(&vert_data, _heights, _width,
-      _length, PATCH_SIZE, patch_x, patch_z);
+  int num_verts = generate_terrain_vertices(&vert_data, _heights, _width, _length, PATCH_SIZE, patch_x, patch_z);
 
   std::shared_ptr<terrain_patch> patch(_patches[index]);
   patch->vb->set_data(num_verts, vert_data, 0);

@@ -51,17 +51,19 @@ void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::vec
   if (num_segments < 8)
     num_segments = 8;
 
-  std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz>();
-  fw::vertex::xyz *vertices = new fw::vertex::xyz[num_segments + 1];
+  std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_c>();
+  fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[num_segments + 1];
   for (int i = 0; i < num_segments; i++) {
     float factor = 2.0f * (float) M_PI * (i / (float) num_segments);
     vertices[i].x = centre[0] + radius * sin(factor);
     vertices[i].z = centre[2] + radius * cos(factor);
     vertices[i].y = terrain->get_height(vertices[i].x, vertices[i].z) + 0.5f;
+    vertices[i].colour = fw::colour(1, 1, 1).to_rgba();
   }
   vertices[num_segments].x = vertices[0].x;
   vertices[num_segments].y = vertices[0].y;
   vertices[num_segments].z = vertices[0].z;
+  vertices[num_segments].colour = fw::colour(1, 1, 1).to_rgba();
   vb->set_data(num_segments + 1, vertices);
   delete[] vertices;
 

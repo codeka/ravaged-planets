@@ -262,7 +262,7 @@ static void xyz_c_setup() {
   FW_CHECKED(glEnableVertexAttribArray(0));
   FW_CHECKED(glEnableVertexAttribArray(1));
   FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, colour)));
+  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, colour)));
 }
 
 std::function<void()> xyz_c::get_setup_function() {

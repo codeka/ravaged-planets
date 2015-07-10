@@ -68,8 +68,7 @@ fw::vector get_vertex(int x, int z, float *height, int width, int length) {
 }
 
 // calculates the normal at the given location in the map
-fw::vector calculate_normal(float *heights, int width, int length, int x,
-    int z) {
+fw::vector calculate_normal(float *heights, int width, int length, int x, int z) {
   fw::vector centre = get_vertex(x, z, heights, width, length);
   fw::vector north = get_vertex(x, z + 1, heights, width, length);
   fw::vector south = get_vertex(x, z - 1, heights, width, length);
@@ -89,9 +88,8 @@ fw::vector calculate_normal(float *heights, int width, int length, int x,
   return normal.normalize();
 }
 
-int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height,
-    int width, int length, int patch_size /* = 0 */, int patch_x /* = 0 */,
-    int patch_z /* = 0 */) {
+int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int width, int length,
+    int patch_size /* = 0 */, int patch_x /* = 0 */, int patch_z /* = 0 */) {
   if (patch_size == 0) {
     if (width != length) {
       BOOST_THROW_EXCEPTION(
@@ -120,8 +118,7 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height,
   return (patch_size + 1) * (patch_size + 1);
 }
 
-void build_collision_data(std::vector<bool> &vertices, float *heights,
-    int width, int length) {
+void build_collision_data(std::vector<bool> &vertices, float *heights,  int width, int length) {
   fw::vector up(0, 1, 0);
 
   for (int z = 0; z < length; z++) {
@@ -129,8 +126,7 @@ void build_collision_data(std::vector<bool> &vertices, float *heights,
       fw::vector normal = calculate_normal(heights, width, length, x, z);
       float dot = cml::dot(up, normal);
 
-      // todo: we should store the actual dot product, since it could be useful
-      // in other places...
+      // todo: we should store the actual dot product, since it could be useful in other places.
       vertices[x + (z * width)] = (dot > 0.85f);
     }
   }

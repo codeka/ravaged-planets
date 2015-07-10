@@ -3,6 +3,7 @@
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
 #include <framework/colour.h>
+#include <framework/exception.h>
 #include <framework/input.h>
 #include <framework/timer.h>
 #include <framework/logging.h>
@@ -248,6 +249,12 @@ bool heightfield_tool_window::on_import_clicked(fw::gui::widget *w) {
 }
 
 void heightfield_tool_window::on_import_file_selected(ed::open_file_window *ofw) {
+  try {
+    fw::bitmap bmp(ofw->get_selected_file());
+    _tool->import_heightfield(bmp);
+  } catch (fw::exception &e) {
+    // error, probably not a bitmap?
+  }
 }
 
 bool heightfield_tool_window::on_tool_clicked(fw::gui::widget *w) {

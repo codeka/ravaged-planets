@@ -83,14 +83,16 @@ void main_menu_window::initialize() {
       << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit")
           << widget::click(std::bind(&main_menu_window::file_quit_clicked, this, _1)));
 
-  _tool_menu = builder<window>(px(50), px(20), px(100), px(60))
+  _tool_menu = builder<window>(px(50), px(20), px(100), px(80))
       << window::background("frame") << widget::visible(false)
       << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("Heightfield")
           << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "heightfield")))
       << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Texture")
           << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "texture")))
       << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Players")
-          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "players")));
+          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "players")))
+      << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Pathing")
+          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "pathing")));
 
   fw::framework *frmwrk = fw::framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);

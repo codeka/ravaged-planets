@@ -24,6 +24,19 @@
       light_pos = lightviewproj * vec4(position, 1);
     }
   ]]></source>
+  <source name="vertex-notexture"><![CDATA[
+    uniform mat4 worldviewproj;
+
+    out vec4 colour;
+
+    layout (location = 0) in vec3 in_position;
+    layout (location = 1) in vec4 in_colour;
+
+    void main() {
+      gl_Position = worldviewproj * vec4(in_position, 1);
+      colour = in_colour;
+    }
+  ]]></source>
   <source name="fragment"><![CDATA[
     in vec2 tex;
     in vec4 light_pos;
@@ -46,10 +59,11 @@
     }
   ]]></source>
   <source name="fragment-notexture"><![CDATA[
-    out vec4 colour;
+    in vec4 colour;
+    out vec4 out_colour;
 
     void main() {
-      colour = vec4(1, 1, 1, 1);
+      out_colour = colour;
     }
   ]]></source>
   <program name="default">
@@ -60,7 +74,7 @@
     <state name="blend" value="off" />
   </program>
   <program name="notexture">
-    <vertex-shader source="vertex" />
+    <vertex-shader source="vertex-notexture" />
     <fragment-shader source="fragment-notexture" />
     <state name="z-write" value="on" />
     <state name="z-test" value="on" />

@@ -125,6 +125,7 @@ void editor_screen::set_active_tool(std::string const &name) {
   if (_tool != nullptr) {
     _tool->deactivate();
     delete _tool;
+    _tool = nullptr;
   }
 
   if (name == "")

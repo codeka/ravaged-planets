@@ -173,6 +173,10 @@ struct xyz_c {
       x(x), y(y), z(z), colour(colour) {
   }
 
+  inline xyz_c(float x, float y, float z, fw::colour const &colour) :
+      x(x), y(y), z(z), colour(colour.to_abgr()) {
+  }
+
   inline xyz_c(xyz_c const &copy) :
       x(copy.x), y(copy.y), z(copy.z), colour(copy.colour) {
   }
