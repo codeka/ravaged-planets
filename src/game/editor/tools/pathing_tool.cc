@@ -32,6 +32,11 @@ using namespace fw::gui;
 
 //-----------------------------------------------------------------------------
 
+enum IDS {
+  START_ID,
+  END_ID,
+};
+
 class pathing_tool_window {
 private:
   window *_wnd;
@@ -51,8 +56,13 @@ public:
 
 pathing_tool_window::pathing_tool_window(ed::pathing_tool *tool) :
     _tool(tool), _wnd(nullptr) {
-  _wnd = builder<window>(px(10), px(30), px(100), px(262)) << window::background("frame")
-      << (builder<button>(px(4), px(228), sum(pct(100), px(-8)), px(30)) << button::text("Change"));
+  _wnd = builder<window>(px(10), px(30), px(100), px(94)) << window::background("frame")
+      << (builder<button>(px(4), px(4), sum(pct(100), px(-8)), px(30)) << button::text("Start") << widget::id(START_ID)
+          << widget::click(std::bind(&pathing_tool_window::on_start_click, this, _1)))
+      << (builder<button>(px(4), px(38), sum(pct(100), px(-8)), px(30)) << button::text("End") << widget::id(END_ID)
+          << widget::click(std::bind(&pathing_tool_window::on_end_click, this, _1)))
+      << (builder<checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18)) << checkbox::text("Simplify")
+          << widget::click(std::bind(&pathing_tool_window::on_simplify_click, this, _1)));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
@@ -71,12 +81,16 @@ void pathing_tool_window::hide() {
 bool pathing_tool_window::on_start_click(widget *w) {
 //  ed::statusbar->set_message("Set test start...");
   _tool->set_test_start();
+  _wnd->find<button>(START_ID)->set_pressed(true);
+  _wnd->find<button>(END_ID)->set_pressed(false);
   return true;
 }
 
 bool pathing_tool_window::on_end_click(widget *w) {
 //  ed::statusbar->set_message("Set test end...");
   _tool->set_test_end();
+  _wnd->find<button>(START_ID)->set_pressed(false);
+  _wnd->find<button>(END_ID)->set_pressed(true);
   return true;
 }
 
@@ -101,6 +115,7 @@ public:
 
 std::shared_ptr<fw::index_buffer> collision_patch::_ib;
 std::shared_ptr<fw::vertex_buffer> current_path_vb;
+std::shared_ptr<fw::index_buffer> current_path_ib;
 
 void collision_patch::bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
   if (!_ib) {
@@ -119,7 +134,6 @@ void collision_patch::bake(std::vector<bool> &data, float *heights, int width, i
 
       bool passable = data[(iz * width) + ix];
       fw::colour colour(passable ? fw::colour(0.1f, 1.0f, 0.1f) : fw::colour(1.0f, 0.1f, 0.1f));
-     // fw::colour colour(0.0f, 0.0f, 1.0f);
 
       int index = z * (PATCH_SIZE + 1) + x;
       vertices[index] = fw::vertex::xyz_c(x, heights[iz * width + ix] + 0.1f, z, colour);
@@ -242,6 +256,7 @@ void pathing_tool::render(fw::sg::scenegraph &scenegraph) {
   if (current_path_vb) {
     std::shared_ptr<fw::sg::node> sgnode(new fw::sg::node());
     sgnode->set_vertex_buffer(current_path_vb);
+    sgnode->set_index_buffer(current_path_ib);
     sgnode->set_cast_shadows(false);
     sgnode->set_primitive_type(fw::sg::primitive_linelist);
     std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
@@ -328,6 +343,13 @@ void pathing_tool::find_path() {
     vb->set_data(buffer.size(), &buffer[0]);
 
     current_path_vb = vb;
+
+    current_path_ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+    std::vector<uint16_t> indices(buffer.size());
+    for (int i = 0; i < buffer.size(); i++) {
+      indices[i] = i;
+    }
+    current_path_ib->set_data(indices.size(), indices.data());
   }
 }
 
