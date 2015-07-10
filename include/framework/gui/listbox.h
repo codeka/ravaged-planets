@@ -17,6 +17,7 @@ class listbox_item;
 class listbox : public widget {
 private:
   friend class listbox_item_selected_property;
+  friend class listbox_item_activated_property;
 
   std::shared_ptr<drawable> _background;
   widget *_item_container;
@@ -31,7 +32,8 @@ public:
   listbox(gui *gui);
   virtual ~listbox();
 
-  static property *item_selected(std::function<void(int index)> on_click);
+  static property *item_selected(std::function<void(int index)> on_selected);
+  static property *item_activated(std::function<void(int index)> on_activated);
 
   /**
    * Add an item to the list. This is not quite the same as attach_child, so be sure to not use that. You must give
@@ -46,12 +48,18 @@ public:
   /** Select the item with the given index. */
   void select_item(int index);
 
+  /** Activates the item with the given index. Basically just fires the signal. */
+  void activate_item(int index);
+
   int get_selected_index();
   widget *get_item(int index);
   widget *get_selected_item();
 
   /** Signaled when an item is selected. */
   boost::signals2::signal<void(int index)> sig_item_selected;
+
+  /** Signaled when an item is double-clicked. */
+  boost::signals2::signal<void(int index)> sig_item_activated;
 
   void render();
 };

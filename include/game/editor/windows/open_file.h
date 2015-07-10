@@ -1,46 +1,52 @@
 #pragma once
 
-#include <framework/gui/window.h>
+#include <functional>
+#include <string>
+#include <vector>
+#include <boost/filesystem.hpp>
+
+namespace fw {
+namespace gui {
+class listbox;
+class widget;
+class window;
+}
+}
 
 namespace ed {
-/*
-	// a generic "open file" dialog, which lets us open whatever file we want to open.
-	class open_file_window : public fw::gui::window
-	{
-	public:
-		typedef boost::function<void (open_file_window *)> file_selected_handler;
+/**
+ * A generic "open file" dialog, which lets us open whatever file we want to open, though with a
+ * particular focus on opening images.
+ */
+class open_file_window {
+public:
+  typedef std::function<void(open_file_window *)> file_selected_handler;
 
-	private:
-		fw::shell_folder _curr_folder;
-		CEGUI::MultiColumnList *_file_list;
-		CEGUI::Editbox *_filename;
-		CEGUI::Editbox *_path;
-		file_selected_handler _file_selected;
+private:
+  fw::gui::window *_wnd;
+  boost::filesystem::path _curr_directory;
+  file_selected_handler _file_selected_handler;
+  std::vector<std::string> _items;
 
-		bool ok_clicked(CEGUI::EventArgs const &e);
-		bool cancel_clicked(CEGUI::EventArgs const &e);
-		bool item_double_clicked(CEGUI::EventArgs const &e);
-		bool item_selection_changed(CEGUI::EventArgs const &e);
+  bool on_ok_clicked(fw::gui::widget *w);
+  bool on_cancel_clicked(fw::gui::widget *w);
+  void on_item_selected(int index);
+  void on_item_activated(int index);
 
-		void clear_filelist();
-		void refresh_filelist();
-		void navigate_to_folder(fw::shell_folder const &new_folder);
+  void refresh_filelist();
+  void navigate_to_directory(boost::filesystem::path const &new_directory);
+  void add_row(fw::gui::listbox *lbx, std::string const &name);
 
-	public:
-		open_file_window();
-		~open_file_window();
+public:
+  open_file_window();
+  ~open_file_window();
 
-		virtual void initialize();
-		virtual void show();
-		virtual void hide();
+  void initialize();
+  void show(file_selected_handler fn);
+  void hide();
 
-		std::string get_full_path() const;
+  boost::filesystem::path get_selected_file() const;
+};
 
-		// when the user clicks "OK" after they select a file, the function you
-		// pass here will be called.
-		void set_file_selected_handler(file_selected_handler fn) { _file_selected = fn; }
-	};
-
-	extern open_file_window *open_file;
-*/
+extern open_file_window *open_file;
 }

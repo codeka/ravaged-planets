@@ -29,7 +29,7 @@ editor_screen::~editor_screen() {
   delete ed::new_map;
 //  delete ed::message_box;
   delete ed::save_map;
-//  delete ed::open_file;
+  delete ed::open_file;
 //  delete ed::statusbar;
 }
 
@@ -42,12 +42,13 @@ void editor_screen::show() {
   ed::new_map = new new_map_window();
 //  ed::message_box = new message_box_window();
   ed::save_map = new save_map_window();
-//  ed::open_file = new open_file_window();
+  ed::open_file = new open_file_window();
 
   ed::main_menu->initialize();
   ed::new_map->initialize();
   ed::save_map->initialize();
   ed::open_map->initialize();
+  ed::open_file->initialize();
 //  statusbar->show();
 }
 
@@ -59,7 +60,6 @@ void editor_screen::update() {
 }
 
 void editor_screen::render(fw::sg::scenegraph &scenegraph) {
-
   if (_world != nullptr) {
     // set up the properties of the sun that we'll use to light and also cast shadows
     fw::vector sun(0.485f, 0.485f, 0.727f);

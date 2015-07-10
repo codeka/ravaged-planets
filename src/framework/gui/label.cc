@@ -8,26 +8,28 @@
 namespace fw { namespace gui {
 
 /** Property that sets the background of the widget. */
-class static_background_property : public property {
+class label_background_property : public property {
 private:
   std::string _drawable_name;
+  bool _centred;
 public:
-  static_background_property(std::string const &drawable_name) :
-      _drawable_name(drawable_name) {
+  label_background_property(std::string const &drawable_name, bool centred) :
+      _drawable_name(drawable_name), _centred(centred) {
   }
 
   void apply(widget *widget) {
     label *wdgt = dynamic_cast<label *>(widget);
     wdgt->_background = wdgt->_gui->get_drawable_manager()->get_drawable(_drawable_name);
+    wdgt->_background_centred = _centred;
   }
 };
 
 /** Property that sets the text of the widget. */
-class static_text_property : public property {
+class label_text_property : public property {
 private:
   std::string _text;
 public:
-  static_text_property(std::string const &text) :
+  label_text_property(std::string const &text) :
     _text(text) {
   }
 
@@ -37,18 +39,37 @@ public:
   }
 };
 
-label::label(gui *gui) : widget(gui) {
+/** Property that sets the text of the widget. */
+class label_text_align_property : public property {
+private:
+  label::alignment _text_alignment;
+public:
+  label_text_align_property(label::alignment text_alignment) :
+    _text_alignment(text_alignment) {
+  }
+
+  void apply(widget *widget) {
+    label *wdgt = dynamic_cast<label *>(widget);
+    wdgt->_text_alignment = _text_alignment;
+  }
+};
+
+label::label(gui *gui) : widget(gui), _background_centred(false), _text_alignment(left) {
 }
 
 label::~label() {
 }
 
-property *label::background(std::string const &drawable_name) {
-  return new static_background_property(drawable_name);
+property *label::background(std::string const &drawable_name, bool centred /*= false */) {
+  return new label_background_property(drawable_name, centred);
 }
 
 property *label::text(std::string const &text) {
-  return new static_text_property(text);
+  return new label_text_property(text);
+}
+
+property *label::text_align(label::alignment text_alignment) {
+  return new label_text_align_property(text_alignment);
 }
 
 void label::render() {
@@ -56,9 +77,19 @@ void label::render() {
     _background->render(get_left(), get_top(), get_width(), get_height());
   }
   if (_text != "") {
-    fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        get_left(), get_top() + get_height() / 2, _text,
-        static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
+    if (_text_alignment == label::left) {
+      fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+          get_left(), get_top() + get_height() / 2, _text,
+          static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
+    } else if (_text_alignment == label::center) {
+      fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+          get_left() + get_width() / 2, get_top() + get_height() / 2, _text,
+          static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
+    } else if (_text_alignment == label::right) {
+      fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+          get_left() + get_width(), get_top() + get_height() / 2, _text,
+          static_cast<fw::font_face::draw_flags>(fw::font_face::align_right | fw::font_face::align_middle));
+    }
   }
 }
 

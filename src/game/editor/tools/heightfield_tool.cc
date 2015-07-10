@@ -195,7 +195,8 @@ private:
 
   bool on_radius_updated(int value);
   bool on_tool_clicked(fw::gui::widget *w);
-  bool import_clicked(fw::gui::widget *w);
+  bool on_import_clicked(fw::gui::widget *w);
+  void on_import_file_selected(ed::open_file_window *ofw);
 
 public:
   heightfield_tool_window(ed::heightfield_tool *tool);
@@ -207,7 +208,7 @@ public:
 
 heightfield_tool_window::heightfield_tool_window(ed::heightfield_tool *tool) :
     _tool(tool) {
-  _wnd = builder<window>(px(10), px(30), px(100), px(262)) << window::background("frame")
+  _wnd = builder<window>(px(10), px(30), px(100), px(130)) << window::background("frame")
       << (builder<button>(px(8), px(8), px(36), px(36)) << widget::id(RAISE_LOWER_BRUSH_ID)
           << button::icon("editor_hightfield_raiselower")
           << button::click(std::bind(&heightfield_tool_window::on_tool_clicked, this, _1)))
@@ -217,7 +218,9 @@ heightfield_tool_window::heightfield_tool_window(ed::heightfield_tool *tool) :
       << (builder<label>(px(4), px(52), sum(pct(100), px(-8)), px(18)) << label::text("Size:"))
       << (builder<slider>(px(4), px(74), sum(pct(100), px(-8)), px(18))
           << slider::limits(20, 100) << slider::value(40)
-          << slider::on_update(std::bind(&heightfield_tool_window::on_radius_updated, this, _1)));
+          << slider::on_update(std::bind(&heightfield_tool_window::on_radius_updated, this, _1)))
+      << (builder<button>(px(4), px(96), sum(pct(100), px(-8)), px(30)) << button::text("Import")
+          << button::click(std::bind(&heightfield_tool_window::on_import_clicked, this, _1)));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
@@ -239,10 +242,12 @@ bool heightfield_tool_window::on_radius_updated(int value) {
   return true;
 }
 
-bool heightfield_tool_window::import_clicked(fw::gui::widget *w) {
-  //ed::open_file->set_file_selected_handler(boost::bind(&heightfield_tool_window::open_file_file_selected, this, _1));
- // ed::open_file->show();
+bool heightfield_tool_window::on_import_clicked(fw::gui::widget *w) {
+  ed::open_file->show(std::bind(&heightfield_tool_window::on_import_file_selected, this, _1));
   return true;
+}
+
+void heightfield_tool_window::on_import_file_selected(ed::open_file_window *ofw) {
 }
 
 bool heightfield_tool_window::on_tool_clicked(fw::gui::widget *w) {

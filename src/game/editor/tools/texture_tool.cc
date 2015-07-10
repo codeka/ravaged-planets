@@ -87,7 +87,6 @@ void texture_tool_window::on_texture_selected(int index) {
   std::shared_ptr<drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
       layer, 0, 0, layer->get_width(), layer->get_height());
   _wnd->find<label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
-
   _tool->set_layer(index);
 }
 

@@ -1,9 +1,11 @@
 
+#include <framework/framework.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
 #include <framework/gui/drawable.h>
 #include <framework/gui/listbox.h>
+#include <framework/timer.h>
 
 using namespace std::placeholders;
 
@@ -15,18 +17,34 @@ enum ids {
   DOWN_BUTTON = 56758
 };
 
+/** If you click again within this amount of time, then we count your click as "activate" (i.e. double-click) */
+static const float ACTIVATE_TIME_MS = 600.0f;
+
 //-----------------------------------------------------------------------------
 
 class listbox_item_selected_property : public property {
 private:
-  std::function<void(int index)> _item_selected;
+  std::function<void(int index)> _on_selected;
 public:
-  listbox_item_selected_property(std::function<void(int index)> item_selected)
-      : _item_selected(item_selected) {
+  listbox_item_selected_property(std::function<void(int index)> on_selected)
+      : _on_selected(on_selected) {
   }
 
   void apply(widget *widget) {
-    dynamic_cast<listbox *>(widget)->sig_item_selected.connect(_item_selected);
+    dynamic_cast<listbox *>(widget)->sig_item_selected.connect(_on_selected);
+  }
+};
+
+class listbox_item_activated_property : public property {
+private:
+  std::function<void(int index)> _on_activated;
+public:
+  listbox_item_activated_property(std::function<void(int index)> on_activated)
+      : _on_activated(on_activated) {
+  }
+
+  void apply(widget *widget) {
+    dynamic_cast<listbox *>(widget)->sig_item_activated.connect(_on_activated);
   }
 };
 
@@ -38,6 +56,7 @@ private:
   listbox *_listbox;
   int _index;
   std::shared_ptr<state_drawable> _background;
+  float _last_down_time;
 public:
   listbox_item(gui *gui);
   virtual ~listbox_item();
@@ -52,7 +71,7 @@ public:
   void render();
 };
 
-listbox_item::listbox_item(gui *gui) : widget(gui), _listbox(nullptr), _index(-1) {
+listbox_item::listbox_item(gui *gui) : widget(gui), _listbox(nullptr), _index(-1), _last_down_time(0) {
   _background = std::shared_ptr<state_drawable>(new state_drawable());
   _background->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("listbox_item_normal"));
   _background->add_drawable(state_drawable::selected, _gui->get_drawable_manager()->get_drawable("listbox_item_selected"));
@@ -64,6 +83,11 @@ listbox_item::~listbox_item() {
 /** When you click a listbox item, we want to make sure it's the selected one. */
 bool listbox_item::on_mouse_down(float x, float y) {
   _listbox->select_item(_index);
+  float now = fw::framework::get_instance()->get_timer()->get_total_time();
+  if (now - _last_down_time < (ACTIVATE_TIME_MS / 1000.0f)) {
+    _listbox->activate_item(_index);
+  }
+  _last_down_time = now;
   return true;
 }
 
@@ -123,10 +147,13 @@ listbox::listbox(gui *gui) : widget(gui), _selected_item(nullptr), _scrollbar_vi
 listbox::~listbox() {
 }
 
-property *listbox::item_selected(std::function<void(int index)> on_click) {
-  return new listbox_item_selected_property(on_click);
+property *listbox::item_selected(std::function<void(int index)> on_selected) {
+  return new listbox_item_selected_property(on_selected);
 }
 
+property *listbox::item_activated(std::function<void(int index)> on_activated) {
+  return new listbox_item_activated_property(on_activated);
+}
 
 void listbox::add_item(widget *w) {
   int top = _item_container->get_height();
@@ -141,7 +168,10 @@ void listbox::add_item(widget *w) {
 
 void listbox::clear() {
   _item_container->clear_children();
+  _item_container->set_height(px(0));
+  _item_container->set_top(px(0));
   _items.clear();
+  update_thumb_button(true);
 }
 
 void listbox::update_thumb_button(bool adjust_height) {
@@ -227,6 +257,10 @@ void listbox::select_item(int index) {
   _selected_item = _items[index];
   _selected_item->set_selected(true);
   sig_item_selected(index);
+}
+
+void listbox::activate_item(int index) {
+  sig_item_activated(index);
 }
 
 int listbox::get_selected_index() {
