@@ -72,7 +72,7 @@ main_menu_window::~main_menu_window() {
 }
 
 void main_menu_window::initialize() {
-  _wnd = builder<window>(px(0), px(0), pct(100), px(20)) << window::background("frame")
+  _wnd = builder<window>(px(0), px(0), pct(100), px(20)) << window::background("frame") << widget::visible(false)
       << (builder<menu_item>(px(0), px(0), px(50), px(20)) << button::text("File")
           << widget::click(std::bind(&main_menu_window::file_menu_clicked, this, _1)))
       << (builder<menu_item>(px(50), px(0), px(50), px(20)) << button::text("Tool")
@@ -106,6 +106,14 @@ void main_menu_window::initialize() {
   frmwrk->get_gui()->attach_widget(_tool_menu);
 
   frmwrk->get_gui()->sig_click.connect(std::bind(&main_menu_window::global_click_handler, this, _1, _2, _3));
+}
+
+void main_menu_window::show() {
+  _wnd->set_visible(true);
+}
+
+void main_menu_window::hide() {
+  _wnd->set_visible(false);
 }
 
 /**
@@ -203,9 +211,18 @@ statusbar_window::~statusbar_window() {
 
 void statusbar_window::initialize() {
   _wnd = builder<window>(px(0), sum(pct(100), px(-20)), pct(100), px(20)) << window::background("frame")
+      << widget::visible(false)
       << (builder<label>(px(0), px(0), pct(100), pct(100)) << widget::id(STATUS_MESSAGE_ID));
   fw::framework *frmwrk = fw::framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
+}
+
+void statusbar_window::show() {
+  _wnd->set_visible(true);
+}
+
+void statusbar_window::hide() {
+  _wnd->set_visible(false);
 }
 
 void statusbar_window::set_message(std::string const &msg) {

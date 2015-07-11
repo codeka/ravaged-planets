@@ -21,21 +21,6 @@ namespace ed {
 
 editor_screen::editor_screen() :
     _tool(nullptr), _world(nullptr) {
-}
-
-editor_screen::~editor_screen() {
-  delete ed::main_menu;
-  delete ed::open_map;
-  delete ed::new_map;
-//  delete ed::message_box;
-  delete ed::save_map;
-  delete ed::open_file;
-  delete ed::statusbar;
-}
-
-void editor_screen::show() {
-  fw::gui::gui *gui = fw::framework::get_instance()->get_gui();
-
   ed::statusbar = new statusbar_window();
   ed::main_menu = new main_menu_window();
   ed::open_map = new open_map_window();
@@ -50,6 +35,37 @@ void editor_screen::show() {
   ed::open_map->initialize();
   ed::open_file->initialize();
   ed::statusbar->initialize();
+}
+
+editor_screen::~editor_screen() {
+  delete ed::main_menu;
+  delete ed::open_map;
+  delete ed::new_map;
+//  delete ed::message_box;
+  delete ed::save_map;
+  delete ed::open_file;
+  delete ed::statusbar;
+}
+
+void editor_screen::show() {
+  ed::main_menu->show();
+  ed::statusbar->show();
+}
+
+void editor_screen::hide() {
+  ed::main_menu->hide();
+  ed::statusbar->hide();
+
+  if (_tool != nullptr) {
+    _tool->deactivate();
+    delete _tool;
+    _tool = nullptr;
+  }
+
+  if (_world != nullptr) {
+    delete _world;
+    _world = nullptr;
+  }
 }
 
 void editor_screen::update() {
@@ -103,19 +119,6 @@ void editor_screen::open_map(std::string const &name) {
   _world = new editor_world(reader);
   _world->initialize();
   set_active_tool("heightfield");
-}
-
-void editor_screen::hide() {
-  if (_tool != nullptr) {
-    _tool->deactivate();
-    delete _tool;
-    _tool = nullptr;
-  }
-
-  if (_world != nullptr) {
-    delete _world;
-    _world = nullptr;
-  }
 }
 
 void editor_screen::set_active_tool(std::string const &name) {

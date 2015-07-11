@@ -35,6 +35,8 @@ public:
   ~main_menu_window();
 
   void initialize();
+  void show();
+  void hide();
 };
 
 // represents the statusbar
@@ -46,6 +48,8 @@ public:
   ~statusbar_window();
 
   void initialize();
+  void show();
+  void hide();
 
   void set_message(std::string const &msg);
 };
