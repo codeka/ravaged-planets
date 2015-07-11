@@ -11,6 +11,7 @@
 #include <framework/framework.h>
 #include <framework/logging.h>
 #include <framework/camera.h>
+#include <framework/bitmap.h>
 #include <framework/exception.h>
 #include <framework/settings.h>
 #include <framework/graphics.h>
@@ -22,6 +23,7 @@
 #include <framework/net.h>
 #include <framework/http.h>
 #include <framework/timer.h>
+#include <framework/texture.h>
 #include <framework/lang.h>
 #include <framework/misc.h>
 #include <framework/input.h>
@@ -286,10 +288,9 @@ void framework::render() {
   _app->render(scenegraph);
   _particle_mgr->render(scenegraph);
 
-  // if we've been asked for some screenshots, take them before we do the
-  // normal render.
-  // if (_screenshots.size() > 0)
-  //   take_screenshots(scenegraph);
+  // if we've been asked for some screenshots, take them before we do the normal render.
+   if (_screenshots.size() > 0)
+     take_screenshots(scenegraph);
 
   fw::render(scenegraph);
 }
@@ -320,8 +321,8 @@ bool framework::wait_events() {
 
 void framework::take_screenshot(int width, int height, std::function<void(fw::bitmap const &)> callback_fn) {
   if (width == 0 || height == 0) {
-    width = 640; // TODO
-    height = 480; // TODO
+    width = _graphics->get_width();
+    height = _graphics->get_height();
   }
 
   screenshot_request *request = new screenshot_request();
@@ -332,57 +333,38 @@ void framework::take_screenshot(int width, int height, std::function<void(fw::bi
   _screenshots.push_back(request);
 }
 
-// this is called on another thread to call the callbacks that were registered against
-// the "screenshot" request.
-void call_callacks_thread_proc(
-    boost::shared_ptr<std::list<boost::shared_ptr<screenshot_request> > > requests) {
-  BOOST_FOREACH(boost::shared_ptr<screenshot_request> request, *requests) {
+/* This is called on another thread to call the callbacks that were registered against the "screenshot" request. */
+void call_callacks_thread_proc(std::shared_ptr<std::list<screenshot_request *>> requests) {
+  BOOST_FOREACH(screenshot_request *request, *requests) {
     request->callback(*request->bitmap);
+    delete request->bitmap;
+    delete request;
   }
 }
 
-// This is called at the beginning of a frame if there are pending screenshot
-// callbacks. We'll take the screenshot, then (on another thread) get the data
-// and call the callbacks.
+/**
+ * This is called at the beginning of a frame if there are pending screenshot callbacks. We'll take the screenshot,
+ * then (on another thread) get the data and call the callbacks.
+ */
 void framework::take_screenshots(sg::scenegraph &scenegraph) {
-  boost::shared_ptr<std::list<boost::shared_ptr<screenshot_request> > > requests(
-      new std::list<boost::shared_ptr<screenshot_request> >());
+  std::shared_ptr<std::list<screenshot_request *>> requests(new std::list<screenshot_request *>());
 
   BOOST_FOREACH(screenshot_request *request, _screenshots) {
     // render the scene to a separate render target first
-//			boost::shared_ptr<fw::texture> render_target(new fw::texture());
-//			render_target->create_rendertarget(request->width, request->height, D3DFMT_X8R8G8B8);
+    std::shared_ptr<fw::texture> render_target(new fw::texture());
+    render_target->create(request->width, request->height);
 
-//			_graphics->set_render_target(render_target.get());
-//			fw::render(scenegraph);
+    _graphics->set_render_target(render_target.get(), nullptr);
+    fw::render(scenegraph);
+    _graphics->set_render_target(nullptr, nullptr);
 
-    // create a local-memory texture that'll hold the actual data
-//			fw::texture local_texture;
-//			local_texture.create(request->width, request->height, D3DUSAGE_DYNAMIC, D3DFMT_X8R8G8B8, 1, D3DPOOL_SYSTEMMEM);
-
-//			IDirect3DSurface9 *surface = 0;
-//			HRESULT hr = local_texture.get_d3dtexture()->GetSurfaceLevel(0, &surface);
-//			if (FAILED(hr))
-//			{
-//				BOOST_THROW_EXCEPTION(fw::exception(hr));
-//			}
-
-//			hr = _graphics->get_device()->GetRenderTargetData(render_target->get_render_target(), surface);
-//			if (FAILED(hr))
-//			{
-//				BOOST_THROW_EXCEPTION(fw::exception(hr));
-//			}
-
-//			request->bitmap = new fw::bitmap(surface);
-//			surface->Release();
-
-//			_graphics->set_render_target(0);
-
-//			requests->push_back(request);
+    request->bitmap = new fw::bitmap(*render_target.get());
+    requests->push_back(request);
   }
 
   // create a thread to finish the job
   std::thread t(std::bind(&call_callacks_thread_proc, requests));
+  t.detach();
 
   _screenshots.clear();
 }

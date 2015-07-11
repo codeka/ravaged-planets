@@ -147,11 +147,22 @@ void graphics::run_on_render_thread(std::function<void()> fn) {
   _run_queue.push_back(fn);
 }
 
-void graphics::set_render_target(texture *tex) {
-  if (tex != nullptr) {
-    tex->bind_framebuffer();
+void graphics::set_render_target(texture *colour_target, texture *depth_target) {
+  if (colour_target != nullptr || depth_target != nullptr) {
+    std::vector<GLenum> draw_buffers;
+    if (colour_target != nullptr) {
+      colour_target->bind_framebuffer(true);
+      draw_buffers.push_back(GL_COLOR_ATTACHMENT0);
+    }
+    if (depth_target != nullptr) {
+      depth_target->bind_framebuffer(false);
+    }
+    if (draw_buffers.size() == 0) {
+      FW_CHECKED(glDrawBuffer(GL_NONE));
+    } else {
+      FW_CHECKED(glDrawBuffers(draw_buffers.size(), draw_buffers.data()));
+    }
   } else {
-    FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0));
     FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     FW_CHECKED(glDrawBuffer(GL_BACK));
   }

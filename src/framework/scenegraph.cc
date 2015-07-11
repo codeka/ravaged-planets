@@ -209,8 +209,9 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/
     shadow_shader = fw::shader::create("shadow.shader");
   }
 
-  if (render_target != 0)
-    g->set_render_target(render_target);
+  if (render_target != nullptr) {
+    g->set_render_target(render_target, nullptr);
+  }
 
   // set up the shadow sources that we'll need to render from first to
   // get the various shadows going...
@@ -255,7 +256,7 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/
 
   if (render_target != nullptr) {
     g->end_scene();
-    g->set_render_target(nullptr);
+    g->set_render_target(nullptr, nullptr);
   } else {
     // render the GUI now
     g->before_gui();

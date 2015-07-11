@@ -148,7 +148,7 @@ void texture::bind() const {
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 }
 
-void texture::bind_framebuffer() {
+void texture::bind_framebuffer(bool colour_buffer) {
   if (!_data) {
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
     FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
@@ -165,11 +165,12 @@ void texture::bind_framebuffer() {
   FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
   FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
- // FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL));
- // FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE));
 
-  FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _data->texture_id, 0));
-  FW_CHECKED(glDrawBuffer(GL_NONE));
+  if (colour_buffer) {
+    FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _data->texture_id, 0));
+  } else {
+    FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _data->texture_id, 0));
+  }
 }
 
 void texture::save_png(fs::path const &filename) {

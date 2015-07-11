@@ -50,7 +50,7 @@ void shadow_source::begin_scene() {
   frmwrk->set_camera(&_camera);
   _camera.update(framework::get_instance()->get_timer()->get_frame_time());
 
-  frmwrk->get_graphics()->set_render_target(_shadowmap.get());
+  frmwrk->get_graphics()->set_render_target(nullptr, _shadowmap.get());
 
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -62,7 +62,7 @@ void shadow_source::end_scene() {
   framework *frmwrk = fw::framework::get_instance();
 
   // reset the render target and camera back to the "real" one
-  frmwrk->get_graphics()->set_render_target(nullptr);
+  frmwrk->get_graphics()->set_render_target(nullptr, nullptr);
   frmwrk->set_camera(_real_camera);
 }
 

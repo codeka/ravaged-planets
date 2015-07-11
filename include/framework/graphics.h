@@ -67,8 +67,9 @@ public:
   void before_gui();
   void after_gui();
 
-  // Sets the render target to the given texture, or if the texture is NULL, back to the main backbuffer.
-  void set_render_target(texture *tex);
+  // Sets the render target to the given textures, (one for colour data, one for depth) or if the textures are
+  // both NULL, back to the main target.
+  void set_render_target(texture *colour_target, texture *depth_target);
 
   inline int get_width() { return _width; }
   inline int get_height() { return _height; }

@@ -35,7 +35,7 @@ public:
   void bind() const;
 
   /** Bind this texture as the current frame buffer. */
-  void bind_framebuffer();
+  void bind_framebuffer(bool colour_buffer);
 
   // gets the name of the file we were created from (or an empty string if we
   // weren't created from a file)
