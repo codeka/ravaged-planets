@@ -112,8 +112,7 @@ int input::bind_key(std::string const &keyname, input_bind_fn fn) {
 int input::bind_key(std::string keyname, input_binding const &binding) {
   key_names_map::iterator it = g_key_names.find(keyname);
   if (it == g_key_names.end()) {
-    BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("No such key:" + keyname));
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No such key:" + keyname));
   }
 
   return fw::bind_key(it->second, binding);
@@ -254,11 +253,11 @@ void callback(int key, Uint16 mod, bool is_down) {
       input_binding const &binding = it->second;
 
       // check that the correct ctrl/shift/alt combination is pressed as well
-      if (binding.ctrl && (mod & KMOD_CTRL) != 0)
+      if (binding.ctrl && (mod & KMOD_CTRL) == 0)
         continue;
-      if (binding.shift && (mod & KMOD_SHIFT) != 0)
+      if (binding.shift && (mod & KMOD_SHIFT) == 0)
         continue;
-      if (binding.alt && (mod & KMOD_ALT) != 0)
+      if (binding.alt && (mod & KMOD_ALT) == 0)
         continue;
 
       binding.fn(g_key_codes[key], is_down);
