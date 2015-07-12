@@ -69,6 +69,10 @@ public:
   /** Global 'click' signal, fired whenever you click the mouse. Widget may be null if you clicked on no widget. */
   boost::signals2::signal<void(int button, bool is_down, widget *widget)> sig_click;
 
+  bool is_mouse_over_widget() const {
+    return _widget_under_mouse != nullptr;
+  }
+
   inline drawable_manager *get_drawable_manager() const {
     return _drawable_manager;
   }

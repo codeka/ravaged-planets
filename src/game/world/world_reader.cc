@@ -66,6 +66,14 @@ void world_reader::read(std::string name) {
     _minimap_background = tex;
   }
 
+  wfe = wf.get_entry("screenshot.png", false /* for_write */);
+  if (wfe.exists()) {
+    wfe.close();
+
+    std::shared_ptr<fw::bitmap> bmp(new fw::bitmap(wfe.get_full_path()));
+    _screenshot = bmp;
+  }
+
   wfe = wf.get_entry(name + ".mapdesc", false /* for_write */);
   if (wfe.exists()) {
     wfe.close();

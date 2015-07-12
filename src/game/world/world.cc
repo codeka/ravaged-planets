@@ -45,10 +45,11 @@ world::~world() {
 
 void world::initialize() {
   _terrain = _reader->get_terrain();
- // _minimap_background = _reader->get_minimap_background();
+  _minimap_background = _reader->get_minimap_background();
   _name = _reader->get_name();
   _description = _reader->get_description();
   _author = _reader->get_author();
+  _screenshot = _reader->get_screenshot();
 
   _terrain->initialize();
 
@@ -120,12 +121,11 @@ void world::on_key_pause(std::string, bool is_down) {
 
 void world::on_key_screenshot(std::string, bool is_down) {
   if (!is_down) {
-    fw::framework::get_instance()->take_screenshot(0, 0,
-        std::bind(&world::screenshot_callback, this, std::placeholders::_1));
+    fw::framework::get_instance()->take_screenshot(0, 0, std::bind(&world::screenshot_callback, this, _1));
   }
 }
 
-void world::screenshot_callback(fw::bitmap const &screenshot) {
+void world::screenshot_callback(std::shared_ptr<fw::bitmap> screenshot) {
   // screenshots go under the data directory\screens folder
   fs::path base_path = fw::resolve("screens", true);
   if (!fs::exists(base_path)) {
@@ -154,7 +154,7 @@ void world::screenshot_callback(fw::bitmap const &screenshot) {
   }
 
   fs::path full_path = base_path / (boost::format("screen-%1$04d.png") % (max_file_number + 1)).str();
-  screenshot.save_bitmap(full_path.string());
+  screenshot->save_bitmap(full_path.string());
 }
 
 void world::update() {

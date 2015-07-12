@@ -27,7 +27,7 @@ private:
   bool file_quit_clicked(fw::gui::widget *w);
   bool tool_clicked(fw::gui::widget *w, std::string tool_name);
 
-  void map_screenshot_clicked_finished(fw::bitmap const &bmp);
+  void map_screenshot_clicked_finished(std::shared_ptr<fw::bitmap> bmp);
   bool map_screenshot_clicked(fw::gui::widget *w);
 
 public:

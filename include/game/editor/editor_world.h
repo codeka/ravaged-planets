@@ -35,15 +35,10 @@ protected:
   virtual void initialize_entities();
   virtual void initialize_pathing();
 
-  std::shared_ptr<fw::bitmap> _screenshot;
-
 public:
   editor_world(std::shared_ptr<game::world_reader> reader);
   virtual ~editor_world();
 
-  std::shared_ptr<fw::bitmap> get_screenshot() const {
-    return _screenshot;
-  }
   void set_screenshot(std::shared_ptr<fw::bitmap> bmp) {
     _screenshot = bmp;
   }

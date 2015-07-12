@@ -33,8 +33,9 @@ namespace fw {
 struct screenshot_request {
   int width;
   int height;
-  std::function<void(fw::bitmap const &)> callback;
-  fw::bitmap *bitmap;
+  bool include_gui;
+  std::function<void(std::shared_ptr<fw::bitmap> bmp)> callback;
+  std::shared_ptr<fw::bitmap> bitmap;
 };
 
 static framework *only_instance = 0;
@@ -319,7 +320,8 @@ bool framework::wait_events() {
   return true;
 }
 
-void framework::take_screenshot(int width, int height, std::function<void(fw::bitmap const &)> callback_fn) {
+void framework::take_screenshot(int width, int height, std::function<void(std::shared_ptr<fw::bitmap> bmp)> callback_fn,
+    bool include_gui /*= true */) {
   if (width == 0 || height == 0) {
     width = _graphics->get_width();
     height = _graphics->get_height();
@@ -328,6 +330,7 @@ void framework::take_screenshot(int width, int height, std::function<void(fw::bi
   screenshot_request *request = new screenshot_request();
   request->width = width;
   request->height = height;
+  request->include_gui = include_gui;
   request->callback = callback_fn;
 
   _screenshots.push_back(request);
@@ -336,8 +339,7 @@ void framework::take_screenshot(int width, int height, std::function<void(fw::bi
 /* This is called on another thread to call the callbacks that were registered against the "screenshot" request. */
 void call_callacks_thread_proc(std::shared_ptr<std::list<screenshot_request *>> requests) {
   BOOST_FOREACH(screenshot_request *request, *requests) {
-    request->callback(*request->bitmap);
-    delete request->bitmap;
+    request->callback(request->bitmap);
     delete request;
   }
 }
@@ -364,9 +366,9 @@ void framework::take_screenshots(sg::scenegraph &scenegraph) {
     framebuffer->set_colour_buffer(colour_target);
     framebuffer->set_depth_buffer(depth_target);
 
-    fw::render(scenegraph, framebuffer);
+    fw::render(scenegraph, framebuffer, request->include_gui);
 
-    request->bitmap = new fw::bitmap(*colour_target.get());
+    request->bitmap = std::shared_ptr<fw::bitmap>(new fw::bitmap(*colour_target.get()));
     requests->push_back(request);
   }
 

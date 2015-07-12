@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 
 namespace fw {
 class graphics;
@@ -130,7 +131,8 @@ public:
   // takes a screenshot at the end of the next frame, saves it to an fw::bitmap and
   // calls the given callback with the bitmap, specify 0 for width/height to take a
   // screenshot at the current resolution
-  void take_screenshot(int with, int height, std::function<void(fw::bitmap const &bmp)> callback_fn);
+  void take_screenshot(int with, int height, std::function<void(std::shared_ptr<fw::bitmap> bmp)> callback_fn,
+      bool include_gui = true);
 
   // gets or sets the camera we'll use for camera control
   void set_camera(camera *cam);

@@ -168,7 +168,7 @@ bool main_menu_window::file_quit_clicked(fw::gui::widget *w) {
   return true;
 }
 
-void main_menu_window::map_screenshot_clicked_finished(fw::bitmap const &bmp) {
+void main_menu_window::map_screenshot_clicked_finished(std::shared_ptr<fw::bitmap> bmp) {
 /*  // re-show the UI, we don't need to hide it anymore!
   fw::framework::get_instance()->get_gui()->get_root_window()->setVisible(true);
 

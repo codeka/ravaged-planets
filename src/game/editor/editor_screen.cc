@@ -88,10 +88,16 @@ void editor_screen::render(fw::sg::scenegraph &scenegraph) {
     scenegraph.add_light(light);
   }
 
-  if (_world != nullptr)
+  if (_world != nullptr) {
     _world->render(scenegraph);
-  if (_tool != nullptr)
-    _tool->render(scenegraph);
+  }
+
+  if (_tool != nullptr) {
+    // Only render the tool if the mouse isn't currently over a widget.
+    if (!fw::framework::get_instance()->get_gui()->is_mouse_over_widget()) {
+      _tool->render(scenegraph);
+    }
+  }
 }
 
 void editor_screen::new_map(int width, int height) {
