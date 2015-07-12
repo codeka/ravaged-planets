@@ -12,10 +12,10 @@
   ]]></source>
   <source name="fragment"><![CDATA[
     in vec2 val;
-    out vec3 colour;
+    out vec4 colour;
 
     void main() {
-      colour = vec3(val.x / val.y);
+      colour = vec4(1,0,0,1);// vec3(val.x / val.y);
     }
   ]]></source>
   <program name="default">

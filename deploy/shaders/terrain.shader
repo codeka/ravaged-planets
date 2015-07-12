@@ -3,7 +3,7 @@
   <source name="vertex"><![CDATA[
     uniform mat4 worldviewproj;
     uniform mat4 worldview;
-    uniform mat4 view_to_light;
+    uniform mat4 lightviewproj;
 
     layout (location = 0) in vec3 position;
     layout (location = 1) in vec3 normal;
@@ -19,8 +19,7 @@
       tex = vec2(position.x, position.z);
 
       // transform the position to light projection space
-      vec4 view_pos = worldview * vec4(position, 1);
-      light_pos = view_to_light * view_pos;
+      light_pos = lightviewproj * vec4(position, 1);
     }
   ]]></source>
   <source name="fragment"><![CDATA[
@@ -33,14 +32,15 @@
     uniform sampler2D layer3;
     uniform sampler2D layer4;
     uniform sampler2D splatt;
+    uniform sampler2DShadow shadow_map;
 
     out vec4 colour;
 
     float patch_size = 64;
 
     void main() {
-      // work out how much this pixel is being affected by shadow(s)
-      float light_amount = 1.0;//calculate_shadow_factor(light_pos);
+      vec2 uv = 0.5 * (light_pos.xy / light_pos.w) + 0.5;
+      float light_amount = 1.0;// texture(shadow_map, vec3(uv, light_pos.z / light_pos.w));
 
       // calculate the diffuse light
       float ambient = 0.5;
@@ -55,7 +55,7 @@
       // this only allows for four different kinds of texture, but maybe there's something
       // we can do about this (encoding the splatt texture differently, perhaps?)
       vec4 base_colour;
-      vec2 uv = tex / 8.0;
+      uv = tex / 8.0;
       base_colour  = weights.r * texture(layer1, uv);
       base_colour += weights.g * texture(layer2, uv);
       base_colour += weights.b * texture(layer3, uv);

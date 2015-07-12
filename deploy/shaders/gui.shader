@@ -106,20 +106,6 @@
       color = texture(texsampler, vec2(new_x, new_y));
     }
   ]]></source>
-  <source name="fragment-depth"><![CDATA[
-    uniform sampler2D texsampler;
-    in vec2 tex;
-    out vec4 color;
-
-    void main() {
-      float z = texture(texsampler, tex).r;
-      float n = 200.0;
-      float f = 500.0;
-      float c = (2.0 * n) / (f + n - z * (f - n));
-
-      color = vec4(vec3(c), 1); 
-    }
-  ]]></source>
   <program name="default">
     <vertex-shader source="vertex" />
     <fragment-shader source="fragment-normal" />
@@ -137,13 +123,6 @@
   <program name="ninepatch">
     <vertex-shader source="vertex" />
     <fragment-shader source="fragment-ninepatch" />
-    <state name="z-write" value="off" />
-    <state name="z-test" value="off" />
-    <state name="blend" value="alpha" />
-  </program>
-  <program name="depth">
-    <vertex-shader source="vertex" />
-    <fragment-shader source="fragment-depth" />
     <state name="z-write" value="off" />
     <state name="z-test" value="off" />
     <state name="blend" value="alpha" />

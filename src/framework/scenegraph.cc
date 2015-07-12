@@ -200,6 +200,8 @@ scenegraph::~scenegraph() {
 }
 
 //-----------------------------------------------------------------------------------------
+static const bool g_shadow_debug = false;
+
 // renders the scene!
 void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_target /*= nullptr*/,
     bool render_gui /*= true*/) {
@@ -216,7 +218,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_
   for(auto it = scenegraph.get_lights().begin(); it != scenegraph.get_lights().end(); ++it) {
     if ((*it)->get_cast_shadows()) {
       std::shared_ptr<shadow_source> shdwsrc(new shadow_source());
-      shdwsrc->initialize();
+      shdwsrc->initialize(g_shadow_debug);
 
       light_camera &cam = shdwsrc->get_camera();
       cam.set_location((*it)->get_position());
@@ -250,7 +252,10 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_
   }
 
   // make sure the shadowsrc is empty
-//  std::shared_ptr<shadow_source> test = shadowsrc;
+  std::shared_ptr<shadow_source> debug_shadowsrc;
+  if (g_shadow_debug) {
+    debug_shadowsrc = shadowsrc;
+  }
   if (shadowsrc) {
     shadowsrc.reset();
   }
@@ -259,8 +264,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_
     // render the GUI now
     g->before_gui();
 
-/*
-    if (test) {
+    if (g_shadow_debug && debug_shadowsrc) {
       std::shared_ptr<shader> shader = shader::create("gui.shader");
       std::shared_ptr<shader_parameters> shader_params = shader->create_parameters();
       fw::matrix pos_transform;
@@ -268,8 +272,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_
       pos_transform = fw::scale(fw::vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::vector(440.0f, 280.0f, 0)) * pos_transform;
       shader_params->set_matrix("pos_transform", pos_transform);
       shader_params->set_matrix("uv_transform", fw::identity());
-      shader_params->set_texture("texsampler", test->get_shadowmap());
-      shader_params->set_program_name("depth");
+      shader_params->set_texture("texsampler", debug_shadowsrc->get_shadowmap()->get_colour_buffer());
 
       std::shared_ptr<vertex_buffer> vb = vertex_buffer::create<vertex::xyz_uv>();
       fw::vertex::xyz_uv vertices[4];
@@ -290,14 +293,11 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_
       vb->begin();
       ib->begin();
       shader->begin(shader_params);
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE));
-
       FW_CHECKED(glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr));
       shader->end();
       ib->end();
       vb->end();
     }
-*/
 
     framework::get_instance()->get_gui()->render();
     g->after_gui();

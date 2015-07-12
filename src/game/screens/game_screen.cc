@@ -78,7 +78,7 @@ void game_screen::render(fw::sg::scenegraph &scenegraph) {
   fw::vector cam_dir = old_cam->get_forward();
   fw::vector lookat = _world->get_terrain()->get_cursor_location(cam_pos, cam_dir);
 
-  std::shared_ptr <fw::sg::light> light(new fw::sg::light(lookat + sun * 200.0f, sun * -1, true));
+  std::shared_ptr <fw::sg::light> light(new fw::sg::light(/*lookat +*/ sun * 200.0f, sun * -1, true));
   scenegraph.add_light(light);
 
   _world->render(scenegraph);

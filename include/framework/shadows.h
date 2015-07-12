@@ -33,7 +33,7 @@ public:
   shadow_source();
   ~shadow_source();
 
-  void initialize();
+  void initialize(bool debug = false);
   void destroy();
 
   // this should be called before you call graphics::begin_scene to

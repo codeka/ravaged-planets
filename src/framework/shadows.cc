@@ -10,7 +10,6 @@
 namespace fw {
 
 light_camera::light_camera() {
-  //set_projection_matrix(cml::constantsf::pi() / 8.0f, 1.0f, 100.0f, 500.0f);
   set_projection_matrix(cml::constantsf::pi() / 8.0f, 1.0f, 200.0f, 500.0f);
 }
 
@@ -31,12 +30,18 @@ shadow_source::~shadow_source() {
   }
 }
 
-void shadow_source::initialize() {
+void shadow_source::initialize(bool debug /*= false */) {
   if (g_shadowbuffers.empty()) {
     _shadowbuffer = std::shared_ptr<framebuffer>(new framebuffer());
     std::shared_ptr<fw::texture> depth_texture(new texture());
     depth_texture->create(1024, 1024, true);
     _shadowbuffer->set_depth_buffer(depth_texture);
+
+    if (debug) {
+      std::shared_ptr<fw::texture> colour_texture(new texture());
+      colour_texture->create(1024, 1024, false);
+      _shadowbuffer->set_colour_buffer(colour_texture);
+    }
   } else {
     _shadowbuffer = g_shadowbuffers.front();
     g_shadowbuffers.pop_front();
