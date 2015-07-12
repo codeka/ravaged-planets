@@ -89,6 +89,8 @@ bool save_map_window::screenshot_clicked(widget *w) {
 }
 
 void save_map_window::screenshot_complete(std::shared_ptr<fw::bitmap> bitmap) {
+  bitmap->resize(640, 480);
+
   auto world = dynamic_cast<editor_world *>(game::world::get_instance());
   world->set_screenshot(bitmap);
   fw::framework::get_instance()->get_graphics()->run_on_render_thread([this]() {
