@@ -15,7 +15,7 @@ public:
   dimension();
   virtual ~dimension();
 
-  virtual float get_value(float parent_value) = 0;
+  virtual float get_value(fw::gui::widget *w, float parent_value) = 0;
 };
 
 class pixel_dimension : public dimension {
@@ -26,7 +26,7 @@ public:
   pixel_dimension(float value);
   virtual ~pixel_dimension();
 
-  float get_value(float parent_value);
+  float get_value(fw::gui::widget *w, float parent_value);
 };
 
 class percent_dimension : public dimension {
@@ -37,7 +37,7 @@ public:
   percent_dimension(float value);
   virtual ~percent_dimension();
 
-  float get_value(float parent_value);
+  float get_value(fw::gui::widget *w, float parent_value);
 };
 
 class sum_dimension : public dimension {
@@ -49,7 +49,27 @@ public:
   sum_dimension(std::shared_ptr<dimension> one, std::shared_ptr<dimension> two);
   virtual ~sum_dimension();
 
-  float get_value(float parent_value);
+  float get_value(fw::gui::widget *w, float parent_value);
+};
+
+enum other_dimension {
+  top,
+  left,
+  width,
+  height,
+};
+
+/** A dimension that's defined as a fraction of another dimension (e.g. width = 50% of the height, etc). */
+class fraction_dimension : public dimension {
+private:
+  other_dimension _other_dimension;
+  float _fraction;
+
+public:
+  fraction_dimension(other_dimension dim, float fraction);
+  virtual ~fraction_dimension();
+
+  float get_value(fw::gui::widget *w, float parent_value);
 };
 
 inline std::shared_ptr<dimension> px(float value) {
@@ -62,6 +82,10 @@ inline std::shared_ptr<dimension> pct(float value) {
 
 inline std::shared_ptr<dimension> sum(std::shared_ptr<dimension> one, std::shared_ptr<dimension> two) {
   return std::shared_ptr<dimension>(new sum_dimension(one, two));
+}
+
+inline std::shared_ptr<dimension> fract(other_dimension dimen, float fraction) {
+  return std::shared_ptr<dimension>(new fraction_dimension(dimen, fraction));
 }
 
 /** Base class for properties that can be added to buildable objects. */

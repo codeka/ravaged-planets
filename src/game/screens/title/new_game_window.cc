@@ -49,21 +49,22 @@ void new_game_window::initialize(main_menu_window *main_menu_window) {
   _main_menu_window = main_menu_window;
   _wnd = builder<window>(px(0), px(0), pct(100), pct(100)) << window::background("title_background")
       << widget::visible(false)
-      // Title "Ravaged Planets"
       << (builder<label>(px(40), px(20), px(417), px(49)) << label::background("title_heading"))
-      // "A game by Dean Harding (dean@codeka.com.au)" text
       << (builder<label>(px(40), px(70), px(500), px(16))
           << label::text("A game by Dean Harding (dean@codeka.com.au)"))
       << (builder<label>(px(40), px(100), px(200), px(20)) << label::text("Choose map:"))
       << (builder<listbox>(px(40), px(120), px(200), sum(pct(100), px(-190)))
           << widget::id(MAP_LIST))
+      << (builder<window>(px(250), px(120), sum(pct(100), px(-260)), sum(pct(50), px(-120)))
+          << window::background("frame")
+          << (builder<label>(px(4), px(4), fract(fw::gui::height, 1.333f), sum(pct(100), px(-8)))
+              << label::background("frame")))
       << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Login")
           << widget::click(std::bind(&new_game_window::cancel_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-190)), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Cancel")
           << widget::click(std::bind(&new_game_window::cancel_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-350)), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Start game")
           << widget::click(std::bind(&new_game_window::start_game_clicked, this, _1)))
-      // "v1.2.3"
       << (builder<label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
           << label::text(fw::version_str));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);

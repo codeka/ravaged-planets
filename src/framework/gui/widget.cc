@@ -27,7 +27,7 @@ pixel_dimension::pixel_dimension(float value) :
 pixel_dimension::~pixel_dimension() {
 }
 
-float pixel_dimension::get_value(float parent_value) {
+float pixel_dimension::get_value(fw::gui::widget *w, float parent_value) {
   return _value;
 }
 
@@ -38,7 +38,7 @@ percent_dimension::percent_dimension(float value) :
 percent_dimension::~percent_dimension() {
 }
 
-float percent_dimension::get_value(float parent_value) {
+float percent_dimension::get_value(fw::gui::widget *w, float parent_value) {
   return parent_value * (_value / 100.0f);
 }
 
@@ -49,8 +49,34 @@ sum_dimension::sum_dimension(std::shared_ptr<dimension> one, std::shared_ptr<dim
 sum_dimension::~sum_dimension() {
 }
 
-float sum_dimension::get_value(float parent_value) {
-  return _one->get_value(parent_value) + _two->get_value(parent_value);
+float sum_dimension::get_value(fw::gui::widget *w, float parent_value) {
+  return _one->get_value(w, parent_value) + _two->get_value(w, parent_value);
+}
+
+fraction_dimension::fraction_dimension(other_dimension dim, float fraction) :
+    _other_dimension(dim), _fraction(fraction) {
+}
+
+fraction_dimension::~fraction_dimension() {
+}
+
+float fraction_dimension::get_value(fw::gui::widget *w, float parent_value) {
+  float other_value;
+  switch (_other_dimension) {
+  case top:
+    other_value = w->get_top();
+    break;
+  case left:
+    other_value = w->get_left();
+    break;
+  case width:
+    other_value = w->get_width();
+    break;
+  case height:
+    other_value = w->get_height();
+    break;
+  }
+  return other_value * _fraction;
 }
 
 //-----------------------------------------------------------------------------
@@ -333,7 +359,7 @@ void widget::set_visible(bool visible) {
 float widget::get_top() {
   float parent_top = (_parent != nullptr) ? _parent->get_top() : 0;
   float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();
-  return parent_top + _y->get_value(parent_size);
+  return parent_top + _y->get_value(this, parent_size);
 }
 
 void widget::set_top(std::shared_ptr<dimension> top) {
@@ -343,7 +369,7 @@ void widget::set_top(std::shared_ptr<dimension> top) {
 float widget::get_left() {
   float parent_left = (_parent != nullptr) ? _parent->get_left() : 0;
   float parent_size = (_parent != nullptr) ? _parent->get_width() : _gui->get_width();
-  return parent_left + _x->get_value(parent_size);
+  return parent_left + _x->get_value(this, parent_size);
 }
 
 void widget::set_left(std::shared_ptr<dimension> left) {
@@ -352,7 +378,7 @@ void widget::set_left(std::shared_ptr<dimension> left) {
 
 float widget::get_width() {
   float parent_size = (_parent != nullptr) ? _parent->get_width() : _gui->get_width();
-  return _width->get_value(parent_size);
+  return _width->get_value(this, parent_size);
 }
 
 void widget::set_width(std::shared_ptr<dimension> width) {
@@ -361,7 +387,7 @@ void widget::set_width(std::shared_ptr<dimension> width) {
 
 float widget::get_height() {
   float parent_size = (_parent != nullptr) ? _parent->get_height() : _gui->get_height();
-  return _height->get_value(parent_size);
+  return _height->get_value(this, parent_size);
 }
 
 void widget::set_height(std::shared_ptr<dimension> height) {
