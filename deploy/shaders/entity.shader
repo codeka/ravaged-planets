@@ -51,6 +51,7 @@
       float diffuse = (clamp(NdotL, 0.0, 1.0) * light_amount * ambient) + ambient;
 
       colour = base_colour * diffuse;
+      colour.a = 1.0;
     }
   ]]></source>
   <program name="default">

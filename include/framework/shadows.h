@@ -4,7 +4,7 @@
 
 namespace fw {
 class shader;
-class texture;
+class framebuffer;
 namespace sg {
 class scenegraph;
 }
@@ -26,7 +26,7 @@ public:
 class shadow_source: private boost::noncopyable {
 private:
   light_camera _camera;
-  std::shared_ptr<texture> _shadowmap;
+  std::shared_ptr<framebuffer> _shadowbuffer;
   camera *_real_camera;
 
 public:
@@ -49,9 +49,9 @@ public:
     return _camera;
   }
 
-  // gets the actual shadowmap texture
-  std::shared_ptr<texture> get_shadowmap() {
-    return _shadowmap;
+  // gets the actual framebuffer object
+  std::shared_ptr<framebuffer> get_shadowmap() {
+    return _shadowbuffer;
   }
 };
 

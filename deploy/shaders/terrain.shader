@@ -62,6 +62,7 @@
       base_colour += weights.a * texture(layer4, uv);
 
       colour = base_colour * diffuse;
+      colour.a = 1.0;
     }
   ]]></source>
   <program name="default">

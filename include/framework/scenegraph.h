@@ -12,7 +12,7 @@ class vertex_buffer;
 class index_buffer;
 class shader;
 class shader_parameters;
-class texture;
+class framebuffer;
 
 namespace sg {
 
@@ -193,5 +193,5 @@ public:
 };
 }
 
-void render(fw::sg::scenegraph &sg, fw::texture *render_target = nullptr);
+void render(fw::sg::scenegraph &sg, std::shared_ptr<fw::framebuffer> render_target = nullptr, bool render_gui = true);
 }

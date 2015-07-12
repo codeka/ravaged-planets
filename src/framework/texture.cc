@@ -18,20 +18,29 @@ namespace fw {
 //-------------------------------------------------------------------------
 struct texture_data: private boost::noncopyable {
   GLuint texture_id;
-  GLuint fbo_id;
-  bool is_render_target;
-  mutable int width, height;
+  int width, height;
   fs::path filename; // might be empty if we weren't created from a file
 
-  texture_data() : texture_id(0), is_render_target(false), width(-1), height(-1), fbo_id(0) {
+  texture_data() : texture_id(0), width(-1), height(-1) {
     FW_CHECKED(glGenTextures(1, &texture_id));
   }
 
   ~texture_data() {
     FW_CHECKED(glDeleteTextures(1, &texture_id));
-    if (fbo_id != 0) {
-      FW_CHECKED(glDeleteFramebuffers(1, &fbo_id));
-    }
+  }
+};
+
+struct framebuffer_data: private boost::noncopyable {
+  GLuint fbo_id;
+  std::shared_ptr<texture> colour_texture;
+  std::shared_ptr<texture> depth_texture;
+
+  framebuffer_data() {
+    FW_CHECKED(glGenFramebuffers(1, &fbo_id));
+  }
+
+  ~framebuffer_data() {
+    FW_CHECKED(glDeleteFramebuffers(1, &fbo_id));
   }
 };
 
@@ -148,31 +157,6 @@ void texture::bind() const {
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 }
 
-void texture::bind_framebuffer(bool colour_buffer) {
-  if (!_data) {
-    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
-    FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-    return;
-  }
-
-  if (_data->fbo_id == 0) {
-    FW_CHECKED(glGenFramebuffers(1, &_data->fbo_id));
-  }
-
-  FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, _data->fbo_id));
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
-  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-
-  if (colour_buffer) {
-    FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _data->texture_id, 0));
-  } else {
-    FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _data->texture_id, 0));
-  }
-}
-
 void texture::save_png(fs::path const &filename) {
   bitmap bmp(*this);
   bmp.save_bitmap(filename);
@@ -195,6 +179,85 @@ int texture::get_height() const {
 
 fs::path texture::get_filename() const {
   return _data->filename;
+}
+
+//-----------------------------------------------------------------------------
+framebuffer::framebuffer() : _data(new framebuffer_data()) {
+}
+
+framebuffer::~framebuffer() {
+}
+
+void framebuffer::set_colour_buffer(std::shared_ptr<texture> colour_texture) {
+  _data->colour_texture = colour_texture;
+}
+
+void framebuffer::set_depth_buffer(std::shared_ptr<texture> depth_texture) {
+  _data->depth_texture = depth_texture;
+}
+
+std::shared_ptr<texture> framebuffer::get_colour_buffer() const {
+  return _data->colour_texture;
+}
+
+std::shared_ptr<texture> framebuffer::get_depth_buffer() const {
+  return _data->depth_texture;
+}
+
+void framebuffer::bind() {
+  FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, _data->fbo_id));
+  if (_data->depth_texture) {
+    GLuint texture_id = _data->depth_texture->get_data()->texture_id;
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, texture_id));
+    FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+    FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_id, 0));
+  }
+
+  if (_data->colour_texture) {
+    GLuint texture_id = _data->colour_texture->get_data()->texture_id;
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, texture_id));
+    FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+    FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0));
+    FW_CHECKED(glDrawBuffer(GL_COLOR_ATTACHMENT0));
+  } else {
+    FW_CHECKED(glDrawBuffer(GL_NONE));
+  }
+
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  if (status != GL_FRAMEBUFFER_COMPLETE) {
+    fw::debug << "Framebuffer is not complete, expect errors: " << status << std::endl;
+  }
+}
+
+void framebuffer::unbind() {
+  FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+  FW_CHECKED(glDrawBuffer(GL_BACK));
+}
+
+int framebuffer::get_width() const {
+  if (_data->colour_texture) {
+    return _data->colour_texture->get_width();
+  } else if (_data->depth_texture) {
+    return _data->depth_texture->get_width();
+  } else {
+    return 0;
+  }
+}
+
+int framebuffer::get_height() const {
+  if (_data->colour_texture) {
+    return _data->colour_texture->get_height();
+  } else if (_data->depth_texture) {
+    return _data->depth_texture->get_height();
+  } else {
+    return 0;
+  }
 }
 
 }

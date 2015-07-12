@@ -12,6 +12,7 @@
 #include <framework/misc.h>
 #include <framework/shader.h>
 #include <framework/shadows.h>
+#include <framework/texture.h>
 #include <framework/gui/gui.h>
 
 static std::shared_ptr<fw::shader> shadow_shader;
@@ -143,7 +144,7 @@ void node::render_shader(std::shared_ptr<fw::shader> shader) {
       );
 
       parameters->set_matrix("lightviewproj", bias * lightviewproj);
-      parameters->set_texture("shadow_map", shadowsrc->get_shadowmap());
+      parameters->set_texture("shadow_map", shadowsrc->get_shadowmap()->get_depth_buffer());
     }
   }
 
@@ -200,7 +201,8 @@ scenegraph::~scenegraph() {
 
 //-----------------------------------------------------------------------------------------
 // renders the scene!
-void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/) {
+void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_target /*= nullptr*/,
+    bool render_gui /*= true*/) {
   ensure_primitive_type_map();
 
   graphics *g = fw::framework::get_instance()->get_graphics();
@@ -209,12 +211,7 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/
     shadow_shader = fw::shader::create("shadow.shader");
   }
 
-  if (render_target != nullptr) {
-    g->set_render_target(render_target, nullptr);
-  }
-
-  // set up the shadow sources that we'll need to render from first to
-  // get the various shadows going...
+  // set up the shadow sources that we'll need to render from first to get the various shadows going.
   std::vector<std::shared_ptr<shadow_source>> shadows;
   for(auto it = scenegraph.get_lights().begin(); it != scenegraph.get_lights().end(); ++it) {
     if ((*it)->get_cast_shadows()) {
@@ -233,7 +230,7 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/
   is_rendering_shadow = true;
   BOOST_FOREACH(shadowsrc, shadows) {
     shadowsrc->begin_scene();
-    g->begin_scene(true);
+    g->begin_scene();
     BOOST_FOREACH(std::shared_ptr<fw::sg::node> node, scenegraph.get_nodes()) {
       node->render(&scenegraph);
     }
@@ -242,8 +239,12 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/
   }
   is_rendering_shadow = false;
 
+  if (render_target) {
+    g->set_render_target(render_target);
+  }
+
   // now, render the main scene
-  g->begin_scene(false, scenegraph.get_clear_colour());
+  g->begin_scene(scenegraph.get_clear_colour());
   BOOST_FOREACH(std::shared_ptr<fw::sg::node> node, scenegraph.get_nodes()) {
     node->render(&scenegraph);
   }
@@ -254,10 +255,7 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/
     shadowsrc.reset();
   }
 
-  if (render_target != nullptr) {
-    g->end_scene();
-    g->set_render_target(nullptr, nullptr);
-  } else {
+  if (render_gui) {
     // render the GUI now
     g->before_gui();
 
@@ -303,8 +301,12 @@ void render(sg::scenegraph &scenegraph, fw::texture *render_target /*= nullptr*/
 
     framework::get_instance()->get_gui()->render();
     g->after_gui();
+  }
 
-    g->end_scene();
+  g->end_scene();
+  if (render_target) {
+    g->set_render_target(nullptr);
+  } else {
     g->present();
   }
 }

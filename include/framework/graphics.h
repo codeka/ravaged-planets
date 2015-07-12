@@ -16,7 +16,7 @@ typedef void *SDL_GLContext;
 struct SDL_Window;
 
 namespace fw {
-class texture;
+class framebuffer;
 
 // this is the type of error info we include with exception's when an error is detected by OpenGL
 typedef boost::error_info<struct tag_glerr, GLenum> gl_error_info;
@@ -47,6 +47,7 @@ private:
   SDL_GLContext _context;
   std::mutex _run_queue_mutex;
   std::vector<std::function<void()>> _run_queue;
+  std::shared_ptr<framebuffer> _framebuffer;
 
   int _width;
   int _height;
@@ -59,7 +60,7 @@ public:
   void initialize(char const *title);
   void destroy();
 
-  void begin_scene(bool depth_only = false, fw::colour clear_colour = fw::colour(1, 0, 0, 0));
+  void begin_scene(fw::colour clear_colour = fw::colour(1, 0, 0, 0));
   void end_scene();
   void present();
 
@@ -67,9 +68,8 @@ public:
   void before_gui();
   void after_gui();
 
-  // Sets the render target to the given textures, (one for colour data, one for depth) or if the textures are
-  // both NULL, back to the main target.
-  void set_render_target(texture *colour_target, texture *depth_target);
+  // Sets the render target to the given framebuffer.
+  void set_render_target(std::shared_ptr<framebuffer> fb);
 
   inline int get_width() { return _width; }
   inline int get_height() { return _height; }

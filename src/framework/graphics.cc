@@ -98,15 +98,13 @@ void graphics::destroy() {
   _context = nullptr;
 }
 
-void graphics::begin_scene(bool depth_only, fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
-  if (depth_only) {
-    FW_CHECKED(glViewport(0, 0, 1024, 1024));
-    FW_CHECKED(glClearColor(0, 0, 0, 0));
-    FW_CHECKED(glClearDepth(1.0));
+void graphics::begin_scene(fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
+  if (_framebuffer) {
+    FW_CHECKED(glViewport(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
   } else {
     FW_CHECKED(glViewport(0, 0, _width, _height));
-    FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
   }
+  FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
   FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
@@ -147,24 +145,16 @@ void graphics::run_on_render_thread(std::function<void()> fn) {
   _run_queue.push_back(fn);
 }
 
-void graphics::set_render_target(texture *colour_target, texture *depth_target) {
-  if (colour_target != nullptr || depth_target != nullptr) {
-    std::vector<GLenum> draw_buffers;
-    if (colour_target != nullptr) {
-      colour_target->bind_framebuffer(true);
-      draw_buffers.push_back(GL_COLOR_ATTACHMENT0);
-    }
-    if (depth_target != nullptr) {
-      depth_target->bind_framebuffer(false);
-    }
-    if (draw_buffers.size() == 0) {
-      FW_CHECKED(glDrawBuffer(GL_NONE));
-    } else {
-      FW_CHECKED(glDrawBuffers(draw_buffers.size(), draw_buffers.data()));
-    }
-  } else {
-    FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-    FW_CHECKED(glDrawBuffer(GL_BACK));
+void graphics::set_render_target(std::shared_ptr<framebuffer> fb) {
+  if (_framebuffer && !fb) {
+    _framebuffer->unbind();
+    _framebuffer = nullptr;
+    return;
+  }
+
+  _framebuffer = fb;
+  if (_framebuffer) {
+    _framebuffer->bind();
   }
 }
 

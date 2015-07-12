@@ -288,11 +288,11 @@ void framework::render() {
   _app->render(scenegraph);
   _particle_mgr->render(scenegraph);
 
-  // if we've been asked for some screenshots, take them before we do the normal render.
+  fw::render(scenegraph);
+
+  // if we've been asked for some screenshots, take them after we've done the normal render.
    if (_screenshots.size() > 0)
      take_screenshots(scenegraph);
-
-  fw::render(scenegraph);
 }
 
 bool framework::poll_events() {
@@ -343,22 +343,30 @@ void call_callacks_thread_proc(std::shared_ptr<std::list<screenshot_request *>> 
 }
 
 /**
- * This is called at the beginning of a frame if there are pending screenshot callbacks. We'll take the screenshot,
- * then (on another thread) get the data and call the callbacks.
+ * This is called at the end of a frame if there are pending screenshot callbacks. We'll grab the contents of the,
+ * frame buffer, then (on another thread) call the callbacks.
  */
 void framework::take_screenshots(sg::scenegraph &scenegraph) {
-  std::shared_ptr<std::list<screenshot_request *>> requests(new std::list<screenshot_request *>());
+  if (_screenshots.empty()) {
+    return;
+  }
 
+  std::shared_ptr<std::list<screenshot_request *>> requests(new std::list<screenshot_request *>());
   BOOST_FOREACH(screenshot_request *request, _screenshots) {
     // render the scene to a separate render target first
-    std::shared_ptr<fw::texture> render_target(new fw::texture());
-    render_target->create(request->width, request->height);
+    std::shared_ptr<fw::texture> colour_target(new fw::texture());
+    colour_target->create(request->width, request->height, false);
 
-    _graphics->set_render_target(render_target.get(), nullptr);
-    fw::render(scenegraph);
-    _graphics->set_render_target(nullptr, nullptr);
+    std::shared_ptr<fw::texture> depth_target(new fw::texture());
+    depth_target->create(request->width, request->height, true);
 
-    request->bitmap = new fw::bitmap(*render_target.get());
+    std::shared_ptr<fw::framebuffer> framebuffer(new fw::framebuffer());
+    framebuffer->set_colour_buffer(colour_target);
+    framebuffer->set_depth_buffer(depth_target);
+
+    fw::render(scenegraph, framebuffer);
+
+    request->bitmap = new fw::bitmap(*colour_target.get());
     requests->push_back(request);
   }
 

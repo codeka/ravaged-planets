@@ -165,7 +165,16 @@ void bitmap::load_bitmap(texture const &tex) {
 
   prepare_write(tex.get_width(), tex.get_height());
   tex.bind();
-  FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, _data->rgba.data()));
+  FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data->rgba.data()));
+
+  // OpenGL returns images with 0 at the bottom, but we want 0 at the top so we have to flip it
+  uint32_t *row_buffer = new uint32_t[_data->width];
+  for (int y = 0; y < _data->height / 2; y++) {
+    memcpy(row_buffer, &_data->rgba[y * _data->width], sizeof(uint32_t) * _data->width);
+    memcpy(&_data->rgba[y * _data->width], &_data->rgba[(_data->height - y - 1) * _data->width], sizeof(uint32_t) * _data->width);
+    memcpy(&_data->rgba[(_data->height - y - 1) * _data->width], row_buffer, sizeof(uint32_t) * _data->width);
+  }
+  delete[] row_buffer;
 }
 
 void bitmap::save_bitmap(fs::path const &filename) const {
