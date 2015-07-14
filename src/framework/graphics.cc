@@ -36,9 +36,14 @@ graphics::~graphics() {
 void graphics::initialize(char const *title) {
   settings stg;
 
-  _width = 640;
-  _height = 480;
   _windowed = stg.is_set("windowed");
+  if (_windowed) {
+    _width = stg.get_value<int>("windowed-width");
+    _height = stg.get_value<int>("windowed-height");
+  } else {
+    _width = stg.get_value<int>("fullscreen-width");
+    _height = stg.get_value<int>("fullscreen-height");
+  }
   fw::debug << "Graphics initializing; window size=" << _width << "x" << _height << ", windowed=" << _windowed
       << std::endl;
 
@@ -47,10 +52,22 @@ void graphics::initialize(char const *title) {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-  _wnd = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height,
-      SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+  int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
+  if (!_windowed) {
+    if (_width == 0 || _height == 0) {
+      flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    } else {
+      flags |= SDL_WINDOW_FULLSCREEN;
+    }
+  }
+  _wnd = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
   if (_wnd == nullptr) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::sdl_error_info(SDL_GetError()));
+  }
+
+  // If we didn't specify a width/height, we'll need to query the window for how big it is.
+  if (_width == 0 || _height == 0) {
+    SDL_GetWindowSize(_wnd, &_width, &_height);
   }
 
   _context = SDL_GL_CreateContext(_wnd);

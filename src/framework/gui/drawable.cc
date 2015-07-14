@@ -78,8 +78,11 @@ bitmap_drawable::~bitmap_drawable() {
 }
 
 void bitmap_drawable::render(float x, float y, float width, float height) {
+  // TODO: recalculating this every time seems wasteful
+  fw::graphics *g = fw::framework::get_instance()->get_graphics();
   fw::matrix pos_transform;
-  cml::matrix_orthographic_RH(pos_transform, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+  cml::matrix_orthographic_RH(pos_transform, 0.0f,
+      static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
   pos_transform = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * pos_transform;
   _shader_params->set_matrix("pos_transform", pos_transform);
 

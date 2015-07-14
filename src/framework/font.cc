@@ -240,8 +240,11 @@ void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str
     y -= data->distance_to_bottom;
   }
 
+  // TODO: recalculating this every time seems wasteful
+  fw::graphics *g = fw::framework::get_instance()->get_graphics();
   fw::matrix pos_transform;
-  cml::matrix_orthographic_RH(pos_transform, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+  cml::matrix_orthographic_RH(pos_transform, 0.0f,
+      static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
   pos_transform = fw::translation(x, y, 0.0f) * pos_transform;
 
   data->shader_params->set_matrix("pos_transform", pos_transform);

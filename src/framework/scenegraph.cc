@@ -267,8 +267,11 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_
     if (g_shadow_debug && debug_shadowsrc) {
       std::shared_ptr<shader> shader = shader::create("gui.shader");
       std::shared_ptr<shader_parameters> shader_params = shader->create_parameters();
+      // TODO: recalculating this every time seems wasteful
+      fw::graphics *g = fw::framework::get_instance()->get_graphics();
       fw::matrix pos_transform;
-      cml::matrix_orthographic_RH(pos_transform, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+      cml::matrix_orthographic_RH(pos_transform, 0.0f,
+          static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
       pos_transform = fw::scale(fw::vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::vector(440.0f, 280.0f, 0)) * pos_transform;
       shader_params->set_matrix("pos_transform", pos_transform);
       shader_params->set_matrix("uv_transform", fw::identity());
