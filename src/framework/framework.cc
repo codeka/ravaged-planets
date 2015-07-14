@@ -29,6 +29,8 @@
 #include <framework/input.h>
 #include <framework/gui/gui.h>
 
+using namespace std::placeholders;
+
 namespace fw {
 struct screenshot_request {
   int width;
@@ -136,7 +138,16 @@ bool framework::initialize(char const *title) {
   // start the game timer that'll record fps, elapsed time, etc.
   _timer->start();
 
+
+  _input->bind_function("toggle-fullscreen", std::bind(&framework::on_fullscreen_toggle, this, _1, _2));
+
   return true;
+}
+
+void framework::on_fullscreen_toggle(std::string keyname, bool is_down) {
+  if (!is_down) {
+    _graphics->toggle_fullscreen();
+  }
 }
 
 void framework::language_initialize() {
@@ -377,51 +388,6 @@ void framework::take_screenshots(sg::scenegraph &scenegraph) {
   t.detach();
 
   _screenshots.clear();
-}
-
-void framework::toggle_fullscreen() {/*
- if (_graphics == 0 || !_active)
- return;
-
- debug << boost::format("switching to %1%...") % (_graphics->windowed ? "full-screen" : "windowed") << std::endl;
- _graphics->windowed = !_graphics->windowed;
-
- // Set new window style
- if (_graphics->windowed)
- {
- // Going to windowed mode
- ::SetWindowLongPtr(_hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
- }
- else
- {
- // Save current location/size
- ::ZeroMemory(&_wp, sizeof(WINDOWPLACEMENT));
- _wp.length = sizeof(WINDOWPLACEMENT);
- ::GetWindowPlacement(_hwnd, &_wp);
-
- // Going to fullscreen mode
- ::SetWindowLongPtr(_hwnd, GWL_STYLE, WS_EX_TOPMOST);
-
- // Hide the window to avoid animation of blank windows
- ::ShowWindow(_hwnd, SW_HIDE);
- }
-
- // Reset the Device
- on_lost_device();
- _graphics->reset();
- on_reset_device();
-
- if (_graphics->windowed)
- {
- // Restore the window location/size
- ::SetWindowPlacement(_wnd->get_handle(), &_wp);
- }
-
- // Make the window visible
- if (!::IsWindowVisible(_hwnd))
- {
- ::ShowWindow(_hwnd, SW_SHOW);
- }*/
 }
 
 }

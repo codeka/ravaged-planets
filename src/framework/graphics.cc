@@ -190,6 +190,30 @@ void graphics::ensure_render_thread() {
   }
 }
 
+
+void graphics::toggle_fullscreen() {
+  fw::debug << boost::format("switching to %1%...") % (_windowed ? "full-screen" : "windowed") << std::endl;
+  _windowed = !_windowed;
+
+  fw::settings stg;
+  if (_windowed) {
+    _width = stg.get_value<int>("windowed-width");
+    _height = stg.get_value<int>("windowed-height");
+    SDL_SetWindowFullscreen(_wnd, 0);
+    SDL_SetWindowSize(_wnd, _width, _height);
+  } else {
+    _width = stg.get_value<int>("fullscreen-width");
+    _height = stg.get_value<int>("fullscreen-height");
+    if (_width != 0 && _height != 0) {
+      SDL_SetWindowSize(_wnd, _width, _height);
+      SDL_SetWindowFullscreen(_wnd, SDL_WINDOW_FULLSCREEN);
+    } else {
+      SDL_SetWindowFullscreen(_wnd, SDL_WINDOW_FULLSCREEN_DESKTOP);
+      SDL_GetWindowSize(_wnd, &_width, &_height);
+    }
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 index_buffer::index_buffer(bool dynamic/*= false */) :

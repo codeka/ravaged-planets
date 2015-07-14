@@ -78,6 +78,7 @@ namespace fw {
 
     po::options_description keybinding_options("Keybindings");
     keybinding_options.add_options()
+        ("bind.toggle-fullscreen", po::value<std::string>()->default_value("Alt+Enter"))
         ("bind.cam-left", po::value<std::string>()->default_value("Left"))
         ("bind.cam-right", po::value<std::string>()->default_value("Right"))
         ("bind.cam-forward", po::value<std::string>()->default_value("Up"))

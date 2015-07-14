@@ -64,6 +64,9 @@ public:
   void end_scene();
   void present();
 
+  // toggle between windowed and fullscreen mode.
+  void toggle_fullscreen();
+
   // These are called by the CEGUI system just before & just after it renders.
   void before_gui();
   void after_gui();

@@ -106,6 +106,8 @@ private:
 
   void language_initialize();
 
+  void on_fullscreen_toggle(std::string keyname, bool is_down);
+
 public:
   // construct a new framework that'll call the methods of the given base_app
   framework(base_app* app);
@@ -152,9 +154,6 @@ public:
 
   // exit the game
   void exit();
-
-  // toggle between windowed and fullscreen mode.
-  void toggle_fullscreen();
 
   timer *get_timer() const {
     return _timer;
