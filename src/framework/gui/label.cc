@@ -112,17 +112,26 @@ void label::set_text(std::string const &text) {
   _text = text;
 }
 
+std::string label::get_text() const {
+  return _text;
+}
+
 void label::set_background(std::shared_ptr<drawable> background, bool centred /*= false */) {
   _background = background;
   _background_centred = centred;
 }
 
 void label::set_background(std::shared_ptr<bitmap> bmp, bool centred /*= false*/) {
-  std::shared_ptr<fw::texture> texture(new fw::texture());
-  texture->create(bmp);
-  _background =
-      _gui->get_drawable_manager()->build_drawable(texture, 0, 0, texture->get_width(), texture->get_height());
-  _background_centred = centred;
+  if (!bmp) {
+    _background = nullptr;
+    _background_centred = centred;
+  } else {
+    std::shared_ptr<fw::texture> texture(new fw::texture());
+    texture->create(bmp);
+    _background =
+        _gui->get_drawable_manager()->build_drawable(texture, 0, 0, texture->get_width(), texture->get_height());
+    _background_centred = centred;
+  }
 }
 
 } }

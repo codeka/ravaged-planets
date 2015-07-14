@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <memory>
 #include <boost/filesystem.hpp>
 
 namespace fw {
@@ -16,19 +17,20 @@ namespace game {
 class world_summary {
 private:
   std::string _name;
-  bool _extra_loaded;
-  std::string _description;
-  std::string _author;
-  int _width;
-  int _height;
-  fw::bitmap *_screenshot;
+  mutable bool _extra_loaded;
+  mutable std::string _description;
+  mutable std::string _author;
+  mutable int _width;
+  mutable int _height;
+  mutable std::shared_ptr<fw::bitmap> _screenshot;
+  mutable int _num_players;
 
   // this is called when you request any of the "extra" info (which is anything other than the name), we load
   // up the data on-demand.
-  void ensure_extra_loaded();
+  void ensure_extra_loaded() const;
 
   // parse the <mapdesc> file and populate our extra stuff.
-  void parse_mapdesc_file(boost::filesystem::path const &filename);
+  void parse_mapdesc_file(boost::filesystem::path const &filename) const;
 
 public:
   world_summary();
@@ -41,25 +43,29 @@ public:
   std::string get_name() const {
     return _name;
   }
-  std::string get_description() {
+  std::string get_description() const {
     ensure_extra_loaded();
     return _description;
   }
-  std::string get_author() {
+  std::string get_author() const {
     ensure_extra_loaded();
     return _author;
   }
-  int get_width() {
+  int get_width() const {
     ensure_extra_loaded();
     return _width;
   }
-  int get_height() {
+  int get_height() const {
     ensure_extra_loaded();
     return _height;
   }
-  fw::bitmap *get_screenshot() {
+  std::shared_ptr<fw::bitmap> get_screenshot() const {
     ensure_extra_loaded();
     return _screenshot;
+  }
+  int get_num_players() const {
+    ensure_extra_loaded();
+    return _num_players;
   }
 };
 

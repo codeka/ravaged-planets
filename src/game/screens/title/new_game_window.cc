@@ -3,6 +3,7 @@
 #include <boost/foreach.hpp>
 
 #include <framework/framework.h>
+#include <framework/exception.h>
 #include <framework/misc.h>
 #include <framework/texture.h>
 #include <framework/logging.h>
@@ -19,7 +20,6 @@
 
 #include <game/application.h>
 //#include "../../session/session.h"
-//#include "../../simulation/simulation_thread.h"
 //#include "../../simulation/local_player.h"
 #include <game/world/world_vfs.h>
 #include <game/world/world.h>
@@ -28,6 +28,7 @@
 #include <game/screens/title/main_menu_window.h>
 #include <game/screens/title/new_ai_player_window.h>
 #include <game/screens/title/player_properties_window.h>
+#include <game/simulation/simulation_thread.h>
 
 using namespace std::placeholders;
 using namespace fw::gui;
@@ -57,8 +58,9 @@ void new_game_window::initialize(main_menu_window *main_menu_window) {
           << label::text("A game by Dean Harding (dean@codeka.com.au)"))
       << (builder<label>(px(40), px(100), px(200), px(20)) << label::text("Choose map:"))
       << (builder<listbox>(px(40), px(120), px(200), sum(pct(100), px(-190)))
-          << widget::id(MAP_LIST_ID))
-      << (builder<window>(px(250), px(120), sum(pct(100), px(-260)), sum(pct(50), px(-120)))
+          << widget::id(MAP_LIST_ID)
+          << listbox::item_selected(std::bind(&new_game_window::on_maps_selection_changed, this, _1)))
+      << (builder<window>(px(250), px(100), sum(pct(100), px(-260)), sum(pct(50), px(-100)))
           << window::background("frame")
           << (builder<label>(px(4), px(4), fract(fw::gui::height, 1.333f), sum(pct(100), px(-8)))
               << label::background("frame") << widget::id(MAP_SCREENSHOT_ID))
@@ -68,11 +70,11 @@ void new_game_window::initialize(main_menu_window *main_menu_window) {
               << label::text("Size: nxm Players: n") << widget::id(MAP_SIZE_ID))
           )
       << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Login")
-          << widget::click(std::bind(&new_game_window::cancel_clicked, this, _1)))
+          << widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-190)), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Cancel")
-          << widget::click(std::bind(&new_game_window::cancel_clicked, this, _1)))
+          << widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-350)), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Start game")
-          << widget::click(std::bind(&new_game_window::start_game_clicked, this, _1)))
+          << widget::click(std::bind(&new_game_window::on_start_game_clicked, this, _1)))
       << (builder<label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
           << label::text(fw::version_str));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
@@ -267,15 +269,19 @@ void new_game_window::select_map(std::string const &map_name) {
   _selection_changing = false;*/
 }
 
-bool new_game_window::maps_selection_changed(widget *w) {
-/*  if (_selection_changing)
-    return true;
-
-  _selection_changing = true;
+bool new_game_window::on_maps_selection_changed(int index) {
   update_selection();
-  _selection_changing = false;
-*/
   return true;
+}
+
+game::world_summary const &new_game_window::get_selected_world_summary() {
+  widget *selected_widget = _wnd->find<listbox>(MAP_LIST_ID)->get_selected_item();
+  if (selected_widget == nullptr) {
+    // should never happen (unless you have no maps installed at all)
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No selected world!"));
+  }
+
+  return boost::any_cast<game::world_summary const &>(selected_widget->get_data());
 }
 
 bool new_game_window::new_ai_clicked(widget *w) {
@@ -316,32 +322,13 @@ void new_game_window::add_chat_msg(std::string const &msg) {
 }
 
 void new_game_window::update_selection() {
-/*  if (_maps->getSelectedCount() == 0)
-    return;
+  game::world_summary const &ws = get_selected_world_summary();
+  simulation_thread::get_instance()->set_map_name(ws.get_name());
 
-  _last_selected = _maps->getLastSelectedItem();
-  if (_last_selected != 0) {
-    world_summary &ws = *reinterpret_cast<world_summary *>(_last_selected->getUserData());
-
-    simulation_thread::get_instance()->set_map_name(ws.get_name());
-
-    CEGUI::Window *description = get_child("NewGame/MapDescription");
-    fw::gui::set_text(description, ws.get_description());
-
-    CEGUI::Window *author = get_child("NewGame/MapAuthor");
-    if (ws.get_author() != "")
-      fw::gui::set_text(author, (boost::format("by %1%") % ws.get_author()).str());
-
-    CEGUI::Window *map_size = get_child("NewGame/MapSize");
-    fw::gui::set_text(map_size, (boost::format("%1% x %2%") % ws.get_width() % ws.get_height()).str());
-
-    if (ws.get_screenshot() != nullptr) {
-      set_screenshot(ws.get_screenshot());
-    } else {
-      fw::bitmap no_screenshot(fw::installed_data_path() / "images/no-screenshot.png");
-      set_screenshot(&no_screenshot);
-    }
-  }*/
+  _wnd->find<label>(MAP_NAME_ID)->set_text((boost::format("%s by %s") % ws.get_name() % ws.get_author()).str());
+  _wnd->find<label>(MAP_SIZE_ID)->set_text(
+      (boost::format("Size: %dx%d Players: %d") % ws.get_width() % ws.get_height() % ws.get_num_players()).str());
+  _wnd->find<label>(MAP_SCREENSHOT_ID)->set_background(ws.get_screenshot());
 }
 
 // sets the screenshot image, we need to create a CEGUI imageset and all that....
@@ -374,7 +361,7 @@ void new_game_window::set_screenshot(fw::bitmap *bmp) {
 
 // when we're ready to start, we need to mark our own player as ready and then
 // wait for others. Once they're ready as well, start_game() is called.
-bool new_game_window::start_game_clicked(widget *w) {
+bool new_game_window::on_start_game_clicked(widget *w) {
 //  simulation_thread::get_instance()->get_local_player()->local_player_is_ready();
 
  // _start_game->setEnabled(false);
@@ -415,7 +402,7 @@ bool new_game_window::multiplayer_enabled_checked(widget *w) {
   return true;
 }
 
-bool new_game_window::cancel_clicked(widget *w) {
+bool new_game_window::on_cancel_clicked(widget *w) {
   hide();
   _main_menu_window->show();
   return true;

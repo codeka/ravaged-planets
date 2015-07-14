@@ -30,9 +30,9 @@ private:
 
   std::vector<world_summary> _map_list;
 
-  bool start_game_clicked(fw::gui::widget *w);
-  bool cancel_clicked(fw::gui::widget *w);
-  bool maps_selection_changed(fw::gui::widget *w);
+  bool on_start_game_clicked(fw::gui::widget *w);
+  bool on_cancel_clicked(fw::gui::widget *w);
+  bool on_maps_selection_changed(int index);
   bool multiplayer_enabled_checked(fw::gui::widget *w);
   bool chat_send_clicked(fw::gui::widget *w);
   bool new_ai_clicked(fw::gui::widget *w);
@@ -49,6 +49,7 @@ private:
 
   void start_game();
 
+  game::world_summary const &get_selected_world_summary();
 public:
   new_game_window();
   ~new_game_window();
@@ -64,8 +65,7 @@ public:
   // when joining a game, the "Enable Multiplayer" checkbox needs to be removed
   void set_enable_multiplayer_visible(bool visible);
 
-  // selects the map with the given name. This is usually done to keep our
-  // selection in sync with the host.
+  // selects the map with the given name. This is usually done to keep our selection in sync with the host.
   void select_map(std::string const &map_name);
 };
 

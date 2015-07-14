@@ -39,6 +39,8 @@ public:
   void render();
 
   void set_text(std::string const &text);
+  std::string get_text() const;
+
   void set_background(std::shared_ptr<drawable> background, bool centred = false);
   void set_background(std::shared_ptr<bitmap> bmp, bool centred = false);
 };

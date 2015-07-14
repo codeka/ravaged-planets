@@ -21,38 +21,36 @@ fs::path find_map(std::string name);
 namespace game {
 
 world_summary::world_summary() :
-    _name(""), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0) {
+    _name(""), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0), _num_players(0) {
 }
 
 world_summary::world_summary(world_summary const &copy) :
-    _name(copy._name), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0) {
+    _name(copy._name), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0), _num_players(0) {
 }
 
 world_summary::~world_summary() {
 }
 
-void world_summary::ensure_extra_loaded() {
+void world_summary::ensure_extra_loaded() const {
   if (_extra_loaded)
     return;
 
   fs::path full_path(find_map(_name));
 
   auto screenshot_path = full_path / "screenshot.png";
-  if (fs::exists(screenshot_path))
-    _screenshot = new fw::bitmap(full_path / "screenshot.png");
-  else
-    _screenshot = nullptr;
+  if (fs::exists(screenshot_path)) {
+    _screenshot = std::shared_ptr<fw::bitmap>(new fw::bitmap(full_path / "screenshot.png"));
+  }
 
   parse_mapdesc_file(full_path / (_name + ".mapdesc"));
 
   _extra_loaded = true;
 }
 
-void world_summary::parse_mapdesc_file(fs::path const &filename) {
+void world_summary::parse_mapdesc_file(fs::path const &filename) const {
   fw::xml_element xml = fw::load_xml(filename, "mapdesc", 1);
 
-  for (fw::xml_element child = xml.get_first_child(); child.is_valid(); child =
-      child.get_next_sibling()) {
+  for (fw::xml_element child = xml.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_value() == "description") {
       _description = child.get_text();
     } else if (child.get_value() == "author") {
@@ -60,8 +58,17 @@ void world_summary::parse_mapdesc_file(fs::path const &filename) {
     } else if (child.get_value() == "size") {
       _width = boost::lexical_cast<int>(child.get_attribute("width"));
       _height = boost::lexical_cast<int>(child.get_attribute("height"));
+    } else if (child.get_value() == "players") {
+      _num_players = 0;
+      for (fw::xml_element player = child.get_first_child(); player.is_valid(); player = player.get_next_sibling()) {
+        if (player.get_value() == "player") {
+          _num_players ++;
+        } else {
+          fw::debug << boost::format("WARN: unknown child of <players>: %1%") % child.get_value() << std::endl;
+        }
+      }
     } else {
-      fw::debug << boost::format("WARN: unknown child of <wwmap>: %1%") % child.get_value() << std::endl;
+      fw::debug << boost::format("WARN: unknown child of <mapdesc>: %1%") % child.get_value() << std::endl;
     }
   }
 }
