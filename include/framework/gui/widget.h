@@ -62,11 +62,13 @@ enum other_dimension {
 /** A dimension that's defined as a fraction of another dimension (e.g. width = 50% of the height, etc). */
 class fraction_dimension : public dimension {
 private:
+  int _other_widget_id;
   other_dimension _other_dimension;
   float _fraction;
 
 public:
   fraction_dimension(other_dimension dim, float fraction);
+  fraction_dimension(int other_widget_id, other_dimension dim, float fraction);
   virtual ~fraction_dimension();
 
   float get_value(fw::gui::widget *w, float parent_value);
@@ -86,6 +88,10 @@ inline std::shared_ptr<dimension> sum(std::shared_ptr<dimension> one, std::share
 
 inline std::shared_ptr<dimension> fract(other_dimension dimen, float fraction) {
   return std::shared_ptr<dimension>(new fraction_dimension(dimen, fraction));
+}
+
+inline std::shared_ptr<dimension> fract(int other_widget_id, other_dimension dimen, float fraction) {
+  return std::shared_ptr<dimension>(new fraction_dimension(other_widget_id, dimen, fraction));
 }
 
 /** Base class for properties that can be added to buildable objects. */
@@ -187,6 +193,9 @@ public:
   widget *find(int id);
 
   widget *get_parent();
+
+  /** Gets the root parent, that is, keep looking up the parent chain until you find one that has a null parent. */
+  widget *get_root();
 
   template<typename T>
   inline T *find(int id) {

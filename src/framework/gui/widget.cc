@@ -54,13 +54,20 @@ float sum_dimension::get_value(fw::gui::widget *w, float parent_value) {
 }
 
 fraction_dimension::fraction_dimension(other_dimension dim, float fraction) :
-    _other_dimension(dim), _fraction(fraction) {
+    _other_dimension(dim), _fraction(fraction), _other_widget_id(-1) {
+}
+
+fraction_dimension::fraction_dimension(int other_widget_id, other_dimension dim, float fraction) :
+    _other_dimension(dim), _fraction(fraction), _other_widget_id(other_widget_id) {
 }
 
 fraction_dimension::~fraction_dimension() {
 }
 
 float fraction_dimension::get_value(fw::gui::widget *w, float parent_value) {
+  if (_other_widget_id >= 0) {
+    w = w->get_root()->find<widget>(_other_widget_id);
+  }
   float other_value;
   switch (_other_dimension) {
   case top:
@@ -228,6 +235,18 @@ void widget::on_attached_to_parent(widget *parent) {
 widget *widget::get_parent() {
   return _parent;
 }
+
+widget *widget::get_root() {
+  if (_parent == nullptr) {
+    return this;
+  }
+  widget *root = _parent;
+  while (root->_parent != nullptr) {
+    root = root->_parent;
+  }
+  return root;
+}
+
 
 void widget::on_focus_gained() {
   _focused = true;

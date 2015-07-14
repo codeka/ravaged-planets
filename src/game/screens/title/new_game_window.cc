@@ -35,7 +35,10 @@ using namespace fw::gui;
 namespace game {
 
 enum ids {
-  MAP_LIST = 743432
+  MAP_LIST_ID = 743432,
+  MAP_SCREENSHOT_ID,
+  MAP_NAME_ID,
+  MAP_SIZE_ID,
 };
 
 new_game_window::new_game_window() :
@@ -54,11 +57,16 @@ void new_game_window::initialize(main_menu_window *main_menu_window) {
           << label::text("A game by Dean Harding (dean@codeka.com.au)"))
       << (builder<label>(px(40), px(100), px(200), px(20)) << label::text("Choose map:"))
       << (builder<listbox>(px(40), px(120), px(200), sum(pct(100), px(-190)))
-          << widget::id(MAP_LIST))
+          << widget::id(MAP_LIST_ID))
       << (builder<window>(px(250), px(120), sum(pct(100), px(-260)), sum(pct(50), px(-120)))
           << window::background("frame")
           << (builder<label>(px(4), px(4), fract(fw::gui::height, 1.333f), sum(pct(100), px(-8)))
-              << label::background("frame")))
+              << label::background("frame") << widget::id(MAP_SCREENSHOT_ID))
+          << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(8), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
+              << label::text("<map name here>") << widget::id(MAP_NAME_ID))
+          << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(30), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
+              << label::text("Size: nxm Players: n") << widget::id(MAP_SIZE_ID))
+          )
       << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Login")
           << widget::click(std::bind(&new_game_window::cancel_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-190)), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Cancel")
@@ -78,11 +86,11 @@ void new_game_window::show() {
   _map_list = vfs.list_maps();
   BOOST_FOREACH(world_summary &ws, _map_list) {
     std::string title = ws.get_name();
-    _wnd->find<listbox>(MAP_LIST)->add_item(
+    _wnd->find<listbox>(MAP_LIST_ID)->add_item(
         builder<label>(px(8), px(0), pct(100), px(20)) << label::text(title) << widget::data(ws));
   }
   if (!_map_list.empty()) {
-    _wnd->find<listbox>(MAP_LIST)->select_item(0);
+    _wnd->find<listbox>(MAP_LIST_ID)->select_item(0);
   }
 /*
   _sig_players_changed_conn = simulation_thread::get_instance()->sig_players_changed.connect(
@@ -377,7 +385,7 @@ bool new_game_window::start_game_clicked(widget *w) {
 
 // once all players are ready to start, this is called to actually start the game
 void new_game_window::start_game() {
-  widget *selected_widget = _wnd->find<listbox>(MAP_LIST)->get_selected_item();
+  widget *selected_widget = _wnd->find<listbox>(MAP_LIST_ID)->get_selected_item();
   if (selected_widget == nullptr) {
     // should never happen (unless you have no maps installed at all)
     return;
