@@ -6,5 +6,5 @@ extern "C" {
 #include <lualib.h>
 }
 
-#include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
+//#include <luabind/luabind.hpp>
+//#include <luabind/object.hpp>

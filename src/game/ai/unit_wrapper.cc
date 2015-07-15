@@ -11,12 +11,12 @@ namespace game {
 
 // registers our class and methods and stuff in the given lua_State
 void unit_wrapper::register_class(lua_State *state) {
-  luabind::module(state)[luabind::class_<unit_wrapper>("Unit")
-      .def(luabind::constructor<>())
-      .property("kind", &unit_wrapper::l_get_kind)
-      .property("player_no", &unit_wrapper::l_get_player_no)
-      .property("state",&unit_wrapper::l_get_state)
-    ];
+ // luabind::module(state)[luabind::class_<unit_wrapper>("Unit")
+//      .def(luabind::constructor<>())
+ //     .property("kind", &unit_wrapper::l_get_kind)
+//      .property("player_no", &unit_wrapper::l_get_player_no)
+// //     .property("state",&unit_wrapper::l_get_state)
+//    ];
 }
 
 void unit_wrapper::set_entity(std::weak_ptr<ent::entity> const &ent) {

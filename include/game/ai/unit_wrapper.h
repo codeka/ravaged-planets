@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <luabind/wrapper_base.hpp>
+//#include <luabind/wrapper_base.hpp>
 
 struct lua_State;
 
@@ -17,7 +17,7 @@ namespace game {
 /**
  * Wraps entities so that Lua classes can inherit from and call methods on and so on.
  */
-class unit_wrapper: public luabind::wrap_base {
+class unit_wrapper/*: public luabind::wrap_base*/ {
 private:
   std::weak_ptr<ent::entity> _entity;
   ent::ownable_component *_ownable;

@@ -15,7 +15,7 @@ void l_log_debug(std::string const &msg);
 lua_context::lua_context() {
   _state = luaL_newstate();
   luaL_openlibs(_state);
-  luabind::open(_state);
+  //luabind::open(_state);
 
   // sets up our custom functions and so on
   setup_state();
@@ -28,21 +28,21 @@ lua_context::~lua_context() {
 void lua_context::setup_state() {
   // first, clear out the default package.path. we want to restrict where we look
   // for scripts to just those areas that we control
-  luabind::object package = luabind::globals(_state)["package"];
-  if (package.is_valid()) {
-    package["path"] = (fs::initial_path() / "?.lua").string();
-  }
+  //luabind::object package = luabind::globals(_state)["package"];
+ // if (package.is_valid()) {
+  //  package["path"] = (fs::initial_path() / "?.lua").string();
+ // }
 
   // add the log.debug() method
-  luabind::module(_state, "log")[luabind::def("debug", &l_log_debug)];
+ // luabind::module(_state, "log")[luabind::def("debug", &l_log_debug)];
 }
 
 void lua_context::add_path(fs::path const &path) {
-  luabind::object package = luabind::globals(_state)["package"];
-  if (package.is_valid()) {
-    // simply append the new path onto package.path
-    package["path"] = boost::lexical_cast<std::string>(package["path"]) + ";" + path.string();
-  }
+ // luabind::object package = luabind::globals(_state)["package"];
+ // if (package.is_valid()) {
+ //  // simply append the new path onto package.path
+ //   package["path"] = boost::lexical_cast<std::string>(package["path"]) + ";" + path.string();
+ // }
 }
 
 bool lua_context::load_script(fs::path const &filename) {

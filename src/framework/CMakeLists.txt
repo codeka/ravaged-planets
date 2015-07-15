@@ -39,7 +39,7 @@ target_link_libraries(framework
     ${OPENGL_LIBRARY}
     ${GLEW_LIBRARY}
     ${PROTOBUF_LIBRARY}
-    ${LUABIND_LIBRARY}
+    ${LUA_LIBRARY}
     ${ENET_LIBRARY}
     ${CURL_LIBRARY}
     freetype

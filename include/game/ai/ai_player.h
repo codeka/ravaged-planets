@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-#include <luabind/object.hpp>
+//#include <luabind/object.hpp>
 
 #include <game/simulation/player.h>
 #include <game/ai/update_queue.h>
@@ -10,6 +10,10 @@
 
 namespace fw {
 class lua_context;
+}
+
+namespace luabind {
+typedef void *object;
 }
 
 namespace game {
