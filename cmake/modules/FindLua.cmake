@@ -10,6 +10,7 @@ SET(LUA_SEARCH_PATHS
     /Library/Frameworks
     /usr/local
     /usr
+    /opt/local
 )
 
 find_path (LUA_INCLUDE_DIR lua.h
@@ -19,7 +20,7 @@ find_path (LUA_INCLUDE_DIR lua.h
     PATHS ${LUA_SEARCH_PATHS}
 )
 
-find_library (LUA_LIBRARY NAMES lua5.2 lua-5.2 PATHS ${LUA_SEARCH_PATHS})
+find_library (LUA_LIBRARY NAMES lua5.2 lua-5.2 lua.5.2 PATHS ${LUA_SEARCH_PATHS})
 
 find_package_handle_standard_args(Lua
     required_vars LUA_LIBRARY LUA_INCLUDE_DIR)

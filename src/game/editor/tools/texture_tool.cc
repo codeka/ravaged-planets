@@ -36,7 +36,7 @@ private:
   ed::texture_tool *_tool;
   window *_wnd;
 
-  bool on_radius_updated(int new_radius);
+  void on_radius_updated(int new_radius);
   void on_texture_selected(int index);
   void refresh_texture_icon(fw::gui::window *wnd, int layer_num);
 
@@ -90,10 +90,9 @@ void texture_tool_window::on_texture_selected(int index) {
   _tool->set_layer(index);
 }
 
-bool texture_tool_window::on_radius_updated(int value) {
+void texture_tool_window::on_radius_updated(int value) {
   int radius = value / 10;
   _tool->set_radius(radius);
-  return true;
 }
 
 // refreshes the icon of the given window which represents the given

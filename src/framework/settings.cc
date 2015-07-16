@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream>
 
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>

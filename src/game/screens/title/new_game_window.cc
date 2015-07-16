@@ -1,5 +1,6 @@
 #include <functional>
 #include <memory>
+#include <string>
 #include <boost/foreach.hpp>
 
 #include <framework/framework.h>
@@ -269,9 +270,8 @@ void new_game_window::select_map(std::string const &map_name) {
   _selection_changing = false;*/
 }
 
-bool new_game_window::on_maps_selection_changed(int index) {
+void new_game_window::on_maps_selection_changed(int index) {
   update_selection();
-  return true;
 }
 
 game::world_summary const &new_game_window::get_selected_world_summary() {

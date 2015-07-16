@@ -32,7 +32,7 @@ private:
 
   bool on_start_game_clicked(fw::gui::widget *w);
   bool on_cancel_clicked(fw::gui::widget *w);
-  bool on_maps_selection_changed(int index);
+  void on_maps_selection_changed(int index);
   bool multiplayer_enabled_checked(fw::gui::widget *w);
   bool chat_send_clicked(fw::gui::widget *w);
   bool new_ai_clicked(fw::gui::widget *w);

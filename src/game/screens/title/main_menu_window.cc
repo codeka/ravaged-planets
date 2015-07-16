@@ -1,4 +1,5 @@
 #include <functional>
+#include <string>
 
 #include <framework/framework.h>
 #include <framework/lang.h>

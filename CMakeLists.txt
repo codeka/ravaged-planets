@@ -15,6 +15,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 # Make sure we compile with C++11 features
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS off)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -36,8 +37,10 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 include_directories(include external/include external/include/SDL)
-if (UNIX)
+if (LINUX)
     link_directories(external/lib/linux)
+elseif (APPLE)
+    link_directories(external/lib/macos)
 endif()
 
 # Configure the config.h file
@@ -53,14 +56,16 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Lua REQUIRED)
-find_package(ENet REQUIRED)
 find_package(CURL REQUIRED)
+find_package(Png REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
 
-if(UNIX)
+if(LINUX)
     # I don't know why, but libSDL is importing symbols from libX11.
     find_package(X11 REQUIRED)
     list(APPEND SDL2_LIBRARY ${X11_LIBRARIES} pthread)
+elseif(APPLE)
+    find_package(BZip2 REQUIRED)
 endif()
 
 include_directories(${Boost_INCLUDE_DIR})
@@ -69,7 +74,6 @@ include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${PROTOBUF_INCLUDE_DIR})
 include_directories(${LUA_INCLUDE_DIR})
-include_directories(${ENET_INCLUDE_DIR})
 include_directories(${CURL_INCLUDE_DIR})
 
 add_subdirectory(src/version-number)

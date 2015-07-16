@@ -40,12 +40,20 @@ target_link_libraries(framework
     ${GLEW_LIBRARY}
     ${PROTOBUF_LIBRARY}
     ${LUA_LIBRARY}
-    ${ENET_LIBRARY}
     ${CURL_LIBRARY}
+    ${PNG_LIBRARY}
+    enet
     freetype
-    png
     z
     SDL2_static_2.0.3
     dl # not sure why SDL needs this
 )
+
+if(APPLE)
+    target_link_libraries(framework
+        -lobjc "-framework Foundation" "-framework Carbon" "-framework AppKit" "-framework AudioUnit"
+        "-framework CoreAudio" "-framework IOKit" "-framework ForceFeedback"
+        ${BZIP2_LIBRARY} iconv
+    )
+endif()
 

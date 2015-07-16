@@ -194,7 +194,7 @@ private:
   window *_wnd;
   ed::heightfield_tool *_tool;
 
-  bool on_radius_updated(int value);
+  void on_radius_updated(int value);
   bool on_tool_clicked(fw::gui::widget *w);
   bool on_import_clicked(fw::gui::widget *w);
   void on_import_file_selected(ed::open_file_window *ofw);
@@ -237,10 +237,9 @@ void heightfield_tool_window::hide() {
   _wnd->set_visible(false);
 }
 
-bool heightfield_tool_window::on_radius_updated(int value) {
+void heightfield_tool_window::on_radius_updated(int value) {
   int radius = value / 10;
   _tool->set_radius(radius);
-  return true;
 }
 
 bool heightfield_tool_window::on_import_clicked(fw::gui::widget *w) {

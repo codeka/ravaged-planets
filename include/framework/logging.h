@@ -33,7 +33,7 @@ namespace fw {
   class log_wrapper {
   private:
     boost::filesystem::path _filename;
-    thread_local static std::ostream *_log;
+    __thread static std::ostream *_log;
     log_sink _sink;
 
   public:
