@@ -37,7 +37,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 include_directories(include external/include external/include/SDL)
-if (LINUX)
+if (UNIX AND NOT APPLE)
     link_directories(external/lib/linux)
 elseif (APPLE)
     link_directories(external/lib/macos)
@@ -57,7 +57,7 @@ find_package(GLEW REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Lua REQUIRED)
 find_package(CURL REQUIRED)
-find_package(Png REQUIRED)
+find_package(PNG REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
 
 if(LINUX)

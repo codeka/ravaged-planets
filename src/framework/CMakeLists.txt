@@ -41,9 +41,9 @@ target_link_libraries(framework
     ${PROTOBUF_LIBRARY}
     ${LUA_LIBRARY}
     ${CURL_LIBRARY}
-    ${PNG_LIBRARY}
     enet
     freetype
+    ${PNG_LIBRARY}
     z
     SDL2_static_2.0.3
     dl # not sure why SDL needs this

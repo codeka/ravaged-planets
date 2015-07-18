@@ -102,6 +102,9 @@ inline packet_buffer &operator >>(packet_buffer &lhs, uint8_t &rhs) {
   return lhs;
 }
 
+#ifdef APPLE
+// CLang for Apple makes size_t a different type, but on other platforms, it's the same as uint64_t (or uint32_t).
+
 inline packet_buffer &operator <<(packet_buffer &lhs, size_t rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(&rhs), 0, sizeof(size_t));
   return lhs;
@@ -111,6 +114,8 @@ inline packet_buffer &operator >>(packet_buffer &lhs, size_t &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(&rhs), 0, sizeof(size_t));
   return lhs;
 }
+
+#endif
 
 inline packet_buffer &operator <<(packet_buffer &lhs, fw::vector const &rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(rhs.data()), 0, sizeof(float) * 3);
