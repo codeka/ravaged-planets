@@ -8,13 +8,11 @@
 #include <game/editor/editor_terrain.h>
 
 namespace ed {
-
-world_create::world_create() :
-    _width(-1), _height(-1) {
+    
+world_create::world_create() {
 }
 
-world_create::world_create(int width, int height) :
-    _width(width), _height(height) {
+world_create::world_create(int width, int height) {
   _terrain = create_terrain(width, height);
 }
 

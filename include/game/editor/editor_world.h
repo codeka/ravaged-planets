@@ -17,10 +17,6 @@ namespace ed {
 
 /** This is a specialization of world_reader that creates a brand new world from scratch. */
 class world_create: public game::world_reader {
-private:
-  int _width;
-  int _height;
-
 protected:
   virtual game::terrain *create_terrain(int width, int length);
 

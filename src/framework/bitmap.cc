@@ -15,22 +15,6 @@
 namespace fs = boost::filesystem;
 
 namespace fw {
-static void argb_2_rgba(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest);
-static void rgba_2_argb(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest);
-
-void argb_2_rgba(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest) {
-  dest.resize(src.size());
-  for (int i = 0; i < src.size(); i++) {
-    dest[i] = ((src[i] & 0xff000000) >> 24) | ((src[i] & 0x00ffffff) << 8);
-  }
-}
-
-void rgba_2_argb(std::vector<uint32_t> const &src, std::vector<uint32_t> &dest) {
-  dest.resize(src.size());
-  for (int i = 0; i < src.size(); i++) {
-    dest[i] = ((src[i] & 0xffffff00) >> 8) | ((src[i] & 0xff) << 24);
-  }
-}
 
 //-------------------------------------------------------------------------
 // This class contains the actual bitmap data, which is an array of 32-bit ARGB pixels
@@ -195,6 +179,8 @@ void bitmap::save_bitmap(fs::path const &filename) const {
   } else if (filename.extension() == ".bmp") {
     res = stbi_write_bmp(filename.c_str(), _data->width, _data->height, 4,
         reinterpret_cast<unsigned char *>(_data->rgba.data()));
+  } else {
+    res = 0;
   }
   if (res == 0) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error writing file."));
