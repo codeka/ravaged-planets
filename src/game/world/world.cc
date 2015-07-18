@@ -20,6 +20,7 @@
 #include <game/world/world.h>
 #include <game/world/world_reader.h>
 #include <game/world/terrain.h>
+#include <game/screens/hud/pause_window.h>
 #include <game/simulation/simulation_thread.h>
 #include <game/simulation/local_player.h>
 
@@ -113,7 +114,7 @@ void world::on_key_pause(std::string, bool is_down) {
     if (fw::framework::get_instance()->is_paused()) {
       fw::framework::get_instance()->unpause();
     } else {
-//      hud_pause->show();
+      hud_pause->show();
       fw::framework::get_instance()->pause();
     }
   }
@@ -162,8 +163,9 @@ void world::update() {
     return;
   }
   // if update is called, we can't be paused so hide the "pause" menu...
-//  if (hud_pause != 0 && hud_pause->is_visible())
-//    hud_pause->hide();
+  if (hud_pause != nullptr && hud_pause->is_visible()) {
+    hud_pause->hide();
+  }
 
   _cursor->update();
   _terrain->update();

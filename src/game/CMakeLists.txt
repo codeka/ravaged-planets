@@ -7,6 +7,7 @@ file(GLOB GAME_FILES
     editor/windows/*.cc
     entities/*.cc
     screens/*.cc
+    screens/hud/*.cc
     screens/title/*.cc
     session/*.cc
     simulation/*.cc
@@ -31,4 +32,3 @@ target_link_libraries(rp
 install(TARGETS rp RUNTIME DESTINATION bin)
 
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/ravagedplanets.conf" DESTINATION etc/ravaged-planets)
-

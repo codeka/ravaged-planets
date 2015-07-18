@@ -9,18 +9,22 @@
 #include <game/world/terrain.h>
 #include <game/world/world.h>
 #include <game/world/world_reader.h>
-//#include "../simulation/simulation_thread.h"
-//#include "../simulation/player.h"
-
+#include <game/simulation/simulation_thread.h>
+#include <game/simulation/player.h>
+#include <game/screens/hud/pause_window.h>
 #include <game/screens/game_screen.h>
 
 namespace game {
 
 game_screen::game_screen() : _world(nullptr) {
+  hud_pause = new pause_window();
+
+  hud_pause->initialize();
 }
 
 game_screen::~game_screen() {
   delete _world;
+  delete hud_pause;
 }
 
 void game_screen::set_options(std::shared_ptr<screen_options> opt) {
@@ -37,14 +41,6 @@ void game_screen::show() {
   reader->read(_options->map_name);
   _world = new world(reader);
 
-//  gui->set_active_layout("hud");
-//  if (hud_chat == nullptr) {
-//    hud_pause = new pause_window();
-//    hud_chat = new chat_window();
-//    hud_minimap = new minimap_window();
-//    hud_build = new build_window();
-//  }
-
   // initialize the world
   _world->initialize();
 
@@ -56,10 +52,6 @@ void game_screen::show() {
   // show the initial set of windows
 //  hud_chat->show();
 //  hud_minimap->show();
-
-  // todo: move these to "hud" folder (and actually give them functionality)
-//  CEGUI::Window *status = gui->get_window("StatusDisplay");
-//  status->setVisible(true);
 }
 
 void game_screen::update() {
