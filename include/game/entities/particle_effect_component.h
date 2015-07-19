@@ -29,6 +29,7 @@ public:
 
   virtual void initialize();
   virtual void update(float dt);
+  virtual void render(fw::sg::scenegraph &, fw::matrix const &);
 
   virtual int get_identifier() {
     return identifier;

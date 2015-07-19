@@ -65,6 +65,8 @@ void particle_manager::render(sg::scenegraph &scenegraph) {
 }
 
 std::shared_ptr<particle_effect> particle_manager::create_effect(std::string const &name) {
+  FW_ENSURE_RENDER_THREAD();
+
   std::shared_ptr<particle_effect_config> config = particle_effect_config::load(name);
   std::shared_ptr <particle_effect> effect(new particle_effect(this, config));
   effect->initialize();

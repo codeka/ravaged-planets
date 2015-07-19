@@ -35,12 +35,15 @@ void particle_effect_component::apply_template(std::shared_ptr<entity_component_
 }
 
 void particle_effect_component::initialize() {
-  fw::particle_manager *mgr = fw::framework::get_instance()->get_particle_mgr();
-  _effect = mgr->create_effect(_effect_name);
   _our_position = std::shared_ptr<entity>(_entity)->get_component<position_component>();
 }
 
 void particle_effect_component::update(float) {
+  if (!_effect) {
+    // It might not be created yet (since it only gets created on the render thread when we render).
+    return;
+  }
+
   if (_our_position != nullptr) {
     _effect->set_position(_our_position->get_position());
   }
@@ -49,5 +52,13 @@ void particle_effect_component::update(float) {
     std::shared_ptr<entity>(_entity)->get_manager()->destroy(_entity);
   }
 }
+
+void particle_effect_component::render(fw::sg::scenegraph &, fw::matrix const &) {
+  if (!_effect) {
+    fw::particle_manager *mgr = fw::framework::get_instance()->get_particle_mgr();
+    _effect = mgr->create_effect(_effect_name);
+  }
+}
+
 
 }

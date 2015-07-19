@@ -9,6 +9,8 @@
 namespace fw {
 
 std::shared_ptr<model> model_manager::get_model(std::string const &name) {
+  FW_ENSURE_RENDER_THREAD();
+
   auto it = _models.find(name);
   if (it == _models.end()) {
     model_reader reader;

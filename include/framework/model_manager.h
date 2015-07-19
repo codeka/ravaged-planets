@@ -12,6 +12,7 @@ private:
   std::map<std::string, std::shared_ptr<model>> _models;
 
 public:
+  /** Fetches the given model, must be called on the render thread. */
   std::shared_ptr<model> get_model(std::string const &name);
 };
 }

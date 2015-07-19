@@ -45,9 +45,9 @@ void game_screen::show() {
   _world->initialize();
 
   // notify all of the players that the world is loaded
-//  BOOST_FOREACH(player * plyr, simulation_thread::get_instance()->get_players()) {
-//    plyr->world_loaded();
-//  }
+  BOOST_FOREACH(player * plyr, simulation_thread::get_instance()->get_players()) {
+    plyr->world_loaded();
+  }
 
   // show the initial set of windows
 //  hud_chat->show();

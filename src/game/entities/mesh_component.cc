@@ -50,8 +50,8 @@ void mesh_component::owner_changed(ownable_component *ownable) {
 void mesh_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
   BOOST_FOREACH(auto & kvp, comp_template->properties) {
     if (kvp.first == "FileName") {
-      std::shared_ptr<fw::model> model = fw::framework::get_instance()->get_model_manager()->get_model(kvp.second);
-      set_model(model);
+      // Since we need to
+      _model_name = kvp.second;
     }
   }
 
@@ -68,15 +68,15 @@ void mesh_component::initialize() {
   }
 }
 
-void mesh_component::set_model(std::shared_ptr<fw::model> const &model) {
-  _model = model;
-  _model->set_colour(_colour);
-}
-
 void mesh_component::render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform) {
   std::shared_ptr<entity> entity(_entity);
   position_component *pos = entity->get_component<position_component>();
   if (pos != nullptr) {
+    if (!_model) {
+      _model = fw::framework::get_instance()->get_model_manager()->get_model(_model_name);
+      _model->set_colour(_colour);
+    }
+
     _model->render(scenegraph, pos->get_transform() * transform);
   }
 }

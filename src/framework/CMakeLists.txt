@@ -46,10 +46,14 @@ target_link_libraries(framework
     ${PNG_LIBRARY}
     z
     SDL2_static_2.0.3
-    dl # not sure why SDL needs this
 )
 
-if(APPLE)
+if(UNIX AND NOT APPLE)
+    target_link_libraries(framework
+        dl # not sure why SDL needs this
+        pthread
+    )
+elseif(APPLE)
     target_link_libraries(framework
         -lobjc "-framework Foundation" "-framework Carbon" "-framework AppKit" "-framework AudioUnit"
         "-framework CoreAudio" "-framework IOKit" "-framework ForceFeedback"

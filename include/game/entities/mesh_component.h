@@ -15,6 +15,7 @@ class ownable_component;
 class mesh_component: public entity_component {
 private:
   fw::colour _colour;
+  std::string _model_name;
   std::shared_ptr<fw::model> _model;
 
   // this is called when the entity's owner changes
@@ -33,7 +34,6 @@ public:
   // this is called after the entity has added all of it's components
   virtual void initialize();
 
-  void set_model(std::shared_ptr<fw::model> const &model);
   std::shared_ptr<fw::model> get_model() const {
     return _model;
   }
