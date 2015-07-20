@@ -3,7 +3,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 
-#include <framework/lua_context.h>
 #include <framework/lua.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
@@ -53,10 +52,10 @@ ai_player::ai_player(std::string const &name, script_desc *desc, uint8_t player_
 
   // add the ..\data\ai\common path to the package.path variable (so you can just go require("whatever") to load
   // stuff from there)
-  script->add_path(fw::install_base_path() / "ai/common/?.lua");
+  //script->add_path(fw::install_base_path() / "ai/common/?.lua");
 
   // also add the AI script's directory so we can pick up any extra scripts you might have defined
-  script->add_path(desc->filename.parent_path() / "?.lua");
+  //script->add_path(desc->filename.parent_path() / "?.lua");
 
   if (!script->load_script(_script_desc.filename.string())) {
     _is_valid = false;
