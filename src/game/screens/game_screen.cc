@@ -11,20 +11,24 @@
 #include <game/world/world_reader.h>
 #include <game/simulation/simulation_thread.h>
 #include <game/simulation/player.h>
+#include <game/screens/hud/minimap_window.h>
 #include <game/screens/hud/pause_window.h>
 #include <game/screens/game_screen.h>
 
 namespace game {
 
 game_screen::game_screen() : _world(nullptr) {
+  hud_minimap = new minimap_window();
   hud_pause = new pause_window();
 
+  hud_minimap->initialize();
   hud_pause->initialize();
 }
 
 game_screen::~game_screen() {
   delete _world;
   delete hud_pause;
+  delete hud_minimap;
 }
 
 void game_screen::set_options(std::shared_ptr<screen_options> opt) {
@@ -51,7 +55,7 @@ void game_screen::show() {
 
   // show the initial set of windows
 //  hud_chat->show();
-//  hud_minimap->show();
+  hud_minimap->show();
 }
 
 void game_screen::update() {
@@ -78,6 +82,8 @@ void game_screen::render(fw::sg::scenegraph &scenegraph) {
 
 void game_screen::hide() {
   _world->destroy();
+
+  hud_minimap->hide();
 }
 
 }

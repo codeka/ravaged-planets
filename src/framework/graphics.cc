@@ -226,6 +226,10 @@ index_buffer::~index_buffer() {
   FW_CHECKED(glDeleteBuffers(1, &_id));
 }
 
+std::shared_ptr<index_buffer> index_buffer::create() {
+  return std::shared_ptr<index_buffer>(new index_buffer());
+}
+
 void index_buffer::set_data(int num_indices, uint16_t const *indices, int flags) {
   FW_ENSURE_RENDER_THREAD();
   _num_indices = num_indices;

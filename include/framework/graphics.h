@@ -101,6 +101,8 @@ public:
   index_buffer(bool dynamic = false);
   ~index_buffer();
 
+  static std::shared_ptr<index_buffer> create();
+
   void set_data(int num_indices, uint16_t const *indices, int flags = -1);
 
   inline int get_num_indices() const {

@@ -23,6 +23,7 @@ class game_screen: public screen {
 private:
   world *_world;
   std::shared_ptr<game_screen_options> _options;
+  bool _initialized;
 
 public:
   game_screen();
