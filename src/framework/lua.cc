@@ -4,12 +4,14 @@
 
 #include <framework/lua.h>
 #include <framework/logging.h>
+#include <framework/paths.h>
 
 namespace fs = boost::filesystem;
 
 namespace fw {
 
-void l_log_debug(std::string const &msg);
+int l_debug_openlib(lua_State *);
+int l_debug_log(lua_State *);
 
 lua_context::lua_context() {
   _state = luaL_newstate();
@@ -24,15 +26,13 @@ lua_context::~lua_context() {
 }
 
 void lua_context::setup_state() {
-  // first, clear out the default package.path. we want to restrict where we look
-  // for scripts to just those areas that we control
-  //luabind::object package = luabind::globals(_state)["package"];
- // if (package.is_valid()) {
-  //  package["path"] = (fs::initial_path() / "?.lua").string();
- // }
+  // first, clear out the default package.path. we want to restrict where we look for scripts to just those areas that
+  // we control
+  set_search_pattern((fw::resolve("lua") / "?.lua").string());
 
-  // add the log.debug() method
- // luabind::module(_state, "log")[luabind::def("debug", &l_log_debug)];
+  // add the 'debug' library.
+  luaL_requiref(_state, "debug", &l_debug_openlib, 1);
+  lua_pop(_state, 1); // luaL_requiref leaves the library table on the stack
 }
 
 std::string get_string(lua_State *s, std::string const &name) {
@@ -83,8 +83,20 @@ bool lua_context::load_script(fs::path const &filename) {
 
 //-----------------------------------------------------------------------------
 
-void l_log_debug(std::string const &msg) {
-  debug << "LUA : " << msg << std::endl;
+int l_debug_openlib(lua_State *state) {
+  const luaL_Reg debug_lib[] = {
+    { "log", &l_debug_log},
+    { nullptr, nullptr }
+  };
+  luaL_newlib(state, debug_lib);
+
+  return 1;
+}
+
+int l_debug_log(lua_State *state) {
+  char const *msg = luaL_checkstring(state, 1);
+  fw::debug << "LUA : " << msg << std::endl;
+  return 0;
 }
 
 }
