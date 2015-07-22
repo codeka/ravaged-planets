@@ -93,6 +93,11 @@ public:
     lua_pop(state, 2);  // drop metatable and method table
   }
 
+  /** Registers the templated class as a static table. */
+  static void register_static(lua_State *state) {
+    
+  }
+
   /** Call the named Lua method from userdata method table. */
   static int call(lua_State *state, const char *method, int nargs=0, int nresults=LUA_MULTRET, int errfunc=0) {
     int base = lua_gettop(state) - nargs;  // userdata index
