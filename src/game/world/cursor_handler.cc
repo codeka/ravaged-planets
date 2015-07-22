@@ -66,6 +66,7 @@ void cursor_handler::update() {
         cursor_name = "attack";
       }
     } else {
+      // should never happen.
       cursor_name = "i-beam";
     }
   } else {

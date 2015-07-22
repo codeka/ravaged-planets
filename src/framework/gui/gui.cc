@@ -2,6 +2,7 @@
 #include <boost/foreach.hpp>
 
 #include <framework/framework.h>
+#include <framework/cursor.h>
 #include <framework/input.h>
 #include <framework/graphics.h>
 #include <framework/paths.h>
@@ -39,6 +40,9 @@ void gui::update(float dt) {
     _widget_under_mouse = wdgt;
     if (_widget_under_mouse != nullptr) {
       _widget_under_mouse->on_mouse_over();
+      fw::framework::get_instance()->get_cursor()->set_cursor(2, _widget_under_mouse->get_cursor_name());
+    } else {
+      fw::framework::get_instance()->get_cursor()->set_cursor(2, "");
     }
   }
   if (_widget_under_mouse != nullptr && (inp->mouse_dx() != 0.0f || inp->mouse_dy() != 0.0f)) {

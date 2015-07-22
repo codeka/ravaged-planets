@@ -247,6 +247,9 @@ widget *widget::get_root() {
   return root;
 }
 
+std::string widget::get_cursor_name() const {
+  return "arrow";
+}
 
 void widget::on_focus_gained() {
   _focused = true;

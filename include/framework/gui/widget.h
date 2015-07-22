@@ -157,6 +157,9 @@ public:
     return false;
   }
 
+  /** Gets the name of the cursor we want to display when the mouse is over us. */
+  virtual std::string get_cursor_name() const;
+
   virtual void update(float dt);
 
   /** Called just before render. You should not override this, it define the scissor rectangle and stuff like that. */

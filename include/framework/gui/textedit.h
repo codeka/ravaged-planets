@@ -38,6 +38,7 @@ public:
   virtual bool can_focus() const {
     return true;
   }
+  virtual std::string get_cursor_name() const;
 
   void select_all();
   std::string get_text() const;

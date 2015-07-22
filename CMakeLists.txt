@@ -80,6 +80,7 @@ add_subdirectory(src/version-number)
 add_subdirectory(src/framework)
 add_subdirectory(src/meshexp)
 add_subdirectory(src/font-test)
+add_subdirectory(src/lua-test)
 add_subdirectory(src/particle-test)
 add_subdirectory(src/mesh-test)
 add_subdirectory(src/game)
@@ -89,4 +90,3 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data/"
         DESTINATION share/ravaged-planets
         REGEX "\\.git" EXCLUDE
 )
-

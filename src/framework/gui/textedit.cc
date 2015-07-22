@@ -12,7 +12,6 @@
 
 namespace conv = boost::locale::conv;
 
-
 #define STB_TEXTEDIT_CHARTYPE uint32_t
 #define STB_TEXTEDIT_POSITIONTYPE int
 #define STB_TEXTEDIT_UNDOSTATECOUNT 99
@@ -196,6 +195,10 @@ void textedit::set_text(std::string const &text) {
   _buffer->codepoints = conv::utf_to_utf<uint32_t>(text);
 }
 
+std::string textedit::get_cursor_name() const {
+  return "i-beam";
+}
+
 void textedit::update(float dt) {
   if (_focused) {
     _cursor_flip_time += dt;
@@ -232,4 +235,3 @@ void textedit::render() {
 
 }
 }
-
