@@ -43,7 +43,7 @@ private:
   void on_maps_selection_changed(int index);
   bool multiplayer_enabled_checked(fw::gui::widget *w);
   bool chat_send_clicked(fw::gui::widget *w);
-  bool new_ai_clicked(fw::gui::widget *w);
+  bool on_new_ai_clicked(fw::gui::widget *w);
   bool player_properties_clicked(fw::gui::widget *w);
 
   void add_chat_msg(std::string const &user_name, std::string const &msg);

@@ -69,6 +69,9 @@ void new_game_window::initialize(main_menu_window *main_menu_window) {
               << label::text("<map name here>") << widget::id(MAP_NAME_ID))
           << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(30), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
               << label::text("Size: nxm Players: n") << widget::id(MAP_SIZE_ID))
+          << (builder<button>(sum(pct(100), px(-110)), sum(pct(100), px(-40)), px(100), px(30))
+              << button::text(fw::text("title.new-game.add-ai-player"))
+              << button::click(std::bind(&new_game_window::on_new_ai_clicked, this, _1)))
           )
       << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Login")
           << widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
@@ -263,7 +266,7 @@ game::world_summary const &new_game_window::get_selected_world_summary() {
   return boost::any_cast<game::world_summary const &>(selected_widget->get_data());
 }
 
-bool new_game_window::new_ai_clicked(widget *w) {
+bool new_game_window::on_new_ai_clicked(widget *w) {
  //new_ai_player->show();
   return true;
 }
