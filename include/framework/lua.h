@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <boost/filesystem.hpp>
 
@@ -49,6 +50,17 @@ public:
 template<typename T>
 struct lua_wrapper {
   T *wrapped;
+};
+
+/** Wrapper around a callback Lua function. */
+class lua_callback {
+  int _ref;
+  lua_State *_state;
+
+public:
+  lua_callback(lua_State *state, int ref);
+
+  void call();
 };
 
 /**
@@ -103,6 +115,13 @@ public:
       push(state, *it, gc);
       lua_rawseti(state, array, index);
     }
+  }
+
+  /** Grabs a Lua function off the stack. */
+  static std::shared_ptr<lua_callback> check_callback(lua_State *state, int index) {
+    lua_pushvalue(state, index);
+    int ref = luaL_ref(state, LUA_REGISTRYINDEX);
+    return std::shared_ptr<lua_callback>(new lua_callback(state, ref));
   }
 
   /** Call the named Lua method from userdata method table. */
@@ -328,11 +347,10 @@ public:
    * -- Lua code
    * class_name:some_method()
    */
-  static void register_static(lua_State *state) {
+  static void register_static(lua_State *state, T *obj) {
     register_without_constructor(state);
 
     // create a new instance and set it as a global variable with the given class name.
-    T *obj = new T(state);
     lua_helper<T>::push(state, obj, true);
     lua_setglobal(state, T::class_name);
   }

@@ -12,42 +12,50 @@ namespace fw {
 class lua_context;
 }
 
-namespace luabind {
-typedef void *object;
-}
-
 namespace game {
 
-// This implementation of player provides an AI player so that you can play
-// against the computer, if you don't have any friends.
+/** This implementation of player uses Lua scripts to perform the actions of a player. */
 class ai_player: public player {
 private:
-  typedef std::map<std::string, std::vector<luabind::object> > lua_event_map;
-  typedef std::map<std::string, luabind::object> unit_creator_map;
+  typedef std::map<std::string, std::vector<std::shared_ptr<fw::lua_callback>>> lua_event_map;
 
   script_desc _script_desc;
   std::shared_ptr<fw::lua_context> _script;
   update_queue _upd_queue;
   lua_event_map _event_map;
-  unit_creator_map _unit_creator_map;
   bool _is_valid;
 
   void fire_event(std::string const &event_name,
       std::map<std::string, std::string> const &parameters = std::map<std::string, std::string>());
 
-  luabind::object create_wrapper(std::string const &entity_name);
-  void issue_order(unit_wrapper *unit, luabind::object orders);
+  unit_wrapper *create_wrapper(std::string const &entity_name);
+  void issue_order(unit_wrapper *unit, std::map<std::string, std::string> &orders);
 
-  void l_set_ready();
-  void l_say(std::string const &msg);
-  void l_local_say(std::string const &msg);
-  void l_timer(float dt, luabind::object obj);
-  void l_register_unit(std::string name, luabind::object creator);
-  void l_event(std::string const &event_name, luabind::object obj);
-  luabind::object l_find_units(luabind::object params, lua_State* L);
-  void l_issue_order(luabind::object units, luabind::object orders);
+  int l_set_ready(fw::lua_context &ctx);
+  void set_ready();
+
+  int l_say(fw::lua_context &ctx);
+  void say(std::string const &msg);
+
+  int l_local_say(fw::lua_context &ctx);
+  void local_say(std::string const &msg);
+
+  int l_timer(fw::lua_context &ctx);
+  void timer(float dt, std::shared_ptr<fw::lua_callback> callback);
+
+  int l_event(fw::lua_context &ctx);
+  void event(std::string const &event_name, std::shared_ptr<fw::lua_callback> callback);
+
+  int l_find_units(fw::lua_context &ctx);
+  std::vector<unit_wrapper *> find_units(std::map<std::string, std::string> &params);
+
+  int l_issue_order(fw::lua_context &ctx);
+  void issue_order(std::vector<unit_wrapper *> &units, std::map<std::string, std::string> &orders);
 
 public:
+  static char const class_name[];
+  static fw::lua_registrar<ai_player>::method_definition methods[];
+
   ai_player(std::string const &name, script_desc *desc, uint8_t player_no);
   virtual ~ai_player();
 

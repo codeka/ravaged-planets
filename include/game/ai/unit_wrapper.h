@@ -2,9 +2,7 @@
 
 #include <memory>
 
-//#include <luabind/wrapper_base.hpp>
-
-struct lua_State;
+#include <framework/lua.h>
 
 namespace ent {
 class entity;
@@ -17,19 +15,23 @@ namespace game {
 /**
  * Wraps entities so that Lua classes can inherit from and call methods on and so on.
  */
-class unit_wrapper/*: public luabind::wrap_base*/ {
+class unit_wrapper {
 private:
   std::weak_ptr<ent::entity> _entity;
   ent::ownable_component *_ownable;
   ent::orderable_component *_orderable;
 
-  std::string l_get_kind();
-  int l_get_player_no();
-  std::string l_get_state();
+  int l_get_kind(fw::lua_context &ctx);
+  int l_get_player_no(fw::lua_context &ctx);
+  int l_get_state(fw::lua_context &ctx);
+
+  std::string get_kind();
+  int get_player_no();
+  std::string get_state();
 
 public:
-  // registers the unit_wrapper as the "Unit" class in LUA.
-  static void register_class(lua_State *state);
+  static char const class_name[];
+  static fw::lua_registrar<unit_wrapper>::method_definition methods[];
 
   // this must be called before you do anything with this wrapper
   void set_entity(std::weak_ptr<ent::entity> const &ent);

@@ -14,6 +14,8 @@ namespace po = boost::program_options;
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 
+std::shared_ptr<fw::lua_callback> g_callback;
+
 //-----------------------------------------------------------------------------
 class unit_wrapper {
 private:
@@ -31,14 +33,13 @@ class ai_player {
 private:
   int l_say(fw::lua_context &ctx);
   int l_find(fw::lua_context &ctx);
+  int l_timer(fw::lua_context &ctx);
 
   void say(std::string const &msg);
   std::vector<unit_wrapper *> find();
 public:
   static char const class_name[];
   static fw::lua_registrar<ai_player>::method_definition methods[];
-
-  ai_player(lua_State *state);
 };
 
 char const unit_wrapper::class_name[] = "unit";
@@ -64,12 +65,9 @@ char const ai_player::class_name[] = "player";
 fw::lua_registrar<ai_player>::method_definition ai_player::methods[] = {
   {"say", &ai_player::l_say},
   {"find", &ai_player::l_find},
+  {"timer", &ai_player::l_timer},
   {nullptr, nullptr}
 };
-
-ai_player::ai_player(lua_State *state) {
-
-}
 
 int ai_player::l_say(fw::lua_context &ctx) {
   char const *msg = luaL_checkstring(ctx.get_state(), 1);
@@ -81,6 +79,12 @@ int ai_player::l_find(fw::lua_context &ctx) {
   std::vector<unit_wrapper *> units(find());
   fw::lua_helper<unit_wrapper>::push(ctx.get_state(), units.begin(), units.end(), true);
   return 1;
+}
+
+int ai_player::l_timer(fw::lua_context &ctx) {
+  double time = luaL_checknumber(ctx.get_state(), 1);
+  g_callback = fw::lua_helper<ai_player>::check_callback(ctx.get_state(), 2);
+  return 0;
 }
 
 void ai_player::say(std::string const &msg) {
@@ -107,9 +111,14 @@ int main(int argc, char** argv) {
 
     fw::lua_context ctx;
     fw::lua_registrar<unit_wrapper>::register_without_constructor(ctx.get_state());
-    fw::lua_registrar<ai_player>::register_static(ctx.get_state());
+    fw::lua_registrar<ai_player>::register_static(ctx.get_state(), new ai_player());
     ctx.set_search_pattern("/home/deanh/Downloads/?.lua");
     ctx.load_script("/home/deanh/Downloads/main.lua");
+
+    if (g_callback) {
+      fw::debug << "g_callback is non-null, calling it now." << std::endl;
+      g_callback->call();
+    }
 
   } catch(std::exception &e) {
     std::string msg = boost::diagnostic_information(e);

@@ -18,12 +18,21 @@
 #include <game/entities/ownable_component.h>
 #include <game/entities/orderable_component.h>
 
-//#include <luabind/adopt_policy.hpp>
-//#include <luabind/raw_policy.hpp>
-
 namespace fs = boost::filesystem;
 
 namespace game {
+
+char const ai_player::class_name[] = "player";
+fw::lua_registrar<ai_player>::method_definition ai_player::methods[] = {
+  {"set_ready", &ai_player::l_set_ready},
+  {"say", &ai_player::l_say},
+  {"local_say", &ai_player::l_local_say},
+  {"timer", &ai_player::l_timer},
+  {"event", &ai_player::l_event},
+  {"find_units", &ai_player::l_find_units},
+  {"issue_order", &ai_player::l_issue_order},
+  {nullptr, nullptr}
+};
 
 ai_player::ai_player(std::string const &name, script_desc *desc, uint8_t player_no) {
   _script_desc = *desc;
@@ -36,26 +45,13 @@ ai_player::ai_player(std::string const &name, script_desc *desc, uint8_t player_
   // create a new lua_context for our script, then add all of our global
   // functions and so on to it
   std::shared_ptr<fw::lua_context> script(new fw::lua_context());
-/*
-  luabind::module(*script)[luabind::class_<ai_player>("ai_player")
-      .def("set_ready", &ai_player::l_set_ready)
-      .def("say", &ai_player::l_say)
-      .def("local_say", &ai_player::l_local_say)
-      .def("timer", &ai_player::l_timer)
-      .def("event", &ai_player::l_event)
-      .def("register_unit", &ai_player::l_register_unit)
-      .def("find_units", &ai_player::l_find_units, luabind::raw(boost::arg<3>()))
-      .def("issue_order", &ai_player::l_issue_order)];*/
-//  unit_wrapper::register_class(*script);
-//  luabind::globals(*script)["self"] = this;
-  //player->self = luabind::get_globals(state)["player"];
+  fw::lua_registrar<unit_wrapper>::register_without_constructor(script->get_state());
+  fw::lua_registrar<ai_player>::register_static(script->get_state(), this);
 
-  // add the ..\data\ai\common path to the package.path variable (so you can just go require("whatever") to load
-  // stuff from there)
-  //script->add_path(fw::install_base_path() / "ai/common/?.lua");
-
-  // also add the AI script's directory so we can pick up any extra scripts you might have defined
-  //script->add_path(desc->filename.parent_path() / "?.lua");
+  // add the ..\data\ai\common path to the search pattern, as well as the directory the script was loaded from.
+  std::string search_pattern = (fw::install_base_path() / "ai/common/?.lua").string()
+      + ";" + (desc->filename.parent_path() / "?.lua").string();
+  script->set_search_pattern(search_pattern);
 
   if (!script->load_script(_script_desc.filename.string())) {
     _is_valid = false;
@@ -68,29 +64,47 @@ ai_player::ai_player(std::string const &name, script_desc *desc, uint8_t player_
 ai_player::~ai_player() {
 }
 
-void ai_player::l_set_ready() {
+int ai_player::l_set_ready(fw::lua_context &ctx) {
+  set_ready();
+  return 1;
+}
+
+void ai_player::set_ready() {
   _is_ready_to_start = true;
 }
 
-void ai_player::l_say(std::string const &msg) {
-  // just "say" whatever they told us to say...
+int ai_player::l_say(fw::lua_context &ctx) {
+  std::string msg = luaL_checkstring(ctx.get_state(), 1);
+  say(msg);
+  return 1;
+}
+
+void ai_player::say(std::string const &msg) {
+  // just "say" whatever they told us to say.
   // todo: this should be a proper network call
   simulation_thread::get_instance()->sig_chat(_user_name, msg);
 }
 
-void ai_player::l_local_say(std::string const &msg) {
+int ai_player::l_local_say(fw::lua_context &ctx) {
+  std::string msg = luaL_checkstring(ctx.get_state(), 1);
+  local_say(msg);
+  return 1;
+}
+
+void ai_player::local_say(std::string const &msg) {
   // just "say" whatever they told us to say... (but just locally, it's for debugging your scripts, basically)
   simulation_thread::get_instance()->sig_chat(_user_name, msg);
 }
 
-void ai_player::l_timer(float dt, luabind::object obj) {
-  // this is called to queue a LUA function to our update_queue so we can call
-  // a LUA function at the given time
- // if (!obj.is_valid()) {
- //   return;
- // }
+int ai_player::l_timer(fw::lua_context &ctx) {
+  double dt = luaL_checknumber(ctx.get_state(), 1);
+  std::shared_ptr<fw::lua_callback> callback = fw::lua_helper<ai_player>::check_callback(ctx.get_state(), 2);
+  timer(dt, callback);
+  return 1;
+}
 
-  //_upd_queue.push(dt, std::bind<void>(obj));
+void ai_player::timer(float dt, std::shared_ptr<fw::lua_callback> callback) {
+  _upd_queue.push(dt, [callback]() { callback->call(); });
 }
 
 void ai_player::fire_event(std::string const &event_name, std::map<std::string, std::string> const &parameters) {
@@ -116,24 +130,21 @@ void ai_player::fire_event(std::string const &event_name, std::map<std::string, 
 //  }
 }
 
-void ai_player::l_event(std::string const &event_name, luabind::object obj) {
-  // this is called to queue a LUA function when the given named event occurs.
-//  if (!obj.is_valid()) {
- //   return;
- // }
-
-// lua_event_map::iterator it = _event_map.find(event_name);
- // if (it == _event_map.end()) {
- //   _event_map[event_name] = lua_event_map::mapped_type();
- //   it = _event_map.find(event_name);
- // }
-
-//  it->second.push_back(obj);
+int ai_player::l_event(fw::lua_context &ctx) {
+  std::string event_name = luaL_checkstring(ctx.get_state(), 1);
+  std::shared_ptr<fw::lua_callback> callback = fw::lua_helper<ai_player>::check_callback(ctx.get_state(), 2);
+  event(event_name, callback);
+  return 1;
 }
 
-// registers the given "creator" function that we'll use to create subclasses of unit_wrapper with
-void ai_player::l_register_unit(std::string name, luabind::object creator) {
- // _unit_creator_map[name] = creator;
+void ai_player::event(std::string const &event_name, std::shared_ptr<fw::lua_callback> callback) {
+  lua_event_map::iterator it = _event_map.find(event_name);
+  if (it == _event_map.end()) {
+    _event_map[event_name] = lua_event_map::mapped_type();
+    it = _event_map.find(event_name);
+  }
+
+  it->second.push_back(callback);
 }
 
 // this is the predicate we pass to the entity manager for our l_findunits() implementation
@@ -144,7 +155,7 @@ private:
   std::string _unit_type;
 
 public:
-  inline findunits_predicate(ai_player *plyr, luabind::object &params) : _plyr(plyr) {
+  inline findunits_predicate(ai_player *plyr, std::map<std::string, std::string> const &params) : _plyr(plyr) {
 //    luabind::iterator end;
  //   for (luabind::iterator it(params); it != end; ++it) {
   //    try {
@@ -203,103 +214,89 @@ public:
   }
 };
 
+int ai_player::l_find_units(fw::lua_context &ctx) {
+  std::map<std::string, std::string> params;
+  std::vector<unit_wrapper *> units(find_units(params));
+  fw::lua_helper<unit_wrapper>::push(ctx.get_state(), units.begin(), units.end(), true);
+  return 1;
+}
+
 // this is the "workhorse" of the AI function. it searches for all
 // of the units which match the parameters given (note: because of the
 // luabind::adopt policy, LUA takes ownership of the object we return)
-luabind::object ai_player::l_find_units(luabind::object params, lua_State *L) {
-  //luabind::object units = luabind::newtable(L);
-
-  // if you pass something that's not a table as the first parameter,
-  // we can't do anything so we just return an empty set.
- // if (luabind::type(params) != LUA_TTABLE) {
-//    return units;
- // }
+std::vector<unit_wrapper *> ai_player::find_units(std::map<std::string, std::string> &params) {
+  std::vector<unit_wrapper *> units;
 
   // create the predicate object that does the actual searching
-//  findunits_predicate pred(this, params);
+  findunits_predicate pred(this, params);
 
   // do the actual search
-//  ent::entity_manager *entmgr = game::world::get_instance()->get_entity_manager();
-//  std::list<std::weak_ptr<ent::entity>> entities = entmgr->get_entities(pred);
+  ent::entity_manager *entmgr = game::world::get_instance()->get_entity_manager();
+  std::list<std::weak_ptr<ent::entity>> entities = entmgr->get_entities(pred);
 
-//  int index = 1;
-//  BOOST_FOREACH(std::weak_ptr < ent::entity > &wp, entities) {
-//    std::shared_ptr<ent::entity> ent = wp.lock();
-//    if (!ent)
-//      continue;
+  BOOST_FOREACH(std::weak_ptr<ent::entity> &wp, entities) {
+    std::shared_ptr<ent::entity> ent = wp.lock();
+    if (!ent) {
+      continue;
+    }
 
-    // find the entity's unit_wrapper (if it has one) and return it. if it doesn't
-    // have one yet, create a new one and return that.
-//    ent::entity_attribute *attr = ent->get_attribute("ai_wrapper");
-//    if (attr == nullptr) {
- //     luabind::object wrapper = create_wrapper(ent->get_name());
- //     luabind::object_cast<unit_wrapper *>(wrapper)->set_entity(wp);
- //     ent->add_attribute(ent::entity_attribute("ai_wrapper", wrapper));
- //     attr = ent->get_attribute("ai_wrapper");
- //   }
+    // Find the entity's unit_wrapper (if it has one) and use it. If it doesn't have one yet, create a new
+    // one and use that.
+    ent::entity_attribute *attr = ent->get_attribute("ai_wrapper");
+    if (attr == nullptr) {
+      unit_wrapper *wrapper = create_wrapper(ent->get_name());
+      wrapper->set_entity(wp);
+      ent->add_attribute(ent::entity_attribute("ai_wrapper", wrapper));
+      attr = ent->get_attribute("ai_wrapper");
+    }
 
-  //  units[index++] = attr->get_value<luabind::object>();
-//  }
+    units.push_back(attr->get_value<unit_wrapper *>());
+  }
 
-  // and return the object
-//  return units;
-  return nullptr;
+  return units;
+}
+
+int ai_player::l_issue_order(fw::lua_context &ctx) {
+  return 1;
 }
 
 // issues the given orders to the given units. We assime that units is an array
 // of unit_wrappers and orders is an object containing the parameters for the order.
-void ai_player::l_issue_order(luabind::object units, luabind::object orders) {
-  // if you pass something that's not a table as the parameters,
-  // we can't do anything.
-//  if (luabind::type(units) != LUA_TTABLE || luabind::type(orders) != LUA_TTABLE) {
-//    return;
- // }
-
-//  boost::optional<unit_wrapper *> unit = luabind::object_cast_nothrow<unit_wrapper *>(units);
-//  if (unit) {
-    // if they just passed one unit in, we'll just issue the order to that unit
- //   issue_order(*unit, orders);
- // } else {
- //   luabind::iterator end;
- //   for (luabind::iterator it(units); it != end; ++it) {
- //     unit = luabind::object_cast_nothrow<unit_wrapper *>(*it);
- //     if (unit) {
- //       issue_order(*unit, orders);
- //     }
- //   }
- // }
+void ai_player::issue_order(std::vector<unit_wrapper *> &units, std::map<std::string, std::string> &orders) {
+  BOOST_FOREACH(unit_wrapper *unit, units) {
+    issue_order(unit, orders);
+  }
 }
 
-void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
+void ai_player::issue_order(unit_wrapper *unit, std::map<std::string, std::string> &orders) {
   std::shared_ptr<ent::entity> entity = unit->get_entity().lock();
   if (!entity)
     return;
 
   ent::orderable_component *orderable = entity->get_component<ent::orderable_component>();
 
-//  if (luabind::object_cast<std::string>(orders["order"]) == "build") {
-//    fw::debug << "issuing \"build\" order to unit... " << orders << std::endl;
+  std::string order = orders["order"];
+  if (order == "build") {
+    fw::debug << "issuing \"build\" order to unit... " << std::endl;
 
- //   // todo: we should make this "generic"
- //   std::shared_ptr<build_order> order = create_order<build_order>();
- //   order->template_name = luabind::object_cast<std::string>(orders["build_unit"]);
- //   orderable->issue_order(order);
-//  } else {
-//    fw::debug << "unknown order!" << std::endl;
-//  }
+    // todo: we should make this "generic"
+    std::shared_ptr<build_order> order = create_order<build_order>();
+    order->template_name = orders["build_unit"];
+    orderable->issue_order(order);
+  } else {
+    fw::debug << "unknown order!" << std::endl;
+  }
 }
 
 // creates a new unit_wrapper for the given entity type
-luabind::object ai_player::create_wrapper(std::string const &entity_name) {
+unit_wrapper *ai_player::create_wrapper(std::string const &entity_name) {
 //  unit_creator_map::iterator it = _unit_creator_map.find(entity_name);
  // if (it != _unit_creator_map.end() && it->second.is_valid()) {
  ///   return it->second()[luabind::adopt(luabind::result)];
  // }
 
-  // if we don't have a specific wrapper for this unit type, just create a generic
-  // one and return that instead
- // return luabind::call_function<luabind::object>(*_script, "Unit");
-  return nullptr;
+  // if we don't have a specific wrapper for this unit type, just create a generic one and return that instead
+  return new unit_wrapper();
 }
 
 void ai_player::update() {
@@ -332,9 +329,8 @@ void ai_player::world_loaded() {
   fire_event("game_started");
 }
 
-// This is called each simulation frame when we get all the commands from
-// other players
-void ai_player::post_commands(std::vector<std::shared_ptr<command> > &) {
+// This is called each simulation frame when we get all the commands from other players
+void ai_player::post_commands(std::vector<std::shared_ptr<command>> &) {
 }
 
 }

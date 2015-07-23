@@ -9,15 +9,13 @@
 
 namespace game {
 
-// registers our class and methods and stuff in the given lua_State
-void unit_wrapper::register_class(lua_State *state) {
- // luabind::module(state)[luabind::class_<unit_wrapper>("Unit")
-//      .def(luabind::constructor<>())
- //     .property("kind", &unit_wrapper::l_get_kind)
-//      .property("player_no", &unit_wrapper::l_get_player_no)
-// //     .property("state",&unit_wrapper::l_get_state)
-//    ];
-}
+char const unit_wrapper::class_name[] = "Unit";
+fw::lua_registrar<unit_wrapper>::method_definition unit_wrapper::methods[] = {
+   {"kind", &unit_wrapper::l_get_kind},
+   {"player_no", &unit_wrapper::l_get_player_no},
+   {"state", &unit_wrapper::l_get_state},
+   {nullptr, nullptr}
+};
 
 void unit_wrapper::set_entity(std::weak_ptr<ent::entity> const &ent) {
   _entity = ent;
@@ -29,7 +27,25 @@ void unit_wrapper::set_entity(std::weak_ptr<ent::entity> const &ent) {
   }
 }
 
-std::string unit_wrapper::l_get_kind() {
+int unit_wrapper::l_get_kind(fw::lua_context &ctx) {
+  std::string kind = get_kind();
+  lua_pushstring(ctx.get_state(), kind.c_str());
+  return 1;
+}
+
+int unit_wrapper::l_get_player_no(fw::lua_context &ctx) {
+  int player_no = get_player_no();
+  lua_pushvalue(ctx.get_state(), player_no);
+  return 1;
+}
+
+int unit_wrapper::l_get_state(fw::lua_context &ctx) {
+  std::string kind = get_state();
+  lua_pushstring(ctx.get_state(), kind.c_str());
+  return 1;
+}
+
+std::string unit_wrapper::get_kind() {
   std::shared_ptr<ent::entity> ent = _entity.lock();
   if (ent)
     return ent->get_name();
@@ -37,7 +53,7 @@ std::string unit_wrapper::l_get_kind() {
     return "";
 }
 
-std::string unit_wrapper::l_get_state() {
+std::string unit_wrapper::get_state() {
   std::shared_ptr<ent::entity> entity = _entity.lock();
   if (entity && _orderable != 0) {
     std::shared_ptr<game::order> curr_order = _orderable->get_current_order();
@@ -49,7 +65,7 @@ std::string unit_wrapper::l_get_state() {
   return "idle";
 }
 
-int unit_wrapper::l_get_player_no() {
+int unit_wrapper::get_player_no() {
   std::shared_ptr<ent::entity> entity = _entity.lock();
   if (entity) {
     return static_cast<int>(_ownable->get_owner()->get_player_no());

@@ -21,7 +21,6 @@ public:
   static char const class_name[];
   static fw::lua_registrar<lua_debug>::method_definition methods[];
 
-  lua_debug(lua_State *state);
   int l_log(lua_context &ctx);
 };
 
@@ -51,7 +50,7 @@ void lua_context::setup_state() {
   set_search_pattern((fw::resolve("lua") / "?.lua").string());
 
   // add the 'debug' library.
-  fw::lua_registrar<lua_debug>::register_static(_state);
+  fw::lua_registrar<lua_debug>::register_static(_state, new lua_debug());
 }
 
 std::string get_string(lua_State *s, std::string const &name) {
@@ -101,15 +100,26 @@ bool lua_context::load_script(fs::path const &filename) {
 }
 
 //-----------------------------------------------------------------------------
+lua_callback::lua_callback(lua_State *state, int ref) :
+  _state(state), _ref(ref) {
+}
+
+void lua_callback::call() {
+  lua_rawgeti(_state, LUA_REGISTRYINDEX, _ref);
+  int ret = lua_pcall(_state, 0, 0, 0);
+  if (ret != 0) {
+    std::string err = lua_tostring(_state, -1);
+    debug << boost::format("ERR: calling Lua callback: %1%") % err << std::endl;
+  }
+}
+
+//-----------------------------------------------------------------------------
 
 char const lua_debug::class_name[] = "debug";
 fw::lua_registrar<lua_debug>::method_definition lua_debug::methods[] = {
   {"log", &lua_debug::l_log},
   {nullptr, nullptr}
 };
-
-lua_debug::lua_debug(lua_State *state) {
-}
 
 int lua_debug::l_log(lua_context &ctx) {
   char const *msg = luaL_checkstring(ctx.get_state(), 1);
