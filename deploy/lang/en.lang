@@ -1,1 +1,62 @@
-lang.name = English
+﻿
+# This is the name of the language as it appears in the selection drop-down (and
+# a few other places)
+lang.name = English (US)
+lang.font = default
+
+# Some generic strings that'll appear all over the place...
+cancel = Cancel
+ok = OK
+
+please-wait.logging-in = Please wait, logging in...
+please-wait.logging-out = Please wait, logging out...
+
+# The buttons on the title page
+title.new-game = New Game
+title.join-game = Join Game
+title.options = Options
+title.editor = Editor
+title.quit = Quit
+title.sub-title = A game by %1% (%2%)
+
+title.login.username = Username:
+title.login.password = Password:
+title.login.remember-me = Remember me
+title.login.login = Login
+title.login.logged-in = Logged in: %1%
+title.login.failed = Login failed, check password
+
+title.new-game.start-game = Start Game
+title.new-game.choose-map = Choose map:
+title.new-game.user-header.username = Username
+title.new-game.user-header.ready = Ready
+title.new-game.map-size = Size:
+title.new-game.add-ai-player = Add AI Player
+title.new-game.player-properties = Player Properties
+title.new-game.multiplayer = Multiplayer
+title.new-game.not-logged-in = You are not logged in.
+title.new-game.ready-to-go = %1% is ready to go!
+title.new-game.joining-game = Please wait, joining game...
+title.new-game.ready = ready
+title.new-game.enable-multiplayer = Enable multiplayer
+title.new-game.type-to-chat = Type to chat:
+
+title.new-ai-player.title = New AI Player
+title.new-ai-player.player-name = Player Name:
+title.new-ai-player.player-colour = Player Color:
+title.new-ai-player.script = Script:
+
+title.player-props.title = Player Properties
+title.player-props.player-colour = Player Color:
+
+title.join-game.join = Join Game
+title.join-game.col-id = ID
+title.join-game.col-user = Username
+title.join-game.col-game-name = Game Name
+title.join-game.col-address = Address
+
+hud.pause.title = Pause
+hud.pause.resume = Resume
+hud.pause.options = Options
+hud.pause.exit-to-menu = Exit to Menu
+hud.pause.exit-game = Exit Game

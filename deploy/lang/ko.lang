@@ -1,1 +1,63 @@
-lang.name = 한국의 (Korean)
+﻿
+# This is the name of the language as it appears in the selection drop-down (and
+# a few other places)
+lang.name = 한국어 (Korean)
+lang.font = korean
+
+# Some generic strings that'll appear all over the place...
+cancel = 취소
+ok = 확인
+
+please-wait.logging-in = 잠시 기다려주십시오, 로깅을 한번 이용해보십시오
+please-wait.logging-out = 잠시 기다려주십시오, 로그아웃
+
+# The buttons on the title page
+title.new-game = 새로운 게임
+title.join-game = 게임에 참가할
+title.options = 옵션
+title.editor = 편집자
+title.quit = 종료
+title.sub-title = %1%의에 의해 게임 (%2%)
+
+title.login.username = 이름:
+title.login.password = 비밀 번호:
+title.login.remember-me = 날 기억
+title.login.login = 로그인
+title.login.please-wait = 잠시 기다려주십시오, 로깅을 한번 이용해보십시오
+title.login.logged-in = 현재 접속 회원: %1%
+title.login.failed = 로그인 비밀 번호를 확인하지 못했습니다
+
+title.new-game.start-game = 게임 시작
+title.new-game.choose-map = 지도를 선택하십시오:
+title.new-game.user-header.username = 이름
+title.new-game.user-header.ready = 준비
+title.new-game.map-size = 크기:
+title.new-game.add-ai-player = AI 선수 추가
+title.new-game.player-properties = 플레이어 속성
+title.new-game.multiplayer = 멀티 플레이어
+title.new-game.not-logged-in = 당신은 로그인하지 않은
+title.new-game.ready-to-go = %1%는 갈 준비가되어있습니다!
+title.new-game.joining-game = 잠시 기다려주십시오, 게임에 합류
+title.new-game.ready = 준비
+title.new-game.enable-multiplayer = 멀티 활성화
+title.new-game.type-to-chat = 유형 채팅:
+
+title.new-ai-player.title = 새로운 AI 플레이어
+title.new-ai-player.player-name = 이름:
+title.new-ai-player.player-colour = 색상:
+title.new-ai-player.script = 스크립트:
+
+title.player-props.title = 플레이어 속성
+title.player-props.player-colour = 플레이어 색상:
+
+title.join-game.join = 참가할
+title.join-game.col-id = ID
+title.join-game.col-user = 아이디
+title.join-game.col-game-name = 게임 이름
+title.join-game.col-address = 주소
+
+hud.pause.title = 일시 중지됨
+hud.pause.resume = 이력서
+hud.pause.options = 옵션
+hud.pause.exit-to-menu = 메인 메뉴
+hud.pause.exit-game = 종료 게임
