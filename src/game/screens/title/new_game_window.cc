@@ -20,16 +20,16 @@
 #include <framework/version.h>
 
 #include <game/application.h>
-//#include "../../session/session.h"
-//#include "../../simulation/local_player.h"
-#include <game/world/world_vfs.h>
-#include <game/world/world.h>
+#include <game/session/session.h>
 #include <game/screens/game_screen.h>
 #include <game/screens/title/new_game_window.h>
 #include <game/screens/title/main_menu_window.h>
 #include <game/screens/title/new_ai_player_window.h>
 #include <game/screens/title/player_properties_window.h>
+#include <game/simulation/local_player.h>
 #include <game/simulation/simulation_thread.h>
+#include <game/world/world_vfs.h>
+#include <game/world/world.h>
 
 using namespace std::placeholders;
 using namespace fw::gui;
@@ -44,7 +44,7 @@ enum ids {
 };
 
 new_game_window::new_game_window() :
-    _wnd(nullptr), _main_menu_window(nullptr) {
+    _wnd(nullptr), _main_menu_window(nullptr), _sess_state(game::session::disconnected), _refresh_players(false) {
 }
 
 new_game_window::~new_game_window() {
@@ -95,25 +95,24 @@ void new_game_window::show() {
   if (!_map_list.empty()) {
     _wnd->find<listbox>(MAP_LIST_ID)->select_item(0);
   }
-/*
+
   _sig_players_changed_conn = simulation_thread::get_instance()->sig_players_changed.connect(
-      boost::bind(&new_game_window::on_players_changed, this));
+      std::bind(&new_game_window::on_players_changed, this));
   _sig_chat_conn = simulation_thread::get_instance()->sig_chat.connect(
-      boost::bind(&new_game_window::add_chat_msg, this, _1, _2));
+      std::bind(&new_game_window::add_chat_msg, this, _1, _2));
   _sig_session_state_changed = session::get_instance()->sig_state_changed.connect(
-      boost::bind(&new_game_window::on_session_state_changed, this, _1));
-*/
+      std::bind(&new_game_window::on_session_state_changed, this, _1));
+
   // call this as if the session state just changed, to make sure we're up-to-date
-  on_session_state_changed(/*session::get_instance()->get_state()*/);
+  on_session_state_changed(session::get_instance()->get_state());
 }
 
 void new_game_window::hide() {
   _wnd->set_visible(false);
-/*
+
   _sig_players_changed_conn.disconnect();
   _sig_chat_conn.disconnect();
   _sig_session_state_changed.disconnect();
-*/
 }
 
 void new_game_window::set_enable_multiplayer_visible(bool visible) {
@@ -121,38 +120,19 @@ void new_game_window::set_enable_multiplayer_visible(bool visible) {
 }
 
 void new_game_window::update() {
-/*
-  CEGUI::Window *state_msg = get_child("NewGame/Multiplayer/Status");
-
   if (session::get_instance() == 0) {
-    fw::gui::set_text(state_msg, fw::text("title.new-game.not-logged-in"));
+    //fw::gui::set_text(state_msg, fw::text("title.new-game.not-logged-in"));
     return;
-  }
-
-  // if there's no maps selected, select at least the first one (or the last
-  // one that was selected)
-  if (_maps->getSelectedCount() == 0) {
-    _selection_changing = true;
-    if (_last_selected != 0)
-      _last_selected->select();
-    else
-      _maps->selectRange(0, 0);
-
-    update_selection();
-    _selection_changing = false;
   }
 
   // check which players are now ready that weren't ready before
   int num_players = 0;
-  BOOST_FOREACH(player * p, simulation_thread::get_instance()->get_players())
-  {
+  BOOST_FOREACH(player * p, simulation_thread::get_instance()->get_players()) {
     num_players++;
     if (p->is_ready()) {
       bool was_ready_before = false;
-      BOOST_FOREACH(uint32_t user_id, _ready_players)
-      {
-        if (user_id == p->get_user_id())
-        {
+      BOOST_FOREACH(uint32_t user_id, _ready_players) {
+        if (user_id == p->get_user_id()) {
           was_ready_before = true;
         }
       }
@@ -160,12 +140,12 @@ void new_game_window::update() {
       if (!was_ready_before) {
         _ready_players.push_back(p->get_user_id());
 
-        // if he wasn't ready before, but now is, we'll have to refresh the player
+        // if they weren't ready before, but now are, we'll have to refresh the player
         // list and also print a message to the chat window saying that they're ready
         _refresh_players = true;
 
         std::string msg = (boost::format(fw::text("title.new-game.ready-to-go")) % p->get_user_name()).str();
-        add_chat_msg(msg);
+        append_chat(msg);
       }
     }
   }
@@ -179,10 +159,9 @@ void new_game_window::update() {
     // if all players are now ready to start, we can start the game
     start_game();
   }
-*/
 }
 
-void new_game_window::on_session_state_changed(/*session::session_state new_state*/) {
+void new_game_window::on_session_state_changed(session::session_state new_state) {
 /*
   CEGUI::Window *state_msg = get_child("NewGame/Multiplayer/Status");
   CEGUI::Window *multiplayer_enable_checkbox = get_child("NewGame/Multiplayer/Enable");
@@ -225,10 +204,10 @@ void new_game_window::on_session_state_changed(/*session::session_state new_stat
 */
 }
 
-// this is called when the list of players has changed, we set a flag (because it
-// can happen on another thread) and update the players in the main update() call.
+// this is called when the list of players has changed, we set a flag (because it can happen on another thread)
+// and update the players in the main update() call.
 void new_game_window::on_players_changed() {
-//  _refresh_players = true;
+  _refresh_players = true;
 }
 
 // refreshes the list of players in the game
@@ -308,10 +287,10 @@ bool new_game_window::chat_send_clicked(widget *w) {
 }
 
 void new_game_window::add_chat_msg(std::string const &user_name, std::string const &msg) {
-  add_chat_msg(user_name + "> " + msg);
+  append_chat(user_name + "> " + msg);
 }
 
-void new_game_window::add_chat_msg(std::string const &msg) {
+void new_game_window::append_chat(std::string const &msg) {
 /*  int index = _chat_msgs->getItemCount() + 1;
   std::string id = boost::lexical_cast<std::string>(index);
 
@@ -331,42 +310,14 @@ void new_game_window::update_selection() {
   _wnd->find<label>(MAP_SCREENSHOT_ID)->set_background(ws.get_screenshot());
 }
 
-// sets the screenshot image, we need to create a CEGUI imageset and all that....
-void new_game_window::set_screenshot(fw::bitmap *bmp) {
-/*  CEGUI::ImagesetManager &imgset_mgr = CEGUI::ImagesetManager::getSingleton();
-
-  // copy the bitmap into a texture, ready to be used by CEGUI
-  shared_ptr<fw::texture> texture(new fw::texture());
-  texture->create(bmp->get_width(), bmp->get_height());
-  fw::blit(*bmp, *texture);
-
-  // create a CEGUI texture from the texture
-  CEGUI::Direct3D9Renderer *renderer =
-      dynamic_cast<CEGUI::Direct3D9Renderer *>(CEGUI::System::getSingleton().getRenderer());
-  CEGUI::Texture &cegui_texture = renderer->createTexture(texture->get_d3dtexture());
-
-  // next, check if there's an imageset with the name "NewGameScreenshot" and destroy it
-  // if there is (we'll create a new one right away)
-  if (imgset_mgr.isDefined("NewGameScreenshot"))
-    imgset_mgr.destroy("NewGameScreenshot");
-
-  // then, create an imageset based on our bitmap
-  CEGUI::Imageset &imgset = imgset_mgr.create("NewGameScreenshot", cegui_texture);
-  imgset.defineImage("Screenshot", CEGUI::Point(0, 0),
-      CEGUI::Size(static_cast<float>(bmp->get_width()), static_cast<float>(bmp->get_height())), CEGUI::Point(0, 0));
-
-  CEGUI::Window *wnd = get_child("NewGame/MapPicture");
-  wnd->setProperty("Image", "set:NewGameScreenshot image:Screenshot");*/
-}
-
 // when we're ready to start, we need to mark our own player as ready and then
 // wait for others. Once they're ready as well, start_game() is called.
 bool new_game_window::on_start_game_clicked(widget *w) {
-//  simulation_thread::get_instance()->get_local_player()->local_player_is_ready();
+  simulation_thread::get_instance()->get_local_player()->local_player_is_ready();
 
  // _start_game->setEnabled(false);
 //  _maps->setEnabled(false);
-  start_game();
+//  start_game();
   return true;
 }
 
