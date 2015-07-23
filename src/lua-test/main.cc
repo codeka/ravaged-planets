@@ -17,7 +17,7 @@ void display_exception(std::string const &msg);
 //-----------------------------------------------------------------------------
 class unit_wrapper {
 private:
-  int l_attack(lua_State *state);
+  int l_attack(fw::lua_context &ctx);
 
   void attack(std::string const &msg);
 public:
@@ -29,8 +29,8 @@ public:
 
 class ai_player {
 private:
-  int l_say(lua_State *state);
-  int l_find(lua_State *state);
+  int l_say(fw::lua_context &ctx);
+  int l_find(fw::lua_context &ctx);
 
   void say(std::string const &msg);
   std::vector<unit_wrapper *> find();
@@ -50,8 +50,8 @@ fw::lua_registrar<unit_wrapper>::method_definition unit_wrapper::methods[] = {
 unit_wrapper::unit_wrapper() {
 }
 
-int unit_wrapper::l_attack(lua_State *state) {
-  char const *msg = luaL_checkstring(state, 1);
+int unit_wrapper::l_attack(fw::lua_context &ctx) {
+  char const *msg = luaL_checkstring(ctx.get_state(), 1);
   attack(msg);
   return 1;
 }
@@ -71,15 +71,15 @@ ai_player::ai_player(lua_State *state) {
 
 }
 
-int ai_player::l_say(lua_State *state) {
-  char const *msg = luaL_checkstring(state, 1);
+int ai_player::l_say(fw::lua_context &ctx) {
+  char const *msg = luaL_checkstring(ctx.get_state(), 1);
   say(msg);
   return 1;
 }
 
-int ai_player::l_find(lua_State *state) {
+int ai_player::l_find(fw::lua_context &ctx) {
   std::vector<unit_wrapper *> units(find());
-  fw::lua_helper<unit_wrapper>::push(state, units.begin(), units.end(), true);
+  fw::lua_helper<unit_wrapper>::push(ctx.get_state(), units.begin(), units.end(), true);
   return 1;
 }
 

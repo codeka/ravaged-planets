@@ -1,3 +1,5 @@
+#include <map>
+
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
@@ -10,19 +12,37 @@ namespace fs = boost::filesystem;
 
 namespace fw {
 
-int l_debug_openlib(lua_State *);
-int l_debug_log(lua_State *);
+namespace {
+std::map<lua_State *, lua_context *> g_context_map;
+}
+
+class lua_debug {
+public:
+  static char const class_name[];
+  static fw::lua_registrar<lua_debug>::method_definition methods[];
+
+  lua_debug(lua_State *state);
+  int l_log(lua_context &ctx);
+};
 
 lua_context::lua_context() {
   _state = luaL_newstate();
   luaL_openlibs(_state);
+
+  g_context_map[_state] = this;
 
   // sets up our custom functions and so on
   setup_state();
 }
 
 lua_context::~lua_context() {
+  g_context_map.erase(_state);
   lua_close(_state);
+}
+
+/** Gets a reference to the lua_context for a given lua_State object. */
+lua_context &lua_context::get(lua_State *state) {
+  return *g_context_map[state];
 }
 
 void lua_context::setup_state() {
@@ -31,8 +51,7 @@ void lua_context::setup_state() {
   set_search_pattern((fw::resolve("lua") / "?.lua").string());
 
   // add the 'debug' library.
-  luaL_requiref(_state, "debug", &l_debug_openlib, 1);
-  lua_pop(_state, 1); // luaL_requiref leaves the library table on the stack
+  fw::lua_registrar<lua_debug>::register_static(_state);
 }
 
 std::string get_string(lua_State *s, std::string const &name) {
@@ -83,20 +102,19 @@ bool lua_context::load_script(fs::path const &filename) {
 
 //-----------------------------------------------------------------------------
 
-int l_debug_openlib(lua_State *state) {
-  const luaL_Reg debug_lib[] = {
-    { "log", &l_debug_log},
-    { nullptr, nullptr }
-  };
-  luaL_newlib(state, debug_lib);
+char const lua_debug::class_name[] = "debug";
+fw::lua_registrar<lua_debug>::method_definition lua_debug::methods[] = {
+  {"log", &lua_debug::l_log},
+  {nullptr, nullptr}
+};
 
-  return 1;
+lua_debug::lua_debug(lua_State *state) {
 }
 
-int l_debug_log(lua_State *state) {
-  char const *msg = luaL_checkstring(state, 1);
+int lua_debug::l_log(lua_context &ctx) {
+  char const *msg = luaL_checkstring(ctx.get_state(), 1);
   fw::debug << "LUA : " << msg << std::endl;
-  return 0;
+  return 1;
 }
 
 }

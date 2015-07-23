@@ -11,6 +11,40 @@ extern "C" {
 
 namespace fw {
 
+/**
+ * This class represents the Lua context. It contains the state for a given "instance" of Lua, and holds references
+ * to all the global objects, registrations and so on.
+ */
+class lua_context: boost::noncopyable {
+private:
+  lua_State *_state;
+  std::string _last_error;
+
+  void setup_state();
+
+public:
+  lua_context();
+  ~lua_context();
+
+  /** Gets a reference to the lua_context for a given lua_State object. */
+  static lua_context &get(lua_State *state);
+
+  /** Sets the search pattern that Lua will use when searching for scripts via {@code require()}. */
+  void set_search_pattern(std::string const &pattern);
+
+  /** Loads a .lua script (and executes it immediately - you should have set up the context ready to go) */
+  bool load_script(boost::filesystem::path const &filename);
+
+  lua_State *get_state() const {
+    return _state;
+  }
+
+  /** If something returns an error, this'll return a string version of the last error that occurred. */
+  inline std::string get_last_error() const {
+    return _last_error;
+  }
+};
+
 /** Wrapper object for the registered class. */
 template<typename T>
 struct lua_wrapper {
@@ -180,7 +214,7 @@ private:
 template <typename T>
 class lua_registrar {
 public:
-  typedef int (T::*member_func_ptr)(lua_State *state);
+  typedef int (T::*member_func_ptr)(lua_context &ctx);
   typedef struct { const char *name; member_func_ptr mfunc; } method_definition;
 
   /**
@@ -313,7 +347,7 @@ private:
     lua_remove(state, 1);  // remove self so member function args start at index 1
     // get member function from upvalue
     method_definition *l = static_cast<method_definition*>(lua_touserdata(state, lua_upvalueindex(1)));
-    return (obj->*(l->mfunc))(state);  // call member function
+    return (obj->*(l->mfunc))(lua_context::get(state));  // call member function
   }
 
   // create a new T object and push onto the Lua stack a userdata containing a pointer to T object
@@ -351,37 +385,6 @@ private:
     lua_pushstring(state, key);
     lua_insert(state, -2);  // swap value and key
     lua_settable(state, table_index);
-  }
-};
-
-/**
- * This class represents the Lua context. It contains the state for a given "instance" of Lua, and holds references
- * to all the global objects, registrations and so on.
- */
-class lua_context: boost::noncopyable {
-private:
-  lua_State *_state;
-  std::string _last_error;
-
-  void setup_state();
-
-public:
-  lua_context();
-  ~lua_context();
-
-  /** Sets the search pattern that Lua will use when searching for scripts via {@code require()}. */
-  void set_search_pattern(std::string const &pattern);
-
-  /** Loads a .lua script (and executes it immediately - you should have set up the context ready to go) */
-  bool load_script(boost::filesystem::path const &filename);
-
-  lua_State *get_state() const {
-    return _state;
-  }
-
-  /** If something returns an error, this'll return a string version of the last error that occurred. */
-  inline std::string get_last_error() const {
-    return _last_error;
   }
 };
 
