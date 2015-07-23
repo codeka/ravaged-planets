@@ -33,7 +33,7 @@ private:
   int l_find(lua_State *state);
 
   void say(std::string const &msg);
-  std::shared_ptr<unit_wrapper> find();
+  std::vector<unit_wrapper *> find();
 public:
   static char const class_name[];
   static fw::lua_registrar<ai_player>::method_definition methods[];
@@ -78,8 +78,8 @@ int ai_player::l_say(lua_State *state) {
 }
 
 int ai_player::l_find(lua_State *state) {
-  std::shared_ptr<unit_wrapper> unit(find());
-  fw::lua_helper<unit_wrapper>::push(state, unit.get(), false);
+  std::vector<unit_wrapper *> units(find());
+  fw::lua_helper<unit_wrapper>::push(state, units.begin(), units.end(), true);
   return 1;
 }
 
@@ -87,8 +87,12 @@ void ai_player::say(std::string const &msg) {
   fw::debug << "SAY: " << msg << std::endl;
 }
 
-std::shared_ptr<unit_wrapper> ai_player::find() {
-  return std::shared_ptr<unit_wrapper>(new unit_wrapper());
+std::vector<unit_wrapper *> ai_player::find() {
+  std::vector<unit_wrapper *> units;
+  units.push_back(new unit_wrapper());
+  units.push_back(new unit_wrapper());
+  units.push_back(new unit_wrapper());
+  return units;
 }
 
 //-----------------------------------------------------------------------------

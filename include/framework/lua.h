@@ -55,6 +55,51 @@ public:
     return mt;  // index of userdata containing pointer to T object
   }
 
+  /**
+   * Push only the Lua stack a collection of pointers to T objects. From the Lua side, you'll get a table with
+   * indices corresponding to the values in the collection.
+   */
+  template<typename iterator>
+  static typename boost::enable_if<boost::is_same<typename iterator::value_type, T*>>::type push(
+      lua_State *state, iterator begin, iterator end, bool gc = false) {
+    lua_newtable(state);
+    int array = lua_gettop(state);
+    int index = 1;
+    for (iterator it = begin; it != end; ++it, ++index) {
+      push(state, *it, gc);
+      lua_rawseti(state, array, index);
+    }
+  }
+
+  /** Call the named Lua method from userdata method table. */
+  static int call(lua_State *state, const char *method, int nargs=0, int nresults=LUA_MULTRET, int errfunc=0) {
+    int base = lua_gettop(state) - nargs;  // userdata index
+    if (!luaL_checkudata(state, base, T::class_name)) {
+      lua_settop(state, base-1);           // drop userdata and args
+      lua_pushfstring(state, "not a valid %s userdata", T::class_name);
+      return -1;
+    }
+
+    lua_pushstring(state, method);         // method name
+    lua_gettable(state, base);             // get method from userdata
+    if (lua_isnil(state, -1)) {            // no method?
+      lua_settop(state, base-1);           // drop userdata and args
+      lua_pushfstring(state, "%s missing method '%s'", T::class_name, method);
+      return -1;
+    }
+    lua_insert(state, base);               // put method under userdata, args
+
+    int status = lua_pcall(state, 1+nargs, nresults, errfunc);  // call method
+    if (status) {
+      const char *msg = lua_tostring(state, -1);
+      if (msg == nullptr) msg = "(error with no message)";
+      lua_pushfstring(state, "%s:%s status = %d\n%s", T::class_name, method, status, msg);
+      lua_remove(state, base);             // remove old message
+      return -1;
+    }
+    return lua_gettop(state) - base + 1;   // number of results
+  }
+
   /** Get userdata from Lua stack and return pointer to T object. */
   static T *check(lua_State *state, int narg) {
     lua_wrapper<T> *w = static_cast<lua_wrapper<T> *>(luaL_checkudata(state, narg, T::class_name));
@@ -256,35 +301,6 @@ public:
     T *obj = new T(state);
     lua_helper<T>::push(state, obj, true);
     lua_setglobal(state, T::class_name);
-  }
-
-  /** Call the named Lua method from userdata method table. */
-  static int call(lua_State *state, const char *method, int nargs=0, int nresults=LUA_MULTRET, int errfunc=0) {
-    int base = lua_gettop(state) - nargs;  // userdata index
-    if (!luaL_checkudata(state, base, T::class_name)) {
-      lua_settop(state, base-1);           // drop userdata and args
-      lua_pushfstring(state, "not a valid %s userdata", T::class_name);
-      return -1;
-    }
-
-    lua_pushstring(state, method);         // method name
-    lua_gettable(state, base);             // get method from userdata
-    if (lua_isnil(state, -1)) {            // no method?
-      lua_settop(state, base-1);           // drop userdata and args
-      lua_pushfstring(state, "%s missing method '%s'", T::class_name, method);
-      return -1;
-    }
-    lua_insert(state, base);               // put method under userdata, args
-
-    int status = lua_pcall(state, 1+nargs, nresults, errfunc);  // call method
-    if (status) {
-      const char *msg = lua_tostring(state, -1);
-      if (msg == nullptr) msg = "(error with no message)";
-      lua_pushfstring(state, "%s:%s status = %d\n%s", T::class_name, method, status, msg);
-      lua_remove(state, base);             // remove old message
-      return -1;
-    }
-    return lua_gettop(state) - base + 1;   // number of results
   }
 
 private:
