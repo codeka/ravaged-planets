@@ -47,7 +47,15 @@ public:
   typedef int (T::*member_func_ptr)(lua_State *state);
   typedef struct { const char *name; member_func_ptr mfunc; } method_definition;
 
-  /** Registers the templated class with the given lua_State. */
+  /**
+   * Registers the templated class with the given lua_State with a constructor such that you can create instances
+   * of this class from your Lua code. For example:
+   *
+   * \example
+   * -- Lua code:
+   * local foo = class_name()
+   * foo:some_method()
+   */
   static void register_with_constructor(lua_State *state) {
     lua_newtable(state);
     int methods = lua_gettop(state);
@@ -59,7 +67,7 @@ public:
     lua_pushglobaltable(state);
     lua_pushvalue(state, methods);
     set(state, -3, T::class_name);
-    lua_pop(state, 1); // pop the global table
+    lua_pop(state, 1); // pop the global table.
 
     // hide metatable from Lua getmetatable()
     lua_pushvalue(state, metatable);
@@ -93,9 +101,70 @@ public:
     lua_pop(state, 2);  // drop metatable and method table
   }
 
-  /** Registers the templated class as a static table. */
+  /**
+   * Registers the templated class with the given lua_State with no constructor. The only way to access this class
+   * from Lua code would be if it was returned from another C function. For example:
+   *
+   * \example
+   * -- Lua code:
+   * local foo = player:make_foo()
+   * foo:some_method()
+   */
+  static void register_without_constructor(lua_State *state) {
+    lua_newtable(state);
+    int methods = lua_gettop(state);
+
+    luaL_newmetatable(state, T::class_name);
+    int metatable = lua_gettop(state);
+
+    // store method table in globals so that scripts can add functions written in Lua.
+    lua_pushglobaltable(state);
+    lua_pushvalue(state, methods);
+    set(state, -3, T::class_name);
+    lua_pop(state, 1); // pop the global table.
+
+    // hide metatable from Lua getmetatable()
+    lua_pushvalue(state, metatable);
+    lua_pushvalue(state, methods);
+    set(state, metatable, "__metatable");
+
+    lua_pushvalue(state, methods);
+    set(state, metatable, "__index");
+
+    lua_pushcfunction(state, tostring_T);
+    set(state, metatable, "__tostring");
+
+    lua_pushcfunction(state, gc_T);
+    set(state, metatable, "__gc");
+
+    lua_setmetatable(state, methods);
+
+    // fill method table with methods from class T
+    for (method_definition *l = T::methods; l->name; l++) {
+      lua_pushstring(state, l->name);
+      lua_pushlightuserdata(state, (void*)l);
+      lua_pushcclosure(state, thunk, 1);
+      lua_settable(state, methods);
+    }
+
+    lua_pop(state, 2);  // drop metatable and method table
+  }
+
+  /**
+   * Registers the templated class as a static table. You can reference methods on the class directly through the
+   * global table like so:
+   *
+   * \example
+   * -- Lua code
+   * class_name:some_method()
+   */
   static void register_static(lua_State *state) {
-    
+    register_without_constructor(state);
+
+    // create a new instance and set it as a global variable with the given class name.
+    T *obj = new T(state);
+    push(state, obj, true);
+    lua_setglobal(state, T::class_name);
   }
 
   /** Call the named Lua method from userdata method table. */
