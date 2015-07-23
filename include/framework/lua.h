@@ -11,6 +11,100 @@ extern "C" {
 
 namespace fw {
 
+/** Wrapper object for the registered class. */
+template<typename T>
+struct lua_wrapper {
+  T *wrapped;
+};
+
+/**
+ * This is a helper method which contains some utility function for interfacing between Lua and C++.
+ */
+template<typename T>
+class lua_helper {
+public:
+
+  /** Push onto the Lua stack a userdata containing a pointer to T object. */
+  static int push(lua_State *state, T *obj, bool gc=false) {
+    if (!obj) {
+      lua_pushnil(state);
+      return 0;
+    }
+    luaL_getmetatable(state, T::class_name);  // lookup metatable in Lua registry
+    if (lua_isnil(state, -1)) {
+      luaL_error(state, "%s missing metatable", T::class_name);
+    }
+    int mt = lua_gettop(state);
+    subtable(state, mt, "userdata", "v");
+    lua_wrapper<T> *w = static_cast<lua_wrapper<T> *>(pushuserdata(state, obj, sizeof(lua_wrapper<T>)));
+    if (w) {
+      w->wrapped = obj;  // store pointer to object in userdata
+      lua_pushvalue(state, mt);
+      lua_setmetatable(state, -2);
+      if (gc == false) {
+        lua_checkstack(state, 3);
+        subtable(state, mt, "do not trash", "k");
+        lua_pushvalue(state, -2);
+        lua_pushboolean(state, 1);
+        lua_settable(state, -3);
+        lua_pop(state, 1);
+      }
+    }
+    lua_replace(state, mt);
+    lua_settop(state, mt);
+    return mt;  // index of userdata containing pointer to T object
+  }
+
+  /** Get userdata from Lua stack and return pointer to T object. */
+  static T *check(lua_State *state, int narg) {
+    lua_wrapper<T> *w = static_cast<lua_wrapper<T> *>(luaL_checkudata(state, narg, T::class_name));
+    if(!w) {
+      const char *msg = lua_pushfstring(state, "%s expected, got %s", T::class_name, luaL_typename(state, narg));
+      luaL_argerror(state, narg, msg);
+      return nullptr;
+    }
+    return w->wrapped;  // pointer to T object
+  }
+
+private:
+  static void weaktable(lua_State *state, const char *mode) {
+    lua_newtable(state);
+    lua_pushvalue(state, -1);  // table is its own metatable
+    lua_setmetatable(state, -2);
+    lua_pushliteral(state, "__mode");
+    lua_pushstring(state, mode);
+    lua_settable(state, -3);   // metatable.__mode = mode
+  }
+
+  static void subtable(lua_State *state, int tindex, const char *name, const char *mode) {
+    lua_pushstring(state, name);
+    lua_gettable(state, tindex);
+    if (lua_isnil(state, -1)) {
+      lua_pop(state, 1);
+      lua_checkstack(state, 3);
+      weaktable(state, mode);
+      lua_pushstring(state, name);
+      lua_pushvalue(state, -2);
+      lua_settable(state, tindex);
+    }
+  }
+
+  static void *pushuserdata(lua_State *state, void *key, size_t sz) {
+    void *ud = nullptr;
+    lua_pushlightuserdata(state, key);
+    lua_gettable(state, -2);     // lookup[key]
+    if (lua_isnil(state, -1)) {
+      lua_pop(state, 1);         // drop nil
+      lua_checkstack(state, 3);
+      ud = lua_newuserdata(state, sz);  // create new userdata
+      lua_pushlightuserdata(state, key);
+      lua_pushvalue(state, -2);  // dup userdata
+      lua_settable(state, -4);   // lookup[key] = userdata
+    }
+    return ud;
+  }
+};
+
 /**
  * This is a helper class for registering classes with Lua. It is based on Lunar.
  *
@@ -40,9 +134,6 @@ namespace fw {
  */
 template <typename T>
 class lua_registrar {
-private:
-  /** Wrapper object for the registered class. */
-  typedef struct { T *wrapped; } wrapper;
 public:
   typedef int (T::*member_func_ptr)(lua_State *state);
   typedef struct { const char *name; member_func_ptr mfunc; } method_definition;
@@ -163,7 +254,7 @@ public:
 
     // create a new instance and set it as a global variable with the given class name.
     T *obj = new T(state);
-    push(state, obj, true);
+    lua_helper<T>::push(state, obj, true);
     lua_setglobal(state, T::class_name);
   }
 
@@ -196,55 +287,13 @@ public:
     return lua_gettop(state) - base + 1;   // number of results
   }
 
-  /** Push onto the Lua stack a userdata containing a pointer to T object. */
-  static int push(lua_State *state, T *obj, bool gc=false) {
-    if (!obj) {
-      lua_pushnil(state);
-      return 0;
-    }
-    luaL_getmetatable(state, T::class_name);  // lookup metatable in Lua registry
-    if (lua_isnil(state, -1)) {
-      luaL_error(state, "%s missing metatable", T::class_name);
-    }
-    int mt = lua_gettop(state);
-    subtable(state, mt, "userdata", "v");
-    wrapper *w = static_cast<wrapper *>(pushuserdata(state, obj, sizeof(wrapper)));
-    if (w) {
-      w->wrapped = obj;  // store pointer to object in userdata
-      lua_pushvalue(state, mt);
-      lua_setmetatable(state, -2);
-      if (gc == false) {
-        lua_checkstack(state, 3);
-        subtable(state, mt, "do not trash", "k");
-        lua_pushvalue(state, -2);
-        lua_pushboolean(state, 1);
-        lua_settable(state, -3);
-        lua_pop(state, 1);
-      }
-    }
-    lua_replace(state, mt);
-    lua_settop(state, mt);
-    return mt;  // index of userdata containing pointer to T object
-  }
-
-  /** Get userdata from Lua stack and return pointer to T object. */
-  static T *check(lua_State *state, int narg) {
-    wrapper *w = static_cast<wrapper*>(luaL_checkudata(state, narg, T::class_name));
-    if(!w) {
-      const char *msg = lua_pushfstring(state, "%s expected, got %s", T::class_name, luaL_typename(state, narg));
-      luaL_argerror(state, narg, msg);
-      return nullptr;
-    }
-    return w->wrapped;  // pointer to T object
-  }
-
 private:
   lua_registrar();  // hide default constructor
 
   // member function dispatcher
   static int thunk(lua_State *state) {
     // Stack has userdata, followed by method args
-    T *obj = check(state, 1);  // get 'self', or if you prefer, 'this'
+    T *obj = lua_helper<T>::check(state, 1);  // get 'self', or if you prefer, 'this'
     lua_remove(state, 1);  // remove self so member function args start at index 1
     // get member function from upvalue
     method_definition *l = static_cast<method_definition*>(lua_touserdata(state, lua_upvalueindex(1)));
@@ -266,7 +315,7 @@ private:
       lua_gettable(state, -2);
       if (!lua_isnil(state, -1)) return 0;  // do not delete object
     }
-    wrapper *w = static_cast<wrapper*>(lua_touserdata(state, 1));
+    lua_wrapper<T> *w = static_cast<lua_wrapper<T> *>(lua_touserdata(state, 1));
     T *obj = w->wrapped;
     if (obj) delete obj;  // call destructor for T objects
     return 0;
@@ -274,7 +323,7 @@ private:
 
   static int tostring_T (lua_State *state) {
     char buff[32];
-    wrapper *w = static_cast<wrapper*>(lua_touserdata(state, 1));
+    lua_wrapper<T> *w = static_cast<lua_wrapper<T> *>(lua_touserdata(state, 1));
     T *obj = w->wrapped;
     sprintf(buff, "%p", (void*)obj);
     lua_pushfstring(state, "%s (%s)", T::class_name, buff);
@@ -286,43 +335,6 @@ private:
     lua_pushstring(state, key);
     lua_insert(state, -2);  // swap value and key
     lua_settable(state, table_index);
-  }
-
-  static void weaktable(lua_State *state, const char *mode) {
-    lua_newtable(state);
-    lua_pushvalue(state, -1);  // table is its own metatable
-    lua_setmetatable(state, -2);
-    lua_pushliteral(state, "__mode");
-    lua_pushstring(state, mode);
-    lua_settable(state, -3);   // metatable.__mode = mode
-  }
-
-  static void subtable(lua_State *state, int tindex, const char *name, const char *mode) {
-    lua_pushstring(state, name);
-    lua_gettable(state, tindex);
-    if (lua_isnil(state, -1)) {
-      lua_pop(state, 1);
-      lua_checkstack(state, 3);
-      weaktable(state, mode);
-      lua_pushstring(state, name);
-      lua_pushvalue(state, -2);
-      lua_settable(state, tindex);
-    }
-  }
-
-  static void *pushuserdata(lua_State *state, void *key, size_t sz) {
-    void *ud = nullptr;
-    lua_pushlightuserdata(state, key);
-    lua_gettable(state, -2);     // lookup[key]
-    if (lua_isnil(state, -1)) {
-      lua_pop(state, 1);         // drop nil
-      lua_checkstack(state, 3);
-      ud = lua_newuserdata(state, sz);  // create new userdata
-      lua_pushlightuserdata(state, key);
-      lua_pushvalue(state, -2);  // dup userdata
-      lua_settable(state, -4);   // lookup[key] = userdata
-    }
-    return ud;
   }
 };
 

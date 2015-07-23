@@ -79,7 +79,7 @@ int ai_player::l_say(lua_State *state) {
 
 int ai_player::l_find(lua_State *state) {
   std::shared_ptr<unit_wrapper> unit(find());
-  fw::lua_registrar<unit_wrapper>::push(state, unit.get(), false);
+  fw::lua_helper<unit_wrapper>::push(state, unit.get(), false);
   return 1;
 }
 
