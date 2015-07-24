@@ -102,7 +102,7 @@ inline packet_buffer &operator >>(packet_buffer &lhs, uint8_t &rhs) {
   return lhs;
 }
 
-#ifdef APPLE
+#ifdef __APPLE__
 // CLang for Apple makes size_t a different type, but on other platforms, it's the same as uint64_t (or uint32_t).
 
 inline packet_buffer &operator <<(packet_buffer &lhs, size_t rhs) {
