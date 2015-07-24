@@ -41,6 +41,7 @@ void title_screen::hide() {
 
 void title_screen::update() {
   _main_menu_window->update();
+  _new_game_window->update();
 }
 
 }
