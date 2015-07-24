@@ -16,7 +16,7 @@
 namespace game {
 
 terrain::terrain() :
-    _width(0), _length(0), _heights(nullptr), _ib(new fw::index_buffer()) {
+    _width(0), _length(0), _heights(nullptr) {
 }
 
 terrain::~terrain() {
@@ -27,6 +27,7 @@ void terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices(index_data, PATCH_SIZE);
+  _ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
   _ib->set_data(index_data.size(), &index_data[0], 0);
 
   // load the shader file that we'll use for rendering
@@ -326,4 +327,3 @@ fw::vector terrain::get_cursor_location(fw::vector const &start, fw::vector cons
   return fw::vector(0, 0, 0);
 }
 }
-

@@ -1,11 +1,13 @@
 
 #include <boost/foreach.hpp>
 
+#include <framework/exception.h>
+#include <framework/framework.h>
+#include <framework/graphics.h>
 #include <game/screens/screen.h>
 #include <game/screens/title_screen.h>
 #include <game/screens/game_screen.h>
 #include <game/editor/editor_screen.h>
-#include <framework/exception.h>
 
 namespace game {
 
@@ -43,21 +45,23 @@ screen_stack::~screen_stack() {
 
 void screen_stack::set_active_screen(std::string const &name,
     std::shared_ptr<screen_options> options /*= std::shared_ptr<screen_options>()*/) {
-  auto it = _screens.find(name);
-  if (it == _screens.end()) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("invalid screen name!"));
-  }
-
-  if (_active != name) {
-    if (_active != "") {
-      std::string old_active = _active;
-      _active = "";
-      _screens[old_active]->hide();
+  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    auto it = _screens.find(name);
+    if (it == _screens.end()) {
+      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("invalid screen name!"));
     }
-    _screens[name]->set_options(options);
-    _screens[name]->show();
-    _active = name;
-  }
+
+    if (_active != name) {
+      if (_active != "") {
+        std::string old_active = _active;
+        _active = "";
+        _screens[old_active]->hide();
+      }
+      _screens[name]->set_options(options);
+      _screens[name]->show();
+      _active = name;
+    }
+  });
 }
 
 screen *screen_stack::get_active_screen() {
