@@ -18,11 +18,13 @@ namespace game {
 class world_summary;
 class game_screen_options;
 class main_menu_window;
+class new_ai_player_window;
 
 /** This is the "new game" window where you can choose the map, number of players and so on. */
 class new_game_window {
 private:
   main_menu_window *_main_menu_window;
+  new_ai_player_window *_new_ai_player_window;
   fw::gui::window *_wnd;
   std::shared_ptr<game_screen_options> _game_options;
   game::session::session_state _sess_state;
@@ -61,7 +63,7 @@ public:
   new_game_window();
   ~new_game_window();
 
-  void initialize(main_menu_window *main_menu_window);
+  void initialize(main_menu_window *main_menu_window, new_ai_player_window *new_ai_player_window);
   void show();
   void hide();
   void update();
@@ -75,7 +77,5 @@ public:
   // selects the map with the given name. This is usually done to keep our selection in sync with the host.
   void select_map(std::string const &map_name);
 };
-
-extern new_game_window *new_game;
 
 }

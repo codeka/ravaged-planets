@@ -50,8 +50,10 @@ new_game_window::new_game_window() :
 new_game_window::~new_game_window() {
 }
 
-void new_game_window::initialize(main_menu_window *main_menu_window) {
+void new_game_window::initialize(main_menu_window *main_menu_window, new_ai_player_window *new_ai_player_window) {
   _main_menu_window = main_menu_window;
+  _new_ai_player_window = new_ai_player_window;
+
   _wnd = builder<window>(px(0), px(0), pct(100), pct(100)) << window::background("title_background")
       << widget::visible(false)
       << (builder<label>(px(40), px(20), px(417), px(49)) << label::background("title_heading"))
@@ -267,7 +269,7 @@ game::world_summary const &new_game_window::get_selected_world_summary() {
 }
 
 bool new_game_window::on_new_ai_clicked(widget *w) {
- //new_ai_player->show();
+  _new_ai_player_window->show();
   return true;
 }
 

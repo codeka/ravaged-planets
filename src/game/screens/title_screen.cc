@@ -7,6 +7,7 @@
 #include <game/screens/game_screen.h>
 #include <game/screens/title_screen.h>
 #include <game/screens/title/main_menu_window.h>
+#include <game/screens/title/new_ai_player_window.h>
 #include <game/screens/title/new_game_window.h>
 
 namespace game {
@@ -25,9 +26,11 @@ title_screen::~title_screen() {
 
 void title_screen::show() {
   _main_menu_window = new main_menu_window();
+  _new_ai_player_window = new new_ai_player_window();
   _new_game_window = new new_game_window();
   _main_menu_window->initialize(_new_game_window);
-  _new_game_window->initialize(_main_menu_window);
+  _new_game_window->initialize(_main_menu_window, _new_ai_player_window);
+  _new_ai_player_window->initialize(_new_game_window);
 
   _main_menu_window->show();
 }
@@ -35,6 +38,8 @@ void title_screen::show() {
 void title_screen::hide() {
   delete _main_menu_window;
   _main_menu_window = nullptr;
+  delete _new_ai_player_window;
+  _new_ai_player_window = nullptr;
   delete _new_game_window;
   _new_game_window = nullptr;
 }
