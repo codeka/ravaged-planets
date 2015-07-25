@@ -11,6 +11,7 @@
 #include <framework/exception.h>
 #include <framework/font.h>
 #include <framework/graphics.h>
+#include <framework/lang.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
 #include <framework/shader.h>
@@ -342,7 +343,7 @@ void font_manager::update(float dt) {
 }
 
 std::shared_ptr<font_face> font_manager::get_face() {
-  return get_face(fw::resolve("gui/SaccoVanzetti.ttf"));
+  return get_face(fw::resolve("gui/" + fw::text("lang.font")));
 }
 
 /** Gets the \ref font_face for the font at the given path (assumed to be a .ttf file). */

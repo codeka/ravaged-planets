@@ -2,7 +2,7 @@
 # This is the name of the language as it appears in the selection drop-down (and
 # a few other places)
 lang.name = 한국어 (Korean)
-lang.font = korean
+lang.font = dotum.ttf
 
 # Some generic strings that'll appear all over the place...
 cancel = 취소
