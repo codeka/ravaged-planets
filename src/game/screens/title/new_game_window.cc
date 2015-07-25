@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <boost/foreach.hpp>
+#include <boost/format.hpp>
 
 #include <framework/framework.h>
 #include <framework/exception.h>
@@ -58,8 +59,8 @@ void new_game_window::initialize(main_menu_window *main_menu_window, new_ai_play
       << widget::visible(false)
       << (builder<label>(px(40), px(20), px(417), px(49)) << label::background("title_heading"))
       << (builder<label>(px(40), px(70), px(500), px(16))
-          << label::text("A game by Dean Harding (dean@codeka.com.au)"))
-      << (builder<label>(px(40), px(100), px(200), px(20)) << label::text("Choose map:"))
+          << label::text((boost::format(fw::text("title.sub-title")) % "Dean Harding" % "dean@codeka.com.au").str()))
+      << (builder<label>(px(40), px(100), px(200), px(20)) << label::text(fw::text("title.new-game.choose-map")))
       << (builder<listbox>(px(40), px(120), px(200), sum(pct(100), px(-190)))
           << widget::id(MAP_LIST_ID)
           << listbox::item_selected(std::bind(&new_game_window::on_maps_selection_changed, this, _1)))
@@ -68,18 +69,21 @@ void new_game_window::initialize(main_menu_window *main_menu_window, new_ai_play
           << (builder<label>(px(4), px(4), fract(fw::gui::height, 1.333f), sum(pct(100), px(-8)))
               << label::background("frame") << widget::id(MAP_SCREENSHOT_ID))
           << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(8), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
-              << label::text("<map name here>") << widget::id(MAP_NAME_ID))
+              << widget::id(MAP_NAME_ID))
           << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(30), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
-              << label::text("Size: nxm Players: n") << widget::id(MAP_SIZE_ID))
+              << widget::id(MAP_SIZE_ID))
           << (builder<button>(sum(pct(100), px(-120)), sum(pct(100), px(-40)), px(110), px(30))
               << button::text(fw::text("title.new-game.add-ai-player"))
               << button::click(std::bind(&new_game_window::on_new_ai_clicked, this, _1)))
           )
-      << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Login")
+      << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30))
+          << button::text(fw::text("title.new-game.login"))
           << widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
-      << (builder<button>(sum(pct(100), px(-190)), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Cancel")
+      << (builder<button>(sum(pct(100), px(-190)), sum(pct(100), px(-60)), px(150), px(30))
+          << button::text(fw::text("cancel"))
           << widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
-      << (builder<button>(sum(pct(100), px(-350)), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Start game")
+      << (builder<button>(sum(pct(100), px(-350)), sum(pct(100), px(-60)), px(150), px(30))
+          << button::text(fw::text("title.new-game.start-game"))
           << widget::click(std::bind(&new_game_window::on_start_game_clicked, this, _1)))
       << (builder<label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
           << label::text(fw::version_str));
@@ -311,8 +315,8 @@ void new_game_window::update_selection() {
   simulation_thread::get_instance()->set_map_name(ws.get_name());
 
   _wnd->find<label>(MAP_NAME_ID)->set_text((boost::format("%s by %s") % ws.get_name() % ws.get_author()).str());
-  _wnd->find<label>(MAP_SIZE_ID)->set_text(
-      (boost::format("Size: %dx%d Players: %d") % ws.get_width() % ws.get_height() % ws.get_num_players()).str());
+  _wnd->find<label>(MAP_SIZE_ID)->set_text((boost::format(fw::text("title.new-game.map-size"))
+      % ws.get_width() % ws.get_height() % ws.get_num_players()).str());
   _wnd->find<label>(MAP_SCREENSHOT_ID)->set_background(ws.get_screenshot());
 }
 

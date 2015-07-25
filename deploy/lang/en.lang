@@ -12,8 +12,8 @@ please-wait.logging-in = Please wait, logging in...
 please-wait.logging-out = Please wait, logging out...
 
 # The buttons on the title page
-title.new-game = New Game
-title.join-game = Join Game
+title.new-game = New game
+title.join-game = Join game
 title.options = Options
 title.editor = Editor
 title.quit = Quit
@@ -26,13 +26,14 @@ title.login.login = Login
 title.login.logged-in = Logged in: %1%
 title.login.failed = Login failed, check password
 
-title.new-game.start-game = Start Game
+title.new-game.start-game = Start game
 title.new-game.choose-map = Choose map:
+title.new-game.login = Login
 title.new-game.user-header.username = Username
 title.new-game.user-header.ready = Ready
-title.new-game.map-size = Size:
-title.new-game.add-ai-player = Add AI Player
-title.new-game.player-properties = Player Properties
+title.new-game.map-size = Size: %dx%d Players: %d
+title.new-game.add-ai-player = Add AI player
+title.new-game.player-properties = Player properties
 title.new-game.multiplayer = Multiplayer
 title.new-game.not-logged-in = You are not logged in.
 title.new-game.ready-to-go = %1% is ready to go!
@@ -41,22 +42,20 @@ title.new-game.ready = ready
 title.new-game.enable-multiplayer = Enable multiplayer
 title.new-game.type-to-chat = Type to chat:
 
-title.new-ai-player.title = New AI Player
-title.new-ai-player.player-name = Player Name:
-title.new-ai-player.player-colour = Player Color:
+title.new-ai-player.player-name = Player name:
+title.new-ai-player.player-colour = Player color:
 title.new-ai-player.script = Script:
 
 title.player-props.title = Player Properties
 title.player-props.player-colour = Player Color:
 
-title.join-game.join = Join Game
+title.join-game.join = Join game
 title.join-game.col-id = ID
 title.join-game.col-user = Username
-title.join-game.col-game-name = Game Name
+title.join-game.col-game-name = Game name
 title.join-game.col-address = Address
 
-hud.pause.title = Pause
+hud.pause.title = Game paused
 hud.pause.resume = Resume
-hud.pause.options = Options
-hud.pause.exit-to-menu = Exit to Menu
-hud.pause.exit-game = Exit Game
+hud.pause.exit-to-menu = Exit to menu
+hud.pause.exit-game = Exit game

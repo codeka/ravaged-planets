@@ -29,9 +29,10 @@ title.login.failed = 로그인 비밀 번호를 확인하지 못했습니다
 
 title.new-game.start-game = 게임 시작
 title.new-game.choose-map = 지도를 선택하십시오:
+title.new-game.login = 로그인
 title.new-game.user-header.username = 이름
 title.new-game.user-header.ready = 준비
-title.new-game.map-size = 크기:
+title.new-game.map-size = 크기: %dx%d 선수 의 수: %d
 title.new-game.add-ai-player = AI 선수 추가
 title.new-game.player-properties = 플레이어 속성
 title.new-game.multiplayer = 멀티 플레이어
@@ -56,8 +57,7 @@ title.join-game.col-user = 아이디
 title.join-game.col-game-name = 게임 이름
 title.join-game.col-address = 주소
 
-hud.pause.title = 일시 중지됨
+hud.pause.title = 게임 일시 중지
 hud.pause.resume = 이력서
-hud.pause.options = 옵션
 hud.pause.exit-to-menu = 메인 메뉴
 hud.pause.exit-game = 종료 게임
