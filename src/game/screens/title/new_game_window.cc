@@ -21,15 +21,15 @@
 
 #include <game/application.h>
 #include <game/session/session.h>
-#include <game/simulation/local_player.h>
-#include <game/world/world_vfs.h>
-#include <game/world/world.h>
 #include <game/screens/game_screen.h>
 #include <game/screens/title/new_game_window.h>
 #include <game/screens/title/main_menu_window.h>
 #include <game/screens/title/new_ai_player_window.h>
 #include <game/screens/title/player_properties_window.h>
+#include <game/simulation/local_player.h>
 #include <game/simulation/simulation_thread.h>
+#include <game/world/world_vfs.h>
+#include <game/world/world.h>
 
 using namespace std::placeholders;
 using namespace fw::gui;
@@ -44,7 +44,7 @@ enum ids {
 };
 
 new_game_window::new_game_window() :
-    _wnd(nullptr), _main_menu_window(nullptr) {
+    _wnd(nullptr), _main_menu_window(nullptr), _sess_state(game::session::disconnected), _need_refresh_players(false) {
 }
 
 new_game_window::~new_game_window() {
@@ -72,7 +72,7 @@ void new_game_window::initialize(main_menu_window *main_menu_window, new_ai_play
           << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(30), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
               << label::text("Size: nxm Players: n") << widget::id(MAP_SIZE_ID))
           << (builder<button>(sum(pct(100), px(-120)), sum(pct(100), px(-40)), px(110), px(30))
-              << button::text("Add AI player")
+              << button::text(fw::text("title.new-game.add-ai-player"))
               << button::click(std::bind(&new_game_window::on_new_ai_clicked, this, _1)))
           )
       << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30)) << button::text("Login")
@@ -149,7 +149,7 @@ void new_game_window::update() {
         // list and also print a message to the chat window saying that they're ready
         _need_refresh_players = true;
 
-        std::string msg = (boost::format("%1% is ready to go") % p->get_user_name()).str();
+        std::string msg = (boost::format(fw::text("title.new-game.ready-to-go")) % p->get_user_name()).str();
         append_chat(msg);
       }
     }
@@ -209,8 +209,8 @@ void new_game_window::on_session_state_changed(session::session_state new_state)
 */
 }
 
-// this is called when the list of players has changed, we set a flag (because it
-// can happen on another thread) and update the players in the main update() call.
+// this is called when the list of players has changed, we set a flag (because it can happen on another thread)
+// and update the players in the main update() call.
 void new_game_window::on_players_changed() {
   _need_refresh_players = true;
 }

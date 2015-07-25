@@ -5,7 +5,6 @@
 
 #include <game/session/session.h>
 
-
 namespace fw {
 class bitmap;
 namespace gui {
@@ -32,6 +31,8 @@ private:
   boost::signals2::connection _sig_chat_conn;
   boost::signals2::connection _sig_session_state_changed;
   std::vector<uint32_t> _ready_players;
+
+  /** Set to true when we need to refresh the player list. */
   bool _need_refresh_players;
 
   void on_players_changed();
@@ -50,9 +51,6 @@ private:
   void add_chat_msg(std::string const &user_name, std::string const &msg);
 
   void on_session_state_changed(session::session_state new_state);
-
-  // set the screenshot image
-  void set_screenshot(fw::bitmap *bmp);
 
   void update_selection();
 

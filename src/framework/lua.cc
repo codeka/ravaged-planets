@@ -53,27 +53,12 @@ void lua_context::setup_state() {
   fw::lua_registrar<lua_debug>::register_static(_state, new lua_debug());
 }
 
-std::string get_string(lua_State *s, std::string const &name) {
-  lua_pushstring(s, name.c_str());
-  lua_gettable(s, -2);
-  if (!lua_isstring(s, -1)) {
-    return ""; // TODO: handle errors
-  }
-  std::string value = lua_tostring(s, -1);
-  lua_pop(s, 1);  /* remove value */
-  return value;
-}
-
-void put_string (lua_State *s, std::string const &name, std::string const &value) {
-  lua_pushstring(s, name.c_str());
-  lua_pushstring(s, value.c_str());
-  lua_settable(s, -3);
-}
-
 void lua_context::set_search_pattern(std::string const &pattern) {
   lua_getglobal(_state, "package");
   if (lua_istable(_state, -1)) {
-    put_string(_state, "path", pattern);
+    lua_pushstring(_state, "path");
+    lua_pushstring(_state, pattern.c_str());
+    lua_settable(_state, -3);
   }
   lua_pop(_state, 1);
 }
