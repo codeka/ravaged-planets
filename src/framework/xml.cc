@@ -78,10 +78,14 @@ xml_element load_xml(fs::path const &filepath, std::string const & format_name, 
           (boost::format("invalid root node, expected \"%1%\" found \"%2%\"") % format_name % root->Value()).str()));
     }
 
-    std::string actual_version(root->Attribute("version"));
+    std::string actual_version = "1";
+    if (root->Attribute("version") != nullptr) {
+      actual_version = root->Attribute("version");
+    }
     if (actual_version != boost::lexical_cast<std::string>(version)) {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(
-          (boost::format("invalid %1% version: %2% (expected \"%3%\")") % format_name % actual_version % version).str()));
+      BOOST_THROW_EXCEPTION(fw::exception()
+          << fw::message_error_info((boost::format("invalid %1% version: %2% (expected \"%3%\")")
+              % format_name % actual_version % version).str()));
     }
   }
 

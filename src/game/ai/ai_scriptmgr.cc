@@ -29,12 +29,13 @@ void parse_ai(fs::path containing_dir, fw::xml_element &root, script_desc &desc)
   for (fw::xml_element elem = root.get_first_child(); elem.is_valid(); elem = elem.get_next_sibling()) {
     if (elem.get_value() == "description") {
       desc.name = elem.get_attribute("name");
-      if (elem.is_attribute_defined("desc"))
-        desc.desc = elem.get_attribute("desc");
-      if (elem.is_attribute_defined("author"))
+      desc.desc = elem.get_text();
+      if (elem.is_attribute_defined("author")) {
         desc.author = elem.get_attribute("author");
-      if (elem.is_attribute_defined("url"))
+      }
+      if (elem.is_attribute_defined("url")) {
         desc.url = elem.get_attribute("url");
+      }
     } else if (elem.get_value() == "script") {
       desc.filename = (containing_dir / elem.get_text());
     }

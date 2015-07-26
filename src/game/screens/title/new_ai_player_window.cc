@@ -6,6 +6,7 @@
 #include <framework/gui/button.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/label.h>
+#include <framework/gui/listbox.h>
 #include <framework/gui/window.h>
 #include <framework/gui/widget.h>
 #include <framework/logging.h>
@@ -21,6 +22,10 @@ using namespace fw::gui;
 
 namespace game {
 
+enum ids {
+  AI_LIST_ID = 347456,
+};
+
 new_ai_player_window::new_ai_player_window() : _wnd(nullptr) {
 }
 
@@ -30,8 +35,14 @@ new_ai_player_window::~new_ai_player_window() {
 
 void new_ai_player_window::initialize(new_game_window *new_game_window) {
 	_new_game_window = new_game_window;
-	_wnd = builder<window>(sum(pct(50), px(-150)), sum(pct(40), px(-100)), px(300), px(200))
-	    << window::background("frame") << widget::visible(false);
+	_wnd = builder<window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
+	    << window::background("frame") << widget::visible(false)
+      << (builder<listbox>(px(10), px(10), px(250), sum(pct(100), px(-50)))
+          << widget::id(AI_LIST_ID))
+      << (builder<button>(sum(pct(100), px(-220)), sum(pct(100), px(-40)), px(100), px(30))
+          << button::text("Add player"))
+      << (builder<button>(sum(pct(100), px(-110)), sum(pct(100), px(-40)), px(100), px(30))
+          << button::text("Cancel"));
 	fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 
 	// add each of the scripts to the "scripts" combobox so the user can choose
@@ -39,13 +50,14 @@ void new_ai_player_window::initialize(new_game_window *new_game_window) {
 	ai_scriptmgr scriptmgr;
 	std::vector<script_desc> &scripts = scriptmgr.get_scripts();
 	BOOST_FOREACH(script_desc &desc, scripts) {
-		//cb->addItem(new CEGUI::ListboxTextItem(desc.name, 0, &desc));
+    _wnd->find<listbox>(AI_LIST_ID)->add_item(
+        builder<label>(px(8), px(0), pct(100), px(20)) << label::text(desc.name) << widget::data(desc));
 	}
 
 	// if there's at least one script (which there should be...) we'll want the default
 	// one to be the first one in the list.
 	if (scripts.size() > 0) {
-		//cb->setText(scripts[0].name);
+    _wnd->find<listbox>(AI_LIST_ID)->select_item(0);
 	}
 }
 
