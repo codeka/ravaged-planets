@@ -37,16 +37,15 @@ void new_ai_player_window::initialize(new_game_window *new_game_window) {
 	_new_game_window = new_game_window;
 	_wnd = builder<window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
 	    << window::background("frame") << widget::visible(false)
-      << (builder<listbox>(px(10), px(10), px(250), sum(pct(100), px(-50)))
+      << (builder<listbox>(px(10), px(10), px(250), sum(pct(100), px(-60)))
           << widget::id(AI_LIST_ID))
       << (builder<button>(sum(pct(100), px(-220)), sum(pct(100), px(-40)), px(100), px(30))
-          << button::text("Add player"))
+          << button::text("Add player") << button::click(std::bind(&new_ai_player_window::on_ok_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-110)), sum(pct(100), px(-40)), px(100), px(30))
-          << button::text("Cancel"));
+          << button::text("Cancel") << button::click(std::bind(&new_ai_player_window::on_cancel_clicked, this, _1)));
 	fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 
-	// add each of the scripts to the "scripts" combobox so the user can choose
-	// which one he wants
+	// add each of the scripts to the "scripts" combobox so the user can choose which one he wants
 	ai_scriptmgr scriptmgr;
 	std::vector<script_desc> &scripts = scriptmgr.get_scripts();
 	BOOST_FOREACH(script_desc &desc, scripts) {
@@ -82,7 +81,7 @@ bool new_ai_player_window::on_ok_clicked(widget *w) {
 	//CEGUI::Window *player_name = get_child("NewAiPlayer/Name");
 	std::string name("Player 2");
 
-	script_desc *desc = 0;
+	script_desc *desc = nullptr;
 	//CEGUI::Combobox *cb = get_child<CEGUI::Combobox>("NewAiPlayer/Script");
 	//CEGUI::ListboxItem *selected = cb->getSelectedItem();
 	//if (selected != 0) {
@@ -107,9 +106,7 @@ bool new_ai_player_window::on_ok_clicked(widget *w) {
 			simulation_thread::get_instance()->add_ai_player(ply);
 		}
 	} else {
-		// if we're part of a multiplayer game, we have to join this player like any
-		// other player...
-
+		// if we're part of a multiplayer game, we have to join this player like any other player...
 		fw::debug
 		    << boost::format("you're already in game %1%, cannot add an AI player (that feature is not yet implemented)")
 			  % game_id << std::endl;
