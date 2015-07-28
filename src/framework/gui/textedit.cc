@@ -78,7 +78,7 @@ void STB_TEXTEDIT_LAYOUTROW(StbTexteditRow *r, textedit_buffer *buffer, int line
 /** Not just spaces, but basically anything we can word wrap on. */
 bool STB_TEXTEDIT_IS_SPACE(uint32_t ch) {
   static std::basic_string<uint32_t> spaces = conv::utf_to_utf<uint32_t>(" \t\n\r,;(){}[]<>|");
-  return spaces.find(ch) >= 0;
+  return spaces.find(ch) != std::string::npos;
 }
 
 void STB_TEXTEDIT_DELETECHARS(textedit_buffer *buffer, int pos, int n) {
@@ -128,6 +128,20 @@ public:
   }
 };
 
+class textedit_filter_property : public property {
+private:
+  std::function<bool(std::string ch)> _filter;
+public:
+  textedit_filter_property(std::function<bool(std::string ch)> filter) :
+    _filter(filter) {
+  }
+
+  void apply(widget *widget) {
+    textedit *te = dynamic_cast<textedit *>(widget);
+    te->_filter = _filter;
+  }
+};
+
 //-----------------------------------------------------------------------------
 
 textedit::textedit(gui *gui) : widget(gui), _buffer(new textedit_buffer()), _cursor_flip_time(0), _draw_cursor(true) {
@@ -143,6 +157,10 @@ textedit::~textedit() {
 
 property *textedit::text(std::string const &text) {
   return new textedit_text_property(text);
+}
+
+property *textedit::filter(std::function<bool(std::string ch)> filter) {
+  return new textedit_filter_property(filter);
 }
 
 void textedit::on_focus_gained() {
@@ -162,6 +180,13 @@ bool textedit::on_key(int key, bool is_down) {
   }
 
   if (is_down) {
+    if (_filter) {
+      std::string str(1, (char) key); // TODO: this is horrible!
+      if (!_filter(str)) {
+        return true;
+      }
+    }
+
     stb_textedit_key(_buffer, &_buffer->state, key);
   }
   _cursor_flip_time = 0.0f;
@@ -181,6 +206,9 @@ bool textedit::on_mouse_up(float x, float y) {
   return widget::on_mouse_up(x, y);
 }
 
+void textedit::set_filter(std::function<bool(std::string ch)> filter) {
+  _filter = filter;
+}
 
 void textedit::select_all() {
   _buffer->state.select_start = 0;

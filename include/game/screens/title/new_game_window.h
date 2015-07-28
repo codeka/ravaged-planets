@@ -44,7 +44,7 @@ private:
   bool on_cancel_clicked(fw::gui::widget *w);
   void on_maps_selection_changed(int index);
   bool multiplayer_enabled_checked(fw::gui::widget *w);
-  bool chat_send_clicked(fw::gui::widget *w);
+  bool on_chat_filter(std::string ch);
   bool on_new_ai_clicked(fw::gui::widget *w);
   bool player_properties_clicked(fw::gui::widget *w);
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -15,11 +16,13 @@ class drawable;
 class textedit : public widget {
 private:
   friend class textedit_text_property;
+  friend class textedit_filter_property;
 
   textedit_buffer *_buffer;
   std::shared_ptr<drawable> _background;
   std::shared_ptr<drawable> _selection_background;
   std::shared_ptr<drawable> _cursor;
+  std::function<bool(std::string ch)> _filter;
   bool _draw_cursor;
   float _cursor_flip_time;
 
@@ -28,6 +31,7 @@ public:
   virtual ~textedit();
 
   static property *text(std::string const &text);
+  static property *filter(std::function<bool(std::string ch)> filter);
 
   virtual void on_focus_gained();
   virtual void on_focus_lost();
@@ -43,6 +47,8 @@ public:
   void select_all();
   std::string get_text() const;
   void set_text(std::string const &text);
+
+  void set_filter(std::function<bool(std::string ch)> filter);
 
   virtual void update(float dt);
   virtual void render();

@@ -1,6 +1,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 
@@ -18,6 +19,7 @@
 #include <framework/gui/button.h>
 #include <framework/gui/label.h>
 #include <framework/gui/listbox.h>
+#include <framework/gui/textedit.h>
 #include <framework/version.h>
 
 #include <game/application.h>
@@ -43,6 +45,8 @@ enum ids {
   MAP_NAME_ID,
   MAP_SIZE_ID,
   PLAYER_LIST_ID,
+  CHAT_LIST_ID,
+  CHAT_TEXTEDIT_ID,
 };
 
 new_game_window::new_game_window() :
@@ -80,6 +84,11 @@ void new_game_window::initialize(main_menu_window *main_menu_window, new_ai_play
               << label::text(fw::text("title.new-game.players")))
           << (builder<listbox>(px(10), px(30), sum(pct(50), px(-10)), sum(pct(100), px(-80)))
               << widget::id(PLAYER_LIST_ID))
+          << (builder<listbox>(sum(pct(50), px(10)), px(10), sum(pct(50), px(-20)), sum(pct(100), px(-40)))
+              << widget::id(CHAT_LIST_ID))
+          << (builder<textedit>(sum(pct(50), px(10)), sum(pct(100), px(-30)), sum(pct(50), px(-20)), px(20))
+              << widget::id(CHAT_TEXTEDIT_ID)
+              << textedit::filter(std::bind(&new_game_window::on_chat_filter, this, _1)))
           << (builder<button>(sum(pct(50), px(-110)), sum(pct(100), px(-40)), px(110), px(30))
               << button::text(fw::text("title.new-game.add-ai-player"))
               << button::click(std::bind(&new_game_window::on_new_ai_clicked, this, _1)))
@@ -283,17 +292,20 @@ bool new_game_window::player_properties_clicked(widget *w) {
   return true;
 }
 
-bool new_game_window::chat_send_clicked(widget *w) {
- /* std::string msg = _chat_input->getText().c_str();
+bool new_game_window::on_chat_filter(std::string ch) {
+  if (ch != "\r" && ch != "\n" && ch != "\r\n") {
+    return true;
+  }
+
+  textedit *ed = _wnd->find<textedit>(CHAT_TEXTEDIT_ID);
+  std::string msg = ed->get_text();
   boost::trim(msg);
 
-  // add the message to our chat window
   add_chat_msg(session::get_instance()->get_user_name(), msg);
-
-  // send chat message to other players
   simulation_thread::get_instance()->send_chat_msg(msg);
-*/
-  return true;
+
+  ed->set_text("");
+  return false; // ignore the newline character
 }
 
 void new_game_window::add_chat_msg(std::string const &user_name, std::string const &msg) {
@@ -301,14 +313,8 @@ void new_game_window::add_chat_msg(std::string const &user_name, std::string con
 }
 
 void new_game_window::append_chat(std::string const &msg) {
-  fw::debug << "CHAT " << msg << std::endl;
-/*  int index = _chat_msgs->getItemCount() + 1;
-  std::string id = boost::lexical_cast<std::string>(index);
-
-  CEGUI::ItemEntry *entry = dynamic_cast<CEGUI::ItemEntry *>(_wndmgr->createWindow("ww/ListboxItem",
-      ("NewGame/Multiplayer/ChatMessages/" + id).c_str()));
-  fw::gui::set_text(entry, msg);
-  _chat_msgs->addItem(entry);*/
+  listbox *chat_list = _wnd->find<listbox>(CHAT_LIST_ID);
+  chat_list->add_item(builder<label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << label::text(msg));
 }
 
 void new_game_window::update_selection() {
