@@ -34,8 +34,8 @@ fw::lua_registrar<ai_player>::method_definition ai_player::methods[] = {
   {nullptr, nullptr}
 };
 
-ai_player::ai_player(std::string const &name, script_desc *desc, uint8_t player_no) {
-  _script_desc = *desc;
+ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t player_no) {
+  _script_desc = desc;
   _user_name = name;
   _player_no = player_no;
 
@@ -50,7 +50,7 @@ ai_player::ai_player(std::string const &name, script_desc *desc, uint8_t player_
 
   // add the ..\data\ai\common path to the search pattern, as well as the directory the script was loaded from.
   std::string search_pattern = (fw::install_base_path() / "ai/common/?.lua").string()
-      + ";" + (desc->filename.parent_path() / "?.lua").string();
+      + ";" + (_script_desc.filename.parent_path() / "?.lua").string();
   script->set_search_pattern(search_pattern);
 
   if (!script->load_script(_script_desc.filename.string())) {

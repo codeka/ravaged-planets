@@ -7,8 +7,10 @@
 #include <framework/gui/gui.h>
 #include <framework/gui/label.h>
 #include <framework/gui/listbox.h>
+#include <framework/gui/textedit.h>
 #include <framework/gui/window.h>
 #include <framework/gui/widget.h>
+#include <framework/lang.h>
 #include <framework/logging.h>
 
 #include <game/ai/ai_player.h>
@@ -24,6 +26,7 @@ namespace game {
 
 enum ids {
   AI_LIST_ID = 347456,
+  PLAYER_NAME_ID
 };
 
 new_ai_player_window::new_ai_player_window() : _wnd(nullptr) {
@@ -39,6 +42,9 @@ void new_ai_player_window::initialize(new_game_window *new_game_window) {
 	    << window::background("frame") << widget::visible(false)
       << (builder<listbox>(px(10), px(10), px(250), sum(pct(100), px(-60)))
           << widget::id(AI_LIST_ID))
+      << (builder<label>(px(270), px(10), sum(pct(100), px(-280)), px(20))
+          << label::text(fw::text("title.new-ai-player.player-name")))
+      << (builder<textedit>(px(270), px(30), sum(pct(100), px(-280)), px(20)) << widget::id(PLAYER_NAME_ID))
       << (builder<button>(sum(pct(100), px(-220)), sum(pct(100), px(-40)), px(100), px(30))
           << button::text("Add player") << button::click(std::bind(&new_ai_player_window::on_ok_clicked, this, _1)))
       << (builder<button>(sum(pct(100), px(-110)), sum(pct(100), px(-40)), px(100), px(30))
@@ -63,8 +69,6 @@ void new_ai_player_window::initialize(new_game_window *new_game_window) {
 void new_ai_player_window::show() {
 	_wnd->set_visible(true);
 
-	//CEGUI::Window *player_name = get_child("NewAiPlayer/Name");
-
 	int max_player_no = 0;
 	BOOST_FOREACH(player *plyr, simulation_thread::get_instance()->get_players()) {
 		int player_no = plyr->get_player_no();
@@ -74,23 +78,18 @@ void new_ai_player_window::show() {
 
 	std::stringstream ss;
 	ss << "Player " << (max_player_no + 1);
-	//player_name->setText(CEGUI::String(ss.str().c_str()));
+  _wnd->find<textedit>(PLAYER_NAME_ID)->set_text(ss.str());
 }
 
 bool new_ai_player_window::on_ok_clicked(widget *w) {
-	//CEGUI::Window *player_name = get_child("NewAiPlayer/Name");
+	_wnd->find<textedit>(PLAYER_NAME_ID)->get_text();
 	std::string name("Player 2");
 
-	script_desc *desc = nullptr;
-	//CEGUI::Combobox *cb = get_child<CEGUI::Combobox>("NewAiPlayer/Script");
-	//CEGUI::ListboxItem *selected = cb->getSelectedItem();
-	//if (selected != 0) {
-	//	desc = static_cast<script_desc *>(selected->getUserData());
-	//} else {
-	//	ai_scriptmgr scriptmgr;
-	//	std::vector<script_desc> &scripts = scriptmgr.get_scripts();
-	//	desc = &scripts[0];
-	//}
+  widget *selected_item = _wnd->find<listbox>(AI_LIST_ID)->get_selected_item();
+  if (selected_item == nullptr) {
+    return false;
+  }
+  script_desc const &desc = boost::any_cast<script_desc const &>(selected_item->get_data());
 
 	uint16_t game_id = simulation_thread::get_instance()->get_game_id();
 	if (game_id == 0) {

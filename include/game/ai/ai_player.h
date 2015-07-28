@@ -56,7 +56,7 @@ public:
   static char const class_name[];
   static fw::lua_registrar<ai_player>::method_definition methods[];
 
-  ai_player(std::string const &name, script_desc *desc, uint8_t player_no);
+  ai_player(std::string const &name, script_desc const &desc, uint8_t player_no);
   virtual ~ai_player();
 
   virtual void update();
