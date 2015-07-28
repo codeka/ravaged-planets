@@ -204,6 +204,7 @@ void open_file_window::on_item_activated(int index) {
 bool open_file_window::on_show_hidden_clicked(widget *w) {
   _show_hidden = dynamic_cast<checkbox *>(w)->is_checked();
   refresh();
+  return true;
 }
 
 bool open_file_window::on_ok_clicked(widget *w) {
@@ -238,4 +239,3 @@ std::string format_file_size(uint32_t size) {
 
   return boost::lexical_cast<std::string>(size / (1024 * 1024)) + " MB";
 }
-
