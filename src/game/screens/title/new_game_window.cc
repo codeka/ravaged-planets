@@ -42,6 +42,7 @@ enum ids {
   MAP_SCREENSHOT_ID,
   MAP_NAME_ID,
   MAP_SIZE_ID,
+  PLAYER_LIST_ID,
 };
 
 new_game_window::new_game_window() :
@@ -72,9 +73,18 @@ void new_game_window::initialize(main_menu_window *main_menu_window, new_ai_play
               << widget::id(MAP_NAME_ID))
           << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(30), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
               << widget::id(MAP_SIZE_ID))
-          << (builder<button>(sum(pct(100), px(-120)), sum(pct(100), px(-40)), px(110), px(30))
+          )
+      << (builder<window>(px(250), sum(pct(50), px(10)), sum(pct(100), px(-260)), sum(pct(50), px(-80)))
+          << window::background("frame")
+          << (builder<label>(px(10), px(10), sum(pct(50), px(-10)), px(20))
+              << label::text(fw::text("title.new-game.players")))
+          << (builder<listbox>(px(10), px(30), sum(pct(50), px(-10)), sum(pct(100), px(-80)))
+              << widget::id(PLAYER_LIST_ID))
+          << (builder<button>(sum(pct(50), px(-110)), sum(pct(100), px(-40)), px(110), px(30))
               << button::text(fw::text("title.new-game.add-ai-player"))
               << button::click(std::bind(&new_game_window::on_new_ai_clicked, this, _1)))
+          << (builder<button>(sum(pct(50), px(-240)), sum(pct(100), px(-40)), px(120), px(30))
+              << button::text(fw::text("title.new-game.start-multiplayer")))
           )
       << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30))
           << button::text(fw::text("title.new-game.login"))
@@ -114,6 +124,7 @@ void new_game_window::show() {
 
   // call this as if the session state just changed, to make sure we're up-to-date
   on_session_state_changed(session::get_instance()->get_state());
+  refresh_players();
 }
 
 void new_game_window::hide() {
@@ -221,29 +232,19 @@ void new_game_window::on_players_changed() {
 
 // refreshes the list of players in the game
 void new_game_window::refresh_players() {
-/*  std::vector<player *> players = simulation_thread::get_instance()->get_players();
+  std::vector<player *> players = simulation_thread::get_instance()->get_players();
 
-  _players_list->resetList();
-  BOOST_FOREACH(player * plyr, players)
-  {
+  listbox *players_list = _wnd->find<listbox>(PLAYER_LIST_ID);
+  players_list->clear();
+  BOOST_FOREACH(player *plyr, players) {
     int player_no = static_cast<int>(plyr->get_player_no());
 
-    std::vector<std::string> values;
-    values.push_back(boost::lexical_cast<std::string>(player_no));
-    values.push_back("o");
-    values.push_back(plyr->get_user_name());
-    values.push_back(plyr->is_ready() ? fw::text("title.new-game.ready") : "");
-
-    uint32_t row_no = fw::add_multicolumn_row(_players_list, values, 0);
-
-    // set the colour of the second column to be the player's colour
-    CEGUI::ListboxTextItem *item = dynamic_cast<CEGUI::ListboxTextItem *>(_players_list->getItemAtGridReference(
-        CEGUI::MCLGridRef(row_no, 1)));
-
-    CEGUI::colour col;
-    col.setARGB(plyr->get_colour().to_d3dcolor());
-    item->setTextColours(col);
-  }*/
+    std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";
+    players_list->add_item(builder<widget>(px(0), px(0), pct(100), px(20)) << widget::data(plyr)
+        << (builder<label>(px(8), px(0), px(30), px(20)) << label::text(boost::lexical_cast<std::string>(player_no)))
+        << (builder<label>(px(30), px(0), sum(pct(100), px(-80)), px(20)) << label::text(plyr->get_user_name()))
+        << (builder<label>(sum(pct(100), px(-50)), px(0), px(50), px(20)) << label::text(ready_str)));
+  }
 }
 
 void new_game_window::select_map(std::string const &map_name) {
