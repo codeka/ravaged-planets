@@ -36,7 +36,7 @@ private:
   pathing_thread *_pathing;
   std::vector<int> _keybind_tokens;
   cursor_handler *_cursor;
-  std::shared_ptr<fw::texture> _minimap_background;
+  std::shared_ptr<fw::bitmap> _minimap_background;
   std::map<int, fw::vector> _player_starts;
 
   std::string _description;
@@ -78,7 +78,7 @@ public:
     _instance = wrld;
   }
 
-  std::shared_ptr<fw::texture> const &get_minimap_background() const {
+  std::shared_ptr<fw::bitmap> const &get_minimap_background() const {
     return _minimap_background;
   }
 

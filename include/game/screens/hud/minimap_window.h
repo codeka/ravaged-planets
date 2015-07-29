@@ -19,15 +19,14 @@ class widget;
 }
 
 namespace game {
+class minimap_drawable;
 
 // The minimap_window shows a graphic with the current map and all the friendlies/enemies/etc
 class minimap_window {
 private:
   fw::gui::window *_wnd;
-  std::shared_ptr<fw::texture> _fg_texture;
-  fw::matrix _m;
-  fw::vector _map_size;
-  fw::vector _map_centre;
+  std::shared_ptr<fw::texture> _texture;
+  std::shared_ptr<minimap_drawable> _drawable;
   float _last_entity_display_update;
 
   // this is fired when the camera is moved/rotated/etc - we have to update our matrix
@@ -36,6 +35,8 @@ private:
 
   // this is called every now&then to update the display of entities on the map
   void update_entity_display();
+
+  void update_drawable();
 
 public:
   minimap_window();

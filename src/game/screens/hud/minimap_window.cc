@@ -9,7 +9,9 @@
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
+#include <framework/gui/label.h>
 #include <framework/gui/window.h>
 #include <framework/logging.h>
 #include <framework/shader.h>
@@ -32,10 +34,48 @@ using namespace std::placeholders;
 
 namespace game {
 
+/** This is the special drawble implementation we use to draw the rotated bitmap for the minimap. */
+class minimap_drawable : public fw::gui::bitmap_drawable {
+protected:
+  fw::matrix _transform;
+  fw::matrix get_transform(fw::graphics *g, float x, float y, float width, float height);
+
+public:
+  minimap_drawable(std::shared_ptr<fw::texture> texture);
+  virtual ~minimap_drawable();
+
+  void update(fw::matrix transform);
+};
+
+minimap_drawable::minimap_drawable(std::shared_ptr<fw::texture> texture) :
+    fw::gui::bitmap_drawable(texture) {
+}
+
+minimap_drawable::~minimap_drawable() {
+}
+
+void minimap_drawable::update(fw::matrix transform) {
+  _transform = transform;
+}
+
+fw::matrix minimap_drawable::get_transform(fw::graphics *g, float x, float y, float width, float height) {
+  fw::matrix transform;
+  cml::matrix_orthographic_RH(transform, 0.0f,
+      static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+  transform = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * transform;
+  return _transform * transform;
+}
+
+//-----------------------------------------------------------------------------
+
 minimap_window *hud_minimap = nullptr;
 
+enum ids {
+  MINIMAP_IMAGE_ID = 9733,
+};
+
 minimap_window::minimap_window() :
-    _last_entity_display_update(0.0f), _fg_texture(new fw::texture()), _wnd(nullptr) {
+    _last_entity_display_update(0.0f), _texture(new fw::texture()), _wnd(nullptr) {
 }
 
 minimap_window::~minimap_window() {
@@ -44,36 +84,23 @@ minimap_window::~minimap_window() {
 
 void minimap_window::initialize() {
   _wnd = builder<window>(sum(pct(100), px(-210)), px(10), px(200), px(200))
-      << window::background("frame") << widget::visible(false);
+      << window::background("frame") << widget::visible(false)
+      << (builder<label>(px(8), px(8), sum(pct(100), px(-16)), sum(pct(100), px(-16))) << widget::id(MINIMAP_IMAGE_ID));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 void minimap_window::show() {
   game::terrain *trn = game::world::get_instance()->get_terrain();
-  _fg_texture->create(trn->get_width(), trn->get_length());
-
-  fw::graphics *graphics = fw::framework::get_instance()->get_graphics();
-  float screen_width = graphics->get_width();
-  float screen_height = graphics->get_height();
-
-  // calculate the "centre" and "size" of the map window and pass it to the effect so it can offset
-  // the map and also clip it.
-  _map_centre = fw::vector(_wnd->get_left(), _wnd->get_top(), 0);
-  _map_centre += fw::vector(_wnd->get_width() / 2.0f, _wnd->get_height() / 2.0f, 0);
-  _map_centre = fw::vector(_map_centre[0] / screen_width, _map_centre[1] / screen_height, 0);
-
-  // _map_centre now points to the centre of the minimap window, using the coordinates 0..1 - but we want
-  // the coordinates to be -1..1 (remembering that the y-axis is the other way around)
-  _map_centre = fw::vector((_map_centre[0] * 2.0f) - 1.0f, -1.0f * (((_map_centre[1] * 2.0f) - 1.0f)), 0.0f);
-
-  _map_size = fw::vector(_wnd->get_width(), _wnd->get_height(), 0);
-  _map_size = fw::vector(_map_size[0] / screen_width, _map_size[1] / screen_height, 0);
+  _texture->create(trn->get_width(), trn->get_length());
+  _drawable = std::shared_ptr<minimap_drawable>(new minimap_drawable(_texture));
+  _wnd->find<label>(MINIMAP_IMAGE_ID)->set_background(_drawable);
 
   // bind to the camera's sig_updated signal, to be notified when you move the camera around
   _camera_updated_connection = fw::framework::get_instance()->get_camera()->sig_updated
       .connect(std::bind(&minimap_window::on_camera_updated, this));
 
   _wnd->set_visible(true);
+  update_drawable();
 }
 
 void minimap_window::hide() {
@@ -84,8 +111,18 @@ void minimap_window::hide() {
 }
 
 void minimap_window::on_camera_updated() {
-  _m = fw::identity();
+  update_drawable();
 
+  float gt = fw::framework::get_instance()->get_timer()->get_total_time();
+  if ((gt - 1.0f) > _last_entity_display_update) {
+    _last_entity_display_update = gt;
+    fw::framework::get_instance()->get_graphics()->run_on_render_thread([this]() {
+      update_entity_display();
+    });
+  }
+}
+
+void minimap_window::update_drawable() {
   fw::camera *camera = fw::framework::get_instance()->get_camera();
   game::terrain *terrain = game::world::get_instance()->get_terrain();
   fw::graphics *graphics = fw::framework::get_instance()->get_graphics();
@@ -103,18 +140,18 @@ void minimap_window::on_camera_updated() {
       camera->get_position()[2] / terrain->get_length(), 0);
   cam_pos = fw::vector((cam_pos[0] * 2.0f) - 1.0f, (cam_pos[1] * 2.0f) - 1.0f, 0);
   cam_pos = fw::vector(cam_pos[0] / 3.0f, -cam_pos[1] / 3.0f, 0);
-  _m *= fw::translation(cam_pos);
+  fw::matrix transform = fw::translation(cam_pos);
 
-  // scale so that we're in the correct aspect ratio, and also the same size as the HUD window
-  _m *= fw::scale(fw::vector(3.0f, 3.0f, 0.0f));
+  transform *= fw::scale(fw::vector(3.0f, 3.0f, 0.0f));
 
   // rotate so that we're facing in the same direction as the camera
   fw::vector cam_dir(camera->get_direction());
   cam_dir = fw::vector(cam_dir[0], cam_dir[2], 0).normalize();
-  _m *= fw::rotate(fw::vector(0, -1, 0), cam_dir);
+  transform *= fw::rotate(fw::vector(0, -1, 0), cam_dir);
 
   // scale it so that it's the correct aspect ratio for the window
-  _m *= fw::scale(fw::vector(scale_x, -scale_y, 0.0f));
+  transform *= fw::scale(fw::vector(scale_x, -scale_y, 0.0f));
+  _drawable->update(transform);
 }
 
 void minimap_window::update_entity_display() {
@@ -132,8 +169,8 @@ void minimap_window::update_entity_display() {
   int pixel_width = 1 + static_cast<int>(0.5f + width / wnd_width);
   int pixel_height = 1 + static_cast<int>(0.5f + height / wnd_height);
 
-  uint32_t *pixels = new uint32_t[width * height];
-  memset(pixels, 0, width * height * sizeof(uint32_t));
+  // make a copy of the minimap background's pixels
+  std::vector<uint32_t> pixels(game::world::get_instance()->get_minimap_background()->get_pixels());
 
   // go through each minimap_visible entity and draw it on our bitmap
   ent::entity_manager *ent_mgr = game::world::get_instance()->get_entity_manager();
@@ -171,10 +208,8 @@ void minimap_window::update_entity_display() {
     }
   }
 
-  fw::bitmap bm(width, height, pixels);
-  delete[] pixels;
-
-  _fg_texture->create(bm);
+  fw::bitmap bm(width, height, pixels.data());
+  _texture->create(bm);
 }
 /*
 void minimap_window::on_before_present() {

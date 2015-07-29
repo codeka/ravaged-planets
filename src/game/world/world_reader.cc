@@ -6,7 +6,6 @@
 #include <framework/graphics.h>
 #include <framework/misc.h>
 #include <framework/exception.h>
-#include <framework/texture.h>
 #include <framework/xml.h>
 
 #include <game/world/world_reader.h>
@@ -61,9 +60,7 @@ void world_reader::read(std::string name) {
   if (wfe.exists()) {
     wfe.close();
 
-    std::shared_ptr<fw::texture> tex(new fw::texture());
-    tex->create(wfe.get_full_path());
-    _minimap_background = tex;
+    _minimap_background = std::shared_ptr<fw::bitmap>(new fw::bitmap(wfe.get_full_path()));
   }
 
   wfe = wf.get_entry("screenshot.png", false /* for_write */);

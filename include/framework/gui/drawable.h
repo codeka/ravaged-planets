@@ -4,10 +4,11 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
-
+#include <framework/vector.h>
 #include <framework/xml.h>
 
 namespace fw {
+class graphics;
 class texture;
 class shader;
 class shader_parameters;
@@ -52,6 +53,7 @@ protected:
   std::shared_ptr<fw::shader> _shader;
   std::shared_ptr<fw::shader_parameters> _shader_params;
 
+  virtual fw::matrix get_transform(fw::graphics *g, float x, float y, float width, float height);
 public:
   virtual ~bitmap_drawable();
 
