@@ -76,6 +76,9 @@ public:
 
   // Resizes the bitmap to the new width/height
   void resize(int new_width, int new_height);
+
+  // Calculate the average colour of this bitmap.
+  fw::colour get_average_colour() const;
 };
 
 }

@@ -1,4 +1,6 @@
 
+#include <boost/foreach.hpp>
+
 #include <framework/framework.h>
 #include <framework/bitmap.h>
 #include <framework/misc.h>
@@ -251,6 +253,16 @@ void bitmap::resize(int new_width, int new_height) {
 
   prepare_write(new_width, new_height);
   set_pixels(resized);
+}
+
+fw::colour bitmap::get_average_colour() const {
+  fw::colour average(0, 0, 0, 0);
+  BOOST_FOREACH(uint32_t rgba, _data->rgba) {
+    average += fw::colour::from_bgra(rgba);
+  }
+
+  average /= static_cast<double>(_data->rgba.size());
+  return average.clamp();
 }
 
 }
