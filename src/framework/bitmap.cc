@@ -24,6 +24,7 @@ struct bitmap_data: private boost::noncopyable {
   int width;
   int height;
   std::vector<uint32_t> rgba;
+  fs::path filename;
 
   // This is the number of bitmaps that have a reference to us.
   int ref_count;
@@ -109,11 +110,13 @@ void bitmap::prepare_write(int width, int height) {
   _data->rgba.resize(width * height);
   _data->width = width;
   _data->height = height;
+  _data->filename = fs::path();
 }
 
 void bitmap::load_bitmap(fs::path const &filename) {
   debug << boost::format("loading image: %1%") % filename << std::endl;
   prepare_write(0, 0);
+  _data->filename = filename;
 
   int channels;
   unsigned char *pixels = stbi_load(filename.string().c_str(), &_data->width, &_data->height, &channels, 4);
@@ -203,6 +206,13 @@ int bitmap::get_height() const {
   return _data->height;
 }
 
+fs::path bitmap::get_filename() const {
+  if (_data == nullptr) {
+    return fs::path();
+  }
+  return _data->filename;
+}
+
 std::vector<uint32_t> const &bitmap::get_pixels() const {
   return _data->rgba;
 }
@@ -255,10 +265,14 @@ void bitmap::resize(int new_width, int new_height) {
   set_pixels(resized);
 }
 
-fw::colour bitmap::get_average_colour() const {
+/**
+ * Gets the "dominant" colour of this bitmap. For now, we simple return the average colour, but something like finding
+ * the most common colour or something might be better.
+ */
+fw::colour bitmap::get_dominant_colour() const {
   fw::colour average(0, 0, 0, 0);
   BOOST_FOREACH(uint32_t rgba, _data->rgba) {
-    average += fw::colour::from_bgra(rgba);
+    average += fw::colour::from_abgr(rgba);
   }
 
   average /= static_cast<double>(_data->rgba.size());

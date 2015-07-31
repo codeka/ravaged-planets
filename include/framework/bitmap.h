@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/filesystem.hpp>
 #include "colour.h"
 
 namespace fw {
@@ -53,6 +54,9 @@ public:
   // Assigns this bitmap to what's in the the other one
   bitmap &operator =(fw::bitmap const &copy);
 
+  // Gets the filename of this bitmap (if it was loaded from a file).
+  boost::filesystem::path get_filename() const;
+
   // Saves the bitmap to the given file.
   void save_bitmap(boost::filesystem::path const &filename) const;
 
@@ -77,8 +81,8 @@ public:
   // Resizes the bitmap to the new width/height
   void resize(int new_width, int new_height);
 
-  // Calculate the average colour of this bitmap.
-  fw::colour get_average_colour() const;
+  // Calculate the "dominant" colour of this bitmap.
+  fw::colour get_dominant_colour() const;
 };
 
 }

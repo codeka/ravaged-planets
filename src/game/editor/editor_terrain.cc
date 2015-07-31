@@ -110,24 +110,31 @@ int editor_terrain::get_num_layers() const {
   return _layers.size();
 }
 
-std::shared_ptr<fw::texture> editor_terrain::get_layer(int number) {
-  if (number < 0 || number >= static_cast<int>(_layers.size()))
-    return std::shared_ptr<fw::texture>();
+std::shared_ptr<fw::bitmap> editor_terrain::get_layer(int number) {
+  if (number < 0 || number >= static_cast<int>(_layer_bitmaps.size()))
+    return std::shared_ptr<fw::bitmap>();
 
-  return _layers[number];
+  return _layer_bitmaps[number];
 }
 
-void editor_terrain::set_layer(int number, std::shared_ptr<fw::texture> texture) {
+void editor_terrain::set_layer(int number, std::shared_ptr<fw::bitmap> bitmap) {
   if (number < 0)
     return;
 
+  std::shared_ptr<fw::texture> texture(new fw::texture());
+  texture->create(bitmap);
+
   if (number == static_cast<int>(_layers.size())) {
     // we need to add a new layer
+    _layer_bitmaps.push_back(bitmap);
     _layers.push_back(texture);
-  } else if (number > static_cast<int>(_layers.size())) {
+    return;
+  } else if (number > static_cast<int>(_layer_bitmaps.size())) {
+    // TODO: not supported yet
     return;
   }
 
+  _layer_bitmaps[number] = bitmap;
   _layers[number] = texture;
 }
 
