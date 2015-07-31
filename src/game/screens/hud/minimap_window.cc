@@ -38,7 +38,8 @@ namespace game {
 class minimap_drawable : public fw::gui::bitmap_drawable {
 protected:
   fw::matrix _transform;
-  fw::matrix get_transform(fw::graphics *g, float x, float y, float width, float height);
+  fw::matrix get_pos_transform(float x, float y, float width, float height);
+  fw::matrix get_uv_transform();
 
 public:
   minimap_drawable(std::shared_ptr<fw::texture> texture);
@@ -49,6 +50,9 @@ public:
 
 minimap_drawable::minimap_drawable(std::shared_ptr<fw::texture> texture) :
     fw::gui::bitmap_drawable(texture) {
+  _top = _left = 0;
+  _width = texture->get_width() * 3;
+  _height = texture->get_height() * 3;
 }
 
 minimap_drawable::~minimap_drawable() {
@@ -58,11 +62,21 @@ void minimap_drawable::update(fw::matrix transform) {
   _transform = transform;
 }
 
-fw::matrix minimap_drawable::get_transform(fw::graphics *g, float x, float y, float width, float height) {
+fw::matrix minimap_drawable::get_uv_transform() {
+  float x = static_cast<float>(_left) / static_cast<float>(_texture->get_width());
+  float y = static_cast<float>(_top) / static_cast<float>(_texture->get_height());
+  float width = static_cast<float>(_width) / static_cast<float>(_texture->get_width());
+  float height = static_cast<float>(_height) / static_cast<float>(_texture->get_height());
+  return fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0));
+}
+
+fw::matrix minimap_drawable::get_pos_transform(float x, float y, float width, float height) {
+  fw::graphics *g = fw::framework::get_instance()->get_graphics();
   fw::matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
-  transform = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * transform;
+  transform = fw::translation(fw::vector(x - width, y - height, 0)) * transform;
+  transform = fw::scale(fw::vector(width * 3, height * 3, 0.0f)) * transform;
   return _transform * transform;
 }
 
@@ -85,7 +99,9 @@ minimap_window::~minimap_window() {
 void minimap_window::initialize() {
   _wnd = builder<window>(sum(pct(100), px(-210)), px(10), px(200), px(200))
       << window::background("frame") << widget::visible(false)
-      << (builder<label>(px(8), px(8), sum(pct(100), px(-16)), sum(pct(100), px(-16))) << widget::id(MINIMAP_IMAGE_ID));
+      << (builder<label>(px(8), px(8), sum(pct(100), px(-16)), sum(pct(100), px(-16))) << widget::id(MINIMAP_IMAGE_ID))
+      << (builder<label>(sum(pct(50), px(-10)), sum(pct(50), px(-16)), px(19), px(31))
+          << label::background("hud_minimap_crosshair"));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
@@ -125,32 +141,25 @@ void minimap_window::on_camera_updated() {
 void minimap_window::update_drawable() {
   fw::camera *camera = fw::framework::get_instance()->get_camera();
   game::terrain *terrain = game::world::get_instance()->get_terrain();
-  fw::graphics *graphics = fw::framework::get_instance()->get_graphics();
 
-  // get the width/height of the screen
-  float screen_width = graphics->get_width();
-  float screen_height = graphics->get_height();
-
-  // get the width/height of the HUD window as a percentage of the screen
-  float scale_x = _wnd->get_width() / screen_width;
-  float scale_y = _wnd->get_height() / screen_height;
-
-  // offset so that it shows up in the correct position relative to where the camera is
-  fw::vector cam_pos(camera->get_position()[0] / terrain->get_width(),
-      camera->get_position()[2] / terrain->get_length(), 0);
-  cam_pos = fw::vector((cam_pos[0] * 2.0f) - 1.0f, (cam_pos[1] * 2.0f) - 1.0f, 0);
-  cam_pos = fw::vector(cam_pos[0] / 3.0f, -cam_pos[1] / 3.0f, 0);
+  // Offset so that it shows up in the correct position relative to where the camera is
+  fw::vector cam_pos(
+      1.0f - (camera->get_location()[0] / terrain->get_width()),
+      1.0f - (camera->get_location()[2] / terrain->get_length()),
+      0);
+  // Make it go from -0.5 -> 0.5
+  cam_pos = fw::vector(cam_pos[0] - 0.5f, cam_pos[1] - .5f, 0);
+  // Make it 1/3 the size, because we expand the drawable by 3 (size you're always in the centre of a 3x3 grid)
+  cam_pos = fw::vector(cam_pos[0] / 3.0f, cam_pos[1] / 3.0f, 0);
   fw::matrix transform = fw::translation(cam_pos);
-
-  transform *= fw::scale(fw::vector(3.0f, 3.0f, 0.0f));
 
   // rotate so that we're facing in the same direction as the camera
   fw::vector cam_dir(camera->get_direction());
-  cam_dir = fw::vector(cam_dir[0], cam_dir[2], 0).normalize();
-  transform *= fw::rotate(fw::vector(0, -1, 0), cam_dir);
+  cam_dir = fw::vector(cam_dir[0], -cam_dir[2], 0).normalize();
+  transform *= fw::translation(-0.5f, -0.5f, 0);
+  transform *= fw::rotate(fw::vector(0, 1, 0), cam_dir);
+  transform *= fw::translation(0.5f, 0.5f, 0);
 
-  // scale it so that it's the correct aspect ratio for the window
-  transform *= fw::scale(fw::vector(scale_x, -scale_y, 0.0f));
   _drawable->update(transform);
 }
 
@@ -211,56 +220,5 @@ void minimap_window::update_entity_display() {
   fw::bitmap bm(width, height, pixels.data());
   _texture->create(bm);
 }
-/*
-void minimap_window::on_before_present() {
-  if (!_bg_fx_params)
-    return;
 
-  float gt = fw::framework::get_instance()->get_timer()->get_total_time();
-  if ((gt - 1.0f) > _last_entity_display_update) {
-    _last_entity_display_update = gt;
-    update_entity_display();
-  }
-
-  // calculate the rectangle that we want to draw the map into
-  fw::main_window *main_window = fw::framework::get_instance()->get_window();
-  float screen_width = main_window->get_width();
-  float screen_height = main_window->get_height();
-  CEGUI::Vector2 pos = get_window()->getPosition().asAbsolute(CEGUI::Size(screen_width, screen_height));
-  CEGUI::Vector2 size = get_window()->getSize().asAbsolute(CEGUI::Size(screen_width, screen_height));
-  RECT rect = { pos.d_x + 4, pos.d_y + 4, pos.d_x + size.d_x - 4, pos.d_y + size.d_y - 4 };
-
-  // use a scissor rectangle to limit the area in which we actually draw the map
-  fw::graphics *g = fw::framework::get_instance()->get_graphics();
-  g->get_device()->SetScissorRect(&rect);
-  g->get_device()->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
-
-  // render the minimap background
-  int num_passes = _fx->begin(_bg_fx_params.get());
-  _fx->set_matrix("map_transform", _m);
-  _fx->set_vector("map_centre", _map_centre);
-  _fx->set_vector("map_size", _map_size);
-  for (int i = 0; i < num_passes; i++) {
-    _fx->begin_pass(i);
-    _vb->render(2, D3DPT_TRIANGLELIST, _ib.get());
-    _fx->end_pass();
-  }
-  _fx->end();
-
-  // render the minimap again with the foreground texture this time
-  num_passes = _fx->begin(_fg_fx_params.get());
-  _fx->set_matrix("map_transform", _m);
-  _fx->set_vector("map_centre", _map_centre);
-  _fx->set_vector("map_size", _map_size);
-  for (int i = 0; i < num_passes; i++) {
-    _fx->begin_pass(i);
-    _vb->render(2, D3DPT_TRIANGLELIST, _ib.get());
-    _fx->end_pass();
-  }
-  _fx->end();
-
-  // turn the scissor test off again
-  g->get_device()->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
-}
-*/
 }

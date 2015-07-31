@@ -53,7 +53,8 @@ protected:
   std::shared_ptr<fw::shader> _shader;
   std::shared_ptr<fw::shader_parameters> _shader_params;
 
-  virtual fw::matrix get_transform(fw::graphics *g, float x, float y, float width, float height);
+  virtual fw::matrix get_pos_transform(float x, float y, float width, float height);
+  virtual fw::matrix get_uv_transform();
 public:
   virtual ~bitmap_drawable();
 

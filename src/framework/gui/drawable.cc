@@ -77,7 +77,16 @@ bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture, fw::xml::
 bitmap_drawable::~bitmap_drawable() {
 }
 
-fw::matrix bitmap_drawable::get_transform(fw::graphics *g, float x, float y, float width, float height) {
+fw::matrix bitmap_drawable::get_uv_transform() {
+  float x = static_cast<float>(_left) / static_cast<float>(_texture->get_width());
+  float y = static_cast<float>(_top) / static_cast<float>(_texture->get_height());
+  float width = static_cast<float>(_width) / static_cast<float>(_texture->get_width());
+  float height = static_cast<float>(_height) / static_cast<float>(_texture->get_height());
+  return fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0));
+}
+
+fw::matrix bitmap_drawable::get_pos_transform(float x, float y, float width, float height) {
+  fw::graphics *g = fw::framework::get_instance()->get_graphics();
   fw::matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
@@ -86,15 +95,8 @@ fw::matrix bitmap_drawable::get_transform(fw::graphics *g, float x, float y, flo
 
 void bitmap_drawable::render(float x, float y, float width, float height) {
   // TODO: recalculating this every time seems wasteful.
-  _shader_params->set_matrix("pos_transform", get_transform(
-    fw::framework::get_instance()->get_graphics(), x, y, width, height));
-
-  x = static_cast<float>(_left) / static_cast<float>(_texture->get_width());
-  y = static_cast<float>(_top) / static_cast<float>(_texture->get_height());
-  width = static_cast<float>(_width) / static_cast<float>(_texture->get_width());
-  height = static_cast<float>(_height) / static_cast<float>(_texture->get_height());
-  fw::matrix uv_transform = fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0));
-  _shader_params->set_matrix("uv_transform", uv_transform);
+  _shader_params->set_matrix("pos_transform", get_pos_transform(x, y, width, height));
+  _shader_params->set_matrix("uv_transform", get_uv_transform());
 
   g_vertex_buffer->begin();
   g_index_buffer->begin();

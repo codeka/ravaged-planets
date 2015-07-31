@@ -51,6 +51,8 @@
     <drawable name="slider_thumb_hover" pos="99,3" size="9,18" />
     <drawable name="checkbox" pos="86,51" size="9,9" />
 
+    <drawable name="hud_minimap_crosshair" pos="219,96" size="19,31" />
+
     <drawable name="editor_hightfield_raiselower" pos="166,82" size="16,15" />
     <drawable name="editor_hightfield_level" pos="183,82" size="16,15" />
     <drawable name="editor_icon_directory" pos="163,102" size="16,16" />
