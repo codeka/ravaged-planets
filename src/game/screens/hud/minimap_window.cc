@@ -100,7 +100,7 @@ void minimap_window::initialize() {
   _wnd = builder<window>(sum(pct(100), px(-210)), px(10), px(200), px(200))
       << window::background("frame") << widget::visible(false)
       << (builder<label>(px(8), px(8), sum(pct(100), px(-16)), sum(pct(100), px(-16))) << widget::id(MINIMAP_IMAGE_ID))
-      << (builder<label>(sum(pct(50), px(-10)), sum(pct(50), px(-16)), px(19), px(31))
+      << (builder<label>(sum(pct(50), px(-10)), sum(pct(50), px(-22)), px(19), px(31))
           << label::background("hud_minimap_crosshair"));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
