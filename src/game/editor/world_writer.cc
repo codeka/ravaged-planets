@@ -154,8 +154,8 @@ fw::colour world_writer::get_terrain_colour(int x, int z) {
   float centre_u = (x - (patch_x * game::terrain::PATCH_SIZE)) / static_cast<float>(game::terrain::PATCH_SIZE);
   float centre_v = (z - (patch_z * game::terrain::PATCH_SIZE)) / static_cast<float>(game::terrain::PATCH_SIZE);
 
-  // centre_x and centre_y are the (x,y) corrdinates (in texture space)
-  // of the splatt texture where the cursor is currently pointing.
+  // centre_x and centre_y are the (x,y) coordinates (in texture space) of the splatt texture where the cursor
+  // is currently pointing.
   int centre_x = static_cast<int>(centre_u * bmp.get_width());
   int centre_y = static_cast<int>(centre_v * bmp.get_height());
 
@@ -174,11 +174,10 @@ fw::colour world_writer::get_terrain_colour(int x, int z) {
 void world_writer::calculate_base_minimap_colours() {
   editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
   for (int i = 0; i < 4; i++) {
-    std::shared_ptr<fw::texture> layer_texture = trn->get_layer(i);
-    fw::bitmap layer_bmp(*layer_texture.get());
-
-     // Use the average colour of this texture
-    _base_minimap_colours[i] = layer_bmp.get_average_colour();
+     // Use the average colour of this layer
+    std::shared_ptr<fw::bitmap> layer_bmp = trn->get_layer(i);
+    _base_minimap_colours[i] = layer_bmp->get_dominant_colour();
+    fw::debug << "base minimap colour [" << i << "] = " << _base_minimap_colours[i] << std::endl;
   }
 }
 

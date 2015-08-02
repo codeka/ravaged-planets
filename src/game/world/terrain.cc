@@ -33,21 +33,11 @@ void terrain::initialize() {
   // load the shader file that we'll use for rendering
   _shader = fw::shader::create("terrain.shader");
 
-  std::shared_ptr<fw::texture> layer(new fw::texture());
-  layer->create(fw::resolve("terrain/grass-01.jpg"));
-  _layers.push_back(layer);
-
-  layer = std::shared_ptr<fw::texture>(new fw::texture());
-  layer->create(fw::resolve("terrain/rock-01.jpg"));
-  _layers.push_back(layer);
-
-  layer = std::shared_ptr<fw::texture>(new fw::texture());
-  layer->create(fw::resolve("terrain/snow-01.jpg"));
-  _layers.push_back(layer);
-
-  layer = std::shared_ptr<fw::texture>(new fw::texture());
-  layer->create(fw::resolve("terrain/rock-snow-01.jpg"));
-  _layers.push_back(layer);
+  // TODO: this should come from the world_reader
+  set_layer(0, std::shared_ptr<fw::bitmap>(new fw::bitmap(fw::resolve("terrain/grass-01.jpg"))));
+  set_layer(1, std::shared_ptr<fw::bitmap>(new fw::bitmap(fw::resolve("terrain/rock-01.jpg"))));
+  set_layer(2, std::shared_ptr<fw::bitmap>(new fw::bitmap(fw::resolve("terrain/snow-01.jpg"))));
+  set_layer(3, std::shared_ptr<fw::bitmap>(new fw::bitmap(fw::resolve("terrain/rock-snow-01.jpg"))));
 
   // bake the patches into the vertex buffers that'll be used for rendering
   for (int patch_z = 0; patch_z < get_patches_length(); patch_z++) {
@@ -75,6 +65,25 @@ std::shared_ptr<fw::texture> terrain::get_patch_splatt(int patch_x, int patch_z)
 
   unsigned int index = get_patch_index(patch_x, patch_z);
   return _patches[index]->texture;
+}
+
+void terrain::set_layer(int number, std::shared_ptr<fw::bitmap> bitmap) {
+  if (number < 0)
+    return;
+
+  std::shared_ptr<fw::texture> texture(new fw::texture());
+  texture->create(bitmap);
+
+  if (number == static_cast<int>(_layers.size())) {
+    // we need to add a new layer
+    _layers.push_back(texture);
+    return;
+  } else if (number > static_cast<int>(_layers.size())) {
+    // TODO: not supported yet
+    return;
+  }
+
+  _layers[number] = texture;
 }
 
 void terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::texture> texture) {

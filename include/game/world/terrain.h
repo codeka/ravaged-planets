@@ -84,6 +84,8 @@ public:
   virtual void update();
   virtual void render(fw::sg::scenegraph &scenegraph);
 
+  virtual void set_layer(int number, std::shared_ptr<fw::bitmap> bitmap);
+
   // gets the height of the terrain vertex at the given integer coordinates.
   float get_vertex_height(int x, int z);
 

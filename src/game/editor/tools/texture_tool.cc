@@ -71,8 +71,7 @@ void texture_tool_window::show() {
   listbox *lbx = _wnd->find<listbox>(TEXTURES_ID);
   lbx->clear();
   for (int i = 0; i < _tool->get_terrain()->get_num_layers(); i++) {
-    std::shared_ptr<fw::texture> layer = _tool->get_terrain()->get_layer(i);
-    fs::path filename = layer->get_filename();
+    fs::path filename = _tool->get_terrain()->get_layer(i)->get_filename();
     lbx->add_item(builder<label>(px(0), px(0), pct(100), px(18)) << label::text(filename.stem().string()));
   }
   lbx->select_item(0);
@@ -83,7 +82,9 @@ void texture_tool_window::hide() {
 }
 
 void texture_tool_window::on_texture_selected(int index) {
-  std::shared_ptr<fw::texture> layer = _tool->get_terrain()->get_layer(index);
+  std::shared_ptr<fw::texture> layer(new fw::texture());
+  layer->create(_tool->get_terrain()->get_layer(index));
+
   std::shared_ptr<drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
       layer, 0, 0, layer->get_width(), layer->get_height());
   _wnd->find<label>(TEXTURE_PREVIEW_ID)->set_background(drawable);

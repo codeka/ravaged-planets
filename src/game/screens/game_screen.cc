@@ -60,6 +60,8 @@ void game_screen::show() {
 
 void game_screen::update() {
   _world->update();
+
+  hud_minimap->update();
 }
 
 void game_screen::render(fw::sg::scenegraph &scenegraph) {
