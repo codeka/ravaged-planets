@@ -149,7 +149,9 @@ void button::update_drawable_state() {
     return;
   }
 
-  if (_is_pressed) {
+  if (!is_enabled()) {
+    drawable->set_current_state(state_drawable::disabled);
+  } else if (_is_pressed) {
     drawable->set_current_state(state_drawable::pressed);
   } else if (_is_mouse_over) {
     drawable->set_current_state(state_drawable::hover);

@@ -91,7 +91,8 @@ public:
     normal,
     hover,
     pressed,
-    selected
+    selected,
+    disabled
   };
 
 private:

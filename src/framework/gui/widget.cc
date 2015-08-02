@@ -175,10 +175,23 @@ public:
   }
 };
 
+class widget_enabled_property : public property {
+private:
+  bool _enabled;
+public:
+  widget_enabled_property(bool enabled)
+      : _enabled(enabled) {
+  }
+
+  void apply(widget *widget) {
+    widget->set_enabled(_enabled);
+  }
+};
+
 //-----------------------------------------------------------------------------
 
 widget::widget(gui *gui) :
-    _gui(gui), _parent(nullptr), _id(-1), _visible(true), _focused(false) {
+    _gui(gui), _parent(nullptr), _id(-1), _visible(true), _focused(false), _enabled(true) {
 }
 
 widget::~widget() {
@@ -206,6 +219,10 @@ property *widget::id(int id) {
 
 property *widget::data(boost::any const &data) {
   return new widget_data_property(data);
+}
+
+property *widget::enabled(bool enabled) {
+  return new widget_enabled_property(enabled);
 }
 
 void widget::attach_child(widget *child) {
@@ -300,11 +317,11 @@ void widget::postrender() {
 }
 
 bool widget::on_mouse_down(float x, float y) {
-  return _on_click != nullptr;
+  return _enabled && _on_click != nullptr;
 }
 
 bool widget::on_mouse_up(float x, float y) {
-  if (_on_click) {
+  if (_enabled && _on_click) {
     return _on_click(this);
   }
   return false;
@@ -376,6 +393,10 @@ void widget::set_visible(bool visible) {
     // if it's a top-level widget, move it to the front of the z-order
     _gui->bring_to_top(this);
   }
+}
+
+void widget::set_enabled(bool enabled) {
+  _enabled = enabled;
 }
 
 float widget::get_top() {

@@ -332,8 +332,8 @@ void new_game_window::update_selection() {
 bool new_game_window::on_start_game_clicked(widget *w) {
   simulation_thread::get_instance()->get_local_player()->local_player_is_ready();
 
- // _start_game->setEnabled(false);
-//  _maps->setEnabled(false);
+  // disable the start_game button, since we don't want you clicking it twice.
+  w->set_enabled(false);
   return true;
 }
 

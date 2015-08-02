@@ -114,6 +114,7 @@ protected:
   friend class widget_visible_property;
   friend class widget_id_property;
   friend class widget_data_property;
+  friend class widget_enabled_property;
 
   gui *_gui;
   widget *_parent;
@@ -125,6 +126,7 @@ protected:
   std::shared_ptr<dimension> _height;
   bool _visible;
   bool _focused;
+  bool _enabled;
   std::function<bool(widget *)> _on_click;
   boost::any _data;
 
@@ -138,6 +140,7 @@ public:
   static property *visible(bool visible);
   static property *id(int id);
   static property *data(boost::any const &data);
+  static property *enabled(bool enabled);
 
   void attach_child(widget *child);
   void detach_child(widget *child);
@@ -223,6 +226,11 @@ public:
 
   boost::any const &get_data() const;
   void set_data(boost::any const &data);
+
+  bool is_enabled() const {
+    return _enabled;
+  }
+  void set_enabled(bool enabled);
 
   bool is_visible() const {
     return _visible;
