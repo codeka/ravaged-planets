@@ -1,17 +1,19 @@
-#include "config.h"
-#include "paths.h"
 
 #include <boost/filesystem.hpp>
 
-namespace fs = boost::filesystem;
+#include <framework/paths.h>
+#include <framework/settings.h>
 
-static fs::path g_user_data_path;
+namespace fs = boost::filesystem;
 
 namespace fw {
 
-// Base "user" path and base "installation" path
+static fs::path g_user_base_path;
+static fs::path g_install_base_path;
+
+/** Base "user" path is ~/.ravaged-planets and is where you can install your custom maps, etc. */
 fs::path user_base_path() {
-  if (g_user_data_path == fs::path()) {
+  if (g_user_base_path.empty()) {
     fs::path path = fs::path(getenv("HOME"));
     path = path / ".ravaged-planets";
 
@@ -20,14 +22,28 @@ fs::path user_base_path() {
       fs::create_directories(path);
     }
 
-    g_user_data_path = path;
+    g_user_base_path = path;
   }
 
-  return g_user_data_path;
+  return g_user_base_path;
 }
 
+/**
+ * Install path is (usually) the directory up from where the exectuable is (that is, the exectuable is usually in
+ * the bin/ folder under the install base path). It can be overwritten on the command line with --data-path.
+ */
 fs::path install_base_path() {
-  return fs::path(INSTALL_PREFIX);
+  if (g_install_base_path.empty()) {
+    settings stg;
+    std::string data_path = stg.get_value<std::string>("data-path");
+    if (!data_path.empty()) {
+      g_install_base_path = data_path;
+    } else {
+      fs::path exe_path = stg.get_executable_path();
+      g_install_base_path = exe_path.parent_path().parent_path();
+    }
+  }
+  return g_install_base_path;
 }
 
 fs::path resolve(std::string const &path, bool for_write /*=false*/) {
