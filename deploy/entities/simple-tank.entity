@@ -4,7 +4,7 @@
 		<component type="orderable" />
 		<component type="moveable" />
 		<component type="pathing" />
-		<!--component type="minimap-visible" /-->
+		<component type="minimap-visible" />
 
 		<!--component type="buildable">
 			<property name="BuildGroup">vehicles</property>

@@ -8,9 +8,10 @@ class player;
 
 namespace ent {
 
-// This component is used to make an entity visible on the minimap. The entity
-// must also have a position_component and an ownable_component (to get a colour -
-// if no ownable colour, it gets drawn white.)
+/**
+ * This component is used to make an entity visible on the minimap. The entity must also have a position_component and
+ * optionally an ownable_component (to get a colour - if no ownable colour, it gets drawn white.)
+ */
 class minimap_visible_component: public entity_component {
 public:
   static const int identifier = 150;

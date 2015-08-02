@@ -43,6 +43,7 @@ public:
   virtual ~minimap_window();
 
   void initialize();
+  void update();
   void show();
   void hide();
 };

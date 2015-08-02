@@ -126,9 +126,7 @@ void minimap_window::hide() {
   _camera_updated_connection.disconnect();
 }
 
-void minimap_window::on_camera_updated() {
-  update_drawable();
-
+void minimap_window::update() {
   float gt = fw::framework::get_instance()->get_timer()->get_total_time();
   if ((gt - 1.0f) > _last_entity_display_update) {
     _last_entity_display_update = gt;
@@ -136,6 +134,10 @@ void minimap_window::on_camera_updated() {
       update_entity_display();
     });
   }
+}
+
+void minimap_window::on_camera_updated() {
+  update_drawable();
 }
 
 void minimap_window::update_drawable() {
@@ -212,13 +214,15 @@ void minimap_window::update_entity_display() {
         if (x < 0 || x >= width || y < 0 || y >= height)
           continue;
 
-        pixels[x + (y * width)] = col.to_rgba();
+        pixels[x + (y * width)] = col.to_argb();
       }
     }
   }
 
   fw::bitmap bm(width, height, pixels.data());
-  _texture->create(bm);
+  fw::framework::get_instance()->get_graphics()->run_on_render_thread([this, bm]() {
+    _texture->create(bm);
+  });
 }
 
 }
