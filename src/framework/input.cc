@@ -28,7 +28,7 @@ static volatile uint32_t g_next_token;
 
 static float g_mx, g_my;
 static float g_mdx, g_mdy;
-static float g_mw, g_mdw;
+static float g_mwdx, g_mwdy;
 static bool g_mouse_inside;
 
 // maps a key to a list of input bindings, we don't necessarily call each binding on each
@@ -157,7 +157,7 @@ void input::update(float dt) {
   // this is called each frame - we need to reset the _mdx and _mdy to zero (because if we
   // don't get an on_mouse_move, it means the mouse didn't move!)
   g_mdx = g_mdy = 0.0f;
-  g_mdw = 0.0f;
+  g_mwdx = g_mwdy = 0.0f;
 }
 
 /** Called on the render thread when an event is received. We queue it up to actually run on the update thread. */
@@ -192,7 +192,8 @@ void input::process_event(SDL_Event &event) {
       callback(keycode, 0, false);
     }
   } else if (event.type == SDL_MOUSEWHEEL) {
-    fw::debug << "SDL_MOUSEWHEEL: x=" << event.wheel.x << ", y=" << event.wheel.y << std::endl;
+    g_mwdx = event.wheel.x;
+    g_mwdy = event.wheel.y;
   }
 }
 
@@ -208,11 +209,11 @@ float input::mouse_dx() const {
 float input::mouse_dy() const {
   return g_mdy;
 }
-float input::mouse_wheel() const {
-  return g_mw;
+float input::mouse_wheel_dx() const {
+  return g_mwdx;
 }
-float input::mouse_dwheel() const {
-  return g_mdw;
+float input::mouse_wheel_dy() const {
+  return g_mwdy;
 }
 
 bool input::key(std::string keyname) const {

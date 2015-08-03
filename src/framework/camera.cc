@@ -287,6 +287,11 @@ void top_down_camera::update(float dt) {
     rotate_around_right = inp->mouse_dy() * 0.0035f;
   }
 
+  // TODO: only do this when we know it's a trackpad
+  // TODO: these numbers are totally made-up
+  rotate_around_up += inp->mouse_wheel_dx() * 0.03f;
+  rotate_around_right += inp->mouse_wheel_dy() * 0.03f;
+
   if (_rotate_left)
     rotate_around_up += dt;
   if (_rotate_right)
@@ -321,7 +326,7 @@ void top_down_camera::update(float dt) {
     right -= 15.0f * dt;
   move(forward, right);
 
-  float zoom_amount = inp->mouse_dwheel();
+  float zoom_amount = 0.0f;// TODO: handle non-trackpad mouse wheel: inp->mouse_dwheel();
   if (_zoom_in) {
     zoom_amount += 5.0f * dt;
   }
