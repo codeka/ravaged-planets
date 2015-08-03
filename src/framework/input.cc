@@ -191,6 +191,8 @@ void input::process_event(SDL_Event &event) {
     if (!gui->inject_mouse(event.button.button, false, g_mx, g_my)) {
       callback(keycode, 0, false);
     }
+  } else if (event.type == SDL_MOUSEWHEEL) {
+    fw::debug << "SDL_MOUSEWHEEL: x=" << event.wheel.x << ", y=" << event.wheel.y << std::endl;
   }
 }
 
