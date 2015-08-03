@@ -130,9 +130,7 @@ void minimap_window::update() {
   float gt = fw::framework::get_instance()->get_timer()->get_total_time();
   if ((gt - 1.0f) > _last_entity_display_update) {
     _last_entity_display_update = gt;
-    fw::framework::get_instance()->get_graphics()->run_on_render_thread([this]() {
-      update_entity_display();
-    });
+    update_entity_display();
   }
 }
 
