@@ -102,7 +102,7 @@ public:
   }
 
   /**
-   * Push only the Lua stack a collection of pointers to T objects. From the Lua side, you'll get a table with
+   * Push onto the Lua stack a collection of pointers to T objects. From the Lua side, you'll get a table with
    * indices corresponding to the values in the collection.
    */
   template<typename iterator>
@@ -314,8 +314,8 @@ public:
 
     // hide metatable from Lua getmetatable()
     lua_pushvalue(state, metatable);
-    lua_pushvalue(state, methods);
-    set(state, metatable, "__metatable");
+  //  lua_pushvalue(state, methods);
+  //  set(state, metatable, "__metatable");
 
     lua_pushvalue(state, methods);
     set(state, metatable, "__index");
@@ -340,19 +340,22 @@ public:
   }
 
   /**
-   * Registers the templated class as a static table. You can reference methods on the class directly through the
-   * global table like so:
+   * Registers the templated class as a static table with the given name. You can reference methods on the class
+   * directly through the global table like so:
    *
    * \example
    * -- Lua code
-   * class_name:some_method()
+   * function ClassName.new_method()
+   * end
+   *
+   * name:some_method()
    */
-  static void register_static(lua_State *state, T *obj) {
+  static void register_static(lua_State *state, std::string const &name, T *obj) {
     register_without_constructor(state);
 
     // create a new instance and set it as a global variable with the given class name.
     lua_helper<T>::push(state, obj, true);
-    lua_setglobal(state, T::class_name);
+    lua_setglobal(state, name.c_str());
   }
 
 private:
@@ -360,20 +363,19 @@ private:
 
   // member function dispatcher
   static int thunk(lua_State *state) {
-    // Stack has userdata, followed by method args
-    T *obj = lua_helper<T>::check(state, 1);  // get 'self', or if you prefer, 'this'
-    lua_remove(state, 1);  // remove self so member function args start at index 1
-    // get member function from upvalue
-    method_definition *l = static_cast<method_definition*>(lua_touserdata(state, lua_upvalueindex(1)));
+    // Stack has userdata, followed by method args.
+    T *obj = lua_helper<T>::check(state, 1);
+    lua_remove(state, 1);
+    method_definition *l = static_cast<method_definition *>(lua_touserdata(state, lua_upvalueindex(1)));
     return (obj->*(l->mfunc))(lua_context::get(state));  // call member function
   }
 
   // create a new T object and push onto the Lua stack a userdata containing a pointer to T object
   static int new_T(lua_State *state) {
-    lua_remove(state, 1);   // use classname:new(), instead of classname.new()
-    T *obj = new T(state);  // call constructor for T objects
+    lua_remove(state, 1); // use classname:new(), instead of classname.new()
+    T *obj = new T(state); // call constructor for T objects
     push(state, obj, true); // gc_T will delete this object
-    return 1;           // userdata containing pointer to T object
+    return 1; // userdata containing pointer to T object
   }
 
   // garbage collection metamethod
@@ -384,8 +386,10 @@ private:
       if (!lua_isnil(state, -1)) return 0;  // do not delete object
     }
     lua_wrapper<T> *w = static_cast<lua_wrapper<T> *>(lua_touserdata(state, 1));
-    T *obj = w->wrapped;
-    if (obj) delete obj;  // call destructor for T objects
+    if (w != nullptr) {
+      T *obj = w->wrapped;
+      if (obj) delete obj;  // call destructor for T objects
+    }
     return 0;
   }
 

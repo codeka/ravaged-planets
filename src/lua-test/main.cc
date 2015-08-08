@@ -42,7 +42,7 @@ public:
   static fw::lua_registrar<ai_player>::method_definition methods[];
 };
 
-char const unit_wrapper::class_name[] = "unit";
+char const unit_wrapper::class_name[] = "Unit";
 fw::lua_registrar<unit_wrapper>::method_definition unit_wrapper::methods[] = {
   {"attack", &unit_wrapper::l_attack},
   {nullptr, nullptr}
@@ -61,7 +61,7 @@ void unit_wrapper::attack(std::string const &msg) {
   fw::debug << "ATTACK: " << msg << std::endl;
 }
 
-char const ai_player::class_name[] = "player";
+char const ai_player::class_name[] = "Player";
 fw::lua_registrar<ai_player>::method_definition ai_player::methods[] = {
   {"say", &ai_player::l_say},
   {"find", &ai_player::l_find},
@@ -111,9 +111,9 @@ int main(int argc, char** argv) {
 
     fw::lua_context ctx;
     fw::lua_registrar<unit_wrapper>::register_without_constructor(ctx.get_state());
-    fw::lua_registrar<ai_player>::register_static(ctx.get_state(), new ai_player());
-    ctx.set_search_pattern("/home/deanh/Downloads/?.lua");
-    ctx.load_script("/home/deanh/Downloads/main.lua");
+    fw::lua_registrar<ai_player>::register_static(ctx.get_state(), "player", new ai_player());
+    ctx.set_search_pattern("/Users/deanh/Downloads/?.lua");
+    ctx.load_script("/Users/deanh/Downloads/main.lua");
 
     if (g_callback) {
       fw::debug << "g_callback is non-null, calling it now." << std::endl;
