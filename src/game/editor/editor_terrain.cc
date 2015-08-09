@@ -23,11 +23,14 @@ editor_terrain::~editor_terrain() {
 
 void editor_terrain::render(fw::sg::scenegraph &scenegraph) {
   int num_baked = 0;
-  BOOST_FOREACH(auto patch, _patches_to_bake) {
-    bake_patch(std::get<0>(patch), std::get<1>(patch));
-    num_baked ++;
+  {
+    std::unique_lock<std::mutex> lock(_patches_to_bake_mutex);
+    BOOST_FOREACH(auto patch, _patches_to_bake) {
+      bake_patch(std::get<0>(patch), std::get<1>(patch));
+      num_baked++;
+    }
+    _patches_to_bake.clear();
   }
-  _patches_to_bake.clear();
 
   terrain::render(scenegraph);
 }
@@ -52,6 +55,7 @@ void editor_terrain::set_vertex_height(int x, int z, float height) {
   auto this_patch = std::make_tuple(x / PATCH_SIZE, z / PATCH_SIZE);
   bool found = false;
 
+  std::unique_lock<std::mutex> lock(_patches_to_bake_mutex);
   BOOST_FOREACH(auto patch, _patches_to_bake) {
     if (patch == this_patch) {
       found = true;

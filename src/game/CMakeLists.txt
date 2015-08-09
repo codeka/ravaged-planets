@@ -60,7 +60,7 @@ add_custom_command(
    DEPENDS version-number
 )
 
-add_executable(rp
+add_executable(rp WIN32
     ${GAME_FILES}
     ${GAME_HEADERS}
     version.cc

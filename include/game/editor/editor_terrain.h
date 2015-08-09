@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <tuple>
 
 #include <game/world/terrain.h>
@@ -14,6 +15,7 @@ namespace ed {
 // this subclass of game::terrain allows us to edit the actual heightfield data, textures, and so on.
 class editor_terrain: public game::terrain {
 private:
+  std::mutex _patches_to_bake_mutex;
   std::vector<std::tuple<int, int>> _patches_to_bake;
 
   // we keep a separate vector of the splatt bitmaps for easy editing
