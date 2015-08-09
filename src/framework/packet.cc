@@ -1,4 +1,6 @@
 
+#include <map>
+
 #include <framework/packet.h>
 #include <framework/packet_buffer.h>
 #include <framework/logging.h>

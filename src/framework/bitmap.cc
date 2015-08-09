@@ -179,11 +179,11 @@ void bitmap::save_bitmap(fs::path const &filename) const {
 
   int res;
   if (filename.extension() == ".png") {
-    res = stbi_write_png(filename.c_str(), _data->width, _data->height, 4,
-        reinterpret_cast<unsigned char *>(_data->rgba.data()), 0);
+    res = stbi_write_png(filename.string().c_str(), _data->width, _data->height, 4,
+        reinterpret_cast<void const *>(_data->rgba.data()), 0);
   } else if (filename.extension() == ".bmp") {
-    res = stbi_write_bmp(filename.c_str(), _data->width, _data->height, 4,
-        reinterpret_cast<unsigned char *>(_data->rgba.data()));
+    res = stbi_write_bmp(filename.string().c_str(), _data->width, _data->height, 4,
+        reinterpret_cast<void const *>(_data->rgba.data()));
   } else {
     res = 0;
   }

@@ -8,6 +8,12 @@
 
 namespace fw {
 
+#ifdef UNIX
+#define THREADLOCAL __thread
+#else
+#define THREADLOCAL thread_local
+#endif
+
   // this is a "log sink" that we'll provide to the boost.iostreams
   // library for actual writing...
   class log_sink {
@@ -33,7 +39,7 @@ namespace fw {
   class log_wrapper {
   private:
     boost::filesystem::path _filename;
-    static __thread std::ostream *_log;
+    static THREADLOCAL std::ostream *_log;
     log_sink _sink;
 
   public:

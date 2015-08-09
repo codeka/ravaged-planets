@@ -36,6 +36,10 @@ vector point_plane_intersect(vector const &plane_pt, vector const &plane_normal,
  */
 std::string get_user_name();
 
+// max and min are #define'd by windows.h ?_?
+#undef max
+#undef min
+
 template<typename T>
 inline T max(T a, T b) {
   return (a > b ? a : b);

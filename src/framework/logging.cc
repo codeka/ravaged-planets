@@ -17,7 +17,7 @@ namespace fw {
   static std::mutex mutex;
   static bool log_to_console = false;
 
-  __thread std::ostream *log_wrapper::_log;
+  THREADLOCAL std::ostream *log_wrapper::_log;
 
   void logging_initialize() {
     settings stg;

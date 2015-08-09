@@ -67,7 +67,8 @@ int input::bind_function(std::string const &name, input_bind_fn fn) {
 }
 
 int input::bind_key(std::string const &keyname, input_bind_fn fn) {
-  int token = static_cast<int>(__sync_add_and_fetch(&g_next_token, 1));
+  // TODO: interlocked increment?
+  int token = ++g_next_token;
 
   std::vector<int> tokens;
   std::vector<std::string> keys = split<std::string>(keyname, ",");
@@ -119,7 +120,8 @@ int input::bind_key(std::string keyname, input_binding const &binding) {
 }
 
 int bind_key(int keycode, input_binding const &binding) {
-  int token = static_cast<int>(__sync_add_and_fetch(&g_next_token, 1));
+  // TODO: interlocked increment?
+  int token = ++g_next_token;
 
   callback_map::iterator it = g_callbacks.find(keycode);
   if (it == g_callbacks.end()) {

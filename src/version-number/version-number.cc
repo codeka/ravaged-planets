@@ -3,11 +3,17 @@
 #include <iostream>
 #include <string>
 
+#ifdef _WIN32
+#define POPEN _popen
+#else
+#define POPEN popen
+#endif
+
 int get_revision_number(char const *src_directory) {
   std::string command = "git -C \"";
   command += src_directory;
   command += "\" rev-list HEAD --count";
-  FILE *fp = popen(command.c_str(), "r");
+  FILE *fp = POPEN(command.c_str(), "r");
   if (fp == nullptr) {
     //??
     return 0;

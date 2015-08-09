@@ -16,7 +16,7 @@ namespace game {
 
 void display_exception(std::string const &msg);
 
-int main(int argc, char** argv) {
+int SDL_main(int argc, char** argv) {
   try {
     game::settings_initialize(argc, argv);
 

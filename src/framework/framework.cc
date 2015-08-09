@@ -246,7 +246,7 @@ void framework::update_proc() {
 
       int64_t remaining_micros = timestep_micros - accum_micros;
       if (remaining_micros > 1000) {
-        usleep(remaining_micros);
+        std::this_thread::sleep_for(std::chrono::microseconds(remaining_micros));
         continue;
       }
 

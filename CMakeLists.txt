@@ -31,6 +31,11 @@ if(WIN32)
          CACHE STRING "Default Install Path" FORCE)
 endif()
 
+if(MSVC)
+    # Set /EHsc so we can have proper unwind semantics in Visual C++
+    SET(CMAKE_CXX_FLAGS "/EHsc")
+endif()
+
 if (CMAKE_COMPILER_IS_GNUCC)
     # Make sure we compile with -rdynamic so that stack traces can include method names.
     add_definitions(-rdynamic)
@@ -41,6 +46,8 @@ if (UNIX AND NOT APPLE)
     link_directories(external/lib/linux)
 elseif (APPLE)
     link_directories(external/lib/macos)
+elseif (WIN32)
+    link_directories(external/lib/win32)
 endif()
 
 # Make sure generated files are #includable.
@@ -48,13 +55,14 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 # Look for the various libraries we depend on.
-find_package(Boost COMPONENTS filesystem iostreams program_options signals system REQUIRED)
+find_package(Boost COMPONENTS datetime filesystem iostreams program_options signals system REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Lua REQUIRED)
 find_package(CURL REQUIRED)
-find_package(PNG REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(PNG)
 find_package(Assimp) # not required, no meshexp if not found.
 
 if(LINUX)
