@@ -1,2 +1,0 @@
-
-player:set_ready()

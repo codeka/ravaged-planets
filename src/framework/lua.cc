@@ -50,7 +50,7 @@ void lua_context::setup_state() {
   set_search_pattern((fw::resolve("lua") / "?.lua").string());
 
   // add the 'debug' library.
-  fw::lua_registrar<lua_debug>::register_static(_state, new lua_debug());
+  fw::lua_registrar<lua_debug>::register_static(_state, "debug", new lua_debug());
 }
 
 void lua_context::set_search_pattern(std::string const &pattern) {
@@ -100,7 +100,7 @@ void lua_callback::call() {
 
 //-----------------------------------------------------------------------------
 
-char const lua_debug::class_name[] = "debug";
+char const lua_debug::class_name[] = "Debug";
 fw::lua_registrar<lua_debug>::method_definition lua_debug::methods[] = {
   {"log", &lua_debug::l_log},
   {nullptr, nullptr}

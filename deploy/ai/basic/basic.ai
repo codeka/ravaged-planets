@@ -3,5 +3,5 @@
   <description name="Basic AI" author="Dean Harding" url="http://www.codeka.com.au/">
     A basic AI that just does the minimal stuff.
   </description>
-  <script>basic.lua</script>
+  <script>player.lua</script>
 </ai>

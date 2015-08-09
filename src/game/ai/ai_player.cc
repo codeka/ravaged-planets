@@ -22,7 +22,7 @@ namespace fs = boost::filesystem;
 
 namespace game {
 
-char const ai_player::class_name[] = "player";
+char const ai_player::class_name[] = "Player";
 fw::lua_registrar<ai_player>::method_definition ai_player::methods[] = {
   {"set_ready", &ai_player::l_set_ready},
   {"say", &ai_player::l_say},
@@ -46,7 +46,7 @@ ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t p
   // functions and so on to it
   std::shared_ptr<fw::lua_context> script(new fw::lua_context());
   fw::lua_registrar<unit_wrapper>::register_without_constructor(script->get_state());
-  fw::lua_registrar<ai_player>::register_static(script->get_state(), this);
+  fw::lua_registrar<ai_player>::register_static(script->get_state(), "player", this);
 
   // add the ..\data\ai\common path to the search pattern, as well as the directory the script was loaded from.
   std::string search_pattern = (fw::install_base_path() / "ai/common/?.lua").string()
