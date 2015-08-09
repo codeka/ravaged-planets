@@ -52,6 +52,7 @@ add_library(framework
 
 target_link_libraries(framework 
     ${SDL2_LIBRARY}
+	${SDL2main_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
@@ -76,7 +77,7 @@ endif()
 
 if(UNIX AND NOT APPLE)
     target_link_libraries(framework
-        dl # not sure why SDL needs this
+        dl
         pthread
     )
 elseif(APPLE)
@@ -85,7 +86,11 @@ elseif(APPLE)
         "-framework CoreAudio" "-framework IOKit" "-framework ForceFeedback"
         ${BZIP2_LIBRARY} iconv
     )
-elseif(WINDOWS)
-# winmm.lib Version.lib Imm32.lib
+elseif(WIN32)
+    target_link_libraries(framework
+	    winmm
+		version
+		imm32
+	)
 endif()
 

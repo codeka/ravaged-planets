@@ -33,7 +33,14 @@ endif()
 
 if(MSVC)
     # Set /EHsc so we can have proper unwind semantics in Visual C++
-    SET(CMAKE_CXX_FLAGS "/EHsc")
+    add_definitions(/EHsc)
+	if (CMAKE_BUILD_TYPE MATCHES Debug)
+	    # /MDd = multi-threaded debug DLL
+	    add_definitions(/MDd)
+	    add_definitions(/ZI)
+	    add_definitions(/Od)
+	endif()
+	add_definitions(/MP)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -55,7 +62,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 # Look for the various libraries we depend on.
-find_package(Boost COMPONENTS datetime filesystem iostreams program_options signals system REQUIRED)
+find_package(Boost COMPONENTS filesystem iostreams program_options signals system REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Protobuf REQUIRED)
@@ -74,12 +81,24 @@ elseif(APPLE)
 endif()
 
 include_directories(${Boost_INCLUDE_DIR})
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    link_directories(${Boost_LIBRARY_DIR_DEBUG})
+else()
+    link_directories(${Boost_LIBRARY_DIR_RELEASE})
+endif()
 include_directories(${SDL2_INCLUDE_DIR})
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLEW_INCLUDE_DIR})
 include_directories(${PROTOBUF_INCLUDE_DIR})
 include_directories(${LUA_INCLUDE_DIR})
 include_directories(${CURL_INCLUDE_DIR})
+
+# TODO: not sure if there's an automatic way to detect whether these are static?
+if (MSVC AND CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions(-DGLEW_STATIC)
+	add_definitions(-DCURL_STATICLIB)
+	add_definitions(-DSDL_STATIC)
+endif()
 
 add_subdirectory(src/version-number)
 add_subdirectory(src/framework)

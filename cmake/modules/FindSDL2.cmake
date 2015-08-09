@@ -21,10 +21,11 @@ find_path (SDL2_INCLUDE_DIR SDL.h
 )
 
 find_library (SDL2_LIBRARY NAMES SDL2 PATHS ${SDL2_SEARCH_PATHS})
+find_library (SDL2main_LIBRARY NAMES SDL2main PATHS ${SDL2_SEARCH_PATHS})
 
 find_package_handle_standard_args(SDL2
-    required_vars SDL2_LIBRARY SDL2_INCLUDE_DIR)
+    required_vars SDL2_LIBRARY SDL2main_LIBRARY SDL2_INCLUDE_DIR)
 
 if (SDL2_FOUND)
-    mark_as_advanced (SDL2_INCLUDE_DIR SDL2_LIBRARY)
+    mark_as_advanced (SDL2_INCLUDE_DIR SDL2main_LIBRARY SDL2_LIBRARY)
 endif()
