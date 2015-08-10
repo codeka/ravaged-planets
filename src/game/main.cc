@@ -3,6 +3,7 @@
 #include <boost/exception/all.hpp>
 
 #include <SDL.h>
+#include <SDL_main.h>
 
 #include "framework/settings.h"
 #include "framework/logging.h"
@@ -16,7 +17,9 @@ namespace game {
 
 void display_exception(std::string const &msg);
 
-int SDL_main(int argc, char** argv) {
+extern "C" {
+
+int main(int argc, char** argv) {
   try {
     game::settings_initialize(argc, argv);
 
@@ -40,6 +43,8 @@ int SDL_main(int argc, char** argv) {
   }
 
   return 0;
+}
+
 }
 
 void display_exception(std::string const &msg) {

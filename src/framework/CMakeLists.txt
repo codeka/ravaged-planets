@@ -45,14 +45,14 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS model_file.proto)
 
 add_library(framework
     ${FRAMEWORK_FILES}
-	${FRAMEWORK_HEADERS}
+    ${FRAMEWORK_HEADERS}
     ${ARCH_FILES}
     ${PROTO_SRCS}
 )
 
-target_link_libraries(framework 
+target_link_libraries(framework
+    ${SDL2main_LIBRARY}
     ${SDL2_LIBRARY}
-	${SDL2main_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
@@ -88,9 +88,8 @@ elseif(APPLE)
     )
 elseif(WIN32)
     target_link_libraries(framework
-	    winmm
-		version
-		imm32
-	)
+        winmm
+        version
+        imm32
+    )
 endif()
-

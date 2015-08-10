@@ -8,7 +8,7 @@
 
 namespace fw {
 
-#ifdef UNIX
+#if defined(UNIX) || defined(__APPLE__)
 #define THREADLOCAL __thread
 #else
 #define THREADLOCAL thread_local

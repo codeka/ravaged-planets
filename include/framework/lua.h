@@ -314,8 +314,8 @@ public:
 
     // hide metatable from Lua getmetatable()
     lua_pushvalue(state, metatable);
-  //  lua_pushvalue(state, methods);
-  //  set(state, metatable, "__metatable");
+    lua_pushvalue(state, methods);
+    set(state, metatable, "__metatable");
 
     lua_pushvalue(state, methods);
     set(state, metatable, "__index");
