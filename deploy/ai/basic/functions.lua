@@ -17,7 +17,7 @@ end
 -- This is called when the game starts. we set up our "in-game" timers and event handlers and otherwise get the show
 -- on the road
 function game_started(event_name, params)
-  debug:log("game started, setting up handlers")
+  log.debug("game started, setting up handlers")
 
   player:timer(2, check_attack)
 end
@@ -25,11 +25,11 @@ end
 -- This is called every few seconds to check whether it's time to attack the enemy. we look at how many idle units
 -- we have and if there's enough, we'll launch the attack.
 function check_attack()
-  debug:say("attack", "check attack")
+  log.write("attack", "check attack")
 
   local units = player:find_units({ unit_type="factory" })
   for _,u in ipairs(units) do
-    debug:say("attack", "unit: " .. u.kind .. " owner: " .. u.player_no .. " state: " .. u.state)
+    log.write("attack", "unit: " .. u.kind .. " owner: " .. u.player_no .. " state: " .. u.state)
   end
   player:issue_order(units, { order="build", build_unit="simple-tank" })
 

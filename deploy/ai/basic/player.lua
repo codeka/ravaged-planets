@@ -11,7 +11,7 @@ require ("factory")
 player:set_ready()
 
 -- Enable some logging contexts so that we can see these messages in the chat log (for debugging).
-debug:enable_context("attack")
+log.enable_context("attack")
 
 -- set up the timer that runs while we're waiting for the game to start.
 player:timer(10, joingame_waiting_for_start)

@@ -21,17 +21,13 @@ private:
   ent::ownable_component *_ownable;
   ent::orderable_component *_orderable;
 
-  int l_get_kind(fw::lua_context &ctx);
-  int l_get_player_no(fw::lua_context &ctx);
-  int l_get_state(fw::lua_context &ctx);
-
-  std::string get_kind();
-  int get_player_no();
-  std::string get_state();
+  std::string l_get_kind();
+  int l_get_player_no();
+  std::string l_get_state();
 
 public:
-  static char const class_name[];
-  static fw::lua_registrar<unit_wrapper>::method_definition methods[];
+  // registers the unit_wrapper as the "Unit" class in Lua.
+  static void register_class(lua_State *state);
 
   // this must be called before you do anything with this wrapper
   void set_entity(std::weak_ptr<ent::entity> const &ent);

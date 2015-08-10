@@ -29,23 +29,22 @@ function taunt(kind, probability)
   end
 end
 
+_log_contexts = {}
+
 -- Enables the given context that we'll log to the chat window
-function Debug.enable_context(self, context)
-  if not self._log_contexts then
-    self._log_contexts = {}
-  end
-  self._log_contexts[context] = true
+function log.enable_context(context)
+  _log_contexts[context] = true
 end
 
 -- Disables the given context from being logged to the chat window
-function Debug.disable_context(self, context)
-  self._log_contexts[context] = false
+function log.disable_context(context)
+  _log_contexts[context] = false
 end
 
 -- This is useful for debugging. You can selectively enable/disable a context in your setup, and then sprinkle
--- debug:say() throughout your code. The message is printed in the game's chat log.
-function Debug.say(self, context, msg)
-  if (self._log_contexts and self._log_contexts[context] == true) then
+-- log.say() throughout your code. The message is printed in the game's chat log.
+function log.say(context, msg)
+  if (_log_contexts[context] == true) then
     player:local_say(msg)
   end
 end

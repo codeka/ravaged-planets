@@ -13,7 +13,7 @@ namespace po = boost::program_options;
 
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
-
+/*
 std::shared_ptr<fw::lua_callback> g_callback;
 
 //-----------------------------------------------------------------------------
@@ -98,7 +98,7 @@ std::vector<unit_wrapper *> ai_player::find() {
   units.push_back(new unit_wrapper());
   return units;
 }
-
+*/
 //-----------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
     fw::tool_application app;
     new fw::framework(&app);
     fw::framework::get_instance()->initialize("Lua Test");
-
+/*
     fw::lua_context ctx;
     fw::lua_registrar<unit_wrapper>::register_without_constructor(ctx.get_state());
     fw::lua_registrar<ai_player>::register_static(ctx.get_state(), "player", new ai_player());
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
       fw::debug << "g_callback is non-null, calling it now." << std::endl;
       g_callback->call();
     }
-
+*/
   } catch(std::exception &e) {
     std::string msg = boost::diagnostic_information(e);
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;

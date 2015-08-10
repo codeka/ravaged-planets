@@ -63,6 +63,7 @@ target_link_libraries(framework
     ${GLEW_LIBRARY}
     ${PROTOBUF_LIBRARY}
     ${LUA_LIBRARY}
+    ${LUABIND_LIBRARY}
     ${CURL_LIBRARY}
     enet
     freetype
