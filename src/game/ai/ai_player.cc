@@ -92,6 +92,7 @@ void ai_player::l_timer(float dt, luabind::object obj) {
     return;
 
   _upd_queue.push(dt, [obj]() mutable {
+    fw::debug << "Calling: " << obj << std::endl;
     obj();
   });
 }
@@ -108,13 +109,7 @@ void ai_player::fire_event(std::string const &event_name, std::map<std::string, 
   }
 
   BOOST_FOREACH(luabind::object obj, it->second) {
-    try {
-      obj(event_name);
-    } catch(luabind::error &e) {
-      luabind::object error_msg(luabind::from_stack(e.state(), -1));
-      fw::debug << boost::format("An exception occured firing a LUA event\n%1%\n%2%")
-          % e.what() % error_msg << std::endl;
-    }
+    obj(event_name);
   }
 }
 
@@ -148,25 +143,21 @@ public:
   inline findunits_predicate(ai_player *plyr, luabind::object &params) : _plyr(plyr) {
     luabind::iterator end;
     for(luabind::iterator it(params); it != end; ++it) {
-      try {
-        std::string key = luabind::object_cast<std::string>(it.key());
+      std::string key = luabind::object_cast<std::string>(it.key());
 
-        if (key == "players") {
-          luabind::object value = *it;
-          if (luabind::type(value) == LUA_TTABLE) {
-            // if it's a table, we treat it as an array
-            fw::debug << "TODO: specifying multiple player_nos is not implemented" << std::endl;
-          } else {
-            // if it's not a table, it should be an integer
-            _player_nos.push_back(luabind::object_cast<uint8_t>(value));
-          }
-        } else if (key == "unit_type") {
-          _unit_type = luabind::object_cast<std::string>(*it);
+      if (key == "players") {
+        luabind::object value = *it;
+        if (luabind::type(value) == LUA_TTABLE) {
+          // if it's a table, we treat it as an array
+          fw::debug << "TODO: specifying multiple player_nos is not implemented" << std::endl;
         } else {
-          fw::debug << boost::format("WARN: unknown option for findunits: %1%") % key << std::endl;
+          // if it's not a table, it should be an integer
+          _player_nos.push_back(luabind::object_cast<uint8_t>(value));
         }
-      } catch(luabind::cast_failed &) {
-        fw::debug << "WARN: findunits was passed some invalid options, the returned units may not be what you wanted!" << std::endl;
+      } else if (key == "unit_type") {
+        _unit_type = luabind::object_cast<std::string>(*it);
+      } else {
+        fw::debug << boost::format("WARN: unknown option for findunits: %1%") % key << std::endl;
       }
     }
 

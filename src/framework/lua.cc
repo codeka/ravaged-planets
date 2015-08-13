@@ -4,6 +4,7 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <luabind/config.hpp>
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
@@ -15,12 +16,17 @@ namespace fs = boost::filesystem;
 
 namespace fw {
 
+static void error_callback(lua_State *state);
+static void cast_failed_callback(lua_State *state, luabind::type_id const &type_info);
+
 void l_log_debug(std::string const &msg);
 
 lua_context::lua_context() {
   _state = luaL_newstate();
   luaL_openlibs(_state);
   luabind::open(_state);
+  luabind::set_error_callback(error_callback);
+  luabind::set_cast_failed_callback(cast_failed_callback);
 
   // sets up our custom functions and so on
   setup_state();
@@ -55,12 +61,12 @@ void lua_context::add_path(fs::path const &path) {
 
 bool lua_context::load_script(fs::path const &filename) {
   _last_error = "";
-  debug << boost::format("loading script: \"%1%\"") % filename << std::endl;
+  debug << boost::format("loading script: %1%") % filename << std::endl;
 
   int ret = luaL_loadfile(_state, filename.string().c_str());
   if (ret != 0) {
     _last_error = lua_tostring(_state, -1);
-    debug << boost::format("ERR: could not load Lua script \"%1%\":\n%2%")
+    debug << boost::format("ERR: could not load Lua script %1%:\n%2%")
         % filename % _last_error << std::endl;
     return false;
   }
@@ -68,12 +74,22 @@ bool lua_context::load_script(fs::path const &filename) {
   ret = lua_pcall(_state, 0, 0, 0);
   if (ret != 0) {
     _last_error = lua_tostring(_state, -1);
-    debug << boost::format("ERR: could not load Lua script \"%1%\":\n%2%")
+    debug << boost::format("ERR: could not load Lua script %1%:\n%2%")
         % filename % _last_error << std::endl;
     return false;
   }
 
   return true;
+}
+
+//-------------------------------------------------------------------------
+
+void error_callback(lua_State *state) {
+  fw::debug << "ERROR CALLBACK";
+}
+
+void cast_failed_callback(lua_State *state, luabind::type_id const &type_info) {
+  fw::debug << "CAST FAILED CALLBACK";
 }
 
 //-------------------------------------------------------------------------

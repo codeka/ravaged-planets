@@ -1,6 +1,9 @@
 #include <functional>
 #include <boost/format.hpp>
 
+#include <luabind/error.hpp>
+#include <luabind/object.hpp>
+
 #include <framework/framework.h>
 #include <framework/lua.h>
 #include <framework/timer.h>
