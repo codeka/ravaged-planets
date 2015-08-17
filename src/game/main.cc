@@ -27,8 +27,6 @@ int main(int argc, char** argv) {
     new fw::framework(&app);
     fw::framework::get_instance()->initialize("Ravaged Planet");
 
-    fw::debug << "Hello World!" << std::endl;
-
     fw::framework::get_instance()->run();
   } catch(std::exception &e) {
     std::string msg = boost::diagnostic_information(e);
