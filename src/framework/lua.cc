@@ -16,17 +16,12 @@ namespace fs = boost::filesystem;
 
 namespace fw {
 
-static void error_callback(lua_State *state);
-static void cast_failed_callback(lua_State *state, luabind::type_id const &type_info);
-
 void l_log_debug(std::string const &msg);
 
 lua_context::lua_context() {
   _state = luaL_newstate();
   luaL_openlibs(_state);
   luabind::open(_state);
-  luabind::set_error_callback(error_callback);
-  luabind::set_cast_failed_callback(cast_failed_callback);
 
   // sets up our custom functions and so on
   setup_state();
@@ -80,16 +75,6 @@ bool lua_context::load_script(fs::path const &filename) {
   }
 
   return true;
-}
-
-//-------------------------------------------------------------------------
-
-void error_callback(lua_State *state) {
-  fw::debug << "ERROR CALLBACK";
-}
-
-void cast_failed_callback(lua_State *state, luabind::type_id const &type_info) {
-  fw::debug << "CAST FAILED CALLBACK";
 }
 
 //-------------------------------------------------------------------------
