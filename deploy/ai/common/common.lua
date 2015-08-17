@@ -24,7 +24,7 @@ is_game_started = false
 function taunt(kind, probability)
   if (math.random() < probability) then
     local taunt_list = _taunts[kind]
-    local msg = taunt_list[math.random(table.getn(taunt_list))]
+    local msg = taunt_list[math.random(#taunt_list)]
     player:say(msg)
   end
 end

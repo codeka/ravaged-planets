@@ -92,7 +92,6 @@ void ai_player::l_timer(float dt, luabind::object obj) {
     return;
 
   _upd_queue.push(dt, [obj]() mutable {
-    fw::debug << "Calling: " << obj << std::endl;
     obj();
   });
 }
