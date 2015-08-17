@@ -109,7 +109,13 @@ void ai_player::fire_event(std::string const &event_name, std::map<std::string, 
   }
 
   BOOST_FOREACH(luabind::object obj, it->second) {
-    obj(event_name);
+    try {
+      obj(event_name);
+    } catch (luabind::error &e) {
+      luabind::object error_msg(luabind::from_stack(e.state(), -1));
+      fw::debug << boost::format("An exception occured executing a Lua event handler\n%1%\n%2%")
+          % e.what() % error_msg << std::endl;
+    }
   }
 }
 
