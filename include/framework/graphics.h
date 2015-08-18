@@ -246,8 +246,7 @@ struct xyz_n_uv {
   }
 
   inline xyz_n_uv(xyz_n_uv const &copy) :
-      x(copy.x), y(copy.y), z(copy.z), nx(copy.nx), ny(copy.ny), nz(copy.nz), u(
-          copy.u), v(copy.v) {
+      x(copy.x), y(copy.y), z(copy.z), nx(copy.nx), ny(copy.ny), nz(copy.nz), u(copy.u), v(copy.v) {
   }
 
   float x, y, z;
