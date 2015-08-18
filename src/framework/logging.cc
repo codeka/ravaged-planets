@@ -1,8 +1,15 @@
-#include <iostream>
+#include <ctime>
+#include <chrono>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <mutex>
+#include <sstream>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 
 #include <framework/logging.h>
 #include <framework/settings.h>
@@ -68,19 +75,31 @@ namespace fw {
   }
 
   std::streamsize log_sink::write(const char *s, std::streamsize n) {
-    boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    std::time_t c_now = std::chrono::system_clock::to_time_t(now);
 
     {
       std::unique_lock<std::mutex> lock(mutex);
       if (_open) {
-        (*_outs) << now << " : ";
-        _outs->write(s, n);
-        _outs->flush();
+        try {
+          (*_outs) << std::put_time(std::localtime(&c_now), "%F %T") << " : ";
+          _outs->write(s, n);
+          _outs->flush();
+        } catch (std::exception &e) {
+          std::cerr << e.what();
+        }
       }
 
       if (log_to_console) {
-        std::cout << now << " : ";
+#if defined(_WIN32)
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&c_now), "%F %T") << " : ";
+        ss.write(s, n);
+        ::OutputDebugString(ss.str().c_str());
+#else
+        std::cout << std::put_time(std::localtime(&c_now), "%F %T") << " : ";
         std::cout.write(s, n);
+#endif
       }
     }
 
