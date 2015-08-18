@@ -141,7 +141,7 @@ void graphics::present() {
 
   // Run any functions that were scheduled to run on the render thread
   {
-    std::unique_lock<std::mutex>(_run_queue_mutex);
+    std::lock_guard<std::mutex> lock(_run_queue_mutex);
     BOOST_FOREACH(std::function<void()> fn, _run_queue) {
       fn();
     }
@@ -158,7 +158,7 @@ void graphics::present() {
 }
 
 void graphics::run_on_render_thread(std::function<void()> fn) {
-  std::unique_lock<std::mutex>(_run_queue_mutex);
+  std::lock_guard<std::mutex> lock(_run_queue_mutex);
   _run_queue.push_back(fn);
 }
 
