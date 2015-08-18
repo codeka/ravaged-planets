@@ -65,8 +65,8 @@ target_link_libraries(framework
     ${LUA_LIBRARY}
     ${LUABIND_LIBRARY}
     ${CURL_LIBRARY}
-    enet
-    freetype
+    ${ENET_LIBRARY}
+    ${FREETYPE_LIBRARY}
     ${PNG_LIBRARY}
 )
 
