@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     fw::framework::get_instance()->initialize("Font Test");
 
     std::shared_ptr<fw::font_face> font_face = fw::framework::get_instance()->get_font_manager()->get_face();
-    font_face->ensure_glyphs("ABCabcDEFdefGHIghiJKLjklMNOmnoPQRpqrSTUstuVWXvwxYZyz");
+    font_face->ensure_glyphs("wm");
     font_face->get_bitmap()->save_bitmap(fw::resolve("test.png", true));
     fw::debug << "Bitmap saved to:" << fw::resolve("test.png", true) << std::endl;
 
