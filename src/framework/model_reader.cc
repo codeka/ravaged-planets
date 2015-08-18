@@ -33,6 +33,7 @@ std::shared_ptr<model> model_reader::read(fs::path const &filename) {
     std::shared_ptr<model_mesh_noanim> mesh_noanim = std::shared_ptr<model_mesh_noanim>(new model_mesh_noanim(
         pb_mesh.vertices().size() / sizeof(vertex::xyz_n_uv),
         pb_mesh.indices().size() / sizeof(uint16_t)));
+    fw::debug << "vertices.size = " << pb_mesh.vertices().size() << " bytes (" << (pb_mesh.vertices().size() / sizeof(vertex::xyz_n_uv)) << " verts)" << std::endl;
     vertex::xyz_n_uv const *vertex_begin = reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data());
     vertex::xyz_n_uv const *vertex_end =
         reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data() + pb_mesh.vertices().size());
