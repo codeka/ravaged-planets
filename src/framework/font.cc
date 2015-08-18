@@ -145,15 +145,12 @@ void font_face::ensure_glyph(uint32_t ch) {
     return;
   }
 
-  fw::debug << "ensure_glph(" << (char) ch << ")" << std::endl;
   int glyph_index = FT_Get_Char_Index(_face, ch);
-  fw::debug << "  - glyph_index = " << glyph_index << std::endl;
 
   // Load the glyph into the glyph slot and render it if it's not a bitmap
   FT_CHECK(FT_Load_Glyph(_face, glyph_index, FT_LOAD_DEFAULT));
   if (_face->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
     // TODO: FT_RENDER_MODE_LCD?
-    fw::debug << "  - FT_Render_Glyph" << std::endl;
     FT_CHECK(FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL));
   }
 
@@ -163,9 +160,7 @@ void font_face::ensure_glyph(uint32_t ch) {
   int offset_x = (_glyphs.size() - (offset_y * glyphs_per_row));
   offset_y *= _size;
   offset_x *= _size;
-  fw::debug << "  - offset_x=" << offset_x << " offset_y=" << offset_y << std::endl;
 
-  fw::debug << "  - bitmap.width=" << _face->glyph->bitmap.width << " bitmap.rows=" << _face->glyph->bitmap.rows << std::endl;
   for (int y = 0; y < _face->glyph->bitmap.rows; y++) {
     for (int x = 0; x < _face->glyph->bitmap.width; x++) {
       uint32_t rgba = 0x00ffffff | (
@@ -174,11 +169,6 @@ void font_face::ensure_glyph(uint32_t ch) {
     }
   }
 
-  fw::debug << "  - advance: " << _face->glyph->advance.x / 64.0f << ", " << _face->glyph->advance.y / 64.0f << std::endl;
-  fw::debug << "  - bitmap rect: t=" << _face->glyph->bitmap_top << " l=" << _face->glyph->bitmap_left
-      << " w=" << _face->glyph->bitmap.width << " h=" << _face->glyph->bitmap.rows << std::endl;
-  fw::debug << "  - bearingY = " << _face->glyph->metrics.horiBearingY / 64.0f << std::endl;
-  fw::debug << "  - baseline_height = " << (_face->glyph->metrics.height - _face->glyph->metrics.horiBearingY) / 64.0f << std::endl;
   std::string chstr = conv::utf_to_utf<char>(std::basic_string<uint32_t>({ch, 0}));
   _glyphs[ch] = new glyph(ch, glyph_index, offset_x, offset_y,
       _face->glyph->advance.x / 64.0f, _face->glyph->advance.y / 64.0f, _face->glyph->bitmap_left,
