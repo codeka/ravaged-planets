@@ -65,6 +65,7 @@ void game_screen::show() {
 void game_screen::update() {
   _world->update();
 
+  hud_build->update();
   hud_minimap->update();
 }
 

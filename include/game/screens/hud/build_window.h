@@ -16,7 +16,11 @@ namespace game {
 class build_window {
 private:
   fw::gui::window *_wnd;
+  std::weak_ptr<ent::entity> _entity;
+  std::string _build_group;
+  bool _require_refresh;
 
+  void do_refresh();
 public:
   build_window();
   virtual ~build_window();
