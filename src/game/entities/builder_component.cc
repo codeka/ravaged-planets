@@ -6,7 +6,7 @@
 #include <game/entities/selectable_component.h>
 #include <game/entities/position_component.h>
 #include <game/entities/ownable_component.h>
-//#include <game/screens/hud/build_window.h>
+#include <game/screens/hud/build_window.h>
 //#include <game/screens/hud/chat_window.h>
 #include <game/simulation/simulation_thread.h>
 #include <game/simulation/commands.h>
@@ -46,10 +46,10 @@ void builder_component::apply_template(std::shared_ptr<entity_component_template
 // this is called when our entity is selected/deselected, we need to show/hide the build window as appropriate.
 void builder_component::on_selected(bool selected) {
   if (selected) {
-    //game::hud_build->show();
-    //game::hud_build->refresh(_entity, _build_group);
+    game::hud_build->show();
+    game::hud_build->refresh(_entity, _build_group);
   } else {
-    //game::hud_build->hide();
+    game::hud_build->hide();
   }
 }
 
