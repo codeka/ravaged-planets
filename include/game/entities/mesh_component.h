@@ -37,6 +37,9 @@ public:
   std::shared_ptr<fw::model> get_model() const {
     return _model;
   }
+  std::string get_model_name() const {
+    return _model_name;
+  }
 
   virtual void render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform);
 
@@ -46,4 +49,3 @@ public:
 };
 
 }
-
