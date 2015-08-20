@@ -97,15 +97,6 @@ void world::initialize_pathing() {
 void world::initialize_entities() {
   _entities = new ent::entity_manager();
   _entities->initialize();
-
-  std::shared_ptr<ent::entity> entity = _entities->create_entity("simple-tank", 1);
-  entity->get_component<ent::ownable_component>()->set_owner(
-      simulation_thread::get_instance()->get_local_player());
-
-  entity = _entities->create_entity("simple-tank", 1);
-  entity->set_position(fw::vector(10, 0, 10));
-  entity->get_component<ent::ownable_component>()->set_owner(
-      simulation_thread::get_instance()->get_local_player());
 }
 
 // this is called when the "pause" button is pressed (usually "ESC")
