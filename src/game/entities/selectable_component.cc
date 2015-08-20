@@ -35,10 +35,6 @@ void selectable_component::initialize() {
   // later on.
   std::shared_ptr<entity> entity(_entity);
   _ownable = entity->get_component<ownable_component>();
-
-  if (!_vb) {
-    populate_buffers();
-  }
 }
 
 // this is called when we start up, and also when our device is reset. we need to populate
@@ -93,6 +89,10 @@ void selectable_component::unhighlight() {
 }
 
 void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform) {
+  if (!_vb) {
+    populate_buffers();
+  }
+
   bool draw = false;
   fw::colour col(1, 1, 1);
   if (_is_selected) {
