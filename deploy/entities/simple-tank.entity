@@ -6,9 +6,9 @@
 		<component type="pathing" />
 		<component type="minimap-visible" />
 
-		<!--component type="buildable">
+		<component type="buildable">
 			<property name="BuildGroup">vehicles</property>
-		</component-->
+		</component>
 
 		<component type="position">
 			<property name="SitOnTerrain">1</property>

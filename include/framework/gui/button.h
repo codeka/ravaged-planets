@@ -55,6 +55,9 @@ public:
   inline std::string get_text() const {
     return _text;
   }
+  inline void set_icon(std::shared_ptr<drawable> drawable) {
+    _icon = drawable;
+  }
 
   void set_pressed(bool is_pressed);
   bool is_pressed() {
