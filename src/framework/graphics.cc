@@ -139,6 +139,14 @@ void graphics::after_gui() {
 void graphics::present() {
   sig_before_present();
 
+  GLenum err = glGetError();
+  if (err != GL_NO_ERROR) {
+    // this might happen in Release mode, where we don't actually check errors on every single call (it's expensive).
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::gl_error_info(err));
+  }
+
+  SDL_GL_SwapWindow(_wnd);
+
   // Run any functions that were scheduled to run on the render thread
   {
     std::lock_guard<std::mutex> lock(_run_queue_mutex);
@@ -147,14 +155,6 @@ void graphics::present() {
     }
     _run_queue.clear();
   }
-
-  GLenum err = glGetError();
-  if (err != GL_NO_ERROR) {
-    // this might happen in Release mode, where we don't actually check errors on every single call (it's expensive).
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::gl_error_info(err));
-  }
-
-  SDL_GL_SwapWindow(_wnd);
 }
 
 void graphics::run_on_render_thread(std::function<void()> fn) {

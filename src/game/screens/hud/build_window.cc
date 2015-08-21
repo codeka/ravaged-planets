@@ -12,6 +12,7 @@
 #include <framework/gui/window.h>
 #include <framework/logging.h>
 #include <framework/model.h>
+#include <framework/model_manager.h>
 #include <framework/scenegraph.h>
 #include <framework/texture.h>
 #include <framework/timer.h>
@@ -78,7 +79,7 @@ void entity_icon::initialize() {
 void entity_icon::set_model(std::shared_ptr<fw::model> mdl) {
   _model = mdl;
   _rotation = 0.0f;
-  queue_render();
+  render();
 }
 
 void entity_icon::render() {
@@ -90,7 +91,6 @@ void entity_icon::render() {
   _rotation += 3.14159f * fw::framework::get_instance()->get_timer()->get_frame_time();
 
   fw::lookat_camera cam;
-
   cam.set_distance(2.0f);
   cam.update(1.0f / 30.0f);
 
@@ -183,9 +183,11 @@ void build_window::do_refresh() {
 
     BOOST_FOREACH(auto comp_tmpl, tmpl->components) {
       if (comp_tmpl->identifier == ent::mesh_component::identifier) {
-        ent::mesh_component mesh_comp;
-        mesh_comp.apply_template(comp_tmpl);
-        icon->set_model(mesh_comp.get_model());
+        fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+          ent::mesh_component mesh_comp;
+          mesh_comp.apply_template(comp_tmpl);
+          icon->set_model(fw::framework::get_instance()->get_model_manager()->get_model(mesh_comp.get_model_name()));
+        });
         break;
       }
     }
