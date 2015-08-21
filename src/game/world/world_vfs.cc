@@ -151,9 +151,9 @@ void world_file_entry::ensure_open(bool throw_on_error) {
   }
 
   if (_for_write) {
-    _stream.open(_full_path.c_str(), std::ios::out);
+    _stream.open(_full_path.c_str(), std::ios::out | std::ifstream::binary);
   } else {
-    _stream.open(_full_path.c_str(), std::ios::in);
+    _stream.open(_full_path.c_str(), std::ios::in | std::ifstream::binary);
   }
   if (_stream.fail()) {
     if (throw_on_error) {
