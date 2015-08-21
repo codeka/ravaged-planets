@@ -28,7 +28,11 @@ if(WIN32)
     file(GLOB ARCH_FILES
         arch/win32/*.cc
     )
+    file(GLOB ARCH_HEADERS
+        ../../include/framework/arch/win32/*.h
+    )
     SOURCE_GROUP(src\\arch\\win32 REGULAR_EXPRESSION arch/win32/.*\\.cc)
+    SOURCE_GROUP(inc\\arch\\win32 REGULAR_EXPRESSION arch/win32/.*\\.h)
 elseif(UNIX)
     file(GLOB ARCH_FILES
         arch/linux/*.cc
@@ -47,6 +51,7 @@ add_library(framework
     ${FRAMEWORK_FILES}
     ${FRAMEWORK_HEADERS}
     ${ARCH_FILES}
+    ${ARCH_HEADERS}
     ${PROTO_SRCS}
 )
 
