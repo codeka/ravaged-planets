@@ -62,7 +62,7 @@ void settings::initialize(po::options_description const &additional_options, int
       ("windowed-height", po::value<int>()->default_value(600), "The height of the window when running in windowed mode")
       ("fullscreen-width,W", po::value<int>()->default_value(0), "The width of the screen when running in fullscreen mode")
       ("fullscreen-height,H", po::value<int>()->default_value(0), "The height of the screen when running in fullscreen mode")
-      ("windowed", "Run in windowed mode")
+      ("windowed", po::value<bool>()->default_value(true), "Run in windowed mode")
       ("disable-antialiasing", "If specified, we'll disable fullscreen anti-aliasing (better performance, lower quality)")
     ;
 
