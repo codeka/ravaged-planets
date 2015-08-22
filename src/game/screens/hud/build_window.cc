@@ -62,17 +62,17 @@ entity_icon::entity_icon() : _rotation(0.0f) {
 
 void entity_icon::initialize() {
   std::shared_ptr<fw::texture> colour_target(new fw::texture());
-  colour_target->create(50, 50, false);
+  colour_target->create(64, 64, false);
 
   std::shared_ptr<fw::texture> depth_target(new fw::texture());
-  depth_target->create(50, 50, true);
+  depth_target->create(64, 64, true);
 
   _framebuffer = std::shared_ptr<fw::framebuffer>(new fw::framebuffer());
   _framebuffer->set_colour_buffer(colour_target);
   _framebuffer->set_depth_buffer(depth_target);
 
   _drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
-      ->build_drawable(colour_target, 0, 0, 50, 50);
+      ->build_drawable(colour_target, 0, 0, 64, 64);
   render();
 }
 
@@ -88,7 +88,7 @@ void entity_icon::render() {
   }
 
   fw::lookat_camera cam;
-  cam.set_distance(4.0f);
+  cam.set_distance(2.0f);
   cam.update(1.0f / 30.0f);
 
   fw::sg::scenegraph sg;
