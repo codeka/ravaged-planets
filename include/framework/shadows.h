@@ -27,7 +27,6 @@ class shadow_source: private boost::noncopyable {
 private:
   light_camera _camera;
   std::shared_ptr<framebuffer> _shadowbuffer;
-  camera *_real_camera;
 
 public:
   shadow_source();

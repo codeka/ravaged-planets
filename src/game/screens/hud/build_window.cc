@@ -91,19 +91,16 @@ void entity_icon::render() {
   cam.set_distance(4.0f);
   cam.update(1.0f / 30.0f);
 
-  fw::camera *old_cam = fw::framework::get_instance()->get_camera();
-  fw::framework::get_instance()->set_camera(&cam);
-
   fw::sg::scenegraph sg;
   float c = _rotation / (3.14159f * 3.0f);
   while (c > 1.0f) {
     c -= 1.0f;
   }
   sg.set_clear_colour(fw::colour(1, 0, c, 0));
+  sg.push_camera(&cam);
   _model->render(sg, fw::rotate_axis_angle(fw::vector(0, 1, 0), _rotation));
 
   fw::render(sg, _framebuffer, false);
-  fw::framework::get_instance()->set_camera(old_cam);
 }
 
 void entity_icon::update() {

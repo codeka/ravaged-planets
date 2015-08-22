@@ -100,10 +100,15 @@ void node::render(scenegraph *sg) {
       shader = shadow_shader;
     }
 
+    fw::camera *camera = sg->get_camera();
+    if (camera == nullptr) {
+      camera = fw::framework::get_instance()->get_camera();
+    }
+
     if (!shader) {
-      render_noshader();
+      render_noshader(camera);
     } else {
-      render_shader(shader);
+      render_shader(shader, camera);
     }
   }
 
@@ -114,7 +119,7 @@ void node::render(scenegraph *sg) {
 }
 
 // this is called when we're rendering a given shader
-void node::render_shader(std::shared_ptr<fw::shader> shader) {
+void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera) {
   std::shared_ptr<fw::shader_parameters> parameters;
   if (_shader_params) {
     parameters = _shader_params;
@@ -123,11 +128,10 @@ void node::render_shader(std::shared_ptr<fw::shader> shader) {
   }
 
   // add the world_view and world_view_proj parameters as well as shadow parameters
-  fw::camera *cam = fw::framework::get_instance()->get_camera();
-  if (cam != nullptr) {
-    fw::matrix worldview = cam->get_view_matrix();
+  if (camera != nullptr) {
+    fw::matrix worldview = camera->get_view_matrix();
     worldview = _world * worldview;
-    fw::matrix worldviewproj = worldview * cam->get_projection_matrix();
+    fw::matrix worldviewproj = worldview * camera->get_projection_matrix();
 
     parameters->set_matrix("worldviewproj", worldviewproj);
     parameters->set_matrix("worldview", worldview);
@@ -157,12 +161,12 @@ void node::render_shader(std::shared_ptr<fw::shader> shader) {
   _vb->end();
 }
 
-void node::render_noshader() {
+void node::render_noshader(fw::camera *camera) {
   if (!basic_shader) {
     basic_shader = fw::shader::create("basic.shader");
   }
 
-  render_shader(basic_shader);
+  render_shader(basic_shader, camera);
 }
 
 void node::populate_clone(std::shared_ptr<node> clone) {
@@ -232,11 +236,13 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_
   is_rendering_shadow = true;
   BOOST_FOREACH(shadowsrc, shadows) {
     shadowsrc->begin_scene();
+    scenegraph.push_camera(&shadowsrc->get_camera());
     g->begin_scene();
     BOOST_FOREACH(std::shared_ptr<fw::sg::node> node, scenegraph.get_nodes()) {
       node->render(&scenegraph);
     }
     g->end_scene();
+    scenegraph.pop_camera();
     shadowsrc->end_scene();
   }
   is_rendering_shadow = false;

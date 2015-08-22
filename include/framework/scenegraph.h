@@ -1,12 +1,13 @@
 #pragma once
 
 #include <memory>
+#include <stack>
 
 #include <framework/vector.h>
 #include <framework/colour.h>
 
 namespace fw {
-
+class camera;
 class shadow_source;
 class vertex_buffer;
 class index_buffer;
@@ -74,7 +75,7 @@ private:
   std::shared_ptr<fw::shader_parameters> _shader_params;
 
   // Renders the node if the shader file is null (basically just uses the basic shader).
-  void render_noshader();
+  void render_noshader(fw::camera *camera);
 
 protected:
   node *_parent;
@@ -82,7 +83,7 @@ protected:
   fw::matrix _world;
 
   // this is called when we're rendering a given shader
-  virtual void render_shader(std::shared_ptr<fw::shader> shader);
+  virtual void render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera);
 
   // called by clone() to populate the clone
   virtual void populate_clone(std::shared_ptr<node> clone);
@@ -164,6 +165,7 @@ private:
   light_coll _lights;
   node_coll _root_nodes;
   fw::colour _clear_colour;
+  std::stack<fw::camera *> _camera_stack;
 
 public:
   scenegraph();
@@ -189,6 +191,19 @@ public:
   }
   fw::colour get_clear_colour() const {
     return _clear_colour;
+  }
+
+  void push_camera(fw::camera *cam) {
+    _camera_stack.push(cam);
+  }
+  void pop_camera() {
+    _camera_stack.pop();
+  }
+  fw::camera *get_camera() const {
+    if (_camera_stack.empty()) {
+      return nullptr;
+    }
+    return _camera_stack.top();
   }
 };
 }

@@ -21,7 +21,7 @@ light_camera::~light_camera() {
 // over and over (as shadow_sources get created/destroyed)
 static std::list<std::shared_ptr<framebuffer>> g_shadowbuffers;
 
-shadow_source::shadow_source() : _real_camera(0) {
+shadow_source::shadow_source() {
 }
 
 shadow_source::~shadow_source() {
@@ -50,12 +50,7 @@ void shadow_source::initialize(bool debug /*= false */) {
 
 void shadow_source::begin_scene() {
   framework *frmwrk = fw::framework::get_instance();
-
-  // set the camera to our light's camera, and update it
-  _real_camera = framework::get_instance()->get_camera();
-  frmwrk->set_camera(&_camera);
-  _camera.update(framework::get_instance()->get_timer()->get_frame_time());
-
+  _camera.update(frmwrk->get_timer()->get_frame_time());
   frmwrk->get_graphics()->set_render_target(_shadowbuffer);
 }
 
@@ -64,7 +59,6 @@ void shadow_source::end_scene() {
 
   // reset the render target and camera back to the "real" one
   frmwrk->get_graphics()->set_render_target(nullptr);
-  frmwrk->set_camera(_real_camera);
 }
 
 }
