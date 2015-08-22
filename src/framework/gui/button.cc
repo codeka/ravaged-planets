@@ -88,6 +88,8 @@ public:
 //-----------------------------------------------------------------------------
 
 button::button(gui *gui) : widget(gui), _text_align(center), _is_pressed(false), _is_mouse_over(false) {
+  sig_mouse_out.connect(std::bind(&button::on_mouse_out, this));
+  sig_mouse_over.connect(std::bind(&button::on_mouse_over, this));
 }
 
 button::~button() {

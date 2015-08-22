@@ -35,11 +35,11 @@ void gui::update(float dt) {
   widget *wdgt = get_widget_at(inp->mouse_x(), inp->mouse_y());
   if (wdgt != _widget_under_mouse) {
     if (_widget_under_mouse != nullptr) {
-      _widget_under_mouse->on_mouse_out();
+      _widget_under_mouse->sig_mouse_out();
     }
     _widget_under_mouse = wdgt;
     if (_widget_under_mouse != nullptr) {
-      _widget_under_mouse->on_mouse_over();
+      _widget_under_mouse->sig_mouse_over();
       fw::framework::get_instance()->get_cursor()->set_cursor(2, _widget_under_mouse->get_cursor_name());
     } else {
       fw::framework::get_instance()->get_cursor()->set_cursor(2, "");
@@ -48,7 +48,7 @@ void gui::update(float dt) {
   if (_widget_under_mouse != nullptr && (inp->mouse_dx() != 0.0f || inp->mouse_dy() != 0.0f)) {
     float mx = inp->mouse_x() - _widget_under_mouse->get_left();
     float my = inp->mouse_y() - _widget_under_mouse->get_top();
-    _widget_under_mouse->on_mouse_move(mx, my);
+    _widget_under_mouse->sig_mouse_move(mx, my);
   }
 
   std::unique_lock<std::mutex> lock(_top_level_widget_mutex);

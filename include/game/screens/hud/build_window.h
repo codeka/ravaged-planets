@@ -19,8 +19,11 @@ private:
   std::weak_ptr<ent::entity> _entity;
   std::string _build_group;
   bool _require_refresh;
+  int _mouse_over_button_id;
 
   void do_refresh();
+  void on_mouse_over_button(int id);
+  void on_mouse_out_button(int id);
 public:
   build_window();
   virtual ~build_window();

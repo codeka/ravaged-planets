@@ -31,6 +31,9 @@ protected:
   bool _is_pressed;
   bool _is_mouse_over;
 
+  void on_mouse_out();
+  void on_mouse_over();
+
   void update_drawable_state();
 
 public:
@@ -45,8 +48,6 @@ public:
   static property *text_align(alignment align);
 
   void on_attached_to_parent(widget *parent);
-  void on_mouse_out();
-  void on_mouse_over();
   void render();
 
   inline void set_text(std::string const &new_text) {

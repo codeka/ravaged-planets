@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <boost/any.hpp>
+#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
+#include <boost/signals2.hpp>
 
 namespace fw { namespace gui {
 class gui;
@@ -171,17 +173,14 @@ public:
   /** Called just after render. You should not override this, it define the scissor rectangle and stuff like that. */
   void postrender();
 
-  /** Called when the mouse moves out of this widget. */
-  virtual void on_mouse_out() {
-  }
+  /** Signalled when the mouse moves out of this widget. */
+  boost::signals2::signal<void()> sig_mouse_out;
 
-  /** Called when the mouse moves over this widget. */
-  virtual void on_mouse_over() {
-  }
+  /** Signalled when the mouse moves over this widget. */
+  boost::signals2::signal<void()> sig_mouse_over;
 
-  /** Called when the mouse moves over us. (x,y) is relative to this widget's origin. */
-  virtual void on_mouse_move(float x, float y) {
-  }
+  /** Signalled when the mouse moves over us. (x,y) is relative to this widget's origin. */
+  boost::signals2::signal<void(float x, float y)> sig_mouse_move;
 
   /** Called when the mouse is pressed down, (x,y) is relative to this widget's origin. */
   virtual bool on_mouse_down(float x, float y);
