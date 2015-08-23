@@ -38,6 +38,8 @@ public:
 static std::shared_ptr<fw::model> g_model;
 static bool g_show_ground = false;
 static std::shared_ptr<fw::sg::node> g_ground;
+static bool g_rotating = false;
+static float g_rotate_angle = 0.0f;
 
 bool restart_handler(fw::gui::widget *wdgt) {
   fw::settings stg;
@@ -56,26 +58,34 @@ bool ground_handler(fw::gui::widget *wdgt) {
   return true;
 }
 
+bool rotate_handler(fw::gui::widget *wdgt) {
+  if (g_rotating) {
+    g_rotating = false;
+    dynamic_cast<fw::gui::button *>(wdgt)->set_text("Rotate");
+  } else {
+    g_rotating = true;
+    dynamic_cast<fw::gui::button *>(wdgt)->set_text("Stop rotating");
+  }
+  return true;
+}
+
 bool application::initialize(fw::framework *frmwrk) {
   fw::top_down_camera *cam = new fw::top_down_camera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
 
   fw::gui::window *wnd;
-  wnd = fw::gui::builder<fw::gui::window>()
-      << fw::gui::widget::position(fw::gui::px(20), fw::gui::px(20))
-      << fw::gui::widget::size(fw::gui::px(150), fw::gui::px(130))
+  wnd = fw::gui::builder<fw::gui::window>(fw::gui::px(20), fw::gui::px(20), fw::gui::px(150), fw::gui::px(130))
       << fw::gui::window::background("frame")
-      << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(10), fw::gui::px(10))
-          << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
+      << (fw::gui::builder<fw::gui::button>(fw::gui::px(10), fw::gui::px(10), fw::gui::px(130), fw::gui::px(30))
           << fw::gui::button::text("Restart")
           << fw::gui::widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
-      << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(10), fw::gui::px(50))
-          << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
+      << (fw::gui::builder<fw::gui::button>(fw::gui::px(10), fw::gui::px(50), fw::gui::px(130), fw::gui::px(30))
           << fw::gui::button::text("Show ground")
-          << fw::gui::widget::click(std::bind<bool>(ground_handler, std::placeholders::_1)));
+          << fw::gui::widget::click(std::bind<bool>(ground_handler, std::placeholders::_1)))
+      << (fw::gui::builder<fw::gui::button>(fw::gui::px(10), fw::gui::px(90), fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::button::text("Rotate")
+          << fw::gui::widget::click(std::bind<bool>(rotate_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
   fw::settings stg;
@@ -86,6 +96,9 @@ bool application::initialize(fw::framework *frmwrk) {
 }
 
 void application::update(float dt) {
+  if (g_rotating) {
+    g_rotate_angle += 3.14159f * dt;
+  }
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {
@@ -102,7 +115,7 @@ void application::render(fw::sg::scenegraph &scenegraph) {
   }
 
   g_model->set_colour(fw::colour(1.0f, 1.0f, 0.0f, 0.0f));
-  g_model->render(scenegraph);
+  g_model->render(scenegraph, fw::rotate_axis_angle(fw::vector(0, 1, 0), g_rotate_angle));
 }
 
 //-----------------------------------------------------------------------------
