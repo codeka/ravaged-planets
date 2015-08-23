@@ -118,8 +118,10 @@ void graphics::destroy() {
 void graphics::begin_scene(fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
   if (_framebuffer) {
     FW_CHECKED(glViewport(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
+    FW_CHECKED(glScissor(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
   } else {
     FW_CHECKED(glViewport(0, 0, _width, _height));
+    FW_CHECKED(glScissor(0, 0, _width, _height));
   }
   FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
   FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -146,7 +148,10 @@ void graphics::present() {
   }
 
   SDL_GL_SwapWindow(_wnd);
+}
 
+/** Called on the render thread, after we've finished rendering. */
+void graphics::after_render() {
   // Run any functions that were scheduled to run on the render thread
   {
     std::lock_guard<std::mutex> lock(_run_queue_mutex);
@@ -189,7 +194,6 @@ void graphics::ensure_render_thread() {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Expected to be running on the render thread."));
   }
 }
-
 
 void graphics::toggle_fullscreen() {
   fw::debug << boost::format("switching to %1%...") % (_windowed ? "full-screen" : "windowed") << std::endl;

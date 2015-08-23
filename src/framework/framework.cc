@@ -303,8 +303,10 @@ void framework::render() {
   fw::render(scenegraph);
 
   // if we've been asked for some screenshots, take them after we've done the normal render.
-   if (_screenshots.size() > 0)
-     take_screenshots(scenegraph);
+  if (_screenshots.size() > 0)
+    take_screenshots(scenegraph);
+
+  _graphics->after_render();
 }
 
 bool framework::poll_events() {

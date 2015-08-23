@@ -44,6 +44,8 @@ private:
   float _rotation;
   std::shared_ptr<fw::model> _model;
   std::shared_ptr<fw::framebuffer> _framebuffer;
+  std::shared_ptr<fw::texture> _colour_texture;
+  std::shared_ptr<fw::texture> _depth_texture;
   std::shared_ptr<drawable> _drawable;
 
   void render();
@@ -53,6 +55,7 @@ public:
   void initialize();
   void set_model(std::shared_ptr<fw::model> mdl);
   void update();
+  void reset();
 
   std::shared_ptr<drawable> get_drawable();
 };
@@ -61,18 +64,18 @@ entity_icon::entity_icon() : _rotation(0.0f) {
 }
 
 void entity_icon::initialize() {
-  std::shared_ptr<fw::texture> colour_target(new fw::texture());
-  colour_target->create(64, 64, false);
+  _colour_texture = std::shared_ptr<fw::texture>(new fw::texture());
+  _colour_texture->create(64, 64, false);
 
-  std::shared_ptr<fw::texture> depth_target(new fw::texture());
-  depth_target->create(64, 64, true);
+  _depth_texture = std::shared_ptr<fw::texture>(new fw::texture());
+  _depth_texture->create(64, 64, true);
 
   _framebuffer = std::shared_ptr<fw::framebuffer>(new fw::framebuffer());
-  _framebuffer->set_colour_buffer(colour_target);
-  _framebuffer->set_depth_buffer(depth_target);
+  _framebuffer->set_colour_buffer(_colour_texture);
+  _framebuffer->set_depth_buffer(_depth_texture);
 
   _drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
-      ->build_drawable(colour_target, 7, 7, 50, 50);
+      ->build_drawable(_colour_texture, 7, 7, 50, 50);
   render();
 }
 
@@ -80,6 +83,10 @@ void entity_icon::set_model(std::shared_ptr<fw::model> mdl) {
   _model = mdl;
   _rotation = 0.0f;
   render();
+  for (int i = 0; i < 20; i++) {
+    _rotation += 3.14159f * fw::framework::get_instance()->get_timer()->get_frame_time();
+    render();
+  }
 }
 
 void entity_icon::render() {
@@ -92,12 +99,10 @@ void entity_icon::render() {
   cam.update(1.0f / 30.0f);
 
   fw::sg::scenegraph sg;
-  float c = _rotation / (3.14159f * 3.0f);
-  while (c > 1.0f) {
-    c -= 1.0f;
-  }
-  sg.set_clear_colour(fw::colour(1, 0, c, 0));
+  sg.set_clear_colour(fw::colour(1, 1, 1, 1));
   sg.push_camera(&cam);
+
+  // set up the properties of the sun that we'll use to light and also cast shadows
   _model->render(sg, fw::rotate_axis_angle(fw::vector(0, 1, 0), _rotation));
 
   fw::render(sg, _framebuffer, false);
@@ -105,6 +110,13 @@ void entity_icon::render() {
 
 void entity_icon::update() {
   _rotation += 3.14159f * fw::framework::get_instance()->get_timer()->get_frame_time();
+  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    render();
+  });
+}
+
+void entity_icon::reset() {
+  _rotation = 0.0f;
   fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     render();
   });
@@ -165,6 +177,16 @@ void build_window::on_mouse_over_button(int id) {
 
 void build_window::on_mouse_out_button(int id) {
   if (_mouse_over_button_id == id) {
+    button *btn = _wnd->find<button>(_mouse_over_button_id);
+    if (btn != nullptr) {
+      std::shared_ptr<entity_icon> const *iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
+      std::shared_ptr<entity_icon> icon;
+      if (iconp != nullptr) {
+        icon = *iconp;
+        icon->reset();
+      }
+    }
+
     _mouse_over_button_id = -1;
   }
 }
@@ -181,7 +203,7 @@ void build_window::do_refresh() {
       continue; // TODO
     }
 
-    std::shared_ptr<entity_icon> const *iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
+    auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
     std::shared_ptr<entity_icon> icon;
     if (iconp != nullptr) {
       icon = *iconp;
@@ -219,11 +241,9 @@ void build_window::update() {
   if (_mouse_over_button_id > 0) {
     button *btn = _wnd->find<button>(_mouse_over_button_id);
     if (btn != nullptr) {
-      std::shared_ptr<entity_icon> const *iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
-      std::shared_ptr<entity_icon> icon;
-      if (iconp != nullptr) {
-        icon = *iconp;
-        icon->update();
+      auto icon = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
+      if (icon != nullptr) {
+        (*icon)->update();
       }
     }
   }

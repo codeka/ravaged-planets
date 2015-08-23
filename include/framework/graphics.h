@@ -63,6 +63,7 @@ public:
   void begin_scene(fw::colour clear_colour = fw::colour(1, 0, 0, 0));
   void end_scene();
   void present();
+  void after_render();
 
   // toggle between windowed and fullscreen mode.
   void toggle_fullscreen();

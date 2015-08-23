@@ -163,17 +163,13 @@ int main(int argc, char** argv) {
     fw::framework::get_instance()->run();
   } catch (std::exception &e) {
     std::string msg = boost::diagnostic_information(e);
-    fw::debug
-        << "--------------------------------------------------------------------------------"
-        << std::endl;
+    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
     fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
     fw::debug << msg << std::endl;
 
     display_exception(e.what());
   } catch (...) {
-    fw::debug
-        << "--------------------------------------------------------------------------------"
-        << std::endl;
+    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
     fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
   }
 
