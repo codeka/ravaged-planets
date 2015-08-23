@@ -3,6 +3,7 @@
 #include <boost/foreach.hpp>
 
 #include <framework/framework.h>
+#include <framework/bitmap.h>
 #include <framework/camera.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
@@ -13,6 +14,7 @@
 #include <framework/logging.h>
 #include <framework/model.h>
 #include <framework/model_manager.h>
+#include <framework/paths.h>
 #include <framework/scenegraph.h>
 #include <framework/texture.h>
 #include <framework/timer.h>
@@ -22,6 +24,8 @@
 #include <game/entities/entity_factory.h>
 #include <game/entities/mesh_component.h>
 #include <game/screens/hud/build_window.h>
+#include <game/simulation/local_player.h>
+#include <game/simulation/simulation_thread.h>
 
 using namespace fw::gui;
 using namespace std::placeholders;
@@ -76,6 +80,7 @@ void entity_icon::initialize() {
 
   _drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
       ->build_drawable(_colour_texture, 7, 7, 50, 50);
+  std::dynamic_pointer_cast<bitmap_drawable>(_drawable)->set_flipped(true);
   render();
 }
 
@@ -83,10 +88,6 @@ void entity_icon::set_model(std::shared_ptr<fw::model> mdl) {
   _model = mdl;
   _rotation = 0.0f;
   render();
-  for (int i = 0; i < 20; i++) {
-    _rotation += 3.14159f * fw::framework::get_instance()->get_timer()->get_frame_time();
-    render();
-  }
 }
 
 void entity_icon::render() {
@@ -94,17 +95,19 @@ void entity_icon::render() {
     return;
   }
 
+  fw::sg::scenegraph sg;
+  sg.set_clear_colour(fw::colour(0, 0, 0, 0));
+
   fw::lookat_camera cam;
   cam.set_distance(2.0f);
   cam.update(1.0f / 30.0f);
-
-  fw::sg::scenegraph sg;
-  sg.set_clear_colour(fw::colour(1, 1, 1, 1));
   sg.push_camera(&cam);
 
-  // set up the properties of the sun that we'll use to light and also cast shadows
-  _model->render(sg, fw::rotate_axis_angle(fw::vector(0, 1, 0), _rotation));
+  fw::vector sun(0.485f, 0.485f, 0.727f);
+  std::shared_ptr <fw::sg::light> light(new fw::sg::light(sun * 200.0f, sun * -1, true));
+  sg.add_light(light);
 
+  _model->render(sg, fw::rotate_axis_angle(fw::vector(0, 1, 0), _rotation));
   fw::render(sg, _framebuffer, false);
 }
 
@@ -221,7 +224,10 @@ void build_window::do_refresh() {
         fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
           ent::mesh_component mesh_comp;
           mesh_comp.apply_template(comp_tmpl);
-          icon->set_model(fw::framework::get_instance()->get_model_manager()->get_model(mesh_comp.get_model_name()));
+          std::shared_ptr<fw::model> mdl =
+              fw::framework::get_instance()->get_model_manager()->get_model(mesh_comp.get_model_name());
+          mdl->set_colour(game::simulation_thread::get_instance()->get_local_player()->get_colour());
+          icon->set_model(mdl);
         });
         break;
       }

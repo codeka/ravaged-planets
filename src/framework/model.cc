@@ -37,7 +37,7 @@ void model_mesh_noanim::setup_buffers() {
 
 //-------------------------------------------------------------------------
 
-model::model() {
+model::model() : _wireframe(false), _colour(fw::colour(1, 1, 1)) {
 }
 
 model::~model() {
@@ -46,22 +46,6 @@ model::~model() {
 void model::render(sg::scenegraph &sg, fw::matrix const &transform /*= fw::matrix::identity() */) {
   root_node->set_world_matrix(transform);
   sg.add_node(root_node->clone());
-}
-
-void model::set_wireframe(bool value) {
-  root_node->wireframe = value;
-}
-
-bool model::get_wireframe() const {
-  return root_node->wireframe;
-}
-
-void model::set_colour(fw::colour col) {
-  root_node->colour = col;
-}
-
-fw::colour model::get_colour() const {
-  return root_node->colour;
 }
 
 }

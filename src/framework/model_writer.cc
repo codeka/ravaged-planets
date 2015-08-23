@@ -43,7 +43,6 @@ void add_node(Node *pb_node, std::shared_ptr<model_node> node) {
   for (int i = 0; i < 16; i++) {
     pb_node->mutable_transformation()->Add(node->transform.data()[i]);
   }
-  pb_node->set_colour(node->colour.to_argb());
 
   for (int i = 0; i < node->get_num_children(); i++) {
     std::shared_ptr<model_node> child_node = std::dynamic_pointer_cast<model_node>(node->get_child(i));

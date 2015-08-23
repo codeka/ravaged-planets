@@ -44,6 +44,7 @@ protected:
   int _left;
   int _width;
   int _height;
+  bool _flipped;
 
   friend class drawable_manager;
   bitmap_drawable(std::shared_ptr<fw::texture> texture);
@@ -65,6 +66,10 @@ public:
   }
   float get_intrinsic_height() const {
     return _height;
+  }
+
+  void set_flipped(bool flipped) {
+    _flipped = flipped;
   }
 };
 

@@ -53,7 +53,6 @@ std::shared_ptr<model> model_reader::read(fs::path const &filename) {
 }
 
 void add_node(std::shared_ptr<model_node> node, Node const &pb_node) {
-  node->colour = fw::colour::from_argb(pb_node.colour());
   node->mesh_index = pb_node.mesh_index();
   if (pb_node.transformation_size() == 16) {
     for (int i = 0; i < 16; i++) {
@@ -62,7 +61,6 @@ void add_node(std::shared_ptr<model_node> node, Node const &pb_node) {
   } else {
     node->transform = fw::identity();
   }
-  node->wireframe = false;
   node->node_name = pb_node.name();
 
   for (int i = 0; i < pb_node.children_size(); i++) {

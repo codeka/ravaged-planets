@@ -119,12 +119,14 @@ void graphics::begin_scene(fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
   if (_framebuffer) {
     FW_CHECKED(glViewport(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
     FW_CHECKED(glScissor(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
+    FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
+    _framebuffer->clear();
   } else {
     FW_CHECKED(glViewport(0, 0, _width, _height));
     FW_CHECKED(glScissor(0, 0, _width, _height));
+    FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
+    FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
   }
-  FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
-  FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void graphics::end_scene() {

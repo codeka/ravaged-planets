@@ -61,6 +61,7 @@ public:
   std::shared_ptr<texture> get_depth_buffer() const;
 
   void bind();
+  void clear();
   void unbind();
 
   int get_width() const;

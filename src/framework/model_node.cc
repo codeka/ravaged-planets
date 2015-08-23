@@ -10,24 +10,25 @@
 
 namespace fw {
 
-model_node::model_node() :
-    wireframe(false), transform(fw::identity()), mesh_index(-1) {
+model_node::model_node() : transform(fw::identity()), mesh_index(-1) {
 }
 
 model_node::~model_node() {
 }
 
-void model_node::initialize(model &mdl) {
+void model_node::initialize(model *mdl) {
+  _model = mdl;
+
   if (mesh_index >= 0) {
-    std::shared_ptr<model_mesh> mesh = mdl.meshes[mesh_index];
+    std::shared_ptr<model_mesh> mesh = mdl->meshes[mesh_index];
     set_vertex_buffer(mesh->get_vertex_buffer());
     set_index_buffer(mesh->get_index_buffer());
     set_shader(mesh->get_shader());
     set_primitive_type(sg::primitive_trianglelist);
 
     std::shared_ptr<shader_parameters> params = get_shader()->create_parameters();
-    if (mdl.texture) {
-      params->set_texture("entity_texture", mdl.texture);
+    if (mdl->texture) {
+      params->set_texture("entity_texture", mdl->texture);
     }
     params->set_colour("mesh_colour", fw::colour(1, 1, 1));
     set_shader_parameters(params);
@@ -38,19 +39,19 @@ void model_node::initialize(model &mdl) {
   }
 }
 
-void model_node::render(sg::scenegraph *sg) {
-  if (wireframe) {
+void model_node::render(sg::scenegraph *sg, fw::matrix const &model_matrix /*= fw::identity()*/) {
+  if (_model->get_wireframe()) {
 //    device = fw::framework::get_instance()->get_graphics()->get_device();
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
   }
 
   if (mesh_index >= 0) {
-    get_shader_parameters()->set_colour("mesh_colour", colour);
+    get_shader_parameters()->set_colour("mesh_colour", _model->get_colour());
   }
 
-  node::render(sg, transform * _world);
+  node::render(sg, transform * model_matrix);
 
-  if (wireframe) {
+  if (_model->get_wireframe()) {
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
   }
 }
@@ -59,10 +60,9 @@ void model_node::populate_clone(std::shared_ptr<sg::node> clone) {
   node::populate_clone(clone);
 
   std::shared_ptr<model_node> mnclone(std::dynamic_pointer_cast<model_node>(clone));
+  mnclone->_model = _model;
   mnclone->mesh_index = mesh_index;
   mnclone->node_name = node_name;
-  mnclone->wireframe = wireframe;
-  mnclone->colour = colour;
   mnclone->transform = transform;
 }
 

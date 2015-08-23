@@ -22,7 +22,7 @@ std::shared_ptr<model> model_manager::get_model(std::string const &name) {
     std::shared_ptr<model> model = reader.read(path);
     model->texture = std::shared_ptr<texture>(new texture());
     model->texture->create(fw::resolve("meshes/" + name + ".png"));
-    model->root_node->initialize(*model);
+    model->root_node->initialize(model.get());
     _models[name] = model;
     return model;
   } else {

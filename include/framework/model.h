@@ -61,6 +61,10 @@ public:
  * named animations.
  */
 class model {
+private:
+  bool _wireframe;
+  fw::colour _colour;
+
 public:
   model();
   ~model();
@@ -70,15 +74,23 @@ public:
   std::shared_ptr<fw::texture> texture;
 
   /** Sets a value which indicates whether we want to render in wireframe mode or not. */
-  void set_wireframe(bool value);
-  bool get_wireframe() const;
+  inline void set_wireframe(bool value) {
+    _wireframe = value;
+  }
+  inline bool get_wireframe() const {
+    return _wireframe;
+  }
 
   /**
    * Sets the colour we apply to transparent parts of the model's texture - this is usually used to differentiate
    * different players.
    */
-  void set_colour(fw::colour col);
-  fw::colour get_colour() const;
+  inline void set_colour(fw::colour col) {
+    _colour = col;
+  }
+  inline fw::colour get_colour() const {
+    return _colour;
+  }
 
   /** Renders the mesh to the given scenegraph. */
   void render(sg::scenegraph &sg, fw::matrix const &transform = fw::identity());
