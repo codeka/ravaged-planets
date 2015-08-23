@@ -22,6 +22,7 @@
 
 #include <game/entities/entity.h>
 #include <game/entities/entity_factory.h>
+#include <game/entities/builder_component.h>
 #include <game/entities/mesh_component.h>
 #include <game/screens/hud/build_window.h>
 #include <game/simulation/local_player.h>
@@ -46,6 +47,7 @@ enum ids {
 class entity_icon {
 private:
   float _rotation;
+  std::string _template_name;
   std::shared_ptr<fw::model> _model;
   std::shared_ptr<fw::framebuffer> _framebuffer;
   std::shared_ptr<fw::texture> _colour_texture;
@@ -57,10 +59,11 @@ public:
   entity_icon();
 
   void initialize();
-  void set_model(std::shared_ptr<fw::model> mdl);
+  void set_model(std::string const &template_name, std::shared_ptr<fw::model> mdl);
   void update();
   void reset();
 
+  std::string get_template_name();
   std::shared_ptr<drawable> get_drawable();
 };
 
@@ -84,7 +87,8 @@ void entity_icon::initialize() {
   render();
 }
 
-void entity_icon::set_model(std::shared_ptr<fw::model> mdl) {
+void entity_icon::set_model(std::string const &template_name, std::shared_ptr<fw::model> mdl) {
+  _template_name = template_name;
   _model = mdl;
   _rotation = 0.0f;
   render();
@@ -125,6 +129,10 @@ void entity_icon::reset() {
   });
 }
 
+std::string entity_icon::get_template_name() {
+  return _template_name;
+}
+
 std::shared_ptr<drawable> entity_icon::get_drawable() {
   return _drawable;
 }
@@ -157,6 +165,7 @@ void build_window::initialize() {
     button *btn = _wnd->find<button>(id);
     btn->sig_mouse_over.connect(std::bind(&build_window::on_mouse_over_button, this, id));
     btn->sig_mouse_out.connect(std::bind(&build_window::on_mouse_out_button, this, id));
+    btn->set_on_click(std::bind(&build_window::on_build_clicked, this, _1, id));
   }
 }
 
@@ -174,6 +183,20 @@ void build_window::refresh(std::weak_ptr<ent::entity> entity, std::string build_
   _require_refresh = true;
 }
 
+bool build_window::on_build_clicked(widget *w, int id) {
+  button *btn = dynamic_cast<button *>(w);
+  auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
+  if (iconp != nullptr) {
+    std::string tmpl_name = (*iconp)->get_template_name();
+    std::shared_ptr<ent::entity> entity(_entity);
+    if (entity) {
+      entity->get_component<ent::builder_component>()->build(tmpl_name);
+    }
+  }
+
+  return true;
+}
+
 void build_window::on_mouse_over_button(int id) {
   _mouse_over_button_id = id;
 }
@@ -182,11 +205,9 @@ void build_window::on_mouse_out_button(int id) {
   if (_mouse_over_button_id == id) {
     button *btn = _wnd->find<button>(_mouse_over_button_id);
     if (btn != nullptr) {
-      std::shared_ptr<entity_icon> const *iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
-      std::shared_ptr<entity_icon> icon;
+      auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
       if (iconp != nullptr) {
-        icon = *iconp;
-        icon->reset();
+        (*iconp)->reset();
       }
     }
 
@@ -227,7 +248,7 @@ void build_window::do_refresh() {
           std::shared_ptr<fw::model> mdl =
               fw::framework::get_instance()->get_model_manager()->get_model(mesh_comp.get_model_name());
           mdl->set_colour(game::simulation_thread::get_instance()->get_local_player()->get_colour());
-          icon->set_model(mdl);
+          icon->set_model(tmpl->name, mdl);
         });
         break;
       }

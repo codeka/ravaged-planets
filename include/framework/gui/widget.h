@@ -226,6 +226,10 @@ public:
   boost::any const &get_data() const;
   void set_data(boost::any const &data);
 
+  void set_on_click(std::function<bool(widget *)> on_click) {
+    _on_click = on_click;
+  }
+
   bool is_enabled() const {
     return _enabled;
   }

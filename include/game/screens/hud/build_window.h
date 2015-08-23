@@ -24,6 +24,7 @@ private:
   void do_refresh();
   void on_mouse_over_button(int id);
   void on_mouse_out_button(int id);
+  bool on_build_clicked(fw::gui::widget *w, int id);
 public:
   build_window();
   virtual ~build_window();
