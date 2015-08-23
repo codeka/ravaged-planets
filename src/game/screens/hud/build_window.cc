@@ -72,7 +72,7 @@ void entity_icon::initialize() {
   _framebuffer->set_depth_buffer(depth_target);
 
   _drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
-      ->build_drawable(colour_target, 0, 0, 64, 64);
+      ->build_drawable(colour_target, 7, 7, 50, 50);
   render();
 }
 

@@ -87,13 +87,13 @@ std::shared_ptr<fw::shader> node::get_shader() const {
   return shader;
 }
 
-void node::render(scenegraph *sg) {
-  // if we're not a shadow caster, and we're rendering shadows, don't
-  // render the node this time around
+void node::render(scenegraph *sg, fw::matrix const &model_matrix /*= fw::identity()*/) {
+  // if we're not a shadow caster, and we're rendering shadows, don't render the node this time around
   if (is_rendering_shadow && !_cast_shadows) {
     return;
   }
 
+  fw::matrix transform(model_matrix * _world);
   if (_vb) {
     std::shared_ptr<fw::shader> shader = get_shader();
     if (is_rendering_shadow) {
@@ -106,20 +106,20 @@ void node::render(scenegraph *sg) {
     }
 
     if (!shader) {
-      render_noshader(camera);
+      render_noshader(camera, transform);
     } else {
-      render_shader(shader, camera);
+      render_shader(shader, camera, transform);
     }
   }
 
   // render the children as well (todo: pass transformations)
   BOOST_FOREACH(std::shared_ptr<node> &child_node, _children) {
-    child_node->render(sg);
+    child_node->render(sg, transform);
   }
 }
 
 // this is called when we're rendering a given shader
-void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera) {
+void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera, fw::matrix const &transform) {
   std::shared_ptr<fw::shader_parameters> parameters;
   if (_shader_params) {
     parameters = _shader_params;
@@ -130,14 +130,14 @@ void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera)
   // add the world_view and world_view_proj parameters as well as shadow parameters
   if (camera != nullptr) {
     fw::matrix worldview = camera->get_view_matrix();
-    worldview = _world * worldview;
+    worldview = transform * worldview;
     fw::matrix worldviewproj = worldview * camera->get_projection_matrix();
 
     parameters->set_matrix("worldviewproj", worldviewproj);
     parameters->set_matrix("worldview", worldview);
 
     if (!is_rendering_shadow && shadowsrc) {
-      fw::matrix lightviewproj = _world * shadowsrc->get_camera().get_view_matrix();
+      fw::matrix lightviewproj = transform * shadowsrc->get_camera().get_view_matrix();
       lightviewproj *= shadowsrc->get_camera().get_projection_matrix();
 
       fw::matrix bias = fw::matrix(
@@ -161,12 +161,12 @@ void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera)
   _vb->end();
 }
 
-void node::render_noshader(fw::camera *camera) {
+void node::render_noshader(fw::camera *camera, fw::matrix const &transform) {
   if (!basic_shader) {
     basic_shader = fw::shader::create("basic.shader");
   }
 
-  render_shader(basic_shader, camera);
+  render_shader(basic_shader, camera, transform);
 }
 
 void node::populate_clone(std::shared_ptr<node> clone) {

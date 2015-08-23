@@ -44,16 +44,11 @@ void model_node::render(sg::scenegraph *sg) {
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
   }
 
-  fw::matrix old_world = _world;
-  _world = transform * _world;
-
   if (mesh_index >= 0) {
     get_shader_parameters()->set_colour("mesh_colour", colour);
   }
 
-  node::render(sg);
-
-  _world = old_world;
+  node::render(sg, transform * _world);
 
   if (wireframe) {
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);

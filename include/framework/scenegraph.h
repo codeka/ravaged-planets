@@ -75,7 +75,7 @@ private:
   std::shared_ptr<fw::shader_parameters> _shader_params;
 
   // Renders the node if the shader file is null (basically just uses the basic shader).
-  void render_noshader(fw::camera *camera);
+  void render_noshader(fw::camera *camera, fw::matrix const &transform);
 
 protected:
   node *_parent;
@@ -83,7 +83,7 @@ protected:
   fw::matrix _world;
 
   // this is called when we're rendering a given shader
-  virtual void render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera);
+  virtual void render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera, fw::matrix const &transform);
 
   // called by clone() to populate the clone
   virtual void populate_clone(std::shared_ptr<node> clone);
@@ -148,7 +148,7 @@ public:
   }
 
   // this is called by the scenegraph itself when it's time to render
-  virtual void render(scenegraph *sg);
+  virtual void render(scenegraph *sg, fw::matrix const &model_matrix = fw::identity());
 
   // Creates a clone of this node (it's a "shallow" clone in that the vertex_buffer, index_buffer and shader will be
   // shared but matrix and shader_parameters will be new)
