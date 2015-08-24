@@ -21,9 +21,10 @@
 // ordering issues)
 struct particle_sorter {
   fw::vector _cam_pos;
+  float _epsilon;
 
   particle_sorter(fw::vector camera_pos) :
-      _cam_pos(camera_pos) {
+      _cam_pos(camera_pos), _epsilon(0.00001f) {
   }
 
   bool operator()(fw::particle const *lhs, fw::particle const *rhs) {
@@ -37,7 +38,9 @@ struct particle_sorter {
       return (lhs->config->billboard.mode > rhs->config->billboard.mode);
     }
 
-    return (lhs->pos - _cam_pos).length_squared() > (rhs->pos - _cam_pos).length_squared();
+    float lhs_len = (lhs->pos - _cam_pos).length_squared();
+    float rhs_len = (rhs->pos - _cam_pos).length_squared();
+    return abs(lhs_len - rhs_len) > _epsilon && lhs_len > rhs_len;
   }
 };
 

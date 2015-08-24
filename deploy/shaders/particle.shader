@@ -53,8 +53,8 @@
 
       // look up the colour for that intensity for the two colours we are blending, then
       // combine the two colours based on whatever value of colour.b we have.
-      vec4 c1 = texture(colour_texture, vec2(a.r, colour.r));
-      vec4 c2 = texture(colour_texture, vec2(a.r, colour.g));
+      vec4 c1 = texture(colour_texture, vec2(a.r + 0.0078125, colour.r + 0.0078125));
+      vec4 c2 = texture(colour_texture, vec2(a.r + 0.0078125, colour.g + 0.0078125));
       out_colour = mix(c1, c2, vec4(colour.b, colour.b, colour.b, colour.b));
 
       // the final colour is multiplied by the intensity

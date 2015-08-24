@@ -78,9 +78,8 @@ bool particle_effect_config::load_document(xml_element const &root) {
 
     return true;
   } catch (fw::exception const &e) {
-    // if we get an exception, we'll just report the error and return false.
-    // it means we weren't able to parse the file...
-    debug << "ERROR: could not parse .wwpart file:" << std::endl;
+    // if we get an exception, we'll just report the error and return false. it means we weren't able to parse the file.
+    debug << "ERROR: could not parse .part file:" << std::endl;
     debug << diagnostic_information(e) << std::endl;
     return false;
   }
