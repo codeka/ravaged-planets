@@ -2,9 +2,12 @@
 	<components>
 		<component type="ownable" />
 		<component type="orderable" />
-		<component type="moveable" />
 		<component type="pathing" />
 		<component type="minimap-visible" />
+
+		<component type="moveable">
+			<property name="TurnRadius">0.15</property>
+		</component>
 
 		<component type="buildable">
 			<property name="BuildGroup">vehicles</property>

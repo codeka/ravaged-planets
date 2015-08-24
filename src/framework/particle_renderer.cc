@@ -40,7 +40,7 @@ struct particle_sorter {
 
     float lhs_len = (lhs->pos - _cam_pos).length_squared();
     float rhs_len = (rhs->pos - _cam_pos).length_squared();
-    return abs(lhs_len - rhs_len) > _epsilon && lhs_len > rhs_len;
+    return std::abs(lhs_len - rhs_len) > _epsilon && lhs_len > rhs_len;
   }
 };
 
