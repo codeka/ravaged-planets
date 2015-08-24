@@ -153,11 +153,15 @@ void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera,
   }
 
   _vb->begin();
-  _ib->begin();
   shader->begin(parameters);
-  FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], _ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
+  if (_ib) {
+    _ib->begin();
+    FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], _ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
+    _ib->end();
+  } else {
+    FW_CHECKED(glDrawArrays(g_primitive_type_map[_primitive_type], 0, _vb->get_num_vertices()));
+  }
   shader->end();
-  _ib->end();
   _vb->end();
 }
 

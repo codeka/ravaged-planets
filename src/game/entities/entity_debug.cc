@@ -5,7 +5,11 @@
 #include <framework/input.h>
 #include <framework/graphics.h>
 #include <framework/scenegraph.h>
+#include <framework/shader.h>
+#include <framework/gui/builder.h>
+#include <framework/gui/checkbox.h>
 #include <framework/gui/gui.h>
+#include <framework/gui/label.h>
 #include <framework/gui/window.h>
 #include <framework/gui/widget.h>
 
@@ -16,30 +20,37 @@
 #include <game/entities/moveable_component.h>
 
 using namespace std::placeholders;
+using namespace fw::gui;
 
 namespace ent {
+
+enum ids {
+  SHOW_STEERING_ID = 3642,
+  POSITION_ID,
+  GOAL_ID,
+};
 
 entity_debug::entity_debug(entity_manager *mgr) :
     _mgr(mgr), _just_shown(false), _wnd(nullptr) {
 }
 
 entity_debug::~entity_debug() {
+  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
-void entity_debug::initialize() {/*
-  fw::gui::cegui *gui = fw::framework::get_instance()->get_gui();
-  _wnd = gui->get_window("DebugOptionsWindow");
-  _sel_show_steering = dynamic_cast<CEGUI::Checkbox *>(_wnd->getChildRecursive(
-      "DebugOptionsWindow/SelectedEntityOptions/ShowSteering"));
-  _sel_position = _wnd->getChildRecursive("DebugOptionsWindow/SelectedEntityOptions/Position");
-  _sel_goal = _wnd->getChildRecursive("DebugOptionsWindow/SelectedEntityOptions/Goal");
-  _gbl_cam_position = _wnd->getChildRecursive("DebugOptionsWindow/GlobalOptions/CameraPosition");
+void entity_debug::initialize() {
+  _wnd = builder<window>(px(10), px(10), px(200), px(106))
+      << window::background("frame") << widget::visible(false)
+      << (builder<checkbox>(px(10), px(10), sum(pct(100), px(-20)), px(26))
+          << checkbox::text("Show steering") << widget::id(SHOW_STEERING_ID)
+          << widget::click(std::bind(&entity_debug::on_show_steering_changed, this, _1)))
+      << (builder<label>(px(10), px(46), sum(pct(100), px(-20)), px(20))
+          << label::text("Pos: ") << widget::id(POSITION_ID))
+      << (builder<label>(px(10), px(76), sum(pct(100), px(-20)), px(20))
+          << label::text("Goal: ") << widget::id(GOAL_ID))
+      ;
+  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 
-//		subscribe(_sel_show_steering, CEGUI::Checkbox::EventCheckStateChanged,
-//			CEGUI::SubscriberSlot(&entity_debug::on_show_steering_changed, this));
-  _sel_show_steering->subscribeEvent(CEGUI::Checkbox::EventCheckStateChanged,
-      CEGUI::SubscriberSlot(&entity_debug::on_show_steering_changed, this));
-*/
   fw::input *inp = fw::framework::get_instance()->get_input();
   inp->bind_key("Ctrl+D", std::bind(&entity_debug::on_key_press, this, _1, _2));
 }
@@ -47,6 +58,9 @@ void entity_debug::initialize() {/*
 void entity_debug::update() {
   if (_wnd == nullptr)
     initialize();
+
+  std::string new_pos_value;
+  std::string new_goal_value;
 
   std::list<std::weak_ptr<entity> > selection = _mgr->get_selection();
   if (selection.size() > 0) {
@@ -59,19 +73,20 @@ void entity_debug::update() {
 
     position_component *pos = entity->get_component<position_component>();
 
-    if (pos != 0) {/*
-      _sel_position->setText(
-          (boost::format("(%1$.1f, %2$.1f, %3$.1f)") % pos->get_position()[0] % pos->get_position()[1]
-              % pos->get_position()[2]).str().c_str());
-    */}
+    if (pos != 0) {
+      new_pos_value = (boost::format("Pos: (%1$.1f, %2$.1f, %3$.1f)")
+          % pos->get_position()[0] % pos->get_position()[1] % pos->get_position()[2]).str();
+    }
 
     moveable_component *moveable = entity->get_component<moveable_component>();
-    if (moveable != nullptr) {/*
+    if (moveable != nullptr) {
       fw::vector goal = moveable->get_goal();
-      _sel_goal->setText((boost::format("(%1$.1f, %2$.1f, %3$.1f)") % goal[0] % goal[1] % goal[2]).str().c_str());
-    */}
+      new_goal_value = (boost::format("Goal: (%1$.1f, %2$.1f, %3$.1f)") % goal[0] % goal[1] % goal[2]).str();
+    }
   }
 
+  _wnd->find<label>(POSITION_ID)->set_text(new_pos_value);
+  _wnd->find<label>(GOAL_ID)->set_text(new_goal_value);
 /*  _gbl_cam_position->setText(
       (boost::format("(%1$.1f, %2$.1f, %3$.1f)") % _mgr->get_view_centre()[0] % _mgr->get_view_centre()[1]
           % _mgr->get_view_centre()[2]).str().c_str());*/
@@ -86,20 +101,21 @@ void entity_debug::on_key_press(std::string /*key*/, bool is_down) {
   }
 }
 
-bool entity_debug::on_show_steering_changed(fw::gui::widget *w) {
-  std::list<std::weak_ptr<entity>> selection = _mgr->get_selection();
-  BOOST_FOREACH(std::weak_ptr<entity> const &wp, selection) {
+bool entity_debug::on_show_steering_changed(widget *w) {
+  checkbox *cbx = dynamic_cast<checkbox *>(w);
+
+  BOOST_FOREACH(std::weak_ptr<entity> const &wp, _mgr->get_selection()) {
     std::shared_ptr<entity> ent = wp.lock();
     if (!ent) {
       continue;
     }
 
     entity_debug_flags flags = ent->get_debug_flags();
-    //if (_sel_show_steering->isSelected()) {
+    if (cbx->is_checked()) {
       flags = static_cast<entity_debug_flags>(flags | debug_show_steering);
-    //} else {
-    //  flags = static_cast<entity_debug_flags>(flags & ~debug_show_steering);
-    //}
+    } else {
+      flags = static_cast<entity_debug_flags>(flags & ~debug_show_steering);
+    }
     ent->set_debug_flags(flags);
   }
 
@@ -171,10 +187,16 @@ void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::matrix const 
   vb->set_data(_lines.size() * 2, vertices);
   delete[] vertices;
 
+  std::shared_ptr<fw::shader> shader(fw::shader::create("basic.shader"));
+  std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
+  shader_params->set_program_name("notexture");
+
   std::shared_ptr<fw::sg::node> node(new fw::sg::node());
   node->set_world_matrix(transform);
   node->set_vertex_buffer(vb);
   node->set_primitive_type(fw::sg::primitive_linelist);
+  node->set_shader(shader);
+  node->set_shader_parameters(shader_params);
   node->set_cast_shadows(false);
   scenegraph.add_node(node);
 

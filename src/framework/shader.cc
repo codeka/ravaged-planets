@@ -235,8 +235,7 @@ void shader_program::begin() {
 }
 
 void shader_program::apply_state(std::string const &name, std::string const &value) {
-  // TODO: we could probably do something better than this (e.g. at load time rather than
-  // at run time)
+  // TODO: we could probably do something better than this (e.g. at load time rather than at run time)
   if (name == "z-write") {
     if (value == "on") {
       FW_CHECKED(glDepthMask(GL_TRUE));
