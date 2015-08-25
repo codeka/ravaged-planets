@@ -21,6 +21,8 @@
 		</component>
 
 		<component type="ownable" />
+		<component type="orderable" />
+		<component type="pathing" />
 
 		<component type="weapon">
 			<property name="FireEntity">missile</property>
