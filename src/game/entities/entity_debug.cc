@@ -87,9 +87,6 @@ void entity_debug::update() {
 
   _wnd->find<label>(POSITION_ID)->set_text(new_pos_value);
   _wnd->find<label>(GOAL_ID)->set_text(new_goal_value);
-/*  _gbl_cam_position->setText(
-      (boost::format("(%1$.1f, %2$.1f, %3$.1f)") % _mgr->get_view_centre()[0] % _mgr->get_view_centre()[1]
-          % _mgr->get_view_centre()[2]).str().c_str());*/
 }
 
 void entity_debug::on_key_press(std::string /*key*/, bool is_down) {
@@ -167,10 +164,13 @@ void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::matrix const 
   if (_lines.size() == 0)
     return;
 
-  fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[_lines.size() * 2];
+  std::vector<line> lines_copy = _lines;
+  _lines.clear();
 
-  for (int i = 0; i < static_cast<int>(_lines.size()); i++) {
-    line const &l = _lines[i];
+  fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[lines_copy.size() * 2];
+
+  for (int i = 0; i < static_cast<int>(lines_copy.size()); i++) {
+    line const &l = lines_copy[i];
 
     vertices[i * 2].x = l.from[0];
     vertices[i * 2].y = l.from[1];
@@ -184,7 +184,7 @@ void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::matrix const 
   }
 
   std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_c>();
-  vb->set_data(_lines.size() * 2, vertices);
+  vb->set_data(lines_copy.size() * 2, vertices);
   delete[] vertices;
 
   std::shared_ptr<fw::shader> shader(fw::shader::create("basic.shader"));
@@ -199,8 +199,6 @@ void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::matrix const 
   node->set_shader_parameters(shader_params);
   node->set_cast_shadows(false);
   scenegraph.add_node(node);
-
-  _lines.clear();
 }
 
 }
