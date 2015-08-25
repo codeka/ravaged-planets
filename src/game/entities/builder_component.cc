@@ -58,7 +58,7 @@ void builder_component::build(std::string name) {
 
   entity_factory factory;
   _curr_building = factory.get_template(name);
-  _time_to_build = 5.0f; // todo: get this from the template
+  _time_to_build = 0.01f; // todo: get this from the template
 }
 
 bool builder_component::is_building() const {

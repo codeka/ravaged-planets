@@ -33,7 +33,7 @@ void timer::update() {
   // and purposes, it doesn't matter.
   _frame_time = now - _curr_time_point;
   auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(_frame_time).count();
-  _frame_time_seconds = (float) microseconds / 1000000.f;
+  _frame_time_seconds = ((float) microseconds / 1000000.f)/* / 10.0f*/;
 
   microseconds = std::chrono::duration_cast<std::chrono::microseconds>(now - _start_time_point).count();
   _total_time_seconds = (float) microseconds / 1000000.0f;

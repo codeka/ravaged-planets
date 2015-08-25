@@ -2,6 +2,8 @@
 
 #include <framework/misc.h>
 #include <framework/colour.h>
+#include <framework/logging.h>
+
 #include <game/entities/entity.h>
 #include <game/entities/entity_manager.h>
 #include <game/entities/entity_factory.h>
@@ -75,7 +77,9 @@ void moveable_component::update(float dt) {
       float obstacle_distance = obstacle_dir.length();
 
       // only worry about the obstacle when it's in front of us
-      if (cml::dot(_pos->get_direction(), obstacle_dir) > 0.0f) {
+      float d = cml::dot(cml::normalize(_pos->get_direction()), cml::normalize(obstacle_dir));
+    //  fw::debug << "cml::dot(_pos->get_direction(), obstacle_dir) = " << d << std::endl;
+      if (d > 0.0f) {
         // if they're selectable, reduce the distance by their selection radius - that's what we ACTUALLY want to
         // avoid...
         float obstacle_radius = 1.0f;
@@ -94,22 +98,21 @@ void moveable_component::update(float dt) {
           }
 
           // temporarily adjust the "goal" so as to avoid the obstacle
-          fw::vector v = cml::cross(_pos->get_direction(), obstacle_dir);
-          if (v.length_squared() < 0.01f) {
-            // if they're *directly* in front of us, just choose a random direction, left
-            // or right. we'll choose . . . left
-            v = fw::vector(0, 1, 0);
+          fw::vector up = cml::cross(_pos->get_direction(), obstacle_dir);
+          if (up.length_squared() < 0.01f) {
+            // if they're *directly* in front of us, just choose a random direction, left or right. we'll choose... left
+            up = fw::vector(0, 1, 0);
           }
-          fw::vector avoid_dir = cml::cross(_pos->get_direction(), v).normalize();
+          fw::vector avoid_dir = cml::cross(cml::normalize(_pos->get_direction()), cml::normalize(up));
 
           if (show_steering) {
-            // draw a blue line from the obstacle in the direction we're going to travel
-            // to avoid it.
+            // draw a blue line from the obstacle in the direction we're going to travel to avoid it.
             entity->get_debug_view()->add_line(
                 obstacle_pos, obstacle_pos + (avoid_dir * (obstacle_radius * 2.0f)), fw::colour(0, 0, 1));
           }
 
-          goal = obstacle_pos + (avoid_dir * (obstacle_radius * 2.0f));
+          // our new goal is just in front of where we are now, but offset by what we're trying to avoid.
+          goal = _pos->get_direction() + obstacle_pos + (avoid_dir * (obstacle_radius * 2.0f));
           dir = _pos->get_direction_to(goal);
           distance = dir.length();
         }
@@ -145,19 +148,22 @@ void moveable_component::update(float dt) {
   _pos->set_position(pos);
 }
 
-// applies a steering factor to the "curr_direction" so that we slowly turn towards
-// the goal_direction.
+// applies a steering factor to the "curr_direction" so that we slowly turn towards the goal_direction.
 //
 // if show_steering is true, we use the entity's debug_view (which we assume is non-NULL
 //   to display the relevent steering vectors.
 fw::vector moveable_component::steer(fw::vector pos, fw::vector curr_direction, fw::vector goal_direction,
     float turn_amount, bool show_steering) {
-  curr_direction = curr_direction.normalize();
-  goal_direction = goal_direction.normalize();
-  fw::vector up = cml::cross(curr_direction, goal_direction);
+  curr_direction.normalize();
+  goal_direction.normalize();
 
-  // so, to work out the steering factor, we start off by rotating the direction
-  // vector clockwise 90 degrees...
+  // If we're almost facing the right direction already, just point straight towards the goal, no steering.
+  if (cml::dot(curr_direction, goal_direction) > 0.95f) {
+    return goal_direction;
+  }
+
+  // so, to work out the steering factor, we start off by rotating the direction vector clockwise 90 degrees...
+  fw::vector up = cml::cross(curr_direction, goal_direction);
   fw::matrix rotation = fw::rotate_axis_angle(up, static_cast<float>(M_PI / 2.0));
   fw::vector steer = cml::transform_vector(rotation, curr_direction).normalize();
 
@@ -177,9 +183,8 @@ fw::vector moveable_component::steer(fw::vector pos, fw::vector curr_direction, 
     entity->get_debug_view()->add_line(pos, pos + steer, fw::colour(0, 1, 1));
   }
 
-  // adjust the amount of steering by the turn_amount. The higher the turn amount, the
-  // more we try to steer (we assume turn_amount is already scaled by the time delta
-  // for this frame)
+  // adjust the amount of steering by the turn_amount. The higher the turn amount, the more we try to steer (we assume
+  // turn_amount is already scaled by the time delta for this frame)
   steer *= turn_amount;
 
   // adjust our current heading by applying a steering factor
