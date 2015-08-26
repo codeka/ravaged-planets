@@ -88,8 +88,7 @@ void projectile_component::explode(std::shared_ptr<entity> hit) {
   // if we hit someone, apply damage to them
   if (hit) {
     damageable_component *damageable = hit->get_component<damageable_component>();
-    if (damageable != 0) {
-      fw::debug << "hit damageable entity!" << std::endl;
+    if (damageable != nullptr) {
       damageable->apply_damage(30.0f);
     }
   }
@@ -97,7 +96,7 @@ void projectile_component::explode(std::shared_ptr<entity> hit) {
   // now, just set our health to zero and let our damageable_component handle it
   std::shared_ptr<ent::entity> entity(_entity);
   entity_attribute *attr = entity->get_attribute("health");
-  attr->set_value(0);
+  attr->set_value(0.0f);
 }
 
 //-------------------------------------------------------------------------

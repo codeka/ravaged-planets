@@ -43,9 +43,9 @@ void damageable_component::apply_damage(float amt) {
   std::shared_ptr<entity> entity(_entity);
   entity_attribute *attr = entity->get_attribute("health");
   if (attr != nullptr) {
-    int curr_value = attr->get_value<int>();
+    float curr_value = attr->get_value<float>();
     if (curr_value > 0) {
-      attr->set_value(curr_value - static_cast<int>(amt));
+      attr->set_value(curr_value - amt);
     }
   }
 }
@@ -53,7 +53,7 @@ void damageable_component::apply_damage(float amt) {
 // this is called whenever our health attribute changes value. we check whether it's
 // hit 0, and explode if it has
 void damageable_component::check_explode(boost::any health_value) {
-  if (boost::any_cast<int>(health_value) <= 0) {
+  if (boost::any_cast<float>(health_value) <= 0) {
     explode();
   }
 }

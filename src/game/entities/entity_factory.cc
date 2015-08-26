@@ -39,7 +39,16 @@ void entity_factory::populate(std::shared_ptr<entity> ent, std::string name) {
     if (it.key() == "components") {
       continue;
     }
-    entity_attribute attr(luabind::object_cast<std::string>(it.key()), *it);
+    boost::any value;
+    int type = luabind::type(*it);
+    if (type == LUA_TNUMBER) {
+      value = luabind::object_cast<float>(*it);
+    } else if (type == LUA_TSTRING) {
+      value = luabind::object_cast<std::string>(*it);
+    } else {
+      // table? maybe a vector?
+    }
+    entity_attribute attr(luabind::object_cast<std::string>(it.key()), value);
     ent->add_attribute(attr);
   }
 
