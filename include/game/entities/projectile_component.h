@@ -28,15 +28,12 @@ public:
     return _target;
   }
 
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
   virtual void initialize();
   virtual void update(float dt);
 
-  // this is called when we detect we've hit our target (or something
-  // else got in the way) not all projectiles will actually "explode" but
-  // that's a good enough analogy.
-  // If hit is valid, we'll assume that's the entity we actually hit and give
-  // them some extra damage
+  // this is called when we detect we've hit our target (or something else got in the way) not all projectiles
+  // will actually "explode" but that's a good enough analogy. If hit is valid, we'll assume that's the entity we
+  // actually hit and give them some extra damage
   virtual void explode(std::shared_ptr<entity> hit);
 
   virtual int get_identifier() {
@@ -44,8 +41,7 @@ public:
   }
 };
 
-// This is a "seeking" projectile component, which "seeks" it target
-// (for example, missiles)
+// This is a "seeking" projectile component, which "seeks" it target (for example, missiles)
 class seeking_projectile_component: public projectile_component {
 private:
   // The seeker takes a short amount of time before it "locks" on the target.
@@ -56,7 +52,7 @@ public:
   seeking_projectile_component();
   virtual ~seeking_projectile_component();
 
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
+  virtual void apply_template(luabind::object const &tmpl);
 
   virtual void update(float dt);
 };
@@ -71,7 +67,7 @@ public:
   ballistic_projectile_component();
   virtual ~ballistic_projectile_component();
 
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
+  virtual void apply_template(luabind::object const &tmpl);
 
   virtual void set_target(std::weak_ptr<entity> target);
 };

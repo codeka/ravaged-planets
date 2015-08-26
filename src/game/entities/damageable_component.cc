@@ -15,7 +15,7 @@ namespace ent {
 using namespace std::placeholders;
 
 // register the damageable component with the entity_factory
-ENT_COMPONENT_REGISTER("damageable", damageable_component);
+ENT_COMPONENT_REGISTER("Damageable", damageable_component);
 
 damageable_component::damageable_component() {
 }
@@ -23,10 +23,10 @@ damageable_component::damageable_component() {
 damageable_component::~damageable_component() {
 }
 
-void damageable_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "Explosion") {
-      _expl_name = kvp.second;
+void damageable_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "Explosion") {
+      _expl_name = luabind::object_cast<std::string>(*it);
     }
   }
 }

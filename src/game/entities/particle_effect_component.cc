@@ -12,7 +12,7 @@
 namespace ent {
 
 // Register the our component in this file with the entity_factory.
-ENT_COMPONENT_REGISTER("particle-effect", particle_effect_component);
+ENT_COMPONENT_REGISTER("ParticleEffect", particle_effect_component);
 
 particle_effect_component::particle_effect_component() :
     _destroy_entity_on_complete(false), _our_position(nullptr) {
@@ -22,16 +22,14 @@ particle_effect_component::~particle_effect_component() {
   _effect->destroy();
 }
 
-void particle_effect_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "EffectName") {
-      _effect_name = kvp.second;
-    } else if (kvp.first == "DestroyEntityOnComplete") {
-      _destroy_entity_on_complete = boost::lexical_cast<bool>(kvp.second);
+void particle_effect_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "EffectName") {
+      _effect_name = luabind::object_cast<std::string>(*it);
+    } else if (it.key() == "DestroyEntityOnComplete") {
+      _destroy_entity_on_complete = luabind::object_cast<bool>(*it);
     }
   }
-
-  entity_component::apply_template(comp_template);
 }
 
 void particle_effect_component::initialize() {

@@ -24,7 +24,7 @@ public:
   damageable_component();
   ~damageable_component();
 
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
+  virtual void apply_template(luabind::object const &tmpl);
   virtual void initialize();
 
   void apply_damage(float amt);

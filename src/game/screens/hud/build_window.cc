@@ -216,12 +216,13 @@ void build_window::on_mouse_out_button(int id) {
 }
 
 void build_window::do_refresh() {
-  std::vector<std::shared_ptr<ent::entity_template>> templates;
+  std::vector<luabind::object> templates;
   ent::entity_factory ent_factory;
   ent_factory.get_buildable_templates(_build_group, templates);
 
   int index = 0;
-  BOOST_FOREACH(std::shared_ptr<ent::entity_template> tmpl, templates) {
+  BOOST_FOREACH(luabind::object const &tmpl, templates) {
+    fw::debug << " checking " << tmpl["name"] << std::endl;
     button *btn = _wnd->find<button>(FIRST_BUILD_BUTTON_ID + index);
     if (btn == nullptr) {
       continue; // TODO
@@ -240,19 +241,13 @@ void build_window::do_refresh() {
       });
     }
 
-    BOOST_FOREACH(auto comp_tmpl, tmpl->components) {
-      if (comp_tmpl->identifier == ent::mesh_component::identifier) {
-        fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
-          ent::mesh_component mesh_comp;
-          mesh_comp.apply_template(comp_tmpl);
-          std::shared_ptr<fw::model> mdl =
-              fw::framework::get_instance()->get_model_manager()->get_model(mesh_comp.get_model_name());
-          mdl->set_colour(game::simulation_thread::get_instance()->get_local_player()->get_colour());
-          icon->set_model(tmpl->name, mdl);
-        });
-        break;
-      }
-    }
+    std::string mesh_file_name = luabind::object_cast<std::string>(tmpl["components"]["Mesh"]["FileName"]);
+    fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+      std::shared_ptr<fw::model> mdl =
+          fw::framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
+      mdl->set_colour(game::simulation_thread::get_instance()->get_local_player()->get_colour());
+      icon->set_model(luabind::object_cast<std::string>(tmpl["name"]), mdl);
+    });
 
     index ++;
   }

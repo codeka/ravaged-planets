@@ -1,31 +1,20 @@
-<entity version="1">
-	<components>
-		<component type="position" />
 
-		<!--component type="mesh">
-			<property name="FileName">missile</property>
-		</component-->
-
-		<component type="moveable">
-			<property name="Speed">15.0</property>
-			<!-- The ballistic-projectile component handles turning, so this would be ignored anyway-->
-			<property name="TurnRadius">0.25</property>
-		</component>
-
-		<component type="seeking-projectile">
-			<property name="TimeToLock">0.3</property>
-		</component>
-
-		<component type="damageable">
-			<property name="Explosion">missile-expl</property>
-		</component>
-
-		<component type="particle-effect">
-			<property name="EffectName">missile</property>
-		</component>
-	</components>
-
-	<attributes>
-		<attribute name="health" value="1" type="int" />
-	</attributes>
-</entity>
+Entity = {
+  components = {
+    Position = {},
+    Moveable = {
+      Speed = 15,
+      TurnRadius = 0.15
+    },
+    SeekingProjectile = {
+      TimeToLock = 0.3
+    },
+    Damageable = {
+      Explosion = "missile-expl"
+    },
+    ParticleEffect = {
+      EffectName = "missile"
+    }
+  },
+  health = 1
+}

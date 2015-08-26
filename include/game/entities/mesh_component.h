@@ -28,8 +28,7 @@ public:
   mesh_component(std::shared_ptr<fw::model> const &model);
   virtual ~mesh_component();
 
-  // loads the given property, which we got from the entity definition file.
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
+  virtual void apply_template(luabind::object const &tmpl);
 
   // this is called after the entity has added all of it's components
   virtual void initialize();

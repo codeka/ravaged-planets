@@ -16,7 +16,7 @@ namespace ent {
 using namespace std::placeholders;
 
 // register the builder component with the entity_factory
-ENT_COMPONENT_REGISTER("builder", builder_component);
+ENT_COMPONENT_REGISTER("Builder", builder_component);
 
 builder_component::builder_component() :
     _time_to_build(0.0f) {
@@ -33,14 +33,12 @@ void builder_component::initialize() {
   }
 }
 
-void builder_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "BuildGroup") {
-      _build_group = kvp.second;
+void builder_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "BuildGroup") {
+      _build_group = luabind::object_cast<std::string>(*it);
     }
   }
-
-  entity_component::apply_template(comp_template);
 }
 
 // this is called when our entity is selected/deselected, we need to show/hide the build window as appropriate.
@@ -76,14 +74,14 @@ void builder_component::update(float dt) {
         position_component *our_pos = entity->get_component<position_component>();
         if (our_pos != 0) {
           std::shared_ptr<game::create_entity_command> cmd(game::create_command<game::create_entity_command>());
-          cmd->template_name = _curr_building->name;
+          cmd->template_name = luabind::object_cast<std::string>(_curr_building["name"]);
           cmd->initial_position = our_pos->get_position();
           cmd->initial_goal = our_pos->get_position() + (our_pos->get_direction() * 3.0f);
           game::simulation_thread::get_instance()->post_command(cmd);
         }
       }
 
-      _curr_building.reset();
+      _curr_building = luabind::object();
       _time_to_build = 0.0f;
     }
   }

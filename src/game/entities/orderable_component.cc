@@ -7,7 +7,7 @@
 namespace ent {
 
 // register the orderable component with the entity_factory
-ENT_COMPONENT_REGISTER("orderable", orderable_component);
+ENT_COMPONENT_REGISTER("Orderable", orderable_component);
 
 orderable_component::orderable_component() :
     _order_pending(false) {

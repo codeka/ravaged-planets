@@ -21,7 +21,7 @@ static std::shared_ptr<fw::vertex_buffer> _vb;
 static std::shared_ptr<fw::index_buffer> _ib;
 
 // register the selectable component with the entity_factory
-ENT_COMPONENT_REGISTER("selectable", selectable_component);
+ENT_COMPONENT_REGISTER("Selectable", selectable_component);
 
 selectable_component::selectable_component() :
     _is_selected(false), _selection_radius(2.0f), _is_highlighted(false), _ownable(nullptr) {
@@ -65,14 +65,12 @@ void selectable_component::set_is_selected(bool selected) {
   sig_selected(selected);
 }
 
-void selectable_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "SelectionRadius") {
-      set_selection_radius(boost::lexical_cast<float>(kvp.second));
+void selectable_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "SelectionRadius") {
+      set_selection_radius(luabind::object_cast<float>(*it));
     }
   }
-
-  entity_component::apply_template(comp_template);
 }
 
 void selectable_component::set_selection_radius(float value) {

@@ -14,7 +14,7 @@ namespace ent {
 using namespace std::placeholders;
 
 // register the pathing component with the entity_factory
-ENT_COMPONENT_REGISTER("pathing", pathing_component);
+ENT_COMPONENT_REGISTER("Pathing", pathing_component);
 
 pathing_component::pathing_component() :
     _position(nullptr), _moveable(nullptr), _curr_goal_node(0) {

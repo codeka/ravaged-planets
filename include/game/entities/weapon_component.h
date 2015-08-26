@@ -22,7 +22,7 @@ public:
   weapon_component();
   virtual ~weapon_component();
 
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
+  virtual void apply_template(luabind::object const &tmpl);
 
   virtual void update(float dt);
 

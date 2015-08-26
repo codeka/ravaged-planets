@@ -22,7 +22,7 @@ using namespace std::placeholders;
 namespace ent {
 
 // register the mesh component with the entity_factory
-ENT_COMPONENT_REGISTER("mesh", mesh_component);
+ENT_COMPONENT_REGISTER("Mesh", mesh_component);
 
 mesh_component::mesh_component() :
     _model(), _colour(1, 1, 1) {
@@ -47,15 +47,12 @@ void mesh_component::owner_changed(ownable_component *ownable) {
   }
 }
 
-void mesh_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto & kvp, comp_template->properties) {
-    if (kvp.first == "FileName") {
-      // Since we need to
-      _model_name = kvp.second;
+void mesh_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "FileName") {
+      _model_name = luabind::object_cast<std::string>(*it);
     }
   }
-
-  entity_component::apply_template(comp_template);
 }
 
 void mesh_component::initialize() {

@@ -1,45 +1,32 @@
-<entity version="1">
-	<components>
-		<component type="ownable" />
-		<component type="orderable" />
-		<component type="pathing" />
-		<component type="minimap-visible" />
 
-		<component type="moveable">
-			<property name="TurnRadius">0.15</property>
-		</component>
-
-		<component type="buildable">
-			<property name="BuildGroup">vehicles</property>
-		</component>
-
-		<component type="position">
-			<property name="SitOnTerrain">1</property>
-		</component>
-
-		<component type="mesh">
-			<property name="FileName">tank-tracks</property>
-		</component>
-
-		<component type="selectable">
-			<property name="SelectionRadius">0.75</property>
-		</component>
-
-		<component type="damageable">
-			<property name="Explosion">missile-expl</property>
-		</component>
-
-		<component type="weapon">
-			<property name="FireEntity">missile</property>
-			<property name="FireDirection">0 1 0</property>
-		</component>
-
-		<!--component type="audio">
-			<sound cue="Fire" filename="missile-launch.ogg" />
-		</component-->
-	</components>
-
-	<attributes>
-		<attribute name="health" value="100" type="int" />
-	</attributes>
-</entity>
+Entity = {
+  components = {
+    Ownable = {},
+    Orderable = {},
+    Pathing = {},
+    MinimapVisible = {},
+    Moveable = {
+      TurnRadius = 0.15
+    },
+    Buildable = {
+      BuildGroup = "vehicles",
+    },
+    Position = {
+      SitOnTerrain = true
+    },
+    Mesh = {
+      FileName = "tank-tracks",
+    },
+    Selectable = {
+      SelectionRadius = 0.75
+    },
+    Damageable = {
+      Explosion = "missile-expl"
+    },
+    Weapon = {
+      FireEntity = "missile",
+      FireDirection = "0 1 0"
+    }
+  },
+  health = 100
+}

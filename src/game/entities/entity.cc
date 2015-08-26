@@ -131,10 +131,4 @@ entity_component::entity_component() {
 entity_component::~entity_component() {
 }
 
-// creates an instance of the entity_component_template we'll want to use (some components can have
-// special requirements for their templates that's not satified by the default implementation)
-entity_component_template *entity_component::create_template() {
-  return new entity_component_template();
-}
-
 }

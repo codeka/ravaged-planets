@@ -18,8 +18,8 @@
 namespace ent {
 
 // register the various components in this file with the entity_factory
-ENT_COMPONENT_REGISTER("seeking-projectile", seeking_projectile_component);
-ENT_COMPONENT_REGISTER("ballistic-projectile", ballistic_projectile_component);
+ENT_COMPONENT_REGISTER("SeekingProjectile", seeking_projectile_component);
+ENT_COMPONENT_REGISTER("BallisticProjectile", ballistic_projectile_component);
 
 //-------------------------------------------------------------------------
 projectile_component::projectile_component() :
@@ -27,9 +27,6 @@ projectile_component::projectile_component() :
 }
 
 projectile_component::~projectile_component() {
-}
-
-void projectile_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
 }
 
 void projectile_component::initialize() {
@@ -111,14 +108,12 @@ seeking_projectile_component::seeking_projectile_component() :
 seeking_projectile_component::~seeking_projectile_component() {
 }
 
-void seeking_projectile_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "TimeToLock") {
-      _time_to_lock = boost::lexical_cast<float>(kvp.second);
+void seeking_projectile_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "TimeToLock") {
+      _time_to_lock = luabind::object_cast<float>(*it);
     }
   }
-
-  return projectile_component::apply_template(comp_template);
 }
 
 void seeking_projectile_component::update(float dt) {
@@ -154,14 +149,12 @@ ballistic_projectile_component::ballistic_projectile_component() :
 ballistic_projectile_component::~ballistic_projectile_component() {
 }
 
-void ballistic_projectile_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "MaxHeight") {
-      _max_height = boost::lexical_cast<float>(kvp.second);
+void ballistic_projectile_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "MaxHeight") {
+      _max_height = luabind::object_cast<float>(*it);
     }
   }
-
-  return projectile_component::apply_template(comp_template);
 }
 
 void ballistic_projectile_component::set_target(std::weak_ptr<entity> target) {

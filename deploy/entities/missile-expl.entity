@@ -1,10 +1,10 @@
-<entity version="1">
-	<components>
-		<component type="position" />
 
-		<component type="particle-effect">
-			<property name="EffectName">explosion-01</property>
-			<property name="DestroyEntityOnComplete">1</property>
-		</component>
-	</components>
-</entity>
+Entity = {
+  components = {
+    Position = {},
+    ParticleEffect = {
+      EffectName = "explosion-01",
+      DestroyEntityOnComplete = true
+    }
+  }
+}

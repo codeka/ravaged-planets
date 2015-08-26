@@ -34,7 +34,7 @@ public:
   // this is called after the entity loads all of it's components
   virtual void initialize();
 
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
+  virtual void apply_template(luabind::object const &tmpl);
 
   virtual void render(fw::sg::scenegraph &scenegraph,
       fw::matrix const &transform);

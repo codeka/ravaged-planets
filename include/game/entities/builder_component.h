@@ -10,13 +10,12 @@ class entity_template;
 /**
  * This component is attached to entities who have the ability to build things (units, buildings, etc).
  */
-class builder_component: public entity_component,
-    public boost::signals2::trackable {
+class builder_component: public entity_component, public boost::signals2::trackable {
 private:
   std::string _build_group;
   void on_selected(bool selected);
 
-  std::shared_ptr<entity_template> _curr_building;
+  luabind::object _curr_building;
   float _time_to_build;
 
 public:
@@ -31,7 +30,7 @@ public:
   void build(std::string name);
   bool is_building() const;
 
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
+  virtual void apply_template(luabind::object const &tmpl);
   virtual void initialize();
   virtual void update(float dt);
 };

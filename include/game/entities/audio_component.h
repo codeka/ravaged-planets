@@ -37,13 +37,10 @@ public:
   audio_component();
   virtual ~audio_component();
 
-  virtual void apply_template(std::shared_ptr<entity_component_template> comp_template);
+  virtual void apply_template(luabind::object const &tmpl);
 
   /** Plays the cue with the given name (if the cue doesn't exist, nothing happens). */
   void play_cue(std::string const &name);
-
-  /** Creates an instance of the entity_component_template we'll want to use. */
-  virtual entity_component_template *create_template();
 
   virtual int get_identifier() {
     return identifier;

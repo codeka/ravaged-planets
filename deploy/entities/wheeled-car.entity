@@ -1,36 +1,32 @@
-<entity version="1">
-	<components>
-		<component type="buildable">
-			<property name="BuildGroup">vehicles</property>
-		</component>
 
-		<component type="position">
-			<property name="SitOnTerrain">1</property>
-		</component>
-
-		<component type="mesh">
-			<property name="FileName">wheeled-car</property>
-		</component>
-
-		<component type="moveable" />
-
-		<component type="minimap-visible" />
-
-		<component type="selectable">
-			<property name="SelectionRadius">0.75</property>
-		</component>
-
-		<component type="ownable" />
-		<component type="orderable" />
-		<component type="pathing" />
-
-		<component type="weapon">
-			<property name="FireEntity">missile</property>
-			<property name="FireDirection">0 1 0</property>
-		</component>
-
-		<component type="audio">
-			<sound name="Fire" wavebank="Weapons.xwb" soundbank="Weapons.xsb" cue="missile-fire" />
-		</component>
-	</components>
-</entity>
+Entity = {
+  components = {
+    Ownable = {},
+    Orderable = {},
+    Pathing = {},
+    MinimapVisible = {},
+    Moveable = {
+      TurnRadius = 0.15
+    },
+    Buildable = {
+      BuildGroup = "vehicles",
+    },
+    Position = {
+      SitOnTerrain = true
+    },
+    Mesh = {
+      FileName = "wheeled-car",
+    },
+    Selectable = {
+      SelectionRadius = 0.75
+    },
+    Damageable = {
+      Explosion = "missile-expl"
+    },
+    Weapon = {
+      FireEntity = "missile",
+      FireDirection = "0 1 0"
+    }
+  },
+  health = 100
+}

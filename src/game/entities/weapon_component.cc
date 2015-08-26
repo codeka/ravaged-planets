@@ -18,7 +18,7 @@
 namespace ent {
 
 // register the component with the entity_factory
-ENT_COMPONENT_REGISTER("weapon", weapon_component);
+ENT_COMPONENT_REGISTER("Weapon", weapon_component);
 
 weapon_component::weapon_component() :
     _time_to_fire(0.0f) {
@@ -27,19 +27,18 @@ weapon_component::weapon_component() :
 weapon_component::~weapon_component() {
 }
 
-void weapon_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "FireEntity") {
-      _fire_entity_name = kvp.second;
-    } else if (kvp.first == "FireDirection") {
-      std::vector<float> parts = fw::split<float>(kvp.second);
+void weapon_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "FireEntity") {
+      _fire_entity_name = luabind::object_cast<std::string>(*it);
+    } else if (it.key() == "FireDirection") {
+      // TODO: factor this out and use an actual array or something
+      std::vector<float> parts = fw::split<float>(luabind::object_cast<std::string>(*it));
       if (parts.size() == 3) {
         _fire_direction = fw::vector(parts[0], parts[1], parts[2]);
       }
     }
   }
-
-  return entity_component::apply_template(comp_template);
 }
 
 void weapon_component::update(float dt) {

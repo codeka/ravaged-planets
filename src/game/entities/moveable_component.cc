@@ -15,7 +15,7 @@
 namespace ent {
 
 // register the moveable component with the entity_factory
-ENT_COMPONENT_REGISTER("moveable", moveable_component);
+ENT_COMPONENT_REGISTER("Moveable", moveable_component);
 
 moveable_component::moveable_component() :
     _pos(0), _speed(3.0f), _turn_speed(1.0f), _avoid_collisions(true) {
@@ -24,18 +24,16 @@ moveable_component::moveable_component() :
 moveable_component::~moveable_component() {
 }
 
-void moveable_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "Speed") {
-      _speed = boost::lexical_cast<float>(kvp.second);
-    } else if (kvp.first == "TurnRadius") {
-      _turn_speed = 1.0f / boost::lexical_cast<float>(kvp.second);
-    } else if (kvp.first == "AvoidCollisions") {
-      _avoid_collisions = boost::lexical_cast<bool>(kvp.second);
+void moveable_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "Speed") {
+      _speed = luabind::object_cast<float>(*it);
+    } else if (it.key() == "TurnRadius") {
+      _turn_speed = 1.0f / luabind::object_cast<float>(*it);
+    } else if (it.key() == "AvoidCollisions") {
+      _avoid_collisions = luabind::object_cast<bool>(*it);
     }
   }
-
-  entity_component::apply_template(comp_template);
 }
 
 void moveable_component::initialize() {

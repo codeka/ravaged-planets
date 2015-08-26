@@ -1,6 +1,10 @@
 #pragma once
 
 #include <memory>
+
+#include <framework/lua.h>
+#include <luabind/object.hpp>
+
 #include <game/entities/entity_attribute.h>
 #include <game/entities/entity_debug.h>
 
@@ -16,7 +20,6 @@ namespace ent {
 class entity_debug_view;
 class entity;
 class entity_manager;
-class entity_component_template;
 
 /**
  * This is the identifier for an entity, it's actually made up of two components, the
@@ -53,8 +56,8 @@ public:
   virtual void render(fw::sg::scenegraph &, fw::matrix const &) {
   }
 
-  /** Loads this component with data from the given component template. */
-  virtual void apply_template(std::shared_ptr<entity_component_template>) {
+  /** Loads this component with data from the given component template (Lua object). */
+  virtual void apply_template(luabind::object const &tmpl) {
   }
 
   /**
@@ -76,12 +79,6 @@ public:
   virtual bool allow_get_by_component() {
     return false;
   }
-
-  /**
-   * creates an instance of the entity_component_template we'll want to use (some components can have
-   * special requirements for their templates that's not satified by the default implementation).
-   */
-  virtual entity_component_template *create_template();
 };
 
 /**

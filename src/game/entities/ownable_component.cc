@@ -7,7 +7,7 @@
 
 namespace ent {
 
-ENT_COMPONENT_REGISTER("ownable", ownable_component);
+ENT_COMPONENT_REGISTER("Ownable", ownable_component);
 
 ownable_component::ownable_component() :
     _owner(nullptr) {

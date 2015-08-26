@@ -16,7 +16,7 @@ using namespace std::placeholders;
 namespace ent {
 
 // register the position component with the entity_factory
-ENT_COMPONENT_REGISTER("position", position_component);
+ENT_COMPONENT_REGISTER("Position", position_component);
 
 position_component::position_component() :
     _pos(0, 0, 0), _dir(0, 0, 1), _up(0, 1, 0), _pos_updated(true), _sit_on_terrain(false),
@@ -26,16 +26,14 @@ position_component::position_component() :
 position_component::~position_component() {
 }
 
-void position_component::apply_template(std::shared_ptr<entity_component_template> comp_template) {
-  BOOST_FOREACH(auto &kvp, comp_template->properties) {
-    if (kvp.first == "SitOnTerrain") {
-      set_sit_on_terrain(boost::lexical_cast<bool>(kvp.second));
-    } else if (kvp.first == "OrientToTerrain") {
-      this->set_orient_to_terrain(boost::lexical_cast<bool>(kvp.second));
+void position_component::apply_template(luabind::object const &tmpl) {
+  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+    if (it.key() == "SitOnTerrain") {
+      set_sit_on_terrain(luabind::object_cast<bool>(*it));
+    } else if (it.key() == "OrientToTerrain") {
+      this->set_orient_to_terrain(luabind::object_cast<bool>(*it));
     }
   }
-
-  entity_component::apply_template(comp_template);
 }
 
 void position_component::set_sit_on_terrain(bool sit_on_terrain) {
