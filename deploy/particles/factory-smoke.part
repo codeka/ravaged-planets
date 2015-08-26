@@ -1,0 +1,27 @@
+<particle version="1">
+  <!-- When a factory is building, it emits a plume of smoke so you know what's going on. -->
+  <emitter start="0.0">
+    <position offset="0 0 0"
+              radius="0.3"
+              falloff="linear" />
+    <billboard texture="smoke.png"
+               mode="additive" />
+    <emit policy="distance" value="0.1" />
+    <age min="3.5" max="4.0" />
+
+    <life>
+      <state age="0">
+        <size min="0.5" max="0.8" />
+        <colour row="2" alpha="0.3" />
+        <speed min="0" max="0.2" />
+		<gravity min="-10.2" max="-10.8" />
+      </state>
+
+      <state age="1">
+        <size min="1.0" max="1.4" />
+        <colour row="2" alpha="0" />
+		<gravity min="-10.2" max="-10.8" />
+      </state>
+    </life>
+  </emitter>
+</particle>
