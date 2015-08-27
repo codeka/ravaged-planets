@@ -3,8 +3,11 @@ Entity = {
   components = {
     Position = {},
     ParticleEffect = {
-      EffectName = "explosion-01",
-      DestroyEntityOnComplete = true
+      default = {
+        EffectName = "explosion-01",
+        DestroyEntityOnComplete = true,
+        Started = true
+      }
     }
   }
 }

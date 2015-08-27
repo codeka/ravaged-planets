@@ -34,6 +34,7 @@ public:
     rotation_kind::value rotation_kind;
     float alpha;
     float speed;
+    fw::vector direction;
     float gravity;
     int colour_row;
 

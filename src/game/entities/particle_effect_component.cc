@@ -14,21 +14,30 @@ namespace ent {
 // Register the our component in this file with the entity_factory.
 ENT_COMPONENT_REGISTER("ParticleEffect", particle_effect_component);
 
-particle_effect_component::particle_effect_component() :
-    _destroy_entity_on_complete(false), _our_position(nullptr) {
+particle_effect_component::particle_effect_component() : _our_position(nullptr) {
 }
 
 particle_effect_component::~particle_effect_component() {
-  _effect->destroy();
+  BOOST_FOREACH(auto kvp, _effects) {
+    effect_info const &effect_info = kvp.second;
+    if (effect_info.effect) {
+      effect_info.effect->destroy();
+    }
+  }
 }
 
 void particle_effect_component::apply_template(luabind::object const &tmpl) {
   for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "EffectName") {
-      _effect_name = luabind::object_cast<std::string>(*it);
-    } else if (it.key() == "DestroyEntityOnComplete") {
-      _destroy_entity_on_complete = luabind::object_cast<bool>(*it);
+    std::string name = luabind::object_cast<std::string>(it.key());
+    effect_info effect;
+    effect.name = luabind::object_cast<std::string>((*it)["EffectName"]);
+    if ((*it)["DestroyEntityOnComplete"]) {
+      effect.destroy_entity_on_complete = true;
     }
+    if ((*it)["Started"]) {
+      effect.started = true;
+    }
+    _effects[name] = effect;
   }
 }
 
@@ -37,26 +46,30 @@ void particle_effect_component::initialize() {
 }
 
 void particle_effect_component::update(float) {
-  if (!_effect) {
-    // It might not be created yet (since it only gets created on the render thread when we render).
-    return;
-  }
+  BOOST_FOREACH(auto kvp, _effects) {
+    effect_info const &effect_info = kvp.second;
+    if (!effect_info.effect) {
+      continue;
+    }
 
-  if (_our_position != nullptr) {
-    _effect->set_position(_our_position->get_position());
-  }
+    if (_our_position != nullptr) {
+      effect_info.effect->set_position(_our_position->get_position());
+    }
 
-  if (_destroy_entity_on_complete && _effect->is_dead()) {
-    std::shared_ptr<entity>(_entity)->get_manager()->destroy(_entity);
+    if (effect_info.destroy_entity_on_complete && effect_info.effect->is_dead()) {
+      std::shared_ptr<entity>(_entity)->get_manager()->destroy(_entity);
+    }
   }
 }
 
 void particle_effect_component::render(fw::sg::scenegraph &, fw::matrix const &) {
-  if (!_effect) {
-    fw::particle_manager *mgr = fw::framework::get_instance()->get_particle_mgr();
-    _effect = mgr->create_effect(_effect_name);
+  fw::particle_manager *mgr = fw::framework::get_instance()->get_particle_mgr();
+  BOOST_FOREACH(auto &kvp, _effects) {
+    effect_info &effect_info = kvp.second;
+    if (effect_info.started && !effect_info.effect) {
+      effect_info.effect = mgr->create_effect(effect_info.name);
+    }
   }
 }
-
 
 }

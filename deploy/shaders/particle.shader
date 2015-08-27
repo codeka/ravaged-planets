@@ -25,13 +25,13 @@
 
     out vec4 out_colour;
 
-    // this is the pixel shader used by the "additive" particle effect
+    // this is the pixel shader used by the "normal" particle effect
     void main() {
       // get the colour from the texture
       vec4 c = texture(particle_texture, uv);
 
       // and blend the texture colour with the vertex colour
-      c.rgb = (c.rgb * colour.a) + (colour.rgb * (1 - colour.a));
+      //c.rgb = (c.rgb * colour.a) + (colour.rgb * (1 - colour.a));
       c.a = c.a * colour.a;
 
       out_colour = c;

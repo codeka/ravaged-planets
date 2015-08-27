@@ -9,7 +9,7 @@ namespace fw {
 //-------------------------------------------------------------------------
 particle::life_state::life_state() :
     age(0), size(0), colour_row(0), alpha(0), rotation_speed(0), rotation_kind(rotation_kind::random), speed(0),
-    gravity(0) {
+    direction(fw::vector(0, 0, 0)), gravity(0) {
 }
 
 particle::life_state::life_state(particle::life_state const &copy) {
@@ -20,6 +20,7 @@ particle::life_state::life_state(particle::life_state const &copy) {
   rotation_speed = copy.rotation_speed;
   rotation_kind = copy.rotation_kind;
   speed = copy.speed;
+  direction = copy.direction;
   gravity = copy.gravity;
 }
 
@@ -58,6 +59,10 @@ void particle::initialize() {
     state.rotation_kind = (*it).rotation_kind;
     state.speed = (*it).speed.get_value();
     state.gravity = (*it).gravity.get_value();
+    state.direction = (*it).direction.get_value();
+    if (state.direction.length_squared() > 0.001f) {
+      state.direction.normalize();
+    }
     _states.push_back(state);
   }
 
@@ -105,7 +110,13 @@ bool particle::update(float dt) {
 
   // adjust the particle's direction based on it's gravity factor
   fw::vector gravity = fw::vector(0, -1, 0) * (fw::lerp(prev->gravity, next->gravity, t));
-  direction += gravity * dt;
+  if (prev->direction.length_squared() < 0.001f || next->direction.length_squared() < 0.001f) {
+    direction += gravity * dt;
+  } else {
+    direction = fw::lerp(prev->direction, next->direction, t);
+    direction += gravity * age;
+    direction.normalize();
+  }
 
   float rotation_speed = 0.0f;
   rotation_kind = prev->rotation_kind;

@@ -121,6 +121,7 @@ public:
     random<float> size;
     random<float> rotation_speed;
     rotation_kind::value rotation_kind;
+    random<fw::vector> direction;
     random<float> speed;
     int colour_row;
     float alpha;

@@ -9,15 +9,24 @@ class particle_effect;
 namespace ent {
 class position_component;
 
-// this is a component that holds a particle_emitter and allows an entity
-// to act as a particle emitter as well (basically, the particle_emitter
-// follows the entity around)
+/**
+ * This component holds a bunch of particle_emitters, and allows an entity to act as a particle emitter as well
+ * (basically, the particle_emitter follows the entity around).
+ */
 class particle_effect_component: public entity_component {
 private:
-  std::string _effect_name;
-  std::shared_ptr<fw::particle_effect> _effect;
+  struct effect_info {
+    std::string name;
+    std::shared_ptr<fw::particle_effect> effect;
+    bool destroy_entity_on_complete;
+    bool started;
+
+    effect_info() : destroy_entity_on_complete(false), started(false) {
+    }
+  };
+
+  std::map<std::string, effect_info> _effects;
   position_component *_our_position;
-  bool _destroy_entity_on_complete;
 
 public:
   static const int identifier = 700;

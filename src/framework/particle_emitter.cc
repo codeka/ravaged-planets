@@ -1,8 +1,9 @@
-#include <framework/particle_manager.h>
-#include <framework/particle_emitter.h>
+#include <framework/logging.h>
+#include <framework/misc.h>
 #include <framework/particle.h>
 #include <framework/particle_config.h>
-#include <framework/misc.h>
+#include <framework/particle_emitter.h>
+#include <framework/particle_manager.h>
 
 namespace fw {
 
@@ -34,8 +35,13 @@ bool particle_emitter::update(float dt) {
     return true;
 
   // if, on the other hand, we're supposed to be finished, mark ourselves dead
-  if (_config->end_time > 0 && _age > _config->end_time)
+  if (_config->emit_policy_name == "none") {
+//    fw::debug << "_dead=" << _dead << ", _age=" << _age << ", _config->end_time=" << _config->end_time << std::endl;
+  }
+
+  if (!_dead && _config->end_time > 0 && _age > _config->end_time) {
     destroy();
+  }
 
   // check whether we need to emit a new particle
   if (!_dead) {

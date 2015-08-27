@@ -13,7 +13,10 @@ Entity = {
       Explosion = "missile-expl"
     },
     ParticleEffect = {
-      EffectName = "missile"
+      default = {
+        EffectName = "missile",
+        Started = true
+      }
     }
   },
   health = 1

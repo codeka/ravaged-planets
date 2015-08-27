@@ -107,6 +107,7 @@ particle_emitter_config::life_state::life_state() {
   rotation_speed.min = rotation_speed.max = 0.0f;
   rotation_kind = rotation_kind::random;
   speed.min = speed.max = 0.0f;
+  direction.min = direction.max = fw::vector(0, 0, 0);
   alpha = 1.0f;
   colour_row = 0;
   gravity.min = gravity.max = 0.0f;
@@ -121,6 +122,8 @@ particle_emitter_config::life_state::life_state(particle_emitter_config::life_st
   rotation_kind = copy.rotation_kind;
   speed.min = copy.speed.min;
   speed.max = copy.speed.max;
+  direction.min = copy.direction.min;
+  direction.max = copy.direction.max;
   colour_row = copy.colour_row;
   alpha = copy.alpha;
   gravity.min = copy.gravity.min;
@@ -290,6 +293,8 @@ void particle_emitter_config::parse_life_state(life_state &state, xml_element co
       parse_random_float(state.gravity, child);
     } else if (child.get_value() == "speed") {
       parse_random_float(state.speed, child);
+    } else if (child.get_value() == "direction") {
+      parse_random_vector(state.direction, child);
     } else {
       BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("unknown child element of <state>"));
     }
@@ -331,15 +336,13 @@ void particle_emitter_config::parse_random_vector(random<fw::vector> &value, xml
   if (min_components.size() == 3)
     value.min = fw::vector(min_components[0], min_components[1], min_components[2]);
   else {
-    BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("values require 3 or 4 floating point values"));
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("values require 3 floating point values"));
   }
 
   if (max_components.size() == 3)
     value.max = fw::vector(max_components[0], max_components[1], max_components[2]);
   else {
-    BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("values require 3 or 4 floating point values"));
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("values require 3 floating point values"));
   }
 }
 

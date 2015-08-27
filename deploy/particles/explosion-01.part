@@ -1,7 +1,7 @@
 <!-- This effect is for explosions that you get when you blow up smaller tanks/vehicles -->
 <particle version="1">
 	<!-- First, we have the main part of the explosion, the fire which fades into smoke -->
-	<emitter initial="15">
+	<emitter initial="15" start="0.0" end="0.5">
 		<position offset="0 0 0"
 				  radius="0.75"
 				  falloff="linear" />
@@ -40,7 +40,7 @@
 	</emitter>
 
 	<!-- This is bright flash that you get very briefly at the beginning of the explosion. -->
-	<emitter initial="5">
+	<emitter initial="5" start="0.0" end="0.5">
 		<position offset="0 0 0"
 				  radius="0.5"
 				  falloff="linear" />
@@ -72,7 +72,7 @@
 	</emitter>
 
 	<!-- This emitter is a bunch of sparks that radiate outwards. -->
-	<emitter initial="25">
+	<emitter initial="25" start="0.0" end="0.5">
 		<position offset="0 0 0"
 				  radius="0.1"
 				  falloff="linear" />
@@ -101,7 +101,7 @@
 	</emitter>
 
 	<!-- This emitter represents the "smoke trails" that radiate outwards. -->
-	<emitter initial="10">
+	<emitter initial="10" start="0.0" end="0.5">
 		<position offset="0 0 0"
 				  radius="0.1"
 				  falloff="linear" />
@@ -133,7 +133,7 @@
 	</emitter>
 
 	<!-- This emitter represents the debris that radiates and spins outwards. -->
-	<emitter initial="10">
+	<emitter initial="10" start="0.0" end="0.5">
 		<position offset="0 0 0"
 				  radius="0.1"
 				  falloff="linear" />
@@ -172,7 +172,7 @@
 	</emitter>
 
 	<!-- This emitter represents the debris that radiates and spins outwards. -->
-	<emitter initial="5">
+	<emitter initial="5" start="0.0" end="0.5">
 		<position offset="0 0 0"
 				  radius="1.0"
 				  falloff="linear" />

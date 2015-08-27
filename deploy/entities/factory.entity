@@ -7,6 +7,11 @@ Entity = {
     Position = {
       SitOnTerrain = true
     },
+    ParticleEffect = {
+      building = {
+        EffectName = "factory-smoke"
+      }
+    },
     Mesh = {
       FileName = "factory"
     },
