@@ -40,6 +40,9 @@ public:
   virtual void update(float dt);
   virtual void render(fw::sg::scenegraph &, fw::matrix const &);
 
+  void start_effect(std::string const &name);
+  void stop_effect(std::string const &name);
+
   virtual int get_identifier() {
     return identifier;
   }

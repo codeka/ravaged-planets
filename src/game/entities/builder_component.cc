@@ -6,6 +6,7 @@
 #include <game/entities/selectable_component.h>
 #include <game/entities/position_component.h>
 #include <game/entities/ownable_component.h>
+#include <game/entities/particle_effect_component.h>
 #include <game/screens/hud/build_window.h>
 //#include <game/screens/hud/chat_window.h>
 #include <game/simulation/simulation_thread.h>
@@ -28,9 +29,10 @@ builder_component::~builder_component() {
 void builder_component::initialize() {
   std::shared_ptr<entity> entity(_entity);
   selectable_component *sel = entity->get_component<selectable_component>();
-  if (sel != 0) {
+  if (sel != nullptr) {
     sel->sig_selected.connect(std::bind(&builder_component::on_selected, this, _1));
   }
+  _particle_effect_component = entity->get_component<particle_effect_component>();
 }
 
 void builder_component::apply_template(luabind::object const &tmpl) {
@@ -56,7 +58,11 @@ void builder_component::build(std::string name) {
 
   entity_factory factory;
   _curr_building = factory.get_template(name);
-  _time_to_build = 0.01f; // todo: get this from the template
+  _time_to_build = 5.00f; // todo: get this from the template
+
+  if (_particle_effect_component != nullptr) {
+    _particle_effect_component->start_effect("building");
+  }
 }
 
 bool builder_component::is_building() const {
@@ -83,6 +89,9 @@ void builder_component::update(float dt) {
 
       _curr_building = luabind::object();
       _time_to_build = 0.0f;
+      if (_particle_effect_component != nullptr) {
+        _particle_effect_component->stop_effect("building");
+      }
     }
   }
 }

@@ -45,6 +45,25 @@ void particle_effect_component::initialize() {
   _our_position = std::shared_ptr<entity>(_entity)->get_component<position_component>();
 }
 
+void particle_effect_component::start_effect(std::string const &name) {
+  auto it = _effects.find(name);
+  if (it == _effects.end()) {
+    return;
+  }
+  effect_info &effect_info = it->second;
+  effect_info.started = true;
+}
+
+void particle_effect_component::stop_effect(std::string const &name) {
+  auto it = _effects.find(name);
+  if (it == _effects.end()) {
+    return;
+  }
+  effect_info &effect_info = it->second;
+  effect_info.started = false;
+  effect_info.effect = std::shared_ptr<fw::particle_effect>();
+}
+
 void particle_effect_component::update(float) {
   BOOST_FOREACH(auto kvp, _effects) {
     effect_info const &effect_info = kvp.second;
