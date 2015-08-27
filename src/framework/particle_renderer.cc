@@ -21,10 +21,9 @@
 // ordering issues)
 struct particle_sorter {
   fw::vector _cam_pos;
-  float _epsilon;
 
   particle_sorter(fw::vector camera_pos) :
-      _cam_pos(camera_pos), _epsilon(0.00001f) {
+      _cam_pos(camera_pos) {
   }
 
   bool operator()(fw::particle const *lhs, fw::particle const *rhs) {
@@ -38,9 +37,9 @@ struct particle_sorter {
       return (lhs->config->billboard.mode > rhs->config->billboard.mode);
     }
 
-    float lhs_len = (lhs->pos - _cam_pos).length_squared();
-    float rhs_len = (rhs->pos - _cam_pos).length_squared();
-    return std::abs(lhs_len - rhs_len) > _epsilon && lhs_len > rhs_len;
+    float lhs_len = (lhs->pos - _cam_pos).length();
+    float rhs_len = (rhs->pos - _cam_pos).length();
+    return lhs_len > rhs_len;
   }
 };
 
@@ -253,6 +252,11 @@ void particle_renderer::render_particles(render_state &rs, float offset_x, float
 void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::particle_list &particles) {
   if (particles.size() == 0)
     return;
+
+  // make sure the particle's pos is update
+  BOOST_FOREACH(particle *p, particles) {
+    p->pos = p->new_pos;
+  }
 
   // sort the particles by texture, then by z-order
   sort_particles(particles);

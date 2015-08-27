@@ -49,7 +49,11 @@ private:
 public:
   std::shared_ptr<particle_emitter_config> config;
   fw::vector direction;
+  // We cannot update the "real" pos in the update thread, because the render thread needs to query it to sort, and if
+  // we update it in the update thread, we risk making the sort non-strict weak ordering. That's bad. So the update
+  // thread will update the position in new_pos, and the render thread will copy it to pos.
   fw::vector pos;
+  fw::vector new_pos;
   int colour1;
   int colour2;
   float colour_factor;

@@ -67,7 +67,7 @@ void particle::initialize() {
   }
 
   direction = fw::vector(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f).normalize();
-  pos = config->position.get_point();
+  new_pos = pos = config->position.get_point();
   age = 0.0f;
 }
 
@@ -132,8 +132,8 @@ bool particle::update(float dt) {
   alpha = fw::lerp(prev->alpha, next->alpha, t);
   size = fw::lerp(prev->size, next->size, t);
 
-  pos += (direction * speed) * dt;
-
+  // Don't update pos in the update thread, set new_pos and let the render thread update pos.
+  new_pos = pos + (direction * speed) * dt;
   return true;
 }
 
