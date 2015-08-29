@@ -1,4 +1,3 @@
-#include <framework/logging.h>
 #include <framework/misc.h>
 #include <framework/particle.h>
 #include <framework/particle_config.h>
@@ -33,11 +32,6 @@ bool particle_emitter::update(float dt) {
   // if we're not supposed to have started yet, don't do anything
   if (_config->start_time > _age)
     return true;
-
-  // if, on the other hand, we're supposed to be finished, mark ourselves dead
-  if (_config->emit_policy_name == "none") {
-//    fw::debug << "_dead=" << _dead << ", _age=" << _age << ", _config->end_time=" << _config->end_time << std::endl;
-  }
 
   if (!_dead && _config->end_time > 0 && _age > _config->end_time) {
     destroy();
@@ -81,6 +75,7 @@ particle *particle_emitter::emit(fw::vector pos, float time_offset /*= 0.0f*/) {
   particle *p = new particle(_config);
   p->initialize();
   p->pos += pos;
+  p->new_pos = p->pos;
   p->age = time_offset;
 
   _particles.push_back(p);
@@ -139,7 +134,7 @@ distance_emit_policy::~distance_emit_policy() {
 }
 
 void distance_emit_policy::check_emit(float) {
-  if (_last_particle == 0) {
+  if (_last_particle == nullptr) {
     _last_particle = _emitter->emit(_emitter->get_position());
     return;
   }
@@ -157,15 +152,13 @@ void distance_emit_policy::check_emit(float) {
   float this_distance = calculate_distance(curr_pos, next_pos, wrap_x, wrap_z);
   float last_distance = this_distance + 1.0f;
   while (last_distance >= this_distance) {
-    _emitter->emit(curr_pos, time_offset);
+    _last_particle = _emitter->emit(curr_pos, time_offset);
 
     curr_pos += dir * _max_distance;
 
     last_distance = this_distance;
     this_distance = (curr_pos - next_pos).length();
   }
-
-  _last_particle = _emitter->emit(next_pos, time_offset);
 }
 
 //-------------------------------------------------------------------------
