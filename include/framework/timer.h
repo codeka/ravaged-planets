@@ -25,6 +25,7 @@ public:
   void start();
   void stop();
   void update();
+  void render();
 
   inline bool is_stopped() const {
     return _stopped;

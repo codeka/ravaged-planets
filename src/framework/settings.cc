@@ -76,6 +76,7 @@ void settings::initialize(po::options_description const &additional_options, int
       ("debug-logfile", po::value<std::string>()->default_value(""), "Name of the file to do debug logging to. If not specified, does not log.")
       ("debug-console", po::value<bool>()->default_value(true), "If set, we'll log to the console as well as the log file.")
       ("debug-libcurl", po::value<bool>()->default_value(false), "If true, debug HTTP requests and responses.")
+      ("debug-view", po::value<bool>()->default_value(false), "If true, show some debug info in the bottom-right of the screen.")
       ("dbghelp-path", po::value<std::string>()->default_value(""), "Windows-only, path to dbghelp.dll file.")
     ;
 

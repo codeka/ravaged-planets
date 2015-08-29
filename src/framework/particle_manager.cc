@@ -64,6 +64,11 @@ void particle_manager::render(sg::scenegraph &scenegraph) {
   std::remove_if(_particles.begin(), _particles.end(), [](particle *p) { return p->age >= 1.0f; });
 }
 
+long particle_manager::get_num_active_particles() const {
+  // some may have died but not been removed yet, that's OK as this is just to give us an idea.
+  return _particles.size();
+}
+
 std::shared_ptr<particle_effect> particle_manager::create_effect(std::string const &name) {
   FW_ENSURE_RENDER_THREAD();
 

@@ -8,6 +8,7 @@ namespace fw {
 class graphics;
 class framework;
 class font_manager;
+class debug_view;
 class model_manager;
 class timer;
 class camera;
@@ -96,6 +97,7 @@ private:
   cursor *_cursor;
   lang *_lang;
   font_manager *_font_manager;
+  debug_view *_debug_view;
   volatile bool _running;
 
   // game updates happen (synchronized) on this thread in constant timestep
