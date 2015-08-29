@@ -61,7 +61,9 @@ void particle_manager::render(sg::scenegraph &scenegraph) {
   _renderer->render(scenegraph, _particles);
 
   // remove any dead particles
-  std::remove_if(_particles.begin(), _particles.end(), [](particle *p) { return p->age >= 1.0f; });
+  _particles.erase(std::remove_if(_particles.begin(), _particles.end(), [](particle const *p) {
+    return p->age >= 1.0f;
+  }), _particles.end());
 }
 
 long particle_manager::get_num_active_particles() const {
