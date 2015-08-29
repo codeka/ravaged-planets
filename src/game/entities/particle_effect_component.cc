@@ -61,6 +61,9 @@ void particle_effect_component::stop_effect(std::string const &name) {
   }
   effect_info &effect_info = it->second;
   effect_info.started = false;
+  if (effect_info.effect) {
+    effect_info.effect->destroy();
+  }
   effect_info.effect = std::shared_ptr<fw::particle_effect>();
 }
 
