@@ -317,6 +317,11 @@ void shader_parameters::apply(shader_program *prog) const {
       texture_unit ++;
     }
   }
+  while (texture_unit < 9) {
+    FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
+    texture_unit++;
+  }
 
   for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
     shader_variable const &var = prog->_shader_variables[it->first];

@@ -250,8 +250,8 @@ void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str
   data->shader_params->set_matrix("pos_transform", pos_transform);
   data->shader_params->set_matrix("uv_transform", fw::identity());
   data->shader_params->set_colour("colour", colour);
+  data->shader_params->set_texture("texsampler", _texture);
 
-  _texture->bind();
   data->vb->begin();
   data->ib->begin();
   data->shader->begin(data->shader_params);
