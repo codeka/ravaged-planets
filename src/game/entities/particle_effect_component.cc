@@ -37,6 +37,10 @@ void particle_effect_component::apply_template(luabind::object const &tmpl) {
     if ((*it)["Started"]) {
       effect.started = true;
     }
+    if ((*it)["Offset"]) {
+      std::string offset = luabind::object_cast<std::string>((*it)["Offset"]);
+      effect.offset = fw::vector(0, 2, 0); // TODO
+    }
     _effects[name] = effect;
   }
 }
@@ -75,7 +79,7 @@ void particle_effect_component::update(float) {
     }
 
     if (_our_position != nullptr) {
-      effect_info.effect->set_position(_our_position->get_position());
+      effect_info.effect->set_position(_our_position->get_position() + effect_info.offset);
     }
 
     if (effect_info.destroy_entity_on_complete && effect_info.effect->is_dead()) {

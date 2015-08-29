@@ -2,24 +2,29 @@
   <!-- When a factory is building, it emits a plume of smoke so you know what's going on. -->
   <emitter start="0.0">
     <position offset="0 0 0"
-              radius="0.3"
+              radius="0.1"
               falloff="linear" />
     <billboard texture="smoke.png"
                mode="normal" />
-    <emit policy="distance" value="0.1" />
-    <age min="2.5" max="3.0" />
+    <emit policy="distance" value="0.4" />
+    <age min="1.5" max="2.0" />
 
     <life>
       <state age="0">
-        <size min="0.5" max="0.8" />
-        <colour row="2" alpha="0.3" />
-        <speed min="3.0" max="3.5" />
+        <size min="0.2" max="0.4" />
+        <colour row="2" alpha="0.0" />
+        <speed min="2.0" max="2.5" />
         <direction min="-0.1 1 -0.1" max="0.1 1 0.1" />
         <gravity min="-3.0" max="-4.0" />
       </state>
 
+      <state age="0.2">
+        <size min="0.3" max="0.5" />
+        <colour row="2" alpha="0.3" />
+      </state>
+
       <state age="1">
-        <size min="1.0" max="1.4" />
+        <size min="1.8" max="2.2" />
         <colour row="2" alpha="0" />
       </state>
     </life>
