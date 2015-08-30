@@ -16,6 +16,7 @@
 #include <framework/settings.h>
 #include <framework/graphics.h>
 #include <framework/cursor.h>
+#include <framework/debug_view.h>
 #include <framework/font.h>
 #include <framework/particle_manager.h>
 #include <framework/model_manager.h>
@@ -46,7 +47,7 @@ framework::framework(base_app* app) :
     _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(nullptr),
     _graphics(nullptr), _timer(nullptr), _audio(nullptr), _input(nullptr), _lang(nullptr),
     _gui(nullptr), _font_manager(nullptr), _model_manager(nullptr), _cursor(nullptr),
-    _running(true) {
+    _debug_view(nullptr), _running(true) {
   only_instance = this;
 }
 
@@ -69,6 +70,8 @@ framework::~framework() {
     delete _cursor;
   if (_model_manager != nullptr)
     delete _model_manager;
+  if (_debug_view != nullptr)
+    delete _debug_view;
 
   /*
    if (_audio != 0) delete _audio;
@@ -126,6 +129,11 @@ bool framework::initialize(char const *title) {
     _gui->initialize(_graphics);
   }
 
+  if (stg.is_set("debug-view")) {
+    _debug_view = new debug_view();
+    _debug_view->initialize();
+  }
+
   net::initialize();
   http::initialize();
 
@@ -171,6 +179,9 @@ void framework::destroy() {
   _app->destroy();
 
   debug << "framework is shutting down..." << std::endl;
+  if (_debug_view != nullptr) {
+    _debug_view->destroy();
+  }
 
   if (_graphics != nullptr) {
     _graphics->destroy();
@@ -283,6 +294,9 @@ void framework::update(float dt) {
     _app->update(dt);
     _particle_mgr->update(dt);
   }
+  if (_debug_view != nullptr) {
+    _debug_view->update(dt);
+  }
 
   if (_camera != nullptr)
     _camera->update(dt);
@@ -294,6 +308,8 @@ void framework::render() {
   if (_graphics == nullptr) {
     return;
   }
+
+  _timer->render();
 
   // populate the scene graph by calling into the application itself
   sg::scenegraph scenegraph;

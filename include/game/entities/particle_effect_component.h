@@ -1,5 +1,6 @@
 #pragma once
 
+#include <framework/vector.h>
 #include <game/entities/entity.h>
 
 namespace fw {
@@ -18,6 +19,7 @@ private:
   struct effect_info {
     std::string name;
     std::shared_ptr<fw::particle_effect> effect;
+    fw::vector offset;
     bool destroy_entity_on_complete;
     bool started;
 

@@ -1,4 +1,5 @@
 
+#include <framework/logging.h>
 #include <framework/timer.h>
 
 namespace fw {
@@ -39,14 +40,18 @@ void timer::update() {
   _total_time_seconds = (float) microseconds / 1000000.0f;
 
   _curr_time_point = now;
+}
 
+/** Called on the render thread whenever we render a frame. We use this to update FPS. */
+void timer::render() {
   // update the fps counter every now and then
   _num_frames++;
   auto micros_since_fps_update =
-      std::chrono::duration_cast<std::chrono::microseconds>(_curr_time_point - _last_fps_update).count();
+    std::chrono::duration_cast<std::chrono::microseconds>(_curr_time_point - _last_fps_update).count();
   if (micros_since_fps_update >= _fps_update_interval_microseconds) {
-    float time = (float) micros_since_fps_update / 1000000.0f;
-    _fps = (float) _num_frames / time;
+    double time = static_cast<double>(micros_since_fps_update) / 1000000.0;
+    fw::debug << "_num_frames = " << _num_frames << " time = " << time << std::endl;
+    _fps = static_cast<float>(static_cast<double>(_num_frames) / time);
 
     _last_fps_update = _curr_time_point;
     _num_frames = 0;

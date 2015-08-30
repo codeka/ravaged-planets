@@ -60,6 +60,9 @@ public:
     return _wrap_z;
   }
 
+  /** Gets a count of the number of active (alive) particles, mostly for debugging. */
+  long get_num_active_particles() const;
+
   // this is called by the particle_emitter to add a new particle
   void add_particle(particle *p);
 };
