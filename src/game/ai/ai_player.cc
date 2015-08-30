@@ -291,7 +291,13 @@ void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
     orderable->issue_order(order);
   } else if (order_name == "attack") {
     fw::debug << "issuing \"attack\" order to units." << std::endl;
-    // TODO
+    std::weak_ptr<ent::entity> target_entity_wp = luabind::object_cast<unit_wrapper *>(orders["target"])->get_entity();
+    std::shared_ptr<ent::entity> target_entity = target_entity_wp.lock();
+    if (target_entity) {
+      std::shared_ptr<attack_order> order = create_order<attack_order>();
+      order->target = target_entity->get_id();
+      orderable->issue_order(order);
+    }
   } else {
     fw::debug << "unknown order!" << std::endl;
   }
