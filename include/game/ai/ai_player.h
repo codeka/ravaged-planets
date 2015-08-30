@@ -33,7 +33,12 @@ private:
   void fire_event(std::string const &event_name,
      std::map<std::string, std::string> const &parameters = std::map<std::string, std::string>());
 
-  luabind::object create_wrapper(std::string const &entity_name);
+  /** Helper function that returns the unit_wrapper (as a luabind::object) for the given entity. */
+  luabind::object get_unit_wrapper(std::weak_ptr<ent::entity> wp);
+
+  /** Creates a unit_wrapper for entities of the given type. */
+  luabind::object create_unit_wrapper(std::string const &entity_name);
+
   void issue_order(unit_wrapper *unit, luabind::object orders);
 
   void l_set_ready();

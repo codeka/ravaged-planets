@@ -82,6 +82,7 @@ void ai_player::l_say(std::string const &msg) {
 }
 
 void ai_player::l_local_say(std::string const &msg) {
+  fw::debug << "SAY : " << msg << std::endl;
   // just "say" whatever they told us to say... (but just locally, it's for debugging your scripts, basically)
   simulation_thread::get_instance()->sig_chat(_user_name, msg);
 }
@@ -143,6 +144,7 @@ private:
   ai_player *_plyr;
   std::vector<uint8_t> _player_nos;
   std::string _unit_type;
+  std::string _state;
 
 public:
   inline findunits_predicate(ai_player *plyr, luabind::object &params) : _plyr(plyr) {
@@ -161,6 +163,8 @@ public:
         }
       } else if (key == "unit_type") {
         _unit_type = luabind::object_cast<std::string>(*it);
+      } else if (key == "state") {
+        _state = luabind::object_cast<std::string>(*it);
       } else {
         fw::debug << boost::format("WARN: unknown option for findunits: %1%") % key << std::endl;
       }
@@ -192,8 +196,23 @@ public:
 
     // if we're looking for a specific unit_type, check the entity's name
     if (_unit_type != "") {
-      if (_unit_type != ent->get_name())
+      if (_unit_type != ent->get_name()) {
         return false;
+      }
+    }
+
+    // if we're looking for entities in a particular state, then check that
+    if (_state != "") {
+      ent::orderable_component *orderable = ent->get_component<ent::orderable_component>();
+      if (orderable == nullptr) {
+        return false;
+      }
+      std::shared_ptr<game::order> curr_order = orderable->get_current_order();
+      if (curr_order && curr_order->get_state_name() != _state) {
+        return false;
+      } else if (!curr_order && _state != "idle") {
+        return false;
+      }
     }
 
     return true;
@@ -221,22 +240,11 @@ luabind::object ai_player::l_find_units(luabind::object params, lua_State *L) {
 
   int index = 1;
   BOOST_FOREACH(std::weak_ptr<ent::entity> &wp, entities) {
-    std::shared_ptr<ent::entity> ent = wp.lock();
-    if (!ent) {
+    luabind::object wrapper = get_unit_wrapper(wp);
+    if (!wrapper) {
       continue;
     }
-
-    // find the entity's unit_wrapper (if it has one) and return it. if it doesn't
-    // have one yet, create a new one and return that.
-    ent::entity_attribute *attr = ent->get_attribute("ai_wrapper");
-    if (attr == nullptr) {
-      luabind::object wrapper = create_wrapper(ent->get_name());
-      luabind::object_cast<unit_wrapper *>(wrapper)->set_entity(wp);
-      ent->add_attribute(ent::entity_attribute("ai_wrapper", wrapper));
-      attr = ent->get_attribute("ai_wrapper");
-    }
-
-    units[index++] = attr->get_value<luabind::object>();
+    units[index++] = wrapper;
   }
 
   // and return the object
@@ -246,8 +254,7 @@ luabind::object ai_player::l_find_units(luabind::object params, lua_State *L) {
 // issues the given orders to the given units. We assime that units is an array
 // of unit_wrappers and orders is an object containing the parameters for the order.
 void ai_player::l_issue_order(luabind::object units, luabind::object orders) {
-  // if you pass something that's not a table as the parameters,
-  // we can't do anything.
+  // if you pass something that's not a table as the parameters, we can't do anything.
   if (luabind::type(units) != LUA_TTABLE || luabind::type(orders) != LUA_TTABLE) {
     return;
   }
@@ -274,20 +281,40 @@ void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
 
   ent::orderable_component *orderable = entity->get_component<ent::orderable_component>();
 
-  if (luabind::object_cast<std::string>(orders["order"]) == "build") {
-    fw::debug << "issuing \"build\" order to unit... " << orders << std::endl;
+  std::string order_name = luabind::object_cast<std::string>(orders["order"]);
+  if (order_name == "build") {
+    fw::debug << "issuing \"build\" order to unit." << std::endl;
 
     // todo: we should make this "generic"
     std::shared_ptr<build_order> order = create_order<build_order>();
     order->template_name = luabind::object_cast<std::string>(orders["build_unit"]);
     orderable->issue_order(order);
+  } else if (order_name == "attack") {
+    fw::debug << "issuing \"attack\" order to units." << std::endl;
+    // TODO
   } else {
     fw::debug << "unknown order!" << std::endl;
   }
 }
 
-// creates a new unit_wrapper for the given entity type
-luabind::object ai_player::create_wrapper(std::string const &entity_name) {
+luabind::object ai_player::get_unit_wrapper(std::weak_ptr<ent::entity> wp) {
+  std::shared_ptr<ent::entity> ent = wp.lock();
+  if (!ent) {
+    return luabind::object();
+  }
+
+  ent::entity_attribute *attr = ent->get_attribute("ai_wrapper");
+  if (attr == nullptr) {
+    luabind::object wrapper = create_unit_wrapper(ent->get_name());
+    luabind::object_cast<unit_wrapper *>(wrapper)->set_entity(wp);
+    ent->add_attribute(ent::entity_attribute("ai_wrapper", wrapper));
+    attr = ent->get_attribute("ai_wrapper");
+  }
+
+  return attr->get_value<luabind::object>();
+}
+
+luabind::object ai_player::create_unit_wrapper(std::string const &entity_name) {
   unit_creator_map::iterator it = _unit_creator_map.find(entity_name);
   if (it != _unit_creator_map.end() && it->second.is_valid()) {
     return it->second() [luabind::adopt(luabind::result)];

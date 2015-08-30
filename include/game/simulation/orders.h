@@ -103,6 +103,27 @@ public:
   }
 };
 
+/** This is the "attack" order, which you issue to a unit when you want it to attack another unit. */
+class attack_order: public order {
+public:
+  attack_order();
+  ~attack_order();
+
+  virtual void begin(std::weak_ptr<ent::entity> const &ent);
+  virtual bool is_complete();
+
+  virtual void serialize(fw::net::packet_buffer &buffer);
+  virtual void deserialize(fw::net::packet_buffer &buffer);
+
+  // ID of the entity we want to attack.
+  ent::entity_id target;
+
+  static const int identifier = 3;
+  virtual uint16_t get_identifier() const {
+    return identifier;
+  }
+};
+
 // creates the order object from the given identifier
 std::shared_ptr<order> create_order(uint16_t id);
 

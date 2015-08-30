@@ -25,13 +25,21 @@ end
 -- This is called every few seconds to check whether it's time to attack the enemy. we look at how many idle units
 -- we have and if there's enough, we'll launch the attack.
 function check_attack()
-  log.write("attack", "check attack")
+  log.say("attack", "check attack")
 
-  local units = player:find_units({ unit_type="factory" })
+  local units = player:find_units({ unit_type="factory", state="idle" })
   for _,u in ipairs(units) do
-    log.write("attack", "unit: " .. u.kind .. " owner: " .. u.player_no .. " state: " .. u.state)
+    log.say("attack", "unit: " .. u.kind .. " owner: " .. u.player_no .. " state: " .. u.state)
   end
   player:issue_order(units, { order="build", build_unit="simple-tank" })
+
+  units = player:find_units({ unit_type="simple-tank", state="idle" })
+  log.say("attack", "found " .. #units .. " idle tanks")
+  if #units > 3 then
+    log.say("attack", "attacking!")
+    local enemy = player:find_units({ player=1 }) -- todo: find out our enemy player id?
+    player:issue_order(units, { order="attack", target=enemy[1] })
+  end
 
   player:timer(7, check_attack)
 end

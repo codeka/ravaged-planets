@@ -52,6 +52,7 @@ std::shared_ptr<order> create_order(uint16_t id) {
 //-------------------------------------------------------------------------
 ORDER_REGISTER(build_order);
 ORDER_REGISTER(move_order);
+ORDER_REGISTER(attack_order);
 
 //-------------------------------------------------------------------------
 
@@ -160,5 +161,33 @@ void move_order::serialize(fw::net::packet_buffer &buffer) {
 void move_order::deserialize(fw::net::packet_buffer &buffer) {
   buffer >> goal;
 }
+
+//-----------------------------------------------------------------------------
+
+attack_order::attack_order() :
+    order("attacking") {
+}
+
+attack_order::~attack_order() {
+}
+
+void attack_order::begin(std::weak_ptr<ent::entity> const &ent) {
+  order::begin(ent);
+
+}
+
+bool attack_order::is_complete() {
+
+  return true;
+}
+
+void attack_order::serialize(fw::net::packet_buffer &buffer) {
+  buffer << target;
+}
+
+void attack_order::deserialize(fw::net::packet_buffer &buffer) {
+  buffer >> target;
+}
+
 
 }
