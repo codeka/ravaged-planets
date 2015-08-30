@@ -6,11 +6,13 @@
 
 #include <game/simulation/orders.h>
 #include <game/entities/builder_component.h>
+#include <game/entities/entity_manager.h>
 #include <game/entities/orderable_component.h>
 #include <game/entities/moveable_component.h>
 #include <game/entities/position_component.h>
 #include <game/entities/weapon_component.h>
 #include <game/entities/pathing_component.h>
+#include <game/world/world.h>
 
 namespace game {
 
@@ -173,12 +175,36 @@ attack_order::~attack_order() {
 
 void attack_order::begin(std::weak_ptr<ent::entity> const &ent) {
   order::begin(ent);
+  std::shared_ptr<ent::entity> entity = _entity.lock();
+  if (entity) {
+    std::weak_ptr<ent::entity> target_entity_wp = game::world::get_instance()->get_entity_manager()->get_entity(target);
+    std::shared_ptr<ent::entity> target_entity = target_entity_wp.lock();
+    if (target_entity) {
+      attack(entity, target_entity);
+    }
+  }
+}
 
+void attack_order::attack(std::shared_ptr<ent::entity> entity, std::shared_ptr<ent::entity> target_entity) {
+  ent::weapon_component *weapon = entity->get_component<ent::weapon_component>();
+  if (weapon != nullptr) {
+    weapon->set_target(target_entity);
+  }
 }
 
 bool attack_order::is_complete() {
+  // attack is complete when either of us is dead
+  std::shared_ptr<ent::entity> entity = _entity.lock();
+  if (!entity) {
+    return true;
+  }
 
-  return true;
+  std::weak_ptr<ent::entity> target_entity = game::world::get_instance()->get_entity_manager()->get_entity(target);
+  if (!target_entity.lock()) {
+    return true;
+  }
+
+  return false;
 }
 
 void attack_order::serialize(fw::net::packet_buffer &buffer) {

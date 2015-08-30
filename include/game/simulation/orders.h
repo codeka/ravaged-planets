@@ -105,6 +105,8 @@ public:
 
 /** This is the "attack" order, which you issue to a unit when you want it to attack another unit. */
 class attack_order: public order {
+private:
+  void attack(std::shared_ptr<ent::entity> entity, std::shared_ptr<ent::entity> target_entity);
 public:
   attack_order();
   ~attack_order();

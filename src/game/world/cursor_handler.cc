@@ -116,9 +116,11 @@ void cursor_handler::on_key_select(std::string, bool is_down) {
           if (!ent)
             continue;
 
-          ent::weapon_component *weapon = ent->get_component<ent::weapon_component>();
-          if (weapon != nullptr) {
-            weapon->set_target(_entity_under_cursor);
+          ent::orderable_component *orderable = ent->get_component<ent::orderable_component>();
+          if (orderable != nullptr) {
+            std::shared_ptr<attack_order> order(create_order<attack_order>());
+            order->target = entity_under_cursor->get_id();
+            orderable->issue_order(order);
           }
         }
       }
