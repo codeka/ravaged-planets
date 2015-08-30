@@ -1,5 +1,4 @@
 
-#include <framework/logging.h>
 #include <framework/timer.h>
 
 namespace fw {
@@ -50,7 +49,6 @@ void timer::render() {
     std::chrono::duration_cast<std::chrono::microseconds>(_curr_time_point - _last_fps_update).count();
   if (micros_since_fps_update >= _fps_update_interval_microseconds) {
     double time = static_cast<double>(micros_since_fps_update) / 1000000.0;
-    fw::debug << "_num_frames = " << _num_frames << " time = " << time << std::endl;
     _fps = static_cast<float>(static_cast<double>(_num_frames) / time);
 
     _last_fps_update = _curr_time_point;
