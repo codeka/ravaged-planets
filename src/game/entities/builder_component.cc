@@ -11,6 +11,7 @@
 //#include <game/screens/hud/chat_window.h>
 #include <game/simulation/simulation_thread.h>
 #include <game/simulation/commands.h>
+#include <game/simulation/player.h>
 
 namespace ent {
 
@@ -86,10 +87,11 @@ void builder_component::update(float dt) {
     // we've finished so actually create the entity
     std::shared_ptr<entity> entity(_entity);
     ownable_component *our_ownable = entity->get_component<ownable_component>();
-    if (our_ownable != 0 && our_ownable->is_local_or_ai_player()) {
+    if (our_ownable != nullptr && our_ownable->is_local_or_ai_player()) {
       position_component *our_pos = entity->get_component<position_component>();
-      if (our_pos != 0) {
-        std::shared_ptr<game::create_entity_command> cmd(game::create_command<game::create_entity_command>());
+      if (our_pos != nullptr) {
+        std::shared_ptr<game::create_entity_command> cmd(
+            game::create_command<game::create_entity_command>(our_ownable->get_owner()->get_player_no()));
         cmd->template_name = luabind::object_cast<std::string>(entry.tmpl["name"]);
         cmd->initial_position = our_pos->get_position();
         cmd->initial_goal = our_pos->get_position() + (our_pos->get_direction() * 3.0f);
