@@ -10,6 +10,7 @@ Entity = {
     },
     Buildable = {
       BuildGroup = "vehicles",
+      TimeToBuild = 2.0
     },
     Position = {
       SitOnTerrain = true

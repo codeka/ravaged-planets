@@ -19,8 +19,7 @@ using namespace std::placeholders;
 // register the builder component with the entity_factory
 ENT_COMPONENT_REGISTER("Builder", builder_component);
 
-builder_component::builder_component() :
-    _time_to_build(0.0f) {
+builder_component::builder_component() {
 }
 
 builder_component::~builder_component() {
@@ -57,41 +56,52 @@ void builder_component::build(std::string name) {
   //game::hud_chat->add_line("Building: " + name + "...");
 
   entity_factory factory;
-  _curr_building = factory.get_template(name);
-  _time_to_build = 5.00f; // todo: get this from the template
+  queue_entry entry;
+  entry.tmpl = factory.get_template(name);
+  entry.time_to_build = luabind::object_cast<float>(entry.tmpl["components"]["Buildable"]["TimeToBuild"]);
+  entry.time_remaining = entry.time_to_build;
+  entry.percent_complete = 0.0f;
+  _build_queue.push(entry);
 
-  if (_particle_effect_component != nullptr) {
+  if (_particle_effect_component != nullptr && _build_queue.size() == 1) {
     _particle_effect_component->start_effect("building");
   }
 }
 
 bool builder_component::is_building() const {
-  return !!_curr_building;
+  return !_build_queue.empty();
 }
 
 void builder_component::update(float dt) {
-  if (_curr_building) {
-    _time_to_build -= dt;
+  if (_build_queue.empty()) {
+    return;
+  }
 
-    if (_time_to_build <= 0.0f) {
-      std::shared_ptr<entity> entity(_entity);
-      ownable_component *our_ownable = entity->get_component<ownable_component>();
-      if (our_ownable != 0 && our_ownable->is_local_or_ai_player()) {
-        position_component *our_pos = entity->get_component<position_component>();
-        if (our_pos != 0) {
-          std::shared_ptr<game::create_entity_command> cmd(game::create_command<game::create_entity_command>());
-          cmd->template_name = luabind::object_cast<std::string>(_curr_building["name"]);
-          cmd->initial_position = our_pos->get_position();
-          cmd->initial_goal = our_pos->get_position() + (our_pos->get_direction() * 3.0f);
-          game::simulation_thread::get_instance()->post_command(cmd);
-        }
-      }
+  queue_entry &entry = _build_queue.front();
+  entry.time_remaining -= dt;
+  entry.percent_complete += (dt / entry.time_to_build) * 100.0f;
+  if (entry.percent_complete >= 100.0f) {
+    entry.percent_complete = 100.0f;
 
-      _curr_building = luabind::object();
-      _time_to_build = 0.0f;
-      if (_particle_effect_component != nullptr) {
-        _particle_effect_component->stop_effect("building");
+    // we've finished so actually create the entity
+    std::shared_ptr<entity> entity(_entity);
+    ownable_component *our_ownable = entity->get_component<ownable_component>();
+    if (our_ownable != 0 && our_ownable->is_local_or_ai_player()) {
+      position_component *our_pos = entity->get_component<position_component>();
+      if (our_pos != 0) {
+        std::shared_ptr<game::create_entity_command> cmd(game::create_command<game::create_entity_command>());
+        cmd->template_name = luabind::object_cast<std::string>(entry.tmpl["name"]);
+        cmd->initial_position = our_pos->get_position();
+        cmd->initial_goal = our_pos->get_position() + (our_pos->get_direction() * 3.0f);
+        game::simulation_thread::get_instance()->post_command(cmd);
       }
+    }
+
+    // technically, we could probably start on part of the next entry this update, but for simplicity sake
+    // we'll just wait for the next update.
+    _build_queue.pop();
+    if (_build_queue.empty()) {
+      _particle_effect_component->stop_effect("building");
     }
   }
 }

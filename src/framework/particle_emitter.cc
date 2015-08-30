@@ -34,11 +34,6 @@ bool particle_emitter::update(float dt) {
   if (_config->start_time > _age)
     return true;
 
-  // if, on the other hand, we're supposed to be finished, mark ourselves dead
-  if (_config->emit_policy_name == "none") {
-//    fw::debug << "_dead=" << _dead << ", _age=" << _age << ", _config->end_time=" << _config->end_time << std::endl;
-  }
-
   if (!_dead && _config->end_time > 0 && _age > _config->end_time) {
     destroy();
   }

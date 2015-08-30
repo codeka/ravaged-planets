@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #include <boost/signals2.hpp>
 
 #include <game/entities/entity.h>
@@ -13,10 +14,15 @@ class particle_effect_component;
  */
 class builder_component: public entity_component, public boost::signals2::trackable {
 private:
-  std::string _build_group;
+  struct queue_entry {
+    luabind::object tmpl;
+    float time_to_build;
+    float time_remaining;
+    float percent_complete;
+  };
   particle_effect_component *_particle_effect_component;
-  luabind::object _curr_building;
-  float _time_to_build;
+  std::string _build_group;
+  std::queue<queue_entry> _build_queue;
 
   void on_selected(bool selected);
 
