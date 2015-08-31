@@ -152,7 +152,7 @@ public:
     for(luabind::iterator it(params); it != end; ++it) {
       std::string key = luabind::object_cast<std::string>(it.key());
 
-      if (key == "players") {
+      if (key == "players" || key == "player") {
         luabind::object value = *it;
         if (luabind::type(value) == LUA_TTABLE) {
           // if it's a table, we treat it as an array
