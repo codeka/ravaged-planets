@@ -10,7 +10,7 @@ Entity = {
     ParticleEffect = {
       building = {
         EffectName = "factory-smoke",
-		Offset = "0 2 0"
+        Offset = "0 2 0"
       }
     },
     Mesh = {

@@ -18,7 +18,7 @@ namespace ent {
 ENT_COMPONENT_REGISTER("Moveable", moveable_component);
 
 moveable_component::moveable_component() :
-    _pos(0), _speed(3.0f), _turn_speed(1.0f), _avoid_collisions(true) {
+    _pos(0), _speed(3.0f), _turn_speed(1.0f), _avoid_collisions(true), _is_moving(false) {
 }
 
 moveable_component::~moveable_component() {
@@ -40,6 +40,7 @@ void moveable_component::initialize() {
   std::shared_ptr<entity> entity(_entity);
   _pos = entity->get_component<position_component>();
   _goal = _pos->get_position();
+  _is_moving = false;
 }
 
 void moveable_component::set_goal(fw::vector goal) {
@@ -52,15 +53,25 @@ void moveable_component::set_goal(fw::vector goal) {
       fw::constrain(goal[0], world_width, 0.0f),
       goal[1],
       fw::constrain(goal[2], world_length, 0.0f));
+  _is_moving = true;
+}
+
+void moveable_component::stop() {
+  _is_moving = false;
 }
 
 void moveable_component::update(float dt) {
+  if (!_is_moving) {
+    return;
+  }
+
   fw::vector pos = _pos->get_position();
   fw::vector goal = _goal;
   fw::vector dir = _pos->get_direction_to(goal);
   float distance = dir.length();
   if (distance < 0.1f) {
     // we're close enough to the goal, so just stop!
+    _is_moving = false;
     return;
   }
 

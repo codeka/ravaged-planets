@@ -33,9 +33,12 @@ public:
   // sets the path that we're to follow until we reach the goal
   void set_path(std::vector<fw::vector> const &path);
 
-  // sets the goal for this entity. we request the path from the pathing_thread
-  // and when it comes back, we'll start moving along it.
+  // sets the goal for this entity. we request the path from the pathing_thread and when it comes back, we'll start
+  // moving along it.
   void set_goal(fw::vector const &goal);
+
+  // If we're following a path (or waiting for a path), stop now.
+  void stop();
 
   // get a flag that simply indicates whether we're currently following a path or not
   bool is_following_path() const;

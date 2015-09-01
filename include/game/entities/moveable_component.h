@@ -9,11 +9,13 @@ class position_component;
 // this component is added to entities which can move (e.g. units, etc)
 class moveable_component: public entity_component {
 private:
+  fw::vector _intermediate_goal;
   fw::vector _goal;
   position_component *_pos;
   float _speed;
   float _turn_speed;
   bool _avoid_collisions;
+  bool _is_moving;
 
   fw::vector steer(fw::vector pos, fw::vector curr_direction,
       fw::vector goal_direction, float turn_amount, bool show_steering);
@@ -46,6 +48,20 @@ public:
   fw::vector get_goal() const {
     return _goal;
   }
+
+  /**
+   * Sets the "intermediate" goal, which is the location we're moving directly towards.
+   *
+   * The "goal" will be the final location along a path that was a travelling (via our pathing_component, if we
+   * have one), and the pathing_component will set intermediate goals as we go.
+   */
+  void set_intermediate_goal(fw::vector goal);
+  fw::vector get_intermediate_goal() const {
+    return _intermediate_goal;
+  }
+
+  // Stop moving.
+  void stop();
 };
 
 }

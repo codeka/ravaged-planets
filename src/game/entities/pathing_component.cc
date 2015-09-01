@@ -37,8 +37,7 @@ void pathing_component::update(float dt) {
     fw::vector goal = _path[_curr_goal_node];
     fw::vector dir = _position->get_direction_to(goal);
     if (dir.length_squared() <= 1.0f) {
-      // if we're "at" this node, increment the _curr_goal_node
-      // and try again
+      // if we're "at" this node, increment the _curr_goal_node and try again
       _curr_goal_node++;
       continue;
     }
@@ -61,13 +60,18 @@ void pathing_component::set_path(std::vector<fw::vector> const &path) {
 }
 
 void pathing_component::set_goal(fw::vector const &goal) {
-  // request a path from the entity's current position to the given goal
-  // and get the pathing_thread to call our set_path method when it's done
+  // request a path from the entity's current position to the given goal and get the pathing_thread to call our
+  // set_path method when it's done
   fw::debug << "requesting new path: " << goal << std::endl;
 
   auto pathing_thread = game::world::get_instance()->get_pathing();
   pathing_thread->request_path(_position->get_position(), goal,
       std::bind(&pathing_component::on_path_found, this, _1));
+}
+
+void pathing_component::stop() {
+  _path.clear();
+  _curr_goal_node = 0;
 }
 
 void pathing_component::on_path_found(std::vector<fw::vector> const &path) {

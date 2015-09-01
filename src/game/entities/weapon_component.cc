@@ -8,6 +8,7 @@
 #include <game/entities/entity_factory.h>
 #include <game/entities/entity_manager.h>
 #include <game/entities/weapon_component.h>
+#include <game/entities/pathing_component.h>
 #include <game/entities/position_component.h>
 #include <game/entities/moveable_component.h>
 #include <game/entities/projectile_component.h>
@@ -28,6 +29,8 @@ weapon_component::~weapon_component() {
 }
 
 void weapon_component::apply_template(luabind::object const &tmpl) {
+  _range = 10.0f;
+
   for (luabind::iterator it(tmpl), end; it != end; ++it) {
     if (it.key() == "FireEntity") {
       _fire_entity_name = luabind::object_cast<std::string>(*it);
@@ -37,6 +40,8 @@ void weapon_component::apply_template(luabind::object const &tmpl) {
       if (parts.size() == 3) {
         _fire_direction = fw::vector(parts[0], parts[1], parts[2]);
       }
+    } else if (it.key() == "Range") {
+      _range = luabind::object_cast<float>(*it);
     }
   }
 }
@@ -51,25 +56,36 @@ void weapon_component::update(float dt) {
   if (target) {
     position_component *our_pos = entity->get_component<position_component>();
     position_component *their_pos = target->get_component<position_component>();
+    pathing_component *our_pathing = entity->get_component<pathing_component>();
     moveable_component *our_moveable = entity->get_component<moveable_component>();
 
     if (our_pos == nullptr || their_pos == nullptr)
       return;
 
-    if (our_moveable != nullptr) {
+    bool need_fire = true;
+    if (our_moveable != nullptr || our_pathing != nullptr) {
       float wrap_x = game::world::get_instance()->get_terrain()->get_width();
       float wrap_z = game::world::get_instance()->get_terrain()->get_length();
       fw::vector goal = fw::get_direction_to(our_pos->get_position(), their_pos->get_position(), wrap_x, wrap_z);
-      if (goal.length() > 100.0f) {
-        our_moveable->set_goal(their_pos->get_position());
+      if (goal.length() > _range) {
+        if (our_pathing != nullptr) {
+          our_pathing->set_goal(their_pos->get_position());
+        } else {
+          our_moveable->set_goal(their_pos->get_position());
+        }
+        need_fire = false;
       } else {
-        our_moveable->set_goal(our_pos->get_position());
-
-        if (_time_to_fire <= 0.0f) {
-          fire();
-          _time_to_fire = 5.0f;
+        if (our_pathing != nullptr) {
+          our_pathing->stop();
+        } else {
+          our_moveable->stop();
         }
       }
+    }
+
+    if (need_fire && _time_to_fire <= 0.0f) {
+      fire();
+      _time_to_fire = 5.0f;
     }
   }
 }

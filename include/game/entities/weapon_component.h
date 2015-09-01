@@ -13,6 +13,7 @@ private:
   std::string _fire_entity_name;
   fw::vector _fire_direction;
   float _time_to_fire;
+  float _range;
 
   void fire();
 

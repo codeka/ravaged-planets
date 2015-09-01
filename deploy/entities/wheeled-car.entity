@@ -26,7 +26,8 @@ Entity = {
     },
     Weapon = {
       FireEntity = "missile",
-      FireDirection = "0 1 0"
+      FireDirection = "0 1 0",
+      Range = 10
     }
   },
   health = 100

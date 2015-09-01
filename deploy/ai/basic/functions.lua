@@ -35,8 +35,7 @@ function check_attack()
 
   units = player:find_units({ unit_type="simple-tank", state="idle" })
   log.say("attack", "found " .. #units .. " idle tanks")
-  if #units > 3 then
-    log.say("attack", "attacking!")
+  if #units >= 3 then
     local enemy = player:find_units({ player=1 }) -- todo: find out our enemy player id?
     player:issue_order(units, { order="attack", target=enemy[1] })
   end
