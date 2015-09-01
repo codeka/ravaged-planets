@@ -11,6 +11,8 @@ class position_component;
 // over the terrain (for example, tanks have this; helicopters do not)
 class pathing_component: public entity_component {
 private:
+  fw::vector _last_request_goal;
+  float _last_request_time;
   size_t _curr_goal_node;
   std::vector<fw::vector> _path;
   position_component *_position;

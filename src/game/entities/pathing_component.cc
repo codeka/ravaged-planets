@@ -1,5 +1,8 @@
 #include <functional>
+
+#include <framework/framework.h>
 #include <framework/logging.h>
+#include <framework/timer.h>
 
 #include <game/entities/entity.h>
 #include <game/entities/entity_factory.h>
@@ -17,7 +20,7 @@ using namespace std::placeholders;
 ENT_COMPONENT_REGISTER("Pathing", pathing_component);
 
 pathing_component::pathing_component() :
-    _position(nullptr), _moveable(nullptr), _curr_goal_node(0) {
+    _position(nullptr), _moveable(nullptr), _curr_goal_node(0), _last_request_time(0.0f) {
 }
 
 pathing_component::~pathing_component() {
@@ -56,13 +59,22 @@ void pathing_component::set_path(std::vector<fw::vector> const &path) {
   _path = path;
   _curr_goal_node = 0;
 
-  fw::debug << "found path: " << _path.size() << " node(s)" << std::endl;
+  fw::debug << "found path to [" << _last_request_goal << "]: " << _path.size() << " node(s)" << std::endl;
 }
 
 void pathing_component::set_goal(fw::vector const &goal) {
   // request a path from the entity's current position to the given goal and get the pathing_thread to call our
   // set_path method when it's done
-  fw::debug << "requesting new path: " << goal << std::endl;
+  float now = fw::framework::get_instance()->get_timer()->get_total_time();
+  if ((goal - _last_request_goal).length() < 1.0f) {
+    // it's the same path as we're already following, don't request a new path more than one every few seconds
+    // since there's really no point
+    if (now - _last_request_time < 5.0f) {
+      return;
+    }
+  }
+  _last_request_time = now;
+  _last_request_goal = goal;
 
   auto pathing_thread = game::world::get_instance()->get_pathing();
   pathing_thread->request_path(_position->get_position(), goal,
