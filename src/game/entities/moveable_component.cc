@@ -53,6 +53,19 @@ void moveable_component::set_goal(fw::vector goal) {
       fw::constrain(goal[0], world_width, 0.0f),
       goal[1],
       fw::constrain(goal[2], world_length, 0.0f));
+  set_intermediate_goal(_goal);
+}
+
+void moveable_component::set_intermediate_goal(fw::vector goal) {
+  std::shared_ptr<entity> entity(_entity);
+  float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
+  float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
+
+  // make sure we constraining the goal to the bounds of the map
+  _intermediate_goal = fw::vector(
+      fw::constrain(goal[0], world_width, 0.0f),
+      goal[1],
+      fw::constrain(goal[2], world_length, 0.0f));
   _is_moving = true;
 }
 
@@ -66,7 +79,7 @@ void moveable_component::update(float dt) {
   }
 
   fw::vector pos = _pos->get_position();
-  fw::vector goal = _goal;
+  fw::vector goal = _intermediate_goal;
   fw::vector dir = _pos->get_direction_to(goal);
   float distance = dir.length();
   if (distance < 0.1f) {

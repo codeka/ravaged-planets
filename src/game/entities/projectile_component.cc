@@ -50,8 +50,7 @@ void projectile_component::update(float) {
   bool exploded = false;
   std::shared_ptr<ent::entity> entity(_entity);
 
-  // find the nearest damagable entity - if it's closer than the "hit" distance,
-  // then we've hit them!
+  // find the nearest damagable entity - if it's closer than the "hit" distance, then we've hit them!
   std::shared_ptr<ent::entity> nearest =
       _our_position->get_nearest_entity_with_component<damageable_component>().lock();
   std::shared_ptr<ent::entity> creator = entity->get_creator().lock();
@@ -77,7 +76,7 @@ void projectile_component::update(float) {
 
     fw::vector pos = _our_position->get_position();
     float height = trn->get_height(pos[0], pos[2]);
-    if (height >= pos[1]) {
+    if (height > pos[1]) {
       explode (std::shared_ptr<ent::entity>());
       exploded = true;
     }
@@ -121,7 +120,7 @@ void seeking_projectile_component::update(float dt) {
 
     // our time to lock hasn't expired yet, keep waiting...
     if (_time_to_lock > 0.0f) {
-      _our_moveable->set_goal(_our_position->get_position() + _our_position->get_direction());
+      _our_moveable->set_intermediate_goal(_our_position->get_position() + _our_position->get_direction());
     } else {
       // we've locked, make it exactly 0 (it might be less)
       _time_to_lock = 0.0f;
@@ -133,7 +132,7 @@ void seeking_projectile_component::update(float dt) {
   std::shared_ptr<entity> target = _target.lock();
   if (target && _time_to_lock == 0) {
     // "seek" the target, just move towards it...
-    _our_moveable->set_goal(_target_position->get_position());
+    _our_moveable->set_intermediate_goal(_target_position->get_position());
   }
 
   // the base class will check when it's time to explode
@@ -176,7 +175,7 @@ void ballistic_projectile_component::set_target(std::weak_ptr<entity> target) {
   // todo: this is *not* a nice-looking arc!
   _our_position->set_direction((mid_pos - initial_pos).normalize());
   _our_moveable->set_turn_speed(1.0f);
-  _our_moveable->set_goal(goal_pos);
+  _our_moveable->set_intermediate_goal(goal_pos);
 }
 
 }
