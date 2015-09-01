@@ -4,14 +4,16 @@
 #include <game/entities/entity.h>
 
 namespace ent {
+class pathing_component;
 class position_component;
 
 // this component is added to entities which can move (e.g. units, etc)
 class moveable_component: public entity_component {
 private:
+  position_component *_position_component;
+  pathing_component *_pathing_component;
   fw::vector _intermediate_goal;
   fw::vector _goal;
-  position_component *_pos;
   float _speed;
   float _turn_speed;
   bool _avoid_collisions;
@@ -44,7 +46,7 @@ public:
     _avoid_collisions = value;
   }
 
-  void set_goal(fw::vector goal);
+  void set_goal(fw::vector goal, bool skip_pathing = false);
   fw::vector get_goal() const {
     return _goal;
   }

@@ -150,7 +150,7 @@ void create_entity_command::execute() {
     ent::moveable_component *moveable = ent->get_component<ent::moveable_component>();
     if (moveable != nullptr) {
       fw::vector goal = position->get_position() + (initial_goal - initial_position);
-      moveable->set_goal(goal);
+      moveable->set_goal(goal, true /* skip_pathing */);
     }
   }
 

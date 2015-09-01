@@ -8,7 +8,6 @@
 #include <game/entities/entity_factory.h>
 #include <game/entities/entity_manager.h>
 #include <game/entities/weapon_component.h>
-#include <game/entities/pathing_component.h>
 #include <game/entities/position_component.h>
 #include <game/entities/moveable_component.h>
 #include <game/entities/projectile_component.h>
@@ -56,30 +55,21 @@ void weapon_component::update(float dt) {
   if (target) {
     position_component *our_pos = entity->get_component<position_component>();
     position_component *their_pos = target->get_component<position_component>();
-    pathing_component *our_pathing = entity->get_component<pathing_component>();
     moveable_component *our_moveable = entity->get_component<moveable_component>();
 
     if (our_pos == nullptr || their_pos == nullptr)
       return;
 
     bool need_fire = true;
-    if (our_moveable != nullptr || our_pathing != nullptr) {
+    if (our_moveable != nullptr) {
       float wrap_x = game::world::get_instance()->get_terrain()->get_width();
       float wrap_z = game::world::get_instance()->get_terrain()->get_length();
       fw::vector goal = fw::get_direction_to(our_pos->get_position(), their_pos->get_position(), wrap_x, wrap_z);
       if (goal.length() > _range) {
-        if (our_pathing != nullptr) {
-          our_pathing->set_goal(their_pos->get_position());
-        } else {
-          our_moveable->set_goal(their_pos->get_position());
-        }
+        our_moveable->set_goal(their_pos->get_position());
         need_fire = false;
       } else {
-        if (our_pathing != nullptr) {
-          our_pathing->stop();
-        } else {
-          our_moveable->stop();
-        }
+        our_moveable->stop();
       }
     }
 

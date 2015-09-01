@@ -122,16 +122,10 @@ void move_order::begin(std::weak_ptr<ent::entity> const &ent) {
   order::begin(ent);
   std::shared_ptr<ent::entity> entity(_entity);
 
-  // if we've got a pathing component, use that to move towards the target
-  auto pathing = entity->get_component<ent::pathing_component>();
-  if (pathing != nullptr) {
-    pathing->set_goal(goal);
-  } else {
-    // if, instead, we've got a moveable component, move towards the target
-    auto moveable = entity->get_component<ent::moveable_component>();
-    if (moveable != 0) {
-      moveable->set_goal(goal);
-    }
+  // move towards the component, if we don't have a moveable component, nothing will happen.
+  auto moveable = entity->get_component<ent::moveable_component>();
+  if (moveable != nullptr) {
+    moveable->set_goal(goal);
   }
 
   // if it's got a weapon, clear the target (since we've now moving instead)

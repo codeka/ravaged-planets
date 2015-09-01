@@ -9,6 +9,7 @@
 #include <game/entities/entity_factory.h>
 #include <game/entities/entity_debug.h>
 #include <game/entities/moveable_component.h>
+#include <game/entities/pathing_component.h>
 #include <game/entities/position_component.h>
 #include <game/entities/selectable_component.h>
 
@@ -18,7 +19,8 @@ namespace ent {
 ENT_COMPONENT_REGISTER("Moveable", moveable_component);
 
 moveable_component::moveable_component() :
-    _pos(0), _speed(3.0f), _turn_speed(1.0f), _avoid_collisions(true), _is_moving(false) {
+    _position_component(nullptr), _pathing_component(nullptr), _speed(3.0f), _turn_speed(1.0f),
+    _avoid_collisions(true), _is_moving(false) {
 }
 
 moveable_component::~moveable_component() {
@@ -38,12 +40,14 @@ void moveable_component::apply_template(luabind::object const &tmpl) {
 
 void moveable_component::initialize() {
   std::shared_ptr<entity> entity(_entity);
-  _pos = entity->get_component<position_component>();
-  _goal = _pos->get_position();
+  _pathing_component = entity->get_component<pathing_component>();
+  _position_component = entity->get_component<position_component>();
+  _goal = _position_component->get_position();
   _is_moving = false;
 }
 
-void moveable_component::set_goal(fw::vector goal) {
+// TODO: skip_pathing is such a hack
+void moveable_component::set_goal(fw::vector goal, bool skip_pathing /*= false*/) {
   std::shared_ptr<entity> entity(_entity);
   float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
   float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
@@ -53,7 +57,11 @@ void moveable_component::set_goal(fw::vector goal) {
       fw::constrain(goal[0], world_width, 0.0f),
       goal[1],
       fw::constrain(goal[2], world_length, 0.0f));
-  set_intermediate_goal(_goal);
+  if (skip_pathing || _pathing_component == nullptr) {
+    set_intermediate_goal(_goal);
+  } else {
+    _pathing_component->set_goal(_goal);
+  }
 }
 
 void moveable_component::set_intermediate_goal(fw::vector goal) {
@@ -71,6 +79,9 @@ void moveable_component::set_intermediate_goal(fw::vector goal) {
 
 void moveable_component::stop() {
   _is_moving = false;
+  if (_pathing_component != nullptr) {
+    _pathing_component->stop();
+  }
 }
 
 void moveable_component::update(float dt) {
@@ -78,9 +89,9 @@ void moveable_component::update(float dt) {
     return;
   }
 
-  fw::vector pos = _pos->get_position();
+  fw::vector pos = _position_component->get_position();
   fw::vector goal = _intermediate_goal;
-  fw::vector dir = _pos->get_direction_to(goal);
+  fw::vector dir = _position_component->get_direction_to(goal);
   float distance = dir.length();
   if (distance < 0.1f) {
     // we're close enough to the goal, so just stop!
@@ -93,14 +104,14 @@ void moveable_component::update(float dt) {
 
   // if we're avoiding obstacles, we'll need to figure out what is the closest entity to us
   if (_avoid_collisions) {
-    std::shared_ptr<ent::entity> obstacle = _pos->get_nearest_entity().lock();
+    std::shared_ptr<ent::entity> obstacle = _position_component->get_nearest_entity().lock();
     if (obstacle) {
-      fw::vector obstacle_dir = _pos->get_direction_to(obstacle);
+      fw::vector obstacle_dir = _position_component->get_direction_to(obstacle);
       float obstacle_distance = obstacle_dir.length();
 
       // only worry about the obstacle when it's in front of us
-      float d = cml::dot(cml::normalize(_pos->get_direction()), cml::normalize(obstacle_dir));
-    //  fw::debug << "cml::dot(_pos->get_direction(), obstacle_dir) = " << d << std::endl;
+      float d = cml::dot(cml::normalize(_position_component->get_direction()), cml::normalize(obstacle_dir));
+    //  fw::debug << "cml::dot(_position_component->get_direction(), obstacle_dir) = " << d << std::endl;
       if (d > 0.0f) {
         // if they're selectable, reduce the distance by their selection radius - that's what we ACTUALLY want to
         // avoid...
@@ -120,12 +131,12 @@ void moveable_component::update(float dt) {
           }
 
           // temporarily adjust the "goal" so as to avoid the obstacle
-          fw::vector up = cml::cross(_pos->get_direction(), obstacle_dir);
+          fw::vector up = cml::cross(_position_component->get_direction(), obstacle_dir);
           if (up.length_squared() < 0.01f) {
             // if they're *directly* in front of us, just choose a random direction, left or right. we'll choose... left
             up = fw::vector(0, 1, 0);
           }
-          fw::vector avoid_dir = cml::cross(cml::normalize(_pos->get_direction()), cml::normalize(up));
+          fw::vector avoid_dir = cml::cross(cml::normalize(_position_component->get_direction()), cml::normalize(up));
 
           if (show_steering) {
             // draw a blue line from the obstacle in the direction we're going to travel to avoid it.
@@ -134,8 +145,8 @@ void moveable_component::update(float dt) {
           }
 
           // our new goal is just in front of where we are now, but offset by what we're trying to avoid.
-          goal = _pos->get_direction() + obstacle_pos + (avoid_dir * (obstacle_radius * 2.0f));
-          dir = _pos->get_direction_to(goal);
+          goal = _position_component->get_direction() + obstacle_pos + (avoid_dir * (obstacle_radius * 2.0f));
+          dir = _position_component->get_direction_to(goal);
           distance = dir.length();
         }
       }
@@ -161,13 +172,14 @@ void moveable_component::update(float dt) {
   }
 
   // turn towards the goal
-  dir = steer(_pos->get_position(), _pos->get_direction(), dir, turn_speed * dt, show_steering);
+  dir = steer(_position_component->get_position(),
+      _position_component->get_direction(), dir, turn_speed * dt, show_steering);
 
   // move in the direction we're facing
   pos += (dir * dt * speed);
 
-  _pos->set_direction(dir);
-  _pos->set_position(pos);
+  _position_component->set_direction(dir);
+  _position_component->set_position(pos);
 }
 
 // applies a steering factor to the "curr_direction" so that we slowly turn towards the goal_direction.

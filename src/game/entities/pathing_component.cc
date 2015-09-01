@@ -43,7 +43,7 @@ void pathing_component::update(float dt) {
     }
 
     // otherwise, move towards the goal...
-    _moveable->set_goal(goal);
+    _moveable->set_intermediate_goal(goal);
     break;
   }
 }
