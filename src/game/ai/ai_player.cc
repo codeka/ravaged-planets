@@ -34,6 +34,9 @@ ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t p
   // we do one update of the update queue, to ensure it's ready to go
   _upd_queue.update();
 
+  int colour_index = static_cast<int>(fw::random() * player_colours.size());
+  _colour = player_colours[colour_index];
+
   // create a new lua_context for our script, then add all of our global
   // functions and so on to it
   std::shared_ptr<fw::lua_context> script(new fw::lua_context());
