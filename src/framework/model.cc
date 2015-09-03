@@ -45,6 +45,7 @@ model::~model() {
 
 void model::render(sg::scenegraph &sg, fw::matrix const &transform /*= fw::matrix::identity() */) {
   root_node->set_world_matrix(transform);
+  root_node->set_colour(_colour);
   sg.add_node(root_node->clone());
 }
 

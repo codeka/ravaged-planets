@@ -46,7 +46,7 @@ void model_node::render(sg::scenegraph *sg, fw::matrix const &model_matrix /*= f
   }
 
   if (mesh_index >= 0) {
-    get_shader_parameters()->set_colour("mesh_colour", _model->get_colour());
+    get_shader_parameters()->set_colour("mesh_colour", _colour);
   }
 
   node::render(sg, transform * model_matrix);
@@ -64,6 +64,14 @@ void model_node::populate_clone(std::shared_ptr<sg::node> clone) {
   mnclone->mesh_index = mesh_index;
   mnclone->node_name = node_name;
   mnclone->transform = transform;
+  mnclone->_colour = _colour;
+}
+
+void model_node::set_colour(fw::colour colour) {
+  _colour = colour;
+  BOOST_FOREACH(std::shared_ptr<node> &child_node, _children) {
+    std::dynamic_pointer_cast<model_node>(child_node)->set_colour(colour);
+  }
 }
 
 std::shared_ptr<sg::node> model_node::clone() {

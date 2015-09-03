@@ -24,8 +24,7 @@ namespace ent {
 // register the mesh component with the entity_factory
 ENT_COMPONENT_REGISTER("Mesh", mesh_component);
 
-mesh_component::mesh_component() :
-    _model(), _colour(1, 1, 1) {
+mesh_component::mesh_component() {
 }
 
 mesh_component::mesh_component(std::shared_ptr<fw::model> const &model) :
@@ -33,18 +32,6 @@ mesh_component::mesh_component(std::shared_ptr<fw::model> const &model) :
 }
 
 mesh_component::~mesh_component() {
-}
-
-// this is called when the entity's owner changes
-void mesh_component::owner_changed(ownable_component *ownable) {
-  game::player *plyr = ownable->get_owner();
-  if (plyr != nullptr) {
-    _colour = plyr->get_colour();
-
-    if (_model) {
-      _model->set_colour(_colour);
-    }
-  }
 }
 
 void mesh_component::apply_template(luabind::object const &tmpl) {
@@ -57,12 +44,7 @@ void mesh_component::apply_template(luabind::object const &tmpl) {
 
 void mesh_component::initialize() {
   std::shared_ptr<entity> entity(_entity);
-  ownable_component *ownable = entity->get_component<ownable_component>();
-  if (ownable != nullptr) {
-    // get a signal if/when the owner changes
-    ownable->owner_changed_event.connect(std::bind(&mesh_component::owner_changed, this, _1));
-    owner_changed(ownable);
-  }
+  _ownable_component = entity->get_component<ownable_component>();
 }
 
 void mesh_component::render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform) {
@@ -71,7 +53,13 @@ void mesh_component::render(fw::sg::scenegraph &scenegraph, fw::matrix const &tr
   if (pos != nullptr) {
     if (!_model) {
       _model = fw::framework::get_instance()->get_model_manager()->get_model(_model_name);
-      _model->set_colour(_colour);
+    }
+
+    if (_ownable_component != nullptr) {
+      game::player *player = _ownable_component->get_owner();
+      if (player != nullptr) {
+        _model->set_colour(player->get_colour());
+      }
     }
 
     _model->render(scenegraph, pos->get_transform() * transform);

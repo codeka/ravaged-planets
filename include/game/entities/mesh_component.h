@@ -14,12 +14,9 @@ class ownable_component;
 // all the visible entities
 class mesh_component: public entity_component {
 private:
-  fw::colour _colour;
+  ownable_component *_ownable_component;
   std::string _model_name;
   std::shared_ptr<fw::model> _model;
-
-  // this is called when the entity's owner changes
-  void owner_changed(ownable_component *ownable);
 
 public:
   static const int identifier = 200;
