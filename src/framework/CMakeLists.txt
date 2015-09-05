@@ -58,6 +58,7 @@ add_library(framework
 target_link_libraries(framework
     ${SDL2main_LIBRARY}
     ${SDL2_LIBRARY}
+    ${SDL_mixer_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}

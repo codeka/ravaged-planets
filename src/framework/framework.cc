@@ -9,6 +9,7 @@
 #include <SDL.h>
 
 #include <framework/framework.h>
+#include <framework/audio.h>
 #include <framework/logging.h>
 #include <framework/camera.h>
 #include <framework/bitmap.h>
@@ -72,10 +73,8 @@ framework::~framework() {
     delete _model_manager;
   if (_debug_view != nullptr)
     delete _debug_view;
-
-  /*
-   if (_audio != 0) delete _audio;
-   */
+  if (_audio != nullptr)
+    delete _audio;
 }
 
 framework *framework::get_instance() {
@@ -93,7 +92,7 @@ bool framework::initialize(char const *title) {
   logging_initialize();
   language_initialize();
 
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::sdl_error_info(SDL_GetError()));
   }
 
@@ -113,10 +112,8 @@ bool framework::initialize(char const *title) {
     _cursor->initialize();
   }
 
-  /*
-   // initialise audio
-   _audio->initialize();
-   */
+  // initialise audio
+  _audio->initialize();
 
   _input = new input();
   _input->initialize();
@@ -191,8 +188,7 @@ void framework::destroy() {
   if (_cursor != nullptr) {
     _cursor->destroy();
   }
-   /*
-   _audio->destroy();*/
+  _audio->destroy();
 }
 
 void framework::deactivate() {
@@ -286,10 +282,7 @@ void framework::update(float dt) {
     _gui->update(dt);
   }
   _font_manager->update(dt);
-  /*
-   _audio->update();
-
-   */
+  _audio->update();
   if (!_paused) {
     _app->update(dt);
     _particle_mgr->update(dt);
