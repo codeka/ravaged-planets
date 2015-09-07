@@ -44,7 +44,15 @@ void audio_manager::initialize() {
       << static_cast<int>(link_version->major) << "."
       << static_cast<int>(link_version->minor) << "."
       << static_cast<int>(link_version->patch) << ") initialized "
-      << "[" << frequency << "Hz, " << format_name << " " << channels << " channels]" << std::endl;
+      << "[" << frequency << "Hz, " << format_name << ", " << channels << " channels]" << std::endl;
+  fw::debug << "  decoders loaded: ";
+  for (int i = 0; i < Mix_GetNumChunkDecoders(); i++) {
+    if (i != 0) {
+      fw::debug << ", ";
+    }
+    fw::debug << Mix_GetChunkDecoder(i);
+  }
+  fw::debug << "." << std::endl;
 }
 
 void audio_manager::destroy() {
