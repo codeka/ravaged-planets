@@ -92,7 +92,7 @@ private:
   gui::gui *_gui;
   particle_manager *_particle_mgr;
   bool _paused;
-  audio_manager *_audio;
+  audio_manager *_audio_manager;
   model_manager *_model_manager;
   cursor *_cursor;
   lang *_lang;
@@ -184,8 +184,8 @@ public:
   cursor *get_cursor() const {
     return _cursor;
   }
-  audio_manager *get_audio() const {
-    return _audio;
+  audio_manager *get_audio_manager() const {
+    return _audio_manager;
   }
   lang *get_lang() const {
     return _lang;

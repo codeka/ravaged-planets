@@ -1,11 +1,17 @@
 
 #include <SDL_mixer.h>
 
+#include <boost/filesystem.hpp>
+#include <boost/format.hpp>
+
 #include <framework/audio.h>
 #include <framework/exception.h>
 #include <framework/logging.h>
+#include <framework/paths.h>
 
 namespace fw {
+
+namespace fs = boost::filesystem;
 
 #if defined(_DEBUG)
 #define CHECK_ERROR(fn) \
@@ -68,6 +74,30 @@ void audio_manager::check_error(int error_code, char const *fn_name) {
     char *error_msg = Mix_GetError();
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(fn_name) << fw::audio_error_info(error_msg));
   }
+}
+
+std::shared_ptr<audio_buffer> audio_manager::get_audio_buffer(std::string const &name) {
+  auto it = _loaded_buffers.find(name);
+  if (it != _loaded_buffers.end()) {
+    return it->second;
+  }
+
+  std::shared_ptr<audio_buffer> buffer(new audio_buffer(this, name));
+  _loaded_buffers[name] = buffer;
+  return buffer;
+}
+
+//-----------------------------------------------------------------------------
+
+audio_buffer::audio_buffer(audio_manager *mgr, std::string const &name) {
+  fs::path path = fw::resolve(name);
+  fw::debug << boost::format("loading sound: %1%") % path << std::endl;
+  _chunk = Mix_LoadWAV(path.string().c_str());
+}
+
+audio_buffer::~audio_buffer() {
+  Mix_FreeChunk(_chunk);
+  _chunk = nullptr;
 }
 
 //-----------------------------------------------------------------------------

@@ -46,7 +46,7 @@ static framework *only_instance = 0;
 
 framework::framework(base_app* app) :
     _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(nullptr),
-    _graphics(nullptr), _timer(nullptr), _audio(nullptr), _input(nullptr), _lang(nullptr),
+    _graphics(nullptr), _timer(nullptr), _audio_manager(nullptr), _input(nullptr), _lang(nullptr),
     _gui(nullptr), _font_manager(nullptr), _model_manager(nullptr), _cursor(nullptr),
     _debug_view(nullptr), _running(true) {
   only_instance = this;
@@ -73,8 +73,8 @@ framework::~framework() {
     delete _model_manager;
   if (_debug_view != nullptr)
     delete _debug_view;
-  if (_audio != nullptr)
-    delete _audio;
+  if (_audio_manager != nullptr)
+    delete _audio_manager;
 }
 
 framework *framework::get_instance() {
@@ -113,7 +113,8 @@ bool framework::initialize(char const *title) {
   }
 
   // initialise audio
-  _audio->initialize();
+  _audio_manager = new audio_manager();
+  _audio_manager->initialize();
 
   _input = new input();
   _input->initialize();
@@ -188,7 +189,7 @@ void framework::destroy() {
   if (_cursor != nullptr) {
     _cursor->destroy();
   }
-  _audio->destroy();
+  _audio_manager->destroy();
 }
 
 void framework::deactivate() {
@@ -282,7 +283,7 @@ void framework::update(float dt) {
     _gui->update(dt);
   }
   _font_manager->update(dt);
-  _audio->update();
+  _audio_manager->update();
   if (!_paused) {
     _app->update(dt);
     _particle_mgr->update(dt);
