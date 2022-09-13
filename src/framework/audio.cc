@@ -1,5 +1,5 @@
 
-#include <SDL_mixer.h>
+#include <SDL2/SDL_mixer.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -32,7 +32,9 @@ void audio_manager::initialize() {
   int frequency;
   uint16_t format;
   int channels;
-  CHECK_ERROR(Mix_QuerySpec(&frequency, &format, &channels));
+  if (!Mix_QuerySpec(&frequency, &format, &channels)) {
+    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error querying spec"));
+  }
 
   std::string format_name;
   switch(format) {
@@ -71,7 +73,8 @@ void audio_manager::update() {
 
 void audio_manager::check_error(int error_code, char const *fn_name) {
   if (error_code != 0) {
-    char *error_msg = Mix_GetError();
+    char const *error_msg = Mix_GetError();
+    fw::debug << "  error in audio_manager: " << error_code << " - " << error_msg << std::endl;
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(fn_name) << fw::audio_error_info(error_msg));
   }
 }

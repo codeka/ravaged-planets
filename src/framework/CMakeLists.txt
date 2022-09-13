@@ -55,26 +55,38 @@ add_library(framework
     ${PROTO_SRCS}
 )
 
-target_link_libraries(framework
-    ${SDL2main_LIBRARY}
-    ${SDL2_LIBRARY}
-    ${SDL_mixer_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_IOSTREAMS_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_SIGNALS_LIBRARY}
-    ${OPENGL_LIBRARY}
-    ${GLEW_LIBRARY}
-    ${PROTOBUF_LIBRARY}
-    ${LUA_LIBRARY}
-    ${LUABIND_LIBRARY}
-    ${CURL_LIBRARY}
-    ${ENET_LIBRARY}
-    ${FREETYPE_LIBRARY}
-    ${PNG_LIBRARY}
-)
+target_link_libraries(framework ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries(framework ${Boost_IOSTREAMS_LIBRARY})
+target_link_libraries(framework ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(framework ${Boost_THREAD_LIBRARY})
+target_link_libraries(framework ${Boost_SYSTEM_LIBRARY})
+target_link_libraries(framework ${Boost_SIGNALS_LIBRARY})
+target_link_libraries(framework ${OPENGL_LIBRARY})
+target_link_libraries(framework ${PROTOBUF_LIBRARY})
+target_link_libraries(framework ${LUA_LIBRARIES})
+target_link_libraries(framework ${CURL_LIBRARY})
+target_link_libraries(framework ${ENET_LIBRARY})
+target_link_libraries(framework ${FREETYPE_LIBRARY})
+target_link_libraries(framework ${PNG_LIBRARY})
+
+target_link_libraries(framework SDL2::SDL2main)
+target_link_libraries(framework SDL2::SDL2)
+target_link_libraries(framework SDL2_mixer::SDL2_mixer)
+target_link_libraries(framework ${GLEW_LIBRARY})
+
+if(MSVC)
+    # Set /EHsc so we can have proper unwind semantics in Visual C++
+    target_compile_options(framework PUBLIC /EHsc)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        # /MDd = multi-threaded debug DLL
+        target_compile_options(framework PUBLIC /MDd)
+        target_compile_options(framework PUBLIC /ZI)
+        target_compile_options(framework PUBLIC /Od)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG")
+    endif()
+    target_compile_options(framework PUBLIC /MP)
+endif()
+
 
 if(UNIX)
    target_link_libraries(framework
@@ -100,3 +112,5 @@ elseif(WIN32)
         imm32
     )
 endif()
+
+install(TARGETS framework RUNTIME DESTINATION bin)

@@ -13,10 +13,16 @@
 *.dylib
 *.dll
 
-# Fortran module files
+# Fortran module files(?)
 *.mod
-
 
 # Temp files
 *~
 
+# User-specific files
+CMakeUserPresets.json
+
+# Visual Studio files
+out/
+.vs/
+.vscode/

@@ -27,22 +27,22 @@ particle_effect_component::~particle_effect_component() {
 }
 
 void particle_effect_component::apply_template(luabind::object const &tmpl) {
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    std::string name = luabind::object_cast<std::string>(it.key());
-    effect_info effect;
-    effect.name = luabind::object_cast<std::string>((*it)["EffectName"]);
-    if ((*it)["DestroyEntityOnComplete"]) {
-      effect.destroy_entity_on_complete = true;
-    }
-    if ((*it)["Started"]) {
-      effect.started = true;
-    }
-    if ((*it)["Offset"]) {
-      std::string offset = luabind::object_cast<std::string>((*it)["Offset"]);
-      effect.offset = fw::vector(0, 2, 0); // TODO
-    }
-    _effects[name] = effect;
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    std::string name = luabind::object_cast<std::string>(it.key());
+//    effect_info effect;
+//    effect.name = luabind::object_cast<std::string>((*it)["EffectName"]);
+//    if ((*it)["DestroyEntityOnComplete"]) {
+//      effect.destroy_entity_on_complete = true;
+//    }
+//    if ((*it)["Started"]) {
+//      effect.started = true;
+//    }
+//    if ((*it)["Offset"]) {
+//      std::string offset = luabind::object_cast<std::string>((*it)["Offset"]);
+//      effect.offset = fw::vector(0, 2, 0); // TODO
+//    }
+//    _effects[name] = effect;
+//  }
 }
 
 void particle_effect_component::initialize() {

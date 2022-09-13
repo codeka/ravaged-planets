@@ -1,7 +1,7 @@
 
 #include <boost/locale.hpp>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <framework/framework.h>
 #include <framework/gui/drawable.h>

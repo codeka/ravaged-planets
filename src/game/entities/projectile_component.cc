@@ -107,11 +107,11 @@ seeking_projectile_component::~seeking_projectile_component() {
 }
 
 void seeking_projectile_component::apply_template(luabind::object const &tmpl) {
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "TimeToLock") {
-      _time_to_lock = luabind::object_cast<float>(*it);
-    }
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "TimeToLock") {
+//      _time_to_lock = luabind::object_cast<float>(*it);
+//    }
+//  }
 }
 
 void seeking_projectile_component::update(float dt) {
@@ -148,11 +148,11 @@ ballistic_projectile_component::~ballistic_projectile_component() {
 }
 
 void ballistic_projectile_component::apply_template(luabind::object const &tmpl) {
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "MaxHeight") {
-      _max_height = luabind::object_cast<float>(*it);
-    }
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "MaxHeight") {
+//      _max_height = luabind::object_cast<float>(*it);
+//    }
+//  }
 }
 
 void ballistic_projectile_component::set_target(std::weak_ptr<entity> target) {

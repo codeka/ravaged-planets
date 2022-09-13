@@ -4,7 +4,7 @@
 
 #include <boost/foreach.hpp>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <framework/exception.h>
 #include <framework/graphics.h>

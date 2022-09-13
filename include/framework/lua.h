@@ -16,7 +16,7 @@ namespace fw {
  * This class represents the Lua context. It's the main object you'll create when creating an interface to Lua
  * and it allows you to call scripts, register objects, functions and callbacks and so on.
  */
-class lua_context : boost::noncopyable {
+class lua_context {
 private:
   lua_State *_state;
   std::string _last_error;
@@ -26,6 +26,8 @@ private:
 public:
   lua_context();
   ~lua_context();
+
+  lua_context(const lua_context&) = delete;
 
   /** Adds a path to the package.path that LUA uses to search for modules reference in require(...) statements. */
   void add_path(boost::filesystem::path const &path);
@@ -40,4 +42,9 @@ public:
   std::string get_last_error() const { return _last_error; }
 };
 
+}
+
+// TODO: make this real
+namespace luabind {
+    struct object {};
 }

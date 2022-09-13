@@ -56,7 +56,7 @@ SOURCE_GROUP(inc\\world REGULAR_EXPRESSION world/.+\\.h)
 
 add_custom_command(
    OUTPUT version.cc
-   COMMAND version-number ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_BINARY_DIR}/version.cc
+   COMMAND version-number "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_BUILD_TYPE}$<CONFIG>" "${CMAKE_CURRENT_BINARY_DIR}/version.cc"
    DEPENDS version-number
 )
 
@@ -66,10 +66,21 @@ add_executable(rp WIN32
     version.cc
 )
 
-target_link_libraries(rp
-    framework
-)
+if(MSVC)
+    # Set /EHsc so we can have proper unwind semantics in Visual C++
+    target_compile_options(rp PUBLIC /EHsc)
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        # /MDd = multi-threaded debug DLL
+        target_compile_options(rp PUBLIC /MDd)
+        target_compile_options(rp PUBLIC /ZI)
+        target_compile_options(rp PUBLIC /Od)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG")
+    endif()
+    target_compile_options(rp PUBLIC /MP)
+endif()
+
+target_link_libraries(rp framework)
 
 install(TARGETS rp RUNTIME DESTINATION bin)
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/ravagedplanets.conf" DESTINATION etc/ravaged-planets)
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/deploy/default.conf" DESTINATION etc/ravaged-planets/default.conf)

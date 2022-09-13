@@ -6,7 +6,7 @@
 #include <vector>
 #include <boost/foreach.hpp>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <framework/framework.h>
 #include <framework/audio.h>

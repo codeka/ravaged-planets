@@ -5,7 +5,7 @@
 #include <vector>
 
 #include <framework/lua.h>
-#include <luabind/object.hpp>
+//#include <luabind/object.hpp>
 
 #include <game/entities/entity_attribute.h>
 

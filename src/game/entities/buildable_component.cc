@@ -13,11 +13,11 @@ buildable_component::~buildable_component() {
 }
 
 void buildable_component::apply_template(luabind::object const &tmpl) {
-  for(luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "BuildGroup") {
-      _build_group = luabind::object_cast<std::string>(*it);
-    }
-  }
+//  for(luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "BuildGroup") {
+//      _build_group = luabind::object_cast<std::string>(*it);
+//    }
+//  }
 }
 
 }

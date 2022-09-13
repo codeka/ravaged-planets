@@ -24,11 +24,11 @@ damageable_component::~damageable_component() {
 }
 
 void damageable_component::apply_template(luabind::object const &tmpl) {
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "Explosion") {
-      _expl_name = luabind::object_cast<std::string>(*it);
-    }
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "Explosion") {
+//      _expl_name = luabind::object_cast<std::string>(*it);
+//    }
+//  }
 }
 
 void damageable_component::initialize() {

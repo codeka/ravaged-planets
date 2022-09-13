@@ -17,7 +17,7 @@ struct path_node {
   bool passable;
 
   struct cost_comparer {
-    bool operator()(path_node const *lhs, path_node const *rhs) {
+    bool operator()(path_node const *lhs, path_node const *rhs) const {
       float lhs_total_cost = lhs->cost_to_goal + lhs->cost_from_start;
       float rhs_total_cost = rhs->cost_to_goal + rhs->cost_from_start;
       return lhs_total_cost < rhs_total_cost;

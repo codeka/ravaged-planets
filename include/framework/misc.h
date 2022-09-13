@@ -110,23 +110,23 @@ inline T lerp(T const &last, T const &next, float t) {
 
 // an "iless" functor, similar to "std::less" but case insensitive
 template<typename T>
-struct iless: public std::binary_function<T, T, bool> {
-  inline bool operator ()(T const &lhs, T const &rhs) const {
+struct iless {
+  bool operator()(T const &lhs, T const &rhs) const {
     return boost::algorithm::ilexicographical_compare(lhs, rhs);
   }
 };
 
 // an "iequal_to" functor, similar to "std::equal_to" but case insensitive
 template<typename T>
-struct iequal_to: public std::binary_function<T, T, bool> {
-  inline bool operator()(T const &lhs, T const &rhs) const {
+struct iequal_to {
+  bool operator()(T const &lhs, T const &rhs) const {
     return boost::algorithm::iequals(lhs, rhs);
   }
 };
 
 // an "ihash" functor, similar to "std::hash" but case insensitive
 template<typename T>
-struct ihash: public std::unary_function<T, std::size_t> {
+struct ihash {
   inline std::size_t operator()(T const &x) const {
     std::size_t seed = 0;
     std::locale locale;

@@ -27,15 +27,15 @@ moveable_component::~moveable_component() {
 }
 
 void moveable_component::apply_template(luabind::object const &tmpl) {
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "Speed") {
-      _speed = luabind::object_cast<float>(*it);
-    } else if (it.key() == "TurnRadius") {
-      _turn_speed = 1.0f / luabind::object_cast<float>(*it);
-    } else if (it.key() == "AvoidCollisions") {
-      _avoid_collisions = luabind::object_cast<bool>(*it);
-    }
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "Speed") {
+//      _speed = luabind::object_cast<float>(*it);
+//    } else if (it.key() == "TurnRadius") {
+//      _turn_speed = 1.0f / luabind::object_cast<float>(*it);
+//    } else if (it.key() == "AvoidCollisions") {
+//      _avoid_collisions = luabind::object_cast<bool>(*it);
+//    }
+//  }
 }
 
 void moveable_component::initialize() {

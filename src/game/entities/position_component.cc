@@ -27,13 +27,13 @@ position_component::~position_component() {
 }
 
 void position_component::apply_template(luabind::object const &tmpl) {
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "SitOnTerrain") {
-      set_sit_on_terrain(luabind::object_cast<bool>(*it));
-    } else if (it.key() == "OrientToTerrain") {
-      this->set_orient_to_terrain(luabind::object_cast<bool>(*it));
-    }
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "SitOnTerrain") {
+//      set_sit_on_terrain(luabind::object_cast<bool>(*it));
+//    } else if (it.key() == "OrientToTerrain") {
+//      this->set_orient_to_terrain(luabind::object_cast<bool>(*it));
+//    }
+//  }
 }
 
 void position_component::set_sit_on_terrain(bool sit_on_terrain) {

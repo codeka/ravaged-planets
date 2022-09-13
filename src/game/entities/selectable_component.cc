@@ -66,11 +66,11 @@ void selectable_component::set_is_selected(bool selected) {
 }
 
 void selectable_component::apply_template(luabind::object const &tmpl) {
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "SelectionRadius") {
-      set_selection_radius(luabind::object_cast<float>(*it));
-    }
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "SelectionRadius") {
+//      set_selection_radius(luabind::object_cast<float>(*it));
+//    }
+//  }
 }
 
 void selectable_component::set_selection_radius(float value) {

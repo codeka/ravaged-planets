@@ -1,7 +1,7 @@
 
 #include <boost/foreach.hpp>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <framework/bitmap.h>
 #include <framework/cursor.h>

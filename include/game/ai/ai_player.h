@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-#include <luabind/object.hpp>
+//#include <luabind/object.hpp>
 
 #include <game/simulation/player.h>
 #include <game/ai/update_queue.h>

@@ -222,7 +222,7 @@ void build_window::do_refresh() {
 
   int index = 0;
   BOOST_FOREACH(luabind::object const &tmpl, templates) {
-    fw::debug << " checking " << tmpl["name"] << std::endl;
+    fw::debug << " checking " << ""/*tmpl["name"]*/ << std::endl;
     button *btn = _wnd->find<button>(FIRST_BUILD_BUTTON_ID + index);
     if (btn == nullptr) {
       continue; // TODO
@@ -241,12 +241,12 @@ void build_window::do_refresh() {
       });
     }
 
-    std::string mesh_file_name = luabind::object_cast<std::string>(tmpl["components"]["Mesh"]["FileName"]);
+    std::string mesh_file_name = "";// luabind::object_cast<std::string>(tmpl["components"]["Mesh"]["FileName"]);
     fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
       std::shared_ptr<fw::model> mdl =
           fw::framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
       mdl->set_colour(game::simulation_thread::get_instance()->get_local_player()->get_colour());
-      icon->set_model(luabind::object_cast<std::string>(tmpl["name"]), mdl);
+      icon->set_model(""/*luabind::object_cast<std::string>(tmpl["name"])*/, mdl);
     });
 
     index ++;

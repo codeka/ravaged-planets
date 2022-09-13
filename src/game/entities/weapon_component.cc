@@ -30,19 +30,19 @@ weapon_component::~weapon_component() {
 void weapon_component::apply_template(luabind::object const &tmpl) {
   _range = 10.0f;
 
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "FireEntity") {
-      _fire_entity_name = luabind::object_cast<std::string>(*it);
-    } else if (it.key() == "FireDirection") {
-      // TODO: factor this out and use an actual array or something
-      std::vector<float> parts = fw::split<float>(luabind::object_cast<std::string>(*it));
-      if (parts.size() == 3) {
-        _fire_direction = fw::vector(parts[0], parts[1], parts[2]);
-      }
-    } else if (it.key() == "Range") {
-      _range = luabind::object_cast<float>(*it);
-    }
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "FireEntity") {
+//      _fire_entity_name = luabind::object_cast<std::string>(*it);
+//    } else if (it.key() == "FireDirection") {
+//      // TODO: factor this out and use an actual array or something
+//      std::vector<float> parts = fw::split<float>(luabind::object_cast<std::string>(*it));
+//      if (parts.size() == 3) {
+//        _fire_direction = fw::vector(parts[0], parts[1], parts[2]);
+//      }
+//    } else if (it.key() == "Range") {
+//      _range = luabind::object_cast<float>(*it);
+//    }
+//  }
 }
 
 void weapon_component::update(float dt) {

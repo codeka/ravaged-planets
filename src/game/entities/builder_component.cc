@@ -36,11 +36,11 @@ void builder_component::initialize() {
 }
 
 void builder_component::apply_template(luabind::object const &tmpl) {
-  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-    if (it.key() == "BuildGroup") {
-      _build_group = luabind::object_cast<std::string>(*it);
-    }
-  }
+//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
+//    if (it.key() == "BuildGroup") {
+//      _build_group = luabind::object_cast<std::string>(*it);
+//    }
+//  }
 }
 
 // this is called when our entity is selected/deselected, we need to show/hide the build window as appropriate.
@@ -59,7 +59,7 @@ void builder_component::build(std::string name) {
   entity_factory factory;
   queue_entry entry;
   entry.tmpl = factory.get_template(name);
-  entry.time_to_build = luabind::object_cast<float>(entry.tmpl["components"]["Buildable"]["TimeToBuild"]);
+  entry.time_to_build = 2.0f;// luabind::object_cast<float>(entry.tmpl["components"]["Buildable"]["TimeToBuild"]);
   entry.time_remaining = entry.time_to_build;
   entry.percent_complete = 0.0f;
   _build_queue.push(entry);
@@ -92,7 +92,7 @@ void builder_component::update(float dt) {
       if (our_pos != nullptr) {
         std::shared_ptr<game::create_entity_command> cmd(
             game::create_command<game::create_entity_command>(our_ownable->get_owner()->get_player_no()));
-        cmd->template_name = luabind::object_cast<std::string>(entry.tmpl["name"]);
+        cmd->template_name = "test";// luabind::object_cast<std::string>(entry.tmpl["name"]);
         cmd->initial_position = our_pos->get_position();
         cmd->initial_goal = our_pos->get_position() + (our_pos->get_direction() * 3.0f);
         game::simulation_thread::get_instance()->post_command(cmd);

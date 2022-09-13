@@ -4,7 +4,7 @@
 #include <boost/foreach.hpp>
 #include <boost/unordered_set.hpp>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #include <framework/gui/gui.h>
 #include <framework/input.h>
@@ -19,7 +19,7 @@ namespace fs = boost::filesystem;
 // in order to keep the header clean of platform-specific details, and also since keyboard/mouse input
 // is inherently singleton anyway, we have a bunch of global variables here. Sorry.
 
-typedef std::map<std::string, int, fw::iless<std::string> > key_names_map;
+typedef std::map<std::string, int, fw::iless<std::string>> key_names_map;
 typedef std::map<int, std::string> key_codes_map;
 static key_names_map g_key_names;
 static key_codes_map g_key_codes;
