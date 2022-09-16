@@ -127,7 +127,7 @@ bool framework::initialize(char const *title) {
     _gui->initialize(_graphics);
   }
 
-  if (stg.is_set("debug-view")) {
+  if (stg.is_set("debug-view") && _app->wants_graphics()) {
     _debug_view = new debug_view();
     _debug_view->initialize();
   }

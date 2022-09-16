@@ -9,7 +9,7 @@
 #include <game/ai/unit_wrapper.h>
 
 namespace fw {
-class lua_context;
+class LuaContext;
 }
 
 namespace game {
@@ -24,7 +24,7 @@ private:
   typedef std::map<std::string, luabind::object> unit_creator_map;
 
   script_desc _script_desc;
-  std::shared_ptr<fw::lua_context> _script;
+  std::shared_ptr<fw::LuaContext> _script;
   update_queue _upd_queue;
   lua_event_map _event_map;
   unit_creator_map _unit_creator_map;

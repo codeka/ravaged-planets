@@ -39,7 +39,7 @@ ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t p
 
   // create a new lua_context for our script, then add all of our global
   // functions and so on to it
-  std::shared_ptr<fw::lua_context> script(new fw::lua_context());
+  std::shared_ptr<fw::LuaContext> script(new fw::LuaContext());
 
 //  luabind::module(*script) [
 //      luabind::class_<ai_player>("ai_player")

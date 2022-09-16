@@ -108,12 +108,19 @@ int main(int argc, char** argv) {
     fw::tool_application app;
     new fw::framework(&app);
     fw::framework::get_instance()->initialize("Lua Test");
+
+    fw::LuaContext ctx;
+
+    ctx.globals();
+
+    ctx.add_path("D:\\src\\ravaged-planets\\lua");
+    ctx.load_script("D:\\src\\ravaged-planets\\lua\\main.lua");
+
+
 /*
-    fw::lua_context ctx;
+
     fw::lua_registrar<unit_wrapper>::register_without_constructor(ctx.get_state());
     fw::lua_registrar<ai_player>::register_static(ctx.get_state(), "player", new ai_player());
-    ctx.set_search_pattern("/Users/deanh/Downloads/?.lua");
-    ctx.load_script("/Users/deanh/Downloads/main.lua");
 
     if (g_callback) {
       fw::debug << "g_callback is non-null, calling it now." << std::endl;

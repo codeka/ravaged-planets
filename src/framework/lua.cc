@@ -10,24 +10,24 @@
 
 namespace fs = boost::filesystem;
 
-namespace fw {
+namespace fw::lua {
 
 void l_log_debug(std::string const &msg);
 
-lua_context::lua_context() {
-  _state = luaL_newstate();
-  luaL_openlibs(_state);
+LuaContext::LuaContext() {
+  l_ = luaL_newstate();
+  luaL_openlibs(l_);
 //  luabind::open(_state);
 
   // sets up our custom functions and so on
   setup_state();
 }
 
-lua_context::~lua_context() {
-  lua_close(_state);
+LuaContext::~LuaContext() {
+  lua_close(l_);
 }
 
-void lua_context::setup_state() {
+void LuaContext::setup_state() {
   // first, clear out the default package.path. we want to restrict where we look
   // for scripts to just those areas that we control
 //  luabind::object package = luabind::globals(_state)["package"];
@@ -42,7 +42,7 @@ void lua_context::setup_state() {
 //    ];
 }
 
-void lua_context::add_path(fs::path const &path) {
+void LuaContext::add_path(fs::path const &path) {
 //  luabind::object package = luabind::globals(_state)["package"];
 //  if (package.is_valid()) {
 //    // simply append the new path onto package.path
@@ -50,32 +50,39 @@ void lua_context::add_path(fs::path const &path) {
 //  }
 }
 
-bool lua_context::load_script(fs::path const &filename) {
-  _last_error = "";
+bool LuaContext::load_script(fs::path const &filename) {
+  last_error_ = "";
   debug << boost::format("loading script: %1%") % filename << std::endl;
 
-  int ret = luaL_loadfile(_state, filename.string().c_str());
+  int ret = luaL_loadfile(l_, filename.string().c_str());
   if (ret != 0) {
-    _last_error = lua_tostring(_state, -1);
+    last_error_ = lua_tostring(l_, -1);
     debug << boost::format("ERR: could not load Lua script %1%:\n%2%")
-        % filename % _last_error << std::endl;
+        % filename % last_error_ << std::endl;
     return false;
   }
 
-  ret = lua_pcall(_state, 0, 0, 0);
+  ret = lua_pcall(l_, 0, 0, 0);
   if (ret != 0) {
-    _last_error = lua_tostring(_state, -1);
+    last_error_ = lua_tostring(_state, -1);
     debug << boost::format("ERR: could not load Lua script %1%:\n%2%")
-        % filename % _last_error << std::endl;
+        % filename % last_error_ << std::endl;
     return false;
   }
 
   return true;
 }
 
+Value LuaContext::globals() {
+  lua_pushvalue(l_, LUA_GLOBALSINDEX);
+  impl::PopStack pop(l_, 1);
+
+  return Value(l_, -1);
+}
+
 //-------------------------------------------------------------------------
 
-void l_log_debug(std::string const &msg) {
+void l_log_debug(const std::string &msg) {
   debug << "LUA : " << msg << std::endl;
 }
 

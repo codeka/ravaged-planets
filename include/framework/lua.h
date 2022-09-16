@@ -4,47 +4,42 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-}
+#include <framework/lua/base.h>
+#include <framework/lua/value.h>
 
-namespace fw {
+namespace fw::lua {
 
 /**
  * This class represents the Lua context. It's the main object you'll create when creating an interface to Lua
  * and it allows you to call scripts, register objects, functions and callbacks and so on.
  */
-class lua_context {
+class LuaContext {
 private:
-  lua_State *_state;
-  std::string _last_error;
+  lua_State *l_;
+  std::string last_error_;
 
   void setup_state();
 
 public:
-  lua_context();
-  ~lua_context();
+  LuaContext();
+  ~LuaContext();
 
-  lua_context(const lua_context&) = delete;
+  LuaContext(const LuaContext&) = delete;
 
-  /** Adds a path to the package.path that LUA uses to search for modules reference in require(...) statements. */
+  // Adds a path to the package.path that LUA uses to search for modules reference in require(...) statements.
   void add_path(boost::filesystem::path const &path);
 
-  /** Loads a .lua script (and executes it immediately - you should have set up the context ready to go). */
+  // Loads a .lua script (and executes it immediately - you should have set up the context ready to go).
   bool load_script(boost::filesystem::path const &filename);
 
-  /** You can pass a lua_context as a lua_State to luabind, for example. */
-  operator lua_State *() { return _state; }
-
-  /** If something returns an error, this'll return a string version of the last error that occurred. */
+  // Gets a reference to the globals.
+  Value globals();
+ 
+  // If something returns an error, this'll return a string version of the last error that occurred.
   std::string get_last_error() const { return _last_error; }
 };
 
-}
-
-// TODO: make this real
+// TODO: delete this
 namespace luabind {
     struct object {};
 }

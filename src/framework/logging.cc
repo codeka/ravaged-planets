@@ -96,10 +96,10 @@ namespace fw {
         ss << std::put_time(std::localtime(&c_now), "%F %T") << " : ";
         ss.write(s, n);
         ::OutputDebugString(ss.str().c_str());
-#else
+#endif
+
         std::cout << std::put_time(std::localtime(&c_now), "%F %T") << " : ";
         std::cout.write(s, n);
-#endif
       }
     }
 

@@ -42,7 +42,6 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 # Look for the various libraries we depend on.
-find_package(Boost COMPONENTS filesystem iostreams program_options system REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Protobuf REQUIRED)
@@ -53,6 +52,7 @@ find_package(SDL2_mixer REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ENet REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
+find_package(Boost COMPONENTS filesystem iostreams program_options system REQUIRED)
 
 if(LINUX)
     # I don't know why, but libSDL is importing symbols from libX11.

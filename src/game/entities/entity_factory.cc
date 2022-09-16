@@ -13,7 +13,7 @@ namespace fs = boost::filesystem;
 
 namespace ent {
 
-typedef std::map<std::string, fw::lua_context *> entity_template_map;
+typedef std::map<std::string, fw::LuaContext *> entity_template_map;
 static entity_template_map *entity_templates = nullptr;
 static std::map<std::string, std::function<entity_component *()>> *comp_registry = nullptr;
 
@@ -70,7 +70,7 @@ luabind::object entity_factory::get_template(std::string name) {
     return luabind::object();
   }
 
-  fw::lua_context *ctx = it->second;
+  fw::LuaContext *ctx = it->second;
   return luabind::object();
   //return luabind::globals(*ctx)["Entity"];
 }
@@ -78,7 +78,7 @@ luabind::object entity_factory::get_template(std::string name) {
 // gets the complete list of entity_templates
 void entity_factory::get_templates(std::vector<luabind::object> &templates) {
   BOOST_FOREACH(auto &kvp, *entity_templates){
-    fw::lua_context *ctx = kvp.second;
+    fw::LuaContext *ctx = kvp.second;
 //    templates.push_back(luabind::globals(*ctx)["Entity"]);
   }
 }
@@ -87,7 +87,7 @@ void entity_factory::get_templates(std::vector<luabind::object> &templates) {
 void entity_factory::get_buildable_templates(std::string const &build_group,
       std::vector<luabind::object> &templates) {
   BOOST_FOREACH(entity_template_map::value_type & kvp, *entity_templates) {
-    fw::lua_context *ctx = kvp.second;
+    fw::LuaContext *ctx = kvp.second;
 //    luabind::object const &tmpl = luabind::globals(*ctx)["Entity"];
 
     luabind::object buildable_tmpl;// = tmpl["components"]["Buildable"];
@@ -110,7 +110,7 @@ void entity_factory::load_entities() {
     if (fs::is_regular_file(it->status()) && it->path().extension() == ".entity") {
       std::string tmpl_name = it->path().stem().string();
 
-      fw::lua_context *ctx = new fw::lua_context();
+      fw::LuaContext *ctx = new fw::LuaContext();
       ctx->load_script(it->path());
 
 //      luabind::object tmpl = luabind::globals(*ctx)["Entity"];
