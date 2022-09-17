@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
     new fw::framework(&app);
     fw::framework::get_instance()->initialize("Lua Test");
 
-    fw::LuaContext ctx;
+    fw::lua::LuaContext ctx;
 
     ctx.globals();
 

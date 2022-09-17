@@ -12,7 +12,7 @@ namespace fw::lua::impl {
 class PopStack {
 public:
   // Construct a PopStack that will pop n items from the Lua stack when we are destructed.
-  inline PopStack(lua_State* l, int n)
+  inline PopStack(lua_State *l, int n)
   : l_(l), n_(n) {
   }
 
@@ -21,7 +21,7 @@ public:
   }
 
 private:
-  const lua_State* l_;
+  lua_State *l_;
   const int n_;
 };
 

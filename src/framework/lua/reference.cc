@@ -1,5 +1,7 @@
 #include <framework/lua/reference.h>
 
+#include <algorithm>
+
 namespace fw::lua {
 
 Reference::Reference()
@@ -16,7 +18,7 @@ Reference::Reference(lua_State* l, int stack_index)
 Reference::Reference(const Reference& copy)
 : l_(copy.l_), ref_(LUA_NOREF) {
   if (l_ != nullptr) {
-    lua_rawgeti(l_, LUA_REGISTRYINDEX, other.ref_);
+    lua_rawgeti(l_, LUA_REGISTRYINDEX, copy.ref_);
     ref_ = luaL_ref(l_, LUA_REGISTRYINDEX);
   }
 }
@@ -36,7 +38,7 @@ void Reference::swap(Reference& other) {
   std::swap(ref_, other.ref_);
 }
 
-Reference& Reference::operator=(Referecnce other) {
+Reference& Reference::operator=(Reference other) {
   Reference(other).swap(*this);
   return *this;
 }

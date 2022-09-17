@@ -10,7 +10,7 @@ namespace fw::lua {
 
 // Base class for any value-like object (values, index values, call return values, etc). 
 template<typename Derived>
-class BaseValue<Derived> {
+class BaseValue {
 
 private:
   inline Derived& derived() {
@@ -36,18 +36,24 @@ class Value;
 // operator into the registry, it can stay as a temporary object in the stack.
 template<typename NextType>
 class IndexValue : public BaseValue<IndexValue<NextType>> {
-  
+public:
   template<typename T>
-  IndexValue(const NextType& next, lua_State* l, const T& key)
+  inline IndexValue(const NextType& next, lua_State* l, const T& key)
     : l_(l), key_(lua_gettop(l) + 1), next_(next) {
     push(l, key);
   }
 
-  ~IndexValue();
+  inline ~IndexValue() {
+    lua_pop(l_, 1);
+  }
 
   operator Value();
 
-  void push();
+  inline void push() {
+    lua_pushvalue(l_, key_);
+    lua_gettable(l_, -2);
+    lua_remove(l_, -2);
+  }
 
 private:
   lua_State* l_;
@@ -57,6 +63,7 @@ private:
 
 // Represents a value residing in the Lua registry.
 class Value : public BaseValue<Value> {
+public:
   // Constructs a nil value.
   Value();
 
@@ -78,7 +85,7 @@ class Value : public BaseValue<Value> {
     return IndexValue<Value>(*this, ref_.l(), key);
   }
 
-public:
+private:
   // A reference to the value we hold.
   Reference ref_;
 };
@@ -86,6 +93,15 @@ public:
 template<typename T>
 inline Value::Value(lua_State* l, const T& value) {
 
+}
+
+template<typename NextType>
+IndexValue<NextType>::operator Value() {
+  // Push our value onto the stack, construct a new Value with that pushed reference,
+  // use PopStack to pop ourselves from the stack when done.
+  impl::PopStack pop(l_, 1);
+  push();
+  return Value(l_, -1);
 }
 
 }

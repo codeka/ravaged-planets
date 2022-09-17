@@ -2,6 +2,7 @@
 file(GLOB FRAMEWORK_FILES
     *.cc
     gui/*.cc
+    lua/*.cc
     stb/*.cc
 )
 
@@ -9,6 +10,7 @@ file(GLOB FRAMEWORK_FILES
 file(GLOB FRAMEWORK_HEADERS
     ../../include/framework/*.h
     ../../include/framework/gui/*.h
+    ../../include/framework/lua/*.h
     ../../include/framework/stb/*.h
 )
 SOURCE_GROUP(src
@@ -80,7 +82,7 @@ if(MSVC)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
         # /MDd = multi-threaded debug DLL
         target_compile_options(framework PUBLIC /MDd)
-        target_compile_options(framework PUBLIC /ZI)
+        #target_compile_options(framework PUBLIC /ZI)
         target_compile_options(framework PUBLIC /Od)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG")
     endif()

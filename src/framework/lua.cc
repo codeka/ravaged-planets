@@ -64,7 +64,7 @@ bool LuaContext::load_script(fs::path const &filename) {
 
   ret = lua_pcall(l_, 0, 0, 0);
   if (ret != 0) {
-    last_error_ = lua_tostring(_state, -1);
+    last_error_ = lua_tostring(l_, -1);
     debug << boost::format("ERR: could not load Lua script %1%:\n%2%")
         % filename % last_error_ << std::endl;
     return false;
@@ -74,7 +74,7 @@ bool LuaContext::load_script(fs::path const &filename) {
 }
 
 Value LuaContext::globals() {
-  lua_pushvalue(l_, LUA_GLOBALSINDEX);
+  lua_pushglobaltable(l_);
   impl::PopStack pop(l_, 1);
 
   return Value(l_, -1);

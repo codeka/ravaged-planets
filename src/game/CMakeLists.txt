@@ -72,7 +72,7 @@ if(MSVC)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
         # /MDd = multi-threaded debug DLL
         target_compile_options(rp PUBLIC /MDd)
-        target_compile_options(rp PUBLIC /ZI)
+        #target_compile_options(rp PUBLIC /ZI)
         target_compile_options(rp PUBLIC /Od)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG")
     endif()

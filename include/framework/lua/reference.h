@@ -22,7 +22,7 @@ public:
   ~Reference();
 
   void swap(Reference& other);
-  Reference& operator=(Referecnce other);
+  Reference& operator=(Reference other);
 
   // Push this reference onto the stack so we can use it.
   void push() const;

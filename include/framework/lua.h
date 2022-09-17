@@ -10,12 +10,12 @@
 namespace fw::lua {
 
 /**
- * This class represents the Lua context. It's the main object you'll create when creating an interface to Lua
- * and it allows you to call scripts, register objects, functions and callbacks and so on.
- */
+  * This class represents the Lua context. It's the main object you'll create when creating an interface to Lua
+  * and it allows you to call scripts, register objects, functions and callbacks and so on.
+  */
 class LuaContext {
 private:
-  lua_State *l_;
+  lua_State* l_;
   std::string last_error_;
 
   void setup_state();
@@ -27,19 +27,21 @@ public:
   LuaContext(const LuaContext&) = delete;
 
   // Adds a path to the package.path that LUA uses to search for modules reference in require(...) statements.
-  void add_path(boost::filesystem::path const &path);
+  void add_path(boost::filesystem::path const& path);
 
   // Loads a .lua script (and executes it immediately - you should have set up the context ready to go).
-  bool load_script(boost::filesystem::path const &filename);
+  bool load_script(boost::filesystem::path const& filename);
 
   // Gets a reference to the globals.
   Value globals();
- 
+
   // If something returns an error, this'll return a string version of the last error that occurred.
-  std::string get_last_error() const { return _last_error; }
+  std::string get_last_error() const { return last_error_; }
 };
 
 // TODO: delete this
 namespace luabind {
-    struct object {};
+  struct object {};
+}
+
 }
