@@ -7,84 +7,84 @@
 #include <framework/font.h>
 
 
-namespace fw { namespace gui {
+namespace fw::gui {
 
 /** Property that sets the text of the checkbox. */
-class checkbox_text_property : public property {
+class CheckboxTextProperty : public Property {
 private:
-  std::string _text;
+  std::string text_;
 public:
-  checkbox_text_property(std::string const &text) :
-      _text(text) {
+  CheckboxTextProperty(std::string const &text) :
+      text_(text) {
   }
 
-  void apply(widget *widget) {
-    checkbox *chbx = dynamic_cast<checkbox *>(widget);
-    chbx->_text = _text;
+  void apply(Widget *widget) {
+    Checkbox *chbx = dynamic_cast<Checkbox *>(widget);
+    chbx->text_ = text_;
   }
 };
 
 //-----------------------------------------------------------------------------
 
-checkbox::checkbox(gui *gui) : widget(gui), _is_checked(false), _is_mouse_over(false) {
+Checkbox::Checkbox(Gui *gui) : Widget(gui), is_checked_(false), is_mouse_over_(false) {
 }
 
-checkbox::~checkbox() {
+Checkbox::~Checkbox() {
 }
 
-property *checkbox::text(std::string const &text) {
-  return new checkbox_text_property(text);
+Property * Checkbox::text(std::string const &text) {
+  return new CheckboxTextProperty(text);
 }
 
-void checkbox::on_attached_to_parent(widget *parent) {
-  state_drawable *bkgnd = new state_drawable();
-  bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("button_normal"));
-  bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("button_hover"));
-  _background = std::shared_ptr<drawable>(bkgnd);
+void Checkbox::on_attached_to_parent(Widget *parent) {
+  StateDrawable *bkgnd = new StateDrawable();
+  bkgnd->add_drawable(StateDrawable::kNormal, gui_->get_drawable_manager()->get_drawable("button_normal"));
+  bkgnd->add_drawable(StateDrawable::kHover, gui_->get_drawable_manager()->get_drawable("button_hover"));
+  background_ = std::shared_ptr<Drawable>(bkgnd);
 
-  _check_icon = _gui->get_drawable_manager()->get_drawable("checkbox");
+  check_icon_ = gui_->get_drawable_manager()->get_drawable("checkbox");
 }
 
-void checkbox::on_mouse_out() {
-  _is_mouse_over = false;
+void Checkbox::on_mouse_out() {
+  is_mouse_over_ = false;
   update_drawable_state();
 }
 
-void checkbox::on_mouse_over() {
-  _is_mouse_over = true;
+void Checkbox::on_mouse_over() {
+  is_mouse_over_ = true;
   update_drawable_state();
 }
 
-bool checkbox::on_mouse_down(float x, float y) {
-  set_checked(!_is_checked);
-  return widget::on_mouse_down(x, y);
+bool Checkbox::on_mouse_down(float x, float y) {
+  set_checked(!is_checked_);
+  return Widget::on_mouse_down(x, y);
 }
 
-void checkbox::set_checked(bool is_checked) {
-  _is_checked = is_checked;
+void Checkbox::set_checked(bool is_checked) {
+  is_checked_ = is_checked;
   update_drawable_state();
 }
 
-void checkbox::update_drawable_state() {
-  state_drawable *drawable = dynamic_cast<state_drawable *>(_background.get());
-  if (_is_mouse_over) {
-    drawable->set_current_state(state_drawable::hover);
+void Checkbox::update_drawable_state() {
+  StateDrawable *drawable = dynamic_cast<StateDrawable *>(background_.get());
+  if (is_mouse_over_) {
+    drawable->set_current_state(StateDrawable::kHover);
   } else {
-    drawable->set_current_state(state_drawable::normal);
+    drawable->set_current_state(StateDrawable::kNormal);
   }
 }
 
-void checkbox::render() {
+void Checkbox::render() {
   float left = get_left();
   float top = get_top();
   float width = get_width();
   float height = get_height();
 
-  _background->render(left + 2, top + 2, height - 4, height - 4);
+  background_->render(left + 2, top + 2, height - 4, height - 4);
 
-  if (_is_checked) {
-    float icon_width = _check_icon->get_intrinsic_width();
-    float icon_height = _check_icon->get_intrinsic_height();
+  if (is_checked_) {
+    float icon_width = check_icon_->get_intrinsic_width();
+    float icon_height = check_icon_->get_intrinsic_height();
     if (icon_width == 0.0f) {
       icon_width = height * 0.75f;
     }
@@ -93,14 +93,14 @@ void checkbox::render() {
     }
     float x = left + (height / 2.0f) - (icon_width / 2.0f);
     float y = top + (height / 2.0f) - (icon_height / 2.0f);
-    _check_icon->render(x, y, icon_width, icon_height);
+    check_icon_->render(x, y, icon_width, icon_height);
   }
 
-  if (_text.length() > 0) {
+  if (text_.length() > 0) {
     fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        left + height + 4, top + height / 2, _text,
+        left + height + 4, top + height / 2, text_,
         static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
   }
 }
 
-} }
+}

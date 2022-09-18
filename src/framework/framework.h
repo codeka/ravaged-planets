@@ -21,7 +21,7 @@ class cursor;
 class input;
 
 namespace gui {
-class gui;
+class Gui;
 }
 
 namespace sg {
@@ -89,7 +89,7 @@ private:
   base_app * _app;
   timer *_timer;
   camera *_camera;
-  gui::gui *_gui;
+  gui::Gui *_gui;
   particle_manager *_particle_mgr;
   bool _paused;
   audio_manager *_audio_manager;
@@ -166,7 +166,7 @@ public:
   graphics *get_graphics() const {
     return _graphics;
   }
-  gui::gui *get_gui() const {
+  gui::Gui *get_gui() const {
     return _gui;
   }
   base_app *get_app() const {

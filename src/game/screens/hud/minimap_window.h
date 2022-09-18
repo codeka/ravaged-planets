@@ -13,8 +13,7 @@ class vertex_buffer;
 class index_buffer;
 class texture;
 namespace gui {
-class window;
-class widget;
+class Window;
 }
 }
 
@@ -24,7 +23,7 @@ class minimap_drawable;
 // The minimap_window shows a graphic with the current map and all the friendlies/enemies/etc
 class minimap_window {
 private:
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
   std::shared_ptr<fw::texture> _texture;
   std::shared_ptr<minimap_drawable> _drawable;
   float _last_entity_display_update;

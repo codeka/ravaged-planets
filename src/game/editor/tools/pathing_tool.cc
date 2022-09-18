@@ -39,12 +39,12 @@ enum IDS {
 
 class pathing_tool_window {
 private:
-  window *_wnd;
+  Window *_wnd;
   ed::pathing_tool *_tool;
 
-  bool on_start_click(widget *w);
-  bool on_end_click(widget *w);
-  bool on_simplify_click(widget *w);
+  bool on_start_click(Widget *w);
+  bool on_end_click(Widget *w);
+  bool on_simplify_click(Widget *w);
 
 public:
   pathing_tool_window(ed::pathing_tool *tool);
@@ -56,13 +56,13 @@ public:
 
 pathing_tool_window::pathing_tool_window(ed::pathing_tool *tool) :
     _tool(tool), _wnd(nullptr) {
-  _wnd = builder<window>(px(10), px(30), px(100), px(94)) << window::background("frame")
-      << (builder<button>(px(4), px(4), sum(pct(100), px(-8)), px(30)) << button::text("Start") << widget::id(START_ID)
-          << widget::click(std::bind(&pathing_tool_window::on_start_click, this, _1)))
-      << (builder<button>(px(4), px(38), sum(pct(100), px(-8)), px(30)) << button::text("End") << widget::id(END_ID)
-          << widget::click(std::bind(&pathing_tool_window::on_end_click, this, _1)))
-      << (builder<checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18)) << checkbox::text("Simplify")
-          << widget::click(std::bind(&pathing_tool_window::on_simplify_click, this, _1)));
+  _wnd = Builder<Window>(px(10), px(30), px(100), px(94)) << Window::background("frame")
+      << (Builder<Button>(px(4), px(4), sum(pct(100), px(-8)), px(30)) << Button::text("Start") << Widget::id(START_ID)
+          << Widget::click(std::bind(&pathing_tool_window::on_start_click, this, _1)))
+      << (Builder<Button>(px(4), px(38), sum(pct(100), px(-8)), px(30)) << Button::text("End") << Widget::id(END_ID)
+          << Widget::click(std::bind(&pathing_tool_window::on_end_click, this, _1)))
+      << (Builder<Checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18)) << Checkbox::text("Simplify")
+          << Widget::click(std::bind(&pathing_tool_window::on_simplify_click, this, _1)));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
@@ -78,24 +78,24 @@ void pathing_tool_window::hide() {
   _wnd->set_visible(false);
 }
 
-bool pathing_tool_window::on_start_click(widget *w) {
+bool pathing_tool_window::on_start_click(Widget *w) {
   ed::statusbar->set_message("Set test start...");
   _tool->set_test_start();
-  _wnd->find<button>(START_ID)->set_pressed(true);
-  _wnd->find<button>(END_ID)->set_pressed(false);
+  _wnd->find<Button>(START_ID)->set_pressed(true);
+  _wnd->find<Button>(END_ID)->set_pressed(false);
   return true;
 }
 
-bool pathing_tool_window::on_end_click(widget *w) {
+bool pathing_tool_window::on_end_click(Widget *w) {
   ed::statusbar->set_message("Set test end...");
   _tool->set_test_end();
-  _wnd->find<button>(START_ID)->set_pressed(false);
-  _wnd->find<button>(END_ID)->set_pressed(true);
+  _wnd->find<Button>(START_ID)->set_pressed(false);
+  _wnd->find<Button>(END_ID)->set_pressed(true);
   return true;
 }
 
-bool pathing_tool_window::on_simplify_click(widget *w) {
-  _tool->set_simplify(dynamic_cast<checkbox *>(w)->is_checked());
+bool pathing_tool_window::on_simplify_click(Widget *w) {
+  _tool->set_simplify(dynamic_cast<Checkbox *>(w)->is_checked());
   return true;
 }
 

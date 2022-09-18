@@ -10,12 +10,13 @@
 #include <framework/xml.h>
 #include <framework/gui/drawable.h>
 
-namespace fw {
-namespace gui {
+namespace fw::gui {
+
+namespace {
 
 // Parses an attribute value of the form "n,m" and populates the two integers. Throws an exception if we can't parse
 // the value successfully.
-void parse_tuple_attribute(std::string attr_value, int &left, int &right) {
+void parse_tuple_attribute(std::string attr_value, int& left, int& right) {
   std::vector<std::string> parts;
   boost::split(parts, attr_value, boost::is_any_of(","));
   if (parts.size() != 2) {
@@ -31,21 +32,23 @@ static std::shared_ptr<fw::vertex_buffer> g_vertex_buffer;
 static std::shared_ptr<fw::vertex_buffer> g_flipped_vertex_buffer;
 static std::shared_ptr<fw::index_buffer> g_index_buffer;
 
-//-----------------------------------------------------------------------------
-
-drawable::drawable() {
-}
-
-drawable::~drawable() {
-}
-
-void drawable::render(float x, float y, float width, float height) {
-}
+}  // namespace
 
 //-----------------------------------------------------------------------------
 
-bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture) :
-    _top(0), _left(0), _width(0), _height(0), _texture(texture), _flipped(false) {
+Drawable::Drawable() {
+}
+
+Drawable::~Drawable() {
+}
+
+void Drawable::render(float x, float y, float width, float height) {
+}
+
+//-----------------------------------------------------------------------------
+
+BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::texture> texture) :
+    top_(0), left_(0), width_(0), height_(0), texture_(texture), flipped_(false) {
   if (g_vertex_buffer == nullptr) {
     fw::vertex::xyz_uv vertices[4];
     vertices[0] = fw::vertex::xyz_uv(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -71,29 +74,29 @@ bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture) :
     g_index_buffer->set_data(4, indices);
   }
 
-  _shader = fw::shader::create("gui.shader");
-  _shader_params = _shader->create_parameters();
-  _shader_params->set_texture("texsampler", _texture);
+  shader_ = fw::shader::create("gui.shader");
+  shader_params_ = shader_->create_parameters();
+  shader_params_->set_texture("texsampler", texture_);
 }
 
-bitmap_drawable::bitmap_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
-    bitmap_drawable(texture) {
-  parse_tuple_attribute(elem->Attribute("pos"), _left, _top);
-  parse_tuple_attribute(elem->Attribute("size"), _width, _height);
+BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
+    BitmapDrawable(texture) {
+  parse_tuple_attribute(elem->Attribute("pos"), left_, top_);
+  parse_tuple_attribute(elem->Attribute("size"), width_, height_);
 }
 
-bitmap_drawable::~bitmap_drawable() {
+BitmapDrawable::~BitmapDrawable() {
 }
 
-fw::matrix bitmap_drawable::get_uv_transform() {
-  float x = static_cast<float>(_left) / static_cast<float>(_texture->get_width());
-  float y = static_cast<float>(_top) / static_cast<float>(_texture->get_height());
-  float width = static_cast<float>(_width) / static_cast<float>(_texture->get_width());
-  float height = static_cast<float>(_height) / static_cast<float>(_texture->get_height());
+fw::matrix BitmapDrawable::get_uv_transform() {
+  const float x = static_cast<float>(left_) / static_cast<float>(texture_->get_width());
+  const float y = static_cast<float>(top_) / static_cast<float>(texture_->get_height());
+  const float width = static_cast<float>(width_) / static_cast<float>(texture_->get_width());
+  const float height = static_cast<float>(height_) / static_cast<float>(texture_->get_height());
   return fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0));
 }
 
-fw::matrix bitmap_drawable::get_pos_transform(float x, float y, float width, float height) {
+fw::matrix BitmapDrawable::get_pos_transform(float x, float y, float width, float height) {
   fw::graphics *g = fw::framework::get_instance()->get_graphics();
   fw::matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
@@ -101,91 +104,91 @@ fw::matrix bitmap_drawable::get_pos_transform(float x, float y, float width, flo
   return fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * transform;
 }
 
-void bitmap_drawable::render(float x, float y, float width, float height) {
+void BitmapDrawable::render(float x, float y, float width, float height) {
   // TODO: recalculating this every time seems wasteful.
-  _shader_params->set_matrix("pos_transform", get_pos_transform(x, y, width, height));
-  _shader_params->set_matrix("uv_transform", get_uv_transform());
+  shader_params_->set_matrix("pos_transform", get_pos_transform(x, y, width, height));
+  shader_params_->set_matrix("uv_transform", get_uv_transform());
 
-  std::shared_ptr<fw::vertex_buffer> vb = _flipped ? g_flipped_vertex_buffer : g_vertex_buffer;
+  std::shared_ptr<fw::vertex_buffer> vb = flipped_ ? g_flipped_vertex_buffer : g_vertex_buffer;
   vb->begin();
   g_index_buffer->begin();
-  _shader->begin(_shader_params);
+  shader_->begin(shader_params_);
   FW_CHECKED(glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr));
-  _shader->end();
+  shader_->end();
   g_index_buffer->end();
   vb->end();
 }
 
 //-----------------------------------------------------------------------------
 
-ninepatch_drawable::ninepatch_drawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
-    bitmap_drawable(texture) {
+NinePatchDrawable::NinePatchDrawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
+    BitmapDrawable(texture) {
   for (xml::XMLElement *child_elem = elem->FirstChildElement(); child_elem != nullptr;
       child_elem = child_elem->NextSiblingElement()) {
     if (std::string(child_elem->Name()) == "inner") {
-      parse_tuple_attribute(child_elem->Attribute("pos"), _inner_left, _inner_top);
-      parse_tuple_attribute(child_elem->Attribute("size"), _inner_width, _inner_height);
+      parse_tuple_attribute(child_elem->Attribute("pos"), inner_left_, inner_top_);
+      parse_tuple_attribute(child_elem->Attribute("size"), inner_width_, inner_height_);
     } else if (std::string(child_elem->Name()) == "outer") {
-      parse_tuple_attribute(child_elem->Attribute("pos"), _left, _top);
-      parse_tuple_attribute(child_elem->Attribute("size"), _width, _height);
+      parse_tuple_attribute(child_elem->Attribute("pos"), left_, top_);
+      parse_tuple_attribute(child_elem->Attribute("size"), width_, height_);
     }
   }
 
-  _shader = fw::shader::create("gui.shader");
-  _shader_params = _shader->create_parameters();
-  _shader_params->set_program_name("ninepatch");
-  _shader_params->set_texture("texsampler", _texture);
+  shader_ = fw::shader::create("gui.shader");
+  shader_params_ = shader_->create_parameters();
+  shader_params_->set_program_name("ninepatch");
+  shader_params_->set_texture("texsampler", texture_);
 }
 
-void ninepatch_drawable::render(float x, float y, float width, float height) {
-  float pixel_width = 1.0f / static_cast<float>(_texture->get_width());
-  float pixel_height = 1.0f / static_cast<float>(_texture->get_height());
-  float width_scale = width / static_cast<float>(_width);
-  float height_scale = height / static_cast<float>(_height);
+void NinePatchDrawable::render(float x, float y, float width, float height) {
+  const float pixel_width = 1.0f / static_cast<float>(texture_->get_width());
+  const float pixel_height = 1.0f / static_cast<float>(texture_->get_height());
+  const float width_scale = width / static_cast<float>(width_);
+  const float height_scale = height / static_cast<float>(height_);
 
-  float inner_top = (static_cast<float>(_top) + static_cast<float>(_inner_top - _top) / height_scale) * pixel_height;
-  float inner_left = (static_cast<float>(_left) + static_cast<float>(_inner_left - _left) / width_scale) * pixel_width;
-  float inner_bottom = (static_cast<float>(_top + _height) - (static_cast<float>(_top + _height - _inner_top - _inner_height) / height_scale)) * pixel_height;
-  float inner_right = (static_cast<float>(_left + _width) - (static_cast<float>(_left + _width - _inner_left - _inner_width) / width_scale)) * pixel_width;
-  _shader_params->set_scalar("inner_top", inner_top);
-  _shader_params->set_scalar("inner_left", inner_left);
-  _shader_params->set_scalar("inner_bottom", inner_bottom);
-  _shader_params->set_scalar("inner_right", inner_right);
-  _shader_params->set_scalar("inner_top_v", static_cast<float>(_inner_top) * pixel_height);
-  _shader_params->set_scalar("inner_left_u", static_cast<float>(_inner_left) * pixel_width);
-  _shader_params->set_scalar("inner_bottom_v", static_cast<float>(_inner_top + _inner_height) * pixel_height);
-  _shader_params->set_scalar("inner_right_u", static_cast<float>(_inner_left + _inner_width) * pixel_width);
-  _shader_params->set_scalar("fraction_width", width_scale);
-  _shader_params->set_scalar("fraction_height", height_scale);
-  _shader_params->set_scalar("fraction_width2", width / static_cast<float>(_inner_width));
-  _shader_params->set_scalar("fraction_height2", height / static_cast<float>(_inner_height));
-  _shader_params->set_scalar("pixel_width", pixel_width);
-  _shader_params->set_scalar("pixel_height", pixel_height);
+  const float inner_top = (static_cast<float>(top_) + static_cast<float>(inner_top_ - top_) / height_scale) * pixel_height;
+  const float inner_left = (static_cast<float>(left_) + static_cast<float>(inner_left_ - left_) / width_scale) * pixel_width;
+  const float inner_bottom = (static_cast<float>(top_ + height_) - (static_cast<float>(top_ + height_ - inner_top_ - inner_height_) / height_scale)) * pixel_height;
+  const float inner_right = (static_cast<float>(left_ + width_) - (static_cast<float>(left_ + width_ - inner_left_ - inner_width_) / width_scale)) * pixel_width;
+  shader_params_->set_scalar("inner_top", inner_top);
+  shader_params_->set_scalar("inner_left", inner_left);
+  shader_params_->set_scalar("inner_bottom", inner_bottom);
+  shader_params_->set_scalar("inner_right", inner_right);
+  shader_params_->set_scalar("inner_top_v", static_cast<float>(inner_top_) * pixel_height);
+  shader_params_->set_scalar("inner_left_u", static_cast<float>(inner_left_) * pixel_width);
+  shader_params_->set_scalar("inner_bottom_v", static_cast<float>(inner_top_ + inner_height_) * pixel_height);
+  shader_params_->set_scalar("inner_right_u", static_cast<float>(inner_left_ + inner_width_) * pixel_width);
+  shader_params_->set_scalar("fraction_width", width_scale);
+  shader_params_->set_scalar("fraction_height", height_scale);
+  shader_params_->set_scalar("fraction_width2", width / static_cast<float>(inner_width_));
+  shader_params_->set_scalar("fraction_height2", height / static_cast<float>(inner_height_));
+  shader_params_->set_scalar("pixel_width", pixel_width);
+  shader_params_->set_scalar("pixel_height", pixel_height);
 
-  bitmap_drawable::render(x, y, width, height);
+  BitmapDrawable::render(x, y, width, height);
 }
 
 //-----------------------------------------------------------------------------
 
-state_drawable::state_drawable() :
-  _curr_state(normal) {
+StateDrawable::StateDrawable() :
+  curr_state_(kNormal) {
 }
 
-state_drawable::~state_drawable() {
+StateDrawable::~StateDrawable() {
 }
 
-void state_drawable::add_drawable(state state, std::shared_ptr<drawable> drawable) {
-  _drawable_map[state] = drawable;
+void StateDrawable::add_drawable(State state, std::shared_ptr<Drawable> drawable) {
+  drawable_map_[state] = drawable;
 }
 
-void state_drawable::set_current_state(state state) {
-  _curr_state = state;
+void StateDrawable::set_current_state(State state) {
+  curr_state_ = state;
 }
 
-void state_drawable::render(float x, float y, float width, float height) {
-  std::shared_ptr<drawable> curr_drawable = _drawable_map[_curr_state];
+void StateDrawable::render(float x, float y, float width, float height) {
+  std::shared_ptr<Drawable> curr_drawable = drawable_map_[curr_state_];
   if (!curr_drawable) {
-    curr_drawable = _drawable_map[normal];
+    curr_drawable = drawable_map_[kNormal];
   }
 
   if (curr_drawable) {
@@ -195,13 +198,13 @@ void state_drawable::render(float x, float y, float width, float height) {
 
 //-----------------------------------------------------------------------------
 
-drawable_manager::drawable_manager() {
+DrawableManager::DrawableManager() {
 }
 
-drawable_manager::~drawable_manager() {
+DrawableManager::~DrawableManager() {
 }
 
-void drawable_manager::parse(boost::filesystem::path const &file) {
+void DrawableManager::parse(boost::filesystem::path const &file) {
   xml::XMLDocument doc;
   try {
     XML_CHECK(doc.LoadFile(file.string().c_str()));
@@ -229,20 +232,20 @@ void drawable_manager::parse(boost::filesystem::path const &file) {
 
 }
 
-std::shared_ptr<drawable> drawable_manager::get_drawable(std::string const &name) {
-  return _drawables[name];
+std::shared_ptr<Drawable> DrawableManager::get_drawable(std::string const &name) {
+  return drawables_[name];
 }
 
-void drawable_manager::parse_drawable_element(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) {
-  std::shared_ptr<drawable> new_drawable;
+void DrawableManager::parse_drawable_element(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) {
+  std::shared_ptr<Drawable> new_drawable;
   if (elem->Name() == nullptr) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string("Element has null name: ") + elem->Value()));
   }
   std::string type_name(elem->Name());
   if (type_name == "drawable") {
-    new_drawable = std::shared_ptr<drawable>(new bitmap_drawable(texture, elem));
+    new_drawable = std::shared_ptr<Drawable>(new BitmapDrawable(texture, elem));
   } else if (type_name == "ninepatch") {
-    new_drawable = std::shared_ptr<drawable>(new ninepatch_drawable(texture, elem));
+    new_drawable = std::shared_ptr<Drawable>(new NinePatchDrawable(texture, elem));
   } else {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Unknown element: " + type_name));
   }
@@ -251,18 +254,17 @@ void drawable_manager::parse_drawable_element(std::shared_ptr<fw::texture> textu
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Attribute 'name' is required."));
   }
   std::string name(elem->Attribute("name"));
-  _drawables[name] = new_drawable;
+  drawables_[name] = new_drawable;
 }
 
-std::shared_ptr<drawable> drawable_manager::build_drawable(std::shared_ptr<fw::texture> texture,
+std::shared_ptr<Drawable> DrawableManager::build_drawable(std::shared_ptr<fw::texture> texture,
     float top, float left, float width, float height) {
-  std::shared_ptr<bitmap_drawable> new_drawable(new bitmap_drawable(texture));
-  new_drawable->_top = top;
-  new_drawable->_left = left;
-  new_drawable->_width = width;
-  new_drawable->_height = height;
+  auto new_drawable = std::shared_ptr<BitmapDrawable>(new BitmapDrawable(texture));
+  new_drawable->top_ = top;
+  new_drawable->left_ = left;
+  new_drawable->width_ = width;
+  new_drawable->height_ = height;
   return new_drawable;
 }
 
-}
 }

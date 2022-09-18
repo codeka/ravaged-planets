@@ -1,9 +1,12 @@
 #pragma once
 
+#include <memory>
+#include <string>
+
 namespace fw {
 namespace gui {
-class window;
-class widget;
+class Window;
+class Widget;
 }
 }
 
@@ -15,7 +18,7 @@ namespace game {
 // The build_window shows all of the units an entity with builder_component can build.
 class build_window {
 private:
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
   std::weak_ptr<ent::entity> _entity;
   std::string _build_group;
   bool _require_refresh;
@@ -24,7 +27,7 @@ private:
   void do_refresh();
   void on_mouse_over_button(int id);
   void on_mouse_out_button(int id);
-  bool on_build_clicked(fw::gui::widget *w, int id);
+  bool on_build_clicked(fw::gui::Widget *w, int id);
 public:
   build_window();
   virtual ~build_window();

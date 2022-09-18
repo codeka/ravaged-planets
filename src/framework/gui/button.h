@@ -5,31 +5,31 @@
 
 #include <framework/gui/widget.h>
 
-namespace fw { namespace gui {
-class gui;
-class drawable;
+namespace fw::gui {
+class Gui;
+class Drawable;
 
 /** Buttons have a background image and text (or image, or both). */
-class button : public widget {
+class Button : public Widget {
 public:
-  enum alignment {
-    left,
-    center,
-    right
+  enum Alignment {
+    kLeft,
+    kCenter,
+    kRight
   };
 
 protected:
-  friend class button_background_property;
-  friend class button_text_property;
-  friend class button_text_align_property;
-  friend class button_icon_property;
+  friend class ButtonBackgroundProperty;
+  friend class ButtonTextProperty;
+  friend class ButtonTextAlignProperty;
+  friend class ButtonIconProperty;
 
-  std::shared_ptr<drawable> _background;
-  std::shared_ptr<drawable> _icon;
-  std::string _text;
-  alignment _text_align;
-  bool _is_pressed;
-  bool _is_mouse_over;
+  std::shared_ptr<Drawable> background_;
+  std::shared_ptr<Drawable> icon_;
+  std::string text_;
+  Alignment text_align_;
+  bool is_pressed_;
+  bool is_mouse_over_;
 
   void on_mouse_out();
   void on_mouse_over();
@@ -37,33 +37,33 @@ protected:
   void update_drawable_state();
 
 public:
-  button(gui *gui);
-  virtual ~button();
+  Button(Gui *gui);
+  virtual ~Button();
 
-  static property *background(std::string const &drawable_name);
-  static property *background(std::shared_ptr<drawable> drawable);
-  static property *icon(std::string const &drawable_name);
-  static property *icon(std::shared_ptr<drawable> drawable);
-  static property *text(std::string const &text);
-  static property *text_align(alignment align);
+  static Property *background(std::string const &drawable_name);
+  static Property *background(std::shared_ptr<Drawable> drawable);
+  static Property *icon(std::string const &drawable_name);
+  static Property *icon(std::shared_ptr<Drawable> drawable);
+  static Property *text(std::string const &text);
+  static Property *text_align(Alignment align);
 
-  void on_attached_to_parent(widget *parent);
+  void on_attached_to_parent(Widget *parent);
   void render();
 
   inline void set_text(std::string const &new_text) {
-    _text = new_text;
+    text_ = new_text;
   }
   inline std::string get_text() const {
-    return _text;
+    return text_;
   }
-  inline void set_icon(std::shared_ptr<drawable> drawable) {
-    _icon = drawable;
+  inline void set_icon(std::shared_ptr<Drawable> drawable) {
+    icon_ = drawable;
   }
 
   void set_pressed(bool is_pressed);
   bool is_pressed() {
-    return _is_pressed;
+    return is_pressed_;
   }
 };
 
-} }
+}

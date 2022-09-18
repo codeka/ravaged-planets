@@ -5,142 +5,142 @@
 #include <framework/gui/gui.h>
 #include <framework/gui/slider.h>
 
-namespace fw { namespace gui {
+namespace fw::gui {
 
 static const int THUMB_WIDTH = 9;
 static const int THUMB_HEIGHT = 18;
 
-/** Property that sets the limits of the slider. */
-class slider_limits_property : public property {
+// Property that sets the limits of the slider.
+class SliderLimitsProperty : public Property {
 private:
-  int _min_value;
-  int _max_value;
+  int min_value_;
+  int max_value_;
 public:
-  slider_limits_property(int min_value, int max_value) :
-      _min_value(min_value), _max_value(max_value) {
+  SliderLimitsProperty(int min_value, int max_value) :
+    min_value_(min_value), max_value_(max_value) {
   }
 
-  void apply(widget *widget) {
-    slider *sldr = dynamic_cast<slider *>(widget);
-    sldr->_min_value = _min_value;
-    sldr->_max_value = _max_value;
+  void apply(Widget *widget) {
+    Slider *sldr = dynamic_cast<Slider *>(widget);
+    sldr->min_value_ = min_value_;
+    sldr->max_value_ = max_value_;
   }
 };
 
 /** Property that sets the current value of the slider. */
-class slider_value_property : public property {
+class SliderValueProperty : public Property {
 private:
-  int _curr_value;
+  int curr_value_;
 public:
-  slider_value_property(int curr_value) :
-      _curr_value(curr_value) {
+  SliderValueProperty(int curr_value) :
+      curr_value_(curr_value) {
   }
 
-  void apply(widget *widget) {
-    slider *sldr = dynamic_cast<slider *>(widget);
-    sldr->_curr_value = _curr_value;
+  void apply(Widget *widget) {
+    Slider *slider = dynamic_cast<Slider *>(widget);
+    slider->curr_value_ = curr_value_;
   }
 };
 
 /** Property that sets the on_update callback for the slider. */
-class slider_on_update_property : public property {
+class SliderOnUpdateProperty : public Property {
 private:
-  std::function<void(int)> _on_update;
+  std::function<void(int)> on_update_;
 public:
-  slider_on_update_property(std::function<void(int)> on_update) :
-    _on_update(on_update) {
+  SliderOnUpdateProperty(std::function<void(int)> on_update) :
+    on_update_(on_update) {
   }
 
-  void apply(widget *widget) {
-    slider *sldr = dynamic_cast<slider *>(widget);
-    sldr->_on_update = _on_update;
+  void apply(Widget *widget) {
+    Slider *sldr = dynamic_cast<Slider *>(widget);
+    sldr->on_update_ = on_update_;
   }
 };
 
 //-----------------------------------------------------------------------------
 
-slider::slider(gui *gui) : widget(gui), _min_value(0), _max_value(100), _curr_value(0), _dragging(false) {
+Slider::Slider(Gui *gui) : Widget(gui), min_value_(0), max_value_(100), curr_value_(0), dragging_(false) {
 }
 
-slider::~slider() {
+Slider::~Slider() {
 }
 
-property *slider::limits(int min_value, int max_value) {
-  return new slider_limits_property(min_value, max_value);
+Property *Slider::limits(int min_value, int max_value) {
+  return new SliderLimitsProperty(min_value, max_value);
 }
 
-property *slider::value(int curr_value) {
-  return new slider_value_property(curr_value);
+Property *Slider::value(int curr_value) {
+  return new SliderValueProperty(curr_value);
 }
 
-property *slider::on_update(std::function<void(int)> on_update) {
-  return new slider_on_update_property(on_update);
+Property *Slider::on_update(std::function<void(int)> on_update) {
+  return new SliderOnUpdateProperty(on_update);
 }
 
-void slider::on_attached_to_parent(widget *parent) {
-  state_drawable *bkgnd = new state_drawable();
-  bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("slider_thumb_normal"));
-  bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("slider_thumb_hover"));
-  _thumb = std::shared_ptr<drawable>(bkgnd);
-  _line = _gui->get_drawable_manager()->get_drawable("slider_line");
+void Slider::on_attached_to_parent(Widget *parent) {
+  StateDrawable *bkgnd = new StateDrawable();
+  bkgnd->add_drawable(StateDrawable::kNormal, gui_->get_drawable_manager()->get_drawable("slider_thumb_normal"));
+  bkgnd->add_drawable(StateDrawable::kHover, gui_->get_drawable_manager()->get_drawable("slider_thumb_hover"));
+  thumb_ = std::shared_ptr<Drawable>(bkgnd);
+  line_ = gui_->get_drawable_manager()->get_drawable("slider_line");
 }
 
-void slider::on_mouse_out() {
-  std::shared_ptr<state_drawable> drawable = std::dynamic_pointer_cast<state_drawable>(_thumb);
-  drawable->set_current_state(state_drawable::normal);
+void Slider::on_mouse_out() {
+  std::shared_ptr<StateDrawable> drawable = std::dynamic_pointer_cast<StateDrawable>(thumb_);
+  drawable->set_current_state(StateDrawable::kNormal);
 }
 
-void slider::on_mouse_over() {
-  std::shared_ptr<state_drawable> drawable = std::dynamic_pointer_cast<state_drawable>(_thumb);
-  drawable->set_current_state(state_drawable::hover);
+void Slider::on_mouse_over() {
+  std::shared_ptr<StateDrawable> drawable = std::dynamic_pointer_cast<StateDrawable>(thumb_);
+  drawable->set_current_state(StateDrawable::kHover);
 }
 
-bool slider::on_mouse_down(float x, float y) {
+bool Slider::on_mouse_down(float x, float y) {
   update_value(x);
-  _dragging = true;
+  dragging_ = true;
   return true;
 }
 
-bool slider::on_mouse_up(float x, float y) {
-  _dragging = false;
+bool Slider::on_mouse_up(float x, float y) {
+  dragging_ = false;
   return true;
 }
 
-void slider::on_mouse_move(float x, float y) {
-  if (_dragging) {
+void Slider::on_mouse_move(float x, float y) {
+  if (dragging_) {
     update_value(x);
   }
 }
 
-void slider::update_value(float mouse_x) {
+void Slider::update_value(float mouse_x) {
   int new_value;
   float width = get_width();
   if (mouse_x > width - (THUMB_WIDTH / 2)) {
-    new_value = _max_value;
+    new_value = max_value_;
   } else if (mouse_x <= (THUMB_WIDTH / 2)) {
-    new_value = _min_value;
+    new_value = min_value_;
   } else {
     float fraction = (mouse_x - (THUMB_WIDTH / 2)) / (get_width() - THUMB_WIDTH);
-    new_value = _min_value + static_cast<int>(fraction * (_max_value - _min_value));
+    new_value = min_value_ + static_cast<int>(fraction * (max_value_ - min_value_));
   }
 
-  if (new_value != _curr_value) {
-    _curr_value = new_value;
-    if (_on_update) {
-      _on_update(_curr_value);
+  if (new_value != curr_value_) {
+    curr_value_ = new_value;
+    if (on_update_) {
+      on_update_(curr_value_);
     }
   }
 }
 
-void slider::render() {
+void Slider::render() {
   int left = get_left();
   int top = get_top();
   int height = get_height();
   int width = get_width();
-  _line->render(left, top + (height / 2), width, 1);
+  line_->render(left, top + (height / 2), width, 1);
 
-  float thumb_offset = (get_width() - THUMB_WIDTH) * (_curr_value - _min_value) / (_max_value - _min_value);
-  _thumb->render(left + thumb_offset, top + (height / 2) - (THUMB_HEIGHT / 2), THUMB_WIDTH, THUMB_HEIGHT);
+  float thumb_offset = (get_width() - THUMB_WIDTH) * (curr_value_ - min_value_) / (max_value_ - min_value_);
+  thumb_->render(left + thumb_offset, top + (height / 2) - (THUMB_HEIGHT / 2), THUMB_WIDTH, THUMB_HEIGHT);
 }
 
-} }
+}

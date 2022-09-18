@@ -42,7 +42,7 @@ void update_effect_position() {
   g_effect->set_position(fw::vector(pos[0], pos[1], pos[2]));
 }
 
-bool restart_handler(fw::gui::widget *wdgt) {
+bool restart_handler(fw::gui::Widget *wdgt) {
   fw::settings stg;
   g_effect->destroy();
   g_effect = fw::framework::get_instance()->get_particle_mgr()->create_effect(
@@ -51,7 +51,7 @@ bool restart_handler(fw::gui::widget *wdgt) {
   return true;
 }
 
-bool pause_handler(fw::gui::widget *wdgt) {
+bool pause_handler(fw::gui::Widget *wdgt) {
   fw::gui::button *btn = dynamic_cast<fw::gui::button *>(wdgt);
   fw::framework *framework = fw::framework::get_instance();
   if (framework->is_paused()) {
@@ -65,7 +65,7 @@ bool pause_handler(fw::gui::widget *wdgt) {
   return true;
 }
 
-bool movement_handler(fw::gui::widget *wdgt) {
+bool movement_handler(fw::gui::Widget *wdgt) {
   fw::gui::button *btn = dynamic_cast<fw::gui::button *>(wdgt);
   if (is_moving) {
     is_moving = false;
@@ -84,26 +84,26 @@ bool application::initialize(fw::framework *frmwrk) {
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
 
-  fw::gui::window *wnd;
-  wnd = fw::gui::builder<fw::gui::window>()
-      << fw::gui::widget::position(fw::gui::px(20), fw::gui::px(20))
-      << fw::gui::widget::size(fw::gui::px(150), fw::gui::px(130))
-      << fw::gui::window::background("frame")
+  fw::gui::Window *wnd;
+  wnd = fw::gui::builder<fw::gui::Window>()
+      << fw::gui::Widget::position(fw::gui::px(20), fw::gui::px(20))
+      << fw::gui::Widget::size(fw::gui::px(150), fw::gui::px(130))
+      << fw::gui::Window::background("frame")
       << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(10), fw::gui::px(10))
-          << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(10))
+          << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
           << fw::gui::button::text("Restart")
-          << fw::gui::widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
+          << fw::gui::Widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
       << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(10), fw::gui::px(50))
-          << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(50))
+          << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
           << fw::gui::button::text("Pause")
-          << fw::gui::widget::click(std::bind<bool>(pause_handler, std::placeholders::_1)))
+          << fw::gui::Widget::click(std::bind<bool>(pause_handler, std::placeholders::_1)))
       << (fw::gui::builder<fw::gui::button>()
-          << fw::gui::widget::position(fw::gui::px(10), fw::gui::px(90))
-          << fw::gui::widget::size(fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(90))
+          << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
           << fw::gui::button::text("Stationary")
-          << fw::gui::widget::click(std::bind<bool>(movement_handler, std::placeholders::_1)));
+          << fw::gui::Widget::click(std::bind<bool>(movement_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
   fw::settings stg;

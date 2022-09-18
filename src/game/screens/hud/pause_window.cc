@@ -28,30 +28,30 @@ pause_window::~pause_window() {
 }
 
 void pause_window::initialize() {
-  _wnd = builder<window>(sum(pct(50), px(-75)), sum(pct(50), px(-100)), px(150), px(130))
-      << window::background("frame") << widget::visible(false)
-      << (builder<label>(px(4), px(4), sum(pct(100), px(-8)), px(20))
-         << label::text(fw::text("hud.pause.title")))
-      << (builder<button>(px(4), px(28), sum(pct(100), px(-8)), px(30))
-          << button::text(fw::text("hud.pause.resume"))
-          << button::click(std::bind(&pause_window::on_resume_clicked, this, _1)))
-      << (builder<button>(px(4), px(62), sum(pct(100), px(-8)), px(30))
-          << button::text(fw::text("hud.pause.exit-to-menu"))
-          << button::click(std::bind(&pause_window::on_exit_to_menu_clicked, this, _1)))
-      << (builder<button>(px(4), px(96), sum(pct(100), px(-8)), px(30))
-          << button::text(fw::text("hud.pause.exit-game"))
-          << button::click(std::bind(&pause_window::on_exit_game_clicked, this, _1)))
+  _wnd = Builder<Window>(sum(pct(50), px(-75)), sum(pct(50), px(-100)), px(150), px(130))
+      << Window::background("frame") << Widget::visible(false)
+      << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(20))
+         << Label::text(fw::text("hud.pause.title")))
+      << (Builder<Button>(px(4), px(28), sum(pct(100), px(-8)), px(30))
+          << Button::text(fw::text("hud.pause.resume"))
+          << Button::click(std::bind(&pause_window::on_resume_clicked, this, _1)))
+      << (Builder<Button>(px(4), px(62), sum(pct(100), px(-8)), px(30))
+          << Button::text(fw::text("hud.pause.exit-to-menu"))
+          << Button::click(std::bind(&pause_window::on_exit_to_menu_clicked, this, _1)))
+      << (Builder<Button>(px(4), px(96), sum(pct(100), px(-8)), px(30))
+          << Button::text(fw::text("hud.pause.exit-game"))
+          << Button::click(std::bind(&pause_window::on_exit_game_clicked, this, _1)))
       ;
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
-bool pause_window::on_resume_clicked(widget *w) {
+bool pause_window::on_resume_clicked(Widget *w) {
   fw::framework::get_instance()->unpause();
   hide();
   return true;
 }
 
-bool pause_window::on_exit_to_menu_clicked(widget *w) {
+bool pause_window::on_exit_to_menu_clicked(Widget *w) {
   fw::framework::get_instance()->unpause();
 
   application *app = dynamic_cast<application *>(fw::framework::get_instance()->get_app());
@@ -61,7 +61,7 @@ bool pause_window::on_exit_to_menu_clicked(widget *w) {
   return true;
 }
 
-bool pause_window::on_exit_game_clicked(widget *w) {
+bool pause_window::on_exit_game_clicked(Widget *w) {
   fw::framework::get_instance()->unpause();
   fw::framework::get_instance()->exit();
   return true;

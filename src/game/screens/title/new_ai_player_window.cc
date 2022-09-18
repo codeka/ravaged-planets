@@ -38,31 +38,35 @@ new_ai_player_window::~new_ai_player_window() {
 
 void new_ai_player_window::initialize(new_game_window *new_game_window) {
   _new_game_window = new_game_window;
-  _wnd = builder<window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
-      << window::background("frame") << widget::visible(false)
-      << (builder<listbox>(px(10), px(10), px(250), sum(pct(100), px(-60)))
-          << widget::id(AI_LIST_ID))
-      << (builder<label>(px(270), px(10), sum(pct(100), px(-280)), px(20))
-          << label::text(fw::text("title.new-ai-player.player-name")))
-      << (builder<textedit>(px(270), px(30), sum(pct(100), px(-280)), px(20)) << widget::id(PLAYER_NAME_ID))
-      << (builder<button>(sum(pct(100), px(-220)), sum(pct(100), px(-40)), px(100), px(30))
-          << button::text("Add player") << button::click(std::bind(&new_ai_player_window::on_ok_clicked, this, _1)))
-      << (builder<button>(sum(pct(100), px(-110)), sum(pct(100), px(-40)), px(100), px(30))
-          << button::text("Cancel") << button::click(std::bind(&new_ai_player_window::on_cancel_clicked, this, _1)));
+  _wnd = Builder<Window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
+      << Window::background("frame")
+      << Widget::visible(false)
+      << (Builder<Listbox>(px(10), px(10), px(250), sum(pct(100), px(-60)))
+          << Widget::id(AI_LIST_ID))
+      << (Builder<Label>(px(270), px(10), sum(pct(100), px(-280)), px(20))
+          << Label::text(fw::text("title.new-ai-player.player-name")))
+      << (Builder<TextEdit>(px(270), px(30), sum(pct(100), px(-280)), px(20))
+          << Widget::id(PLAYER_NAME_ID))
+      << (Builder<Button>(sum(pct(100), px(-220)), sum(pct(100), px(-40)), px(100), px(30))
+          << Button::text("Add player")
+          << Button::click(std::bind(&new_ai_player_window::on_ok_clicked, this, _1)))
+      << (Builder<Button>(sum(pct(100), px(-110)), sum(pct(100), px(-40)), px(100), px(30))
+          << Button::text("Cancel")
+          << Button::click(std::bind(&new_ai_player_window::on_cancel_clicked, this, _1)));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 
   // add each of the scripts to the "scripts" combobox so the user can choose which one he wants
   ai_scriptmgr scriptmgr;
   std::vector<script_desc> &scripts = scriptmgr.get_scripts();
   BOOST_FOREACH(script_desc &desc, scripts) {
-    _wnd->find<listbox>(AI_LIST_ID)->add_item(
-        builder<label>(px(8), px(0), pct(100), px(20)) << label::text(desc.name) << widget::data(desc));
+    _wnd->find<Listbox>(AI_LIST_ID)->add_item(
+        Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(desc.name) << Widget::data(desc));
   }
 
   // if there's at least one script (which there should be...) we'll want the default
   // one to be the first one in the list.
   if (scripts.size() > 0) {
-    _wnd->find<listbox>(AI_LIST_ID)->select_item(0);
+    _wnd->find<Listbox>(AI_LIST_ID)->select_item(0);
   }
 }
 
@@ -78,14 +82,14 @@ void new_ai_player_window::show() {
 
   std::stringstream ss;
   ss << "Player " << (max_player_no + 1);
-  _wnd->find<textedit>(PLAYER_NAME_ID)->set_text(ss.str());
+  _wnd->find<TextEdit>(PLAYER_NAME_ID)->set_text(ss.str());
 }
 
-bool new_ai_player_window::on_ok_clicked(widget *w) {
-  _wnd->find<textedit>(PLAYER_NAME_ID)->get_text();
+bool new_ai_player_window::on_ok_clicked(Widget *w) {
+  _wnd->find<TextEdit>(PLAYER_NAME_ID)->get_text();
   std::string name("Player 2");
 
-  widget *selected_item = _wnd->find<listbox>(AI_LIST_ID)->get_selected_item();
+  Widget *selected_item = _wnd->find<Listbox>(AI_LIST_ID)->get_selected_item();
   if (selected_item == nullptr) {
     return false;
   }
@@ -115,7 +119,7 @@ bool new_ai_player_window::on_ok_clicked(widget *w) {
   return true;
 }
 
-bool new_ai_player_window::on_cancel_clicked(widget *w) {
+bool new_ai_player_window::on_cancel_clicked(Widget *w) {
   _wnd->set_visible(false);
   return true;
 }

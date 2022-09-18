@@ -34,11 +34,11 @@ enum IDS {
 class texture_tool_window {
 private:
   ed::texture_tool *_tool;
-  window *_wnd;
+  Window *_wnd;
 
   void on_radius_updated(int new_radius);
   void on_texture_selected(int index);
-  void refresh_texture_icon(fw::gui::window *wnd, int layer_num);
+  void refresh_texture_icon(fw::gui::Window *wnd, int layer_num);
 
 public:
   texture_tool_window(ed::texture_tool *tool);
@@ -49,15 +49,15 @@ public:
 };
 
 texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
-  _wnd = builder<window>(px(10), px(30), px(100), px(262)) << window::background("frame")
-      << (builder<label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << label::text("Size:"))
-      << (builder<slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
-          << slider::limits(10, 100) << slider::on_update(std::bind(&texture_tool_window::on_radius_updated, this, _1))
-          << slider::value(40))
-      << (builder<listbox>(px(4), px(48), sum(pct(100), px(-8)), px(80)) << widget::id(TEXTURES_ID)
-          << listbox::item_selected(std::bind(&texture_tool_window::on_texture_selected, this, _1)))
-      << (builder<label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << widget::id(TEXTURE_PREVIEW_ID))
-      << (builder<button>(px(4), px(228), sum(pct(100), px(-8)), px(30)) << button::text("Change"));
+  _wnd = Builder<Window>(px(10), px(30), px(100), px(262)) << Window::background("frame")
+      << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
+      << (Builder<Slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
+          << Slider::limits(10, 100) << Slider::on_update(std::bind(&texture_tool_window::on_radius_updated, this, _1))
+          << Slider::value(40))
+      << (Builder<Listbox>(px(4), px(48), sum(pct(100), px(-8)), px(80)) << Widget::id(TEXTURES_ID)
+          << Listbox::item_selected(std::bind(&texture_tool_window::on_texture_selected, this, _1)))
+      << (Builder<Label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << Widget::id(TEXTURE_PREVIEW_ID))
+      << (Builder<Button>(px(4), px(228), sum(pct(100), px(-8)), px(30)) << Button::text("Change"));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
@@ -68,11 +68,11 @@ texture_tool_window::~texture_tool_window() {
 void texture_tool_window::show() {
   _wnd->set_visible(true);
 
-  listbox *lbx = _wnd->find<listbox>(TEXTURES_ID);
+  Listbox *lbx = _wnd->find<Listbox>(TEXTURES_ID);
   lbx->clear();
   for (int i = 0; i < _tool->get_terrain()->get_num_layers(); i++) {
     fs::path filename = _tool->get_terrain()->get_layer(i)->get_filename();
-    lbx->add_item(builder<label>(px(0), px(0), pct(100), px(18)) << label::text(filename.stem().string()));
+    lbx->add_item(Builder<Label>(px(0), px(0), pct(100), px(18)) << Label::text(filename.stem().string()));
   }
   lbx->select_item(0);
 }
@@ -85,9 +85,10 @@ void texture_tool_window::on_texture_selected(int index) {
   std::shared_ptr<fw::texture> layer(new fw::texture());
   layer->create(_tool->get_terrain()->get_layer(index));
 
-  std::shared_ptr<drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
-      layer, 0, 0, layer->get_width(), layer->get_height());
-  _wnd->find<label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
+  std::shared_ptr<Drawable> drawable =
+      fw::framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
+        layer, 0, 0, layer->get_width(), layer->get_height());
+  _wnd->find<Label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
   _tool->set_layer(index);
 }
 
@@ -98,7 +99,7 @@ void texture_tool_window::on_radius_updated(int value) {
 
 // refreshes the icon of the given window which represents the given
 // terrain texture layer
-void texture_tool_window::refresh_texture_icon(fw::gui::window *wnd, int layer_num) {
+void texture_tool_window::refresh_texture_icon(fw::gui::Window *wnd, int layer_num) {
 }
 
 namespace ed {

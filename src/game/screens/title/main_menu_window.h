@@ -2,8 +2,8 @@
 
 namespace fw {
 namespace gui {
-class window;
-class widget;
+class Window;
+class Widget;
 }
 }
 
@@ -16,13 +16,13 @@ class new_game_window;
 class main_menu_window {
 private:
   new_game_window *_new_game_window;
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
   bool _exiting;
 
-  bool new_game_clicked(fw::gui::widget *w);
-  bool join_game_clicked(fw::gui::widget *w);
-  bool quit_clicked(fw::gui::widget *w);
-  bool editor_clicked(fw::gui::widget *w);
+  bool new_game_clicked(fw::gui::Widget *w);
+  bool join_game_clicked(fw::gui::Widget *w);
+  bool quit_clicked(fw::gui::Widget *w);
+  bool editor_clicked(fw::gui::Widget *w);
 
 public:
   main_menu_window();

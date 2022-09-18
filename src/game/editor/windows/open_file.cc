@@ -47,20 +47,20 @@ open_file_window::~open_file_window() {
 }
 
 void open_file_window::initialize() {
-  _wnd = builder<window>(sum(pct(50), px(-200)), sum(pct(40), px(-150)), px(400), px(300))
-      << window::background("frame") << widget::visible(false)
-      << (builder<textedit>(px(8), px(8), sum(pct(100), px(-16)), px(18)) << widget::id(FILENAME_ID))
-      << (builder<listbox>(px(8), px(30), sum(pct(66), px(-12)), sum(pct(100), px(-76))) << widget::id(FILE_LIST_ID)
-          << listbox::item_selected(std::bind(&open_file_window::on_item_selected, this, _1))
-          << listbox::item_activated(std::bind(&open_file_window::on_item_activated, this, _1)))
-      << (builder<label>(sum(pct(66), px(4)), px(30), sum(pct(33), px(-12)), px(100)) << widget::id(IMAGE_PREVIEW_ID))
-      << (builder<button>(sum(pct(100), px(-176)), sum(pct(100), px(-38)), px(80), px(30))
-          << button::text("OK") << widget::id(OK_ID)
-          << button::click(std::bind(&open_file_window::on_ok_clicked, this, _1)))
-      << (builder<button>(sum(pct(100), px(-88)), sum(pct(100), px(-38)), px(80), px(30))
-          << button::text("Cancel") << button::click(std::bind(&open_file_window::on_cancel_clicked, this, _1)))
-      << (builder<checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18)) << checkbox::text("Show hidden files")
-          << widget::click(std::bind(&open_file_window::on_show_hidden_clicked, this, _1)));
+  _wnd = Builder<Window>(sum(pct(50), px(-200)), sum(pct(40), px(-150)), px(400), px(300))
+      << Window::background("frame") << Widget::visible(false)
+      << (Builder<TextEdit>(px(8), px(8), sum(pct(100), px(-16)), px(18)) << Widget::id(FILENAME_ID))
+      << (Builder<Listbox>(px(8), px(30), sum(pct(66), px(-12)), sum(pct(100), px(-76))) << Widget::id(FILE_LIST_ID)
+          << Listbox::item_selected(std::bind(&open_file_window::on_item_selected, this, _1))
+          << Listbox::item_activated(std::bind(&open_file_window::on_item_activated, this, _1)))
+      << (Builder<Label>(sum(pct(66), px(4)), px(30), sum(pct(33), px(-12)), px(100)) << Widget::id(IMAGE_PREVIEW_ID))
+      << (Builder<Button>(sum(pct(100), px(-176)), sum(pct(100), px(-38)), px(80), px(30))
+          << Button::text("OK") << Widget::id(OK_ID)
+          << Button::click(std::bind(&open_file_window::on_ok_clicked, this, _1)))
+      << (Builder<Button>(sum(pct(100), px(-88)), sum(pct(100), px(-38)), px(80), px(30))
+          << Button::text("Cancel") << Button::click(std::bind(&open_file_window::on_cancel_clicked, this, _1)))
+      << (Builder<Checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18)) << Checkbox::text("Show hidden files")
+          << Widget::click(std::bind(&open_file_window::on_show_hidden_clicked, this, _1)));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
   _curr_directory = fw::user_base_path();
 }
@@ -75,7 +75,7 @@ void open_file_window::hide() {
   _wnd->set_visible(false);
 }
 
-void open_file_window::add_row(listbox *lbx, std::string const &name) {
+void open_file_window::add_row(Listbox *lbx, std::string const &name) {
   fs::path full_path = _curr_directory / name;
 
   std::string file_size = "";
@@ -85,17 +85,17 @@ void open_file_window::add_row(listbox *lbx, std::string const &name) {
 
   std::string icon_name = fs::is_directory(full_path) ? "editor_icon_directory" : "editor_icon_file";
 
-  lbx->add_item(builder<widget>(px(0), px(0), pct(100), px(20))
-      << (builder<label>(px(0), px(0), px(20), px(20))
-          << label::background(icon_name, true /* centered */))
-      << (builder<label>(px(28), px(0), sum(pct(75), px(-28)), px(20)) << label::text(name))
-      << (builder<label>(pct(75), px(0), pct(25), px(20))
-          << label::text(file_size) << label::text_align(label::right)));
+  lbx->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20))
+      << (Builder<Label>(px(0), px(0), px(20), px(20))
+          << Label::background(icon_name, true /* centered */))
+      << (Builder<Label>(px(28), px(0), sum(pct(75), px(-28)), px(20)) << Label::text(name))
+      << (Builder<Label>(pct(75), px(0), pct(25), px(20))
+          << Label::text(file_size) << Label::text_align(Label::kRight)));
   _items.push_back(name);
 }
 
 void open_file_window::refresh() {
-  listbox *lbx = _wnd->find<listbox>(FILE_LIST_ID);
+  Listbox*lbx = _wnd->find<Listbox>(FILE_LIST_ID);
   lbx->clear();
   _items.clear();
 
@@ -135,11 +135,11 @@ void open_file_window::refresh() {
   }
 
   // we also want to set the "Path" to be the full path that we're currently displaying
-  _wnd->find<textedit>(FILENAME_ID)->set_text(_curr_directory.string());
+  _wnd->find<TextEdit>(FILENAME_ID)->set_text(_curr_directory.string());
 }
 
 fs::path open_file_window::get_selected_file() const {
-  return fs::path(_wnd->find<textedit>(FILENAME_ID)->get_text());
+  return fs::path(_wnd->find<TextEdit>(FILENAME_ID)->get_text());
 }
 
 void open_file_window::navigate_to_directory(fs::path const &new_directory) {
@@ -149,7 +149,7 @@ void open_file_window::navigate_to_directory(fs::path const &new_directory) {
 
 void open_file_window::on_item_selected(int index) {
   fs::path item_path = _curr_directory / _items[index];
-  _wnd->find<textedit>(FILENAME_ID)->set_text(item_path.string());
+  _wnd->find<TextEdit>(FILENAME_ID)->set_text(item_path.string());
 
   if (fs::is_regular_file(item_path)) {
     std::string ext = item_path.extension().string();
@@ -160,7 +160,7 @@ void open_file_window::on_item_selected(int index) {
         fw::bitmap bmp(item_path);
         is_image = true; // if we loaded it, then we know it's an image
 
-        label *preview = _wnd->find<label>(IMAGE_PREVIEW_ID);
+        Label *preview = _wnd->find<Label>(IMAGE_PREVIEW_ID);
         float width = preview->get_width();
         float height = preview->get_height();
         float bmp_width = bmp.get_width();
@@ -181,7 +181,7 @@ void open_file_window::on_item_selected(int index) {
 
         std::shared_ptr<fw::texture> texture = std::shared_ptr<fw::texture>(new fw::texture());
         texture->create(bmp);
-        std::shared_ptr<drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
+        std::shared_ptr<Drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
             ->build_drawable(texture, 0, 0, bmp_width, bmp_height);
         preview->set_background(drawable, true);
       } catch (fw::exception &e) {
@@ -191,24 +191,24 @@ void open_file_window::on_item_selected(int index) {
     }
 
     if (!is_image) {
-      label *preview = _wnd->find<label>(IMAGE_PREVIEW_ID);
-      preview->set_background(std::shared_ptr<drawable>());
+      Label *preview = _wnd->find<Label>(IMAGE_PREVIEW_ID);
+      preview->set_background(std::shared_ptr<Drawable>());
     }
   }
 }
 
 void open_file_window::on_item_activated(int index) {
-  on_ok_clicked(_wnd->find<button>(OK_ID));
+  on_ok_clicked(_wnd->find<Button>(OK_ID));
 }
 
-bool open_file_window::on_show_hidden_clicked(widget *w) {
-  _show_hidden = dynamic_cast<checkbox *>(w)->is_checked();
+bool open_file_window::on_show_hidden_clicked(Widget *w) {
+  _show_hidden = dynamic_cast<Checkbox *>(w)->is_checked();
   refresh();
   return true;
 }
 
-bool open_file_window::on_ok_clicked(widget *w) {
-  fs::path item_path = fs::path(_wnd->find<textedit>(FILENAME_ID)->get_text());
+bool open_file_window::on_ok_clicked(Widget *w) {
+  fs::path item_path = fs::path(_wnd->find<TextEdit>(FILENAME_ID)->get_text());
   if (fs::is_directory(item_path)) {
     _curr_directory = item_path;
     refresh();
@@ -224,7 +224,7 @@ bool open_file_window::on_ok_clicked(widget *w) {
   return true;
 }
 
-bool open_file_window::on_cancel_clicked(widget *w) {
+bool open_file_window::on_cancel_clicked(Widget *w) {
   hide();
   return true;
 }

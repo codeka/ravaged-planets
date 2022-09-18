@@ -9,11 +9,11 @@
 namespace fw {
 
 namespace detail {
-  class sw_internal;
+  class StackWalkerInternal;
 }
 
 /** You can inherit from this class and implement the various on_* methods to customize it's behaviour. */
-class stack_walker {
+class StackWalker {
 public:
   enum options {
     // no addition info will be retrived (only the address is available)
@@ -47,14 +47,14 @@ public:
     options_all = sym_all | retrieve_all
   };
 
-  stack_walker(
+  StackWalker(
     int options = options_all, // 'int' is by design, to kore easily combine the enum-flags
     char const *symbol_path = 0, 
     DWORD process_id = ::GetCurrentProcessId(), 
     HANDLE process = ::GetCurrentProcess()
   );
-  stack_walker(DWORD process_id, HANDLE process);
-  virtual ~stack_walker();
+  StackWalker(DWORD process_id, HANDLE process);
+  virtual ~StackWalker();
 
   typedef BOOL (__stdcall *PReadProcessMemoryRoutine)(
     HANDLE      hProcess,
@@ -93,7 +93,7 @@ protected:
     char loaded_image_name[STACKWALK_MAX_NAMELEN];
   };
 
-  enum callstack_entry_type {
+  enum CallstackEntryType {
     first_entry,
     next_entry,
     last_entry
@@ -102,11 +102,11 @@ protected:
   virtual void on_sym_init(char const *search_path, uint32_t options, char const *user_name);
   virtual void on_load_module(char const *image, char const *module, uint64_t base_addr, uint32_t size, uint32_t result,
       char const *symbol_type, char const *pdb_name, uint64_t file_version);
-  virtual void on_callstack_entry(callstack_entry_type entry_type, callstack_entry &entry);
+  virtual void on_callstack_entry(CallstackEntryType entry_type, callstack_entry &entry);
   virtual void on_dbghelp_error(char const *func_name, uint32_t gle, DWORD64 addr);
   virtual void on_output(char const *text);
 
-  std::shared_ptr<detail::sw_internal> _sw;
+  std::shared_ptr<detail::StackWalkerInternal> _sw;
   HANDLE _process;
   uint32_t _process_id;
   bool _modules_loaded;
@@ -116,7 +116,7 @@ protected:
   static BOOL __stdcall my_read_memory_function(HANDLE hProcess, DWORD64 qwBaseAddress, PVOID lpBuffer, DWORD nSize,
       LPDWORD lpNumberOfBytesRead);
 
-  friend detail::sw_internal;
+  friend detail::StackWalkerInternal;
 };
 
 }

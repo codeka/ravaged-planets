@@ -5,36 +5,36 @@
 
 #include <framework/gui/widget.h>
 
-namespace fw { namespace gui {
-class gui;
-class drawable;
+namespace fw::gui {
+class Gui;
+class Drawable;
 
-/** Sliders let you drag a thumb from the left to the right to choose a numeric value. */
-class slider : public widget {
+// Sliders let you drag a thumb from the left to the right to choose a numeric value.
+class Slider : public Widget {
 protected:
-  friend class slider_limits_property;
-  friend class slider_on_update_property;
-  friend class slider_value_property;
+  friend class SliderLimitsProperty;
+  friend class SliderOnUpdateProperty;
+  friend class SliderValueProperty;
 
-  std::shared_ptr<drawable> _line;
-  std::shared_ptr<drawable> _thumb;
-  int _min_value;
-  int _max_value;
-  int _curr_value;
-  bool _dragging;
-  std::function<void(int)> _on_update;
+  std::shared_ptr<Drawable> line_;
+  std::shared_ptr<Drawable> thumb_;
+  int min_value_;
+  int max_value_;
+  int curr_value_;
+  bool dragging_;
+  std::function<void(int)> on_update_;
 
   void update_value(float mouse_x);
 
 public:
-  slider(gui *gui);
-  virtual ~slider();
+  Slider(Gui *gui);
+  virtual ~Slider();
 
-  static property *limits(int min_value, int max_value);
-  static property *value(int curr_value);
-  static property *on_update(std::function<void(int)> fn);
+  static Property *limits(int min_value, int max_value);
+  static Property *value(int curr_value);
+  static Property *on_update(std::function<void(int)> fn);
 
-  void on_attached_to_parent(widget *parent);
+  void on_attached_to_parent(Widget *parent);
   void on_mouse_out();
   void on_mouse_over();
   bool on_mouse_down(float x, float y);
@@ -44,14 +44,14 @@ public:
 
   void set_limit(int min_value, int max_value);
   inline int get_min_value() const {
-    return _min_value;
+    return min_value_;
   }
   inline int get_max_value() const {
-    return _max_value;
+    return max_value_;
   }
   inline int get_curr_value() const {
-    return _curr_value;
+    return curr_value_;
   }
 };
 
-} }
+}

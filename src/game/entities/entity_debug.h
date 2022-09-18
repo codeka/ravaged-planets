@@ -5,8 +5,8 @@
 
 namespace fw {
 namespace gui {
-class window;
-class widget;
+class Window;
+class Widget;
 }
 namespace sg {
 class scenegraph;
@@ -33,12 +33,12 @@ enum entity_debug_flags {
 class entity_debug {
 private:
   entity_manager *_mgr;
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
 
   bool _just_shown;
 
   void on_key_press(std::string keyname, bool is_down);
-  bool on_show_steering_changed(fw::gui::widget *w);
+  bool on_show_steering_changed(fw::gui::Widget *w);
 
 public:
   entity_debug(entity_manager *mgr);

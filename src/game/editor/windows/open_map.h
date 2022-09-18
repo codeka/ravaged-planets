@@ -2,8 +2,8 @@
 
 namespace fw {
 namespace gui {
-class widget;
-class window;
+class Widget;
+class Window;
 }
 }
 
@@ -11,10 +11,10 @@ namespace ed {
 
 class open_map_window {
 private:
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
 
-  bool open_clicked(fw::gui::widget *w);
-  bool cancel_clicked(fw::gui::widget *w);
+  bool open_clicked(fw::gui::Widget *w);
+  bool cancel_clicked(fw::gui::Widget *w);
 
 public:
   open_map_window();

@@ -6,148 +6,144 @@
 #include <boost/signals2.hpp>
 
 namespace fw { namespace gui {
-class gui;
-class widget;
+class Gui;
+class Widget;
 
-/**
- * Represents a dimension: either an (x,y) coordinate or a width/height.
- */
-class dimension {
+// Represents a dimension: either an (x,y) coordinate or a width/height.
+class Dimension {
 public:
-  dimension();
-  virtual ~dimension();
+  Dimension();
+  virtual ~Dimension();
 
-  virtual float get_value(fw::gui::widget *w, float parent_value) = 0;
+  virtual float get_value(fw::gui::Widget *w, float parent_value) = 0;
 };
 
-class pixel_dimension : public dimension {
+class PixelDimension : public Dimension {
 private:
-  float _value;
+  float value_;
 
 public:
-  pixel_dimension(float value);
-  virtual ~pixel_dimension();
+  PixelDimension(float value);
+  virtual ~PixelDimension();
 
-  float get_value(fw::gui::widget *w, float parent_value);
+  float get_value(fw::gui::Widget *w, float parent_value);
 };
 
-class percent_dimension : public dimension {
+class PercentDimension : public Dimension {
 private:
-  float _value;
+  float value_;
 
 public:
-  percent_dimension(float value);
-  virtual ~percent_dimension();
+  PercentDimension(float value);
+  virtual ~PercentDimension();
 
-  float get_value(fw::gui::widget *w, float parent_value);
+  float get_value(fw::gui::Widget *w, float parent_value);
 };
 
-class sum_dimension : public dimension {
+class SumDimension : public Dimension {
 private:
-  std::shared_ptr<dimension> _one;
-  std::shared_ptr<dimension> _two;
+  std::shared_ptr<Dimension> one_;
+  std::shared_ptr<Dimension> two_;
 
 public:
-  sum_dimension(std::shared_ptr<dimension> one, std::shared_ptr<dimension> two);
-  virtual ~sum_dimension();
+  SumDimension(std::shared_ptr<Dimension> one, std::shared_ptr<Dimension> two);
+  virtual ~SumDimension();
 
-  float get_value(fw::gui::widget *w, float parent_value);
+  float get_value(fw::gui::Widget *w, float parent_value);
 };
 
-enum other_dimension {
-  top,
-  left,
-  width,
-  height,
+enum OtherDimension {
+  kTop,
+  kLeft,
+  kWidth,
+  kHeight,
 };
 
 /** A dimension that's defined as a fraction of another dimension (e.g. width = 50% of the height, etc). */
-class fraction_dimension : public dimension {
+class FractionDimension : public Dimension {
 private:
-  int _other_widget_id;
-  other_dimension _other_dimension;
-  float _fraction;
+  int other_widget_id_;
+  OtherDimension other_dimension_;
+  float fraction_;
 
 public:
-  fraction_dimension(other_dimension dim, float fraction);
-  fraction_dimension(int other_widget_id, other_dimension dim, float fraction);
-  virtual ~fraction_dimension();
+  FractionDimension(OtherDimension dim, float fraction);
+  FractionDimension(int other_widget_id, OtherDimension dim, float fraction);
+  virtual ~FractionDimension();
 
-  float get_value(fw::gui::widget *w, float parent_value);
+  float get_value(fw::gui::Widget *w, float parent_value);
 };
 
-inline std::shared_ptr<dimension> px(float value) {
-  return std::shared_ptr<dimension>(new pixel_dimension(value));
+inline std::shared_ptr<Dimension> px(float value) {
+  return std::shared_ptr<Dimension>(new PixelDimension(value));
 }
 
-inline std::shared_ptr<dimension> pct(float value) {
-  return std::shared_ptr<dimension>(new percent_dimension(value));
+inline std::shared_ptr<Dimension> pct(float value) {
+  return std::shared_ptr<Dimension>(new PercentDimension(value));
 }
 
-inline std::shared_ptr<dimension> sum(std::shared_ptr<dimension> one, std::shared_ptr<dimension> two) {
-  return std::shared_ptr<dimension>(new sum_dimension(one, two));
+inline std::shared_ptr<Dimension> sum(std::shared_ptr<Dimension> one, std::shared_ptr<Dimension> two) {
+  return std::shared_ptr<Dimension>(new SumDimension(one, two));
 }
 
-inline std::shared_ptr<dimension> fract(other_dimension dimen, float fraction) {
-  return std::shared_ptr<dimension>(new fraction_dimension(dimen, fraction));
+inline std::shared_ptr<Dimension> fract(OtherDimension dimen, float fraction) {
+  return std::shared_ptr<Dimension>(new FractionDimension(dimen, fraction));
 }
 
-inline std::shared_ptr<dimension> fract(int other_widget_id, other_dimension dimen, float fraction) {
-  return std::shared_ptr<dimension>(new fraction_dimension(other_widget_id, dimen, fraction));
+inline std::shared_ptr<Dimension> fract(int other_widget_id, OtherDimension dimen, float fraction) {
+  return std::shared_ptr<Dimension>(new FractionDimension(other_widget_id, dimen, fraction));
 }
 
-/** Base class for properties that can be added to buildable objects. */
-class property {
+// Base class for properties that can be added to buildable objects.
+class Property {
 public:
-  inline virtual ~property() { }
+  inline virtual ~Property() { }
 
-  virtual void apply(widget *widget) = 0;
+  virtual void apply(Widget *widget) = 0;
 };
 
-/**
- * This is the base class of all widgets in the GUI. A widget has a specific position within it's parent, size and
- * so on.
- */
-class widget {
+// This is the base class of all widgets in the GUI. A widget has a specific position within it's parent, size and
+// so on.
+class Widget {
 protected:
-  friend class widget_position_property;
-  friend class widget_size_property;
-  friend class widget_click_property;
-  friend class widget_visible_property;
-  friend class widget_id_property;
-  friend class widget_data_property;
-  friend class widget_enabled_property;
+  friend class WidgetPositionProperty;
+  friend class WidgetSizeProperty;
+  friend class WidgetClickProperty;
+  friend class WidgetVisibleProperty;
+  friend class WidgetIdProperty;
+  friend class WidgetDataProperty;
+  friend class WidgetEnabledProperty;
 
-  gui *_gui;
-  widget *_parent;
-  int _id;
-  std::vector<widget *> _children;
-  std::shared_ptr<dimension> _x;
-  std::shared_ptr<dimension> _y;
-  std::shared_ptr<dimension> _width;
-  std::shared_ptr<dimension> _height;
-  bool _visible;
-  bool _focused;
-  bool _enabled;
-  std::function<bool(widget *)> _on_click;
-  boost::any _data;
+  Gui *gui_;
+  Widget *parent_;
+  int id_;
+  std::vector<Widget *> children_;
+  std::shared_ptr<Dimension> x_;
+  std::shared_ptr<Dimension> y_;
+  std::shared_ptr<Dimension> width_;
+  std::shared_ptr<Dimension> height_;
+  bool visible_;
+  bool focused_;
+  bool enabled_;
+  std::function<bool(Widget *)> on_click_;
+  boost::any data_;
 
 public:
-  widget(gui *gui);
-  virtual ~widget();
+  Widget(Gui *gui);
+  virtual ~Widget();
 
-  static property *position(std::shared_ptr<dimension> x, std::shared_ptr<dimension> y);
-  static property *size(std::shared_ptr<dimension> width, std::shared_ptr<dimension> height);
-  static property *click(std::function<bool(widget *)> on_click);
-  static property *visible(bool visible);
-  static property *id(int id);
-  static property *data(boost::any const &data);
-  static property *enabled(bool enabled);
+  static Property *position(std::shared_ptr<Dimension> x, std::shared_ptr<Dimension> y);
+  static Property *size(std::shared_ptr<Dimension> width, std::shared_ptr<Dimension> height);
+  static Property *click(std::function<bool(Widget *)> on_click);
+  static Property *visible(bool visible);
+  static Property *id(int id);
+  static Property *data(boost::any const &data);
+  static Property *enabled(bool enabled);
 
-  void attach_child(widget *child);
-  void detach_child(widget *child);
+  void attach_child(Widget *child);
+  void detach_child(Widget *child);
   void clear_children();
-  virtual void on_attached_to_parent(widget *parent);
+  virtual void on_attached_to_parent(Widget *parent);
 
   virtual void on_focus_gained();
   virtual void on_focus_lost();
@@ -192,15 +188,15 @@ public:
    * Gets the child widget at the given (x,y). If the point is outside our bounding box, then null is returned. If
    * none of our children are contained within the given (x,y) then \code this is returned.
    */
-  widget *get_child_at(float x, float y);
+  Widget *get_child_at(float x, float y);
 
   /** Searches the heirarchy for the widget with the given id. */
-  widget *find(int id);
+  Widget *find(int id);
 
-  widget *get_parent();
+  Widget *get_parent();
 
   /** Gets the root parent, that is, keep looking up the parent chain until you find one that has a null parent. */
-  widget *get_root();
+  Widget *get_root();
 
   template<typename T>
   inline T *find(int id) {
@@ -208,35 +204,35 @@ public:
   }
 
   /** Returns true if the given widget is a child (or a child of a child...) of us. */
-  bool is_child(widget *w);
+  bool is_child(Widget *w);
 
   int get_id() {
-    return _id;
+    return id_;
   }
 
   float get_top();
-  void set_top(std::shared_ptr<dimension> top);
+  void set_top(std::shared_ptr<Dimension> top);
   float get_left();
-  void set_left(std::shared_ptr<dimension> left);
+  void set_left(std::shared_ptr<Dimension> left);
   float get_width();
-  void set_width(std::shared_ptr<dimension> width);
+  void set_width(std::shared_ptr<Dimension> width);
   float get_height();
-  void set_height(std::shared_ptr<dimension> height);
+  void set_height(std::shared_ptr<Dimension> height);
 
   boost::any const &get_data() const;
   void set_data(boost::any const &data);
 
-  void set_on_click(std::function<bool(widget *)> on_click) {
-    _on_click = on_click;
+  void set_on_click(std::function<bool(Widget *)> on_click) {
+    on_click_ = on_click;
   }
 
   bool is_enabled() const {
-    return _enabled;
+    return enabled_;
   }
   void set_enabled(bool enabled);
 
   bool is_visible() const {
-    return _visible;
+    return visible_;
   }
   void set_visible(bool visible);
 };

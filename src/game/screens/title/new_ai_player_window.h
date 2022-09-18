@@ -2,8 +2,8 @@
 
 namespace fw{
 namespace gui {
-class window;
-class widget;
+class Window;
+class Widget;
 } }
 
 namespace game {
@@ -13,10 +13,10 @@ class new_game_window;
 class new_ai_player_window {
 private:
   new_game_window *_new_game_window;
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
 
-  bool on_ok_clicked(fw::gui::widget *w);
-  bool on_cancel_clicked(fw::gui::widget *w);
+  bool on_ok_clicked(fw::gui::Widget *w);
+  bool on_cancel_clicked(fw::gui::Widget *w);
 
 public:
   new_ai_player_window();

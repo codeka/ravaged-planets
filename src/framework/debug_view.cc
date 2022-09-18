@@ -31,9 +31,9 @@ void debug_view::initialize() {
   if (stg.is_set("debug-view")) {
     _time_to_update = 1.0f;
 
-    _wnd = builder<window>(sum(pct(100), px(-200)), sum(pct(100), px(-50)), px(190), px(40))
-      << (builder<label>(px(0), px(0), px(190), px(20)) << label::text_align(label::alignment::right) << widget::id(FPS_ID))
-      << (builder<label>(px(0), px(20), px(190), px(20)) << label::text_align(label::alignment::right) << widget::id(PARTICLES_ID));
+    _wnd = Builder<Window>(sum(pct(100), px(-200)), sum(pct(100), px(-50)), px(190), px(40))
+      << (Builder<Label>(px(0), px(0), px(190), px(20)) << Label::text_align(Label::Alignment::kRight) << Widget::id(FPS_ID))
+      << (Builder<Label>(px(0), px(20), px(190), px(20)) << Label::text_align(Label::Alignment::kRight) << Widget::id(PARTICLES_ID));
     framework::get_instance()->get_gui()->attach_widget(_wnd);
   }
 }
@@ -53,10 +53,10 @@ void debug_view::update(float dt) {
   if (_time_to_update <= 0.0f) {
     fw::framework *frmwrk = fw::framework::get_instance();
 
-    label *fps = _wnd->find<label>(FPS_ID);
+    Label *fps = _wnd->find<Label>(FPS_ID);
     fps->set_text((boost::format("%1% fps") % frmwrk->get_timer()->get_fps()).str());
 
-    label *particles = _wnd->find<label>(PARTICLES_ID);
+    Label *particles = _wnd->find<Label>(PARTICLES_ID);
     particles->set_text((boost::format("%1% particles") % frmwrk->get_particle_mgr()->get_num_active_particles()).str());
 
     _time_to_update = 1.0f;

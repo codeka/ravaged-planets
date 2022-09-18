@@ -4,41 +4,41 @@
 #include <framework/gui/builder.h>
 #include <framework/gui/window.h>
 
-namespace fw { namespace gui {
+namespace fw::gui {
 
 /** Property that sets the background of the window. */
-class window_background_property : public property {
+class WindowBackgroundProperty : public Property {
 private:
   std::string _drawable_name;
 public:
-  window_background_property(std::string const &drawable_name) :
+  WindowBackgroundProperty(std::string const &drawable_name) :
       _drawable_name(drawable_name) {
   }
 
-  void apply(widget *widget) {
-    window *wnd = dynamic_cast<window *>(widget);
-    wnd->_background = wnd->_gui->get_drawable_manager()->get_drawable(_drawable_name);
+  void apply(Widget *widget) {
+    Window *wnd = dynamic_cast<Window *>(widget);
+    wnd->background_ = wnd->gui_->get_drawable_manager()->get_drawable(_drawable_name);
   }
 };
 
 //-----------------------------------------------------------------------------
 
-window::window(gui *gui) : widget(gui) {
+Window::Window(Gui *gui) : Widget(gui) {
 }
 
-window::~window() {
+Window::~Window() {
 }
 
-void window::render() {
-  if (_background) {
-    _background->render(get_left(), get_top(), get_width(), get_height());
+void Window::render() {
+  if (background_) {
+    background_->render(get_left(), get_top(), get_width(), get_height());
   }
 
-  widget::render();
+  Widget::render();
 }
 
-property *window::background(std::string const &drawable_name) {
-  return new window_background_property(drawable_name);
+Property *Window::background(std::string const &drawable_name) {
+  return new WindowBackgroundProperty(drawable_name);
 }
 
-} }
+}

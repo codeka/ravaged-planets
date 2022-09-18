@@ -12,11 +12,7 @@
 
 namespace game {
 
-using namespace fw::gui;
 using namespace std::placeholders;
-
-// These are the instances of the various windows that are displayed by the title screen.
-fw::gui::window *wnd;
 
 title_screen::title_screen() : _main_menu_window(nullptr), _new_game_window(nullptr) {
 }

@@ -191,12 +191,12 @@ enum IDS {
 
 class heightfield_tool_window {
 private:
-  window *_wnd;
+  Window *_wnd;
   ed::heightfield_tool *_tool;
 
   void on_radius_updated(int value);
-  bool on_tool_clicked(fw::gui::widget *w);
-  bool on_import_clicked(fw::gui::widget *w);
+  bool on_tool_clicked(fw::gui::Widget *w);
+  bool on_import_clicked(fw::gui::Widget *w);
   void on_import_file_selected(ed::open_file_window *ofw);
 
 public:
@@ -209,19 +209,19 @@ public:
 
 heightfield_tool_window::heightfield_tool_window(ed::heightfield_tool *tool) :
     _tool(tool) {
-  _wnd = builder<window>(px(10), px(30), px(100), px(130)) << window::background("frame")
-      << (builder<button>(px(8), px(8), px(36), px(36)) << widget::id(RAISE_LOWER_BRUSH_ID)
-          << button::icon("editor_hightfield_raiselower")
-          << button::click(std::bind(&heightfield_tool_window::on_tool_clicked, this, _1)))
-      << (builder<button>(px(56), px(8), px(36), px(36)) << widget::id(LEVEL_BRUSH_ID)
-          << button::icon("editor_hightfield_level")
-          << button::click(std::bind(&heightfield_tool_window::on_tool_clicked, this, _1)))
-      << (builder<label>(px(4), px(52), sum(pct(100), px(-8)), px(18)) << label::text("Size:"))
-      << (builder<slider>(px(4), px(74), sum(pct(100), px(-8)), px(18))
-          << slider::limits(20, 100) << slider::value(40)
-          << slider::on_update(std::bind(&heightfield_tool_window::on_radius_updated, this, _1)))
-      << (builder<button>(px(4), px(96), sum(pct(100), px(-8)), px(30)) << button::text("Import")
-          << button::click(std::bind(&heightfield_tool_window::on_import_clicked, this, _1)));
+  _wnd = Builder<Window>(px(10), px(30), px(100), px(130)) << Window::background("frame")
+      << (Builder<Button>(px(8), px(8), px(36), px(36)) << Widget::id(RAISE_LOWER_BRUSH_ID)
+          << Button::icon("editor_hightfield_raiselower")
+          << Button::click(std::bind(&heightfield_tool_window::on_tool_clicked, this, _1)))
+      << (Builder<Button>(px(56), px(8), px(36), px(36)) << Widget::id(LEVEL_BRUSH_ID)
+          << Button::icon("editor_hightfield_level")
+          << Button::click(std::bind(&heightfield_tool_window::on_tool_clicked, this, _1)))
+      << (Builder<Label>(px(4), px(52), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
+      << (Builder<Slider>(px(4), px(74), sum(pct(100), px(-8)), px(18))
+          << Slider::limits(20, 100) << Slider::value(40)
+          << Slider::on_update(std::bind(&heightfield_tool_window::on_radius_updated, this, _1)))
+      << (Builder<Button>(px(4), px(96), sum(pct(100), px(-8)), px(30)) << Button::text("Import")
+          << Button::click(std::bind(&heightfield_tool_window::on_import_clicked, this, _1)));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
@@ -242,7 +242,7 @@ void heightfield_tool_window::on_radius_updated(int value) {
   _tool->set_radius(radius);
 }
 
-bool heightfield_tool_window::on_import_clicked(fw::gui::widget *w) {
+bool heightfield_tool_window::on_import_clicked(fw::gui::Widget *w) {
   ed::open_file->show(std::bind(&heightfield_tool_window::on_import_file_selected, this, _1));
   return true;
 }
@@ -256,13 +256,13 @@ void heightfield_tool_window::on_import_file_selected(ed::open_file_window *ofw)
   }
 }
 
-bool heightfield_tool_window::on_tool_clicked(fw::gui::widget *w) {
-  button *raise_lower = _wnd->find<button>(RAISE_LOWER_BRUSH_ID);
-  button *level = _wnd->find<button>(LEVEL_BRUSH_ID);
+bool heightfield_tool_window::on_tool_clicked(fw::gui::Widget *w) {
+  Button *raise_lower = _wnd->find<Button>(RAISE_LOWER_BRUSH_ID);
+  Button *level = _wnd->find<Button>(LEVEL_BRUSH_ID);
 
   raise_lower->set_pressed(false);
   level->set_pressed(false);
-  dynamic_cast<button *>(w)->set_pressed(true);
+  dynamic_cast<Button *>(w)->set_pressed(true);
 
   if (w == raise_lower) {
     _tool->set_brush(new raise_lower_brush());

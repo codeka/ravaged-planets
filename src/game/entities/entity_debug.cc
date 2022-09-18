@@ -39,15 +39,15 @@ entity_debug::~entity_debug() {
 }
 
 void entity_debug::initialize() {
-  _wnd = builder<window>(px(10), px(10), px(200), px(106))
-      << window::background("frame") << widget::visible(false)
-      << (builder<checkbox>(px(10), px(10), sum(pct(100), px(-20)), px(26))
-          << checkbox::text("Show steering") << widget::id(SHOW_STEERING_ID)
-          << widget::click(std::bind(&entity_debug::on_show_steering_changed, this, _1)))
-      << (builder<label>(px(10), px(46), sum(pct(100), px(-20)), px(20))
-          << label::text("Pos: ") << widget::id(POSITION_ID))
-      << (builder<label>(px(10), px(76), sum(pct(100), px(-20)), px(20))
-          << label::text("Goal: ") << widget::id(GOAL_ID))
+  _wnd = Builder<Window>(px(10), px(10), px(200), px(106))
+      << Window::background("frame") << Widget::visible(false)
+      << (Builder<Checkbox>(px(10), px(10), sum(pct(100), px(-20)), px(26))
+          << Checkbox::text("Show steering") << Widget::id(SHOW_STEERING_ID)
+          << Widget::click(std::bind(&entity_debug::on_show_steering_changed, this, _1)))
+      << (Builder<Label>(px(10), px(46), sum(pct(100), px(-20)), px(20))
+          << Label::text("Pos: ") << Widget::id(POSITION_ID))
+      << (Builder<Label>(px(10), px(76), sum(pct(100), px(-20)), px(20))
+          << Label::text("Goal: ") << Widget::id(GOAL_ID))
       ;
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 
@@ -85,8 +85,8 @@ void entity_debug::update() {
     }
   }
 
-  _wnd->find<label>(POSITION_ID)->set_text(new_pos_value);
-  _wnd->find<label>(GOAL_ID)->set_text(new_goal_value);
+  _wnd->find<Label>(POSITION_ID)->set_text(new_pos_value);
+  _wnd->find<Label>(GOAL_ID)->set_text(new_goal_value);
 }
 
 void entity_debug::on_key_press(std::string /*key*/, bool is_down) {
@@ -98,8 +98,8 @@ void entity_debug::on_key_press(std::string /*key*/, bool is_down) {
   }
 }
 
-bool entity_debug::on_show_steering_changed(widget *w) {
-  checkbox *cbx = dynamic_cast<checkbox *>(w);
+bool entity_debug::on_show_steering_changed(Widget *w) {
+  Checkbox *cbx = dynamic_cast<Checkbox *>(w);
 
   BOOST_FOREACH(std::weak_ptr<entity> const &wp, _mgr->get_selection()) {
     std::shared_ptr<entity> ent = wp.lock();

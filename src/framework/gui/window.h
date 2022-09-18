@@ -4,28 +4,25 @@
 
 #include <framework/gui/widget.h>
 
-namespace fw { namespace gui {
-class drawable;
-class gui;
+namespace fw::gui {
+class Drawable;
+class Gui;
 
 
-/**
- * Represents a top-level window, complete with controls for moving and so on. All rendering happens inside a window.
- */
-class window : public widget {
+// Represents a top-level window, complete with controls for moving and so on. All rendering happens inside a window.
+class Window : public Widget {
 private:
-  friend class window_background_property;
+  friend class WindowBackgroundProperty;
 
-  std::shared_ptr<drawable> _background;
+  std::shared_ptr<Drawable> background_;
 
 public:
-  window(gui *gui);
-  ~window();
+  Window(Gui *gui);
+  ~Window();
 
-  static property *background(std::string const &drawable_name);
+  static Property *background(std::string const &drawable_name);
 
   void render();
 };
 
-
-} }
+}

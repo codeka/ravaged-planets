@@ -60,52 +60,62 @@ void new_game_window::initialize(main_menu_window *main_menu_window, new_ai_play
   _main_menu_window = main_menu_window;
   _new_ai_player_window = new_ai_player_window;
 
-  _wnd = builder<window>(px(0), px(0), pct(100), pct(100)) << window::background("title_background")
-      << widget::visible(false)
-      << (builder<label>(px(40), px(20), px(417), px(49)) << label::background("title_heading"))
-      << (builder<label>(px(40), px(70), px(500), px(16))
-          << label::text((boost::format(fw::text("title.sub-title")) % "Dean Harding" % "dean@codeka.com.au").str()))
-      << (builder<label>(px(40), px(100), px(200), px(20)) << label::text(fw::text("title.new-game.choose-map")))
-      << (builder<listbox>(px(40), px(120), px(200), sum(pct(100), px(-190)))
-          << widget::id(MAP_LIST_ID)
-          << listbox::item_selected(std::bind(&new_game_window::on_maps_selection_changed, this, _1)))
-      << (builder<window>(px(250), px(100), sum(pct(100), px(-260)), sum(pct(50), px(-100)))
-          << window::background("frame")
-          << (builder<label>(px(4), px(4), fract(fw::gui::height, 1.333f), sum(pct(100), px(-8)))
-              << label::background("frame") << widget::id(MAP_SCREENSHOT_ID))
-          << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(8), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
-              << widget::id(MAP_NAME_ID))
-          << (builder<label>(sum(fract(MAP_SCREENSHOT_ID, fw::gui::width, 1.0f), px(8)), px(30), sum(pct(100), sum(fract(MAP_SCREENSHOT_ID,fw::gui::width, -1.0f), px(-12))), px(18))
-              << widget::id(MAP_SIZE_ID))
-          )
-      << (builder<window>(px(250), sum(pct(50), px(10)), sum(pct(100), px(-260)), sum(pct(50), px(-80)))
-          << window::background("frame")
-          << (builder<label>(px(10), px(10), sum(pct(50), px(-10)), px(20))
-              << label::text(fw::text("title.new-game.players")))
-          << (builder<listbox>(px(10), px(30), sum(pct(50), px(-10)), sum(pct(100), px(-80)))
-              << widget::id(PLAYER_LIST_ID))
-          << (builder<listbox>(sum(pct(50), px(10)), px(10), sum(pct(50), px(-20)), sum(pct(100), px(-40)))
-              << widget::id(CHAT_LIST_ID))
-          << (builder<textedit>(sum(pct(50), px(10)), sum(pct(100), px(-30)), sum(pct(50), px(-20)), px(20))
-              << widget::id(CHAT_TEXTEDIT_ID)
-              << textedit::filter(std::bind(&new_game_window::on_chat_filter, this, _1)))
-          << (builder<button>(sum(pct(50), px(-110)), sum(pct(100), px(-40)), px(110), px(30))
-              << button::text(fw::text("title.new-game.add-ai-player"))
-              << button::click(std::bind(&new_game_window::on_new_ai_clicked, this, _1)))
-          << (builder<button>(sum(pct(50), px(-240)), sum(pct(100), px(-40)), px(120), px(30))
-              << button::text(fw::text("title.new-game.start-multiplayer")))
-          )
-      << (builder<button>(px(40), sum(pct(100), px(-60)), px(150), px(30))
-          << button::text(fw::text("title.new-game.login"))
-          << widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
-      << (builder<button>(sum(pct(100), px(-190)), sum(pct(100), px(-60)), px(150), px(30))
-          << button::text(fw::text("cancel"))
-          << widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
-      << (builder<button>(sum(pct(100), px(-350)), sum(pct(100), px(-60)), px(150), px(30))
-          << button::text(fw::text("title.new-game.start-game"))
-          << widget::click(std::bind(&new_game_window::on_start_game_clicked, this, _1)))
-      << (builder<label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
-          << label::text(fw::version_str));
+  _wnd = Builder<Window>(px(0), px(0), pct(100), pct(100))
+      << Window::background("title_background")
+      << Widget::visible(false)
+      << (Builder<Label>(px(40), px(20), px(417), px(49))
+        << Label::background("title_heading"))
+      << (Builder<Label>(px(40), px(70), px(500), px(16))
+          << Label::text((boost::format(fw::text("title.sub-title")) % "Dean Harding" % "dean@codeka.com.au").str()))
+      << (Builder<Label>(px(40), px(100), px(200), px(20))
+        << Label::text(fw::text("title.new-game.choose-map")))
+      << (Builder<Listbox>(px(40), px(120), px(200), sum(pct(100), px(-190)))
+          << Widget::id(MAP_LIST_ID)
+          << Listbox::item_selected(std::bind(&new_game_window::on_maps_selection_changed, this, _1)))
+      << (Builder<Window>(px(250), px(100), sum(pct(100), px(-260)), sum(pct(50), px(-100)))
+          << Window::background("frame")
+          << (Builder<Label>(px(4), px(4), fract(OtherDimension::kHeight, 1.333f), sum(pct(100), px(-8)))
+            << Label::background("frame")
+            << Widget::id(MAP_SCREENSHOT_ID))
+          << (Builder<Label>(
+              sum(fract(MAP_SCREENSHOT_ID, OtherDimension::kWidth, 1.0f), px(8)),
+              px(8),
+              sum(pct(100), sum(fract(MAP_SCREENSHOT_ID, OtherDimension::kWidth, -1.0f), px(-12))),
+              px(18))
+            << Widget::id(MAP_NAME_ID))
+          << (Builder<Label>(
+              sum(fract(MAP_SCREENSHOT_ID, OtherDimension::kWidth, 1.0f), px(8)),
+              px(30),
+              sum(pct(100), sum(fract(MAP_SCREENSHOT_ID, OtherDimension::kWidth, -1.0f), px(-12))),
+              px(18))
+            << Widget::id(MAP_SIZE_ID)))
+      << (Builder<Window>(px(250), sum(pct(50), px(10)), sum(pct(100), px(-260)), sum(pct(50), px(-80)))
+          << Window::background("frame")
+          << (Builder<Label>(px(10), px(10), sum(pct(50), px(-10)), px(20))
+            << Label::text(fw::text("title.new-game.players")))
+          << (Builder<Listbox>(px(10), px(30), sum(pct(50), px(-10)), sum(pct(100), px(-80)))
+            << Widget::id(PLAYER_LIST_ID))
+          << (Builder<Listbox>(sum(pct(50), px(10)), px(10), sum(pct(50), px(-20)), sum(pct(100), px(-40)))
+            << Widget::id(CHAT_LIST_ID))
+          << (Builder<TextEdit>(sum(pct(50), px(10)), sum(pct(100), px(-30)), sum(pct(50), px(-20)), px(20))
+            << Widget::id(CHAT_TEXTEDIT_ID)
+            << TextEdit::filter(std::bind(&new_game_window::on_chat_filter, this, _1)))
+          << (Builder<Button>(sum(pct(50), px(-110)), sum(pct(100), px(-40)), px(110), px(30))
+            << Button::text(fw::text("title.new-game.add-ai-player"))
+            << Button::click(std::bind(&new_game_window::on_new_ai_clicked, this, _1)))
+          << (Builder<Button>(sum(pct(50), px(-240)), sum(pct(100), px(-40)), px(120), px(30))
+            << Button::text(fw::text("title.new-game.start-multiplayer"))))
+      << (Builder<Button>(px(40), sum(pct(100), px(-60)), px(150), px(30))
+          << Button::text(fw::text("title.new-game.login"))
+          << Widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
+      << (Builder<Button>(sum(pct(100), px(-190)), sum(pct(100), px(-60)), px(150), px(30))
+          << Button::text(fw::text("cancel"))
+          << Widget::click(std::bind(&new_game_window::on_cancel_clicked, this, _1)))
+      << (Builder<Button>(sum(pct(100), px(-350)), sum(pct(100), px(-60)), px(150), px(30))
+          << Button::text(fw::text("title.new-game.start-game"))
+          << Widget::click(std::bind(&new_game_window::on_start_game_clicked, this, _1)))
+      << (Builder<Label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
+          << Label::text(fw::version_str));
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
   _game_options = std::shared_ptr<game_screen_options>(new game_screen_options());
 }
@@ -117,11 +127,11 @@ void new_game_window::show() {
   _map_list = vfs.list_maps();
   BOOST_FOREACH(world_summary &ws, _map_list) {
     std::string title = ws.get_name();
-    _wnd->find<listbox>(MAP_LIST_ID)->add_item(
-        builder<label>(px(8), px(0), pct(100), px(20)) << label::text(title) << widget::data(ws));
+    _wnd->find<Listbox>(MAP_LIST_ID)->add_item(
+        Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
   }
   if (!_map_list.empty()) {
-    _wnd->find<listbox>(MAP_LIST_ID)->select_item(0);
+    _wnd->find<Listbox>(MAP_LIST_ID)->select_item(0);
   }
 
   _sig_players_changed_conn = simulation_thread::get_instance()->sig_players_changed.connect(
@@ -243,16 +253,16 @@ void new_game_window::on_players_changed() {
 void new_game_window::refresh_players() {
   std::vector<player *> players = simulation_thread::get_instance()->get_players();
 
-  listbox *players_list = _wnd->find<listbox>(PLAYER_LIST_ID);
+  Listbox *players_list = _wnd->find<Listbox>(PLAYER_LIST_ID);
   players_list->clear();
   BOOST_FOREACH(player *plyr, players) {
     int player_no = static_cast<int>(plyr->get_player_no());
 
     std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";
-    players_list->add_item(builder<widget>(px(0), px(0), pct(100), px(20)) << widget::data(plyr)
-        << (builder<label>(px(8), px(0), px(30), px(20)) << label::text(boost::lexical_cast<std::string>(player_no)))
-        << (builder<label>(px(30), px(0), sum(pct(100), px(-80)), px(20)) << label::text(plyr->get_user_name()))
-        << (builder<label>(sum(pct(100), px(-50)), px(0), px(50), px(20)) << label::text(ready_str)));
+    players_list->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20)) << Widget::data(plyr)
+        << (Builder<Label>(px(8), px(0), px(30), px(20)) << Label::text(boost::lexical_cast<std::string>(player_no)))
+        << (Builder<Label>(px(30), px(0), sum(pct(100), px(-80)), px(20)) << Label::text(plyr->get_user_name()))
+        << (Builder<Label>(sum(pct(100), px(-50)), px(0), px(50), px(20)) << Label::text(ready_str)));
   }
 }
 
@@ -273,7 +283,7 @@ void new_game_window::on_maps_selection_changed(int index) {
 }
 
 game::world_summary const &new_game_window::get_selected_world_summary() {
-  widget *selected_widget = _wnd->find<listbox>(MAP_LIST_ID)->get_selected_item();
+  Widget *selected_widget = _wnd->find<Listbox>(MAP_LIST_ID)->get_selected_item();
   if (selected_widget == nullptr) {
     // should never happen (unless you have no maps installed at all)
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No selected world!"));
@@ -282,12 +292,12 @@ game::world_summary const &new_game_window::get_selected_world_summary() {
   return boost::any_cast<game::world_summary const &>(selected_widget->get_data());
 }
 
-bool new_game_window::on_new_ai_clicked(widget *w) {
+bool new_game_window::on_new_ai_clicked(Widget *w) {
   _new_ai_player_window->show();
   return true;
 }
 
-bool new_game_window::player_properties_clicked(widget *w) {
+bool new_game_window::player_properties_clicked(Widget *w) {
   //player_properties->show();
   return true;
 }
@@ -297,7 +307,7 @@ bool new_game_window::on_chat_filter(std::string ch) {
     return true;
   }
 
-  textedit *ed = _wnd->find<textedit>(CHAT_TEXTEDIT_ID);
+  TextEdit *ed = _wnd->find<TextEdit>(CHAT_TEXTEDIT_ID);
   std::string msg = ed->get_text();
   boost::trim(msg);
 
@@ -313,23 +323,23 @@ void new_game_window::add_chat_msg(std::string const &user_name, std::string con
 }
 
 void new_game_window::append_chat(std::string const &msg) {
-  listbox *chat_list = _wnd->find<listbox>(CHAT_LIST_ID);
-  chat_list->add_item(builder<label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << label::text(msg));
+  Listbox *chat_list = _wnd->find<Listbox>(CHAT_LIST_ID);
+  chat_list->add_item(Builder<Label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << Label::text(msg));
 }
 
 void new_game_window::update_selection() {
   game::world_summary const &ws = get_selected_world_summary();
   simulation_thread::get_instance()->set_map_name(ws.get_name());
 
-  _wnd->find<label>(MAP_NAME_ID)->set_text((boost::format("%s by %s") % ws.get_name() % ws.get_author()).str());
-  _wnd->find<label>(MAP_SIZE_ID)->set_text((boost::format(fw::text("title.new-game.map-size"))
+  _wnd->find<Label>(MAP_NAME_ID)->set_text((boost::format("%s by %s") % ws.get_name() % ws.get_author()).str());
+  _wnd->find<Label>(MAP_SIZE_ID)->set_text((boost::format(fw::text("title.new-game.map-size"))
       % ws.get_width() % ws.get_height() % ws.get_num_players()).str());
-  _wnd->find<label>(MAP_SCREENSHOT_ID)->set_background(ws.get_screenshot());
+  _wnd->find<Label>(MAP_SCREENSHOT_ID)->set_background(ws.get_screenshot());
 }
 
 // when we're ready to start, we need to mark our own player as ready and then
 // wait for others. Once they're ready as well, start_game() is called.
-bool new_game_window::on_start_game_clicked(widget *w) {
+bool new_game_window::on_start_game_clicked(Widget *w) {
   simulation_thread::get_instance()->get_local_player()->local_player_is_ready();
 
   // disable the start_game button, since we don't want you clicking it twice.
@@ -339,7 +349,7 @@ bool new_game_window::on_start_game_clicked(widget *w) {
 
 // once all players are ready to start, this is called to actually start the game
 void new_game_window::start_game() {
-  widget *selected_widget = _wnd->find<listbox>(MAP_LIST_ID)->get_selected_item();
+  Widget *selected_widget = _wnd->find<Listbox>(MAP_LIST_ID)->get_selected_item();
   if (selected_widget == nullptr) {
     // should never happen (unless you have no maps installed at all)
     return;
@@ -357,7 +367,7 @@ void new_game_window::start_game() {
 
 // this is called when you check/uncheck the "Enable multiplayer" checkbox. We've got
 // let the session manager know we're starting a new multiplayer game (or not).
-bool new_game_window::multiplayer_enabled_checked(widget *w) {
+bool new_game_window::multiplayer_enabled_checked(Widget *w) {
 /*  bool enabled = _multiplayer_enable->isSelected();
   if (enabled) {
     session::get_instance()->create_game();
@@ -369,7 +379,7 @@ bool new_game_window::multiplayer_enabled_checked(widget *w) {
   return true;
 }
 
-bool new_game_window::on_cancel_clicked(widget *w) {
+bool new_game_window::on_cancel_clicked(Widget *w) {
   hide();
   _main_menu_window->show();
   return true;

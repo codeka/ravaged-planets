@@ -38,27 +38,27 @@ enum IDS {
  * We implement the menu item logic here, since there's only one place in the whole game that uses
  * a menu item like this.
  */
-class menu_item : public button {
+class menu_item : public Button {
 public:
-  menu_item(gui *gui);
+  menu_item(Gui *gui);
   virtual ~menu_item();
 
-  void on_attached_to_parent(widget *parent);
+  void on_attached_to_parent(Widget *parent);
 };
 
-menu_item::menu_item(gui *gui) : button(gui) {
+menu_item::menu_item(Gui *gui) : Button(gui) {
 }
 
 menu_item::~menu_item() {
 }
 
-void menu_item::on_attached_to_parent(widget *parent) {
-  state_drawable *bkgnd = new state_drawable();
-  bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("menu_normal"));
-  bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("menu_hover"));
-  _background = std::shared_ptr<drawable>(bkgnd);
+void menu_item::on_attached_to_parent(Widget *parent) {
+  StateDrawable *bkgnd = new StateDrawable();
+  bkgnd->add_drawable(StateDrawable::kNormal, gui_->get_drawable_manager()->get_drawable("menu_normal"));
+  bkgnd->add_drawable(StateDrawable::kHover, gui_->get_drawable_manager()->get_drawable("menu_hover"));
+  background_ = std::shared_ptr<Drawable>(bkgnd);
 
-  _text_align = button::left;
+  text_align_ = Button::kLeft;
 }
 
 //-----------------------------------------------------------------------------
@@ -72,33 +72,33 @@ main_menu_window::~main_menu_window() {
 }
 
 void main_menu_window::initialize() {
-  _wnd = builder<window>(px(0), px(0), pct(100), px(20)) << window::background("frame") << widget::visible(false)
-      << (builder<menu_item>(px(0), px(0), px(50), px(20)) << button::text("File")
-          << widget::click(std::bind(&main_menu_window::file_menu_clicked, this, _1)))
-      << (builder<menu_item>(px(50), px(0), px(50), px(20)) << button::text("Tool")
-          << widget::click(std::bind(&main_menu_window::tool_menu_clicked, this, _1)));
+  _wnd = Builder<Window>(px(0), px(0), pct(100), px(20)) << Window::background("frame") << Widget::visible(false)
+      << (Builder<menu_item>(px(0), px(0), px(50), px(20)) << Button::text("File")
+          << Widget::click(std::bind(&main_menu_window::file_menu_clicked, this, _1)))
+      << (Builder<menu_item>(px(50), px(0), px(50), px(20)) << Button::text("Tool")
+          << Widget::click(std::bind(&main_menu_window::tool_menu_clicked, this, _1)));
 
-  _file_menu = builder<window>(px(0), px(20), px(100), px(80))
-      << window::background("frame") << widget::visible(false)
-      << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("New")
-          << widget::click(std::bind(&main_menu_window::file_new_clicked, this, _1)))
-      << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Open")
-          << widget::click(std::bind(&main_menu_window::file_open_clicked, this, _1)))
-      << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Save")
-          << widget::click(std::bind(&main_menu_window::file_save_clicked, this, _1)))
-      << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Quit")
-          << widget::click(std::bind(&main_menu_window::file_quit_clicked, this, _1)));
+  _file_menu = Builder<Window>(px(0), px(20), px(100), px(80))
+      << Window::background("frame") << Widget::visible(false)
+      << (Builder<menu_item>(px(0), px(0), px(100), px(20)) << Button::text("New")
+          << Widget::click(std::bind(&main_menu_window::file_new_clicked, this, _1)))
+      << (Builder<menu_item>(px(0), px(20), px(100), px(20)) << Button::text("Open")
+          << Widget::click(std::bind(&main_menu_window::file_open_clicked, this, _1)))
+      << (Builder<menu_item>(px(0), px(40), px(100), px(20)) << Button::text("Save")
+          << Widget::click(std::bind(&main_menu_window::file_save_clicked, this, _1)))
+      << (Builder<menu_item>(px(0), px(60), px(100), px(20)) << Button::text("Quit")
+          << Widget::click(std::bind(&main_menu_window::file_quit_clicked, this, _1)));
 
-  _tool_menu = builder<window>(px(50), px(20), px(100), px(80))
-      << window::background("frame") << widget::visible(false)
-      << (builder<menu_item>(px(0), px(0), px(100), px(20)) << button::text("Heightfield")
-          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "heightfield")))
-      << (builder<menu_item>(px(0), px(20), px(100), px(20)) << button::text("Texture")
-          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "texture")))
-      << (builder<menu_item>(px(0), px(40), px(100), px(20)) << button::text("Players")
-          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "players")))
-      << (builder<menu_item>(px(0), px(60), px(100), px(20)) << button::text("Pathing")
-          << widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "pathing")));
+  _tool_menu = Builder<Window>(px(50), px(20), px(100), px(80))
+      << Window::background("frame") << Widget::visible(false)
+      << (Builder<menu_item>(px(0), px(0), px(100), px(20)) << Button::text("Heightfield")
+          << Widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "heightfield")))
+      << (Builder<menu_item>(px(0), px(20), px(100), px(20)) << Button::text("Texture")
+          << Widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "texture")))
+      << (Builder<menu_item>(px(0), px(40), px(100), px(20)) << Button::text("Players")
+          << Widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "players")))
+      << (Builder<menu_item>(px(0), px(60), px(100), px(20)) << Button::text("Pathing")
+          << Widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "pathing")));
 
   fw::framework *frmwrk = fw::framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
@@ -120,9 +120,9 @@ void main_menu_window::hide() {
  * This is attached to the global GUI 'click' signal. If you've clicked on a widget that's not one
  * of our menus (or you clicked on blank space) then we need to hide the menus.
  */
-void main_menu_window::global_click_handler(int button, bool is_down, fw::gui::widget *w) {
-  std::vector<window *> menus = {_file_menu, _tool_menu};
-  BOOST_FOREACH(window *menu, menus) {
+void main_menu_window::global_click_handler(int button, bool is_down, fw::gui::Widget *w) {
+  std::vector<Window *> menus = {_file_menu, _tool_menu};
+  BOOST_FOREACH(Window *menu, menus) {
     if (is_down && menu->is_visible() && !menu->is_child(w)) {
       menu->set_visible(false);
     }
@@ -133,34 +133,34 @@ void main_menu_window::global_click_handler(int button, bool is_down, fw::gui::w
   }
 }
 
-bool main_menu_window::file_menu_clicked(fw::gui::widget *w) {
+bool main_menu_window::file_menu_clicked(fw::gui::Widget *w) {
   _file_menu->set_visible(true);
   return true;
 }
 
-bool main_menu_window::tool_menu_clicked(fw::gui::widget *w) {
+bool main_menu_window::tool_menu_clicked(fw::gui::Widget *w) {
   _tool_menu->set_visible(true);
   return true;
 }
 
 // when they click "File->New", we just show the "new map" window, which'll
 // actually create the new map (assuming they click "OK" and that)
-bool main_menu_window::file_new_clicked(fw::gui::widget *w) {
+bool main_menu_window::file_new_clicked(fw::gui::Widget *w) {
   new_map->show();
   return true;
 }
 
-bool main_menu_window::file_save_clicked(fw::gui::widget *w) {
+bool main_menu_window::file_save_clicked(fw::gui::Widget *w) {
   save_map->show();
   return true;
 }
 
-bool main_menu_window::file_open_clicked(fw::gui::widget *w) {
+bool main_menu_window::file_open_clicked(fw::gui::Widget *w) {
   open_map->show();
   return true;
 }
 
-bool main_menu_window::file_quit_clicked(fw::gui::widget *w) {
+bool main_menu_window::file_quit_clicked(fw::gui::Widget *w) {
   // we don't actually "exit" the whole application, just go back to the title screen
   game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
   game::screen_stack *ss = app->get_screen();
@@ -182,7 +182,7 @@ void main_menu_window::map_screenshot_clicked_finished(std::shared_ptr<fw::bitma
 
 // We want to take a screenshot of the map at the current camera view to display
 // in the "New Game" and "Join Game" windows
-bool main_menu_window::map_screenshot_clicked(fw::gui::widget *w) {
+bool main_menu_window::map_screenshot_clicked(fw::gui::Widget *w) {
   //fw::framework::get_instance()->get_gui()->get_root_window()->setVisible(false);
 
   // we take the screenshot in 1024x768 because the maps expect a 4:3 image. We
@@ -195,7 +195,7 @@ bool main_menu_window::map_screenshot_clicked(fw::gui::widget *w) {
 
 // This is called when you click one of the "Tool" menu items. We figure out which
 // one you clicked on and switch to that tool as appropriate.
-bool main_menu_window::tool_clicked(fw::gui::widget *w, std::string tool_name) {
+bool main_menu_window::tool_clicked(fw::gui::Widget *w, std::string tool_name) {
   editor_screen::get_instance()->set_active_tool(tool_name);
   return true;
 }
@@ -210,9 +210,9 @@ statusbar_window::~statusbar_window() {
 }
 
 void statusbar_window::initialize() {
-  _wnd = builder<window>(px(0), sum(pct(100), px(-20)), pct(100), px(20)) << window::background("frame")
-      << widget::visible(false)
-      << (builder<label>(px(0), px(0), pct(100), pct(100)) << widget::id(STATUS_MESSAGE_ID));
+  _wnd = Builder<Window>(px(0), sum(pct(100), px(-20)), pct(100), px(20)) << Window::background("frame")
+      << Widget::visible(false)
+      << (Builder<Label>(px(0), px(0), pct(100), pct(100)) << Widget::id(STATUS_MESSAGE_ID));
   fw::framework *frmwrk = fw::framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
 }
@@ -226,7 +226,7 @@ void statusbar_window::hide() {
 }
 
 void statusbar_window::set_message(std::string const &msg) {
-  _wnd->find<label>(STATUS_MESSAGE_ID)->set_text(msg);
+  _wnd->find<Label>(STATUS_MESSAGE_ID)->set_text(msg);
 }
 
 }

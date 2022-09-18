@@ -164,7 +164,7 @@ void input::update(float dt) {
 
 /** Called on the render thread when an event is received. We queue it up to actually run on the update thread. */
 void input::process_event(SDL_Event &event) {
-  fw::gui::gui *gui = fw::framework::get_instance()->get_gui();
+  fw::gui::Gui *gui = fw::framework::get_instance()->get_gui();
   if (event.type == SDL_KEYDOWN) {
     if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), true)) {
       callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, true);

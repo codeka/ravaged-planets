@@ -6,78 +6,78 @@
 #include <framework/gui/label.h>
 #include <framework/texture.h>
 
-namespace fw { namespace gui {
+namespace fw::gui {
 
-/** Property that sets the background of the widget. */
-class label_background_property : public property {
+// Property that sets the background of the widget.
+class LabelBackgroundProperty : public Property {
 private:
-  std::string _drawable_name;
-  bool _centred;
+  std::string drawable_name_;
+  bool centred_;
 public:
-  label_background_property(std::string const &drawable_name, bool centred) :
-      _drawable_name(drawable_name), _centred(centred) {
+  LabelBackgroundProperty(std::string const &drawable_name, bool centred) :
+      drawable_name_(drawable_name), centred_(centred) {
   }
 
-  void apply(widget *widget) {
-    label *wdgt = dynamic_cast<label *>(widget);
-    wdgt->_background = wdgt->_gui->get_drawable_manager()->get_drawable(_drawable_name);
-    wdgt->_background_centred = _centred;
+  void apply(Widget *widget) {
+    Label *wdgt = dynamic_cast<Label *>(widget);
+    wdgt->background_ = wdgt->gui_->get_drawable_manager()->get_drawable(drawable_name_);
+    wdgt->background_centred_ = centred_;
   }
 };
 
-/** Property that sets the text of the widget. */
-class label_text_property : public property {
+// Property that sets the text of the widget.
+class LabelTextProperty : public Property {
 private:
-  std::string _text;
+  std::string text_;
 public:
-  label_text_property(std::string const &text) :
-    _text(text) {
+    LabelTextProperty(std::string const &text) :
+    text_(text) {
   }
 
-  void apply(widget *widget) {
-    label *wdgt = dynamic_cast<label *>(widget);
-    wdgt->_text = _text;
+  void apply(Widget *widget) {
+    Label *wdgt = dynamic_cast<Label *>(widget);
+    wdgt->text_ = text_;
   }
 };
 
-/** Property that sets the text of the widget. */
-class label_text_align_property : public property {
+// Property that sets the text of the widget.
+class LabelTextAlignProperty : public Property {
 private:
-  label::alignment _text_alignment;
+  Label::Alignment text_alignment_;
 public:
-  label_text_align_property(label::alignment text_alignment) :
-    _text_alignment(text_alignment) {
+    LabelTextAlignProperty(Label::Alignment text_alignment) :
+    text_alignment_(text_alignment) {
   }
 
-  void apply(widget *widget) {
-    label *wdgt = dynamic_cast<label *>(widget);
-    wdgt->_text_alignment = _text_alignment;
+  void apply(Widget *widget) {
+    Label *wdgt = dynamic_cast<Label *>(widget);
+    wdgt->text_alignment_ = text_alignment_;
   }
 };
 
-label::label(gui *gui) : widget(gui), _background_centred(false), _text_alignment(left) {
+Label::Label(Gui *gui) : Widget(gui), background_centred_(false), text_alignment_(Alignment::kLeft) {
 }
 
-label::~label() {
+Label::~Label() {
 }
 
-property *label::background(std::string const &drawable_name, bool centred /*= false */) {
-  return new label_background_property(drawable_name, centred);
+Property * Label::background(std::string const &drawable_name, bool centred /*= false */) {
+  return new LabelBackgroundProperty(drawable_name, centred);
 }
 
-property *label::text(std::string const &text) {
-  return new label_text_property(text);
+Property * Label::text(std::string const &text) {
+  return new LabelTextProperty(text);
 }
 
-property *label::text_align(label::alignment text_alignment) {
-  return new label_text_align_property(text_alignment);
+Property * Label::text_align(Label::Alignment text_alignment) {
+  return new LabelTextAlignProperty(text_alignment);
 }
 
-void label::render() {
-  if (_background) {
-    if (_background_centred) {
-      float background_width = _background->get_intrinsic_width();
-      float background_height = _background->get_intrinsic_height();
+void Label::render() {
+  if (background_) {
+    if (background_centred_) {
+      float background_width = background_->get_intrinsic_width();
+      float background_height = background_->get_intrinsic_height();
       if (background_width == 0.0f) {
         background_width = get_width();
       }
@@ -86,52 +86,56 @@ void label::render() {
       }
       float x = get_left() + (get_width() / 2.0f) - (background_width / 2.0f);
       float y = get_top() + (get_height() / 2.0f) - (background_height / 2.0f);
-      _background->render(x, y, background_width, background_height);
+      background_->render(x, y, background_width, background_height);
     } else {
-      _background->render(get_left(), get_top(), get_width(), get_height());
+      background_->render(get_left(), get_top(), get_width(), get_height());
     }
   }
-  if (_text != "") {
-    if (_text_alignment == label::left) {
+  if (text_ != "") {
+    switch (text_alignment_) {
+    case Alignment::kLeft:
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          get_left(), get_top() + get_height() / 2, _text,
-          static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
-    } else if (_text_alignment == label::center) {
+        get_left(), get_top() + get_height() / 2, text_,
+        static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
+      break;
+    case Alignment::kCenter:
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          get_left() + get_width() / 2, get_top() + get_height() / 2, _text,
-          static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
-    } else if (_text_alignment == label::right) {
+        get_left() + get_width() / 2, get_top() + get_height() / 2, text_,
+        static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
+      break;
+    case Alignment::kRight:
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          get_left() + get_width(), get_top() + get_height() / 2, _text,
+          get_left() + get_width(), get_top() + get_height() / 2, text_,
           static_cast<fw::font_face::draw_flags>(fw::font_face::align_right | fw::font_face::align_middle));
+      break;
     }
   }
 }
 
-void label::set_text(std::string const &text) {
-  _text = text;
+void Label::set_text(std::string const &text) {
+  text_ = text;
 }
 
-std::string label::get_text() const {
-  return _text;
+std::string Label::get_text() const {
+  return text_;
 }
 
-void label::set_background(std::shared_ptr<drawable> background, bool centred /*= false */) {
-  _background = background;
-  _background_centred = centred;
+void Label::set_background(std::shared_ptr<Drawable> background, bool centred /*= false */) {
+  background_ = background;
+  background_centred_ = centred;
 }
 
-void label::set_background(std::shared_ptr<bitmap> bmp, bool centred /*= false*/) {
+void Label::set_background(std::shared_ptr<bitmap> bmp, bool centred /*= false*/) {
   if (!bmp) {
-    _background = nullptr;
-    _background_centred = centred;
+    background_ = nullptr;
+    background_centred_ = centred;
   } else {
     std::shared_ptr<fw::texture> texture(new fw::texture());
     texture->create(bmp);
-    _background =
-        _gui->get_drawable_manager()->build_drawable(texture, 0, 0, texture->get_width(), texture->get_height());
-    _background_centred = centred;
+    background_ =
+        gui_->get_drawable_manager()->build_drawable(texture, 0, 0, texture->get_width(), texture->get_height());
+    background_centred_ = centred;
   }
 }
 
-} }
+}

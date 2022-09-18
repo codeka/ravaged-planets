@@ -2,8 +2,8 @@
 
 namespace fw {
 namespace gui {
-class window;
-class widget;
+class Window;
+class Widget;
 }
 }
 
@@ -12,11 +12,11 @@ namespace game {
 /** The pause window displays when you press "Esc" to pause the game. */
 class pause_window {
 private:
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
 
-  bool on_resume_clicked(fw::gui::widget *w);
-  bool on_exit_to_menu_clicked(fw::gui::widget *w);
-  bool on_exit_game_clicked(fw::gui::widget *w);
+  bool on_resume_clicked(fw::gui::Widget *w);
+  bool on_exit_to_menu_clicked(fw::gui::Widget *w);
+  bool on_exit_game_clicked(fw::gui::Widget *w);
 
 public:
   pause_window();

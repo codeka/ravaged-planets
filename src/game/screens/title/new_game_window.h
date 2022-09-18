@@ -8,8 +8,8 @@
 namespace fw {
 class bitmap;
 namespace gui {
-class window;
-class widget;
+class Window;
+class Widget;
 }
 }
 
@@ -24,7 +24,7 @@ class new_game_window {
 private:
   main_menu_window *_main_menu_window;
   new_ai_player_window *_new_ai_player_window;
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
   std::shared_ptr<game_screen_options> _game_options;
   game::session::session_state _sess_state;
   boost::signals2::connection _sig_players_changed_conn;
@@ -40,13 +40,13 @@ private:
 
   std::vector<world_summary> _map_list;
 
-  bool on_start_game_clicked(fw::gui::widget *w);
-  bool on_cancel_clicked(fw::gui::widget *w);
+  bool on_start_game_clicked(fw::gui::Widget *w);
+  bool on_cancel_clicked(fw::gui::Widget *w);
   void on_maps_selection_changed(int index);
-  bool multiplayer_enabled_checked(fw::gui::widget *w);
+  bool multiplayer_enabled_checked(fw::gui::Widget *w);
   bool on_chat_filter(std::string ch);
-  bool on_new_ai_clicked(fw::gui::widget *w);
-  bool player_properties_clicked(fw::gui::widget *w);
+  bool on_new_ai_clicked(fw::gui::Widget *w);
+  bool player_properties_clicked(fw::gui::Widget *w);
 
   void add_chat_msg(std::string const &user_name, std::string const &msg);
 

@@ -10,31 +10,31 @@ namespace fw {
 class graphics;
 
 namespace gui {
-class widget;
-class drawable_manager;
+class Widget;
+class DrawableManager;
 
 /**
  * This is the main entry point into the GUI subsystem. You get an instance of this class from \ref fw::framework.
  */
-class gui {
+class Gui {
 private:
-  fw::graphics *_graphics;
-  drawable_manager *_drawable_manager;
-  std::mutex _top_level_widget_mutex;
-  std::vector<widget *> _top_level_widgets;
-  std::vector<widget *> _pending_remove;
-  widget *_widget_under_mouse;
-  widget *_widget_mouse_down;
-  widget *_focused;
+  fw::graphics *graphics_;
+  DrawableManager *drawable_manager_;
+  std::mutex top_level_widget_mutex_;
+  std::vector<Widget *> top_level_widgets_;
+  std::vector<Widget *> pending_remove_;
+  Widget *widget_under_mouse_;
+  Widget *widget_mouse_down_;
+  Widget *focused_;
 
   /** Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget. */
-  widget *get_widget_at(float x, float y);
+  Widget *get_widget_at(float x, float y);
 
-  void propagate_mouse_event(widget *w, bool is_down, float x, float y);
+  void propagate_mouse_event(Widget *w, bool is_down, float x, float y);
 
 public:
-  gui();
-  ~gui();
+  Gui();
+  ~Gui();
 
   /** Called to initialize the GUI system. */
   void initialize(fw::graphics *graphics);
@@ -46,16 +46,16 @@ public:
   void render();
 
   /** Register a new top-level widget. */
-  void attach_widget(widget *widget);
+  void attach_widget(Widget *widget);
 
   /** Destroys the given top-level widget, unhooks any signals and removes it from the screen. */
-  void detach_widget(widget *widget);
+  void detach_widget(Widget *widget);
 
   /** Bring the given widget to the top. */
-  void bring_to_top(widget *widget);
+  void bring_to_top(Widget *widget);
 
   /** Give the specified widget input focus. Keystrokes will be sent to this widget only. */
-  void focus(widget *widget);
+  void focus(Widget *widget);
 
   int get_width() const;
   int get_height() const;
@@ -67,15 +67,17 @@ public:
   bool inject_key(int key, bool is_down);
 
   /** Global 'click' signal, fired whenever you click the mouse. Widget may be null if you clicked on no widget. */
-  boost::signals2::signal<void(int button, bool is_down, widget *widget)> sig_click;
+  boost::signals2::signal<void(int button, bool is_down, Widget *widget)> sig_click;
 
   bool is_mouse_over_widget() const {
-    return _widget_under_mouse != nullptr;
+    return widget_under_mouse_ != nullptr;
   }
 
-  inline drawable_manager *get_drawable_manager() const {
-    return _drawable_manager;
+  inline DrawableManager *get_drawable_manager() const {
+    return drawable_manager_;
   }
 };
 
-} }
+} 
+
+}

@@ -11,7 +11,7 @@
 
 namespace fw {
 
-class exception_stack_walker : public stack_walker {
+class exception_stack_walker : public StackWalker {
 private:
   std::vector<std::string> &_stacktrace;
   std::vector<std::string> &_modules;
@@ -47,7 +47,7 @@ public:
     _modules.push_back(line);
   }
 
-  virtual void on_callstack_entry(callstack_entry_type entry_type, callstack_entry &entry) {
+  virtual void on_callstack_entry(CallstackEntryType entry_type, callstack_entry &entry) {
     if (entry_type != last_entry && entry.offset != 0) {
       std::string fn_name = "(function-name not available)";
 

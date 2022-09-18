@@ -2,13 +2,13 @@
 
 namespace fw {
 namespace gui {
-class window;
+class Window;
 }
 
 /** GUI view which shows a bit of debug information about the game (fps, num active particles, etc). */
 class debug_view {
 private:
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
   float _time_to_update;
 
 public:

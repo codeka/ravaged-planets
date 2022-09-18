@@ -2,8 +2,8 @@
 
 namespace fw {
 namespace gui {
-class window;
-class widget;
+class Window;
+class Widget;
 }
 class bitmap;
 }
@@ -14,21 +14,21 @@ class editor_screen;
 // Represents the main menu ("File", "Edit", and all that jazz)
 class main_menu_window {
 private:
-  fw::gui::window *_wnd;
-  fw::gui::window *_file_menu;
-  fw::gui::window *_tool_menu;
+  fw::gui::Window *_wnd;
+  fw::gui::Window *_file_menu;
+  fw::gui::Window *_tool_menu;
 
-  void global_click_handler(int button, bool is_down, fw::gui::widget *w);
-  bool file_menu_clicked(fw::gui::widget *w);
-  bool tool_menu_clicked(fw::gui::widget *w);
-  bool file_new_clicked(fw::gui::widget *w);
-  bool file_save_clicked(fw::gui::widget *w);
-  bool file_open_clicked(fw::gui::widget *w);
-  bool file_quit_clicked(fw::gui::widget *w);
-  bool tool_clicked(fw::gui::widget *w, std::string tool_name);
+  void global_click_handler(int button, bool is_down, fw::gui::Widget *w);
+  bool file_menu_clicked(fw::gui::Widget *w);
+  bool tool_menu_clicked(fw::gui::Widget *w);
+  bool file_new_clicked(fw::gui::Widget *w);
+  bool file_save_clicked(fw::gui::Widget *w);
+  bool file_open_clicked(fw::gui::Widget *w);
+  bool file_quit_clicked(fw::gui::Widget *w);
+  bool tool_clicked(fw::gui::Widget *w, std::string tool_name);
 
   void map_screenshot_clicked_finished(std::shared_ptr<fw::bitmap> bmp);
-  bool map_screenshot_clicked(fw::gui::widget *w);
+  bool map_screenshot_clicked(fw::gui::Widget *w);
 
 public:
   main_menu_window();
@@ -42,7 +42,7 @@ public:
 // represents the statusbar
 class statusbar_window {
 private:
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
 public:
   statusbar_window();
   ~statusbar_window();

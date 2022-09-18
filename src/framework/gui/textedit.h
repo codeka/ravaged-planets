@@ -9,29 +9,29 @@
 class TextEditBuffer;
 
 namespace fw { namespace gui {
-class gui;
-class drawable;
+class Gui;
+class Drawable;
 
-/** A textedit widget is a complex widget which allows the user to type, edit, select, cut & copy text. */
-class textedit : public widget {
+// A TextEdit widget is a complex widget which allows the user to type, edit, select, cut & copy text.
+class TextEdit : public Widget {
 private:
-  friend class textedit_text_property;
-  friend class textedit_filter_property;
+  friend class TextEditTextProperty;
+  friend class TextEditFilterProperty;
 
-  TextEditBuffer *_buffer;
-  std::shared_ptr<drawable> _background;
-  std::shared_ptr<drawable> _selection_background;
-  std::shared_ptr<drawable> _cursor;
-  std::function<bool(std::string ch)> _filter;
-  bool _draw_cursor;
-  float _cursor_flip_time;
+  TextEditBuffer *buffer_;
+  std::shared_ptr<Drawable> background_;
+  std::shared_ptr<Drawable> selection_background_;
+  std::shared_ptr<Drawable> cursor_;
+  std::function<bool(std::string ch)> filter_;
+  bool draw_cursor_;
+  float cursor_flip_time_;
 
 public:
-  textedit(gui *gui);
-  virtual ~textedit();
+  TextEdit(Gui *gui);
+  virtual ~TextEdit();
 
-  static property *text(std::string const &text);
-  static property *filter(std::function<bool(std::string ch)> filter);
+  static Property *text(std::string const &text);
+  static Property *filter(std::function<bool(std::string ch)> filter);
 
   virtual void on_focus_gained();
   virtual void on_focus_lost();

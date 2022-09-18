@@ -2,12 +2,6 @@
 
 #include <game/screens/screen.h>
 
-namespace fw {
-namespace gui {
-class widget;
-}
-}
-
 namespace game {
 class main_menu_window;
 class new_game_window;

@@ -6,180 +6,180 @@
 #include <framework/gui/gui.h>
 #include <framework/gui/button.h>
 
-namespace fw { namespace gui {
+namespace fw::gui {
 
-/** Property that sets the background of the button. */
-class button_background_property : public property {
+// Property that sets the background of the button.
+class ButtonBackgroundProperty : public Property {
 private:
-  std::string _drawable_name;
-  std::shared_ptr<drawable> _drawable;
+  std::string drawable_name_;
+  std::shared_ptr<Drawable> drawable_;
 public:
-  button_background_property(std::string const &drawable_name) :
-      _drawable_name(drawable_name) {
+  ButtonBackgroundProperty(std::string const &drawable_name) :
+      drawable_name_(drawable_name) {
   }
-  button_background_property(std::shared_ptr<drawable> drawable) :
-      _drawable(drawable) {
+  ButtonBackgroundProperty(std::shared_ptr<Drawable> drawable) :
+      drawable_(drawable) {
   }
 
-  void apply(widget *widget) {
-    button *btn = dynamic_cast<button *>(widget);
-    if (_drawable) {
-      btn->_background = _drawable;
+  void apply(Widget *widget) {
+    Button *btn = dynamic_cast<Button *>(widget);
+    if (drawable_) {
+      btn->background_ = drawable_;
     } else {
-      btn->_background = btn->_gui->get_drawable_manager()->get_drawable(_drawable_name);
+      btn->background_ = btn->gui_->get_drawable_manager()->get_drawable(drawable_name_);
     }
   }
 };
 
-/** Property that sets the icon of the button. */
-class button_icon_property : public property {
+// Property that sets the icon of the button.
+class ButtonIconProperty : public Property {
 private:
-  std::string _drawable_name;
-  std::shared_ptr<drawable> _drawable;
+  std::string drawable_name_;
+  std::shared_ptr<Drawable> drawable_;
 public:
-  button_icon_property(std::string const &drawable_name) :
-      _drawable_name(drawable_name) {
+  ButtonIconProperty(std::string const &drawable_name) :
+      drawable_name_(drawable_name) {
   }
-  button_icon_property(std::shared_ptr<drawable> drawable) :
-      _drawable(drawable) {
+  ButtonIconProperty(std::shared_ptr<Drawable> drawable) :
+      drawable_(drawable) {
   }
 
-  void apply(widget *widget) {
-    button *btn = dynamic_cast<button *>(widget);
-    if (_drawable) {
-      btn->_icon = _drawable;
+  void apply(Widget *widget) {
+    Button *btn = dynamic_cast<Button *>(widget);
+    if (drawable_) {
+      btn->icon_ = drawable_;
     } else {
-      btn->_icon = btn->_gui->get_drawable_manager()->get_drawable(_drawable_name);
+      btn->icon_ = btn->gui_->get_drawable_manager()->get_drawable(drawable_name_);
     }
   }
 };
 
-/** Property that sets the text of the button. */
-class button_text_property : public property {
+// Property that sets the text of the button.
+class ButtonTextProperty : public Property {
 private:
-  std::string _text;
+  std::string text_;
 public:
-  button_text_property(std::string const &text) :
-      _text(text) {
+  ButtonTextProperty(std::string const &text) :
+      text_(text) {
   }
 
-  void apply(widget *widget) {
-    button *btn = dynamic_cast<button *>(widget);
-    btn->_text = _text;
+  void apply(Widget *widget) {
+    Button *btn = dynamic_cast<Button *>(widget);
+    btn->text_ = text_;
   }
 };
 
-/** Property that sets the alignment of text on the button. */
-class button_text_align_property : public property {
+// Property that sets the alignment of text on the button.
+class ButtonTextAlignProperty : public Property {
 private:
-  button::alignment _text_align;
+  Button::Alignment text_align_;
 public:
-  button_text_align_property(button::alignment text_align) :
-      _text_align(text_align) {
+  ButtonTextAlignProperty(Button::Alignment text_align) :
+      text_align_(text_align) {
   }
 
-  void apply(widget *widget) {
-    button *btn = dynamic_cast<button *>(widget);
-    btn->_text_align = _text_align;
+  void apply(Widget *widget) {
+    Button *btn = dynamic_cast<Button *>(widget);
+    btn->text_align_ = text_align_;
   }
 };
 
 //-----------------------------------------------------------------------------
 
-static std::shared_ptr<fw::audio_buffer> _hover_sound;
+static std::shared_ptr<fw::audio_buffer> g_hover_sound;
 
-button::button(gui *gui) : widget(gui), _text_align(center), _is_pressed(false), _is_mouse_over(false) {
-  sig_mouse_out.connect(std::bind(&button::on_mouse_out, this));
-  sig_mouse_over.connect(std::bind(&button::on_mouse_over, this));
+Button::Button(Gui *gui) : Widget(gui), text_align_(kCenter), is_pressed_(false), is_mouse_over_(false) {
+  sig_mouse_out.connect(std::bind(&Button::on_mouse_out, this));
+  sig_mouse_over.connect(std::bind(&Button::on_mouse_over, this));
 
-  if (!_hover_sound) {
-    _hover_sound = fw::framework::get_instance()->get_audio_manager()->get_audio_buffer("gui/sounds/click.ogg");
+  if (!g_hover_sound) {
+    g_hover_sound = fw::framework::get_instance()->get_audio_manager()->get_audio_buffer("gui/sounds/click.ogg");
   }
 }
 
-button::~button() {
+Button::~Button() {
 }
 
-property *button::background(std::string const &drawable_name) {
-  return new button_background_property(drawable_name);
+Property * Button::background(std::string const &drawable_name) {
+  return new ButtonBackgroundProperty(drawable_name);
 }
 
-property *button::background(std::shared_ptr<drawable> drawable) {
-  return new button_background_property(drawable);
+Property * Button::background(std::shared_ptr<Drawable> drawable) {
+  return new ButtonBackgroundProperty(drawable);
 }
 
-property *button::icon(std::string const &drawable_name) {
-  return new button_icon_property(drawable_name);
+Property * Button::icon(std::string const &drawable_name) {
+  return new ButtonIconProperty(drawable_name);
 }
 
-property *button::icon(std::shared_ptr<drawable> drawable) {
-  return new button_icon_property(drawable);
+Property * Button::icon(std::shared_ptr<Drawable> drawable) {
+  return new ButtonIconProperty(drawable);
 }
 
-property *button::text(std::string const &text) {
-  return new button_text_property(text);
+Property * Button::text(std::string const &text) {
+  return new ButtonTextProperty(text);
 }
 
-property *button::text_align(button::alignment align) {
-  return new button_text_align_property(align);
+Property * Button::text_align(Button::Alignment align) {
+  return new ButtonTextAlignProperty(align);
 }
 
-void button::on_attached_to_parent(widget *parent) {
+void Button::on_attached_to_parent(Widget *parent) {
   // Assign default values for things that haven't been overwritten.
-  if (!_background) {
-    state_drawable *bkgnd = new state_drawable();
-    bkgnd->add_drawable(state_drawable::normal, _gui->get_drawable_manager()->get_drawable("button_normal"));
-    bkgnd->add_drawable(state_drawable::hover, _gui->get_drawable_manager()->get_drawable("button_hover"));
-    bkgnd->add_drawable(state_drawable::pressed, _gui->get_drawable_manager()->get_drawable("button_hover"));
-    _background = std::shared_ptr<drawable>(bkgnd);
+  if (!background_) {
+    StateDrawable *bkgnd = new StateDrawable();
+    bkgnd->add_drawable(StateDrawable::kNormal, gui_->get_drawable_manager()->get_drawable("button_normal"));
+    bkgnd->add_drawable(StateDrawable::kHover, gui_->get_drawable_manager()->get_drawable("button_hover"));
+    bkgnd->add_drawable(StateDrawable::kPressed, gui_->get_drawable_manager()->get_drawable("button_hover"));
+    background_ = std::shared_ptr<Drawable>(bkgnd);
   }
 }
 
-void button::on_mouse_out() {
-  _is_mouse_over = false;
+void Button::on_mouse_out() {
+  is_mouse_over_ = false;
   update_drawable_state();
 }
 
-void button::on_mouse_over() {
-  _is_mouse_over = true;
+void Button::on_mouse_over() {
+  is_mouse_over_ = true;
   update_drawable_state();
 }
 
-void button::set_pressed(bool is_pressed) {
-  _is_pressed = is_pressed;
+void Button::set_pressed(bool is_pressed) {
+  is_pressed_ = is_pressed;
   update_drawable_state();
 }
 
-void button::update_drawable_state() {
-  state_drawable *drawable = dynamic_cast<state_drawable *>(_background.get());
+void Button::update_drawable_state() {
+  StateDrawable *drawable = dynamic_cast<StateDrawable *>(background_.get());
   if (drawable == nullptr) {
     return;
   }
 
   if (!is_enabled()) {
-    drawable->set_current_state(state_drawable::disabled);
-  } else if (_is_pressed) {
-    drawable->set_current_state(state_drawable::pressed);
-  } else if (_is_mouse_over) {
-    drawable->set_current_state(state_drawable::hover);
+    drawable->set_current_state(StateDrawable::kDisabled);
+  } else if (is_pressed_) {
+    drawable->set_current_state(StateDrawable::kPressed);
+  } else if (is_mouse_over_) {
+    drawable->set_current_state(StateDrawable::kHover);
   } else {
-    drawable->set_current_state(state_drawable::normal);
+    drawable->set_current_state(StateDrawable::kNormal);
   }
 }
 
-void button::render() {
+void Button::render() {
   float left = get_left();
   float top = get_top();
   float width = get_width();
   float height = get_height();
 
-  if (_background) {
-    _background->render(left, top, width, height);
+  if (background_) {
+    background_->render(left, top, width, height);
   }
 
-  if (_icon) {
-    float icon_width = _icon->get_intrinsic_width();
-    float icon_height = _icon->get_intrinsic_height();
+  if (icon_) {
+    float icon_width = icon_->get_intrinsic_width();
+    float icon_height = icon_->get_intrinsic_height();
     if (icon_width == 0.0f) {
       icon_width = width * 0.75f;
     }
@@ -188,20 +188,20 @@ void button::render() {
     }
     float x = left + (width / 2.0f) - (icon_width / 2.0f);
     float y = top + (height / 2.0f) - (icon_height / 2.0f);
-    _icon->render(x, y, icon_width, icon_height);
+    icon_->render(x, y, icon_width, icon_height);
   }
 
-  if (_text.length() > 0) {
-    if (_text_align == button::left) {
+  if (text_.length() > 0) {
+    if (text_align_ == kLeft) {
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          left + 4, top + height / 2, _text,
+          left + 4, top + height / 2, text_,
           static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
-    } else if (_text_align == button::center) {
+    } else if (text_align_ == kCenter) {
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          left + width / 2, top + height / 2, _text,
+          left + width / 2, top + height / 2, text_,
           static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
     }
   }
 }
 
-} }
+}

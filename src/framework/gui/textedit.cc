@@ -116,150 +116,150 @@ namespace fw {
 namespace gui {
 
 /** Property that sets the text of the widget. */
-class textedit_text_property : public property {
+class TextEditTextProperty : public Property {
 private:
-  std::string _text;
+  std::string text_;
 public:
-  textedit_text_property(std::string const &text) :
-    _text(text) {
+  TextEditTextProperty(std::string const &text) :
+    text_(text) {
   }
 
-  void apply(widget *widget) {
-    textedit *te = dynamic_cast<textedit *>(widget);
-    te->_buffer->codepoints = conv::utf_to_utf<uint32_t>(_text);
+  void apply(Widget *widget) {
+    TextEdit *te = dynamic_cast<TextEdit *>(widget);
+    te->buffer_->codepoints = conv::utf_to_utf<uint32_t>(text_);
   }
 };
 
-class textedit_filter_property : public property {
+class TextEditFilterProperty : public Property {
 private:
-  std::function<bool(std::string ch)> _filter;
+  std::function<bool(std::string ch)> filter_;
 public:
-  textedit_filter_property(std::function<bool(std::string ch)> filter) :
-    _filter(filter) {
+  TextEditFilterProperty(std::function<bool(std::string ch)> filter) :
+    filter_(filter) {
   }
 
-  void apply(widget *widget) {
-    textedit *te = dynamic_cast<textedit *>(widget);
-    te->_filter = _filter;
+  void apply(Widget *widget) {
+    TextEdit *te = dynamic_cast<TextEdit *>(widget);
+    te->filter_ = filter_;
   }
 };
 
 //-----------------------------------------------------------------------------
 
-textedit::textedit(gui *gui) : widget(gui), _buffer(new TextEditBuffer()), _cursor_flip_time(0), _draw_cursor(true) {
-  _background = gui->get_drawable_manager()->get_drawable("textedit");
-  _selection_background = gui->get_drawable_manager()->get_drawable("textedit_selection");
-  _cursor = gui->get_drawable_manager()->get_drawable("textedit_cursor");
-  stb_textedit_initialize_state(&_buffer->state, true /* is_single_line */);
+TextEdit::TextEdit(Gui *gui) : Widget(gui), buffer_(new TextEditBuffer()), cursor_flip_time_(0), draw_cursor_(true) {
+  background_ = gui->get_drawable_manager()->get_drawable("textedit");
+  selection_background_ = gui->get_drawable_manager()->get_drawable("textedit_selection");
+  cursor_ = gui->get_drawable_manager()->get_drawable("textedit_cursor");
+  stb_textedit_initialize_state(&buffer_->state, true /* is_single_line */);
 }
 
-textedit::~textedit() {
-  delete _buffer;
+TextEdit::~TextEdit() {
+  delete buffer_;
 }
 
-property *textedit::text(std::string const &text) {
-  return new textedit_text_property(text);
+Property * TextEdit::text(std::string const &text) {
+  return new TextEditTextProperty(text);
 }
 
-property *textedit::filter(std::function<bool(std::string ch)> filter) {
-  return new textedit_filter_property(filter);
+Property * TextEdit::filter(std::function<bool(std::string ch)> filter) {
+  return new TextEditFilterProperty(filter);
 }
 
-void textedit::on_focus_gained() {
-  widget::on_focus_gained();
-  _draw_cursor = true;
-  _cursor_flip_time = 0.0f;
+void TextEdit::on_focus_gained() {
+  Widget::on_focus_gained();
+  draw_cursor_ = true;
+  cursor_flip_time_ = 0.0f;
 }
 
-void textedit::on_focus_lost() {
-  widget::on_focus_lost();
+void TextEdit::on_focus_lost() {
+  Widget::on_focus_lost();
 }
 
-bool textedit::on_key(int key, bool is_down) {
+bool TextEdit::on_key(int key, bool is_down) {
   // stb_textedit only supports one shift key, so if it's right-shift just translate to left
   if (key == SDLK_RSHIFT || key == SDLK_LSHIFT) {
     key = STB_TEXTEDIT_K_SHIFT;
   }
 
   if (is_down) {
-    if (_filter) {
+    if (filter_) {
       std::string str(1, (char) key); // TODO: this is horrible!
-      if (!_filter(str)) {
+      if (!filter_(str)) {
         return true;
       }
     }
 
-    stb_textedit_key(_buffer, &_buffer->state, key);
+    stb_textedit_key(buffer_, &buffer_->state, key);
   }
-  _cursor_flip_time = 0.0f;
-  _draw_cursor = true;
+  cursor_flip_time_ = 0.0f;
+  draw_cursor_ = true;
   return true;
 }
 
-bool textedit::on_mouse_down(float x, float y) {
-  widget::on_mouse_down(x, y);
-  stb_textedit_click(_buffer, &_buffer->state, x, y);
-  _cursor_flip_time = 0.0f;
-  _draw_cursor = true;
+bool TextEdit::on_mouse_down(float x, float y) {
+  Widget::on_mouse_down(x, y);
+  stb_textedit_click(buffer_, &buffer_->state, x, y);
+  cursor_flip_time_ = 0.0f;
+  draw_cursor_ = true;
   return true;
 }
 
-bool textedit::on_mouse_up(float x, float y) {
-  return widget::on_mouse_up(x, y);
+bool TextEdit::on_mouse_up(float x, float y) {
+  return Widget::on_mouse_up(x, y);
 }
 
-void textedit::set_filter(std::function<bool(std::string ch)> filter) {
-  _filter = filter;
+void TextEdit::set_filter(std::function<bool(std::string ch)> filter) {
+  filter_ = filter;
 }
 
-void textedit::select_all() {
-  _buffer->state.select_start = 0;
-  _buffer->state.cursor = _buffer->state.select_end = _buffer->codepoints.size();
+void TextEdit::select_all() {
+  buffer_->state.select_start = 0;
+  buffer_->state.cursor = buffer_->state.select_end = buffer_->codepoints.size();
 }
 
-std::string textedit::get_text() const {
-  return conv::utf_to_utf<char>(_buffer->codepoints);
+std::string TextEdit::get_text() const {
+  return conv::utf_to_utf<char>(buffer_->codepoints);
 }
 
-void textedit::set_text(std::string const &text) {
-  _buffer->codepoints = conv::utf_to_utf<uint32_t>(text);
+void TextEdit::set_text(std::string const &text) {
+  buffer_->codepoints = conv::utf_to_utf<uint32_t>(text);
 }
 
-std::string textedit::get_cursor_name() const {
+std::string TextEdit::get_cursor_name() const {
   return "i-beam";
 }
 
-void textedit::update(float dt) {
-  if (_focused) {
-    _cursor_flip_time += dt;
-    if (_cursor_flip_time > 0.75f) {
-      _draw_cursor = !_draw_cursor;
-      _cursor_flip_time = 0.0f;
+void TextEdit::update(float dt) {
+  if (focused_) {
+    cursor_flip_time_ += dt;
+    if (cursor_flip_time_ > 0.75f) {
+      draw_cursor_ = !draw_cursor_;
+      cursor_flip_time_ = 0.0f;
     }
   }
 }
 
-void textedit::render() {
-  _background->render(get_left(), get_top(), get_width(), get_height());
+void TextEdit::render() {
+  background_->render(get_left(), get_top(), get_width(), get_height());
 
-  if (_buffer->state.select_start != _buffer->state.select_end) {
+  if (buffer_->state.select_start != buffer_->state.select_end) {
     float left = get_left() /* + something */;
     float width = get_left() + 100 /*something else */;
-    _selection_background->render(left, get_top() + 1, width, get_height() - 2);
+    selection_background_->render(left, get_top() + 1, width, get_height() - 2);
   }
 
-  if (!_buffer->codepoints.empty()) {
+  if (!buffer_->codepoints.empty()) {
     fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        get_left(), get_top() + get_height() / 2, _buffer->codepoints,
+        get_left(), get_top() + get_height() / 2, buffer_->codepoints,
         static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle),
         fw::colour::BLACK());
   }
 
-  if (_focused && _draw_cursor) {
-    int cursor_pos = _buffer->state.cursor;
-    fw::point size_to_cursor = _buffer->font->measure_substring(_buffer->codepoints, 0, cursor_pos);
+  if (focused_ && draw_cursor_) {
+    int cursor_pos = buffer_->state.cursor;
+    fw::point size_to_cursor = buffer_->font->measure_substring(buffer_->codepoints, 0, cursor_pos);
     float left = get_left() + size_to_cursor[0];
-    _cursor->render(left, get_top() + 2, 1.0f, get_height() - 4.0f);
+    cursor_->render(left, get_top() + 2, 1.0f, get_height() - 4.0f);
   }
 }
 

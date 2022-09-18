@@ -82,7 +82,7 @@ struct IMAGEHLP_MODULE64_V2 {
 namespace fw {
 namespace detail {
 
-class sw_internal {
+class StackWalkerInternal {
 public:
 
   // SymCleanup()
@@ -154,7 +154,7 @@ public:
   typedef BOOL (__stdcall WINAPI *tSymGetSearchPath)(HANDLE hProcess, PSTR SearchPath, DWORD SearchPathLength);
   tSymGetSearchPath pSymGetSearchPath;
 
-  sw_internal(fw::stack_walker *parent, HANDLE process) {
+  StackWalkerInternal(fw::StackWalker *parent, HANDLE process) {
     _parent = parent;
     _dbghelp = 0;
     _process = process;
@@ -174,7 +174,7 @@ public:
     pSymGetSearchPath = 0;
   }
 
-  ~sw_internal() {
+  ~StackWalkerInternal() {
     if (pSymCleanup != 0)
       pSymCleanup(_process);
     if (_dbghelp != NULL)
@@ -245,9 +245,9 @@ public:
     options &= ~SYMOPT_DEFERRED_LOADS;
     options = pSymSetOptions(options);
 
-    char buf[stack_walker::STACKWALK_MAX_NAMELEN] = {0};
+    char buf[StackWalker::STACKWALK_MAX_NAMELEN] = {0};
     if (this->pSymGetSearchPath != 0) {
-      if (pSymGetSearchPath(_process, buf, stack_walker::STACKWALK_MAX_NAMELEN) == FALSE) {
+      if (pSymGetSearchPath(_process, buf, StackWalker::STACKWALK_MAX_NAMELEN) == FALSE) {
         _parent->on_dbghelp_error("SymGetSearchPath", ::GetLastError(), 0);
       }
     }
@@ -263,7 +263,7 @@ public:
   HMODULE _dbghelp;
 
 private:
-  stack_walker *_parent;
+  StackWalker *_parent;
   HANDLE _process;
   fs::path _symbol_path;
 
@@ -312,7 +312,7 @@ private:
     }
 
     uint64_t file_version = 0;
-    if ((_parent->_options & stack_walker::retrieve_file_version) != 0) {
+    if ((_parent->_options & StackWalker::retrieve_file_version) != 0) {
       VS_FIXEDFILEINFO *ff_info = 0;
       DWORD handle;
       DWORD size = ::GetFileVersionInfoSize(file_name, &handle);
@@ -403,23 +403,23 @@ public:
 
 // ---------------------------------------------------------------------------
 
-stack_walker::stack_walker(DWORD process_id, HANDLE process) {
+StackWalker::StackWalker(DWORD process_id, HANDLE process) {
   _options = options_all;
   _modules_loaded = false;
   _process = process;
   _process_id = process_id;
 
-  std::shared_ptr<detail::sw_internal> sw_internal(new detail::sw_internal(this, process));
+  std::shared_ptr<detail::StackWalkerInternal> sw_internal(new detail::StackWalkerInternal(this, process));
   _sw = sw_internal;
 }
 
-stack_walker::stack_walker(int options, char const *symbol_path, DWORD process_id, HANDLE process) {
+StackWalker::StackWalker(int options, char const *symbol_path, DWORD process_id, HANDLE process) {
   _options = options;
   _modules_loaded = false;
   _process = process;
   _process_id = process_id;
 
-  std::shared_ptr<detail::sw_internal> sw_internal(new detail::sw_internal(this, process));
+  std::shared_ptr<detail::StackWalkerInternal> sw_internal(new detail::StackWalkerInternal(this, process));
   _sw = sw_internal;
 
   if (symbol_path != 0) {
@@ -428,10 +428,10 @@ stack_walker::stack_walker(int options, char const *symbol_path, DWORD process_i
   }
 }
 
-stack_walker::~stack_walker() {
+StackWalker::~StackWalker() {
 }
 
-bool stack_walker::load_modules() {
+bool StackWalker::load_modules() {
   if (_modules_loaded)
     return true;
 
@@ -493,10 +493,10 @@ bool stack_walker::load_modules() {
 // This has to be done due to a problem with the "hProcess"-parameter in x64...
 // Because this class is in no case multi-threading-enabled anyway (because of the limitations 
 // of dbghelp.dll) it is "safe" to use a static-variable
-static stack_walker::PReadProcessMemoryRoutine s_read_memory_function = 0;
+static StackWalker::PReadProcessMemoryRoutine s_read_memory_function = 0;
 static LPVOID s_read_memory_function_UserData = 0;
 
-bool stack_walker::walk_stack(
+bool StackWalker::walk_stack(
   HANDLE thread, const CONTEXT *context, PReadProcessMemoryRoutine read_memory_function, void *user_data) {
   if (!_modules_loaded && !load_modules())
     return false;
@@ -661,7 +661,7 @@ bool stack_walker::walk_stack(
       }
     }
 
-    callstack_entry_type et = next_entry;
+    CallstackEntryType et = next_entry;
     if (frame_num == 0)
       et = first_entry;
     on_callstack_entry(et, entry);
@@ -680,7 +680,7 @@ bool stack_walker::walk_stack(
   return true;
 }
 
-BOOL __stdcall stack_walker::my_read_memory_function(HANDLE hProcess, DWORD64 qwBaseAddress, PVOID lpBuffer,
+BOOL __stdcall StackWalker::my_read_memory_function(HANDLE hProcess, DWORD64 qwBaseAddress, PVOID lpBuffer,
     DWORD nSize, LPDWORD lpNumberOfBytesRead) {
   if (s_read_memory_function == 0) {
     SIZE_T st;
@@ -695,7 +695,7 @@ BOOL __stdcall stack_walker::my_read_memory_function(HANDLE hProcess, DWORD64 qw
   }
 }
 
-void stack_walker::on_load_module(char const *image, char const *module, uint64_t base_addr, uint32_t size,
+void StackWalker::on_load_module(char const *image, char const *module, uint64_t base_addr, uint32_t size,
     uint32_t result, char const *symbol_type, char const *pdb_name, uint64_t file_version) {
   char buffer[STACKWALK_MAX_NAMELEN];
   if (file_version == 0) {
@@ -712,7 +712,7 @@ void stack_walker::on_load_module(char const *image, char const *module, uint64_
   on_output(buffer);
 }
 
-void stack_walker::on_callstack_entry(callstack_entry_type entry_type, callstack_entry &entry) {
+void StackWalker::on_callstack_entry(CallstackEntryType entry_type, callstack_entry &entry) {
   char buffer[STACKWALK_MAX_NAMELEN];
   if (entry_type != last_entry && entry.offset != 0) {
     if (entry.name[0] == 0)
@@ -736,13 +736,13 @@ void stack_walker::on_callstack_entry(callstack_entry_type entry_type, callstack
   }
 }
 
-void stack_walker::on_dbghelp_error(char const *func_name, uint32_t gle, DWORD64 addr) {
+void StackWalker::on_dbghelp_error(char const *func_name, uint32_t gle, DWORD64 addr) {
   char buffer[STACKWALK_MAX_NAMELEN];
   sprintf_s(buffer, "ERROR: %s, GetLastError: %d (Address: %p)", func_name, gle, (LPVOID) addr);
   on_output(buffer);
 }
 
-void stack_walker::on_sym_init(char const *search_path, uint32_t options, char const *user_name) {
+void StackWalker::on_sym_init(char const *search_path, uint32_t options, char const *user_name) {
   char buffer[STACKWALK_MAX_NAMELEN];
   sprintf_s(buffer, "SymInit: Symbol-SearchPath: '%s', symOptions: %d, UserName: '%s'",
       search_path, options, user_name);
@@ -759,7 +759,7 @@ void stack_walker::on_sym_init(char const *search_path, uint32_t options, char c
   }
 }
 
-void stack_walker::on_output(char const *text) {
+void StackWalker::on_output(char const *text) {
   fw::debug << text << std::endl;
 }
 

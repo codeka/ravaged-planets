@@ -5,53 +5,53 @@
 
 #include <framework/gui/widget.h>
 
-namespace fw { namespace gui {
-class gui;
-class drawable;
+namespace fw::gui {
+class Gui;
+class Drawable;
 
-/** Checkboxes allow you toggle settings. */
-class checkbox : public widget {
+// Checkbox allow you toggle settings.
+class Checkbox : public Widget {
 public:
-  enum alignment {
-    left,
-    center,
-    right
+  enum Alignment {
+    kLeft,
+    kCenter,
+    kRight
   };
 
 protected:
-  friend class checkbox_text_property;
+  friend class CheckboxTextProperty;
 
-  std::shared_ptr<drawable> _background;
-  std::shared_ptr<drawable> _check_icon;
-  std::string _text;
-  bool _is_mouse_over;
-  bool _is_checked;
+  std::shared_ptr<Drawable> background_;
+  std::shared_ptr<Drawable> check_icon_;
+  std::string text_;
+  bool is_mouse_over_;
+  bool is_checked_;
 
   void update_drawable_state();
 
 public:
-  checkbox(gui *gui);
-  virtual ~checkbox();
+  Checkbox(Gui *gui);
+  virtual ~Checkbox();
 
-  static property *text(std::string const &text);
+  static Property *text(std::string const &text);
 
-  void on_attached_to_parent(widget *parent);
+  void on_attached_to_parent(Widget *parent);
   void on_mouse_out();
   void on_mouse_over();
   bool on_mouse_down(float x, float y);
   void render();
 
   inline void set_text(std::string const &new_text) {
-    _text = new_text;
+    text_ = new_text;
   }
   inline std::string get_text() const {
-    return _text;
+    return text_;
   }
 
   void set_checked(bool is_checked);
   bool is_checked() {
-    return _is_checked;
+    return is_checked_;
   }
 };
 
-} }
+}

@@ -7,9 +7,9 @@
 
 namespace fw {
 namespace gui {
-class listbox;
-class widget;
-class window;
+class Listbox;
+class Widget;
+class Window;
 }
 }
 
@@ -23,21 +23,21 @@ public:
   typedef std::function<void(open_file_window *)> file_selected_handler;
 
 private:
-  fw::gui::window *_wnd;
+  fw::gui::Window *_wnd;
   boost::filesystem::path _curr_directory;
   file_selected_handler _file_selected_handler;
   std::vector<std::string> _items;
   bool _show_hidden;
 
-  bool on_ok_clicked(fw::gui::widget *w);
-  bool on_cancel_clicked(fw::gui::widget *w);
+  bool on_ok_clicked(fw::gui::Widget *w);
+  bool on_cancel_clicked(fw::gui::Widget *w);
   void on_item_selected(int index);
   void on_item_activated(int index);
-  bool on_show_hidden_clicked(fw::gui::widget *w);
+  bool on_show_hidden_clicked(fw::gui::Widget *w);
 
   void refresh();
   void navigate_to_directory(boost::filesystem::path const &new_directory);
-  void add_row(fw::gui::listbox *lbx, std::string const &name);
+  void add_row(fw::gui::Listbox *lbx, std::string const &name);
 
 public:
   open_file_window();

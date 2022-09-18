@@ -123,7 +123,7 @@ bool framework::initialize(char const *title) {
   _font_manager->initialize();
 
   if (_app->wants_graphics()) {
-    _gui = new gui::gui();
+    _gui = new gui::Gui();
     _gui->initialize(_graphics);
   }
 

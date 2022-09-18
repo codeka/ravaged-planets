@@ -5,39 +5,37 @@
 
 #include <framework/gui/widget.h>
 
-namespace fw { namespace gui {
-class gui;
-class drawable;
-class listbox_item;
+namespace fw::gui {
+class Gui;
+class Drawable;
+class ListboxItem;
 
-/** A listbox is a scrollable list of items. */
-class listbox : public widget {
+/** A Listbox is a scrollable list of items. */
+class Listbox : public Widget {
 private:
-  friend class listbox_item_selected_property;
-  friend class listbox_item_activated_property;
+  friend class ListboxItemSelectedProperty;
+  friend class ListboxItemActivatedProperty;
 
-  std::shared_ptr<drawable> _background;
-  widget *_item_container;
-  std::vector<listbox_item *> _items;
-  listbox_item *_selected_item;
-  bool _scrollbar_visible;
+  std::shared_ptr<Drawable> background_;
+  Widget *item_container_;
+  std::vector<ListboxItem *> items_;
+  ListboxItem *selected_item_;
+  bool scrollbar_visible_;
 
   void update_thumb_button(bool adjust_height);
-  bool on_down_button_click(widget *w);
-  bool on_up_button_click(widget *w);
+  bool on_down_button_click(Widget *w);
+  bool on_up_button_click(Widget *w);
 public:
-  listbox(gui *gui);
-  virtual ~listbox();
+  Listbox(Gui *gui);
+  virtual ~Listbox();
 
-  static property *item_selected(std::function<void(int index)> on_selected);
-  static property *item_activated(std::function<void(int index)> on_activated);
+  static Property *item_selected(std::function<void(int index)> on_selected);
+  static Property *item_activated(std::function<void(int index)> on_activated);
 
-  /**
-   * Add an item to the list. This is not quite the same as attach_child, so be sure to not use that. You must give
-   * the widget you want to add an explicit height (in pixel, not percent). It's typically also best to give it an
-   * (x,y) of (0,0) and a width of 100%.
-   */
-  void add_item(widget *w);
+  // Add an item to the list. This is not quite the same as attach_child, so be sure to not use that. You must give
+  // the widget you want to add an explicit height (in pixel, not percent). It's typically also best to give it an
+  // (x,y) of (0,0) and a width of 100%.
+  void add_item(Widget *w);
 
   /** Removes all the items in the listbox. */
   void clear();
@@ -49,8 +47,8 @@ public:
   void activate_item(int index);
 
   int get_selected_index();
-  widget *get_item(int index);
-  widget *get_selected_item();
+  Widget *get_item(int index);
+  Widget *get_selected_item();
 
   /** Signaled when an item is selected. */
   boost::signals2::signal<void(int index)> sig_item_selected;
@@ -61,4 +59,4 @@ public:
   void render();
 };
 
-} }
+}
