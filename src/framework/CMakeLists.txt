@@ -6,25 +6,12 @@ file(GLOB FRAMEWORK_FILES
     stb/*.cc
 )
 
-# These are used so that we get nice organization of files in Xcode/Visual Studio
 file(GLOB FRAMEWORK_HEADERS
-    ../../include/framework/*.h
-    ../../include/framework/gui/*.h
-    ../../include/framework/lua/*.h
-    ../../include/framework/stb/*.h
+    *.h
+    gui/*.h
+    lua/*.h
+    stb/*.h
 )
-SOURCE_GROUP(src
-  REGULAR_EXPRESSION [^/]+\\.cc)
-SOURCE_GROUP(src\\gui
-  REGULAR_EXPRESSION gui/.*\\.cc)
-SOURCE_GROUP(src\\stb
-  REGULAR_EXPRESSION stb/.*\\.cc)
-SOURCE_GROUP(inc
-  REGULAR_EXPRESSION [^/]+\\.h)
-SOURCE_GROUP(inc\\gui
-  REGULAR_EXPRESSION gui/.*\\.h)
-SOURCE_GROUP(inc\\stb
-  REGULAR_EXPRESSION stb/.*\\.h)
 
 if(WIN32)
     file(GLOB ARCH_FILES

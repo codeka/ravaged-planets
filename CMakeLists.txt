@@ -32,6 +32,7 @@ endif()
 
 # Make sure we can include our own include files.
 include_directories(include)
+include_directories(src)
 
 # Make sure generated files are #includable.
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)

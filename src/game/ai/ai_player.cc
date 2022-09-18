@@ -39,7 +39,7 @@ ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t p
 
   // create a new lua_context for our script, then add all of our global
   // functions and so on to it
-  std::shared_ptr<fw::LuaContext> script(new fw::LuaContext());
+  std::shared_ptr<fw::lua::LuaContext> script(new fw::lua::LuaContext());
 
 //  luabind::module(*script) [
 //      luabind::class_<ai_player>("ai_player")
@@ -52,7 +52,7 @@ ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t p
 //          .def("find_units", &ai_player::l_find_units, luabind::raw(_3))
 //          .def("issue_order", &ai_player::l_issue_order)
 //  ];
-  unit_wrapper::register_class(*script);
+//unit_wrapper::register_class(script);
 //  luabind::globals(*script)["player"] = this;
   //player->self = luabind::get_globals(state)["player"];
 
