@@ -6,7 +6,7 @@
 
 #include <framework/gui/widget.h>
 
-class textedit_buffer;
+class TextEditBuffer;
 
 namespace fw { namespace gui {
 class gui;
@@ -18,7 +18,7 @@ private:
   friend class textedit_text_property;
   friend class textedit_filter_property;
 
-  textedit_buffer *_buffer;
+  TextEditBuffer *_buffer;
   std::shared_ptr<drawable> _background;
   std::shared_ptr<drawable> _selection_background;
   std::shared_ptr<drawable> _cursor;

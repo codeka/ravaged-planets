@@ -20,13 +20,13 @@ namespace conv = boost::locale::conv;
 
 //-----------------------------------------------------------------------------
 
-class textedit_buffer {
+class TextEditBuffer {
 public:
   STB_TexteditState state;
   std::shared_ptr<fw::font_face> font;
   std::basic_string<uint32_t> codepoints;
 
-  inline textedit_buffer() {
+  inline TextEditBuffer() {
     font = fw::framework::get_instance()->get_font_manager()->get_face();
   }
 };
@@ -35,18 +35,18 @@ public:
 
 #define STB_TEXTEDIT_IMPLEMENTATION
 
-#define STB_TEXTEDIT_STRING textedit_buffer
+#define STB_TEXTEDIT_STRING TextEditBuffer
 #define STB_TEXTEDIT_NEWLINE '\n'
 
-int STB_TEXTEDIT_STRINGLEN(textedit_buffer *buffer) {
+int STB_TEXTEDIT_STRINGLEN(TextEditBuffer *buffer) {
   return buffer->codepoints.size();
 }
 
-char STB_TEXTEDIT_GETCHAR(const textedit_buffer *buffer, int idx) {
+char STB_TEXTEDIT_GETCHAR(const TextEditBuffer *buffer, int idx) {
   return buffer->codepoints[idx];
 }
 
-float STB_TEXTEDIT_GETWIDTH(textedit_buffer *buffer, int line_start_idx, int char_idx) {
+float STB_TEXTEDIT_GETWIDTH(TextEditBuffer *buffer, int line_start_idx, int char_idx) {
   return buffer->font->measure_glyph(buffer->codepoints[char_idx])[0];
 }
 
@@ -62,7 +62,7 @@ int STB_TEXTEDIT_KEYTOTEXT(int key) {
   return key;
 }
 
-void STB_TEXTEDIT_LAYOUTROW(StbTexteditRow *r, textedit_buffer *buffer, int line_start_idx) {
+void STB_TEXTEDIT_LAYOUTROW(StbTexteditRow *r, TextEditBuffer *buffer, int line_start_idx) {
   const uint32_t *text_remaining = nullptr;
 
   // TODO: handle actual more than one line...
@@ -81,11 +81,11 @@ bool STB_TEXTEDIT_IS_SPACE(uint32_t ch) {
   return spaces.find(ch) != std::string::npos;
 }
 
-void STB_TEXTEDIT_DELETECHARS(textedit_buffer *buffer, int pos, int n) {
+void STB_TEXTEDIT_DELETECHARS(TextEditBuffer *buffer, int pos, int n) {
   buffer->codepoints.erase(pos, n);
 }
 
-bool STB_TEXTEDIT_INSERTCHARS(textedit_buffer *buffer, int pos, const uint32_t* new_text, int new_text_len) {
+bool STB_TEXTEDIT_INSERTCHARS(TextEditBuffer *buffer, int pos, const uint32_t* new_text, int new_text_len) {
   buffer->codepoints.insert(pos, new_text, new_text_len);
   return true;
 }
@@ -94,6 +94,8 @@ bool STB_TEXTEDIT_INSERTCHARS(textedit_buffer *buffer, int pos, const uint32_t* 
 #define STB_TEXTEDIT_K_RIGHT        SDLK_RIGHT // keyboard input to move cursor right
 #define STB_TEXTEDIT_K_UP           SDLK_UP // keyboard input to move cursor up
 #define STB_TEXTEDIT_K_DOWN         SDLK_DOWN // keyboard input to move cursor down
+#define STB_TEXTEDIT_K_PGUP         SDLK_PAGEUP // keyboard input to move up one page
+#define STB_TEXTEDIT_K_PGDOWN       SDLK_PAGEDOWN // keyboard input to move down one page
 #define STB_TEXTEDIT_K_LINESTART    SDLK_HOME // keyboard input to move cursor to start of line
 #define STB_TEXTEDIT_K_LINEEND      SDLK_END // keyboard input to move cursor to end of line
 #define STB_TEXTEDIT_K_TEXTSTART    (1<<29 | 1)  // TODO // keyboard input to move cursor to start of text
@@ -144,7 +146,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-textedit::textedit(gui *gui) : widget(gui), _buffer(new textedit_buffer()), _cursor_flip_time(0), _draw_cursor(true) {
+textedit::textedit(gui *gui) : widget(gui), _buffer(new TextEditBuffer()), _cursor_flip_time(0), _draw_cursor(true) {
   _background = gui->get_drawable_manager()->get_drawable("textedit");
   _selection_background = gui->get_drawable_manager()->get_drawable("textedit_selection");
   _cursor = gui->get_drawable_manager()->get_drawable("textedit_cursor");
