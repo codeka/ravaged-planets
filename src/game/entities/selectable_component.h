@@ -37,7 +37,7 @@ public:
   virtual void apply_template(luabind::object const &tmpl);
 
   virtual void render(fw::sg::scenegraph &scenegraph,
-      fw::matrix const &transform);
+      fw::Matrix const &transform);
 
   // gets or sets a flag which indicates whether we're selected or not
   void set_is_selected(bool selected);

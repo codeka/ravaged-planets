@@ -81,7 +81,7 @@ void entity::update(float dt) {
   }
 }
 
-void entity::render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform) {
+void entity::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform) {
   BOOST_FOREACH(auto &pair, _components) {
     pair.second->render(scenegraph, transform);
   }
@@ -91,7 +91,7 @@ void entity::render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform)
   }
 }
 
-void entity::set_position(fw::vector const &pos) {
+void entity::set_position(fw::Vector const &pos) {
   position_component *position = get_component<ent::position_component>();
   if (position != nullptr) {
     position->set_position(pos);

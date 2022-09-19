@@ -78,11 +78,11 @@ void editor_screen::update() {
 void editor_screen::render(fw::sg::scenegraph &scenegraph) {
   if (_world != nullptr) {
     // set up the properties of the sun that we'll use to light and also cast shadows
-    fw::vector sun(0.485f, 0.485f, 0.727f);
-    fw::camera *old_cam = fw::framework::get_instance()->get_camera();
-    fw::vector cam_pos = old_cam->get_position();
-    fw::vector cam_dir = old_cam->get_forward();
-    fw::vector lookat = _world->get_terrain()->get_cursor_location(cam_pos, cam_dir);
+    fw::Vector sun(0.485f, 0.485f, 0.727f);
+    fw::Camera *old_cam = fw::framework::get_instance()->get_camera();
+    fw::Vector cam_pos = old_cam->get_position();
+    fw::Vector cam_dir = old_cam->get_forward();
+    fw::Vector lookat = _world->get_terrain()->get_cursor_location(cam_pos, cam_dir);
 
     std::shared_ptr <fw::sg::light> light(new fw::sg::light(lookat + sun * 200.0f, sun * -1, true));
     scenegraph.add_light(light);

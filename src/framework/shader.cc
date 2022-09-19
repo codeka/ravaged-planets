@@ -277,11 +277,11 @@ void shader_parameters::set_texture(std::string const &name, std::shared_ptr<Tex
   _textures[name] = tex;
 }
 
-void shader_parameters::set_matrix(std::string const &name, matrix const &m) {
+void shader_parameters::set_matrix(std::string const &name, Matrix const &m) {
   _matrices[name] = m;
 }
 
-void shader_parameters::set_vector(std::string const &name, vector const &v) {
+void shader_parameters::set_vector(std::string const &name, Vector const &v) {
   _vectors[name] = v;
 }
 
@@ -323,14 +323,14 @@ void shader_parameters::apply(shader_program *prog) const {
     texture_unit++;
   }
 
-  for (std::map<std::string, matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
+  for (std::map<std::string, Matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
     shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.data()));
     }
   }
 
-  for (std::map<std::string, vector>::const_iterator it = _vectors.begin(); it != _vectors.end(); ++it) {
+  for (std::map<std::string, Vector>::const_iterator it = _vectors.begin(); it != _vectors.end(); ++it) {
     shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform3fv(var.location, 1, it->second.data()));

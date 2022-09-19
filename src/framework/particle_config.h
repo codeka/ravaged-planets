@@ -76,12 +76,12 @@ public:
    * This defines a spherical area where we choose a point inside the sphere with a certain probability.
    */
   struct spherical_location {
-    vector centre;
+    Vector centre;
     float radius;
     falloff_kind falloff;
 
     /** Gets a point within this location, using the probability rules to work out exactly where to go. */
-    vector get_point() const;
+    Vector get_point() const;
   };
 
   /** This controls the technique we use in the particle.fx file for the texture. */
@@ -121,7 +121,7 @@ public:
     random<float> size;
     random<float> rotation_speed;
     rotation_kind::value rotation_kind;
-    random<fw::vector> direction;
+    random<fw::Vector> direction;
     random<float> speed;
     int colour_row;
     float alpha;
@@ -142,7 +142,7 @@ private:
   void parse_life_state(life_state &state, xml_element const &elem);
   void parse_random_float(random<float> &value, xml_element const &elem);
   void parse_random_colour(random<fw::colour> &value, xml_element const &elem);
-  void parse_random_vector(random<fw::vector> &value, xml_element const &elem);
+  void parse_random_vector(random<fw::Vector> &value, xml_element const &elem);
 
 public:
 

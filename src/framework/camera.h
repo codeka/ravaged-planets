@@ -11,23 +11,23 @@
 
 namespace fw {
 
-class camera {
+class Camera {
 private:
-  void set_look_at(matrix &m, vector const &eye, vector const &look_at,
-      vector const &up);
+  void set_look_at(Matrix &m, Vector const &eye, Vector const &look_at,
+      Vector const &up);
 
 protected:
-  matrix _view;
-  matrix _projection;
+  Matrix _view;
+  Matrix _projection;
 
-  vector _right;
-  vector _up;
-  vector _forward;
+  Vector _right;
+  Vector _up;
+  Vector _forward;
 
-  vector _position;
-  vector _lookat;
+  Vector _position;
+  Vector _lookat;
 
-  vector _velocity;
+  Vector _velocity;
   float _max_speed;
 
   float _floor_height;
@@ -39,8 +39,8 @@ protected:
   std::vector<int> _keybindings;
 
 public:
-  camera();
-  virtual ~camera();
+  Camera();
+  virtual ~Camera();
 
   // this signal is fired when the camera has moved or rotated, etc
   boost::signals2::signal<void()> sig_updated;
@@ -57,61 +57,61 @@ public:
 
   // Projects the given screen (x,y) coordinates to a point in front of the camera in 3D space. You can then use this
   // vector to select objects, etc etc...
-  vector unproject(float x, float y);
+  Vector unproject(float x, float y);
 
-  virtual void set_location(vector const & location) {
+  virtual void set_location(Vector const & location) {
     _position = location;
     //_updated = true;
   }
 
-  virtual vector const & get_location() const {
+  virtual Vector const & get_location() const {
     return _position;
   }
 
-  virtual void set_direction(vector const & direction) {
+  virtual void set_direction(Vector const & direction) {
     _forward = direction;
     //_updated = true;
   }
 
-  virtual vector const & get_direction() const {
+  virtual Vector const & get_direction() const {
     return _forward;
   }
 
   // "Zooms" the view to the given location. Mostly useful with a top_down_camera or lookat_camera.
-  virtual void zoom_to(vector const &location) {
+  virtual void zoom_to(Vector const &location) {
     set_location(location);
   }
 
-  matrix const & get_view_matrix() const {
+  Matrix const & get_view_matrix() const {
     return _view;
   }
 
-  matrix const & get_projection_matrix() const {
+  Matrix const & get_projection_matrix() const {
     return _projection;
   }
 
   // Get the "eye" position of the camera.
-  vector const & get_position() const {
+  Vector const & get_position() const {
     return _position;
   }
 
   // Gets the three directional axis.
-  vector const & get_right() const {
+  Vector const & get_right() const {
     return _right;
   }
 
-  vector const & get_forward() const {
+  Vector const & get_forward() const {
     return _forward;
   }
 
-  vector const & get_up() const {
+  Vector const & get_up() const {
     return _up;
   }
 };
 
 // This implementation of camera is a "first-person" camera. The mouse cursor is hidden and you move the mouse to
 // "look around".
-class first_person_camera: public camera {
+class first_person_camera: public Camera {
 private:
   bool _fly_mode; // Fly mode means we can "fly", if false we don't move in the y-direction
 
@@ -142,10 +142,10 @@ public:
 
 // This is a simple static camera where you tell it what to "look at" and from what direction to look from, and
 // that's it - no interaction possible, etc.
-class lookat_camera: public camera {
+class lookat_camera: public Camera {
 protected:
   // This is the "centre" that we're looking at and our rotations go around.
-  vector _centre;
+  Vector _centre;
 
 public:
   lookat_camera();
@@ -153,8 +153,8 @@ public:
 
   virtual void update(float dt);
 
-  virtual void set_location(vector const & location);
-  virtual vector const & get_location() const {
+  virtual void set_location(Vector const & location);
+  virtual Vector const & get_location() const {
     return _centre;
   }
 
@@ -178,7 +178,7 @@ private:
   bool _zoom_out;
   bool _rotate_mouse;
 
-  fw::vector _zoom_to;
+  fw::Vector _zoom_to;
   bool _zooming;
 
   void rotate(float around_up, float around_right);
@@ -205,7 +205,7 @@ public:
   virtual void update(float dt);
 
   // "Zooms" the camera to the given location.
-  virtual void zoom_to(vector const &location) {
+  virtual void zoom_to(Vector const &location) {
     _zoom_to = location;
     _zooming = true;
   }

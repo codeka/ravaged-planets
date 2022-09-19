@@ -37,8 +37,8 @@ void pathing_component::initialize() {
 void pathing_component::update(float dt) {
   // follow the path... todo: this can be done SOOOOOO much better!
   while (is_following_path()) {
-    fw::vector goal = _path[_curr_goal_node];
-    fw::vector dir = _position->get_direction_to(goal);
+    fw::Vector goal = _path[_curr_goal_node];
+    fw::Vector dir = _position->get_direction_to(goal);
     dir[1] = 0.0f; // ignore height component
     if (dir.length_squared() <= 1.0f) {
       // if we're "at" this node, increment the _curr_goal_node and try again
@@ -56,14 +56,14 @@ bool pathing_component::is_following_path() const {
   return (_path.size() > _curr_goal_node);
 }
 
-void pathing_component::set_path(std::vector<fw::vector> const &path) {
+void pathing_component::set_path(std::vector<fw::Vector> const &path) {
   _path = path;
   _curr_goal_node = 0;
 
   fw::debug << "found path to [" << _last_request_goal << "]: " << _path.size() << " node(s)" << std::endl;
 }
 
-void pathing_component::set_goal(fw::vector const &goal) {
+void pathing_component::set_goal(fw::Vector const &goal) {
   // request a path from the entity's current position to the given goal and get the pathing_thread to call our
   // set_path method when it's done
   float now = fw::framework::get_instance()->get_timer()->get_total_time();
@@ -87,7 +87,7 @@ void pathing_component::stop() {
   _curr_goal_node = 0;
 }
 
-void pathing_component::on_path_found(std::vector<fw::vector> const &path) {
+void pathing_component::on_path_found(std::vector<fw::Vector> const &path) {
   set_path(path);
 }
 

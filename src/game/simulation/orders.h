@@ -95,7 +95,7 @@ public:
   virtual void serialize(fw::net::packet_buffer &buffer);
   virtual void deserialize(fw::net::packet_buffer &buffer);
 
-  fw::vector goal;
+  fw::Vector goal;
 
   static const int identifier = 2;
   virtual uint16_t get_identifier() const {

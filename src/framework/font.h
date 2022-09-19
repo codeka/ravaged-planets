@@ -78,12 +78,12 @@ public:
   void ensure_glyphs(std::string const &str);
 
   /** Measures the given string and returns the width/height of the final rendered string. */
-  fw::point measure_string(std::string const &str);
-  fw::point measure_string(std::basic_string<uint32_t> const &str);
-  fw::point measure_substring(std::basic_string<uint32_t> const &str, int pos, int num_chars);
+  fw::Point measure_string(std::string const &str);
+  fw::Point measure_string(std::basic_string<uint32_t> const &str);
+  fw::Point measure_substring(std::basic_string<uint32_t> const &str, int pos, int num_chars);
 
   /** Measures a single glyph. */
-  fw::point measure_glyph(uint32_t ch);
+  fw::Point measure_glyph(uint32_t ch);
 
   /**
    * Draws the given string on the screen at the given (x,y) coordinates.

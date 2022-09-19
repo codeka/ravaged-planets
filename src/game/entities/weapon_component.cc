@@ -37,7 +37,7 @@ void weapon_component::apply_template(luabind::object const &tmpl) {
 //      // TODO: factor this out and use an actual array or something
 //      std::vector<float> parts = fw::split<float>(luabind::object_cast<std::string>(*it));
 //      if (parts.size() == 3) {
-//        _fire_direction = fw::vector(parts[0], parts[1], parts[2]);
+//        _fire_direction = fw::Vector(parts[0], parts[1], parts[2]);
 //      }
 //    } else if (it.key() == "Range") {
 //      _range = luabind::object_cast<float>(*it);
@@ -64,7 +64,7 @@ void weapon_component::update(float dt) {
     if (our_moveable != nullptr) {
       float wrap_x = game::world::get_instance()->get_terrain()->get_width();
       float wrap_z = game::world::get_instance()->get_terrain()->get_length();
-      fw::vector goal = fw::get_direction_to(our_pos->get_position(), their_pos->get_position(), wrap_x, wrap_z);
+      fw::Vector goal = fw::get_direction_to(our_pos->get_position(), their_pos->get_position(), wrap_x, wrap_z);
       if (goal.length() > _range) {
         our_moveable->set_goal(their_pos->get_position());
         need_fire = false;

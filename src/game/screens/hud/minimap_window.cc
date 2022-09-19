@@ -37,15 +37,15 @@ namespace game {
 /** This is the special drawble implementation we use to draw the rotated bitmap for the minimap. */
 class minimap_drawable : public fw::gui::BitmapDrawable {
 protected:
-  fw::matrix _transform;
-  fw::matrix get_pos_transform(float x, float y, float width, float height);
-  fw::matrix get_uv_transform();
+  fw::Matrix _transform;
+  fw::Matrix get_pos_transform(float x, float y, float width, float height);
+  fw::Matrix get_uv_transform();
 
 public:
   minimap_drawable(std::shared_ptr<fw::Texture> texture);
   virtual ~minimap_drawable();
 
-  void update(fw::matrix transform);
+  void update(fw::Matrix transform);
 };
 
 minimap_drawable::minimap_drawable(std::shared_ptr<fw::Texture> texture)
@@ -58,25 +58,25 @@ minimap_drawable::minimap_drawable(std::shared_ptr<fw::Texture> texture)
 minimap_drawable::~minimap_drawable() {
 }
 
-void minimap_drawable::update(fw::matrix transform) {
+void minimap_drawable::update(fw::Matrix transform) {
   _transform = transform;
 }
 
-fw::matrix minimap_drawable::get_uv_transform() {
+fw::Matrix minimap_drawable::get_uv_transform() {
   float x = static_cast<float>(left_) / static_cast<float>(texture_->get_width());
   float y = static_cast<float>(top_) / static_cast<float>(texture_->get_height());
   float width = static_cast<float>(width_) / static_cast<float>(texture_->get_width());
   float height = static_cast<float>(height_) / static_cast<float>(texture_->get_height());
-  return fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0));
+  return fw::scale(fw::Vector(width, height, 0.0f)) * fw::translation(fw::Vector(x, y, 0));
 }
 
-fw::matrix minimap_drawable::get_pos_transform(float x, float y, float width, float height) {
+fw::Matrix minimap_drawable::get_pos_transform(float x, float y, float width, float height) {
   fw::graphics *g = fw::framework::get_instance()->get_graphics();
-  fw::matrix transform;
+  fw::Matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
-  transform = fw::translation(fw::vector(x - width, y - height, 0)) * transform;
-  transform = fw::scale(fw::vector(width * 3, height * 3, 0.0f)) * transform;
+  transform = fw::translation(fw::Vector(x - width, y - height, 0)) * transform;
+  transform = fw::scale(fw::Vector(width * 3, height * 3, 0.0f)) * transform;
   return _transform * transform;
 }
 
@@ -141,25 +141,25 @@ void minimap_window::on_camera_updated() {
 }
 
 void minimap_window::update_drawable() {
-  fw::camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Camera *camera = fw::framework::get_instance()->get_camera();
   game::terrain *terrain = game::world::get_instance()->get_terrain();
 
   // Offset so that it shows up in the correct position relative to where the camera is
-  fw::vector cam_pos(
+  fw::Vector cam_pos(
       1.0f - (camera->get_location()[0] / terrain->get_width()),
       1.0f - (camera->get_location()[2] / terrain->get_length()),
       0);
   // Make it go from -0.5 -> 0.5
-  cam_pos = fw::vector(cam_pos[0] - 0.5f, cam_pos[1] - .5f, 0);
+  cam_pos = fw::Vector(cam_pos[0] - 0.5f, cam_pos[1] - .5f, 0);
   // Make it 1/3 the size, because we expand the drawable by 3 (size you're always in the centre of a 3x3 grid)
-  cam_pos = fw::vector(cam_pos[0] / 3.0f, cam_pos[1] / 3.0f, 0);
-  fw::matrix transform = fw::translation(cam_pos);
+  cam_pos = fw::Vector(cam_pos[0] / 3.0f, cam_pos[1] / 3.0f, 0);
+  fw::Matrix transform = fw::translation(cam_pos);
 
   // rotate so that we're facing in the same direction as the camera
-  fw::vector cam_dir(camera->get_direction());
-  cam_dir = fw::vector(cam_dir[0], -cam_dir[2], 0).normalize();
+  fw::Vector cam_dir(camera->get_direction());
+  cam_dir = fw::Vector(cam_dir[0], -cam_dir[2], 0).normalize();
   transform *= fw::translation(-0.5f, -0.5f, 0);
-  transform *= fw::rotate(fw::vector(0, 1, 0), cam_dir);
+  transform *= fw::rotate(fw::Vector(0, 1, 0), cam_dir);
   transform *= fw::translation(0.5f, 0.5f, 0);
 
   _drawable->update(transform);
@@ -204,7 +204,7 @@ void minimap_window::update_entity_display() {
       col = ownable_comp->get_owner()->get_colour();
     }
 
-    fw::vector pos = position_comp->get_position();
+    fw::Vector pos = position_comp->get_position();
     for (int y_offset = -pixel_height; y_offset <= pixel_height; y_offset++) {
       for (int x_offset = -pixel_width; x_offset <= pixel_width; x_offset++) {
         int x = static_cast<int>(pos[0] + x_offset);

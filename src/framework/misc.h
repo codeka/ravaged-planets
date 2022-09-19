@@ -13,22 +13,22 @@ namespace fw {
 
 // performs a simple "distance between line and point" to get the minimum distance between
 // the line defined by the given start point and direction and the given point.
-float distance_between_line_and_point(vector const &start,
-    vector const &direction, vector const &point);
+float distance_between_line_and_point(Vector const &start,
+    Vector const &direction, Vector const &point);
 
 // gets the distance between the given line segment and point. this is different to the
 // distance_between_line_and_point in that it looks at an infinite line, where as this one only looks
 // at the given line *segment*
-float distance_between_line_segment_and_point(vector const &start,
-    vector const &end, vector const &point);
+float distance_between_line_segment_and_point(Vector const &start,
+    Vector const &end, Vector const &point);
 
 // returns the angle, in radians, between a and b
-float angle_between(vector const &a, vector const &b);
+float angle_between(Vector const &a, Vector const &b);
 
 // given a plane (defined by a point and a normal), and a vector (defined by
 // a position and direction), gets the point where the line intersects the plane
-vector point_plane_intersect(vector const &plane_pt, vector const &plane_normal,
-    vector const &p_start, vector const &p_dir);
+Vector point_plane_intersect(Vector const &plane_pt, Vector const &plane_normal,
+    Vector const &p_start, Vector const &p_dir);
 
 /**
  * Gets the name of the current user. Sometimes we may be able to return first name/last name, others just a username.
@@ -95,9 +95,9 @@ float random();
 void random_initialize();
 
 // these are used to calculate distances and directions in a world that wraps
-fw::vector get_direction_to(fw::vector const &from, fw::vector const &to,
+fw::Vector get_direction_to(fw::Vector const &from, fw::Vector const &to,
     float wrap_x, float wrap_z);
-float calculate_distance(fw::vector const &from, fw::vector const &to,
+float calculate_distance(fw::Vector const &from, fw::Vector const &to,
     float wrap_x, float wrap_z);
 
 // linearly interpolates between the two given values, given a value between 0

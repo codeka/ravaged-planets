@@ -66,7 +66,7 @@ void STB_TEXTEDIT_LAYOUTROW(StbTexteditRow *r, TextEditBuffer *buffer, int line_
   const uint32_t *text_remaining = nullptr;
 
   // TODO: handle actual more than one line...
-  const fw::point size = buffer->font->measure_string(buffer->codepoints);
+  const fw::Point size = buffer->font->measure_string(buffer->codepoints);
   r->x0 = 0.0f;
   r->x1 = size[0];
   r->baseline_y_delta = size[1];
@@ -257,7 +257,7 @@ void TextEdit::render() {
 
   if (focused_ && draw_cursor_) {
     int cursor_pos = buffer_->state.cursor;
-    fw::point size_to_cursor = buffer_->font->measure_substring(buffer_->codepoints, 0, cursor_pos);
+    fw::Point size_to_cursor = buffer_->font->measure_substring(buffer_->codepoints, 0, cursor_pos);
     float left = get_left() + size_to_cursor[0];
     cursor_->render(left, get_top() + 2, 1.0f, get_height() - 4.0f);
   }

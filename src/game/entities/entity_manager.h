@@ -29,7 +29,7 @@ private:
 
   entity_debug *_debug;
   patch_manager *_patch_mgr;
-  fw::vector _view_centre;
+  fw::Vector _view_centre;
 
   // removes the destroyed entities from the various lists
   void cleanup_destroyed();
@@ -53,7 +53,7 @@ public:
   std::weak_ptr<entity> get_entity(entity_id id);
 
   // gets the entity that's closest to the given ray (used for single selection and stuff)
-  std::weak_ptr<entity> get_entity(fw::vector const &start, fw::vector const &direction);
+  std::weak_ptr<entity> get_entity(fw::Vector const &start, fw::Vector const &direction);
 
   // gets a reference to a list of all the entities with the component with the given identifier.
   std::list<std::weak_ptr<entity>> &get_entities_by_component(int identifier);
@@ -75,7 +75,7 @@ public:
   std::weak_ptr<entity> get_entity_at_cursor();
 
   // gets the current centre of the "view" (basically, where the camera currently sits)
-  fw::vector get_view_centre() const {
+  fw::Vector get_view_centre() const {
     return _view_centre;
   }
 

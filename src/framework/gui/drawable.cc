@@ -88,20 +88,20 @@ BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::Texture> texture, fw::xml::XM
 BitmapDrawable::~BitmapDrawable() {
 }
 
-fw::matrix BitmapDrawable::get_uv_transform() {
+fw::Matrix BitmapDrawable::get_uv_transform() {
   const float x = static_cast<float>(left_) / static_cast<float>(texture_->get_width());
   const float y = static_cast<float>(top_) / static_cast<float>(texture_->get_height());
   const float width = static_cast<float>(width_) / static_cast<float>(texture_->get_width());
   const float height = static_cast<float>(height_) / static_cast<float>(texture_->get_height());
-  return fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0));
+  return fw::scale(fw::Vector(width, height, 0.0f)) * fw::translation(fw::Vector(x, y, 0));
 }
 
-fw::matrix BitmapDrawable::get_pos_transform(float x, float y, float width, float height) {
+fw::Matrix BitmapDrawable::get_pos_transform(float x, float y, float width, float height) {
   fw::graphics *g = fw::framework::get_instance()->get_graphics();
-  fw::matrix transform;
+  fw::Matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
-  return fw::scale(fw::vector(width, height, 0.0f)) * fw::translation(fw::vector(x, y, 0)) * transform;
+  return fw::scale(fw::Vector(width, height, 0.0f)) * fw::translation(fw::Vector(x, y, 0)) * transform;
 }
 
 void BitmapDrawable::render(float x, float y, float width, float height) {

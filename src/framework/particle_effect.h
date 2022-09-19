@@ -31,7 +31,7 @@ public:
   void initialize();
   void destroy();
 
-  void set_position(fw::vector const &pos);
+  void set_position(fw::Vector const &pos);
   void update(float dt);
 
   bool is_dead() const {

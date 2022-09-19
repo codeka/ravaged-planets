@@ -79,8 +79,8 @@ private:
 
 public:
   std::string template_name;
-  fw::vector initial_position;
-  fw::vector initial_goal;
+  fw::Vector initial_position;
+  fw::Vector initial_goal;
 
   create_entity_command(uint8_t player_no);
   virtual ~create_entity_command();

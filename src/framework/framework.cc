@@ -233,7 +233,7 @@ void framework::exit() {
   _running = false;
 }
 
-void framework::set_camera(camera *cam) {
+void framework::set_camera(Camera *cam) {
   if (_camera != 0)
     _camera->disable();
 

@@ -37,7 +37,7 @@ public:
     return _model_name;
   }
 
-  virtual void render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform);
+  virtual void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform);
 
   virtual int get_identifier() {
     return identifier;

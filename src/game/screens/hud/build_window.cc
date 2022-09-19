@@ -107,11 +107,11 @@ void entity_icon::render() {
   cam.update(1.0f / 30.0f);
   sg.push_camera(&cam);
 
-  fw::vector sun(0.485f, 0.485f, 0.727f);
+  fw::Vector sun(0.485f, 0.485f, 0.727f);
   std::shared_ptr <fw::sg::light> light(new fw::sg::light(sun * 200.0f, sun * -1, true));
   sg.add_light(light);
 
-  _model->render(sg, fw::rotate_axis_angle(fw::vector(0, 1, 0), _rotation));
+  _model->render(sg, fw::rotate_axis_angle(fw::Vector(0, 1, 0), _rotation));
   fw::render(sg, _framebuffer, false);
 }
 

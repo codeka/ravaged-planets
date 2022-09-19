@@ -74,6 +74,6 @@ public:
 // draws a circle, centred at the given point, with the given radius. The circle will be
 // in the x/z plane
 void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain,
-    fw::vector const &centre, float radius);
+    fw::Vector const &centre, float radius);
 
 }

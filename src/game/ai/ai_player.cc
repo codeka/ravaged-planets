@@ -344,13 +344,13 @@ void ai_player::local_player_is_ready() {
 }
 
 void ai_player::world_loaded() {
-  fw::vector start_loc;
+  fw::Vector start_loc;
 
   auto start_it = game::world::get_instance()->get_player_starts().find(_player_no);
   if (start_it == game::world::get_instance()->get_player_starts().end()) {
     fw::debug << boost::format("WARN: no player_start defined for player %1%, choosing random")
         % static_cast<int>(_player_no) << std::endl;
-    start_loc = fw::vector(13.0f, 0, 13.0f); // <todo, random
+    start_loc = fw::Vector(13.0f, 0, 13.0f); // <todo, random
   } else {
     start_loc = start_it->second;
   }

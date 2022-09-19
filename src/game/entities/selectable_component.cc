@@ -86,7 +86,7 @@ void selectable_component::unhighlight() {
   _is_highlighted = false;
 }
 
-void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform) {
+void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform) {
   if (!_vb) {
     populate_buffers();
   }
@@ -110,8 +110,8 @@ void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::matrix con
     std::shared_ptr<fw::shader_parameters> shader_params = _shader->create_parameters();
     shader_params->set_colour("selection_colour", col);
 
-    fw::matrix m = pos->get_transform() * transform;
-    m *= fw::translation(fw::vector(0.0f, 0.2f, 0.0f)); // lift it off the ground a bit
+    fw::Matrix m = pos->get_transform() * transform;
+    m *= fw::translation(fw::Vector(0.0f, 0.2f, 0.0f)); // lift it off the ground a bit
     m = fw::scale(_selection_radius) * m; // scale it to the size of our selection radius
 
     std::shared_ptr<fw::sg::node> node(new fw::sg::node());

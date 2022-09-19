@@ -37,7 +37,7 @@ private:
   std::vector<int> _keybind_tokens;
   cursor_handler *_cursor;
   std::shared_ptr<fw::Bitmap> _minimap_background;
-  std::map<int, fw::vector> _player_starts;
+  std::map<int, fw::Vector> _player_starts;
 
   std::string _description;
   std::string _name;
@@ -86,7 +86,7 @@ public:
     return _screenshot;
   }
 
-  std::map<int, fw::vector> &get_player_starts() {
+  std::map<int, fw::Vector> &get_player_starts() {
     return _player_starts;
   }
 

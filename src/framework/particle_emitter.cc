@@ -71,7 +71,7 @@ void particle_emitter::destroy() {
 // This is called when it's time to emit a new particle.
 // The offset is used when emitting "extra" particles, we need to offset
 // their age and position a bit
-particle *particle_emitter::emit(fw::vector pos, float time_offset /*= 0.0f*/) {
+particle *particle_emitter::emit(fw::Vector pos, float time_offset /*= 0.0f*/) {
   particle *p = new particle(_config);
   p->initialize();
   p->pos += pos;
@@ -108,14 +108,14 @@ void timed_emit_policy::check_emit(float dt) {
   _time_since_last_particle += dt;
   float time_offset = dt;
 
-  fw::vector pos = _emitter->get_position();
-  fw::vector dir = (pos - _last_position).normalize();
+  fw::Vector pos = _emitter->get_position();
+  fw::Vector dir = (pos - _last_position).normalize();
 
   while (_time_since_last_particle > _seconds_per_particle) {
     time_offset -= _seconds_per_particle;
     _time_since_last_particle -= _seconds_per_particle;
 
-    fw::vector curr_pos = offset_pos ? _last_position + (dir * _seconds_per_particle) : pos;
+    fw::Vector curr_pos = offset_pos ? _last_position + (dir * _seconds_per_particle) : pos;
 
     _emitter->emit(curr_pos, time_offset);
   }
@@ -142,10 +142,10 @@ void distance_emit_policy::check_emit(float) {
   float wrap_x = _emitter->get_manager()->get_wrap_x();
   float wrap_z = _emitter->get_manager()->get_wrap_z();
 
-  fw::vector next_pos = _emitter->get_position();
-  fw::vector last_pos = _last_particle->pos;
-  fw::vector dir = get_direction_to(last_pos, next_pos, wrap_x, wrap_z).normalize();
-  fw::vector curr_pos = last_pos + (dir * _max_distance);
+  fw::Vector next_pos = _emitter->get_position();
+  fw::Vector last_pos = _last_particle->pos;
+  fw::Vector dir = get_direction_to(last_pos, next_pos, wrap_x, wrap_z).normalize();
+  fw::Vector curr_pos = last_pos + (dir * _max_distance);
 
   float time_offset = 0.0f; // todo: this should be non-zero...
 

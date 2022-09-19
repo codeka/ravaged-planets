@@ -60,27 +60,27 @@ void generate_terrain_indices_wireframe(std::vector<uint16_t> &indices, int patc
 
 // gets the height of a vertex at the given (x,z) location, using fw::constrain() to
 // constrain the coordinates to the width/length.
-fw::vector get_vertex(int x, int z, float *height, int width, int length) {
+fw::Vector get_vertex(int x, int z, float *height, int width, int length) {
   int ix = fw::constrain(x, width);
   int iz = fw::constrain(z, length);
 
-  return fw::vector((float) x, height[iz * width + ix], (float) z);
+  return fw::Vector((float) x, height[iz * width + ix], (float) z);
 }
 
 // calculates the normal at the given location in the map
-fw::vector calculate_normal(float *heights, int width, int length, int x, int z) {
-  fw::vector centre = get_vertex(x, z, heights, width, length);
-  fw::vector north = get_vertex(x, z + 1, heights, width, length);
-  fw::vector south = get_vertex(x, z - 1, heights, width, length);
-  fw::vector east = get_vertex(x + 1, z, heights, width, length);
-  fw::vector west = get_vertex(x - 1, z, heights, width, length);
+fw::Vector calculate_normal(float *heights, int width, int length, int x, int z) {
+  fw::Vector centre = get_vertex(x, z, heights, width, length);
+  fw::Vector north = get_vertex(x, z + 1, heights, width, length);
+  fw::Vector south = get_vertex(x, z - 1, heights, width, length);
+  fw::Vector east = get_vertex(x + 1, z, heights, width, length);
+  fw::Vector west = get_vertex(x - 1, z, heights, width, length);
 
-  fw::vector a = north - centre;
-  fw::vector b = east - centre;
-  fw::vector c = south - centre;
-  fw::vector d = west - centre;
+  fw::Vector a = north - centre;
+  fw::Vector b = east - centre;
+  fw::Vector c = south - centre;
+  fw::Vector d = west - centre;
 
-  fw::vector normal(0, 0, 0);
+  fw::Vector normal(0, 0, 0);
   normal += cml::cross(a, b);
   normal += cml::cross(b, c);
   normal += cml::cross(c, d);
@@ -106,8 +106,8 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int wid
     for (int x = 0; x <= patch_size; x++) {
       int ix = (patch_x * patch_size) + x;
       int iz = (patch_z * patch_size) + z;
-      fw::vector centre = get_vertex(ix, iz, height, width, length);
-      fw::vector normal = calculate_normal(height, width, length, ix, iz);
+      fw::Vector centre = get_vertex(ix, iz, height, width, length);
+      fw::Vector normal = calculate_normal(height, width, length, ix, iz);
 
       int verts_index = z * (patch_size + 1) + x;
       (*buffer)[verts_index] = fw::vertex::xyz_n(x, centre[1], z, normal[0],
@@ -119,11 +119,11 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int wid
 }
 
 void build_collision_data(std::vector<bool> &vertices, float *heights,  int width, int length) {
-  fw::vector up(0, 1, 0);
+  fw::Vector up(0, 1, 0);
 
   for (int z = 0; z < length; z++) {
     for (int x = 0; x < width; x++) {
-      fw::vector normal = calculate_normal(heights, width, length, x, z);
+      fw::Vector normal = calculate_normal(heights, width, length, x, z);
       float dot = cml::dot(up, normal);
 
       // todo: we should store the actual dot product, since it could be useful in other places.

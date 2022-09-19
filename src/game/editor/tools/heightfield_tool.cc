@@ -40,7 +40,7 @@ public:
 
   virtual void on_key(std::string, bool) {
   }
-  virtual void update(fw::vector const &) {
+  virtual void update(fw::Vector const &) {
   }
 };
 
@@ -69,7 +69,7 @@ public:
   virtual ~raise_lower_brush();
 
   virtual void on_key(std::string keyname, bool is_down);
-  virtual void update(fw::vector const &cursor_loc);
+  virtual void update(fw::Vector const &cursor_loc);
 };
 
 raise_lower_brush::raise_lower_brush() :
@@ -93,7 +93,7 @@ void raise_lower_brush::on_key(std::string keyname, bool is_down) {
   }
 }
 
-void raise_lower_brush::update(fw::vector const &cursor_loc) {
+void raise_lower_brush::update(fw::Vector const &cursor_loc) {
   float dy = 0.0f;
   if (_raise_direction == up) {
     dy += 5.0f * fw::framework::get_instance()->get_timer()->get_frame_time();
@@ -132,7 +132,7 @@ public:
   virtual ~level_brush();
 
   virtual void on_key(std::string keyname, bool is_down);
-  virtual void update(fw::vector const &cursor_loc);
+  virtual void update(fw::Vector const &cursor_loc);
 };
 
 level_brush::level_brush() :
@@ -153,7 +153,7 @@ void level_brush::on_key(std::string keyname, bool is_down) {
   }
 }
 
-void level_brush::update(fw::vector const &cursor_loc) {
+void level_brush::update(fw::Vector const &cursor_loc) {
   if (_start) {
     // this means you've just clicked the left-mouse button, we have to start
     // levelling, which means we need to save the current terrain height
@@ -329,7 +329,7 @@ void heightfield_tool::on_key(std::string keyname, bool is_down) {
 void heightfield_tool::update() {
   tool::update();
 
-  fw::vector cursor_loc = _terrain->get_cursor_location();
+  fw::Vector cursor_loc = _terrain->get_cursor_location();
   if (_brush != nullptr) {
     _brush->update(cursor_loc);
   }

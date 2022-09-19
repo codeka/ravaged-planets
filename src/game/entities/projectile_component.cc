@@ -55,7 +55,7 @@ void projectile_component::update(float) {
       _our_position->get_nearest_entity_with_component<damageable_component>().lock();
   std::shared_ptr<ent::entity> creator = entity->get_creator().lock();
   if (nearest && nearest != creator) {
-    fw::vector nearest_dir = _our_position->get_direction_to(nearest);
+    fw::Vector nearest_dir = _our_position->get_direction_to(nearest);
     float nearest_distance = nearest_dir.length();
 
     float hit_distance = 0.5f;
@@ -74,7 +74,7 @@ void projectile_component::update(float) {
     // check whether we've hit the ground
     game::terrain *trn = game::world::get_instance()->get_terrain();
 
-    fw::vector pos = _our_position->get_position();
+    fw::Vector pos = _our_position->get_position();
     float height = trn->get_height(pos[0], pos[2]);
     if (height > pos[1]) {
       explode (std::shared_ptr<ent::entity>());
@@ -168,9 +168,9 @@ void ballistic_projectile_component::set_target(std::weak_ptr<entity> target) {
   // and turn radius on our moveable component so that we travel in a nice-looking
   // arc towards the goal.
 
-  fw::vector initial_pos = _our_position->get_position();
-  fw::vector goal_pos = _target_position->get_position();
-  fw::vector mid_pos = initial_pos + (goal_pos - initial_pos) + fw::vector(0, _max_height, 0);
+  fw::Vector initial_pos = _our_position->get_position();
+  fw::Vector goal_pos = _target_position->get_position();
+  fw::Vector mid_pos = initial_pos + (goal_pos - initial_pos) + fw::Vector(0, _max_height, 0);
 
   // todo: this is *not* a nice-looking arc!
   _our_position->set_direction((mid_pos - initial_pos).normalize());

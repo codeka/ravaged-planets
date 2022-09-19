@@ -24,9 +24,9 @@ private:
   pathing_tool_window *_wnd;
   std::vector<bool> _collision_data;
   std::shared_ptr<fw::model> _marker;
-  fw::vector _start_pos;
+  fw::Vector _start_pos;
   bool _start_set;
-  fw::vector _end_pos;
+  fw::Vector _end_pos;
   bool _end_set;
   bool _simplify;
   std::vector<std::shared_ptr<collision_patch>> _patches;

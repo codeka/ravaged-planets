@@ -73,19 +73,19 @@ public:
   std::shared_ptr<index_buffer> ib;
   std::shared_ptr<fw::shader> shader;
   std::shared_ptr<shader_parameters> shader_params;
-  fw::point size;
+  fw::Point size;
   float distance_to_top;
   float distance_to_bottom;
 
   string_cache_entry(std::shared_ptr<vertex_buffer> vb, std::shared_ptr<index_buffer> ib,
       std::shared_ptr<fw::shader> shader, std::shared_ptr<shader_parameters> shader_params,
-      fw::point size, float distance_to_top, float distance_to_bottom);
+      fw::Point size, float distance_to_top, float distance_to_bottom);
   ~string_cache_entry();
 };
 
 string_cache_entry::string_cache_entry(std::shared_ptr<vertex_buffer> vb,
     std::shared_ptr<index_buffer> ib, std::shared_ptr<fw::shader> shader,
-    std::shared_ptr<shader_parameters> shader_params, fw::point size,
+    std::shared_ptr<shader_parameters> shader_params, fw::Point size,
     float distance_to_top, float distance_to_bottom) :
       vb(vb), ib(ib), shader(shader), shader_params(shader_params), time_since_use(0), size(size),
       distance_to_top(distance_to_top), distance_to_bottom(distance_to_bottom) {
@@ -184,21 +184,21 @@ void font_face::ensure_glyphs(std::basic_string<uint32_t> const &str) {
   }
 }
 
-fw::point font_face::measure_string(std::string const &str) {
+fw::Point font_face::measure_string(std::string const &str) {
   return measure_string(conv::utf_to_utf<uint32_t>(str));
 }
 
-fw::point font_face::measure_string(std::basic_string<uint32_t> const &str) {
+fw::Point font_face::measure_string(std::basic_string<uint32_t> const &str) {
   std::shared_ptr<string_cache_entry> data = get_or_create_cache_entry(str);
   return data->size;
 }
 
-fw::point font_face::measure_substring(std::basic_string<uint32_t> const &str, int pos, int num_chars) {
+fw::Point font_face::measure_substring(std::basic_string<uint32_t> const &str, int pos, int num_chars) {
   ensure_glyphs(str);
 
-  fw::point size(0, 0);
+  fw::Point size(0, 0);
   for (int i = pos; i < pos + num_chars; i++) {
-    fw::point glyph_size = measure_glyph(str[i]);
+    fw::Point glyph_size = measure_glyph(str[i]);
     size[0] += glyph_size[0];
     if (size[1] < glyph_size[1]) {
       size[1] = glyph_size[1];
@@ -208,11 +208,11 @@ fw::point font_face::measure_substring(std::basic_string<uint32_t> const &str, i
   return size;
 }
 
-fw::point font_face::measure_glyph(uint32_t ch) {
+fw::Point font_face::measure_glyph(uint32_t ch) {
   ensure_glyph(ch);
   glyph *g = _glyphs[ch];
   float y = g->distance_from_baseline_to_top + g->distance_from_baseline_to_bottom;
-  return fw::point(g->advance_x, y);
+  return fw::Point(g->advance_x, y);
 }
 
 void font_face::draw_string(int x, int y, std::string const &str, draw_flags flags /*= 0*/,
@@ -242,7 +242,7 @@ void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str
 
   // TODO: recalculating this every time seems wasteful
   fw::graphics *g = fw::framework::get_instance()->get_graphics();
-  fw::matrix pos_transform;
+  fw::Matrix pos_transform;
   cml::matrix_orthographic_RH(pos_transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
   pos_transform = fw::translation(x, y, 0.0f) * pos_transform;
@@ -326,7 +326,7 @@ std::shared_ptr<string_cache_entry> font_face::create_cache_entry(std::basic_str
   shader_params->set_program_name("font");
 
   return std::shared_ptr<string_cache_entry>(new string_cache_entry(vb, ib, shader, shader_params,
-      fw::point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom));
+      fw::Point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom));
 }
 
 //-----------------------------------------------------------------------------

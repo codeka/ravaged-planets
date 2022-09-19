@@ -22,8 +22,8 @@ private:
 
   std::string _program_name;
   std::map<std::string, std::shared_ptr<fw::Texture> > _textures;
-  std::map<std::string, matrix> _matrices;
-  std::map<std::string, vector> _vectors;
+  std::map<std::string, Matrix> _matrices;
+  std::map<std::string, Vector> _vectors;
   std::map<std::string, colour> _colours;
   std::map<std::string, float> _scalars;
 
@@ -35,8 +35,8 @@ public:
 
   void set_program_name(std::string const &name);
   void set_texture(std::string const &name, std::shared_ptr<fw::Texture> const &t);
-  void set_matrix(std::string const &name, matrix const &m);
-  void set_vector(std::string const &name, vector const &v);
+  void set_matrix(std::string const &name, Matrix const &m);
+  void set_vector(std::string const &name, Vector const &v);
   void set_colour(std::string const &name, colour const &c);
   void set_scalar(std::string const &name, float f);
 

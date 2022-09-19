@@ -37,9 +37,9 @@ public:
 };
 
 void update_effect_position() {
-  fw::matrix m = fw::rotate_axis_angle(fw::vector(0, 1, 0), angle);
+  fw::Matrix m = fw::rotate_axis_angle(fw::Vector(0, 1, 0), angle);
   cml::vector4f pos = m * cml::vector4f(10.0f, 0, 0, 1);
-  g_effect->set_position(fw::vector(pos[0], pos[1], pos[2]));
+  g_effect->set_position(fw::Vector(pos[0], pos[1], pos[2]));
 }
 
 bool restart_handler(fw::gui::Widget *wdgt) {
@@ -52,7 +52,7 @@ bool restart_handler(fw::gui::Widget *wdgt) {
 }
 
 bool pause_handler(fw::gui::Widget *wdgt) {
-  fw::gui::button *btn = dynamic_cast<fw::gui::button *>(wdgt);
+  fw::gui::Button *btn = dynamic_cast<fw::gui::Button *>(wdgt);
   fw::framework *framework = fw::framework::get_instance();
   if (framework->is_paused()) {
     framework->unpause();
@@ -66,11 +66,11 @@ bool pause_handler(fw::gui::Widget *wdgt) {
 }
 
 bool movement_handler(fw::gui::Widget *wdgt) {
-  fw::gui::button *btn = dynamic_cast<fw::gui::button *>(wdgt);
+  fw::gui::Button *btn = dynamic_cast<fw::gui::Button *>(wdgt);
   if (is_moving) {
     is_moving = false;
     btn->set_text("Stationary");
-    g_effect->set_position(fw::vector(0, 0, 0));
+    g_effect->set_position(fw::Vector(0, 0, 0));
   } else {
     is_moving = true;
     btn->set_text("Moving");
@@ -85,24 +85,24 @@ bool application::initialize(fw::framework *frmwrk) {
   frmwrk->set_camera(cam);
 
   fw::gui::Window *wnd;
-  wnd = fw::gui::builder<fw::gui::Window>()
+  wnd = fw::gui::Builder<fw::gui::Window>()
       << fw::gui::Widget::position(fw::gui::px(20), fw::gui::px(20))
       << fw::gui::Widget::size(fw::gui::px(150), fw::gui::px(130))
       << fw::gui::Window::background("frame")
-      << (fw::gui::builder<fw::gui::button>()
+      << (fw::gui::Builder<fw::gui::Button>()
           << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(10))
           << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::button::text("Restart")
+          << fw::gui::Button::text("Restart")
           << fw::gui::Widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
-      << (fw::gui::builder<fw::gui::button>()
+      << (fw::gui::Builder<fw::gui::Button>()
           << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(50))
           << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::button::text("Pause")
+          << fw::gui::Button::text("Pause")
           << fw::gui::Widget::click(std::bind<bool>(pause_handler, std::placeholders::_1)))
-      << (fw::gui::builder<fw::gui::button>()
+      << (fw::gui::Builder<fw::gui::Button>()
           << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(90))
           << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::button::text("Stationary")
+          << fw::gui::Button::text("Stationary")
           << fw::gui::Widget::click(std::bind<bool>(movement_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 

@@ -80,7 +80,7 @@ void entity_debug::update() {
 
     moveable_component *moveable = entity->get_component<moveable_component>();
     if (moveable != nullptr) {
-      fw::vector goal = moveable->get_goal();
+      fw::Vector goal = moveable->get_goal();
       new_goal_value = (boost::format("Goal: (%1$.1f, %2$.1f, %3$.1f)") % goal[0] % goal[1] % goal[2]).str();
     }
   }
@@ -127,7 +127,7 @@ entity_debug_view::entity_debug_view() {
 entity_debug_view::~entity_debug_view() {
 }
 
-void entity_debug_view::add_line(fw::vector const &from, fw::vector const &to, fw::colour const &col) {
+void entity_debug_view::add_line(fw::Vector const &from, fw::Vector const &to, fw::colour const &col) {
   line l;
   l.from = from;
   l.to = to;
@@ -136,7 +136,7 @@ void entity_debug_view::add_line(fw::vector const &from, fw::vector const &to, f
   _lines.push_back(l);
 }
 
-void entity_debug_view::add_circle(fw::vector const &centre, float radius, fw::colour const &col) {
+void entity_debug_view::add_circle(fw::Vector const &centre, float radius, fw::colour const &col) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * M_PI * radius);
@@ -145,22 +145,22 @@ void entity_debug_view::add_circle(fw::vector const &centre, float radius, fw::c
   if (num_segments < 8)
     num_segments = 8;
 
-  fw::vector last_point;
+  fw::Vector last_point;
   for (int i = 0; i < num_segments; i++) {
     float factor = 2.0f * (float) M_PI * (i / (float) num_segments);
 
-    fw::vector point(centre[0] + radius * sin(factor), centre[1], centre[2] + radius * cos(factor));
+    fw::Vector point(centre[0] + radius * sin(factor), centre[1], centre[2] + radius * cos(factor));
     if (i > 0) {
       add_line(last_point, point, col);
     }
     last_point = point;
   }
 
-  fw::vector first_point(centre[0] + radius * sin(0.0f), centre[1], centre[2] + radius * cos(0.0f));
+  fw::Vector first_point(centre[0] + radius * sin(0.0f), centre[1], centre[2] + radius * cos(0.0f));
   add_line(last_point, first_point, col);
 }
 
-void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform) {
+void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform) {
   if (_lines.size() == 0)
     return;
 

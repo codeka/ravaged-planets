@@ -53,7 +53,7 @@ public:
   }
 
   /** This is called when it's time to render. generate a scenegraph node and add it to the scenegraph. */
-  virtual void render(fw::sg::scenegraph &, fw::matrix const &) {
+  virtual void render(fw::sg::scenegraph &, fw::Matrix const &) {
   }
 
   /** Loads this component with data from the given component template (Lua object). */
@@ -147,10 +147,10 @@ public:
 
   // these are called each frame to update and then render the entity
   void update(float dt);
-  void render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform);
+  void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform);
 
   // this is a helper that you can use to move an entity directly to somewhere on the map.
-  void set_position(fw::vector const &pos);
+  void set_position(fw::Vector const &pos);
 
   void set_debug_flags(entity_debug_flags flags) {
     _debug_flags = flags;

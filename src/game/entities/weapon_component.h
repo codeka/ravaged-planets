@@ -11,7 +11,7 @@ class weapon_component: public entity_component {
 private:
   std::weak_ptr<entity> _target;
   std::string _fire_entity_name;
-  fw::vector _fire_direction;
+  fw::Vector _fire_direction;
   float _time_to_fire;
   float _range;
 

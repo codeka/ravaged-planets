@@ -21,13 +21,13 @@ class terrain;
  */
 class pathing_thread: private boost::noncopyable {
 public:
-  typedef std::function<void(std::vector<fw::vector> const &)> callback_fn;
+  typedef std::function<void(std::vector<fw::Vector> const &)> callback_fn;
 
 private:
   struct path_request_data {
     int flags;
-    fw::vector start;
-    fw::vector goal;
+    fw::Vector start;
+    fw::Vector goal;
     callback_fn callback;
   };
 
@@ -44,7 +44,7 @@ public:
   void start();
   void stop();
 
-  void request_path(fw::vector const &start, fw::vector const &goal, callback_fn on_path_found);
+  void request_path(fw::Vector const &start, fw::Vector const &goal, callback_fn on_path_found);
 };
 
 }

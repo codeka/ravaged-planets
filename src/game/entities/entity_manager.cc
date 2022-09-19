@@ -141,17 +141,17 @@ std::weak_ptr<entity> entity_manager::get_entity_at_cursor() {
   mx = 1.0f - (2.0f * mx / frmwrk->get_graphics()->get_width());
   my = 1.0f - (2.0f * my / frmwrk->get_graphics()->get_height());
 
-  fw::camera *camera = frmwrk->get_camera();
-  fw::vector mvec = camera->unproject(-mx, my);
+  fw::Camera *camera = frmwrk->get_camera();
+  fw::Vector mvec = camera->unproject(-mx, my);
 
-  fw::vector start = camera->get_position();
-  fw::vector direction = (mvec - start).normalize();
+  fw::Vector start = camera->get_position();
+  fw::Vector direction = (mvec - start).normalize();
 
   return get_entity(start, direction);
 }
 
-std::weak_ptr<entity> entity_manager::get_entity(fw::vector const &start, fw::vector const &direction) {
-  fw::vector location = get_view_centre();
+std::weak_ptr<entity> entity_manager::get_entity(fw::Vector const &start, fw::Vector const &direction) {
+  fw::Vector location = get_view_centre();
 
   int centre_patch_x = (int) (location[0] / patch_manager::PATCH_SIZE);
   int centre_patch_z = (int) (location[2] / patch_manager::PATCH_SIZE);
@@ -160,7 +160,7 @@ std::weak_ptr<entity> entity_manager::get_entity(fw::vector const &start, fw::ve
     for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
       patch *p = _patch_mgr->get_patch(patch_x, patch_z);
 
-      fw::vector offset = fw::vector(
+      fw::Vector offset = fw::Vector(
           (float) (patch_x * patch_manager::PATCH_SIZE) - p->get_origin()[0],
           0,
           (float) (patch_z * patch_manager::PATCH_SIZE) - p->get_origin()[2]);
@@ -274,12 +274,12 @@ void entity_manager::update() {
   // work out the current "view centre" which is used for things like drawing
   // the entities centred around the camera and so on.
   game::world *wrld = game::world::get_instance();
-  fw::camera *camera = fw::framework::get_instance()->get_camera();
-  fw::vector cam_loc = camera->get_position();
-  fw::vector cam_dir = camera->get_direction();
+  fw::Camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Vector cam_loc = camera->get_position();
+  fw::Vector cam_dir = camera->get_direction();
 
-  fw::vector location = wrld->get_terrain()->get_cursor_location(cam_loc, cam_dir);
-  _view_centre = fw::vector(
+  fw::Vector location = wrld->get_terrain()->get_cursor_location(cam_loc, cam_dir);
+  _view_centre = fw::Vector(
       fw::constrain(location[0], this->get_patch_manager()->get_world_width(), 0.0f),
       location[1],
       fw::constrain(location[2], this->get_patch_manager()->get_world_length(), 0.0f));
@@ -295,7 +295,7 @@ void entity_manager::update() {
 }
 
 void entity_manager::render(fw::sg::scenegraph &scenegraph) {
-  fw::vector location = get_view_centre();
+  fw::Vector location = get_view_centre();
 
   int centre_patch_x = (int) (location[0] / patch_manager::PATCH_SIZE);
   int centre_patch_z = (int) (location[2] / patch_manager::PATCH_SIZE);
@@ -304,7 +304,7 @@ void entity_manager::render(fw::sg::scenegraph &scenegraph) {
     for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
       patch *p = _patch_mgr->get_patch(patch_x, patch_z);
 
-      fw::matrix trans = fw::translation(fw::vector(
+      fw::Matrix trans = fw::translation(fw::Vector(
           (float) (patch_x * patch_manager::PATCH_SIZE) - p->get_origin()[0],
           0,
           (float) (patch_z * patch_manager::PATCH_SIZE) - p->get_origin()[2]));

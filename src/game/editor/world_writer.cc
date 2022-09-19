@@ -73,7 +73,7 @@ void world_writer::write_mapdesc(game::world_file &wf) {
   wfe.write((boost::format("  <author>%1%</author>") % _world->get_author()).str());
   wfe.write("  <size width=\"3\" height=\"3\" />");
   wfe.write("  <players>");
-  for (std::map<int, fw::vector>::iterator it = _world->get_player_starts().begin();
+  for (std::map<int, fw::Vector>::iterator it = _world->get_player_starts().begin();
       it != _world->get_player_starts().end(); ++it) {
     wfe.write(
         (boost::format("    <player no=\"%1%\" start=\"%2% %3%\" />") % it->first % it->second[0] % it->second[2]).str());

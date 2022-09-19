@@ -12,15 +12,15 @@ class moveable_component: public entity_component {
 private:
   position_component *_position_component;
   pathing_component *_pathing_component;
-  fw::vector _intermediate_goal;
-  fw::vector _goal;
+  fw::Vector _intermediate_goal;
+  fw::Vector _goal;
   float _speed;
   float _turn_speed;
   bool _avoid_collisions;
   bool _is_moving;
 
-  fw::vector steer(fw::vector pos, fw::vector curr_direction,
-      fw::vector goal_direction, float turn_amount, bool show_steering);
+  fw::Vector steer(fw::Vector pos, fw::Vector curr_direction,
+      fw::Vector goal_direction, float turn_amount, bool show_steering);
 
 public:
   static const int identifier = 400;
@@ -46,8 +46,8 @@ public:
     _avoid_collisions = value;
   }
 
-  void set_goal(fw::vector goal, bool skip_pathing = false);
-  fw::vector get_goal() const {
+  void set_goal(fw::Vector goal, bool skip_pathing = false);
+  fw::Vector get_goal() const {
     return _goal;
   }
 
@@ -57,8 +57,8 @@ public:
    * The "goal" will be the final location along a path that was a travelling (via our pathing_component, if we
    * have one), and the pathing_component will set intermediate goals as we go.
    */
-  void set_intermediate_goal(fw::vector goal);
-  fw::vector get_intermediate_goal() const {
+  void set_intermediate_goal(fw::Vector goal);
+  fw::Vector get_intermediate_goal() const {
     return _intermediate_goal;
   }
 

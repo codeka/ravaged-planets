@@ -11,14 +11,14 @@ class position_component;
 // over the terrain (for example, tanks have this; helicopters do not)
 class pathing_component: public entity_component {
 private:
-  fw::vector _last_request_goal;
+  fw::Vector _last_request_goal;
   float _last_request_time;
   size_t _curr_goal_node;
-  std::vector<fw::vector> _path;
+  std::vector<fw::Vector> _path;
   position_component *_position;
   moveable_component *_moveable;
 
-  void on_path_found(std::vector<fw::vector> const &path);
+  void on_path_found(std::vector<fw::Vector> const &path);
 
 public:
   static const int identifier = 650;
@@ -33,11 +33,11 @@ public:
   virtual void update(float dt);
 
   // sets the path that we're to follow until we reach the goal
-  void set_path(std::vector<fw::vector> const &path);
+  void set_path(std::vector<fw::Vector> const &path);
 
   // sets the goal for this entity. we request the path from the pathing_thread and when it comes back, we'll start
   // moving along it.
-  void set_goal(fw::vector const &goal);
+  void set_goal(fw::Vector const &goal);
 
   // If we're following a path (or waiting for a path), stop now.
   void stop();

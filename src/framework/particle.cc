@@ -9,7 +9,7 @@ namespace fw {
 //-------------------------------------------------------------------------
 particle::life_state::life_state() :
     age(0), size(0), colour_row(0), alpha(0), rotation_speed(0), rotation_kind(rotation_kind::random), speed(0),
-    direction(fw::vector(0, 0, 0)), gravity(0) {
+    direction(fw::Vector(0, 0, 0)), gravity(0) {
 }
 
 particle::life_state::life_state(particle::life_state const &copy) {
@@ -66,7 +66,7 @@ void particle::initialize() {
     _states.push_back(state);
   }
 
-  direction = fw::vector(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f).normalize();
+  direction = fw::Vector(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f).normalize();
   new_pos = pos = config->position.get_point();
   age = 0.0f;
 }
@@ -109,7 +109,7 @@ bool particle::update(float dt) {
   }
 
   // adjust the particle's direction based on it's gravity factor
-  fw::vector gravity = fw::vector(0, -1, 0) * (fw::lerp(prev->gravity, next->gravity, t));
+  fw::Vector gravity = fw::Vector(0, -1, 0) * (fw::lerp(prev->gravity, next->gravity, t));
   if (prev->direction.length_squared() < 0.001f || next->direction.length_squared() < 0.001f) {
     direction += gravity * dt;
   } else {

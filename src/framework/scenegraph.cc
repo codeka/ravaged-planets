@@ -42,7 +42,7 @@ light::light() :
     _cast_shadows(false) {
 }
 
-light::light(fw::vector const &pos, fw::vector const &dir, bool cast_shadows) :
+light::light(fw::Vector const &pos, fw::Vector const &dir, bool cast_shadows) :
     _pos(pos), _dir(dir), _cast_shadows(cast_shadows) {
 }
 
@@ -87,20 +87,20 @@ std::shared_ptr<fw::shader> node::get_shader() const {
   return shader;
 }
 
-void node::render(scenegraph *sg, fw::matrix const &model_matrix /*= fw::identity()*/) {
+void node::render(scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
   // if we're not a shadow caster, and we're rendering shadows, don't render the node this time around
   if (is_rendering_shadow && !_cast_shadows) {
     return;
   }
 
-  fw::matrix transform(model_matrix * _world);
+  fw::Matrix transform(model_matrix * _world);
   if (_vb) {
     std::shared_ptr<fw::shader> shader = get_shader();
     if (is_rendering_shadow) {
       shader = shadow_shader;
     }
 
-    fw::camera *camera = sg->get_camera();
+    fw::Camera *camera = sg->get_camera();
     if (camera == nullptr) {
       camera = fw::framework::get_instance()->get_camera();
     }
@@ -119,7 +119,7 @@ void node::render(scenegraph *sg, fw::matrix const &model_matrix /*= fw::identit
 }
 
 // this is called when we're rendering a given shader
-void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera, fw::matrix const &transform) {
+void node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera, fw::Matrix const &transform) {
   std::shared_ptr<fw::shader_parameters> parameters;
   if (_shader_params) {
     parameters = _shader_params;
@@ -129,18 +129,18 @@ void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera,
 
   // add the world_view and world_view_proj parameters as well as shadow parameters
   if (camera != nullptr) {
-    fw::matrix worldview = camera->get_view_matrix();
+    fw::Matrix worldview = camera->get_view_matrix();
     worldview = transform * worldview;
-    fw::matrix worldviewproj = worldview * camera->get_projection_matrix();
+    fw::Matrix worldviewproj = worldview * camera->get_projection_matrix();
 
     parameters->set_matrix("worldviewproj", worldviewproj);
     parameters->set_matrix("worldview", worldview);
 
     if (!is_rendering_shadow && shadowsrc) {
-      fw::matrix lightviewproj = transform * shadowsrc->get_camera().get_view_matrix();
+      fw::Matrix lightviewproj = transform * shadowsrc->get_camera().get_view_matrix();
       lightviewproj *= shadowsrc->get_camera().get_projection_matrix();
 
-      fw::matrix bias = fw::matrix(
+      fw::Matrix bias = fw::Matrix(
           0.5, 0.0, 0.0, 0.0,
           0.0, 0.5, 0.0, 0.0,
           0.0, 0.0, 0.5, 0.0,
@@ -165,7 +165,7 @@ void node::render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera,
   _vb->end();
 }
 
-void node::render_noshader(fw::camera *camera, fw::matrix const &transform) {
+void node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
   if (!basic_shader) {
     basic_shader = fw::shader::create("basic.shader");
   }
@@ -279,10 +279,10 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       std::shared_ptr<shader_parameters> shader_params = shader->create_parameters();
       // TODO: recalculating this every time seems wasteful
       fw::graphics *g = fw::framework::get_instance()->get_graphics();
-      fw::matrix pos_transform;
+      fw::Matrix pos_transform;
       cml::matrix_orthographic_RH(pos_transform, 0.0f,
           static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
-      pos_transform = fw::scale(fw::vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::vector(440.0f, 280.0f, 0)) * pos_transform;
+      pos_transform = fw::scale(fw::Vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::Vector(440.0f, 280.0f, 0)) * pos_transform;
       shader_params->set_matrix("pos_transform", pos_transform);
       shader_params->set_matrix("uv_transform", fw::identity());
       shader_params->set_texture("texsampler", debug_shadowsrc->get_shadowmap()->get_colour_buffer());

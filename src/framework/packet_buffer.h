@@ -116,12 +116,12 @@ inline packet_buffer &operator >>(packet_buffer &lhs, size_t &rhs) {
 
 #endif
 
-inline packet_buffer &operator <<(packet_buffer &lhs, fw::vector const &rhs) {
+inline packet_buffer &operator <<(packet_buffer &lhs, fw::Vector const &rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(rhs.data()), 0, sizeof(float) * 3);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, fw::vector &rhs) {
+inline packet_buffer &operator >>(packet_buffer &lhs, fw::Vector &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(rhs.data()), 0, sizeof(float) * 3);
   return lhs;
 }

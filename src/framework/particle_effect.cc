@@ -33,7 +33,7 @@ void particle_effect::destroy() {
   _dead = true;
 }
 
-void particle_effect::set_position(fw::vector const &pos) {
+void particle_effect::set_position(fw::Vector const &pos) {
   BOOST_FOREACH(emitter_list::value_type & emitter, _emitters) {
     emitter->set_position(pos);
   }

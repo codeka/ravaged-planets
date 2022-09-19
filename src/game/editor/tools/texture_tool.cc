@@ -136,7 +136,7 @@ void texture_tool::update() {
   tool::update();
 
   if (_is_painting) {
-    fw::vector cursor_loc = _terrain->get_cursor_location();
+    fw::Vector cursor_loc = _terrain->get_cursor_location();
 
     // patch_x and patch_z are the patch number(s) we're inside of
     int patch_x = static_cast<int>(cursor_loc[0] / game::terrain::PATCH_SIZE);
@@ -162,7 +162,7 @@ void texture_tool::update() {
     int centre_x = static_cast<int>(centre_u * splatt.get_width());
     int centre_y = static_cast<int>(centre_v * splatt.get_height());
 
-    fw::vector centre(static_cast<float>(centre_x), static_cast<float>(centre_y), 0.0f);
+    fw::Vector centre(static_cast<float>(centre_x), static_cast<float>(centre_y), 0.0f);
 
     // we have to take a copy of the splatt's pixels cause we'll be modifying them
     std::vector<uint32_t> data = splatt.get_pixels();
@@ -175,7 +175,7 @@ void texture_tool::update() {
         if (y < 0 || x < 0 || y >= splatt.get_height() || x >= splatt.get_width())
           continue;
 
-        fw::vector v(static_cast<float>(x), static_cast<float>(y), 0.0f);
+        fw::Vector v(static_cast<float>(x), static_cast<float>(y), 0.0f);
         if ((v - centre).length() > (_radius * scale_x))
           continue;
 

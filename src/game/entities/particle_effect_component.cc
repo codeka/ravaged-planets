@@ -39,7 +39,7 @@ void particle_effect_component::apply_template(luabind::object const &tmpl) {
 //    }
 //    if ((*it)["Offset"]) {
 //      std::string offset = luabind::object_cast<std::string>((*it)["Offset"]);
-//      effect.offset = fw::vector(0, 2, 0); // TODO
+//      effect.offset = fw::Vector(0, 2, 0); // TODO
 //    }
 //    _effects[name] = effect;
 //  }
@@ -88,7 +88,7 @@ void particle_effect_component::update(float) {
   }
 }
 
-void particle_effect_component::render(fw::sg::scenegraph &, fw::matrix const &) {
+void particle_effect_component::render(fw::sg::scenegraph &, fw::Matrix const &) {
   fw::particle_manager *mgr = fw::framework::get_instance()->get_particle_mgr();
   BOOST_FOREACH(auto &kvp, _effects) {
     effect_info &effect_info = kvp.second;

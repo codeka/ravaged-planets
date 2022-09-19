@@ -20,9 +20,9 @@
 // This structure is used to sort particles first by texture and then by z-order (to avoid state changes and
 // ordering issues)
 struct particle_sorter {
-  fw::vector _cam_pos;
+  fw::Vector _cam_pos;
 
-  particle_sorter(fw::vector camera_pos) :
+  particle_sorter(fw::Vector camera_pos) :
       _cam_pos(camera_pos) {
   }
 
@@ -174,11 +174,11 @@ void generate_scenegraph_node(render_state &rs) {
 }
 
 bool particle_renderer::add_particle(render_state &rs, int base_index, particle *p, float offset_x, float offset_z) {
-  fw::camera *cam = fw::framework::get_instance()->get_camera();
-  fw::vector pos(p->pos[0] + offset_x, p->pos[1], p->pos[2] + offset_z);
+  fw::Camera *cam = fw::framework::get_instance()->get_camera();
+  fw::Vector pos(p->pos[0] + offset_x, p->pos[1], p->pos[2] + offset_z);
 
   // only render if the (absolute, not wrapped) distance to the camera is < 50
-  fw::vector dir_to_cam = (cam->get_position() - pos);
+  fw::Vector dir_to_cam = (cam->get_position() - pos);
   if (dir_to_cam.length_squared() > (50.0f * 50.0f))
     return false;
 
@@ -193,29 +193,29 @@ bool particle_renderer::add_particle(render_state &rs, int base_index, particle 
   fw::colour colour(p->alpha, (static_cast<float>(p->colour1) + 0.5f) * colour_texture_factor,
       (static_cast<float>(p->colour2) + 0.5f) * colour_texture_factor, p->colour_factor);
 
-  matrix m = fw::scale(p->size);
+  Matrix m = fw::scale(p->size);
   if (p->rotation_kind != rotation_kind::direction) {
-    m *= fw::rotate_axis_angle(vector(0, 0, 1), p->angle);
+    m *= fw::rotate_axis_angle(Vector(0, 0, 1), p->angle);
 
-    matrix m2;
+    Matrix m2;
     cml::matrix_rotation_align(m2, dir_to_cam);
     m *= m2;
   } else {
-    matrix m2;
-    cml::matrix_rotation_vec_to_vec(m2, vector(-1, 0, 0), p->direction);
+    Matrix m2;
+    cml::matrix_rotation_vec_to_vec(m2, Vector(-1, 0, 0), p->direction);
     m *= m2;
   }
   m *= fw::translation(pos);
 
   float aspect = (p->rect.bottom - p->rect.top) / (p->rect.right - p->rect.left);
 
-  fw::vector v = cml::transform_point(m, fw::vector(-0.5f, -0.5f * aspect, 0));
+  fw::Vector v = cml::transform_point(m, fw::Vector(-0.5f, -0.5f * aspect, 0));
   rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.left, p->rect.bottom));
-  v = cml::transform_point(m, fw::vector(-0.5f, 0.5f * aspect, 0));
+  v = cml::transform_point(m, fw::Vector(-0.5f, 0.5f * aspect, 0));
   rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.left, p->rect.top));
-  v = cml::transform_point(m, fw::vector(0.5f, 0.5f * aspect, 0));
+  v = cml::transform_point(m, fw::Vector(0.5f, 0.5f * aspect, 0));
   rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.right, p->rect.top));
-  v = cml::transform_point(m, fw::vector(0.5f, -0.5f * aspect, 0));
+  v = cml::transform_point(m, fw::Vector(0.5f, -0.5f * aspect, 0));
   rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.right, p->rect.bottom));
 
   rs.indices.push_back(base_index);
@@ -299,8 +299,8 @@ void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::pa
 }
 
 void particle_renderer::sort_particles(particle_renderer::particle_list &particles) {
-  fw::camera *cam = fw::framework::get_instance()->get_camera();
-  fw::vector const &cam_pos = cam->get_position();
+  fw::Camera *cam = fw::framework::get_instance()->get_camera();
+  fw::Vector const &cam_pos = cam->get_position();
 
   particles.sort(particle_sorter(cam_pos));
 }

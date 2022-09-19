@@ -85,10 +85,10 @@ void players_tool_window::hide() {
 bool players_tool_window::num_players_updated_click(fw::gui::Widget *w) {
   TextEdit *te = _wnd->find<TextEdit>(NUM_PLAYERS_ID);
   int num_players = boost::lexical_cast<int>(te->get_text());
-  std::map<int, fw::vector> &player_starts = _tool->get_world()->get_player_starts();
+  std::map<int, fw::Vector> &player_starts = _tool->get_world()->get_player_starts();
   if (player_starts.size() < num_players) {
     for (int i = player_starts.size(); i < num_players; i++) {
-      player_starts[i + 1] = fw::vector(0, 0, 0);
+      player_starts[i + 1] = fw::Vector(0, 0, 0);
     }
   } else if (player_starts.size() > num_players) {
     // uh, TODO
@@ -132,15 +132,15 @@ void players_tool::render(fw::sg::scenegraph &scenegraph) {
   if (_player_no <= 0)
     return;
 
-  std::map<int, fw::vector> &starts = _world->get_player_starts();
-  std::map<int, fw::vector>::iterator it = starts.find(_player_no);
+  std::map<int, fw::Vector> &starts = _world->get_player_starts();
+  std::map<int, fw::Vector>::iterator it = starts.find(_player_no);
 
   // if there's no player_no in the collection, this player isn't enabled
   if (it == starts.end())
     return;
 
   // otherwise, render the marker at the given location
-  fw::matrix loc(fw::translation(it->second));
+  fw::Matrix loc(fw::translation(it->second));
 
   _marker->set_colour(fw::colour(0.75f, 0.0f, 1.0f, 0.0f));
   _marker->render(scenegraph, loc);
@@ -156,8 +156,8 @@ void players_tool::on_key(std::string keyname, bool is_down) {
       return;
     }
 
-    std::map<int, fw::vector> &starts = _world->get_player_starts();
-    std::map<int, fw::vector>::iterator it = starts.find(_player_no);
+    std::map<int, fw::Vector> &starts = _world->get_player_starts();
+    std::map<int, fw::Vector>::iterator it = starts.find(_player_no);
     if (it == starts.end()) {
       return;
     }

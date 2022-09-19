@@ -47,13 +47,13 @@ void moveable_component::initialize() {
 }
 
 // TODO: skip_pathing is such a hack
-void moveable_component::set_goal(fw::vector goal, bool skip_pathing /*= false*/) {
+void moveable_component::set_goal(fw::Vector goal, bool skip_pathing /*= false*/) {
   std::shared_ptr<entity> entity(_entity);
   float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
   float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
   // make sure we constraining the goal to the bounds of the map
-  _goal = fw::vector(
+  _goal = fw::Vector(
       fw::constrain(goal[0], world_width, 0.0f),
       goal[1],
       fw::constrain(goal[2], world_length, 0.0f));
@@ -64,13 +64,13 @@ void moveable_component::set_goal(fw::vector goal, bool skip_pathing /*= false*/
   }
 }
 
-void moveable_component::set_intermediate_goal(fw::vector goal) {
+void moveable_component::set_intermediate_goal(fw::Vector goal) {
   std::shared_ptr<entity> entity(_entity);
   float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
   float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
   // make sure we constraining the goal to the bounds of the map
-  _intermediate_goal = fw::vector(
+  _intermediate_goal = fw::Vector(
       fw::constrain(goal[0], world_width, 0.0f),
       goal[1],
       fw::constrain(goal[2], world_length, 0.0f));
@@ -89,9 +89,9 @@ void moveable_component::update(float dt) {
     return;
   }
 
-  fw::vector pos = _position_component->get_position();
-  fw::vector goal = _intermediate_goal;
-  fw::vector dir = _position_component->get_direction_to(goal);
+  fw::Vector pos = _position_component->get_position();
+  fw::Vector goal = _intermediate_goal;
+  fw::Vector dir = _position_component->get_direction_to(goal);
   float distance = dir.length();
   if (distance < 0.1f) {
     // we're close enough to the goal, so just stop!
@@ -106,7 +106,7 @@ void moveable_component::update(float dt) {
   if (_avoid_collisions) {
     std::shared_ptr<ent::entity> obstacle = _position_component->get_nearest_entity().lock();
     if (obstacle) {
-      fw::vector obstacle_dir = _position_component->get_direction_to(obstacle);
+      fw::Vector obstacle_dir = _position_component->get_direction_to(obstacle);
       float obstacle_distance = obstacle_dir.length();
 
       // only worry about the obstacle when it's in front of us
@@ -124,19 +124,19 @@ void moveable_component::update(float dt) {
 
         // only worry about the obstacle if we're closer to it than to the goal...
         if (obstacle_distance < (obstacle_radius * 2.0f) && obstacle_distance < distance) {
-          fw::vector obstacle_pos = pos + obstacle_dir;
+          fw::Vector obstacle_pos = pos + obstacle_dir;
           if (show_steering) {
             // draw a circle around whatever we're trying to avoid
             entity->get_debug_view()->add_circle(obstacle_pos, obstacle_radius * 2.0f, fw::colour(1, 0, 0));
           }
 
           // temporarily adjust the "goal" so as to avoid the obstacle
-          fw::vector up = cml::cross(_position_component->get_direction(), obstacle_dir);
+          fw::Vector up = cml::cross(_position_component->get_direction(), obstacle_dir);
           if (up.length_squared() < 0.01f) {
             // if they're *directly* in front of us, just choose a random direction, left or right. we'll choose... left
-            up = fw::vector(0, 1, 0);
+            up = fw::Vector(0, 1, 0);
           }
-          fw::vector avoid_dir = cml::cross(cml::normalize(_position_component->get_direction()), cml::normalize(up));
+          fw::Vector avoid_dir = cml::cross(cml::normalize(_position_component->get_direction()), cml::normalize(up));
 
           if (show_steering) {
             // draw a blue line from the obstacle in the direction we're going to travel to avoid it.
@@ -186,7 +186,7 @@ void moveable_component::update(float dt) {
 //
 // if show_steering is true, we use the entity's debug_view (which we assume is non-NULL
 //   to display the relevent steering vectors.
-fw::vector moveable_component::steer(fw::vector pos, fw::vector curr_direction, fw::vector goal_direction,
+fw::Vector moveable_component::steer(fw::Vector pos, fw::Vector curr_direction, fw::Vector goal_direction,
     float turn_amount, bool show_steering) {
   curr_direction.normalize();
   goal_direction.normalize();
@@ -197,9 +197,9 @@ fw::vector moveable_component::steer(fw::vector pos, fw::vector curr_direction, 
   }
 
   // so, to work out the steering factor, we start off by rotating the direction vector clockwise 90 degrees...
-  fw::vector up = cml::cross(curr_direction, goal_direction);
-  fw::matrix rotation = fw::rotate_axis_angle(up, static_cast<float>(M_PI / 2.0));
-  fw::vector steer = cml::transform_vector(rotation, curr_direction).normalize();
+  fw::Vector up = cml::cross(curr_direction, goal_direction);
+  fw::Matrix rotation = fw::rotate_axis_angle(up, static_cast<float>(M_PI / 2.0));
+  fw::Vector steer = cml::transform_vector(rotation, curr_direction).normalize();
 
   // now, if the angle between steer and the goal is greater than 90,
   // we need to steer in the other direction.
@@ -222,14 +222,14 @@ fw::vector moveable_component::steer(fw::vector pos, fw::vector curr_direction, 
   steer *= turn_amount;
 
   // adjust our current heading by applying a steering factor
-  fw::vector new_direction = (curr_direction + steer);
+  fw::Vector new_direction = (curr_direction + steer);
   new_direction.normalize();
 
   // if the new direction is on the other side of the goal_direction to the current
   // direction, that means we'd be over-steering. rather than do that (and wobble), we'll
   // just start heading straight for the goal.
-  fw::vector old_direction = curr_direction;
-  fw::vector rotated = cml::transform_vector(rotation, goal_direction).normalize();
+  fw::Vector old_direction = curr_direction;
+  fw::Vector rotated = cml::transform_vector(rotation, goal_direction).normalize();
 
   float old_direction_dot = cml::dot(old_direction, rotated);
   float new_direction_dot = cml::dot(new_direction, rotated);

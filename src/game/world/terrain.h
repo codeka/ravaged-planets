@@ -107,12 +107,12 @@ public:
   }
 
   // Gets the (x,y,z) location of the point on the terrain where the cursor is pointing
-  fw::vector get_cursor_location();
-  fw::vector get_cursor_location(fw::vector const &start,
-      fw::vector const &direction);
+  fw::Vector get_cursor_location();
+  fw::Vector get_cursor_location(fw::Vector const &start,
+      fw::Vector const &direction);
 
   // Gets the (x,y,z) of the point on the terrain that the camera is looking at
-  fw::vector get_camera_lookat();
+  fw::Vector get_camera_lookat();
 };
 
 }

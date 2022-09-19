@@ -47,7 +47,7 @@ void mesh_component::initialize() {
   _ownable_component = entity->get_component<ownable_component>();
 }
 
-void mesh_component::render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform) {
+void mesh_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform) {
   std::shared_ptr<entity> entity(_entity);
   position_component *pos = entity->get_component<position_component>();
   if (pos != nullptr) {

@@ -14,11 +14,11 @@ namespace ent {
 // scale (e.g. 4 entity patches for every 1 terrain patch).
 class patch {
 private:
-  fw::vector _origin;
+  fw::Vector _origin;
   std::list<std::weak_ptr<entity>> _entities;
 
 public:
-  patch(fw::vector const &origin);
+  patch(fw::Vector const &origin);
   ~patch();
 
   // adds the given entity to this patch
@@ -32,7 +32,7 @@ public:
     return _entities;
   }
 
-  fw::vector const &get_origin() const {
+  fw::Vector const &get_origin() const {
     return _origin;
   }
 };
@@ -84,9 +84,9 @@ class position_component: public entity_component {
 private:
   friend class entity_patch;
 
-  fw::vector _pos;
-  fw::vector _dir;
-  fw::vector _up;
+  fw::Vector _pos;
+  fw::Vector _dir;
+  fw::Vector _up;
   bool _pos_updated;
   bool _sit_on_terrain;
   bool _orient_to_terrain;
@@ -107,15 +107,15 @@ public:
   virtual void update(float dt);
 
   // gets the view transform for the entity based on it's current world-space position
-  fw::matrix get_transform() const;
+  fw::Matrix get_transform() const;
 
   // gets or sets the current position of the entity
-  void set_position(fw::vector const &pos);
-  fw::vector get_position(bool allow_update = true);
+  void set_position(fw::Vector const &pos);
+  fw::Vector get_position(bool allow_update = true);
 
   // gets or sets the direction the entity is facing
-  void set_direction(fw::vector const &dir);
-  fw::vector get_direction() const;
+  void set_direction(fw::Vector const &dir);
+  fw::Vector get_direction() const;
 
   // gets or sets a value which indicates whether we want to ensure the entity sits
   // on the terrain (for example, trees do, but missiles do not)
@@ -140,8 +140,8 @@ public:
 
   // gets the direction to the given point/entity, taking into account the fact
   // that it might be quicker to wrap around the edges of the map
-  fw::vector get_direction_to(fw::vector const &point) const;
-  fw::vector get_direction_to(std::shared_ptr<entity> entity) const;
+  fw::Vector get_direction_to(fw::Vector const &point) const;
+  fw::Vector get_direction_to(std::shared_ptr<entity> entity) const;
 
   // searches for the nearest entity to us which matches the given predicate
   std::weak_ptr<entity> get_nearest_entity(

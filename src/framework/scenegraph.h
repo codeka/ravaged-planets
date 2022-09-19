@@ -27,27 +27,27 @@ enum primitive_type {
 // scene (we'll need at least one light-source of course!
 class light {
 private:
-  fw::vector _pos;
-  fw::vector _dir;
+  fw::Vector _pos;
+  fw::Vector _dir;
   bool _cast_shadows;
 
 public:
   light();
-  light(fw::vector const &pos, fw::vector const &dir, bool cast_shadows);
+  light(fw::Vector const &pos, fw::Vector const &dir, bool cast_shadows);
   light(light const &copy);
   ~light();
 
-  void set_position(fw::vector const &pos) {
+  void set_position(fw::Vector const &pos) {
     _pos = pos;
   }
-  fw::vector get_position() const {
+  fw::Vector get_position() const {
     return _pos;
   }
 
-  void set_direction(fw::vector const &dir) {
+  void set_direction(fw::Vector const &dir) {
     _dir = dir;
   }
-  fw::vector get_direction() const {
+  fw::Vector get_direction() const {
     return _dir;
   }
 
@@ -71,15 +71,15 @@ private:
   std::shared_ptr<fw::shader_parameters> _shader_params;
 
   // Renders the node if the shader file is null (basically just uses the basic shader).
-  void render_noshader(fw::camera *camera, fw::matrix const &transform);
+  void render_noshader(fw::Camera *camera, fw::Matrix const &transform);
 
 protected:
   node *_parent;
   std::vector<std::shared_ptr<node> > _children;
-  fw::matrix _world;
+  fw::Matrix _world;
 
   // this is called when we're rendering a given shader
-  virtual void render_shader(std::shared_ptr<fw::shader> shader, fw::camera *camera, fw::matrix const &transform);
+  virtual void render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera, fw::Matrix const &transform);
 
   // called by clone() to populate the clone
   virtual void populate_clone(std::shared_ptr<node> clone);
@@ -96,10 +96,10 @@ public:
     return _children[index];
   }
 
-  void set_world_matrix(fw::matrix const &m) {
+  void set_world_matrix(fw::Matrix const &m) {
     _world = m;
   }
-  fw::matrix &get_world_matrix() {
+  fw::Matrix &get_world_matrix() {
     return _world;
   }
 
@@ -144,7 +144,7 @@ public:
   }
 
   // this is called by the scenegraph itself when it's time to render
-  virtual void render(scenegraph *sg, fw::matrix const &model_matrix = fw::identity());
+  virtual void render(scenegraph *sg, fw::Matrix const &model_matrix = fw::identity());
 
   // Creates a clone of this node (it's a "shallow" clone in that the vertex_buffer, index_buffer and shader will be
   // shared but matrix and shader_parameters will be new)
@@ -161,7 +161,7 @@ private:
   light_coll _lights;
   node_coll _root_nodes;
   fw::colour _clear_colour;
-  std::stack<fw::camera *> _camera_stack;
+  std::stack<fw::Camera *> _camera_stack;
 
 public:
   scenegraph();
@@ -189,13 +189,13 @@ public:
     return _clear_colour;
   }
 
-  void push_camera(fw::camera *cam) {
+  void push_camera(fw::Camera *cam) {
     _camera_stack.push(cam);
   }
   void pop_camera() {
     _camera_stack.pop();
   }
-  fw::camera *get_camera() const {
+  fw::Camera *get_camera() const {
     if (_camera_stack.empty()) {
       return nullptr;
     }

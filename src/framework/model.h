@@ -88,7 +88,7 @@ public:
   }
 
   /** Renders the mesh to the given scenegraph. */
-  void render(sg::scenegraph &sg, fw::matrix const &transform = fw::identity());
+  void render(sg::scenegraph &sg, fw::Matrix const &transform = fw::identity());
 };
 
 }

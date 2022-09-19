@@ -110,7 +110,7 @@ private:
 public:
   void bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z);
 
-  void render(fw::sg::scenegraph &scenegraph, fw::matrix const &world);
+  void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &world);
 };
 
 std::shared_ptr<fw::index_buffer> collision_patch::_ib;
@@ -144,7 +144,7 @@ void collision_patch::bake(std::vector<bool> &data, float *heights, int width, i
   _vb->set_data(vertices.size(), vertices.data());
 }
 
-void collision_patch::render(fw::sg::scenegraph &scenegraph, fw::matrix const &world) {
+void collision_patch::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &world) {
   std::shared_ptr<fw::sg::node> node(new fw::sg::node());
   node->set_world_matrix(world);
 
@@ -216,10 +216,10 @@ int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_len
 
 void pathing_tool::render(fw::sg::scenegraph &scenegraph) {
   // we want to render the patches centred on where the camera is looking
-  fw::camera *camera = fw::framework::get_instance()->get_camera();
-  fw::vector cam_loc = camera->get_position();
-  fw::vector cam_dir = camera->get_direction();
-  fw::vector location = get_terrain()->get_cursor_location(cam_loc, cam_dir);
+  fw::Camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Vector cam_loc = camera->get_position();
+  fw::Vector cam_dir = camera->get_direction();
+  fw::Vector location = get_terrain()->get_cursor_location(cam_loc, cam_dir);
 
   int centre_patch_x = (int) (location[0] / PATCH_SIZE);
   int centre_patch_z = (int) (location[2] / PATCH_SIZE);
@@ -234,7 +234,7 @@ void pathing_tool::render(fw::sg::scenegraph &scenegraph) {
       if (!_patches[patch_index])
         _patches[patch_index] = bake_patch(new_patch_x, new_patch_z);
 
-      fw::matrix world = fw::translation(static_cast<float>(patch_x * PATCH_SIZE), 0,
+      fw::Matrix world = fw::translation(static_cast<float>(patch_x * PATCH_SIZE), 0,
           static_cast<float>(patch_z * PATCH_SIZE));
 
       _patches[patch_index]->render(scenegraph, world);
@@ -242,13 +242,13 @@ void pathing_tool::render(fw::sg::scenegraph &scenegraph) {
   }
 
   if (_start_set) {
-    fw::matrix loc(fw::translation(_start_pos));
+    fw::Matrix loc(fw::translation(_start_pos));
     _marker->set_colour(fw::colour(1, 0.1f, 1, 0.1f));
     _marker->render(scenegraph, loc);
   }
 
   if (_end_set) {
-    fw::matrix loc(fw::translation(_end_pos));
+    fw::Matrix loc(fw::translation(_end_pos));
     _marker->set_colour(fw::colour(1, 1, 0.1f, 0.1f));
     _marker->render(scenegraph, loc);
   }
@@ -315,11 +315,11 @@ void pathing_tool::find_path() {
   if (!_start_set || !_end_set)
     return;
 
-  std::vector<fw::vector> full_path;
+  std::vector<fw::Vector> full_path;
   if (!_path_find->find(full_path, _start_pos, _end_pos)) {
     statusbar->set_message((boost::format("No path found after %1%ms") % (_path_find->total_time * 1000.0f)).str());
   } else {
-    std::vector<fw::vector> path;
+    std::vector<fw::Vector> path;
     _path_find->simplify_path(full_path, path);
     statusbar->set_message((boost::format("Path found in %1%ms, %2% nodes, %3% nodes (simplified)")
         % (_path_find->total_time * 1000.0f)
@@ -329,12 +329,12 @@ void pathing_tool::find_path() {
     std::vector<fw::vertex::xyz_c> buffer;
 
     if (_simplify) {
-      BOOST_FOREACH(fw::vector loc, path) {
+      BOOST_FOREACH(fw::Vector loc, path) {
         float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
         buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::colour(1, 0.5f, 0.5f, 1)));
       }
     } else {
-      BOOST_FOREACH(fw::vector loc, full_path) {
+      BOOST_FOREACH(fw::Vector loc, full_path) {
         float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
         buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::colour(1, 0.5f, 0.5f, 1)));
       }

@@ -26,7 +26,7 @@ private:
   typedef std::list<particle *> particle_list;
   particle_list _particles;
 
-  fw::vector _position;
+  fw::Vector _position;
   emit_policy *_emit_policy;
   bool _dead;
 
@@ -43,10 +43,10 @@ public:
    */
   void destroy();
 
-  void set_position(fw::vector const &pos) {
+  void set_position(fw::Vector const &pos) {
     _position = pos;
   }
-  fw::vector const &get_position() const {
+  fw::Vector const &get_position() const {
     return _position;
   }
 
@@ -55,7 +55,7 @@ public:
   }
 
   /** This is called by the emit_policy when it decides to emit a new particle. */
-  particle *emit(fw::vector pos, float time_offset = 0.0f);
+  particle *emit(fw::Vector pos, float time_offset = 0.0f);
 };
 
 /**
@@ -84,7 +84,7 @@ class timed_emit_policy: public emit_policy {
 private:
   float _particles_per_second;
   float _time_since_last_particle;
-  fw::vector _last_position;
+  fw::Vector _last_position;
 
 public:
   timed_emit_policy(float value);

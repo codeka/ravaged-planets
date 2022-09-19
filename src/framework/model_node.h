@@ -19,7 +19,7 @@ private:
 
 protected:
   /* Renders the model node. */
-  virtual void render(sg::scenegraph *sg, fw::matrix const &model_matrix = fw::identity());
+  virtual void render(sg::scenegraph *sg, fw::Matrix const &model_matrix = fw::identity());
 
   /** Called by clone() to populate the clone. */
   virtual void populate_clone(std::shared_ptr<sg::node> clone);
@@ -34,7 +34,7 @@ public:
   std::string node_name;
 
   /** The transform used to move the model into position in the world. */
-  fw::matrix transform;
+  fw::Matrix transform;
 
   void set_colour(fw::colour colour);
 

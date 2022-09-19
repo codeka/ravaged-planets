@@ -13,7 +13,7 @@ struct path_node {
   path_node *previous;
   float cost_to_goal;
   float cost_from_start;
-  fw::vector loc;
+  fw::Vector loc;
   bool passable;
 
   struct cost_comparer {
@@ -35,7 +35,7 @@ path_find::path_find(int width, int length, std::vector<bool> const &passability
   for (int z = 0; z < _length; z++) {
     for (int x = 0; x < _width; x++) {
       path_node &node = _nodes[(z * _width) + x];
-      node.loc = fw::vector(x, 0, z);
+      node.loc = fw::Vector(x, 0, z);
       node.open_run_no = 0;
       node.closed_run_no = 0;
       node.passable = passability[(z * _width) + x];
@@ -47,12 +47,12 @@ path_find::~path_find() {
   delete[] _nodes;
 }
 
-float estimate_cost(fw::vector const &from, fw::vector const &to) {
+float estimate_cost(fw::Vector const &from, fw::Vector const &to) {
   // we'll use the manhatten distance.
   return abs(from[0] - to[0]) + abs(from[2] - to[2]);
 }
 
-void construct_path(std::vector<fw::vector> &path, path_node const *goal_node) {
+void construct_path(std::vector<fw::Vector> &path, path_node const *goal_node) {
   path_node const *node = goal_node;
   while (node != 0) {
     path.insert(path.begin(), node->loc);
@@ -60,13 +60,13 @@ void construct_path(std::vector<fw::vector> &path, path_node const *goal_node) {
   }
 }
 
-path_node *path_find::get_node(fw::vector const &loc) const {
+path_node *path_find::get_node(fw::Vector const &loc) const {
   int x = fw::constrain(static_cast<int>(loc[0]), _width);
   int z = fw::constrain(static_cast<int>(loc[2]), _length);
   return &_nodes[(z * _width) + x];
 }
 
-bool path_find::find(std::vector<fw::vector> &path, fw::vector const &start, fw::vector const &end) {
+bool path_find::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
   std::multiset<path_node *, path_node::cost_comparer> open_set;
 
   // increment the run_no (basically invalidating all the current path_nodes)
@@ -106,7 +106,7 @@ bool path_find::find(std::vector<fw::vector> &path, fw::vector const &start, fw:
 
         // find the node, if we've already visited and discounted it,
         // don't visit it again
-        path_node *n = get_node(fw::vector(curr->loc[0] + dx, 0.0f, curr->loc[2] + dz));
+        path_node *n = get_node(fw::Vector(curr->loc[0] + dx, 0.0f, curr->loc[2] + dz));
 
         // if it's in the closed list already or not passable, don't even consider it
         if (n->closed_run_no == _run_no || !n->passable)
@@ -148,7 +148,7 @@ bool path_find::find(std::vector<fw::vector> &path, fw::vector const &start, fw:
   return false;
 }
 
-bool path_find::is_passable(fw::vector const &start, fw::vector const &end) const {
+bool path_find::is_passable(fw::Vector const &start, fw::Vector const &end) const {
   // we need to determine whether a straight line from start to end is passable
   // or not. We'll trace a line from start to end then look up all the nodes
   // in between
@@ -172,7 +172,7 @@ bool path_find::is_passable(fw::vector const &start, fw::vector const &end) cons
   float x = static_cast<float>(sx);
   float z = static_cast<float>(sz);
   for (int i = 0; i <= steps; i++) {
-    path_node *node = get_node(fw::vector(x, 0, z));
+    path_node *node = get_node(fw::Vector(x, 0, z));
     if (!node->passable)
       return false;
 
@@ -183,18 +183,18 @@ bool path_find::is_passable(fw::vector const &start, fw::vector const &end) cons
   return true;
 }
 
-void path_find::simplify_path(std::vector<fw::vector> const &full_path, std::vector<fw::vector> &new_path) {
-  std::vector<fw::vector>::const_iterator fp_it = full_path.begin();
+void path_find::simplify_path(std::vector<fw::Vector> const &full_path, std::vector<fw::Vector> &new_path) {
+  std::vector<fw::Vector>::const_iterator fp_it = full_path.begin();
   if (fp_it == full_path.end())
     return;
 
   // the first node in full_path is also the first node in new_path
   new_path.push_back(*fp_it);
-  fw::vector start = new_path[0];
+  fw::Vector start = new_path[0];
 
   ++fp_it; // move to the second node now...
   for (; fp_it != full_path.end(); ++fp_it) {
-    fw::vector end = *fp_it;
+    fw::Vector end = *fp_it;
 
     if (!is_passable(start, end)) {
       // if we can't go from start to end without passing over an impassable
@@ -220,7 +220,7 @@ timed_path_find::timed_path_find(int width, int length, std::vector<bool> &passa
 timed_path_find::~timed_path_find() {
 }
 
-bool timed_path_find::find(std::vector<fw::vector> &path, fw::vector const &start, fw::vector const &end) {
+bool timed_path_find::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
   fw::timer tmr;
   tmr.start();
 

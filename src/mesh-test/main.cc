@@ -105,8 +105,8 @@ void application::render(fw::sg::scenegraph &scenegraph) {
   scenegraph.set_clear_colour(fw::colour(1, 0, 1, 0));
 
   // set up the properties of the sun that we'll use to light and also cast shadows
-  fw::vector sun(0.485f, 0.485f, 0.727f);
-  fw::vector lookat(0, 0, 0);
+  fw::Vector sun(0.485f, 0.485f, 0.727f);
+  fw::Vector lookat(0, 0, 0);
   std::shared_ptr <fw::sg::light> light(new fw::sg::light(lookat + sun * 300.0f, sun * -1, true));
   scenegraph.add_light(light);
 
@@ -115,7 +115,7 @@ void application::render(fw::sg::scenegraph &scenegraph) {
   }
 
   g_model->set_colour(fw::colour(1.0f, 1.0f, 0.0f, 0.0f));
-  g_model->render(scenegraph, fw::rotate_axis_angle(fw::vector(0, 1, 0), g_rotate_angle));
+  g_model->render(scenegraph, fw::rotate_axis_angle(fw::Vector(0, 1, 0), g_rotate_angle));
 }
 
 //-----------------------------------------------------------------------------

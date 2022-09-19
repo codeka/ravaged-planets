@@ -38,7 +38,7 @@ void pathing_thread::stop() {
   _work_queue.enqueue(request);
 }
 
-void pathing_thread::request_path(fw::vector const &start, fw::vector const &goal, callback_fn on_path_found) {
+void pathing_thread::request_path(fw::Vector const &start, fw::Vector const &goal, callback_fn on_path_found) {
   path_request_data request;
   request.flags = 0;
   request.start = start;
@@ -55,10 +55,10 @@ void pathing_thread::thread_proc() {
       return;
     }
 
-    std::vector<fw::vector> path;
+    std::vector<fw::Vector> path;
     _pather->find(path, request.start, request.goal);
 
-    std::vector<fw::vector> simplified;
+    std::vector<fw::Vector> simplified;
     _pather->simplify_path(path, simplified);
 
     if (request.callback) {

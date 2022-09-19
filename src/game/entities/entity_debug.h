@@ -57,8 +57,8 @@ public:
 class entity_debug_view {
 private:
   struct line {
-    fw::vector from;
-    fw::vector to;
+    fw::Vector from;
+    fw::Vector to;
     fw::colour col;
   };
   std::vector<line> _lines;
@@ -67,12 +67,12 @@ public:
   entity_debug_view();
   ~entity_debug_view();
 
-  void add_line(fw::vector const &from, fw::vector const &to,
+  void add_line(fw::Vector const &from, fw::Vector const &to,
       fw::colour const &col);
-  void add_circle(fw::vector const &centre, float radius,
+  void add_circle(fw::Vector const &centre, float radius,
       fw::colour const &col);
 
-  void render(fw::sg::scenegraph &scenegraph, fw::matrix const &transform);
+  void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform);
 };
 
 }

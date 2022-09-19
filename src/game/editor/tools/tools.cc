@@ -41,7 +41,7 @@ void tool::render(fw::sg::scenegraph &) {
 }
 
 // This is used by a number of of the tools for giving a basic indication of it's area of effect.
-void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::vector const &centre, float radius) {
+void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::Vector const &centre, float radius) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * M_PI * radius);

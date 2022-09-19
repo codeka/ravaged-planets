@@ -11,7 +11,7 @@ class font_manager;
 class debug_view;
 class model_manager;
 class timer;
-class camera;
+class Camera;
 class Bitmap;
 class particle_manager;
 struct screenshot_request;
@@ -88,7 +88,7 @@ private:
   graphics * _graphics;
   base_app * _app;
   timer *_timer;
-  camera *_camera;
+  Camera *_camera;
   gui::Gui *_gui;
   particle_manager *_particle_mgr;
   bool _paused;
@@ -139,8 +139,8 @@ public:
       bool include_gui = true);
 
   // gets or sets the camera we'll use for camera control
-  void set_camera(camera *cam);
-  camera *get_camera() {
+  void set_camera(Camera *cam);
+  Camera *get_camera() {
     return _camera;
   }
 

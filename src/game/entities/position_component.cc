@@ -51,30 +51,30 @@ void position_component::set_final_position() {
     game::terrain *terrain = game::world::get_instance()->get_terrain();
     if (_sit_on_terrain) {
       // if we're supposed to sit on the terrain, make sure we're doing that now.
-      _pos = fw::vector(_pos[0], terrain->get_height(_pos[0], _pos[2]), _pos[2]);
+      _pos = fw::Vector(_pos[0], terrain->get_height(_pos[0], _pos[2]), _pos[2]);
     }
 
     if (_orient_to_terrain) {
       // if we're supposed to orient ourselves with the terrain (so it looks like we're sitting flat on the
       // terrain, rather than perfectly horizontal) do that as well. Basically, we sample the terrain at three
       // places, calculate the normal and orient ourselves to that.
-      fw::vector right = cml::cross(_up, _dir).normalize();
-      fw::vector v1 = _pos + _dir;
-      fw::vector v2 = _pos + right;
-      fw::vector v3 = _pos - right;
+      fw::Vector right = cml::cross(_up, _dir).normalize();
+      fw::Vector v1 = _pos + _dir;
+      fw::Vector v2 = _pos + right;
+      fw::Vector v3 = _pos - right;
 
       v1[1] = terrain->get_height(v1[0], v1[2]);
       v2[1] = terrain->get_height(v2[0], v2[2]);
       v3[1] = terrain->get_height(v3[0], v3[2]);
 
       _up = cml::cross(v2 - v1, v3 - v1).normalize();
-      _dir = fw::vector(_dir[0], 0.0f, _dir[2]).normalize();
+      _dir = fw::Vector(_dir[0], 0.0f, _dir[2]).normalize();
     }
 
     // constrain our position to the map's dimensions
     float x = fw::constrain(_pos[0], static_cast<float>(terrain->get_width()), 0.0f);
     float z = fw::constrain(_pos[2], static_cast<float>(terrain->get_length()), 0.0f);
-    _pos = fw::vector(x, _pos[1], z);
+    _pos = fw::Vector(x, _pos[1], z);
 
     // make sure we "exist" in the correct patch as well...
     std::shared_ptr<ent::entity> entity(_entity);
@@ -94,51 +94,51 @@ void position_component::set_final_position() {
   }
 }
 
-void position_component::set_position(fw::vector const &pos) {
+void position_component::set_position(fw::Vector const &pos) {
   std::shared_ptr<ent::entity> entity(_entity);
   float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
   float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
-  _pos = fw::vector(fw::constrain(pos[0], world_width, 0.0f), pos[1], fw::constrain(pos[2], world_length, 0.0f));
+  _pos = fw::Vector(fw::constrain(pos[0], world_width, 0.0f), pos[1], fw::constrain(pos[2], world_length, 0.0f));
 
   _pos_updated = true;
 }
 
-fw::vector position_component::get_position(bool allow_update) {
+fw::Vector position_component::get_position(bool allow_update) {
   if (allow_update) {
     set_final_position();
   }
   return _pos;
 }
 
-void position_component::set_direction(fw::vector const &dir) {
+void position_component::set_direction(fw::Vector const &dir) {
   _dir = dir;
   _pos_updated = true;
 }
 
-fw::vector position_component::get_direction() const {
+fw::Vector position_component::get_direction() const {
   return _dir;
 }
 
-fw::matrix position_component::get_transform() const {
-  fw::matrix m = fw::identity();
-  m *= fw::rotate(fw::vector(0, 0, 1), _dir);
-  m *= fw::rotate(fw::vector(0, 1, 0), _up);
+fw::Matrix position_component::get_transform() const {
+  fw::Matrix m = fw::identity();
+  m *= fw::rotate(fw::Vector(0, 0, 1), _dir);
+  m *= fw::rotate(fw::Vector(0, 1, 0), _up);
   m *= fw::translation(_pos);
 
   return m;
 }
 
-fw::vector position_component::get_direction_to(fw::vector const &point) const {
-  fw::vector dir = point - _pos;
+fw::Vector position_component::get_direction_to(fw::Vector const &point) const {
+  fw::Vector dir = point - _pos;
 
   std::shared_ptr<ent::entity> entity(_entity);
   float width = entity->get_manager()->get_patch_manager()->get_world_width();
   float length = entity->get_manager()->get_patch_manager()->get_world_length();
   for (int z = -1; z <= 1; z++) {
     for (int x = -1; x <= 1; x++) {
-      fw::vector another_point(point[0] + (x * width), point[1], point[2] + (z * length));
-      fw::vector another_dir = another_point - _pos;
+      fw::Vector another_point(point[0] + (x * width), point[1], point[2] + (z * length));
+      fw::Vector another_dir = another_point - _pos;
 
       if (another_dir.length_squared() < dir.length_squared())
         dir = another_dir;
@@ -148,12 +148,12 @@ fw::vector position_component::get_direction_to(fw::vector const &point) const {
   return dir;
 }
 
-fw::vector position_component::get_direction_to(std::shared_ptr<entity> entity) const {
+fw::Vector position_component::get_direction_to(std::shared_ptr<entity> entity) const {
   position_component *their_position = entity->get_component<position_component>();
   if (their_position != nullptr)
     return get_direction_to(their_position->get_position());
 
-  return fw::vector(0, 0, 0);
+  return fw::Vector(0, 0, 0);
 }
 
 // searches for the nearest entity to us which matches the given predicate
@@ -202,7 +202,7 @@ std::weak_ptr<entity> position_component::get_nearest_entity_with_component(int 
 
 //-------------------------------------------------------------------------
 
-patch::patch(fw::vector const &origin) :
+patch::patch(fw::Vector const &origin) :
     _origin(origin) {
 }
 
@@ -238,7 +238,7 @@ patch_manager::patch_manager(float size_x, float size_z) {
   _patches.resize(_patch_width * _patch_length);
   for (int z = 0; z < _patch_length; z++) {
     for (int x = 0; x < _patch_width; x++) {
-      patch *p = new patch(fw::vector(static_cast<float>(x * PATCH_SIZE), 0.0f, static_cast<float>(z * PATCH_SIZE)));
+      patch *p = new patch(fw::Vector(static_cast<float>(x * PATCH_SIZE), 0.0f, static_cast<float>(z * PATCH_SIZE)));
       _patches[get_patch_index(x, z)] = p;
     }
   }

@@ -23,7 +23,7 @@ protected:
   terrain *_terrain;
   virtual terrain *create_terrain(int width, int length);
 
-  std::map<int, fw::vector> _player_starts;
+  std::map<int, fw::Vector> _player_starts;
   std::string _name;
   std::string _description;
   std::string _author;
@@ -43,7 +43,7 @@ public:
   // can populate itself
   terrain *get_terrain();
 
-  std::map<int, fw::vector> const &get_player_starts() const {
+  std::map<int, fw::Vector> const &get_player_starts() const {
     return _player_starts;
   }
   std::shared_ptr<fw::Bitmap> get_minimap_background() const {

@@ -138,11 +138,11 @@ void terrain::ensure_patches() {
 }
 
 void terrain::update() {
-  fw::camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Camera *camera = fw::framework::get_instance()->get_camera();
 
   // if the camera has moved off the edge of the map, wrap it back around
-  fw::vector old_loc = camera->get_location();
-  fw::vector new_loc(
+  fw::Vector old_loc = camera->get_location();
+  fw::Vector new_loc(
       fw::constrain(old_loc[0], (float) _width),
       old_loc[1],
       fw::constrain(old_loc[2], (float) _length));
@@ -163,8 +163,8 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
     return;
 
   // we want to render the terrain centered on where the camera is looking
-  fw::camera *camera = fw::framework::get_instance()->get_camera();
-  fw::vector location = get_cursor_location(camera->get_position(), camera->get_direction());
+  fw::Camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Vector location = get_cursor_location(camera->get_position(), camera->get_direction());
 
   int centre_patch_x = (int) (location[0] / PATCH_SIZE);
   int centre_patch_z = (int) (location[2] / PATCH_SIZE);
@@ -177,7 +177,7 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
 
       // set up the world matrix for this patch so that it's being rendered at the right offset
       std::shared_ptr<fw::sg::node> node(new fw::sg::node());
-      fw::matrix world = fw::translation(
+      fw::Matrix world = fw::translation(
           static_cast<float>(patch_x * PATCH_SIZE), 0,
           static_cast<float>(patch_z * PATCH_SIZE));
       node->set_world_matrix(world);
@@ -235,13 +235,13 @@ float terrain::get_height(float x, float z) {
 }
 
 // gets the point on the terrain that the camera is currently looking at
-fw::vector terrain::get_camera_lookat() {
+fw::Vector terrain::get_camera_lookat() {
   fw::framework *frmwrk = fw::framework::get_instance();
-  fw::camera *camera = frmwrk->get_camera();
+  fw::Camera *camera = frmwrk->get_camera();
 
-  fw::vector centre = camera->unproject(0.0f, 0.0f);
-  fw::vector start = camera->get_position();
-  fw::vector direction = (centre - start).normalize();
+  fw::Vector centre = camera->unproject(0.0f, 0.0f);
+  fw::Vector start = camera->get_position();
+  fw::Vector direction = (centre - start).normalize();
 
   return get_cursor_location(start, direction);
 }
@@ -251,10 +251,10 @@ fw::vector terrain::get_camera_lookat() {
 // in the (x,y) plane (so it's a nice, easy 2D line). Then, for each
 // 2D point on that line, we check how close the ray is to that point
 // in 3D-space. If it's close enough, we return that one...
-fw::vector terrain::get_cursor_location() {
+fw::Vector terrain::get_cursor_location() {
   fw::framework *frmwrk = fw::framework::get_instance();
   fw::input *input = frmwrk->get_input();
-  fw::camera *camera = frmwrk->get_camera();
+  fw::Camera *camera = frmwrk->get_camera();
 
   float mx = (float) input->mouse_x();
   float my = (float) input->mouse_y();
@@ -262,19 +262,19 @@ fw::vector terrain::get_cursor_location() {
   mx = 1.0f - (2.0f * mx / frmwrk->get_graphics()->get_width());
   my = 1.0f - (2.0f * my / frmwrk->get_graphics()->get_height());
 
-  fw::vector mvec = camera->unproject(-mx, my);
+  fw::Vector mvec = camera->unproject(-mx, my);
 
-  fw::vector start = camera->get_position();
-  fw::vector direction = (mvec - start).normalize();
+  fw::Vector start = camera->get_position();
+  fw::Vector direction = (mvec - start).normalize();
 
   return get_cursor_location(start, direction);
 }
 
-fw::vector terrain::get_cursor_location(fw::vector const &start, fw::vector const &direction) {
-  fw::vector evec = start + (direction * 150.0f);
-  fw::vector svec = start + (direction * 5.0f);
+fw::Vector terrain::get_cursor_location(fw::Vector const &start, fw::Vector const &direction) {
+  fw::Vector evec = start + (direction * 150.0f);
+  fw::Vector svec = start + (direction * 5.0f);
 
-  // todo: we use the same algorithm here and in path_find::is_passable(fw::vector const &start, fw::vector const &end)
+  // todo: we use the same algorithm here and in path_find::is_passable(fw::Vector const &start, fw::Vector const &end)
   // can we factor it out?
   int sx = static_cast<int>(floor(svec[0] + 0.5f));
   int sz = static_cast<int>(floor(svec[2] + 0.5f));
@@ -306,23 +306,23 @@ fw::vector terrain::get_cursor_location(fw::vector const &start, fw::vector cons
         float z1 = static_cast<float>(oz);
         float z2 = static_cast<float>(oz + 1);
 
-        fw::vector p11(x1, get_vertex_height(static_cast<int>(x1), static_cast<int>(z1)), z1);
-        fw::vector p21(x2, get_vertex_height(static_cast<int>(x2), static_cast<int>(z1)), z1);
-        fw::vector p12(x1, get_vertex_height(static_cast<int>(x1), static_cast<int>(z2)), z2);
-        fw::vector p22(x2, get_vertex_height(static_cast<int>(x2), static_cast<int>(z2)), z2);
+        fw::Vector p11(x1, get_vertex_height(static_cast<int>(x1), static_cast<int>(z1)), z1);
+        fw::Vector p21(x2, get_vertex_height(static_cast<int>(x2), static_cast<int>(z1)), z1);
+        fw::Vector p12(x1, get_vertex_height(static_cast<int>(x1), static_cast<int>(z2)), z2);
+        fw::Vector p22(x2, get_vertex_height(static_cast<int>(x2), static_cast<int>(z2)), z2);
 
-        fw::vector n1 = cml::cross(p12 - p11, p21 - p11);
-        fw::vector n2 = cml::cross(p21 - p22, p12 - p22);
+        fw::Vector n1 = cml::cross(p12 - p11, p21 - p11);
+        fw::Vector n2 = cml::cross(p21 - p22, p12 - p22);
 
         // the line intersects the plane defined by the first triangle at i1. If that's
         // within this triangle's "x,z" coordinates, this is the intersection point!
-        fw::vector i1 = fw::point_plane_intersect(p11, n1, start, direction);
+        fw::Vector i1 = fw::point_plane_intersect(p11, n1, start, direction);
         if (i1[0] > x1 && i1[0] <= x2 && i1[2] > z1 && i1[2] <= z2) {
           return i1;
         }
 
         // same calculation for the second triangle
-        fw::vector i2 = fw::point_plane_intersect(p22, n2, start, direction);
+        fw::Vector i2 = fw::point_plane_intersect(p22, n2, start, direction);
         if (i2[0] > x1 && i2[0] <= x2 && i2[2] > z1 && i2[2] <= z2) {
           return i2;
         }
@@ -333,6 +333,6 @@ fw::vector terrain::get_cursor_location(fw::vector const &start, fw::vector cons
     z += zinc;
   }
 
-  return fw::vector(0, 0, 0);
+  return fw::Vector(0, 0, 0);
 }
 }

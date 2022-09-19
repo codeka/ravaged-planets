@@ -19,7 +19,7 @@ private:
   struct effect_info {
     std::string name;
     std::shared_ptr<fw::particle_effect> effect;
-    fw::vector offset;
+    fw::Vector offset;
     bool destroy_entity_on_complete;
     bool started;
 
@@ -40,7 +40,7 @@ public:
 
   virtual void initialize();
   virtual void update(float dt);
-  virtual void render(fw::sg::scenegraph &, fw::matrix const &);
+  virtual void render(fw::sg::scenegraph &, fw::Matrix const &);
 
   void start_effect(std::string const &name);
   void stop_effect(std::string const &name);

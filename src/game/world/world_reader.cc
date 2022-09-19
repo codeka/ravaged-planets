@@ -135,7 +135,7 @@ void world_reader::read_mapdesc_players(fw::xml_element players_node) {
           << fw::message_error_info("<player> node has invalid 'start' attribute."));
     }
 
-    _player_starts[player_no] = fw::vector(start[0], 0.0f, start[1]);
+    _player_starts[player_no] = fw::Vector(start[0], 0.0f, start[1]);
   }
 }
 

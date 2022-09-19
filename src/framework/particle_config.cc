@@ -93,8 +93,8 @@ void particle_effect_config::load_emitter(xml_element const &elem) {
 }
 
 //-------------------------------------------------------------------------
-fw::vector particle_emitter_config::spherical_location::get_point() const {
-  fw::vector random(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f);
+fw::Vector particle_emitter_config::spherical_location::get_point() const {
+  fw::Vector random(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f);
 
   // TODO: this is the implementation of "constant"
   return centre + (random.normalize() * radius);
@@ -107,7 +107,7 @@ particle_emitter_config::life_state::life_state() {
   rotation_speed.min = rotation_speed.max = 0.0f;
   rotation_kind = rotation_kind::random;
   speed.min = speed.max = 0.0f;
-  direction.min = direction.max = fw::vector(0, 0, 0);
+  direction.min = direction.max = fw::Vector(0, 0, 0);
   alpha = 1.0f;
   colour_row = 0;
   gravity.min = gravity.max = 0.0f;
@@ -134,7 +134,7 @@ particle_emitter_config::life_state::life_state(particle_emitter_config::life_st
 particle_emitter_config::particle_emitter_config() {
   emit_policy_value = 0.0f;
 
-  position.centre = fw::vector(0, 0, 0);
+  position.centre = fw::Vector(0, 0, 0);
   position.radius = 0.0f;
   position.falloff = particle_emitter_config::constant;
 
@@ -186,7 +186,7 @@ void particle_emitter_config::load_position(xml_element const &elem) {
     BOOST_THROW_EXCEPTION(fw::exception()
         << fw::message_error_info("'offset' attribute requires 3 floating point values"));
   }
-  position.centre = fw::vector(components[0], components[1], components[2]);
+  position.centre = fw::Vector(components[0], components[1], components[2]);
 
   if (elem.is_attribute_defined("radius")) {
     position.radius = boost::lexical_cast<float>(elem.get_attribute("radius"));
@@ -329,18 +329,18 @@ void particle_emitter_config::parse_random_colour(random<fw::colour> &value, xml
   }
 }
 
-void particle_emitter_config::parse_random_vector(random<fw::vector> &value, xml_element const &elem) {
+void particle_emitter_config::parse_random_vector(random<fw::Vector> &value, xml_element const &elem) {
   std::vector<float> min_components = fw::split<float>(elem.get_attribute("min"));
   std::vector<float> max_components = fw::split<float>(elem.get_attribute("max"));
 
   if (min_components.size() == 3)
-    value.min = fw::vector(min_components[0], min_components[1], min_components[2]);
+    value.min = fw::Vector(min_components[0], min_components[1], min_components[2]);
   else {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("values require 3 floating point values"));
   }
 
   if (max_components.size() == 3)
-    value.max = fw::vector(max_components[0], max_components[1], max_components[2]);
+    value.max = fw::Vector(max_components[0], max_components[1], max_components[2]);
   else {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("values require 3 floating point values"));
   }
