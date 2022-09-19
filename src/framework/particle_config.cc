@@ -138,7 +138,7 @@ particle_emitter_config::particle_emitter_config() {
   position.radius = 0.0f;
   position.falloff = particle_emitter_config::constant;
 
-  billboard.texture = std::shared_ptr<texture>();
+  billboard.texture = std::shared_ptr<Texture>();
   billboard.mode = particle_emitter_config::normal;
 
   max_age.min = 4.0f;
@@ -208,7 +208,7 @@ void particle_emitter_config::load_position(xml_element const &elem) {
 
 void particle_emitter_config::load_billboard(xml_element const &elem) {
   std::string filename = elem.get_attribute("texture");
-  std::shared_ptr<fw::texture> texture(new fw::texture());
+  std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(fw::resolve("particles/" + filename));
   billboard.texture = texture;
 

@@ -7,12 +7,12 @@
 
 #include <framework/framework.h>
 #include <framework/graphics.h>
+#include <framework/texture.h>
 #include <framework/vector.h>
 
 namespace fw {
 
 class graphics;
-class texture;
 class shader;
 class colour;
 class vertex_buffer;
@@ -25,7 +25,7 @@ private:
   friend class shader;
 
   std::string _program_name;
-  std::map<std::string, std::shared_ptr<texture> > _textures;
+  std::map<std::string, std::shared_ptr<fw::Texture> > _textures;
   std::map<std::string, matrix> _matrices;
   std::map<std::string, vector> _vectors;
   std::map<std::string, colour> _colours;
@@ -38,7 +38,7 @@ public:
   ~shader_parameters();
 
   void set_program_name(std::string const &name);
-  void set_texture(std::string const &name, std::shared_ptr<texture> const &t);
+  void set_texture(std::string const &name, std::shared_ptr<fw::Texture> const &t);
   void set_matrix(std::string const &name, matrix const &m);
   void set_vector(std::string const &name, vector const &v);
   void set_colour(std::string const &name, colour const &c);

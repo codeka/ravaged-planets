@@ -130,7 +130,7 @@ void Label::set_background(std::shared_ptr<Bitmap> bmp, bool centred /*= false*/
     background_ = nullptr;
     background_centred_ = centred;
   } else {
-    std::shared_ptr<fw::texture> texture(new fw::texture());
+    std::shared_ptr<fw::Texture> texture(new fw::Texture());
     texture->create(bmp);
     background_ =
         gui_->get_drawable_manager()->build_drawable(texture, 0, 0, texture->get_width(), texture->get_height());

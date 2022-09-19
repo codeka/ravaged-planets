@@ -273,7 +273,7 @@ void shader_parameters::set_program_name(std::string const &name) {
   _program_name = name;
 }
 
-void shader_parameters::set_texture(std::string const &name, std::shared_ptr<texture> const &tex) {
+void shader_parameters::set_texture(std::string const &name, std::shared_ptr<Texture> const &tex) {
   _textures[name] = tex;
 }
 
@@ -309,7 +309,7 @@ void shader_parameters::apply(shader_program *prog) const {
     shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
-      std::shared_ptr<fw::texture> texture = it->second;
+      std::shared_ptr<fw::Texture> texture = it->second;
       if(texture) {
         texture->bind();
       }

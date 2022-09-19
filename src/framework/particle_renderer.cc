@@ -54,7 +54,7 @@ struct render_state {
   int particle_num;
   std::vector<fw::vertex::xyz_c_uv> vertices;
   std::vector<uint16_t> indices;
-  std::shared_ptr<fw::texture> texture;
+  std::shared_ptr<fw::Texture> texture;
   fw::particle_emitter_config::billboard_mode mode;
   fw::particle_renderer::particle_list &particles;
   std::shared_ptr<fw::shader> shader;
@@ -119,7 +119,7 @@ static buffer_cache g_buffer_cache;
 namespace fw {
 
 particle_renderer::particle_renderer(particle_manager *mgr) :
-    _graphics(nullptr), _shader(nullptr), _mgr(mgr), _draw_frame(1), _colour_texture(new fw::texture()) {
+    _graphics(nullptr), _shader(nullptr), _mgr(mgr), _draw_frame(1), _colour_texture(new fw::Texture()) {
 }
 
 particle_renderer::~particle_renderer() {

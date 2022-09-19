@@ -137,7 +137,7 @@ void initialize_ground(std::shared_ptr<fw::sg::node> node) {
 
   std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
 
-  std::shared_ptr<fw::texture> texture(new fw::texture());
+  std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(fw::resolve("terrain/grass-01.jpg"));
 
   std::shared_ptr<fw::shader_parameters> params = shader->create_parameters();

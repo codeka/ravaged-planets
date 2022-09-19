@@ -47,7 +47,7 @@ void Drawable::render(float x, float y, float width, float height) {
 
 //-----------------------------------------------------------------------------
 
-BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::texture> texture) :
+BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::Texture> texture) :
     top_(0), left_(0), width_(0), height_(0), texture_(texture), flipped_(false) {
   if (g_vertex_buffer == nullptr) {
     fw::vertex::xyz_uv vertices[4];
@@ -79,7 +79,7 @@ BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::texture> texture) :
   shader_params_->set_texture("texsampler", texture_);
 }
 
-BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
+BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement *elem) :
     BitmapDrawable(texture) {
   parse_tuple_attribute(elem->Attribute("pos"), left_, top_);
   parse_tuple_attribute(elem->Attribute("size"), width_, height_);
@@ -121,7 +121,7 @@ void BitmapDrawable::render(float x, float y, float width, float height) {
 
 //-----------------------------------------------------------------------------
 
-NinePatchDrawable::NinePatchDrawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) :
+NinePatchDrawable::NinePatchDrawable(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement *elem) :
     BitmapDrawable(texture) {
   for (xml::XMLElement *child_elem = elem->FirstChildElement(); child_elem != nullptr;
       child_elem = child_elem->NextSiblingElement()) {
@@ -215,7 +215,7 @@ void DrawableManager::parse(boost::filesystem::path const &file) {
       // Parse <image src=""> element
       if (std::string(child_elem->Name()) == "image") {
         std::string src(child_elem->Attribute("src"));
-        std::shared_ptr<fw::texture> texture(new fw::texture());
+        std::shared_ptr<fw::Texture> texture(new fw::Texture());
         texture->create(fw::resolve(std::string("gui/drawables/") + src));
 
         for (xml::XMLElement *drawable_elem = child_elem->FirstChildElement(); drawable_elem != nullptr;
@@ -236,7 +236,7 @@ std::shared_ptr<Drawable> DrawableManager::get_drawable(std::string const &name)
   return drawables_[name];
 }
 
-void DrawableManager::parse_drawable_element(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement *elem) {
+void DrawableManager::parse_drawable_element(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement *elem) {
   std::shared_ptr<Drawable> new_drawable;
   if (elem->Name() == nullptr) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string("Element has null name: ") + elem->Value()));
@@ -257,7 +257,7 @@ void DrawableManager::parse_drawable_element(std::shared_ptr<fw::texture> textur
   drawables_[name] = new_drawable;
 }
 
-std::shared_ptr<Drawable> DrawableManager::build_drawable(std::shared_ptr<fw::texture> texture,
+std::shared_ptr<Drawable> DrawableManager::build_drawable(std::shared_ptr<fw::Texture> texture,
     float top, float left, float width, float height) {
   auto new_drawable = std::shared_ptr<BitmapDrawable>(new BitmapDrawable(texture));
   new_drawable->top_ = top;

@@ -19,7 +19,7 @@ light_camera::~light_camera() {
 //---------------------------------------------------------------------------------------------------------
 // this is a static list of shadow map textures, so we don't have create/destroy them
 // over and over (as shadow_sources get created/destroyed)
-static std::list<std::shared_ptr<framebuffer>> g_shadowbuffers;
+static std::list<std::shared_ptr<Framebuffer>> g_shadowbuffers;
 
 shadow_source::shadow_source() {
 }
@@ -32,13 +32,13 @@ shadow_source::~shadow_source() {
 
 void shadow_source::initialize(bool debug /*= false */) {
   if (g_shadowbuffers.empty()) {
-    _shadowbuffer = std::shared_ptr<framebuffer>(new framebuffer());
-    std::shared_ptr<fw::texture> depth_texture(new texture());
+    _shadowbuffer = std::shared_ptr<Framebuffer>(new Framebuffer());
+    std::shared_ptr<fw::Texture> depth_texture(new Texture());
     depth_texture->create(1024, 1024, true);
     _shadowbuffer->set_depth_buffer(depth_texture);
 
     if (debug) {
-      std::shared_ptr<fw::texture> colour_texture(new texture());
+      std::shared_ptr<fw::Texture> colour_texture(new Texture());
       colour_texture->create(1024, 1024, false);
       _shadowbuffer->set_colour_buffer(colour_texture);
     }

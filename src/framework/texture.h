@@ -5,18 +5,18 @@
 
 namespace fw {
 class Bitmap;
-struct texture_data;
-struct framebuffer_data;
+struct TextureData;
+struct FramebufferData;
 
-class texture {
+class Texture {
 private:
-  std::shared_ptr<texture_data> _data;
+  std::shared_ptr<TextureData> data_;
 
   void calculate_size() const;
 
 public:
-  texture();
-  ~texture();
+  Texture();
+  ~Texture();
 
   void create(boost::filesystem::path const &filename);
   void create(std::shared_ptr<fw::Bitmap> bmp);
@@ -30,7 +30,7 @@ public:
   int get_height() const;
 
   bool is_created() const {
-    return (!!_data);
+    return !!data_;
   }
 
   void bind() const;
@@ -40,25 +40,25 @@ public:
   boost::filesystem::path get_filename() const;
 
   /** Gets the texture_data for this texture (used by framebuffer) */
-  std::shared_ptr<texture_data> get_data() const {
-    return _data;
+  std::shared_ptr<TextureData> get_data() const {
+    return data_;
   }
 };
 
 /** A framebuffer holds either a colour texture, a depth texture or bother, and lets use render to those. */
-class framebuffer {
+class Framebuffer {
 private:
-  std::shared_ptr<framebuffer_data> _data;
+  std::shared_ptr<FramebufferData> data_;
 
 public:
-  framebuffer();
-  ~framebuffer();
+  Framebuffer();
+  ~Framebuffer();
 
-  void set_colour_buffer(std::shared_ptr<texture> colour_texture);
-  void set_depth_buffer(std::shared_ptr<texture> depth_texture);
+  void set_colour_buffer(std::shared_ptr<Texture> colour_texture);
+  void set_depth_buffer(std::shared_ptr<Texture> depth_texture);
 
-  std::shared_ptr<texture> get_colour_buffer() const;
-  std::shared_ptr<texture> get_depth_buffer() const;
+  std::shared_ptr<Texture> get_colour_buffer() const;
+  std::shared_ptr<Texture> get_depth_buffer() const;
 
   void bind();
   void clear();

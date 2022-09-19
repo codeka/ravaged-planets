@@ -3,8 +3,9 @@
 #include <memory>
 #include <stack>
 
-#include <framework/vector.h>
 #include <framework/colour.h>
+#include <framework/texture.h>
+#include <framework/vector.h>
 
 namespace fw {
 class camera;
@@ -13,7 +14,6 @@ class vertex_buffer;
 class index_buffer;
 class shader;
 class shader_parameters;
-class framebuffer;
 
 namespace sg {
 
@@ -208,5 +208,5 @@ public:
 };
 }
 
-void render(fw::sg::scenegraph &sg, std::shared_ptr<fw::framebuffer> render_target = nullptr, bool render_gui = true);
+void render(fw::sg::scenegraph &sg, std::shared_ptr<fw::Framebuffer> render_target = nullptr, bool render_gui = true);
 }

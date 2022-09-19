@@ -82,7 +82,7 @@ void texture_tool_window::hide() {
 }
 
 void texture_tool_window::on_texture_selected(int index) {
-  std::shared_ptr<fw::texture> layer(new fw::texture());
+  std::shared_ptr<fw::Texture> layer(new fw::Texture());
   layer->create(_tool->get_terrain()->get_layer(index));
 
   std::shared_ptr<Drawable> drawable =

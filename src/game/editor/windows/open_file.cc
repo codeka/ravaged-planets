@@ -179,7 +179,7 @@ void open_file_window::on_item_selected(int index) {
           bmp.resize(bmp_width, bmp_height);
         }
 
-        std::shared_ptr<fw::texture> texture = std::shared_ptr<fw::texture>(new fw::texture());
+        std::shared_ptr<fw::Texture> texture = std::shared_ptr<fw::Texture>(new fw::Texture());
         texture->create(bmp);
         std::shared_ptr<Drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
             ->build_drawable(texture, 0, 0, bmp_width, bmp_height);

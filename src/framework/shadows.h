@@ -1,10 +1,10 @@
 #pragma once
 
 #include <framework/camera.h>
+#include <framework/texture.h>
 
 namespace fw {
 class shader;
-class framebuffer;
 namespace sg {
 class scenegraph;
 }
@@ -26,7 +26,7 @@ public:
 class shadow_source: private boost::noncopyable {
 private:
   light_camera _camera;
-  std::shared_ptr<framebuffer> _shadowbuffer;
+  std::shared_ptr<Framebuffer> _shadowbuffer;
 
 public:
   shadow_source();
@@ -49,7 +49,7 @@ public:
   }
 
   // gets the actual framebuffer object
-  std::shared_ptr<framebuffer> get_shadowmap() {
+  std::shared_ptr<Framebuffer> get_shadowmap() {
     return _shadowbuffer;
   }
 };

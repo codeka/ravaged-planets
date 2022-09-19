@@ -88,9 +88,9 @@ void editor_terrain::initialize_splatt() {
 }
 
 void editor_terrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) {
-  std::shared_ptr<fw::texture> splatt = get_patch_splatt(patch_x, patch_z);
-  if (splatt == std::shared_ptr<fw::texture>()) {
-    splatt = std::shared_ptr<fw::texture>(new fw::texture());
+  std::shared_ptr<fw::Texture> splatt = get_patch_splatt(patch_x, patch_z);
+  if (splatt == std::shared_ptr<fw::Texture>()) {
+    splatt = std::shared_ptr<fw::Texture>(new fw::Texture());
     set_patch_splatt(patch_x, patch_z, splatt);
   }
 
@@ -125,7 +125,7 @@ void editor_terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   if (number < 0)
     return;
 
-  std::shared_ptr<fw::texture> texture(new fw::texture());
+  std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(bitmap);
 
   if (number == static_cast<int>(_layers.size())) {

@@ -6,9 +6,9 @@
 #include <framework/vector.h>
 #include <framework/colour.h>
 #include <framework/particle.h>
+#include <framework/texture.h>
 
 namespace fw {
-class texture;
 class xml_element;
 class emit_policy;
 class particle_emitter_config;
@@ -91,7 +91,7 @@ public:
 
   /** Represents the base properties of the texture for this particle effect. */
   struct billboard_texture {
-    std::shared_ptr<fw::texture> texture;
+    std::shared_ptr<fw::Texture> texture;
 
     /** The "billboard mode" defines which technique from the particle.fx file to use. */
     billboard_mode mode;

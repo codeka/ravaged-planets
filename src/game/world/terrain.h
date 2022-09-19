@@ -4,13 +4,13 @@
 #include <vector>
 #include <stdint.h>
 
+#include <framework/bitmap.h>
+#include <framework/texture.h>
 #include <framework/vector.h>
 
 namespace fw {
-class texture;
 class vertex_buffer;
 class index_buffer;
-class Bitmap;
 class shader;
 class shader_parameters;
 
@@ -27,7 +27,7 @@ namespace game {
 
 struct terrain_patch {
   std::shared_ptr<fw::vertex_buffer> vb;
-  std::shared_ptr<fw::texture> texture;
+  std::shared_ptr<fw::Texture> texture;
   std::shared_ptr<fw::shader_parameters> shader_params;
 };
 
@@ -44,7 +44,7 @@ protected:
   friend class ed::world_writer;
   friend class world_reader;
 
-  std::vector<std::shared_ptr<fw::texture>> _layers;
+  std::vector<std::shared_ptr<fw::Texture>> _layers;
   std::vector<bool> _collision_data;
 
   int _width;
@@ -68,9 +68,9 @@ protected:
   void bake_patch(int patch_x, int patch_z);
 
   // gets or sets the splatt texture for the given patch
-  std::shared_ptr<fw::texture> get_patch_splatt(int patch_x, int patch_z);
+  std::shared_ptr<fw::Texture> get_patch_splatt(int patch_x, int patch_z);
   virtual void set_patch_splatt(int patch_x, int patch_z,
-      std::shared_ptr<fw::texture> texture);
+      std::shared_ptr<fw::Texture> texture);
 
   // Makes sure we've created all of the patches we'll need
   void ensure_patches();

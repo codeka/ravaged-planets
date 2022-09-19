@@ -169,7 +169,7 @@ void graphics::run_on_render_thread(std::function<void()> fn) {
   _run_queue.push_back(fn);
 }
 
-void graphics::set_render_target(std::shared_ptr<framebuffer> fb) {
+void graphics::set_render_target(std::shared_ptr<Framebuffer> fb) {
   if (_framebuffer && !fb) {
     _framebuffer->unbind();
     _framebuffer = nullptr;

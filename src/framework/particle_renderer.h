@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <framework/graphics.h>
+#include <framework/texture.h>
 
 struct render_state;
 
@@ -15,7 +16,6 @@ class particle;
 class particle_manager;
 class vertex_buffer;
 class index_buffer;
-class texture;
 namespace sg {
 class scenegraph;
 }
@@ -35,7 +35,7 @@ private:
   graphics *_graphics;
   std::shared_ptr<shader> _shader;
   std::shared_ptr<shader_parameters> _shader_params;
-  std::shared_ptr<texture> _colour_texture;
+  std::shared_ptr<Texture> _colour_texture;
   particle_manager *_mgr;
   int _draw_frame;
 

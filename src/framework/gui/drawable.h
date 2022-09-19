@@ -4,12 +4,13 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+
+#include <framework/texture.h>
 #include <framework/vector.h>
 #include <framework/xml.h>
 
 namespace fw {
 class graphics;
-class texture;
 class shader;
 class shader_parameters;
 
@@ -43,10 +44,10 @@ protected:
   bool flipped_;
 
   friend class DrawableManager;
-  BitmapDrawable(std::shared_ptr<fw::texture> texture);
-  BitmapDrawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement* elem);
+  BitmapDrawable(std::shared_ptr<fw::Texture> texture);
+  BitmapDrawable(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement* elem);
 
-  std::shared_ptr<fw::texture> texture_;
+  std::shared_ptr<fw::Texture> texture_;
   std::shared_ptr<fw::shader> shader_;
   std::shared_ptr<fw::shader_parameters> shader_params_;
 
@@ -79,7 +80,7 @@ private:
 
 protected:
   friend class DrawableManager;
-  NinePatchDrawable(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement* elem);
+  NinePatchDrawable(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement* elem);
 
 public:
   virtual void render(float x, float y, float width, float height);
@@ -116,7 +117,7 @@ class DrawableManager {
 private:
   std::map<std::string, std::shared_ptr<Drawable>> drawables_;
 
-  void parse_drawable_element(std::shared_ptr<fw::texture> texture, fw::xml::XMLElement* elem);
+  void parse_drawable_element(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement* elem);
 public:
   DrawableManager();
   ~DrawableManager();
@@ -125,7 +126,7 @@ public:
   void parse(boost::filesystem::path const& file);
 
   std::shared_ptr<Drawable> get_drawable(std::string const& name);
-  std::shared_ptr<Drawable> build_drawable(std::shared_ptr<fw::texture> texture,
+  std::shared_ptr<Drawable> build_drawable(std::shared_ptr<fw::Texture> texture,
     float top, float left, float width, float height);
 };
 

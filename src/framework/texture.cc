@@ -16,170 +16,175 @@ namespace fs = boost::filesystem;
 namespace fw {
 
 //-------------------------------------------------------------------------
-struct texture_data: private boost::noncopyable {
+struct TextureData {
   GLuint texture_id;
   int width, height;
   fs::path filename; // might be empty if we weren't created from a file
 
-  texture_data() : texture_id(0), width(-1), height(-1) {
+  TextureData(const TextureData&) = delete;
+  TextureData& operator=(const TextureData&) = delete;
+
+  TextureData() : texture_id(0), width(-1), height(-1) {
     FW_CHECKED(glGenTextures(1, &texture_id));
   }
 
-  ~texture_data() {
+  ~TextureData() {
     FW_CHECKED(glDeleteTextures(1, &texture_id));
   }
 };
 
 //-------------------------------------------------------------------------
-// This is a cache of textures, so we don't have to load them over and over...
-class texture_cache {
+// This is a cache of textures, so we don't have to load them over and over.
+class TextureCache {
 private:
-  typedef std::map<boost::filesystem::path, std::shared_ptr<texture_data> > texture_map;
-  texture_map _textures;
+  typedef std::map<boost::filesystem::path, std::shared_ptr<TextureData>> TexturesMap;
+  TexturesMap textures_;
 
 public:
-  std::shared_ptr<texture_data> get_texture(fs::path const &filename);
-  void add_texture(fs::path const &filename, std::shared_ptr<texture_data> data);
+  std::shared_ptr<TextureData> get_texture(fs::path const &filename);
+  void add_texture(fs::path const &filename, std::shared_ptr<TextureData> data);
 
   void clear_cache();
 };
 
-std::shared_ptr<texture_data> texture_cache::get_texture(fs::path const &filename) {
-  texture_map::iterator it = _textures.find(filename);
-  if (it == _textures.end())
-    return std::shared_ptr<texture_data>();
+std::shared_ptr<TextureData> TextureCache::get_texture(fs::path const &filename) {
+  TexturesMap::iterator it = textures_.find(filename);
+  if (it == textures_.end())
+    return std::shared_ptr<TextureData>();
 
   return it->second;
 }
 
-void texture_cache::add_texture(fs::path const &filename, std::shared_ptr<texture_data> data) {
-  _textures[filename] = data;
+void TextureCache::add_texture(fs::path const &filename, std::shared_ptr<TextureData> data) {
+  textures_[filename] = data;
 }
 
-void texture_cache::clear_cache() {
-  _textures.clear();
+void TextureCache::clear_cache() {
+  textures_.clear();
 }
 
-static texture_cache g_cache;
+static TextureCache g_cache;
 
 //-------------------------------------------------------------------------
 
-texture::texture() {
+Texture::Texture() {
 }
 
-texture::~texture() {
+Texture::~Texture() {
 }
 
-void texture::create(fs::path const &filename) {
+void Texture::create(fs::path const &filename) {
   graphics *g = fw::framework::get_instance()->get_graphics();
 
-  _data = g_cache.get_texture(filename);
-  if (!_data) {
-    std::shared_ptr<texture_data> data(new texture_data());
-    _data = data;
+  data_ = g_cache.get_texture(filename);
+  if (!data_) {
+    data_ = std::make_shared<TextureData>();
 
     debug << boost::format("loading texture: %1%") % filename << std::endl;
-    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
 
-    _data->filename = filename;
+    data_->filename = filename;
     int channels;
-    unsigned char *pixels = stbi_load(filename.string().c_str(), &_data->width, &_data->height, &channels, 4);
+    unsigned char *pixels = stbi_load(filename.string().c_str(), &data_->width, &data_->height, &channels, 4);
     // TODO: pre-multiply alpha
     // TODO: DXT compress
     // TODO: mipmaps
-    FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _data->width, _data->height, 0, GL_RGBA,
+    FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data_->width, data_->height, 0, GL_RGBA,
         GL_UNSIGNED_BYTE, pixels));
     stbi_image_free(pixels);
 
-    g_cache.add_texture(filename, _data);
+    g_cache.add_texture(filename, data_);
   }
 }
 
-void texture::create(std::shared_ptr<fw::Bitmap> bmp) {
+void Texture::create(std::shared_ptr<fw::Bitmap> bmp) {
   create(*bmp);
 }
 
-void texture::create(fw::Bitmap const &bmp) {
+void Texture::create(fw::Bitmap const &bmp) {
   graphics *g = fw::framework::get_instance()->get_graphics();
 
-  if (!_data) {
-    _data = std::shared_ptr<texture_data>(new texture_data());
+  if (!data_) {
+    data_ = std::make_shared<TextureData>();
   }
-  _data->width = bmp.get_width();
-  _data->height = bmp.get_height();
+  data_->width = bmp.get_width();
+  data_->height = bmp.get_height();
 
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
-  FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _data->width, _data->height, 0, GL_RGBA,
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
+  FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data_->width, data_->height, 0, GL_RGBA,
       GL_UNSIGNED_BYTE, bmp.get_pixels().data()));
 }
 
-void texture::create(int width, int height, bool is_shadowmap) {
+void Texture::create(int width, int height, bool is_shadowmap) {
   graphics *g = fw::framework::get_instance()->get_graphics();
 
-  if (!_data) {
-    _data = std::shared_ptr<texture_data>(new texture_data());
+  if (!data_) {
+    data_ = std::make_shared<TextureData>();
   }
-  _data->width = width;
-  _data->height = height;
+  data_->width = width;
+  data_->height = height;
 
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
   if (is_shadowmap) {
     FW_CHECKED(glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, _data->width, _data->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr));
+        GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, data_->width, data_->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr));
   } else {
     FW_CHECKED(glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, _data->width, _data->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+        GL_TEXTURE_2D, 0, GL_RGBA, data_->width, data_->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
   }
 }
 
-void texture::bind() const {
-  if (!_data) {
+void Texture::bind() const {
+  if (!data_) {
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
     return;
   }
 
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, _data->texture_id));
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 }
 
-void texture::save_png(fs::path const &filename) {
+void Texture::save_png(fs::path const &filename) {
   Bitmap bmp(*this);
   bmp.save_bitmap(filename);
 }
 
-void texture::calculate_size() const {
-  if (_data->width > 0 && _data->height > 0)
+void Texture::calculate_size() const {
+  if (data_->width > 0 && data_->height > 0)
     return;
 }
 
-int texture::get_width() const {
+int Texture::get_width() const {
   calculate_size();
-  return _data->width;
+  return data_->width;
 }
 
-int texture::get_height() const {
+int Texture::get_height() const {
   calculate_size();
-  return _data->height;
+  return data_->height;
 }
 
-fs::path texture::get_filename() const {
-  return _data->filename;
+fs::path Texture::get_filename() const {
+  return data_->filename;
 }
 
 //-----------------------------------------------------------------------------
 
-struct framebuffer_data : private boost::noncopyable {
+struct FramebufferData {
   GLuint fbo_id;
-  std::shared_ptr<texture> colour_texture;
-  std::shared_ptr<texture> depth_texture;
+  std::shared_ptr<Texture> colour_texture;
+  std::shared_ptr<Texture> depth_texture;
   bool initialized;
 
-  framebuffer_data() : initialized(false) {
+  FramebufferData() : initialized(false) {
     FW_CHECKED(glGenFramebuffers(1, &fbo_id));
   }
 
-  ~framebuffer_data() {
+  FramebufferData(const FramebufferData&) = delete;
+  FramebufferData& operator=(const FramebufferData&) = delete;
+
+  ~FramebufferData() {
     FW_CHECKED(glDeleteFramebuffers(1, &fbo_id));
   }
 
@@ -219,63 +224,63 @@ struct framebuffer_data : private boost::noncopyable {
 
 
 //-----------------------------------------------------------------------------
-framebuffer::framebuffer() : _data(new framebuffer_data()) {
+Framebuffer::Framebuffer() : data_(new FramebufferData()) {
 }
 
-framebuffer::~framebuffer() {
+Framebuffer::~Framebuffer() {
 }
 
-void framebuffer::set_colour_buffer(std::shared_ptr<texture> colour_texture) {
-  _data->colour_texture = colour_texture;
+void Framebuffer::set_colour_buffer(std::shared_ptr<Texture> colour_texture) {
+  data_->colour_texture = colour_texture;
 }
 
-void framebuffer::set_depth_buffer(std::shared_ptr<texture> depth_texture) {
-  _data->depth_texture = depth_texture;
+void Framebuffer::set_depth_buffer(std::shared_ptr<Texture> depth_texture) {
+  data_->depth_texture = depth_texture;
 }
 
-std::shared_ptr<texture> framebuffer::get_colour_buffer() const {
-  return _data->colour_texture;
+std::shared_ptr<Texture> Framebuffer::get_colour_buffer() const {
+  return data_->colour_texture;
 }
 
-std::shared_ptr<texture> framebuffer::get_depth_buffer() const {
-  return _data->depth_texture;
+std::shared_ptr<Texture> Framebuffer::get_depth_buffer() const {
+  return data_->depth_texture;
 }
 
-void framebuffer::bind() {
-  _data->ensure_initialized();
-  FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, _data->fbo_id));
+void Framebuffer::bind() {
+  data_->ensure_initialized();
+  FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, data_->fbo_id));
 }
 
-void framebuffer::clear() {
+void Framebuffer::clear() {
   int bits = 0;
-  if (_data->colour_texture) {
+  if (data_->colour_texture) {
     bits |= GL_COLOR_BUFFER_BIT;
   }
-  if (_data->depth_texture) {
+  if (data_->depth_texture) {
     bits |= GL_DEPTH_BUFFER_BIT;
   }
   FW_CHECKED(glClear(bits));
 }
 
-void framebuffer::unbind() {
+void Framebuffer::unbind() {
   FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
-int framebuffer::get_width() const {
-  if (_data->colour_texture) {
-    return _data->colour_texture->get_width();
-  } else if (_data->depth_texture) {
-    return _data->depth_texture->get_width();
+int Framebuffer::get_width() const {
+  if (data_->colour_texture) {
+    return data_->colour_texture->get_width();
+  } else if (data_->depth_texture) {
+    return data_->depth_texture->get_width();
   } else {
     return 0;
   }
 }
 
-int framebuffer::get_height() const {
-  if (_data->colour_texture) {
-    return _data->colour_texture->get_height();
-  } else if (_data->depth_texture) {
-    return _data->depth_texture->get_height();
+int Framebuffer::get_height() const {
+  if (data_->colour_texture) {
+    return data_->colour_texture->get_height();
+  } else if (data_->depth_texture) {
+    return data_->depth_texture->get_height();
   } else {
     return 0;
   }

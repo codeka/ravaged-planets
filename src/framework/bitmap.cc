@@ -61,7 +61,7 @@ Bitmap::Bitmap(uint8_t const *data, size_t data_size) :
   load_bitmap(data, data_size);
 }
 
-Bitmap::Bitmap(texture const &tex) :
+Bitmap::Bitmap(Texture const &tex) :
     data_(nullptr) {
   load_bitmap(tex);
 }
@@ -150,7 +150,7 @@ void Bitmap::load_bitmap(uint8_t const *data, size_t data_size) {
   stbi_image_free(pixels);
 }
 
-void Bitmap::load_bitmap(texture const &tex) {
+void Bitmap::load_bitmap(Texture const &tex) {
   FW_ENSURE_RENDER_THREAD();
 
   prepare_write(tex.get_width(), tex.get_height());

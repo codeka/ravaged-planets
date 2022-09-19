@@ -211,7 +211,7 @@ scenegraph::~scenegraph() {
 static const bool g_shadow_debug = false;
 
 // renders the scene!
-void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::framebuffer> render_target /*= nullptr*/,
+void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_target /*= nullptr*/,
     bool render_gui /*= true*/) {
   ensure_primitive_type_map();
 

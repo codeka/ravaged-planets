@@ -106,7 +106,7 @@ font_face::font_face(font_manager *manager, fs::path const &filename) :
 
   // TODO: allow us to resize the bitmap?
   _bitmap = std::make_shared<fw::Bitmap>(256, 256);
-  _texture = std::shared_ptr<fw::texture>(new fw::texture());
+  _texture = std::shared_ptr<fw::Texture>(new fw::Texture());
   _texture_dirty = true;
 }
 

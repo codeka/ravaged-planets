@@ -49,9 +49,9 @@ private:
   float _rotation;
   std::string _template_name;
   std::shared_ptr<fw::model> _model;
-  std::shared_ptr<fw::framebuffer> _framebuffer;
-  std::shared_ptr<fw::texture> _colour_texture;
-  std::shared_ptr<fw::texture> _depth_texture;
+  std::shared_ptr<fw::Framebuffer> _framebuffer;
+  std::shared_ptr<fw::Texture> _colour_texture;
+  std::shared_ptr<fw::Texture> _depth_texture;
   std::shared_ptr<Drawable> _drawable;
 
   void render();
@@ -71,13 +71,13 @@ entity_icon::entity_icon() : _rotation(0.0f) {
 }
 
 void entity_icon::initialize() {
-  _colour_texture = std::shared_ptr<fw::texture>(new fw::texture());
+  _colour_texture = std::shared_ptr<fw::Texture>(new fw::Texture());
   _colour_texture->create(64, 64, false);
 
-  _depth_texture = std::shared_ptr<fw::texture>(new fw::texture());
+  _depth_texture = std::shared_ptr<fw::Texture>(new fw::Texture());
   _depth_texture->create(64, 64, true);
 
-  _framebuffer = std::shared_ptr<fw::framebuffer>(new fw::framebuffer());
+  _framebuffer = std::shared_ptr<fw::Framebuffer>(new fw::Framebuffer());
   _framebuffer->set_colour_buffer(_colour_texture);
   _framebuffer->set_depth_buffer(_depth_texture);
 

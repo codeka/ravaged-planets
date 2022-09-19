@@ -60,7 +60,7 @@ void terrain::create(int width, int length, bool create_height_data /*= true */)
   }
 }
 
-std::shared_ptr<fw::texture> terrain::get_patch_splatt(int patch_x, int patch_z) {
+std::shared_ptr<fw::Texture> terrain::get_patch_splatt(int patch_x, int patch_z) {
   ensure_patches();
 
   unsigned int index = get_patch_index(patch_x, patch_z);
@@ -71,7 +71,7 @@ void terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   if (number < 0)
     return;
 
-  std::shared_ptr<fw::texture> texture(new fw::texture());
+  std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(bitmap);
 
   if (number == static_cast<int>(_layers.size())) {
@@ -86,7 +86,7 @@ void terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   _layers[number] = texture;
 }
 
-void terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::texture> texture) {
+void terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::Texture> texture) {
   ensure_patches();
 
   unsigned int index = get_patch_index(patch_x, patch_z);
@@ -94,7 +94,7 @@ void terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::tex
 }
 
 void terrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) {
-  std::shared_ptr<fw::texture> splatt(new fw::texture());
+  std::shared_ptr<fw::Texture> splatt(new fw::Texture());
   splatt->create(bmp);
 
   set_patch_splatt(patch_x, patch_z, splatt);

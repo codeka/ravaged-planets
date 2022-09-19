@@ -4,6 +4,7 @@
 #include <boost/signals2.hpp>
 
 #include <framework/gui/window.h>
+#include <framework/texture.h>
 #include <framework/vector.h>
 
 namespace fw {
@@ -11,7 +12,6 @@ class shader;
 class shader_parameters;
 class vertex_buffer;
 class index_buffer;
-class texture;
 namespace gui {
 class Window;
 }
@@ -24,7 +24,7 @@ class minimap_drawable;
 class minimap_window {
 private:
   fw::gui::Window *_wnd;
-  std::shared_ptr<fw::texture> _texture;
+  std::shared_ptr<fw::Texture> _texture;
   std::shared_ptr<minimap_drawable> _drawable;
   float _last_entity_display_update;
 

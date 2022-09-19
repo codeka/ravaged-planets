@@ -42,13 +42,13 @@ protected:
   fw::matrix get_uv_transform();
 
 public:
-  minimap_drawable(std::shared_ptr<fw::texture> texture);
+  minimap_drawable(std::shared_ptr<fw::Texture> texture);
   virtual ~minimap_drawable();
 
   void update(fw::matrix transform);
 };
 
-minimap_drawable::minimap_drawable(std::shared_ptr<fw::texture> texture)
+minimap_drawable::minimap_drawable(std::shared_ptr<fw::Texture> texture)
     : fw::gui::BitmapDrawable(texture) {
   top_ = left_ = 0;
   width_ = texture->get_width() * 3;
@@ -89,7 +89,7 @@ enum ids {
 };
 
 minimap_window::minimap_window() :
-    _last_entity_display_update(0.0f), _texture(new fw::texture()), _wnd(nullptr) {
+    _last_entity_display_update(0.0f), _texture(new fw::Texture()), _wnd(nullptr) {
 }
 
 minimap_window::~minimap_window() {

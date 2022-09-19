@@ -1,6 +1,7 @@
 #pragma once
 
 #include <framework/graphics.h>
+#include <framework/texture.h>
 #include <framework/vector.h>
 #include <framework/colour.h>
 
@@ -9,7 +10,6 @@ class vertex_buffer;
 class index_buffer;
 class shader;
 class model_node;
-class texture;
 namespace sg {
 class scenegraph;
 class node;
@@ -71,7 +71,7 @@ public:
 
   std::vector<std::shared_ptr<fw::model_mesh>> meshes;
   std::shared_ptr<fw::model_node> root_node;
-  std::shared_ptr<fw::texture> texture;
+  std::shared_ptr<fw::Texture> texture;
 
   /** Sets a value which indicates whether we want to render in wireframe mode or not. */
   inline void set_wireframe(bool value) {

@@ -7,6 +7,7 @@
 #include <boost/filesystem.hpp>
 
 #include <framework/colour.h>
+#include <framework/texture.h>
 #include <framework/vector.h>
 
 /* Cut'n'pasted from the freetype.h header so we don't have to include that whole thing. */
@@ -18,7 +19,6 @@ class Bitmap;
 class font_manager;
 class glyph;
 class string_cache_entry;
-class texture;
 
 class font_face {
 public:
@@ -43,7 +43,7 @@ private:
   // Glyphs are rendered into a bitmap and then copied to a texture as required, before we render
   // when draw is called.
   std::shared_ptr<fw::Bitmap> _bitmap;
-  std::shared_ptr<fw::texture> _texture;
+  std::shared_ptr<fw::Texture> _texture;
   bool _texture_dirty;
 
   /** Mapping of UTF-32 character to glyph object describing the glyph. */
