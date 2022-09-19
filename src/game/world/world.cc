@@ -117,7 +117,7 @@ void world::on_key_screenshot(std::string, bool is_down) {
   }
 }
 
-void world::screenshot_callback(std::shared_ptr<fw::bitmap> screenshot) {
+void world::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
   // screenshots go under the data directory\screens folder
   fs::path base_path = fw::resolve("screens", true);
   if (!fs::exists(base_path)) {

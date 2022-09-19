@@ -10,7 +10,7 @@ namespace fw {
 class texture;
 class vertex_buffer;
 class index_buffer;
-class bitmap;
+class Bitmap;
 class shader;
 class shader_parameters;
 
@@ -84,7 +84,7 @@ public:
   virtual void update();
   virtual void render(fw::sg::scenegraph &scenegraph);
 
-  virtual void set_layer(int number, std::shared_ptr<fw::bitmap> bitmap);
+  virtual void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap);
 
   // gets the height of the terrain vertex at the given integer coordinates.
   float get_vertex_height(int x, int z);
@@ -99,7 +99,7 @@ public:
     return _length;
   }
 
-  virtual void set_splatt(int patch_x, int patch_z, fw::bitmap const &bmp);
+  virtual void set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp);
 
   // gets the collision data for the map
   std::vector<bool> const &get_collision_data() const {

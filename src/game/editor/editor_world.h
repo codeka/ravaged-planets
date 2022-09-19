@@ -35,7 +35,7 @@ public:
   editor_world(std::shared_ptr<game::world_reader> reader);
   virtual ~editor_world();
 
-  void set_screenshot(std::shared_ptr<fw::bitmap> bmp) {
+  void set_screenshot(std::shared_ptr<fw::Bitmap> bmp) {
     _screenshot = bmp;
   }
 };

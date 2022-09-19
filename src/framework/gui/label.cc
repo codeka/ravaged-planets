@@ -125,7 +125,7 @@ void Label::set_background(std::shared_ptr<Drawable> background, bool centred /*
   background_centred_ = centred;
 }
 
-void Label::set_background(std::shared_ptr<bitmap> bmp, bool centred /*= false*/) {
+void Label::set_background(std::shared_ptr<Bitmap> bmp, bool centred /*= false*/) {
   if (!bmp) {
     background_ = nullptr;
     background_centred_ = centred;

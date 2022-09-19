@@ -157,7 +157,7 @@ void open_file_window::on_item_selected(int index) {
     if (ext == ".jpg" || ext == ".png") {
       // we only support JPG and PNG image formats
       try {
-        fw::bitmap bmp(item_path);
+        fw::Bitmap bmp(item_path);
         is_image = true; // if we loaded it, then we know it's an image
 
         Label *preview = _wnd->find<Label>(IMAGE_PREVIEW_ID);

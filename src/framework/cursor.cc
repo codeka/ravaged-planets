@@ -23,14 +23,14 @@ void cursor::initialize() {
 }
 
 void cursor::destroy() {
-  BOOST_FOREACH(auto it, _loaded_cursors) {
+  for(auto it : _loaded_cursors) {
     SDL_FreeCursor(it.second);
   }
   _loaded_cursors.clear();
 }
 
 SDL_Cursor *cursor::load_cursor(std::string const &name) {
-  fw::bitmap bmp(fw::resolve("cursors/" + name + ".png"));
+  fw::Bitmap bmp(fw::resolve("cursors/" + name + ".png"));
 
   int hot_x = bmp.get_width() / 2;
   int hot_y = bmp.get_height() / 2;

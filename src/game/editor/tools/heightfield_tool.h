@@ -38,8 +38,8 @@ public:
     return _radius;
   }
 
-  // imports the height data from the given fw::bitmap
-  void import_heightfield(fw::bitmap &bm);
+  // imports the height data from the given fw::Bitmap
+  void import_heightfield(fw::Bitmap &bm);
 
   // sets the brush to the current value (this is done by the tool window)
   void set_brush(heightfield_brush *brush);

@@ -14,7 +14,7 @@ typedef struct FT_LibraryRec_ *FT_Library;
 typedef struct FT_FaceRec_*  FT_Face;
 
 namespace fw {
-class bitmap;
+class Bitmap;
 class font_manager;
 class glyph;
 class string_cache_entry;
@@ -42,7 +42,7 @@ private:
 
   // Glyphs are rendered into a bitmap and then copied to a texture as required, before we render
   // when draw is called.
-  std::shared_ptr<fw::bitmap> _bitmap;
+  std::shared_ptr<fw::Bitmap> _bitmap;
   std::shared_ptr<fw::texture> _texture;
   bool _texture_dirty;
 
@@ -67,7 +67,7 @@ public:
   void update(float dt);
 
   // Only useful for debugging, gets the atlas bitmap we're using to hold rendered glyphs
-  std::shared_ptr<fw::bitmap> get_bitmap() const {
+  std::shared_ptr<fw::Bitmap> get_bitmap() const {
     return _bitmap;
   }
 

@@ -57,7 +57,7 @@ void world_writer::write_terrain(game::world_file &wf) {
 
   for (int patch_z = 0; patch_z < trn->get_patches_length(); patch_z++) {
     for (int patch_x = 0; patch_x < trn->get_patches_width(); patch_x++) {
-      fw::bitmap &splatt = trn->get_splatt(patch_x, patch_z);
+      fw::Bitmap &splatt = trn->get_splatt(patch_x, patch_z);
 
       std::string name = (boost::format("splatt-%1%-%2%.png") % patch_x % patch_z).str();
       wfe = wf.get_entry(name, true /* for_write */);
@@ -134,7 +134,7 @@ void world_writer::write_minimap_background(game::world_file &wf) {
     }
   }
 
-  fw::bitmap img(width, height);
+  fw::Bitmap img(width, height);
   img.set_pixels(pixels);
 
   game::world_file_entry wfe = wf.get_entry("minimap.png", true /* for_write */);
@@ -147,7 +147,7 @@ fw::colour world_writer::get_terrain_colour(int x, int z) {
   int patch_z = static_cast<int>(static_cast<float>(z) / game::terrain::PATCH_SIZE);
 
   editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
-  fw::bitmap &bmp = trn->get_splatt(patch_x, patch_z);
+  fw::Bitmap &bmp = trn->get_splatt(patch_x, patch_z);
 
   // centre_u and centre_v are the texture coordinates (in the range [0..1])
   // of what the cursor is currently pointing at
@@ -175,7 +175,7 @@ void world_writer::calculate_base_minimap_colours() {
   editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
   for (int i = 0; i < 4; i++) {
      // Use the average colour of this layer
-    std::shared_ptr<fw::bitmap> layer_bmp = trn->get_layer(i);
+    std::shared_ptr<fw::Bitmap> layer_bmp = trn->get_layer(i);
     _base_minimap_colours[i] = layer_bmp->get_dominant_colour();
     fw::debug << "base minimap colour [" << i << "] = " << _base_minimap_colours[i] << std::endl;
   }

@@ -143,7 +143,7 @@ void texture_tool::update() {
     int patch_z = static_cast<int>(cursor_loc[2] / game::terrain::PATCH_SIZE);
 
     // get the splatt texture at the current cursor location
-    fw::bitmap &splatt = _terrain->get_splatt(patch_x, patch_z);
+    fw::Bitmap &splatt = _terrain->get_splatt(patch_x, patch_z);
 
     // scale_x and scale_y represent the number of pixels in the splatt texture
     // per game unit of the terrain

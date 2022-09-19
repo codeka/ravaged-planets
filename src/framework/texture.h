@@ -4,7 +4,7 @@
 #include <boost/filesystem.hpp>
 
 namespace fw {
-class bitmap;
+class Bitmap;
 struct texture_data;
 struct framebuffer_data;
 
@@ -19,8 +19,8 @@ public:
   ~texture();
 
   void create(boost::filesystem::path const &filename);
-  void create(std::shared_ptr<fw::bitmap> bmp);
-  void create(fw::bitmap const &bmp);
+  void create(std::shared_ptr<fw::Bitmap> bmp);
+  void create(fw::Bitmap const &bmp);
   void create(int width, int height, bool is_shadowmap = false);
 
   // save the contents of this texture to a .png file with the given name

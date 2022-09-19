@@ -6,7 +6,7 @@
 #include <game/world/terrain.h>
 
 namespace fw {
-class bitmap;
+class Bitmap;
 class texture;
 }
 
@@ -19,10 +19,10 @@ private:
   std::vector<std::tuple<int, int>> _patches_to_bake;
 
   // we keep a separate vector of the splatt bitmaps for easy editing
-  std::vector<fw::bitmap> _splatt_bitmaps;
+  std::vector<fw::Bitmap> _splatt_bitmaps;
 
   // We also keep a separate vector of the layer bitmaps
-  std::vector<std::shared_ptr<fw::bitmap>> _layer_bitmaps;
+  std::vector<std::shared_ptr<fw::Bitmap>> _layer_bitmaps;
 
 public:
   editor_terrain();
@@ -33,15 +33,15 @@ public:
 
   // gets and sets the texture of the given layer.
   int get_num_layers() const;
-  std::shared_ptr<fw::bitmap> get_layer(int number);
-  void set_layer(int number, std::shared_ptr<fw::bitmap> bitmap);
+  std::shared_ptr<fw::Bitmap> get_layer(int number);
+  void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap);
 
   // creates all of the splatt textures and sets them up initially
   void initialize_splatt();
 
   // sets the splat texture for the given patch to the given bitmap
-  virtual void set_splatt(int patch_x, int patch_z, fw::bitmap const &bmp);
-  fw::bitmap &get_splatt(int patch_x, int patch_z);
+  virtual void set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp);
+  fw::Bitmap &get_splatt(int patch_x, int patch_z);
 
   float *get_height_data() const {
     return _heights;

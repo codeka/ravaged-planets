@@ -7,7 +7,7 @@
 
 namespace fw {
 class graphics;
-class bitmap;
+class Bitmap;
 class texture;
 
 namespace sg {
@@ -36,7 +36,7 @@ private:
   pathing_thread *_pathing;
   std::vector<int> _keybind_tokens;
   cursor_handler *_cursor;
-  std::shared_ptr<fw::bitmap> _minimap_background;
+  std::shared_ptr<fw::Bitmap> _minimap_background;
   std::map<int, fw::vector> _player_starts;
 
   std::string _description;
@@ -50,10 +50,10 @@ private:
   void on_key_screenshot(std::string key, bool is_down);
 
   // This is called after a screenshot is taken, we'll save it to disk.
-  void screenshot_callback(std::shared_ptr<fw::bitmap> screenshot);
+  void screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot);
 
 protected:
-  std::shared_ptr<fw::bitmap> _screenshot;
+  std::shared_ptr<fw::Bitmap> _screenshot;
 
   virtual void initialize_pathing();
   virtual void initialize_entities();
@@ -78,11 +78,11 @@ public:
     _instance = wrld;
   }
 
-  std::shared_ptr<fw::bitmap> const &get_minimap_background() const {
+  std::shared_ptr<fw::Bitmap> const &get_minimap_background() const {
     return _minimap_background;
   }
 
-  std::shared_ptr<fw::bitmap> get_screenshot() const {
+  std::shared_ptr<fw::Bitmap> get_screenshot() const {
     return _screenshot;
   }
 

@@ -249,7 +249,7 @@ bool heightfield_tool_window::on_import_clicked(fw::gui::Widget *w) {
 
 void heightfield_tool_window::on_import_file_selected(ed::open_file_window *ofw) {
   try {
-    fw::bitmap bmp(ofw->get_selected_file());
+    fw::Bitmap bmp(ofw->get_selected_file());
     _tool->import_heightfield(bmp);
   } catch (fw::exception &e) {
     // error, probably not a bitmap?
@@ -335,7 +335,7 @@ void heightfield_tool::update() {
   }
 }
 
-void heightfield_tool::import_heightfield(fw::bitmap &bm) {
+void heightfield_tool::import_heightfield(fw::Bitmap &bm) {
   int terrain_width = _terrain->get_width();
   int terrain_length = _terrain->get_length();
 

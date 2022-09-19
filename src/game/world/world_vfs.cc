@@ -39,7 +39,7 @@ void world_summary::ensure_extra_loaded() const {
 
   auto screenshot_path = full_path / "screenshot.png";
   if (fs::exists(screenshot_path)) {
-    _screenshot = std::shared_ptr<fw::bitmap>(new fw::bitmap(full_path / "screenshot.png"));
+    _screenshot = std::make_shared<fw::Bitmap>(full_path / "screenshot.png");
   }
 
   parse_mapdesc_file(full_path / (_name + ".mapdesc"));

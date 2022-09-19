@@ -95,11 +95,11 @@ void texture::create(fs::path const &filename) {
   }
 }
 
-void texture::create(std::shared_ptr<fw::bitmap> bmp) {
+void texture::create(std::shared_ptr<fw::Bitmap> bmp) {
   create(*bmp);
 }
 
-void texture::create(fw::bitmap const &bmp) {
+void texture::create(fw::Bitmap const &bmp) {
   graphics *g = fw::framework::get_instance()->get_graphics();
 
   if (!_data) {
@@ -144,7 +144,7 @@ void texture::bind() const {
 }
 
 void texture::save_png(fs::path const &filename) {
-  bitmap bmp(*this);
+  Bitmap bmp(*this);
   bmp.save_bitmap(filename);
 }
 

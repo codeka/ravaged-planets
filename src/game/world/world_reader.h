@@ -5,7 +5,7 @@
 #include <framework/vector.h>
 
 namespace fw {
-class bitmap;
+class Bitmap;
 class xml_element;
 }
 
@@ -18,8 +18,8 @@ class world_file_entry;
 // this class reads the map from the filesystem and lets the world populate itself.
 class world_reader {
 protected:
-  std::shared_ptr<fw::bitmap> _minimap_background;
-  std::shared_ptr<fw::bitmap> _screenshot;
+  std::shared_ptr<fw::Bitmap> _minimap_background;
+  std::shared_ptr<fw::Bitmap> _screenshot;
   terrain *_terrain;
   virtual terrain *create_terrain(int width, int length);
 
@@ -46,10 +46,10 @@ public:
   std::map<int, fw::vector> const &get_player_starts() const {
     return _player_starts;
   }
-  std::shared_ptr<fw::bitmap> get_minimap_background() const {
+  std::shared_ptr<fw::Bitmap> get_minimap_background() const {
     return _minimap_background;
   }
-  std::shared_ptr<fw::bitmap> get_screenshot() const {
+  std::shared_ptr<fw::Bitmap> get_screenshot() const {
     return _screenshot;
   }
   std::string get_name() const {

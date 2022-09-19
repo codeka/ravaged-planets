@@ -219,7 +219,7 @@ void minimap_window::update_entity_display() {
     }
   }
 
-  fw::bitmap bm(width, height, pixels.data());
+  fw::Bitmap bm(width, height, pixels.data());
   fw::framework::get_instance()->get_graphics()->run_on_render_thread([this, bm]() {
     _texture->create(bm);
   });

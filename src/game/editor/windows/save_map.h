@@ -19,7 +19,7 @@ private:
   bool save_clicked(fw::gui::Widget *w);
   bool cancel_clicked(fw::gui::Widget *w);
   bool screenshot_clicked(fw::gui::Widget *w);
-  void screenshot_complete(std::shared_ptr<fw::bitmap> bitmap);
+  void screenshot_complete(std::shared_ptr<fw::Bitmap> bitmap);
 
   void update_screenshot();
 

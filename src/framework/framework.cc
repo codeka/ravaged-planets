@@ -38,8 +38,8 @@ struct screenshot_request {
   int width;
   int height;
   bool include_gui;
-  std::function<void(std::shared_ptr<fw::bitmap> bmp)> callback;
-  std::shared_ptr<fw::bitmap> bitmap;
+  std::function<void(std::shared_ptr<fw::Bitmap> bmp)> callback;
+  std::shared_ptr<fw::Bitmap> bitmap;
 };
 
 static framework *only_instance = 0;
@@ -113,7 +113,7 @@ bool framework::initialize(char const *title) {
   }
 
   // initialise audio
-  _audio_manager = new audio_manager();
+  _audio_manager = new AudioManager();
   _audio_manager->initialize();
 
   _input = new input();
@@ -343,7 +343,7 @@ bool framework::wait_events() {
   return true;
 }
 
-void framework::take_screenshot(int width, int height, std::function<void(std::shared_ptr<fw::bitmap> bmp)> callback_fn,
+void framework::take_screenshot(int width, int height, std::function<void(std::shared_ptr<fw::Bitmap> bmp)> callback_fn,
     bool include_gui /*= true */) {
   if (width == 0 || height == 0) {
     width = _graphics->get_width();
@@ -361,7 +361,7 @@ void framework::take_screenshot(int width, int height, std::function<void(std::s
 
 /* This is called on another thread to call the callbacks that were registered against the "screenshot" request. */
 void call_callacks_thread_proc(std::shared_ptr<std::list<screenshot_request *>> requests) {
-  BOOST_FOREACH(screenshot_request *request, *requests) {
+  for(screenshot_request *request : *requests) {
     request->callback(request->bitmap);
     delete request;
   }
@@ -377,7 +377,7 @@ void framework::take_screenshots(sg::scenegraph &scenegraph) {
   }
 
   std::shared_ptr<std::list<screenshot_request *>> requests(new std::list<screenshot_request *>());
-  BOOST_FOREACH(screenshot_request *request, _screenshots) {
+  for(screenshot_request *request : _screenshots) {
     // render the scene to a separate render target first
     std::shared_ptr<fw::texture> colour_target(new fw::texture());
     colour_target->create(request->width, request->height, false);
@@ -391,7 +391,7 @@ void framework::take_screenshots(sg::scenegraph &scenegraph) {
 
     fw::render(scenegraph, framebuffer, request->include_gui);
 
-    request->bitmap = std::shared_ptr<fw::bitmap>(new fw::bitmap(*colour_target.get()));
+    request->bitmap = std::make_shared<fw::Bitmap>(*colour_target.get());
     requests->push_back(request);
   }
 

@@ -77,7 +77,7 @@ void save_map_window::update_screenshot() {
   if (world->get_screenshot() == nullptr || world->get_screenshot()->get_width() == 0)
     return;
 
-  std::shared_ptr<fw::bitmap> bmp = world->get_screenshot();
+  std::shared_ptr<fw::Bitmap> bmp = world->get_screenshot();
   _wnd->find<Label>(SCREENSHOT_ID)->set_background(bmp);
 }
 
@@ -88,7 +88,7 @@ bool save_map_window::screenshot_clicked(Widget *w) {
   return true;
 }
 
-void save_map_window::screenshot_complete(std::shared_ptr<fw::bitmap> bitmap) {
+void save_map_window::screenshot_complete(std::shared_ptr<fw::Bitmap> bitmap) {
   bitmap->resize(640, 480);
 
   auto world = dynamic_cast<editor_world *>(game::world::get_instance());

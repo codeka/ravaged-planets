@@ -105,13 +105,13 @@ font_face::font_face(font_manager *manager, fs::path const &filename) :
   FT_CHECK(FT_Set_Pixel_Sizes(_face, 0, _size));
 
   // TODO: allow us to resize the bitmap?
-  _bitmap = std::shared_ptr<fw::bitmap>(new fw::bitmap(256, 256));
+  _bitmap = std::make_shared<fw::Bitmap>(256, 256);
   _texture = std::shared_ptr<fw::texture>(new fw::texture());
   _texture_dirty = true;
 }
 
 font_face::~font_face() {
-  BOOST_FOREACH(auto entry, _glyphs) {
+  for(auto entry : _glyphs) {
     delete entry.second;
   }
 }

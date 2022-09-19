@@ -12,10 +12,10 @@ class debug_view;
 class model_manager;
 class timer;
 class camera;
-class bitmap;
+class Bitmap;
 class particle_manager;
 struct screenshot_request;
-class audio_manager;
+class AudioManager;
 class lang;
 class cursor;
 class input;
@@ -92,7 +92,7 @@ private:
   gui::Gui *_gui;
   particle_manager *_particle_mgr;
   bool _paused;
-  audio_manager *_audio_manager;
+  AudioManager *_audio_manager;
   model_manager *_model_manager;
   cursor *_cursor;
   lang *_lang;
@@ -132,10 +132,10 @@ public:
     return _paused;
   }
 
-  // takes a screenshot at the end of the next frame, saves it to an fw::bitmap and
+  // takes a screenshot at the end of the next frame, saves it to an fw::Bitmap and
   // calls the given callback with the bitmap, specify 0 for width/height to take a
   // screenshot at the current resolution
-  void take_screenshot(int with, int height, std::function<void(std::shared_ptr<fw::bitmap> bmp)> callback_fn,
+  void take_screenshot(int with, int height, std::function<void(std::shared_ptr<fw::Bitmap> bmp)> callback_fn,
       bool include_gui = true);
 
   // gets or sets the camera we'll use for camera control
@@ -184,7 +184,7 @@ public:
   cursor *get_cursor() const {
     return _cursor;
   }
-  audio_manager *get_audio_manager() const {
+  AudioManager *get_audio_manager() const {
     return _audio_manager;
   }
   lang *get_lang() const {

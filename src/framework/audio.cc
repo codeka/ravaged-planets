@@ -15,13 +15,13 @@ namespace fs = boost::filesystem;
 
 #if defined(_DEBUG)
 #define CHECK_ERROR(fn) \
-  audio_manager::check_error(fn, #fn)
+  AudioManager::check_error(fn, #fn)
 #else
 #define CHECK_ERROR(fn) \
   fn
 #endif
 
-void audio_manager::initialize() {
+void AudioManager::initialize() {
   if (Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG) {
     BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error initializing SDL_mixer"));
   }
@@ -63,15 +63,15 @@ void audio_manager::initialize() {
   fw::debug << "." << std::endl;
 }
 
-void audio_manager::destroy() {
+void AudioManager::destroy() {
   Mix_CloseAudio();
   Mix_Quit();
 }
 
-void audio_manager::update() {
+void AudioManager::update() {
 }
 
-void audio_manager::check_error(int error_code, char const *fn_name) {
+void AudioManager::check_error(int error_code, char const *fn_name) {
   if (error_code != 0) {
     char const *error_msg = Mix_GetError();
     fw::debug << "  error in audio_manager: " << error_code << " - " << error_msg << std::endl;
@@ -79,28 +79,28 @@ void audio_manager::check_error(int error_code, char const *fn_name) {
   }
 }
 
-std::shared_ptr<audio_buffer> audio_manager::get_audio_buffer(std::string const &name) {
-  auto it = _loaded_buffers.find(name);
-  if (it != _loaded_buffers.end()) {
+std::shared_ptr<AudioBuffer> AudioManager::get_audio_buffer(std::string const &name) {
+  auto it = loaded_buffers_.find(name);
+  if (it != loaded_buffers_.end()) {
     return it->second;
   }
 
-  std::shared_ptr<audio_buffer> buffer(new audio_buffer(this, name));
-  _loaded_buffers[name] = buffer;
+  auto buffer = std::make_shared<AudioBuffer>(this, name);
+  loaded_buffers_[name] = buffer;
   return buffer;
 }
 
 //-----------------------------------------------------------------------------
 
-audio_buffer::audio_buffer(audio_manager *mgr, std::string const &name) {
+AudioBuffer::AudioBuffer(AudioManager *mgr, std::string const &name) {
   fs::path path = fw::resolve(name);
   fw::debug << boost::format("loading sound: %1%") % path << std::endl;
-  _chunk = Mix_LoadWAV(path.string().c_str());
+  chunk_ = Mix_LoadWAV(path.string().c_str());
 }
 
-audio_buffer::~audio_buffer() {
-  Mix_FreeChunk(_chunk);
-  _chunk = nullptr;
+AudioBuffer::~AudioBuffer() {
+  Mix_FreeChunk(chunk_);
+  chunk_ = nullptr;
 }
 
 //-----------------------------------------------------------------------------

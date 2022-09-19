@@ -5,14 +5,14 @@
 
 namespace fw {
 
-struct bitmap_data;
+struct BitmapData;
 class texture;
-class bitmap;
+class Bitmap;
 
 // Represents a bitmap, always RGBA.
-class bitmap {
+class Bitmap {
 private:
-  bitmap_data *_data;
+  BitmapData *data_;
 
   // This is called in the destructor or when we're about to assign another bitmap to us, etc.
   void release();
@@ -31,28 +31,28 @@ private:
 
 public:
   // Constructs a blank bitmap.
-  bitmap();
+  Bitmap();
 
   // Constructs a new bitmap that is the given width/height.
-  bitmap(int width, int height, uint32_t *argb = 0);
+  Bitmap(int width, int height, uint32_t *argb = 0);
 
   // Constructs a new bitmap and loads data from the given file.
-  bitmap(boost::filesystem::path const &filename);
+  Bitmap(boost::filesystem::path const &filename);
 
   // Constructs a new bitmap from data in memory (e.g. a PNG file loaded into memory)
-  bitmap(uint8_t const *data, size_t data_size);
+  Bitmap(uint8_t const *data, size_t data_size);
 
   // Constructs a new bitmap from the given texture (if the texture is mip-mapped, we'll use the largest mip-map level)
-  bitmap(texture const &tex);
+  Bitmap(texture const &tex);
 
   // Constructs a new bitmap that is a copy of the given bitmap. We won't actually copy the data until you write to it.
-  bitmap(bitmap const &copy);
+  Bitmap(Bitmap const &copy);
 
   // Destroys the bitmap and frees all associated data.
-  ~bitmap();
+  ~Bitmap();
 
   // Assigns this bitmap to what's in the the other one
-  bitmap &operator =(fw::bitmap const &copy);
+  Bitmap&operator =(fw::Bitmap const &copy);
 
   // Gets the filename of this bitmap (if it was loaded from a file).
   boost::filesystem::path get_filename() const;
@@ -76,7 +76,7 @@ public:
   void set_pixel(int x, int y, uint32_t rgba);
 
   // Copies the bitmap data from the given source image to our buffer.
-  void copy(fw::bitmap const &src);
+  void copy(fw::Bitmap const &src);
 
   // Resizes the bitmap to the new width/height
   void resize(int new_width, int new_height);

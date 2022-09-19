@@ -86,7 +86,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-static std::shared_ptr<fw::audio_buffer> g_hover_sound;
+static std::shared_ptr<fw::AudioBuffer> g_hover_sound;
 
 Button::Button(Gui *gui) : Widget(gui), text_align_(kCenter), is_pressed_(false), is_mouse_over_(false) {
   sig_mouse_out.connect(std::bind(&Button::on_mouse_out, this));

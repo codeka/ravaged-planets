@@ -22,7 +22,7 @@ private:
   mutable std::string _author;
   mutable int _width;
   mutable int _height;
-  mutable std::shared_ptr<fw::bitmap> _screenshot;
+  mutable std::shared_ptr<fw::Bitmap> _screenshot;
   mutable int _num_players;
 
   // this is called when you request any of the "extra" info (which is anything other than the name), we load
@@ -59,7 +59,7 @@ public:
     ensure_extra_loaded();
     return _height;
   }
-  std::shared_ptr<fw::bitmap> get_screenshot() const {
+  std::shared_ptr<fw::Bitmap> get_screenshot() const {
     ensure_extra_loaded();
     return _screenshot;
   }

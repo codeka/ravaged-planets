@@ -51,7 +51,7 @@ void world_reader::read(std::string name) {
       std::string name = (boost::format("splatt-%1%-%2%.png") % patch_x % patch_z).str();
       wfe = wf.get_entry(name, false /* for_write */);
 
-      fw::bitmap splatt(wfe.get_full_path().c_str());
+      fw::Bitmap splatt(wfe.get_full_path().c_str());
       _terrain->set_splatt(patch_x, patch_z, splatt);
     }
   }
@@ -60,15 +60,14 @@ void world_reader::read(std::string name) {
   if (wfe.exists()) {
     wfe.close();
 
-    _minimap_background = std::shared_ptr<fw::bitmap>(new fw::bitmap(wfe.get_full_path()));
+    _minimap_background = std::make_shared<fw::Bitmap>(wfe.get_full_path());
   }
 
   wfe = wf.get_entry("screenshot.png", false /* for_write */);
   if (wfe.exists()) {
     wfe.close();
 
-    std::shared_ptr<fw::bitmap> bmp(new fw::bitmap(wfe.get_full_path()));
-    _screenshot = bmp;
+    _screenshot = std::make_shared<fw::Bitmap>(wfe.get_full_path());
   }
 
   wfe = wf.get_entry(name + ".mapdesc", false /* for_write */);
