@@ -37,7 +37,7 @@ void model_mesh_noanim::setup_buffers() {
 
 //-------------------------------------------------------------------------
 
-model::model() : _wireframe(false), _colour(fw::colour(1, 1, 1)) {
+model::model() : _wireframe(false), _color(fw::Color(1, 1, 1)) {
 }
 
 model::~model() {
@@ -45,7 +45,7 @@ model::~model() {
 
 void model::render(sg::scenegraph &sg, fw::Matrix const &transform /*= fw::matrix::identity() */) {
   root_node->set_world_matrix(transform);
-  root_node->set_colour(_colour);
+  root_node->set_color(_color);
   sg.add_node(root_node->clone());
 }
 

@@ -46,11 +46,11 @@ title.new-game.type-to-chat = 유형 채팅:
 
 title.new-ai-player.title = 새로운 AI 플레이어
 title.new-ai-player.player-name = 이름:
-title.new-ai-player.player-colour = 색상:
+title.new-ai-player.player-color = 색상:
 title.new-ai-player.script = 스크립트:
 
 title.player-props.title = 플레이어 속성
-title.player-props.player-colour = 플레이어 색상:
+title.player-props.player-color = 플레이어 색상:
 
 title.join-game.join = 참가할
 title.join-game.col-id = ID

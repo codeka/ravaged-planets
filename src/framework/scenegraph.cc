@@ -199,7 +199,7 @@ std::shared_ptr<node> node::clone() {
 //-----------------------------------------------------------------------------------------
 
 scenegraph::scenegraph()
-    : _clear_colour(fw::colour(1, 0, 0, 0)) {
+    : _clear_color(fw::Color(1, 0, 0, 0)) {
 }
 
 scenegraph::~scenegraph() {
@@ -256,7 +256,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   }
 
   // now, render the main scene
-  g->begin_scene(scenegraph.get_clear_colour());
+  g->begin_scene(scenegraph.get_clear_color());
   BOOST_FOREACH(std::shared_ptr<fw::sg::node> node, scenegraph.get_nodes()) {
     node->render(&scenegraph);
   }
@@ -285,7 +285,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       pos_transform = fw::scale(fw::Vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::Vector(440.0f, 280.0f, 0)) * pos_transform;
       shader_params->set_matrix("pos_transform", pos_transform);
       shader_params->set_matrix("uv_transform", fw::identity());
-      shader_params->set_texture("texsampler", debug_shadowsrc->get_shadowmap()->get_colour_buffer());
+      shader_params->set_texture("texsampler", debug_shadowsrc->get_shadowmap()->get_color_buffer());
 
       std::shared_ptr<vertex_buffer> vb = vertex_buffer::create<vertex::xyz_uv>();
       fw::vertex::xyz_uv vertices[4];

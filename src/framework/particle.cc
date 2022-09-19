@@ -8,14 +8,14 @@ namespace fw {
 
 //-------------------------------------------------------------------------
 particle::life_state::life_state() :
-    age(0), size(0), colour_row(0), alpha(0), rotation_speed(0), rotation_kind(rotation_kind::random), speed(0),
+    age(0), size(0), color_row(0), alpha(0), rotation_speed(0), rotation_kind(rotation_kind::random), speed(0),
     direction(fw::Vector(0, 0, 0)), gravity(0) {
 }
 
 particle::life_state::life_state(particle::life_state const &copy) {
   age = copy.age;
   size = copy.size;
-  colour_row = copy.colour_row;
+  color_row = copy.color_row;
   alpha = copy.alpha;
   rotation_speed = copy.rotation_speed;
   rotation_kind = copy.rotation_kind;
@@ -27,8 +27,8 @@ particle::life_state::life_state(particle::life_state const &copy) {
 //-------------------------------------------------------------------------
 
 particle::particle(std::shared_ptr<particle_emitter_config> const &config) :
-    config(config), rotation_kind(rotation_kind::random), alpha(0), colour1(0), colour2(0), age(0), _max_age(0),
-    colour_factor(0) {
+    config(config), rotation_kind(rotation_kind::random), alpha(0), color1(0), color2(0), age(0), _max_age(0),
+    color_factor(0) {
   random = fw::random();
   angle = 0.0f;
   size = 0.0f;
@@ -53,7 +53,7 @@ void particle::initialize() {
     life_state state;
     state.age = (*it).age;
     state.size = (*it).size.get_value();
-    state.colour_row = (*it).colour_row;
+    state.color_row = (*it).color_row;
     state.alpha = (*it).alpha;
     state.rotation_speed = (*it).rotation_speed.get_value();
     state.rotation_kind = (*it).rotation_kind;
@@ -126,9 +126,9 @@ bool particle::update(float dt) {
   }
 
   float speed = fw::lerp(prev->speed, next->speed, t);
-  colour1 = prev->colour_row;
-  colour2 = next->colour_row;
-  colour_factor = t;
+  color1 = prev->color_row;
+  color2 = next->color_row;
+  color_factor = t;
   alpha = fw::lerp(prev->alpha, next->alpha, t);
   size = fw::lerp(prev->size, next->size, t);
 

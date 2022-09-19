@@ -216,11 +216,11 @@ fw::Point font_face::measure_glyph(uint32_t ch) {
 }
 
 void font_face::draw_string(int x, int y, std::string const &str, draw_flags flags /*= 0*/,
-    fw::colour colour /*= fw::colour::WHITE*/) {
-  draw_string(x, y, conv::utf_to_utf<uint32_t>(str), flags, colour);
+    fw::Color color /*= fw::color::WHITE*/) {
+  draw_string(x, y, conv::utf_to_utf<uint32_t>(str), flags, color);
 }
 
-void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags, fw::colour colour) {
+void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags, fw::Color color) {
   std::shared_ptr<string_cache_entry> data = get_or_create_cache_entry(str);
 
   if (_texture_dirty) {
@@ -249,7 +249,7 @@ void font_face::draw_string(int x, int y, std::basic_string<uint32_t> const &str
 
   data->shader_params->set_matrix("pos_transform", pos_transform);
   data->shader_params->set_matrix("uv_transform", fw::identity());
-  data->shader_params->set_colour("colour", colour);
+  data->shader_params->set_color("color", color);
   data->shader_params->set_texture("texsampler", _texture);
 
   data->vb->begin();

@@ -379,19 +379,19 @@ void framework::take_screenshots(sg::scenegraph &scenegraph) {
   std::shared_ptr<std::list<screenshot_request *>> requests(new std::list<screenshot_request *>());
   for(screenshot_request *request : _screenshots) {
     // render the scene to a separate render target first
-    std::shared_ptr<fw::Texture> colour_target(new fw::Texture());
-    colour_target->create(request->width, request->height, false);
+    std::shared_ptr<fw::Texture> color_target(new fw::Texture());
+    color_target->create(request->width, request->height, false);
 
     std::shared_ptr<fw::Texture> depth_target(new fw::Texture());
     depth_target->create(request->width, request->height, true);
 
     std::shared_ptr<fw::Framebuffer> framebuffer(new fw::Framebuffer());
-    framebuffer->set_colour_buffer(colour_target);
+    framebuffer->set_color_buffer(color_target);
     framebuffer->set_depth_buffer(depth_target);
 
     fw::render(scenegraph, framebuffer, request->include_gui);
 
-    request->bitmap = std::make_shared<fw::Bitmap>(*colour_target.get());
+    request->bitmap = std::make_shared<fw::Bitmap>(*color_target.get());
     requests->push_back(request);
   }
 

@@ -3,7 +3,7 @@
 #include <game/simulation/player.h>
 
 namespace fw {
-class colour;
+class Color;
 }
 
 namespace game {

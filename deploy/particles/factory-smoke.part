@@ -12,7 +12,7 @@
     <life>
       <state age="0">
         <size min="0.2" max="0.4" />
-        <colour row="2" alpha="0.0" />
+        <color row="2" alpha="0.0" />
         <speed min="2.0" max="2.5" />
         <direction min="-0.1 1 -0.1" max="0.1 1 0.1" />
         <gravity min="-3.0" max="-4.0" />
@@ -20,12 +20,12 @@
 
       <state age="0.2">
         <size min="0.3" max="0.5" />
-        <colour row="2" alpha="0.3" />
+        <color row="2" alpha="0.3" />
       </state>
 
       <state age="1">
         <size min="1.8" max="2.2" />
-        <colour row="2" alpha="0" />
+        <color row="2" alpha="0" />
       </state>
     </life>
   </emitter>

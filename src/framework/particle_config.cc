@@ -109,7 +109,7 @@ particle_emitter_config::life_state::life_state() {
   speed.min = speed.max = 0.0f;
   direction.min = direction.max = fw::Vector(0, 0, 0);
   alpha = 1.0f;
-  colour_row = 0;
+  color_row = 0;
   gravity.min = gravity.max = 0.0f;
 }
 
@@ -124,7 +124,7 @@ particle_emitter_config::life_state::life_state(particle_emitter_config::life_st
   speed.max = copy.speed.max;
   direction.min = copy.direction.min;
   direction.max = copy.direction.max;
-  colour_row = copy.colour_row;
+  color_row = copy.color_row;
   alpha = copy.alpha;
   gravity.min = copy.gravity.min;
   gravity.max = copy.gravity.max;
@@ -268,12 +268,12 @@ void particle_emitter_config::parse_life_state(life_state &state, xml_element co
   for (xml_element child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_value() == "size") {
       parse_random_float(state.size, child);
-    } else if (child.get_value() == "colour") {
+    } else if (child.get_value() == "color") {
       if (child.is_attribute_defined("alpha")) {
         state.alpha = child.get_attribute<float>("alpha");
       }
       if (child.is_attribute_defined("row")) {
-        state.colour_row = child.get_attribute<int>("row");
+        state.color_row = child.get_attribute<int>("row");
       }
     } else if (child.get_value() == "rotation") {
       if (child.is_attribute_defined("kind")) {
@@ -306,26 +306,26 @@ void particle_emitter_config::parse_random_float(random<float> &value, xml_eleme
   value.max = boost::lexical_cast<float>(elem.get_attribute("max"));
 }
 
-void particle_emitter_config::parse_random_colour(random<fw::colour> &value, xml_element const &elem) {
+void particle_emitter_config::parse_random_color(random<fw::Color> &value, xml_element const &elem) {
   std::vector<float> min_components = fw::split<float>(elem.get_attribute("min"));
   std::vector<float> max_components = fw::split<float>(elem.get_attribute("max"));
 
   if (min_components.size() == 3)
-    value.min = fw::colour(min_components[0], min_components[1], min_components[2]);
+    value.min = fw::Color(min_components[0], min_components[1], min_components[2]);
   else if (min_components.size() == 4)
-    value.min = fw::colour(min_components[0], min_components[1], min_components[2], min_components[3]);
+    value.min = fw::Color(min_components[0], min_components[1], min_components[2], min_components[3]);
   else {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("colour values require 3 or 4 floating point values"));
+        fw::exception() << fw::message_error_info("color values require 3 or 4 floating point values"));
   }
 
   if (max_components.size() == 3)
-    value.max = fw::colour(max_components[0], max_components[1], max_components[2]);
+    value.max = fw::Color(max_components[0], max_components[1], max_components[2]);
   else if (max_components.size() == 4)
-    value.max = fw::colour(max_components[0], max_components[1], max_components[2], min_components[3]);
+    value.max = fw::Color(max_components[0], max_components[1], max_components[2], min_components[3]);
   else {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("colour values require 3 or 4 floating point values"));
+        fw::exception() << fw::message_error_info("color values require 3 or 4 floating point values"));
   }
 }
 

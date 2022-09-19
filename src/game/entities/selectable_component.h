@@ -1,6 +1,6 @@
 #pragma once
 
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <game/entities/entity.h>
 
 namespace fw {
@@ -22,7 +22,7 @@ private:
 
   static void populate_buffers();
 
-  fw::colour _highlight_colour;
+  fw::Color _highlight_color;
   bool _is_highlighted;
 
 public:
@@ -46,8 +46,8 @@ public:
   }
   boost::signals2::signal<void(bool)> sig_selected;
 
-  // highlight the entity with the given colour
-  void highlight(fw::colour const &col);
+  // highlight the entity with the given color
+  void highlight(fw::Color const &col);
   void unhighlight();
 
   void set_selection_radius(float value);

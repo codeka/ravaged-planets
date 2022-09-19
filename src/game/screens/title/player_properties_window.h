@@ -3,7 +3,7 @@
 #include "../../../framework/gui/window.h"
 
 namespace fw {
-	class colour_chooser;
+	class color_chooser;
 }
 
 namespace CEGUI {
@@ -12,11 +12,11 @@ namespace CEGUI {
 
 namespace ww {
 
-	// This window is where you define your player's properties (colours, etc)
+	// This window is where you define your player's properties (colors, etc)
 	class player_properties_window : public fw::gui::window
 	{
 	private:
-		fw::colour_chooser *_colour_chooser;
+		fw::color_chooser *_color_chooser;
 
 		bool ok_clicked(CEGUI::EventArgs const &e);
 		bool cancel_clicked(CEGUI::EventArgs const &e);

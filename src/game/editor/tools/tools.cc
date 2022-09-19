@@ -57,12 +57,12 @@ void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::Vec
     vertices[i].x = centre[0] + radius * sin(factor);
     vertices[i].z = centre[2] + radius * cos(factor);
     vertices[i].y = terrain->get_height(vertices[i].x, vertices[i].z) + 0.5f;
-    vertices[i].colour = fw::colour(1, 1, 1).to_rgba();
+    vertices[i].color = fw::Color(1, 1, 1).to_rgba();
   }
   vertices[num_segments].x = vertices[0].x;
   vertices[num_segments].y = vertices[0].y;
   vertices[num_segments].z = vertices[0].z;
-  vertices[num_segments].colour = fw::colour(1, 1, 1).to_rgba();
+  vertices[num_segments].color = fw::Color(1, 1, 1).to_rgba();
   vb->set_data(num_segments + 1, vertices);
   delete[] vertices;
 

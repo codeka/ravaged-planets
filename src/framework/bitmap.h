@@ -2,7 +2,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <framework/colour.h>
+#include <framework/color.h>
 
 namespace fw {
 class Texture;
@@ -69,9 +69,9 @@ public:
   void get_pixels(std::vector<uint32_t> &rgba) const;
   void set_pixels(std::vector<uint32_t> const &rgba);
 
-  // Helper methods to get/set the colour of a single pixel.
-  fw::colour get_pixel(int x, int y);
-  void set_pixel(int x, int y, fw::colour colour);
+  // Helper methods to get/set the color of a single pixel.
+  fw::Color get_pixel(int x, int y);
+  void set_pixel(int x, int y, fw::Color color);
   void set_pixel(int x, int y, uint32_t rgba);
 
   // Copies the bitmap data from the given source image to our buffer.
@@ -80,8 +80,8 @@ public:
   // Resizes the bitmap to the new width/height
   void resize(int new_width, int new_height);
 
-  // Calculate the "dominant" colour of this bitmap.
-  fw::colour get_dominant_colour() const;
+  // Calculate the "dominant" color of this bitmap.
+  fw::Color get_dominant_color() const;
 };
 
 }

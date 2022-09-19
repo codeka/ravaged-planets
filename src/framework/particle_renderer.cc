@@ -119,7 +119,7 @@ static buffer_cache g_buffer_cache;
 namespace fw {
 
 particle_renderer::particle_renderer(particle_manager *mgr) :
-    _graphics(nullptr), _shader(nullptr), _mgr(mgr), _draw_frame(1), _colour_texture(new fw::Texture()) {
+    _graphics(nullptr), _shader(nullptr), _mgr(mgr), _draw_frame(1), _color_texture(new fw::Texture()) {
 }
 
 particle_renderer::~particle_renderer() {
@@ -128,10 +128,10 @@ particle_renderer::~particle_renderer() {
 void particle_renderer::initialize(graphics *g) {
   _graphics = g;
 
-  _colour_texture->create(fw::resolve("particles/colours.png"));
+  _color_texture->create(fw::resolve("particles/colors.png"));
   _shader = fw::shader::create("particle.shader");
   _shader_params = _shader->create_parameters();
-  _shader_params->set_texture("colour_texture", _colour_texture);
+  _shader_params->set_texture("color_texture", _color_texture);
 }
 
 /** Gets the name of the program in the particle.shader file we'll use for the given billboard_mode. */
@@ -187,11 +187,11 @@ bool particle_renderer::add_particle(render_state &rs, int base_index, particle 
     return false;
   p->draw_frame = _draw_frame;
 
-  // the colour_row is divided by this value to get the value between 0 and 1.
-  float colour_texture_factor = 1.0f / this->_colour_texture->get_height();
+  // the color_row is divided by this value to get the value between 0 and 1.
+  float color_texture_factor = 1.0f / this->_color_texture->get_height();
 
-  fw::colour colour(p->alpha, (static_cast<float>(p->colour1) + 0.5f) * colour_texture_factor,
-      (static_cast<float>(p->colour2) + 0.5f) * colour_texture_factor, p->colour_factor);
+  fw::Color color(p->alpha, (static_cast<float>(p->color1) + 0.5f) * color_texture_factor,
+      (static_cast<float>(p->color2) + 0.5f) * color_texture_factor, p->color_factor);
 
   Matrix m = fw::scale(p->size);
   if (p->rotation_kind != rotation_kind::direction) {
@@ -210,13 +210,13 @@ bool particle_renderer::add_particle(render_state &rs, int base_index, particle 
   float aspect = (p->rect.bottom - p->rect.top) / (p->rect.right - p->rect.left);
 
   fw::Vector v = cml::transform_point(m, fw::Vector(-0.5f, -0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.left, p->rect.bottom));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.bottom));
   v = cml::transform_point(m, fw::Vector(-0.5f, 0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.left, p->rect.top));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.top));
   v = cml::transform_point(m, fw::Vector(0.5f, 0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.right, p->rect.top));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.right, p->rect.top));
   v = cml::transform_point(m, fw::Vector(0.5f, -0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], colour.to_abgr(), p->rect.right, p->rect.bottom));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.right, p->rect.bottom));
 
   rs.indices.push_back(base_index);
   rs.indices.push_back(base_index + 1);

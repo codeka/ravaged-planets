@@ -5,7 +5,7 @@
 #include <memory>
 #include <boost/noncopyable.hpp>
 
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/texture.h>
@@ -24,7 +24,7 @@ private:
   std::map<std::string, std::shared_ptr<fw::Texture> > _textures;
   std::map<std::string, Matrix> _matrices;
   std::map<std::string, Vector> _vectors;
-  std::map<std::string, colour> _colours;
+  std::map<std::string, Color> _colors;
   std::map<std::string, float> _scalars;
 
   shader_parameters();
@@ -37,7 +37,7 @@ public:
   void set_texture(std::string const &name, std::shared_ptr<fw::Texture> const &t);
   void set_matrix(std::string const &name, Matrix const &m);
   void set_vector(std::string const &name, Vector const &v);
-  void set_colour(std::string const &name, colour const &c);
+  void set_color(std::string const &name, Color const &c);
   void set_scalar(std::string const &name, float f);
 
   std::shared_ptr<shader_parameters> clone();

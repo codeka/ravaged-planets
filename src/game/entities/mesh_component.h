@@ -1,7 +1,7 @@
 #pragma once
 
 #include <game/entities/entity.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 
 namespace fw {
 class model;

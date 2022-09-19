@@ -10,7 +10,7 @@ namespace ent {
 
 /**
  * This component is used to make an entity visible on the minimap. The entity must also have a position_component and
- * optionally an ownable_component (to get a colour - if no ownable colour, it gets drawn white.)
+ * optionally an ownable_component (to get a color - if no ownable color, it gets drawn white.)
  */
 class minimap_visible_component: public entity_component {
 public:

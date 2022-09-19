@@ -127,7 +127,7 @@ entity_debug_view::entity_debug_view() {
 entity_debug_view::~entity_debug_view() {
 }
 
-void entity_debug_view::add_line(fw::Vector const &from, fw::Vector const &to, fw::colour const &col) {
+void entity_debug_view::add_line(fw::Vector const &from, fw::Vector const &to, fw::Color const &col) {
   line l;
   l.from = from;
   l.to = to;
@@ -136,7 +136,7 @@ void entity_debug_view::add_line(fw::Vector const &from, fw::Vector const &to, f
   _lines.push_back(l);
 }
 
-void entity_debug_view::add_circle(fw::Vector const &centre, float radius, fw::colour const &col) {
+void entity_debug_view::add_circle(fw::Vector const &centre, float radius, fw::Color const &col) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * M_PI * radius);
@@ -175,12 +175,12 @@ void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::Matrix const 
     vertices[i * 2].x = l.from[0];
     vertices[i * 2].y = l.from[1];
     vertices[i * 2].z = l.from[2];
-    vertices[i * 2].colour = l.col.to_rgba();
+    vertices[i * 2].color = l.col.to_rgba();
 
     vertices[(i * 2) + 1].x = l.to[0];
     vertices[(i * 2) + 1].y = l.to[1];
     vertices[(i * 2) + 1].z = l.to[2];
-    vertices[(i * 2) + 1].colour = l.col.to_rgba();
+    vertices[(i * 2) + 1].color = l.col.to_rgba();
   }
 
   std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_c>();

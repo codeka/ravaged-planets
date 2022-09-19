@@ -29,7 +29,7 @@ private:
   graphics *_graphics;
   std::shared_ptr<shader> _shader;
   std::shared_ptr<shader_parameters> _shader_params;
-  std::shared_ptr<Texture> _colour_texture;
+  std::shared_ptr<Texture> _color_texture;
   particle_manager *_mgr;
   int _draw_frame;
 

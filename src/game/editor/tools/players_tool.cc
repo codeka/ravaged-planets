@@ -142,7 +142,7 @@ void players_tool::render(fw::sg::scenegraph &scenegraph) {
   // otherwise, render the marker at the given location
   fw::Matrix loc(fw::translation(it->second));
 
-  _marker->set_colour(fw::colour(0.75f, 0.0f, 1.0f, 0.0f));
+  _marker->set_color(fw::Color(0.75f, 0.0f, 1.0f, 0.0f));
   _marker->render(scenegraph, loc);
 }
 

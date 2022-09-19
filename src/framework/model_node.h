@@ -15,7 +15,7 @@ namespace fw {
 class model_node: public sg::node {
 private:
   model *_model;
-  fw::colour _colour;
+  fw::Color _color;
 
 protected:
   /* Renders the model node. */
@@ -36,7 +36,7 @@ public:
   /** The transform used to move the model into position in the world. */
   fw::Matrix transform;
 
-  void set_colour(fw::colour colour);
+  void set_color(fw::Color color);
 
   /** You can call this after setting mesh_index to set up the node. */
   void initialize(model *mdl);

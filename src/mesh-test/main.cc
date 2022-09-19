@@ -70,7 +70,7 @@ bool rotate_handler(fw::gui::Widget *wdgt) {
 }
 
 bool application::initialize(fw::framework *frmwrk) {
-  fw::top_down_camera *cam = new fw::top_down_camera();
+  fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
 
@@ -102,7 +102,7 @@ void application::update(float dt) {
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {
-  scenegraph.set_clear_colour(fw::colour(1, 0, 1, 0));
+  scenegraph.set_clear_color(fw::Color(1, 0, 1, 0));
 
   // set up the properties of the sun that we'll use to light and also cast shadows
   fw::Vector sun(0.485f, 0.485f, 0.727f);
@@ -114,7 +114,7 @@ void application::render(fw::sg::scenegraph &scenegraph) {
     scenegraph.add_node(g_ground);
   }
 
-  g_model->set_colour(fw::colour(1.0f, 1.0f, 0.0f, 0.0f));
+  g_model->set_color(fw::Color(1.0f, 1.0f, 0.0f, 0.0f));
   g_model->render(scenegraph, fw::rotate_axis_angle(fw::Vector(0, 1, 0), g_rotate_angle));
 }
 

@@ -4,7 +4,7 @@
 #include <framework/model.h>
 #include <framework/model_node.h>
 #include <framework/texture.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/graphics.h>
 #include <framework/shader.h>
 
@@ -30,7 +30,7 @@ void model_node::initialize(model *mdl) {
     if (mdl->texture) {
       params->set_texture("entity_texture", mdl->texture);
     }
-    params->set_colour("mesh_colour", fw::colour(1, 1, 1));
+    params->set_color("mesh_color", fw::Color(1, 1, 1));
     set_shader_parameters(params);
   }
 
@@ -46,7 +46,7 @@ void model_node::render(sg::scenegraph *sg, fw::Matrix const &model_matrix /*= f
   }
 
   if (mesh_index >= 0) {
-    get_shader_parameters()->set_colour("mesh_colour", _colour);
+    get_shader_parameters()->set_color("mesh_color", _color);
   }
 
   node::render(sg, transform * model_matrix);
@@ -64,13 +64,13 @@ void model_node::populate_clone(std::shared_ptr<sg::node> clone) {
   mnclone->mesh_index = mesh_index;
   mnclone->node_name = node_name;
   mnclone->transform = transform;
-  mnclone->_colour = _colour;
+  mnclone->_color = _color;
 }
 
-void model_node::set_colour(fw::colour colour) {
-  _colour = colour;
+void model_node::set_color(fw::Color color) {
+  _color = color;
   BOOST_FOREACH(std::shared_ptr<node> &child_node, _children) {
-    std::dynamic_pointer_cast<model_node>(child_node)->set_colour(colour);
+    std::dynamic_pointer_cast<model_node>(child_node)->set_color(color);
   }
 }
 

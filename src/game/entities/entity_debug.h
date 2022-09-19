@@ -1,7 +1,7 @@
 #pragma once
 
 #include <framework/vector.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 
 namespace fw {
 namespace gui {
@@ -59,7 +59,7 @@ private:
   struct line {
     fw::Vector from;
     fw::Vector to;
-    fw::colour col;
+    fw::Color col;
   };
   std::vector<line> _lines;
 
@@ -68,9 +68,9 @@ public:
   ~entity_debug_view();
 
   void add_line(fw::Vector const &from, fw::Vector const &to,
-      fw::colour const &col);
+      fw::Color const &col);
   void add_circle(fw::Vector const &centre, float radius,
-      fw::colour const &col);
+      fw::Color const &col);
 
   void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform);
 };

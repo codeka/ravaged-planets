@@ -5,7 +5,7 @@
 
 #include <framework/bitmap.h>
 #include <framework/camera.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/gui/builder.h>
@@ -198,10 +198,10 @@ void minimap_window::update_entity_display() {
     if (position_comp == nullptr)
       continue;
 
-    fw::colour col(1, 1, 1); // default is white
+    fw::Color col(1, 1, 1); // default is white
     if (ownable_comp != nullptr) {
-      // if it's ownable, draw it with the owner's colour
-      col = ownable_comp->get_owner()->get_colour();
+      // if it's ownable, draw it with the owner's color
+      col = ownable_comp->get_owner()->get_color();
     }
 
     fw::Vector pos = position_comp->get_position();

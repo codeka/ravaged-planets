@@ -44,11 +44,11 @@ title.new-game.enable-multiplayer = Enable multiplayer
 title.new-game.type-to-chat = Type to chat:
 
 title.new-ai-player.player-name = Player name:
-title.new-ai-player.player-colour = Player color:
+title.new-ai-player.player-color = Player color:
 title.new-ai-player.script = Script:
 
 title.player-props.title = Player Properties
-title.player-props.player-colour = Player Color:
+title.player-props.player-color = Player Color:
 
 title.join-game.join = Join game
 title.join-game.col-id = ID

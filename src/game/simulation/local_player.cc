@@ -20,9 +20,9 @@ local_player::local_player() :
   // a non-networked game, or if we're the host of a networked game
   _player_no = 1;
 
-  // start off with a random colour as well
-  int colour_index = static_cast<int>(fw::random() * player_colours.size());
-  _colour = player_colours[colour_index];
+  // start off with a random color as well
+  int color_index = static_cast<int>(fw::random() * player_colors.size());
+  _color = player_colors[color_index];
 }
 
 local_player::~local_player() {

@@ -28,7 +28,7 @@ bool application::initialize(fw::framework *frmwrk) {
   _framework->get_cursor()->set_visible(true);
 
   // set up the camera
-  fw::top_down_camera *cam = new fw::top_down_camera();
+  fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   _framework->set_camera(cam);
 

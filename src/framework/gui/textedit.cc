@@ -252,7 +252,7 @@ void TextEdit::render() {
     fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
         get_left(), get_top() + get_height() / 2, buffer_->codepoints,
         static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle),
-        fw::colour::BLACK());
+        fw::Color::BLACK());
   }
 
   if (focused_ && draw_cursor_) {

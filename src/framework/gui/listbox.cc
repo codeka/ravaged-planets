@@ -50,7 +50,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-// A special widget that we add children to. This item handles the selection colours and positioning of the item.
+// A special widget that we add children to. This item handles the selection colors and positioning of the item.
 class ListboxItem : public Widget {
 private:
   Listbox *listbox_;

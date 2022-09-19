@@ -12,7 +12,7 @@ message Node {
   optional int32 mesh_index = 1;
   repeated float transformation = 2;
   optional string name = 3;
-  optional uint32 colour = 4;
+  optional uint32 color = 4;
   repeated Node children = 5;
 }
 

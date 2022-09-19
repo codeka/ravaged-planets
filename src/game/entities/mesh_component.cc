@@ -58,7 +58,7 @@ void mesh_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &tr
     if (_ownable_component != nullptr) {
       game::player *player = _ownable_component->get_owner();
       if (player != nullptr) {
-        _model->set_colour(player->get_colour());
+        _model->set_color(player->get_color());
       }
     }
 

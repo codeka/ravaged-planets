@@ -7,7 +7,7 @@
 #include <boost/filesystem.hpp>
 
 #include <framework/bitmap.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/texture.h>
 #include <framework/vector.h>
 
@@ -89,8 +89,8 @@ public:
    * Draws the given string on the screen at the given (x,y) coordinates.
    */
   void draw_string(int x, int y, std::string const &str, draw_flags flags = draw_default,
-      fw::colour colour = fw::colour::WHITE());
-  void draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags, fw::colour colour);
+      fw::Color color = fw::Color::WHITE());
+  void draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags, fw::Color color);
 };
 
 class font_manager {

@@ -17,26 +17,26 @@ private:
       Vector const &up);
 
 protected:
-  Matrix _view;
-  Matrix _projection;
+  Matrix view_;
+  Matrix projection_;
 
-  Vector _right;
-  Vector _up;
-  Vector _forward;
+  Vector right_;
+  Vector up_;
+  Vector forward_;
 
-  Vector _position;
-  Vector _lookat;
+  Vector position_;
+  Vector lookat_;
 
-  Vector _velocity;
-  float _max_speed;
+  Vector velocity_;
+  float max_speed_;
 
-  float _floor_height;
+  float floor_height_;
 
   // this is set when the camera's matrix (etc) needs to be updated
-  bool _updated;
+  bool updated_;
 
   // these are automatically unbound when disable() is called
-  std::vector<int> _keybindings;
+  std::vector<int> keybindings_;
 
 public:
   Camera();
@@ -60,21 +60,21 @@ public:
   Vector unproject(float x, float y);
 
   virtual void set_location(Vector const & location) {
-    _position = location;
+    position_ = location;
     //_updated = true;
   }
 
   virtual Vector const & get_location() const {
-    return _position;
+    return position_;
   }
 
   virtual void set_direction(Vector const & direction) {
-    _forward = direction;
+    forward_ = direction;
     //_updated = true;
   }
 
   virtual Vector const & get_direction() const {
-    return _forward;
+    return forward_;
   }
 
   // "Zooms" the view to the given location. Mostly useful with a top_down_camera or lookat_camera.
@@ -83,37 +83,37 @@ public:
   }
 
   Matrix const & get_view_matrix() const {
-    return _view;
+    return view_;
   }
 
   Matrix const & get_projection_matrix() const {
-    return _projection;
+    return projection_;
   }
 
   // Get the "eye" position of the camera.
   Vector const & get_position() const {
-    return _position;
+    return position_;
   }
 
   // Gets the three directional axis.
   Vector const & get_right() const {
-    return _right;
+    return right_;
   }
 
   Vector const & get_forward() const {
-    return _forward;
+    return forward_;
   }
 
   Vector const & get_up() const {
-    return _up;
+    return up_;
   }
 };
 
 // This implementation of camera is a "first-person" camera. The mouse cursor is hidden and you move the mouse to
 // "look around".
-class first_person_camera: public Camera {
+class FirstPersonCamera: public Camera {
 private:
-  bool _fly_mode; // Fly mode means we can "fly", if false we don't move in the y-direction
+  bool fly_mode_; // Fly mode means we can "fly", if false we don't move in the y-direction
 
   // move in the "forward" direction (negative for backwards)
   void move_forward(float units);
@@ -134,28 +134,28 @@ private:
   void roll(float radians);
 
 public:
-  first_person_camera();
-  virtual ~first_person_camera();
+  FirstPersonCamera();
+  virtual ~FirstPersonCamera();
 
   virtual void update(float dt);
 };
 
 // This is a simple static camera where you tell it what to "look at" and from what direction to look from, and
 // that's it - no interaction possible, etc.
-class lookat_camera: public Camera {
+class LookAtCamera: public Camera {
 protected:
   // This is the "centre" that we're looking at and our rotations go around.
-  Vector _centre;
+  Vector center_;
 
 public:
-  lookat_camera();
-  virtual ~lookat_camera();
+  LookAtCamera();
+  virtual ~LookAtCamera();
 
   virtual void update(float dt);
 
   virtual void set_location(Vector const & location);
   virtual Vector const & get_location() const {
-    return _centre;
+    return center_;
   }
 
   void set_distance(float distance);
@@ -163,23 +163,23 @@ public:
 };
 
 // This implementation of camera is a "top-down" camera, used in RTS-style games, for example.
-class top_down_camera: public lookat_camera {
+class TopDownCamera: public LookAtCamera {
 private:
-  float _last_floor_height;
-  bool _enable_mouse_move;
+  float last_floor_height_;
+  bool enable_mouse_move_;
 
-  bool _move_left;
-  bool _move_right;
-  bool _move_forward;
-  bool _move_backward;
-  bool _rotate_left;
-  bool _rotate_right;
-  bool _zoom_in;
-  bool _zoom_out;
-  bool _rotate_mouse;
+  bool move_left_;
+  bool move_right_;
+  bool move_forward_;
+  bool move_backward_;
+  bool rotate_left_;
+  bool rotate_right_;
+  bool zoom_in_;
+  bool zoom_out_;
+  bool rotate_mouse_;
 
-  fw::Vector _zoom_to;
-  bool _zooming;
+  fw::Vector zoom_to_;
+  bool zooming_;
 
   void rotate(float around_up, float around_right);
   void move(float forward, float right);
@@ -196,8 +196,8 @@ private:
   void on_key_zoomout(std::string keyname, bool is_down);
 
 public:
-  top_down_camera();
-  virtual ~top_down_camera();
+  TopDownCamera();
+  virtual ~TopDownCamera();
 
   virtual void enable();
   virtual void disable();
@@ -206,17 +206,17 @@ public:
 
   // "Zooms" the camera to the given location.
   virtual void zoom_to(Vector const &location) {
-    _zoom_to = location;
-    _zooming = true;
+    zoom_to_ = location;
+    zooming_ = true;
   }
 
   // Gets or sets a value which indicates whether we move the camera by moving the mouse to the edge of the screen (as
   // well as the usual left/right/up/down keys)
   void set_mouse_move(bool value) {
-    _enable_mouse_move = value;
+    enable_mouse_move_ = value;
   }
   bool get_mouse_move() const {
-    return _enable_mouse_move;
+    return enable_mouse_move_;
   }
 };
 

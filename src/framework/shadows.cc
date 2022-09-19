@@ -38,9 +38,9 @@ void shadow_source::initialize(bool debug /*= false */) {
     _shadowbuffer->set_depth_buffer(depth_texture);
 
     if (debug) {
-      std::shared_ptr<fw::Texture> colour_texture(new Texture());
-      colour_texture->create(1024, 1024, false);
-      _shadowbuffer->set_colour_buffer(colour_texture);
+      std::shared_ptr<fw::Texture> color_texture(new Texture());
+      color_texture->create(1024, 1024, false);
+      _shadowbuffer->set_color_buffer(color_texture);
     }
   } else {
     _shadowbuffer = g_shadowbuffers.front();

@@ -25,12 +25,12 @@ join_request_packet::~join_request_packet() {
 
 void join_request_packet::serialize(fw::net::packet_buffer &buffer) {
   buffer << _user_id;
-  buffer << _colour;
+  buffer << _color;
 }
 
 void join_request_packet::deserialize(fw::net::packet_buffer &buffer) {
   buffer >> _user_id;
-  buffer >> _colour;
+  buffer >> _color;
 }
 
 //-------------------------------------------------------------------------
@@ -47,8 +47,8 @@ void join_response_packet::serialize(fw::net::packet_buffer &buffer) {
   BOOST_FOREACH(uint32_t sess_id, _other_users) {
     buffer << sess_id;
   }
-  buffer << _my_colour;
-  buffer << _your_colour;
+  buffer << _my_color;
+  buffer << _your_color;
 }
 
 void join_response_packet::deserialize(fw::net::packet_buffer &buffer) {
@@ -63,8 +63,8 @@ void join_response_packet::deserialize(fw::net::packet_buffer &buffer) {
 
     _other_users.push_back(other_user);
   }
-  buffer >> _my_colour;
-  buffer >> _your_colour;
+  buffer >> _my_color;
+  buffer >> _your_color;
 }
 
 //-------------------------------------------------------------------------

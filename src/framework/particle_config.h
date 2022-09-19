@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <framework/vector.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/particle.h>
 #include <framework/texture.h>
 #include <framework/xml.h>
@@ -123,7 +123,7 @@ public:
     rotation_kind::value rotation_kind;
     random<fw::Vector> direction;
     random<float> speed;
-    int colour_row;
+    int color_row;
     float alpha;
     random<float> gravity;
 
@@ -141,7 +141,7 @@ private:
   void load_emit_policy(xml_element const &elem);
   void parse_life_state(life_state &state, xml_element const &elem);
   void parse_random_float(random<float> &value, xml_element const &elem);
-  void parse_random_colour(random<fw::colour> &value, xml_element const &elem);
+  void parse_random_color(random<fw::Color> &value, xml_element const &elem);
   void parse_random_vector(random<fw::Vector> &value, xml_element const &elem);
 
 public:
@@ -174,7 +174,7 @@ public:
   random<float> max_age;
 
   // this is the list of life_state instances for this particle. Each state contains
-  // things like the size of the particle at that point of time, the colour and so
+  // things like the size of the particle at that point of time, the color and so
   // on. As the particle ages, we want to lerp between each life_state to provide
   // smooth particle effects.
   std::vector<life_state> life;

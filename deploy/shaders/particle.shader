@@ -4,62 +4,62 @@
     uniform mat4 worldviewproj;
 
     layout (location = 0) in vec3 in_position;
-    layout (location = 1) in vec4 in_colour;
+    layout (location = 1) in vec4 in_color;
     layout (location = 2) in vec2 in_uv;
 
-    out vec4 colour;
+    out vec4 color;
     out vec2 uv;
 
     void main() {
       gl_Position = worldviewproj * vec4(in_position, 1);
-      colour = in_colour;
+      color = in_color;
       uv = in_uv;
     }
   ]]></source>
   <source name="fragment-normal"><![CDATA[
-    in vec4 colour;
+    in vec4 color;
     in vec2 uv;
 
     uniform sampler2D particle_texture;
-    uniform sampler2D colour_texture;
+    uniform sampler2D color_texture;
 
-    out vec4 out_colour;
+    out vec4 out_color;
 
     // this is the pixel shader used by the "normal" particle effect
     void main() {
-      // get the colour from the texture
+      // get the color from the texture
       vec4 c = texture(particle_texture, uv);
 
-      // and blend the texture colour with the vertex colour
-      //c.rgb = (c.rgb * colour.a) + (colour.rgb * (1 - colour.a));
-      c.a = c.a * colour.a;
+      // and blend the texture color with the vertex color
+      //c.rgb = (c.rgb * color.a) + (color.rgb * (1 - color.a));
+      c.a = c.a * color.a;
 
-      out_colour = c;
+      out_color = c;
     }
   ]]></source>
   <source name="fragment-additive"><![CDATA[
-    in vec4 colour;
+    in vec4 color;
     in vec2 uv;
 
     uniform sampler2D particle_texture;
-    uniform sampler2D colour_texture;
+    uniform sampler2D color_texture;
 
-    out vec4 out_colour;
+    out vec4 out_color;
 
     // this is the pixel shader used by the "additive" particle effect
     void main() {
       // get the "intensity" from the particle texture
       vec4 a = texture(particle_texture, uv);
 
-      // look up the colour for that intensity for the two colours we are blending, then
-      // combine the two colours based on whatever value of colour.b we have.
-      vec4 c1 = texture(colour_texture, vec2(a.r + 0.0078125, colour.r + 0.0078125));
-      vec4 c2 = texture(colour_texture, vec2(a.r + 0.0078125, colour.g + 0.0078125));
-      out_colour = mix(c1, c2, vec4(colour.b, colour.b, colour.b, colour.b));
+      // look up the color for that intensity for the two colors we are blending, then
+      // combine the two colors based on whatever value of color.b we have.
+      vec4 c1 = texture(color_texture, vec2(a.r + 0.0078125, color.r + 0.0078125));
+      vec4 c2 = texture(color_texture, vec2(a.r + 0.0078125, color.g + 0.0078125));
+      out_color = mix(c1, c2, vec4(color.b, color.b, color.b, color.b));
 
-      // the final colour is multiplied by the intensity
-      out_colour.rgb = out_colour.rgb * a.r * colour.a;
-      out_colour.a = a.r * colour.b;
+      // the final color is multiplied by the intensity
+      out_color.rgb = out_color.rgb * a.r * color.a;
+      out_color.a = a.r * color.b;
     }
   ]]></source>
   <program name="particle-additive">

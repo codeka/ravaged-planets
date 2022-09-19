@@ -4,7 +4,7 @@
 #include <stack>
 
 #include <framework/camera.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/graphics.h>
 #include <framework/shader.h>
 #include <framework/shadows.h>
@@ -160,7 +160,7 @@ public:
 private:
   light_coll _lights;
   node_coll _root_nodes;
-  fw::colour _clear_colour;
+  fw::Color _clear_color;
   std::stack<fw::Camera *> _camera_stack;
 
 public:
@@ -182,11 +182,11 @@ public:
     return _root_nodes;
   }
 
-  void set_clear_colour(fw::colour colour) {
-    _clear_colour = colour;
+  void set_clear_color(fw::Color color) {
+    _clear_color = color;
   }
-  fw::colour get_clear_colour() const {
-    return _clear_colour;
+  fw::Color get_clear_color() const {
+    return _clear_color;
   }
 
   void push_camera(fw::Camera *cam) {

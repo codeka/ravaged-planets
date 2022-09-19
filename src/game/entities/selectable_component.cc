@@ -77,9 +77,9 @@ void selectable_component::set_selection_radius(float value) {
   _selection_radius = value;
 }
 
-void selectable_component::highlight(fw::colour const &col) {
+void selectable_component::highlight(fw::Color const &col) {
   _is_highlighted = true;
-  _highlight_colour = col;
+  _highlight_color = col;
 }
 
 void selectable_component::unhighlight() {
@@ -92,13 +92,13 @@ void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix con
   }
 
   bool draw = false;
-  fw::colour col(1, 1, 1);
+  fw::Color col(1, 1, 1);
   if (_is_selected) {
     draw = true;
-    col = fw::colour(1, 1, 1);
+    col = fw::Color(1, 1, 1);
   } else if (_is_highlighted) {
     draw = true;
-    col = _highlight_colour;
+    col = _highlight_color;
   }
 
   if (!draw)
@@ -108,7 +108,7 @@ void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix con
   position_component *pos = entity->get_component<position_component>();
   if (pos != 0) {
     std::shared_ptr<fw::shader_parameters> shader_params = _shader->create_parameters();
-    shader_params->set_colour("selection_colour", col);
+    shader_params->set_color("selection_color", col);
 
     fw::Matrix m = pos->get_transform() * transform;
     m *= fw::translation(fw::Vector(0.0f, 0.2f, 0.0f)); // lift it off the ground a bit

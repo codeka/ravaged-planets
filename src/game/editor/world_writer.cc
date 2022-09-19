@@ -4,7 +4,7 @@
 #include <framework/framework.h>
 #include <framework/logging.h>
 #include <framework/bitmap.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/graphics.h>
 #include <framework/misc.h>
 #include <framework/exception.h>
@@ -82,7 +82,7 @@ void world_writer::write_mapdesc(game::world_file &wf) {
   wfe.write("</mapdesc>");
 }
 
-// The minimap background consist of basically one pixel per vertex. We calculate the colour
+// The minimap background consist of basically one pixel per vertex. We calculate the color
 // of the pixel as a combination of the height of the terrain at that point and the texture that
 // is displayed on the terrain at that point (so "high" and "grass" would be a light green, etc)
 void world_writer::write_minimap_background(game::world_file &wf) {
@@ -90,15 +90,15 @@ void world_writer::write_minimap_background(game::world_file &wf) {
   int width = trn->get_width();
   int height = trn->get_length();
 
-  // calculate the base colours we use for the minimap (basically the "average" colour
+  // calculate the base colors we use for the minimap (basically the "average" color
   // of each splatt texture)
-  calculate_base_minimap_colours();
+  calculate_base_minimap_colors();
 
   std::vector<uint32_t> pixels(width * height);
   for (int z = 0; z < height; z++) {
     for (int x = 0; x < width; x++) {
-      // get the base colour of the terrain
-      fw::colour col = get_terrain_colour(x, z);
+      // get the base color of the terrain
+      fw::Color col = get_terrain_color(x, z);
 
       // we'll normalize the height so it's between 0.25 and 1.75
       float height = trn->get_vertex_height(x, z);
@@ -110,7 +110,7 @@ void world_writer::write_minimap_background(game::world_file &wf) {
       if (height > 1.75f)
         height = 1.75f;
 
-      // adjust the base colour so that it's lighter when it's higher, darker when it's lower, etc
+      // adjust the base color so that it's lighter when it's higher, darker when it's lower, etc
       col *= height;
 
       if (col.r < 0.0f)
@@ -141,8 +141,8 @@ void world_writer::write_minimap_background(game::world_file &wf) {
   img.save_bitmap(wfe.get_full_path());
 }
 
-// gets the basic colour of the terrain at the given (x,z) location
-fw::colour world_writer::get_terrain_colour(int x, int z) {
+// gets the basic color of the terrain at the given (x,z) location
+fw::Color world_writer::get_terrain_color(int x, int z) {
   int patch_x = static_cast<int>(static_cast<float>(x) / game::terrain::PATCH_SIZE);
   int patch_z = static_cast<int>(static_cast<float>(z) / game::terrain::PATCH_SIZE);
 
@@ -159,25 +159,25 @@ fw::colour world_writer::get_terrain_colour(int x, int z) {
   int centre_x = static_cast<int>(centre_u * bmp.get_width());
   int centre_y = static_cast<int>(centre_v * bmp.get_height());
 
-  fw::colour splatt_colour = bmp.get_pixel(centre_x, centre_y);
+  fw::Color splatt_color = bmp.get_pixel(centre_x, centre_y);
 
-  fw::colour final_colour(0, 0, 0);
-  final_colour += _base_minimap_colours[0] * splatt_colour.a;
-  final_colour += _base_minimap_colours[1] * splatt_colour.r;
-  final_colour += _base_minimap_colours[2] * splatt_colour.g;
-  final_colour += _base_minimap_colours[3] * splatt_colour.b;
-  final_colour.a = 1.0f;
+  fw::Color final_color(0, 0, 0);
+  final_color += _base_minimap_colors[0] * splatt_color.a;
+  final_color += _base_minimap_colors[1] * splatt_color.r;
+  final_color += _base_minimap_colors[2] * splatt_color.g;
+  final_color += _base_minimap_colors[3] * splatt_color.b;
+  final_color.a = 1.0f;
 
-  return final_colour;
+  return final_color;
 }
 
-void world_writer::calculate_base_minimap_colours() {
+void world_writer::calculate_base_minimap_colors() {
   editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
   for (int i = 0; i < 4; i++) {
-     // Use the average colour of this layer
+     // Use the average color of this layer
     std::shared_ptr<fw::Bitmap> layer_bmp = trn->get_layer(i);
-    _base_minimap_colours[i] = layer_bmp->get_dominant_colour();
-    fw::debug << "base minimap colour [" << i << "] = " << _base_minimap_colours[i] << std::endl;
+    _base_minimap_colors[i] = layer_bmp->get_dominant_color();
+    fw::debug << "base minimap color [" << i << "] = " << _base_minimap_colors[i] << std::endl;
   }
 }
 

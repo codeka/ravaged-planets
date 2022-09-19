@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sstream>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/vector.h>
 
 namespace fw::net {
@@ -126,16 +126,16 @@ inline packet_buffer &operator >>(packet_buffer &lhs, fw::Vector &rhs) {
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, colour const &rhs) {
+inline packet_buffer &operator <<(packet_buffer &lhs, Color const &rhs) {
   uint32_t rgba = rhs.to_rgba();
   lhs.add_bytes(reinterpret_cast<char const *>(&rgba), 0, sizeof(uint32_t));
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, colour &rhs) {
+inline packet_buffer &operator >>(packet_buffer &lhs, Color &rhs) {
   uint32_t rgba;
   lhs.get_bytes(reinterpret_cast<char *>(&rgba), 0, sizeof(uint32_t));
-  rhs = fw::colour(rgba);
+  rhs = fw::Color(rgba);
   return lhs;
 }
 

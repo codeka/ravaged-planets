@@ -1,6 +1,6 @@
 #include <functional>
 
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/framework.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
@@ -105,7 +105,7 @@ bool new_ai_player_window::on_ok_clicked(Widget *w) {
     if (!ply->is_valid_state()) {
       _new_game_window->append_chat("Error loading player script, check error log.");
     } else {
-      //ply->set_colour(_colour_chooser->get_colour());
+      //ply->set_color(_color_chooser->get_color());
       simulation_thread::get_instance()->add_ai_player(ply);
     }
   } else {

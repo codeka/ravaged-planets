@@ -80,7 +80,7 @@ bool movement_handler(fw::gui::Widget *wdgt) {
 }
 
 bool application::initialize(fw::framework *frmwrk) {
-  fw::top_down_camera *cam = new fw::top_down_camera();
+  fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
 
@@ -119,7 +119,7 @@ void application::update(float dt) {
 }
 
 void application::render(fw::sg::scenegraph &scenegraph) {
-  scenegraph.set_clear_colour(fw::colour(1, 0, 0.0, 0));
+  scenegraph.set_clear_color(fw::Color(1, 0, 0.0, 0));
 }
 
 //-----------------------------------------------------------------------------

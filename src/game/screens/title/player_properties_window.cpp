@@ -3,7 +3,7 @@
 //
 #include "stdafx.h"
 #include "player_properties_window.h"
-#include "../../../framework/gui/colour_chooser.h"
+#include "../../../framework/gui/color_chooser.h"
 #include "../../simulation/local_player.h"
 
 #include <CEGUIWindow.h>
@@ -14,21 +14,21 @@
 namespace ww {
 
 	player_properties_window::player_properties_window()
-		: window("PlayerProperties"), _colour_chooser(0)
+		: window("PlayerProperties"), _color_chooser(0)
 	{
 	}
 
 	player_properties_window::~player_properties_window()
 	{
-		delete _colour_chooser;
+		delete _color_chooser;
 	}
 
 	void player_properties_window::initialise()
 	{
 		window::initialise();
 
-		_colour_chooser = new fw::colour_chooser(get_child("PlayerProperties/ColourContainer"));
-		_colour_chooser->initialise(player_colours);
+		_color_chooser = new fw::color_chooser(get_child("PlayerProperties/ColourContainer"));
+		_color_chooser->initialise(player_colors);
 
 		subscribe("PlayerProperties/OK", CEGUI::PushButton::EventClicked,
 			CEGUI::SubscriberSlot(&player_properties_window::ok_clicked, this));

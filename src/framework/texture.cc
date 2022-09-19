@@ -173,7 +173,7 @@ fs::path Texture::get_filename() const {
 
 struct FramebufferData {
   GLuint fbo_id;
-  std::shared_ptr<Texture> colour_texture;
+  std::shared_ptr<Texture> color_texture;
   std::shared_ptr<Texture> depth_texture;
   bool initialized;
 
@@ -205,8 +205,8 @@ struct FramebufferData {
       FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_id, 0));
     }
 
-    if (colour_texture) {
-      GLuint texture_id = colour_texture->get_data()->texture_id;
+    if (color_texture) {
+      GLuint texture_id = color_texture->get_data()->texture_id;
       FW_CHECKED(glBindTexture(GL_TEXTURE_2D, texture_id));
       FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
       FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
@@ -230,16 +230,16 @@ Framebuffer::Framebuffer() : data_(new FramebufferData()) {
 Framebuffer::~Framebuffer() {
 }
 
-void Framebuffer::set_colour_buffer(std::shared_ptr<Texture> colour_texture) {
-  data_->colour_texture = colour_texture;
+void Framebuffer::set_color_buffer(std::shared_ptr<Texture> color_texture) {
+  data_->color_texture = color_texture;
 }
 
 void Framebuffer::set_depth_buffer(std::shared_ptr<Texture> depth_texture) {
   data_->depth_texture = depth_texture;
 }
 
-std::shared_ptr<Texture> Framebuffer::get_colour_buffer() const {
-  return data_->colour_texture;
+std::shared_ptr<Texture> Framebuffer::get_color_buffer() const {
+  return data_->color_texture;
 }
 
 std::shared_ptr<Texture> Framebuffer::get_depth_buffer() const {
@@ -253,7 +253,7 @@ void Framebuffer::bind() {
 
 void Framebuffer::clear() {
   int bits = 0;
-  if (data_->colour_texture) {
+  if (data_->color_texture) {
     bits |= GL_COLOR_BUFFER_BIT;
   }
   if (data_->depth_texture) {
@@ -267,8 +267,8 @@ void Framebuffer::unbind() {
 }
 
 int Framebuffer::get_width() const {
-  if (data_->colour_texture) {
-    return data_->colour_texture->get_width();
+  if (data_->color_texture) {
+    return data_->color_texture->get_width();
   } else if (data_->depth_texture) {
     return data_->depth_texture->get_width();
   } else {
@@ -277,8 +277,8 @@ int Framebuffer::get_width() const {
 }
 
 int Framebuffer::get_height() const {
-  if (data_->colour_texture) {
-    return data_->colour_texture->get_height();
+  if (data_->color_texture) {
+    return data_->color_texture->get_height();
   } else if (data_->depth_texture) {
     return data_->depth_texture->get_height();
   } else {

@@ -8,7 +8,7 @@
 
 #include <framework/misc.h>
 #include <framework/framework.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/graphics.h>
 #include <framework/texture.h>
 #include <framework/settings.h>
@@ -285,8 +285,8 @@ void shader_parameters::set_vector(std::string const &name, Vector const &v) {
   _vectors[name] = v;
 }
 
-void shader_parameters::set_colour(std::string const &name, colour const &c) {
-  _colours[name] = c;
+void shader_parameters::set_color(std::string const &name, Color const &c) {
+  _colors[name] = c;
 }
 
 void shader_parameters::set_scalar(std::string const &name, float f) {
@@ -298,7 +298,7 @@ std::shared_ptr<shader_parameters> shader_parameters::clone() {
   clone->_textures = _textures;
   clone->_matrices = _matrices;
   clone->_vectors = _vectors;
-  clone->_colours = _colours;
+  clone->_colors = _colors;
   clone->_scalars = _scalars;
   return clone;
 }
@@ -337,7 +337,7 @@ void shader_parameters::apply(shader_program *prog) const {
     }
   }
 
-  for (std::map<std::string, colour>::const_iterator it = _colours.begin(); it != _colours.end(); ++it) {
+  for (std::map<std::string, Color>::const_iterator it = _colors.begin(); it != _colors.end(); ++it) {
     shader_variable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a));

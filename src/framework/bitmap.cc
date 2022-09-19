@@ -2,7 +2,7 @@
 #include <framework/framework.h>
 #include <framework/bitmap.h>
 #include <framework/misc.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/logging.h>
 #include <framework/graphics.h>
 #include <framework/exception.h>
@@ -238,12 +238,12 @@ void Bitmap::set_pixels(std::vector<uint32_t> const &rgba) {
   memcpy(data_->rgba.data(), rgba.data(), width * height * sizeof(uint32_t));
 }
 
-fw::colour Bitmap::get_pixel(int x, int y) {
-  return fw::colour::from_rgba(data_->rgba[(get_width() * y) + x]);
+fw::Color Bitmap::get_pixel(int x, int y) {
+  return fw::Color::from_rgba(data_->rgba[(get_width() * y) + x]);
 }
 
-void Bitmap::set_pixel(int x, int y, fw::colour colour) {
-  data_->rgba[(get_width() * y) + x] = colour.to_rgba();
+void Bitmap::set_pixel(int x, int y, fw::Color color) {
+  data_->rgba[(get_width() * y) + x] = color.to_rgba();
 }
 
 void Bitmap::set_pixel(int x, int y, uint32_t rgba) {
@@ -267,13 +267,13 @@ void Bitmap::resize(int new_width, int new_height) {
 }
 
 /**
- * Gets the "dominant" colour of this bitmap. For now, we simple return the average colour, but something like finding
- * the most common colour or something might be better.
+ * Gets the "dominant" color of this bitmap. For now, we simple return the average color, but something like finding
+ * the most common color or something might be better.
  */
-fw::colour Bitmap::get_dominant_colour() const {
-  fw::colour average(0, 0, 0, 0);
+fw::Color Bitmap::get_dominant_color() const {
+  fw::Color average(0, 0, 0, 0);
   for(uint32_t rgba : data_->rgba) {
-    average += fw::colour::from_abgr(rgba);
+    average += fw::Color::from_abgr(rgba);
   }
 
   average /= static_cast<double>(data_->rgba.size());

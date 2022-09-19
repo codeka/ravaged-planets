@@ -45,7 +45,7 @@ public:
   }
 };
 
-/** A framebuffer holds either a colour texture, a depth texture or bother, and lets use render to those. */
+/** A framebuffer holds either a color texture, a depth texture or bother, and lets use render to those. */
 class Framebuffer {
 private:
   std::shared_ptr<FramebufferData> data_;
@@ -54,10 +54,10 @@ public:
   Framebuffer();
   ~Framebuffer();
 
-  void set_colour_buffer(std::shared_ptr<Texture> colour_texture);
+  void set_color_buffer(std::shared_ptr<Texture> color_texture);
   void set_depth_buffer(std::shared_ptr<Texture> depth_texture);
 
-  std::shared_ptr<Texture> get_colour_buffer() const;
+  std::shared_ptr<Texture> get_color_buffer() const;
   std::shared_ptr<Texture> get_depth_buffer() const;
 
   void bind();

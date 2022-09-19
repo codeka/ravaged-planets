@@ -1,13 +1,13 @@
 #pragma once
 
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <game/session/session.h>
 #include <game/simulation/commands.h>
 
 namespace game {
 class command;
 
-extern std::vector<fw::colour> player_colours;
+extern std::vector<fw::Color> player_colors;
 
 /**
  * This is the base class for the players. There's three kinds of players in the game, the local player (only one of
@@ -19,7 +19,7 @@ protected:
   uint8_t _player_no;
   uint32_t _user_id;
   std::string _user_name;
-  fw::colour _colour;
+  fw::Color _color;
 
   void player_ready();
 
@@ -57,13 +57,13 @@ public:
   uint8_t get_player_no() const {
     return _player_no;
   }
-  fw::colour get_colour() const {
-    return _colour;
+  fw::Color get_color() const {
+    return _color;
   }
 
-  /** Sets our colour to the given value. */
-  void set_colour(fw::colour const &col) {
-    _colour = col;
+  /** Sets our color to the given value. */
+  void set_color(fw::Color const &col) {
+    _color = col;
   }
 };
 

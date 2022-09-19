@@ -4,7 +4,7 @@
 #pragma once
 
 #include <framework/packet.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 
 namespace fw {
 namespace net {
@@ -22,7 +22,7 @@ class command;
 class join_request_packet: public fw::net::packet {
 private:
   uint32_t _user_id;
-  fw::colour _colour;
+  fw::Color _color;
 
 protected:
   virtual void serialize(fw::net::packet_buffer &buffer);
@@ -39,13 +39,13 @@ public:
     return _user_id;
   }
 
-  // gets or sets the colour of the connecting player (only useful when connecting
+  // gets or sets the color of the connecting player (only useful when connecting
   // to a peer, rather than the host)
-  void set_colour(fw::colour value) {
-    _colour = value;
+  void set_color(fw::Color value) {
+    _color = value;
   }
-  fw::colour get_colour() const {
-    return _colour;
+  fw::Color get_color() const {
+    return _color;
   }
 
   static const int identifier = 1;
@@ -59,8 +59,8 @@ class join_response_packet: public fw::net::packet {
 private:
   std::string _map_name;
   std::vector<uint32_t> _other_users;
-  fw::colour _my_colour;
-  fw::colour _your_colour;
+  fw::Color _my_color;
+  fw::Color _your_color;
 
 protected:
   virtual void serialize(fw::net::packet_buffer &buffer);
@@ -81,21 +81,21 @@ public:
     return _other_users;
   }
 
-  // gets or sets the colour that the player you just connected to has
-  fw::colour get_my_colour() const {
-    return _my_colour;
+  // gets or sets the color that the player you just connected to has
+  fw::Color get_my_color() const {
+    return _my_color;
   }
-  void set_my_colour(fw::colour col) {
-    _my_colour = col;
+  void set_my_color(fw::Color col) {
+    _my_color = col;
   }
 
-  // gets or sets the colour we'll allow you to have (this is only useful when coming
+  // gets or sets the color we'll allow you to have (this is only useful when coming
   // from the host of the game - you can ignore it from other peers)
-  fw::colour get_your_colour() const {
-    return _your_colour;
+  fw::Color get_your_color() const {
+    return _your_color;
   }
-  void set_your_colour(fw::colour col) {
-    _your_colour = col;
+  void set_your_color(fw::Color col) {
+    _your_color = col;
   }
 
   static const int identifier = 2;

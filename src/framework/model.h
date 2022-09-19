@@ -1,6 +1,6 @@
 #pragma once
 
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/graphics.h>
 #include <framework/texture.h>
 #include <framework/shader.h>
@@ -58,7 +58,7 @@ public:
 class model {
 private:
   bool _wireframe;
-  fw::colour _colour;
+  fw::Color _color;
 
 public:
   model();
@@ -77,14 +77,14 @@ public:
   }
 
   /**
-   * Sets the colour we apply to transparent parts of the model's texture - this is usually used to differentiate
+   * Sets the color we apply to transparent parts of the model's texture - this is usually used to differentiate
    * different players.
    */
-  inline void set_colour(fw::colour col) {
-    _colour = col;
+  inline void set_color(fw::Color col) {
+    _color = col;
   }
-  inline fw::colour get_colour() const {
-    return _colour;
+  inline fw::Color get_color() const {
+    return _color;
   }
 
   /** Renders the mesh to the given scenegraph. */

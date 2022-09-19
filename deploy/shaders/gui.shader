@@ -18,20 +18,20 @@
   <source name="fragment-normal"><![CDATA[
     uniform sampler2D texsampler;
     in vec2 tex;
-    out vec4 color;
+    out vec4 out_color;
 
     void main() {
-      color = texture(texsampler, tex);
+      out_color = texture(texsampler, tex);
     }
   ]]></source>
   <source name="fragment-font"><![CDATA[
-    uniform vec4 colour;
+    uniform vec4 color;
     uniform sampler2D texsampler;
     in vec2 tex;
-    out vec4 color;
+    out vec4 out_color;
 
     void main() {
-      color = texture(texsampler, tex) * colour;
+      out_color = texture(texsampler, tex) * color;
     }
   ]]></source>
   <source name="fragment-ninepatch"><![CDATA[
@@ -53,7 +53,7 @@
     uniform float pixel_width;
     uniform float pixel_height;
 
-    out vec4 color;
+    out vec4 out_color;
 
     void main() {
       float new_x;
@@ -103,7 +103,7 @@
         }
       }
 
-      color = texture(texsampler, vec2(new_x, new_y));
+      out_color = texture(texsampler, vec2(new_x, new_y));
     }
   ]]></source>
   <program name="default">

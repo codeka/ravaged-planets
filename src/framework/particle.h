@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/texture.h>
 #include <framework/vector.h>
 
@@ -36,7 +36,7 @@ public:
     float speed;
     fw::Vector direction;
     float gravity;
-    int colour_row;
+    int color_row;
 
     life_state();
     life_state(life_state const &copy);
@@ -54,9 +54,9 @@ public:
   // thread will update the position in new_pos, and the render thread will copy it to pos.
   fw::Vector pos;
   fw::Vector new_pos;
-  int colour1;
-  int colour2;
-  float colour_factor;
+  int color1;
+  int color2;
+  float color_factor;
   float alpha;
   float size;
   float age;

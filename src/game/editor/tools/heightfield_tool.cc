@@ -2,7 +2,7 @@
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
-#include <framework/colour.h>
+#include <framework/color.h>
 #include <framework/exception.h>
 #include <framework/input.h>
 #include <framework/timer.h>
@@ -348,7 +348,7 @@ void heightfield_tool::import_heightfield(fw::Bitmap &bm) {
   // now, for each pixel, we set the terrain height!
   for (int x = 0; x < terrain_width; x++) {
     for (int z = 0; z < terrain_length; z++) {
-      fw::colour col = fw::colour::from_argb(pixels[x + (z * terrain_width)]);
+      fw::Color col = fw::Color::from_argb(pixels[x + (z * terrain_width)]);
       float val = col.grayscale();
 
       _terrain->set_vertex_height(x, z, val * 30.0f);

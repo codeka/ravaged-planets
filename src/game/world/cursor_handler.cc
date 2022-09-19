@@ -40,7 +40,7 @@ void cursor_handler::initialize() {
 
 void cursor_handler::update() {
   bool highlight = false;
-  fw::colour highlight_colour;
+  fw::Color highlight_color;
   std::string cursor_name = "arrow";
 
   if (_entities == nullptr) {
@@ -56,13 +56,13 @@ void cursor_handler::update() {
     if (ownable != nullptr) {
       if (ownable->get_owner() == lplyr) {
         //highlight = true;
-        //highlight_colour = fw::colour(1, 1, 1);
+        //highlight_color = fw::color(1, 1, 1);
         cursor_name = "select";
       } else if (_entities->get_selection().size() > 0) {
         // if it's not ours and we have a selection, highlight with
         // red to indicate we can attack
         highlight = true;
-        highlight_colour = fw::colour(1, 0, 0);
+        highlight_color = fw::Color(1, 0, 0);
         cursor_name = "attack";
       }
     } else {
@@ -87,7 +87,7 @@ void cursor_handler::update() {
 
   if (highlight) {
     ent::selectable_component *selectable = entity_under_cursor->get_component<ent::selectable_component>();
-    selectable->highlight(highlight_colour);
+    selectable->highlight(highlight_color);
     _last_highlighted = _entity_under_cursor;
   }
 }

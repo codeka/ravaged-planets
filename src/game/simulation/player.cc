@@ -3,19 +3,19 @@
 
 namespace game {
 
-std::vector<fw::colour> player_colours;
+std::vector<fw::Color> player_colors;
 
 player::player() :
-    _user_id(0), _player_no(0), _is_ready_to_start(0), _colour(0, 0, 0) {
-  if (player_colours.size() == 0) {
-    player_colours.push_back(fw::colour(0.0f, 1.0f, 1.0f)); // aqua
-    player_colours.push_back(fw::colour(1.0f, 1.0f, 1.0f)); // fuchsia
-    player_colours.push_back(fw::colour(1.0f, 0.0f, 0.0f)); // red
-    player_colours.push_back(fw::colour(0.5f, 0.5f, 0.0f)); // olive
-    player_colours.push_back(fw::colour(0.0f, 1.0f, 0.0f)); // bright green
-    player_colours.push_back(fw::colour(0.0f, 0.0f, 1.0f)); // blue
-    player_colours.push_back(fw::colour(0.5f, 0.0f, 0.5f)); // purple
-    player_colours.push_back(fw::colour(0.0f, 0.5f, 0.5f)); // teal
+    _user_id(0), _player_no(0), _is_ready_to_start(0), _color(0, 0, 0) {
+  if (player_colors.size() == 0) {
+    player_colors.push_back(fw::Color(0.0f, 1.0f, 1.0f)); // aqua
+    player_colors.push_back(fw::Color(1.0f, 1.0f, 1.0f)); // fuchsia
+    player_colors.push_back(fw::Color(1.0f, 0.0f, 0.0f)); // red
+    player_colors.push_back(fw::Color(0.5f, 0.5f, 0.0f)); // olive
+    player_colors.push_back(fw::Color(0.0f, 1.0f, 0.0f)); // bright green
+    player_colors.push_back(fw::Color(0.0f, 0.0f, 1.0f)); // blue
+    player_colors.push_back(fw::Color(0.5f, 0.0f, 0.5f)); // purple
+    player_colors.push_back(fw::Color(0.0f, 0.5f, 0.5f)); // teal
   }
 }
 

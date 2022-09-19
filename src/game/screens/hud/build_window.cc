@@ -50,7 +50,7 @@ private:
   std::string _template_name;
   std::shared_ptr<fw::model> _model;
   std::shared_ptr<fw::Framebuffer> _framebuffer;
-  std::shared_ptr<fw::Texture> _colour_texture;
+  std::shared_ptr<fw::Texture> _color_texture;
   std::shared_ptr<fw::Texture> _depth_texture;
   std::shared_ptr<Drawable> _drawable;
 
@@ -71,18 +71,18 @@ entity_icon::entity_icon() : _rotation(0.0f) {
 }
 
 void entity_icon::initialize() {
-  _colour_texture = std::shared_ptr<fw::Texture>(new fw::Texture());
-  _colour_texture->create(64, 64, false);
+  _color_texture = std::shared_ptr<fw::Texture>(new fw::Texture());
+  _color_texture->create(64, 64, false);
 
   _depth_texture = std::shared_ptr<fw::Texture>(new fw::Texture());
   _depth_texture->create(64, 64, true);
 
   _framebuffer = std::shared_ptr<fw::Framebuffer>(new fw::Framebuffer());
-  _framebuffer->set_colour_buffer(_colour_texture);
+  _framebuffer->set_color_buffer(_color_texture);
   _framebuffer->set_depth_buffer(_depth_texture);
 
   _drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
-      ->build_drawable(_colour_texture, 7, 7, 50, 50);
+      ->build_drawable(_color_texture, 7, 7, 50, 50);
   std::dynamic_pointer_cast<BitmapDrawable>(_drawable)->set_flipped(true);
   render();
 }
@@ -100,9 +100,9 @@ void entity_icon::render() {
   }
 
   fw::sg::scenegraph sg;
-  sg.set_clear_colour(fw::colour(0, 0, 0, 0));
+  sg.set_clear_color(fw::Color(0, 0, 0, 0));
 
-  fw::lookat_camera cam;
+  fw::LookAtCamera cam;
   cam.set_distance(2.0f);
   cam.update(1.0f / 30.0f);
   sg.push_camera(&cam);
@@ -245,7 +245,7 @@ void build_window::do_refresh() {
     fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
       std::shared_ptr<fw::model> mdl =
           fw::framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
-      mdl->set_colour(game::simulation_thread::get_instance()->get_local_player()->get_colour());
+      mdl->set_color(game::simulation_thread::get_instance()->get_local_player()->get_color());
       icon->set_model(""/*luabind::object_cast<std::string>(tmpl["name"])*/, mdl);
     });
 

@@ -133,10 +133,10 @@ void collision_patch::bake(std::vector<bool> &data, float *heights, int width, i
       int iz = fw::constrain((patch_z * PATCH_SIZE) + z, length);
 
       bool passable = data[(iz * width) + ix];
-      fw::colour colour(passable ? fw::colour(0.1f, 1.0f, 0.1f) : fw::colour(1.0f, 0.1f, 0.1f));
+      fw::Color color(passable ? fw::Color(0.1f, 1.0f, 0.1f) : fw::Color(1.0f, 0.1f, 0.1f));
 
       int index = z * (PATCH_SIZE + 1) + x;
-      vertices[index] = fw::vertex::xyz_c(x, heights[iz * width + ix] + 0.1f, z, colour);
+      vertices[index] = fw::vertex::xyz_c(x, heights[iz * width + ix] + 0.1f, z, color);
     }
   }
 
@@ -243,13 +243,13 @@ void pathing_tool::render(fw::sg::scenegraph &scenegraph) {
 
   if (_start_set) {
     fw::Matrix loc(fw::translation(_start_pos));
-    _marker->set_colour(fw::colour(1, 0.1f, 1, 0.1f));
+    _marker->set_color(fw::Color(1, 0.1f, 1, 0.1f));
     _marker->render(scenegraph, loc);
   }
 
   if (_end_set) {
     fw::Matrix loc(fw::translation(_end_pos));
-    _marker->set_colour(fw::colour(1, 1, 0.1f, 0.1f));
+    _marker->set_color(fw::Color(1, 1, 0.1f, 0.1f));
     _marker->render(scenegraph, loc);
   }
 
@@ -331,12 +331,12 @@ void pathing_tool::find_path() {
     if (_simplify) {
       BOOST_FOREACH(fw::Vector loc, path) {
         float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
-        buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::colour(1, 0.5f, 0.5f, 1)));
+        buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));
       }
     } else {
       BOOST_FOREACH(fw::Vector loc, full_path) {
         float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
-        buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::colour(1, 0.5f, 0.5f, 1)));
+        buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));
       }
     }
 

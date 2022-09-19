@@ -115,16 +115,16 @@ void graphics::destroy() {
   _context = nullptr;
 }
 
-void graphics::begin_scene(fw::colour clear_colour /*= fw::colour(1,0,0,0)*/) {
+void graphics::begin_scene(fw::Color clear_color /*= fw::color(1,0,0,0)*/) {
   if (_framebuffer) {
     FW_CHECKED(glViewport(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
     FW_CHECKED(glScissor(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
-    FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
+    FW_CHECKED(glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a));
     _framebuffer->clear();
   } else {
     FW_CHECKED(glViewport(0, 0, _width, _height));
     FW_CHECKED(glScissor(0, 0, _width, _height));
-    FW_CHECKED(glClearColor(clear_colour.r, clear_colour.g, clear_colour.b, clear_colour.a));
+    FW_CHECKED(glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a));
     FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
   }
 }
@@ -314,7 +314,7 @@ static void xyz_c_setup() {
   FW_CHECKED(glEnableVertexAttribArray(0));
   FW_CHECKED(glEnableVertexAttribArray(1));
   FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, colour)));
+  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, color)));
 }
 
 std::function<void()> xyz_c::get_setup_function() {
@@ -337,7 +337,7 @@ void xyz_c_uv_setup() {
   FW_CHECKED(glEnableVertexAttribArray(1));
   FW_CHECKED(glEnableVertexAttribArray(2));
   FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, colour)));
+  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, color)));
   FW_CHECKED(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, u)));
 }
 

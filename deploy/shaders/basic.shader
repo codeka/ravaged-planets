@@ -27,21 +27,21 @@
   <source name="vertex-notexture"><![CDATA[
     uniform mat4 worldviewproj;
 
-    out vec4 colour;
+    out vec4 color;
 
     layout (location = 0) in vec3 in_position;
-    layout (location = 1) in vec4 in_colour;
+    layout (location = 1) in vec4 in_color;
 
     void main() {
       gl_Position = worldviewproj * vec4(in_position, 1);
-      colour = in_colour;
+      color = in_color;
     }
   ]]></source>
   <source name="fragment"><![CDATA[
     in vec2 tex;
     in vec4 light_pos;
     in float NdotL;
-    out vec4 colour;
+    out vec4 color;
     uniform sampler2D tex_sampler;
     uniform sampler2DShadow shadow_map;
 
@@ -49,21 +49,21 @@
       vec2 uv = 0.5 * (light_pos.xy / light_pos.w) + 0.5;
       float light_amount = texture(shadow_map, vec3(uv, light_pos.z / light_pos.w));
 
-      // get the "base" colour from the texture
-      vec4 base_colour = texture(tex_sampler, tex);
+      // get the "base" color from the texture
+      vec4 base_color = texture(tex_sampler, tex);
 
-      // then figure out the "real" colour by applying the light calculation
+      // then figure out the "real" color by applying the light calculation
       float diffuse = clamp(NdotL, 0.0, 1.0) * light_amount;
 
-      colour = base_colour * diffuse;
+      color = base_color * diffuse;
     }
   ]]></source>
   <source name="fragment-notexture"><![CDATA[
-    in vec4 colour;
-    out vec4 out_colour;
+    in vec4 color;
+    out vec4 out_color;
 
     void main() {
-      out_colour = colour;
+      out_color = color;
     }
   ]]></source>
   <program name="default">
