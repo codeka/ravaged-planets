@@ -2,12 +2,11 @@
 
 #include <memory>
 
+#include <framework/gui/drawable.h>
+#include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
 
 namespace fw::gui {
-class Drawable;
-class Gui;
-
 
 // Represents a top-level window, complete with controls for moving and so on. All rendering happens inside a window.
 class Window : public Widget {

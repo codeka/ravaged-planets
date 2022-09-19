@@ -6,12 +6,11 @@
 #define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
 #include <boost/signals2.hpp>
 
-namespace fw {
-class graphics;
+#include <framework/graphics.h>
+#include <framework/gui/drawable.h>
 
-namespace gui {
+namespace fw::gui {
 class Widget;
-class DrawableManager;
 
 /**
  * This is the main entry point into the GUI subsystem. You get an instance of this class from \ref fw::framework.
@@ -80,4 +79,3 @@ public:
 
 } 
 
-}

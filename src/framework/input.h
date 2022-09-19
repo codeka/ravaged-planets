@@ -14,7 +14,6 @@ union SDL_Event;
 #define KEY_MBTNRIGHT (0xffffff00 + 2)
 
 namespace fw {
-class framework;
 
 typedef std::function<void(std::string keyname, bool is_down)> input_bind_fn;
 

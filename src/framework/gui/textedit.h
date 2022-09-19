@@ -4,13 +4,13 @@
 #include <memory>
 #include <string>
 
+#include <framework/gui/drawable.h>
+#include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
 
 class TextEditBuffer;
 
 namespace fw { namespace gui {
-class Gui;
-class Drawable;
 
 // A TextEdit widget is a complex widget which allows the user to type, edit, select, cut & copy text.
 class TextEdit : public Widget {

@@ -4,13 +4,12 @@
 #define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
 #include <boost/signals2.hpp>
 
-#include "vector.h"
-#include "logging.h"
-#include "exception.h"
+#include <framework/exception.h>
+#include <framework/logging.h>
+#include <framework/graphics.h>
+#include <framework/vector.h>
 
 namespace fw {
-
-class graphics;
 
 class camera {
 private:

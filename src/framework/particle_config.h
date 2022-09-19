@@ -7,9 +7,9 @@
 #include <framework/colour.h>
 #include <framework/particle.h>
 #include <framework/texture.h>
+#include <framework/xml.h>
 
 namespace fw {
-class xml_element;
 class emit_policy;
 class particle_emitter_config;
 

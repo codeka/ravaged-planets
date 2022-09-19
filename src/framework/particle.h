@@ -3,11 +3,11 @@
 #include <memory>
 #include <vector>
 
-#include <framework/vector.h>
 #include <framework/colour.h>
+#include <framework/texture.h>
+#include <framework/vector.h>
 
 namespace fw {
-class texture;
 class particle_emitter_config;
 
 namespace rotation_kind {

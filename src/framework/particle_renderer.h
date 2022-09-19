@@ -5,20 +5,14 @@
 
 #include <framework/graphics.h>
 #include <framework/texture.h>
+#include <framework/scenegraph.h>
+#include <framework/shader.h>
 
 struct render_state;
 
 namespace fw {
-class shader;
-class shader_parameters;
-class graphics;
 class particle;
 class particle_manager;
-class vertex_buffer;
-class index_buffer;
-namespace sg {
-class scenegraph;
-}
 
 /**
  * The particle_renderer is responsible for rendering particles. We create our own special scenegraph node that does

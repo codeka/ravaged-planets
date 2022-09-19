@@ -5,18 +5,14 @@
 #include <memory>
 #include <boost/noncopyable.hpp>
 
+#include <framework/colour.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/texture.h>
 #include <framework/vector.h>
 
 namespace fw {
-
-class graphics;
 class shader;
-class colour;
-class vertex_buffer;
-class index_buffer;
 class shader_program;
 
 // you can pass this to a shader to set a bunch of parameters all at once

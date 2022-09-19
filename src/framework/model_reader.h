@@ -2,8 +2,9 @@
 
 #include <boost/filesystem.hpp>
 
+#include <framework/model.h>
+
 namespace fw {
-class model;
 
 /** This class is used to read models in from .mesh files. */
 class model_reader {

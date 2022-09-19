@@ -1,13 +1,12 @@
 #pragma once
 
+#include <framework/graphics.h>
+#include <framework/model.h>
 #include <framework/scenegraph.h>
+#include <framework/shader.h>
 #include <framework/vector.h>
 
 namespace fw {
-class model;
-class model_mesh;
-class graphics;
-class shader;
 
 /**
  * This is a specialization of the scenegraph node used by models. It basically just contains a bit of extra info

@@ -7,13 +7,14 @@
 #include <thread>
 #include <curl/curl.h>
 
+#include <framework/xml.h>
+
 // this is defined in winnt.h... silly!!
 #ifdef DELETE
 #undef DELETE
 #endif
 
 namespace fw {
-class xml_element;
 
 /**
  * Represents a single HTTP request/response. Use the \ref http::perform() methods to initiate a request, then use

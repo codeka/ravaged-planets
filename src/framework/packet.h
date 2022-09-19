@@ -3,10 +3,9 @@
 #include <functional>
 #include <memory>
 
-namespace fw {
-namespace net {
+#include <framework/packet_buffer.h>
 
-class packet_buffer;
+namespace fw::net {
 class net_peer;
 
 // This is a helper macro for registering packet types with the packet_factory
@@ -43,5 +42,4 @@ public:
   packet_registrar(uint16_t id, std::function<std::shared_ptr<packet>()> fn);
 };
 
-}
 }

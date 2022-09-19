@@ -7,7 +7,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 
-//#include "vertex_formats.h"
 #include <framework/vector.h>
 
 namespace fw {

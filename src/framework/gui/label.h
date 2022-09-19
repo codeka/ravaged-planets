@@ -4,11 +4,11 @@
 #include <string>
 
 #include <framework/bitmap.h>
+#include <framework/gui/drawable.h>
+#include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
 
 namespace fw::gui {
-class Gui;
-class Drawable;
 
 // A Label is just a simple static control, either text or a drawable that is non-interactive.
 class Label : public Widget {

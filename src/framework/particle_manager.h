@@ -5,17 +5,15 @@
 #include <mutex>
 #include <vector>
 
+#include <framework/graphics.h>
+#include <framework/scenegraph.h>
+#include <framework/texture.h>
+
 namespace fw {
-class graphics;
 class particle;
 class particle_emitter;
 class particle_effect;
 class particle_renderer;
-class texture;
-
-namespace sg {
-class scenegraph;
-}
 
 /** The particle_manager manages all of the particle emitters in the game. */
 class particle_manager {

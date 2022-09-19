@@ -4,8 +4,7 @@
 #include <framework/colour.h>
 #include <framework/vector.h>
 
-namespace fw {
-namespace net {
+namespace fw::net {
 
 /* This class represents a "buffer" we use for reading/writing packets that get sent between net_peers. */
 class packet_buffer {
@@ -166,5 +165,4 @@ inline packet_buffer &operator >>(packet_buffer &lhs, std::string &rhs) {
   return lhs;
 }
 
-}
 }

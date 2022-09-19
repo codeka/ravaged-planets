@@ -1,19 +1,14 @@
 #pragma once
 
+#include <framework/colour.h>
 #include <framework/graphics.h>
 #include <framework/texture.h>
+#include <framework/shader.h>
+#include <framework/scenegraph.h>
 #include <framework/vector.h>
-#include <framework/colour.h>
 
 namespace fw {
-class vertex_buffer;
-class index_buffer;
-class shader;
 class model_node;
-namespace sg {
-class scenegraph;
-class node;
-}
 
 /** A model_mesh represents all the data needed for a single call to glDraw* - vertices, indices, etc. */
 class model_mesh {

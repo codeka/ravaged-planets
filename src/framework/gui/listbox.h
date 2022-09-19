@@ -3,11 +3,11 @@
 #include <memory>
 #include <string>
 
+#include <framework/gui/drawable.h>
+#include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
 
 namespace fw::gui {
-class Gui;
-class Drawable;
 class ListboxItem;
 
 /** A Listbox is a scrollable list of items. */

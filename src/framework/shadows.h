@@ -1,13 +1,10 @@
 #pragma once
 
 #include <framework/camera.h>
+#include <framework/shader.h>
 #include <framework/texture.h>
 
 namespace fw {
-class shader;
-namespace sg {
-class scenegraph;
-}
 
 /**
  * This is a special camera implementation for rendering the shadow map. basically, we don't

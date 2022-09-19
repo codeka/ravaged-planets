@@ -4,13 +4,13 @@
 #include <memory>
 
 #include <framework/vector.h>
+#include <framework/xml.h>
 
 namespace fw {
 class particle_manager;
 class particle;
 class particle_emitter_config;
 class emit_policy;
-class xml_element;
 
 /**
  * This class represents the particle emitter, whose job it is to "emit" particles into the world with the correct

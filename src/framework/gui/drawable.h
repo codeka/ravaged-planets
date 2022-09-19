@@ -5,16 +5,13 @@
 
 #include <boost/filesystem.hpp>
 
+#include <framework/graphics.h>
+#include <framework/shader.h>
 #include <framework/texture.h>
 #include <framework/vector.h>
 #include <framework/xml.h>
 
-namespace fw {
-class graphics;
-class shader;
-class shader_parameters;
-
-namespace gui {
+namespace fw::gui {
 
 // A Drawable is any object that appears on the screen. It's typically a nine-patch or image and is used at the
 // background of widgets and windows.
@@ -129,7 +126,5 @@ public:
   std::shared_ptr<Drawable> build_drawable(std::shared_ptr<fw::Texture> texture,
     float top, float left, float width, float height);
 };
-
-}
 
 }

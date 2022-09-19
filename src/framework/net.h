@@ -6,9 +6,10 @@
 #include <boost/noncopyable.hpp>
 #include <enet/enet.h>
 
+#include <framework/packet.h>
+
 namespace fw {
 namespace net {
-class packet;
 class peer;
 
 // The framework automatically calls fw::net::initialize() and fw::net::destroy() to ensure we're all ready to go.

@@ -5,7 +5,7 @@
 #define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
 #include <boost/signals2.hpp>
 
-namespace fw { namespace gui {
+namespace fw::gui {
 class Gui;
 class Widget;
 
@@ -237,4 +237,4 @@ public:
   void set_visible(bool visible);
 };
 
-} }
+}

@@ -3,19 +3,15 @@
 #include <memory>
 #include <stack>
 
+#include <framework/camera.h>
 #include <framework/colour.h>
+#include <framework/graphics.h>
+#include <framework/shader.h>
+#include <framework/shadows.h>
 #include <framework/texture.h>
 #include <framework/vector.h>
 
-namespace fw {
-class camera;
-class shadow_source;
-class vertex_buffer;
-class index_buffer;
-class shader;
-class shader_parameters;
-
-namespace sg {
+namespace fw::sg {
 
 class scenegraph;
 
@@ -208,5 +204,6 @@ public:
 };
 }
 
+namespace fw {
 void render(fw::sg::scenegraph &sg, std::shared_ptr<fw::Framebuffer> render_target = nullptr, bool render_gui = true);
 }

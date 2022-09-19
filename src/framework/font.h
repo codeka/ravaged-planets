@@ -6,6 +6,7 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
+#include <framework/bitmap.h>
 #include <framework/colour.h>
 #include <framework/texture.h>
 #include <framework/vector.h>
@@ -15,7 +16,6 @@ typedef struct FT_LibraryRec_ *FT_Library;
 typedef struct FT_FaceRec_*  FT_Face;
 
 namespace fw {
-class Bitmap;
 class font_manager;
 class glyph;
 class string_cache_entry;

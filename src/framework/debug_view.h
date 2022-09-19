@@ -1,9 +1,8 @@
 #pragma once
 
+#include <framework/gui/window.h>
+
 namespace fw {
-namespace gui {
-class Window;
-}
 
 /** GUI view which shows a bit of debug information about the game (fps, num active particles, etc). */
 class debug_view {

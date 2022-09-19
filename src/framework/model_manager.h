@@ -3,8 +3,9 @@
 #include <map>
 #include <memory>
 
+#include <framework/model.h>
+
 namespace fw {
-class model;
 
 /** Manages models, keeps them cached in memory and so on. */
 class model_manager {
