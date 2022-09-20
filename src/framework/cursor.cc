@@ -12,24 +12,24 @@
 
 namespace fw {
 
-cursor::cursor() : _cursor_visible(true) {
+Cursor::Cursor() : cursor_visible_(true) {
 }
 
-cursor::~cursor() {
+Cursor::~Cursor() {
 }
 
-void cursor::initialize() {
+void Cursor::initialize() {
   set_cursor(0, "arrow");
 }
 
-void cursor::destroy() {
-  for(auto it : _loaded_cursors) {
+void Cursor::destroy() {
+  for(auto it : loaded_cursors_) {
     SDL_FreeCursor(it.second);
   }
-  _loaded_cursors.clear();
+  loaded_cursors_.clear();
 }
 
-SDL_Cursor *cursor::load_cursor(std::string const &name) {
+SDL_Cursor *Cursor::load_cursor(std::string const &name) {
   fw::Bitmap bmp(fw::resolve("cursors/" + name + ".png"));
 
   int hot_x = bmp.get_width() / 2;
@@ -60,12 +60,12 @@ SDL_Cursor *cursor::load_cursor(std::string const &name) {
   return cursor;
 }
 
-void cursor::set_cursor_for_real(std::string const &name) {
+void Cursor::set_cursor_for_real(std::string const &name) {
   SDL_Cursor *cursor;
-  auto it = _loaded_cursors.find(name);
-  if (it == _loaded_cursors.end()) {
+  auto it = loaded_cursors_.find(name);
+  if (it == loaded_cursors_.end()) {
     cursor = load_cursor(name);
-    _loaded_cursors[name] = cursor;
+    loaded_cursors_[name] = cursor;
   } else {
     cursor = it->second;
   }
@@ -73,34 +73,34 @@ void cursor::set_cursor_for_real(std::string const &name) {
   SDL_SetCursor(cursor);
 }
 
-void cursor::update_cursor() {
-  std::map<int, std::string>::reverse_iterator cit = _cursor_stack.rbegin();
-  if (cit != _cursor_stack.rend()) {
+void Cursor::update_cursor() {
+  std::map<int, std::string>::reverse_iterator cit = cursor_stack_.rbegin();
+  if (cit != cursor_stack_.rend()) {
      std::string cursor_name = cit->second;
      set_cursor_for_real(cursor_name);
   }
 }
 
-void cursor::set_cursor(int priority, std::string const &name) {
+void Cursor::set_cursor(int priority, std::string const &name) {
   if (name == "") {
-    auto it = _cursor_stack.find(priority);
-    if (it != _cursor_stack.end()) {
-      _cursor_stack.erase(it);
+    auto it = cursor_stack_.find(priority);
+    if (it != cursor_stack_.end()) {
+      cursor_stack_.erase(it);
     }
   } else {
-    _cursor_stack[priority] = name;
+    cursor_stack_[priority] = name;
   }
 
   update_cursor();
 }
 
-void cursor::set_visible(bool is_visible) {
+void Cursor::set_visible(bool is_visible) {
   SDL_ShowCursor(is_visible ? 1 : 0);
-  _cursor_visible = is_visible;
+  cursor_visible_ = is_visible;
 }
 
-bool cursor::is_visible() {
-  return _cursor_visible;
+bool Cursor::is_visible() {
+  return cursor_visible_;
 }
 
 }

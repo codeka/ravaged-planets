@@ -23,7 +23,7 @@ std::shared_ptr<model> model_reader::read(fs::path const &filename) {
   std::fstream ins;
   ins.open(filename.c_str(), std::ios::in | std::ifstream::binary);
   if (ins.fail()) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(filename));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(filename));
   }
   pb_model.ParseFromIstream(&ins);
   ins.close();

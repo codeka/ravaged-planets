@@ -45,7 +45,7 @@ std::shared_ptr<order> create_order(uint16_t id) {
   create_order_fn fn = (*g_order_registry)[id];
   if (fn == nullptr) {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("order does not exist: " + boost::lexical_cast<std::string>(id)));
+        fw::Exception() << fw::message_error_info("order does not exist: " + boost::lexical_cast<std::string>(id)));
   }
 
   return fn();

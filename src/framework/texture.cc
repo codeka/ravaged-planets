@@ -74,7 +74,7 @@ Texture::~Texture() {
 }
 
 void Texture::create(fs::path const &filename) {
-  graphics *g = fw::framework::get_instance()->get_graphics();
+  Graphics *g = fw::framework::get_instance()->get_graphics();
 
   data_ = g_cache.get_texture(filename);
   if (!data_) {
@@ -102,7 +102,7 @@ void Texture::create(std::shared_ptr<fw::Bitmap> bmp) {
 }
 
 void Texture::create(fw::Bitmap const &bmp) {
-  graphics *g = fw::framework::get_instance()->get_graphics();
+  Graphics *g = fw::framework::get_instance()->get_graphics();
 
   if (!data_) {
     data_ = std::make_shared<TextureData>();
@@ -116,7 +116,7 @@ void Texture::create(fw::Bitmap const &bmp) {
 }
 
 void Texture::create(int width, int height, bool is_shadowmap) {
-  graphics *g = fw::framework::get_instance()->get_graphics();
+  Graphics *g = fw::framework::get_instance()->get_graphics();
 
   if (!data_) {
     data_ = std::make_shared<TextureData>();

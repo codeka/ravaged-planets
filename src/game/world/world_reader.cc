@@ -33,7 +33,7 @@ void world_reader::read(std::string name) {
   world_file_entry wfe = wf.get_entry("heightfield", false /* for_write */);
   wfe.read(&version, sizeof(int));
   if (version != 1) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("unknown terrain version"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown terrain version"));
   }
 
   wfe.read(&trn_width, sizeof(int));
@@ -88,7 +88,7 @@ void world_reader::read_collision_data(world_file_entry &wfe) {
   int version;
   wfe.read(&version, sizeof(int));
   if (version != 1) {
-    BOOST_THROW_EXCEPTION(fw::exception()
+    BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("unknown collision_data version"));
   }
 
@@ -114,7 +114,7 @@ void world_reader::read_mapdesc(fw::xml_element root) {
     } else if (child.get_value() == "players") {
       read_mapdesc_players(child);
     } else {
-      BOOST_THROW_EXCEPTION(fw::exception()
+      BOOST_THROW_EXCEPTION(fw::Exception()
           << fw::message_error_info("Unknown child element of <mapdesc> node!"));
     }
   }
@@ -124,14 +124,14 @@ void world_reader::read_mapdesc_players(fw::xml_element players_node) {
   for (fw::xml_element child = players_node.get_first_child(); child.is_valid();
       child = child.get_next_sibling()) {
     if (child.get_value() != "player") {
-      BOOST_THROW_EXCEPTION(fw::exception()
+      BOOST_THROW_EXCEPTION(fw::Exception()
           << fw::message_error_info("Unknown child element of <players> node!"));
     }
 
     int player_no = boost::lexical_cast<int>(child.get_attribute("no"));
     std::vector<float> start = fw::split<float>(child.get_attribute("start"));
     if (start.size() != 2) {
-      BOOST_THROW_EXCEPTION(fw::exception()
+      BOOST_THROW_EXCEPTION(fw::Exception()
           << fw::message_error_info("<player> node has invalid 'start' attribute."));
     }
 
@@ -147,7 +147,7 @@ terrain *world_reader::create_terrain(int width, int length) {
 
 terrain *world_reader::get_terrain() {
   if (_terrain == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::exception()
+    BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("Terrain has not been created yet!"));
   }
 

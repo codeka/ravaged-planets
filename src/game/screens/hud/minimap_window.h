@@ -10,8 +10,8 @@
 namespace fw {
 class shader;
 class shader_parameters;
-class vertex_buffer;
-class index_buffer;
+class VertexBuffer;
+class IndexBuffer;
 namespace gui {
 class Window;
 }

@@ -60,8 +60,8 @@ struct render_state {
   std::shared_ptr<fw::shader> shader;
   std::shared_ptr<fw::shader_parameters> shader_parameters;
 
-  std::vector<std::shared_ptr<fw::vertex_buffer>> vertex_buffers;
-  std::vector<std::shared_ptr<fw::index_buffer>> index_buffers;
+  std::vector<std::shared_ptr<fw::VertexBuffer>> vertex_buffers;
+  std::vector<std::shared_ptr<fw::IndexBuffer>> index_buffers;
 
   inline render_state(fw::sg::scenegraph &sg, fw::particle_renderer::particle_list &particles) :
       scenegraph(sg), particles(particles), mode(fw::particle_emitter_config::additive), particle_num(0) {
@@ -73,42 +73,42 @@ struct render_state {
 // so that we don't have to continually create/destroy them
 class buffer_cache {
 private:
-  std::vector<std::shared_ptr<fw::vertex_buffer>> _vertex_buffers;
-  std::vector<std::shared_ptr<fw::index_buffer>> _index_buffers;
+  std::vector<std::shared_ptr<fw::VertexBuffer>> _vertex_buffers;
+  std::vector<std::shared_ptr<fw::IndexBuffer>> _index_buffers;
 
 public:
-  std::shared_ptr<fw::vertex_buffer> get_vertex_buffer();
-  std::shared_ptr<fw::index_buffer> get_index_buffer();
+  std::shared_ptr<fw::VertexBuffer> get_vertex_buffer();
+  std::shared_ptr<fw::IndexBuffer> get_index_buffer();
 
-  void release_vertex_buffer(std::shared_ptr<fw::vertex_buffer> vb);
-  void release_index_buffer(std::shared_ptr<fw::index_buffer> ib);
+  void release_vertex_buffer(std::shared_ptr<fw::VertexBuffer> vb);
+  void release_index_buffer(std::shared_ptr<fw::IndexBuffer> ib);
 };
 
-std::shared_ptr<fw::vertex_buffer> buffer_cache::get_vertex_buffer() {
+std::shared_ptr<fw::VertexBuffer> buffer_cache::get_vertex_buffer() {
   if (_vertex_buffers.size() > 0) {
-    std::shared_ptr<fw::vertex_buffer> vb(_vertex_buffers.back());
+    std::shared_ptr<fw::VertexBuffer> vb(_vertex_buffers.back());
     _vertex_buffers.pop_back();
     return vb;
   } else {
-    return fw::vertex_buffer::create<fw::vertex::xyz_c_uv>(true);
+    return fw::VertexBuffer::create<fw::vertex::xyz_c_uv>(true);
   }
 }
 
-std::shared_ptr<fw::index_buffer> buffer_cache::get_index_buffer() {
+std::shared_ptr<fw::IndexBuffer> buffer_cache::get_index_buffer() {
   if (_index_buffers.size() > 0) {
-    std::shared_ptr<fw::index_buffer> ib(_index_buffers.back());
+    std::shared_ptr<fw::IndexBuffer> ib(_index_buffers.back());
     _index_buffers.pop_back();
     return ib;
   } else {
-    return std::shared_ptr<fw::index_buffer>(new fw::index_buffer(true));
+    return std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer(true));
   }
 }
 
-void buffer_cache::release_vertex_buffer(std::shared_ptr<fw::vertex_buffer> vb) {
+void buffer_cache::release_vertex_buffer(std::shared_ptr<fw::VertexBuffer> vb) {
   _vertex_buffers.push_back(vb);
 }
 
-void buffer_cache::release_index_buffer(std::shared_ptr<fw::index_buffer> ib) {
+void buffer_cache::release_index_buffer(std::shared_ptr<fw::IndexBuffer> ib) {
   _index_buffers.push_back(ib);
 }
 
@@ -125,7 +125,7 @@ particle_renderer::particle_renderer(particle_manager *mgr) :
 particle_renderer::~particle_renderer() {
 }
 
-void particle_renderer::initialize(graphics *g) {
+void particle_renderer::initialize(Graphics *g) {
   _graphics = g;
 
   _color_texture->create(fw::resolve("particles/colors.png"));
@@ -142,19 +142,19 @@ std::string get_program_name(particle_emitter_config::billboard_mode mode) {
   case particle_emitter_config::additive:
     return "particle-additive";
   default:
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Unknown billboard_mode!"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Unknown billboard_mode!"));
 
     return ""; // never gets here...
   }
 }
 
 void generate_scenegraph_node(render_state &rs) {
-  std::shared_ptr<fw::vertex_buffer> vb = g_buffer_cache.get_vertex_buffer();
+  std::shared_ptr<fw::VertexBuffer> vb = g_buffer_cache.get_vertex_buffer();
   vb->set_data(rs.vertices.size(), &rs.vertices[0]);
   rs.vertices.clear();
   rs.vertex_buffers.push_back(vb);
 
-  std::shared_ptr<fw::index_buffer> ib = g_buffer_cache.get_index_buffer();
+  std::shared_ptr<fw::IndexBuffer> ib = g_buffer_cache.get_index_buffer();
   ib->set_data(rs.indices.size(), &rs.indices[0]);
   rs.indices.clear();
   rs.index_buffers.push_back(ib);
@@ -287,10 +287,10 @@ void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::pa
   // release the vertex and index buffers back into the cache (even though
   // they're still technically in use by the scene graph, we won't need them
   // again until the next frame so we can do this here)
-  BOOST_FOREACH(std::shared_ptr<fw::vertex_buffer> vb, rs.vertex_buffers) {
+  BOOST_FOREACH(std::shared_ptr<fw::VertexBuffer> vb, rs.vertex_buffers) {
     g_buffer_cache.release_vertex_buffer(vb);
   }
-  BOOST_FOREACH(std::shared_ptr<fw::index_buffer> ib, rs.index_buffers) {
+  BOOST_FOREACH(std::shared_ptr<fw::IndexBuffer> ib, rs.index_buffers) {
     g_buffer_cache.release_index_buffer(ib);
   }
 

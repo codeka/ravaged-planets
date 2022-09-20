@@ -12,7 +12,7 @@ namespace net {
 void initialize() {
   fw::debug << "initializing networking..." << std::endl;
   if (enet_initialize() != 0) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("error initializing ENet"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("error initializing ENet"));
   }
 }
 
@@ -85,7 +85,7 @@ bool host::listen(std::string port_range) {
     min_port = boost::lexical_cast<int>(ports[0]);
     max_port = boost::lexical_cast<int>(ports[1]);
   } else {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Invalid 'port_range': " + port_range));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Invalid 'port_range': " + port_range));
     min_port = max_port = 0; // stop the "possibly unassigned variable" warning... obviously we never get here, though
   }
 
@@ -110,7 +110,7 @@ peer *host::connect(std::string address) {
   std::vector<std::string> parts;
   boost::split(parts, address, boost::algorithm::is_any_of(":"));
   if (parts.size() != 2) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("invalid address, 2 parts expected, IP & port"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("invalid address, 2 parts expected, IP & port"));
   }
 
   ENetAddress addr;

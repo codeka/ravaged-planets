@@ -72,12 +72,12 @@ bool particle_effect_config::load_document(xml_element const &root) {
       if (child.get_value() == "emitter") {
         load_emitter(child);
       } else {
-        BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("unknown child element of <wwparticle>"));
+        BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown child element of <wwparticle>"));
       }
     }
 
     return true;
-  } catch (fw::exception const &e) {
+  } catch (fw::Exception const &e) {
     // if we get an exception, we'll just report the error and return false. it means we weren't able to parse the file.
     debug << "ERROR: could not parse .part file:" << std::endl;
     debug << diagnostic_information(e) << std::endl;
@@ -175,7 +175,7 @@ void particle_emitter_config::load_emitter(xml_element const &emitter_elem) {
     } else if (child.get_value() == "emit") {
       load_emit_policy(child);
     } else {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("unknown child element of <emitter>"));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown child element of <emitter>"));
     }
   }
 }
@@ -183,7 +183,7 @@ void particle_emitter_config::load_emitter(xml_element const &emitter_elem) {
 void particle_emitter_config::load_position(xml_element const &elem) {
   std::vector<float> components = fw::split<float>(elem.get_attribute("offset"));
   if (components.size() != 3) {
-    BOOST_THROW_EXCEPTION(fw::exception()
+    BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("'offset' attribute requires 3 floating point values"));
   }
   position.centre = fw::Vector(components[0], components[1], components[2]);
@@ -201,7 +201,7 @@ void particle_emitter_config::load_position(xml_element const &elem) {
     } else if (value == "exponential") {
       position.falloff = particle_emitter_config::exponential;
     } else {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("unknown 'falloff' attribute value"));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown 'falloff' attribute value"));
     }
   }
 }
@@ -217,7 +217,7 @@ void particle_emitter_config::load_billboard(xml_element const &elem) {
     if (mode == "additive") {
       billboard.mode = particle_emitter_config::additive;
     } else if (mode != "normal") {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Billboard mode must be 'additive' or 'normal'"));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Billboard mode must be 'additive' or 'normal'"));
     }
   }
 
@@ -225,7 +225,7 @@ void particle_emitter_config::load_billboard(xml_element const &elem) {
     if (child.get_value() == "area") {
       std::vector<float> components = fw::split<float>(child.get_attribute("rect"));
       if (components.size() != 4) {
-        BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("rect values require 4 floating point values"));
+        BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("rect values require 4 floating point values"));
       }
 
       billboard_rect rect;
@@ -235,7 +235,7 @@ void particle_emitter_config::load_billboard(xml_element const &elem) {
       rect.bottom = components[3];
       billboard.areas.push_back(rect);
     } else {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Unknown child of 'billboard'."));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Unknown child of 'billboard'."));
     }
   }
 }
@@ -249,7 +249,7 @@ void particle_emitter_config::load_life(xml_element const &elem) {
       life.push_back(state);
       last_state = state;
     } else {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("unknown child element of <life>"));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown child element of <life>"));
     }
   }
 }
@@ -282,7 +282,7 @@ void particle_emitter_config::parse_life_state(life_state &state, xml_element co
           state.rotation_kind = rotation_kind::direction;
         } else if (kind != "random") {
           BOOST_THROW_EXCEPTION(
-              fw::exception() << fw::message_error_info("kind expected to be 'random' or 'direction'"));
+              fw::Exception() << fw::message_error_info("kind expected to be 'random' or 'direction'"));
         }
       }
 
@@ -296,7 +296,7 @@ void particle_emitter_config::parse_life_state(life_state &state, xml_element co
     } else if (child.get_value() == "direction") {
       parse_random_vector(state.direction, child);
     } else {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("unknown child element of <state>"));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown child element of <state>"));
     }
   }
 }
@@ -316,7 +316,7 @@ void particle_emitter_config::parse_random_color(random<fw::Color> &value, xml_e
     value.min = fw::Color(min_components[0], min_components[1], min_components[2], min_components[3]);
   else {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("color values require 3 or 4 floating point values"));
+        fw::Exception() << fw::message_error_info("color values require 3 or 4 floating point values"));
   }
 
   if (max_components.size() == 3)
@@ -325,7 +325,7 @@ void particle_emitter_config::parse_random_color(random<fw::Color> &value, xml_e
     value.max = fw::Color(max_components[0], max_components[1], max_components[2], min_components[3]);
   else {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("color values require 3 or 4 floating point values"));
+        fw::Exception() << fw::message_error_info("color values require 3 or 4 floating point values"));
   }
 }
 
@@ -336,13 +336,13 @@ void particle_emitter_config::parse_random_vector(random<fw::Vector> &value, xml
   if (min_components.size() == 3)
     value.min = fw::Vector(min_components[0], min_components[1], min_components[2]);
   else {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("values require 3 floating point values"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("values require 3 floating point values"));
   }
 
   if (max_components.size() == 3)
     value.max = fw::Vector(max_components[0], max_components[1], max_components[2]);
   else {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("values require 3 floating point values"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("values require 3 floating point values"));
   }
 }
 

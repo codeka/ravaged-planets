@@ -1,7 +1,7 @@
 #pragma once
 
 namespace fw {
-class graphics;
+class Graphics;
 namespace sg {
 class scenegraph;
 }

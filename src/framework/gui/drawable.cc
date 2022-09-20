@@ -20,7 +20,7 @@ void parse_tuple_attribute(std::string attr_value, int& left, int& right) {
   std::vector<std::string> parts;
   boost::split(parts, attr_value, boost::is_any_of(","));
   if (parts.size() != 2) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Expected value of the form 'n,m'"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Expected value of the form 'n,m'"));
   }
 
   left = boost::lexical_cast<int>(parts[0]);
@@ -28,9 +28,9 @@ void parse_tuple_attribute(std::string attr_value, int& left, int& right) {
 }
 
 // All drawables share the same vertex buffer, index buffer
-static std::shared_ptr<fw::vertex_buffer> g_vertex_buffer;
-static std::shared_ptr<fw::vertex_buffer> g_flipped_vertex_buffer;
-static std::shared_ptr<fw::index_buffer> g_index_buffer;
+static std::shared_ptr<fw::VertexBuffer> g_vertex_buffer;
+static std::shared_ptr<fw::VertexBuffer> g_flipped_vertex_buffer;
+static std::shared_ptr<fw::IndexBuffer> g_index_buffer;
 
 }  // namespace
 
@@ -55,17 +55,17 @@ BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::Texture> texture) :
     vertices[1] = fw::vertex::xyz_uv(0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
     vertices[2] = fw::vertex::xyz_uv(1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
     vertices[3] = fw::vertex::xyz_uv(1.0f, 1.0f, 0.0f, 1.0f, 1.0f);
-    g_vertex_buffer = fw::vertex_buffer::create<fw::vertex::xyz_uv>(false);
+    g_vertex_buffer = fw::VertexBuffer::create<fw::vertex::xyz_uv>(false);
     g_vertex_buffer->set_data(4, vertices);
 
     vertices[0] = fw::vertex::xyz_uv(0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
     vertices[1] = fw::vertex::xyz_uv(0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
     vertices[2] = fw::vertex::xyz_uv(1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
     vertices[3] = fw::vertex::xyz_uv(1.0f, 1.0f, 0.0f, 1.0f, 0.0f);
-    g_flipped_vertex_buffer = fw::vertex_buffer::create<fw::vertex::xyz_uv>(false);
+    g_flipped_vertex_buffer = fw::VertexBuffer::create<fw::vertex::xyz_uv>(false);
     g_flipped_vertex_buffer->set_data(4, vertices);
 
-    g_index_buffer = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+    g_index_buffer = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
     uint16_t indices[4];
     indices[0] = 0;
     indices[1] = 1;
@@ -97,7 +97,7 @@ fw::Matrix BitmapDrawable::get_uv_transform() {
 }
 
 fw::Matrix BitmapDrawable::get_pos_transform(float x, float y, float width, float height) {
-  fw::graphics *g = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *g = fw::framework::get_instance()->get_graphics();
   fw::Matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
@@ -109,7 +109,7 @@ void BitmapDrawable::render(float x, float y, float width, float height) {
   shader_params_->set_matrix("pos_transform", get_pos_transform(x, y, width, height));
   shader_params_->set_matrix("uv_transform", get_uv_transform());
 
-  std::shared_ptr<fw::vertex_buffer> vb = flipped_ ? g_flipped_vertex_buffer : g_vertex_buffer;
+  std::shared_ptr<fw::VertexBuffer> vb = flipped_ ? g_flipped_vertex_buffer : g_vertex_buffer;
   vb->begin();
   g_index_buffer->begin();
   shader_->begin(shader_params_);
@@ -224,7 +224,7 @@ void DrawableManager::parse(boost::filesystem::path const &file) {
         }
       }
     }
-  } catch (fw::exception &e) {
+  } catch (fw::Exception &e) {
     // If we get an exception here, add the filename we were trying to parse.
     e << fw::filename_error_info(file);
     throw e;
@@ -239,7 +239,7 @@ std::shared_ptr<Drawable> DrawableManager::get_drawable(std::string const &name)
 void DrawableManager::parse_drawable_element(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement *elem) {
   std::shared_ptr<Drawable> new_drawable;
   if (elem->Name() == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string("Element has null name: ") + elem->Value()));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(std::string("Element has null name: ") + elem->Value()));
   }
   std::string type_name(elem->Name());
   if (type_name == "drawable") {
@@ -247,11 +247,11 @@ void DrawableManager::parse_drawable_element(std::shared_ptr<fw::Texture> textur
   } else if (type_name == "ninepatch") {
     new_drawable = std::shared_ptr<Drawable>(new NinePatchDrawable(texture, elem));
   } else {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Unknown element: " + type_name));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Unknown element: " + type_name));
   }
 
   if (elem->Attribute("name") == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Attribute 'name' is required."));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Attribute 'name' is required."));
   }
   std::string name(elem->Attribute("name"));
   drawables_[name] = new_drawable;

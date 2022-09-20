@@ -93,14 +93,14 @@ bool framework::initialize(char const *title) {
   language_initialize();
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::sdl_error_info(SDL_GetError()));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::sdl_error_info(SDL_GetError()));
   }
 
   _timer = new timer();
 
   // initialize graphics
   if (_app->wants_graphics()) {
-    _graphics = new graphics();
+    _graphics = new Graphics();
     _graphics->initialize(title);
 
     _particle_mgr = new particle_manager();
@@ -108,7 +108,7 @@ bool framework::initialize(char const *title) {
 
     _model_manager = new model_manager();
 
-    _cursor = new cursor();
+    _cursor = new Cursor();
     _cursor->initialize();
   }
 
@@ -119,7 +119,7 @@ bool framework::initialize(char const *title) {
   _input = new input();
   _input->initialize();
 
-  _font_manager = new font_manager();
+  _font_manager = new FontManager();
   _font_manager->initialize();
 
   if (_app->wants_graphics()) {
@@ -128,7 +128,7 @@ bool framework::initialize(char const *title) {
   }
 
   if (stg.is_set("debug-view") && _app->wants_graphics()) {
-    _debug_view = new debug_view();
+    _debug_view = new DebugView();
     _debug_view->initialize();
   }
 

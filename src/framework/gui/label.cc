@@ -96,17 +96,17 @@ void Label::render() {
     case Alignment::kLeft:
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
         get_left(), get_top() + get_height() / 2, text_,
-        static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
+        static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
       break;
     case Alignment::kCenter:
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
         get_left() + get_width() / 2, get_top() + get_height() / 2, text_,
-        static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
+        static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignCenter | fw::FontFace::kAlignMiddle));
       break;
     case Alignment::kRight:
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
           get_left() + get_width(), get_top() + get_height() / 2, text_,
-          static_cast<fw::font_face::draw_flags>(fw::font_face::align_right | fw::font_face::align_middle));
+          static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignRight | fw::FontFace::kAlignMiddle));
       break;
     }
   }

@@ -50,10 +50,10 @@ bool restart_handler(fw::gui::Widget *wdgt) {
 bool ground_handler(fw::gui::Widget *wdgt) {
   if (g_show_ground) {
     g_show_ground = false;
-    dynamic_cast<fw::gui::button *>(wdgt)->set_text("Show ground");
+    dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Show ground");
   } else {
     g_show_ground = true;
-    dynamic_cast<fw::gui::button *>(wdgt)->set_text("Hide ground");
+    dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Hide ground");
   }
   return true;
 }
@@ -61,10 +61,10 @@ bool ground_handler(fw::gui::Widget *wdgt) {
 bool rotate_handler(fw::gui::Widget *wdgt) {
   if (g_rotating) {
     g_rotating = false;
-    dynamic_cast<fw::gui::button *>(wdgt)->set_text("Rotate");
+    dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Rotate");
   } else {
     g_rotating = true;
-    dynamic_cast<fw::gui::button *>(wdgt)->set_text("Stop rotating");
+    dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Stop rotating");
   }
   return true;
 }
@@ -75,16 +75,16 @@ bool application::initialize(fw::framework *frmwrk) {
   frmwrk->set_camera(cam);
 
   fw::gui::Window *wnd;
-  wnd = fw::gui::builder<fw::gui::Window>(fw::gui::px(20), fw::gui::px(20), fw::gui::px(150), fw::gui::px(130))
+  wnd = fw::gui::Builder<fw::gui::Window>(fw::gui::px(20), fw::gui::px(20), fw::gui::px(150), fw::gui::px(130))
       << fw::gui::Window::background("frame")
-      << (fw::gui::builder<fw::gui::button>(fw::gui::px(10), fw::gui::px(10), fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::button::text("Restart")
+      << (fw::gui::Builder<fw::gui::Button>(fw::gui::px(10), fw::gui::px(10), fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::Button::text("Restart")
           << fw::gui::Widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
-      << (fw::gui::builder<fw::gui::button>(fw::gui::px(10), fw::gui::px(50), fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::button::text("Show ground")
+      << (fw::gui::Builder<fw::gui::Button>(fw::gui::px(10), fw::gui::px(50), fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::Button::text("Show ground")
           << fw::gui::Widget::click(std::bind<bool>(ground_handler, std::placeholders::_1)))
-      << (fw::gui::builder<fw::gui::button>(fw::gui::px(10), fw::gui::px(90), fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::button::text("Rotate")
+      << (fw::gui::Builder<fw::gui::Button>(fw::gui::px(10), fw::gui::px(90), fw::gui::px(130), fw::gui::px(30))
+          << fw::gui::Button::text("Rotate")
           << fw::gui::Widget::click(std::bind<bool>(rotate_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
@@ -129,10 +129,10 @@ void initialize_ground(std::shared_ptr<fw::sg::node> node) {
     };
   uint16_t indices[] = { 0, 1, 2, 0, 2, 3 };
 
-  std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_n_uv>();
+  std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_n_uv>();
   vb->set_data(4, vertices);
 
-  std::shared_ptr<fw::index_buffer> ib(new fw::index_buffer());
+  std::shared_ptr<fw::IndexBuffer> ib(new fw::IndexBuffer());
   ib->set_data(6, indices);
 
   std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");

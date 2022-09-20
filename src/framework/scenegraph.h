@@ -65,8 +65,8 @@ private:
   bool _cast_shadows;
 
   primitive_type _primitive_type;
-  std::shared_ptr<fw::vertex_buffer> _vb;
-  std::shared_ptr<fw::index_buffer> _ib;
+  std::shared_ptr<fw::VertexBuffer> _vb;
+  std::shared_ptr<fw::IndexBuffer> _ib;
   std::shared_ptr<fw::shader> _shader;
   std::shared_ptr<fw::shader_parameters> _shader_params;
 
@@ -103,17 +103,17 @@ public:
     return _world;
   }
 
-  void set_vertex_buffer(std::shared_ptr<fw::vertex_buffer> vb) {
+  void set_vertex_buffer(std::shared_ptr<fw::VertexBuffer> vb) {
     _vb = vb;
   }
-  std::shared_ptr<fw::vertex_buffer> get_vertex_buffer() const {
+  std::shared_ptr<fw::VertexBuffer> get_vertex_buffer() const {
     return _vb;
   }
 
-  void set_index_buffer(std::shared_ptr<fw::index_buffer> ib) {
+  void set_index_buffer(std::shared_ptr<fw::IndexBuffer> ib) {
     _ib = ib;
   }
-  std::shared_ptr<fw::index_buffer> get_index_buffer() const {
+  std::shared_ptr<fw::IndexBuffer> get_index_buffer() const {
     return _ib;
   }
 

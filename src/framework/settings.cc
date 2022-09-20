@@ -21,7 +21,7 @@ static fs::path g_executable_path;
 
 settings::settings() {
   if (!is_initialized) {
-    BOOST_THROW_EXCEPTION(fw::exception() << message_error_info("settings::initialize() has not been called."));
+    BOOST_THROW_EXCEPTION(fw::Exception() << message_error_info("settings::initialize() has not been called."));
   }
 }
 
@@ -35,7 +35,7 @@ po::variables_map& settings::get_variables() const {
 po::variable_value const &settings::get_variable_value(std::string const &name) const {
   po::variable_value const &val = g_variables_map[name];
   if (val.empty()) {
-    BOOST_THROW_EXCEPTION(fw::exception()
+    BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("specified option does not exist, or has no value: " + name));
   }
 

@@ -122,7 +122,7 @@ void Bitmap::load_bitmap(fs::path const &filename) {
   int channels;
   unsigned char *pixels = stbi_load(filename.string().c_str(), &data_->width, &data_->height, &channels, 4);
   if (pixels == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error reading image."));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error reading image."));
   }
 
   // copy pixels from what stb returned into our own buffer
@@ -140,7 +140,7 @@ void Bitmap::load_bitmap(uint8_t const *data, size_t data_size) {
   unsigned char *pixels = stbi_load_from_memory(
       reinterpret_cast<unsigned char const *>(data), data_size, &data_->width, &data_->height, &channels, 4);
   if (pixels == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error reading image."));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error reading image."));
   }
 
   // copy pixels from what stb returned into our own buffer
@@ -189,7 +189,7 @@ void Bitmap::save_bitmap(fs::path const &filename) const {
     res = 0;
   }
   if (res == 0) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error writing file."));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error writing file."));
   }
 }
 

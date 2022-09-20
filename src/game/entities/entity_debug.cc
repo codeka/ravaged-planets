@@ -183,7 +183,7 @@ void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::Matrix const 
     vertices[(i * 2) + 1].color = l.col.to_rgba();
   }
 
-  std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_c>();
+  std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
   vb->set_data(lines_copy.size() * 2, vertices);
   delete[] vertices;
 

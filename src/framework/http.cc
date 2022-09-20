@@ -161,7 +161,7 @@ std::string http::get_response() {
     return ""; // TODO: something better than just empty string?
 
   if (is_error()) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(get_error_msg()));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(get_error_msg()));
   }
 
   return _download_data.str();

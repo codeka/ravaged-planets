@@ -6,7 +6,7 @@
 #include <framework/vector.h>
 
 namespace fw {
-class graphics;
+class Graphics;
 class Bitmap;
 class texture;
 

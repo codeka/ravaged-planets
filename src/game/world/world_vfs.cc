@@ -114,7 +114,7 @@ world_file world_vfs::open_file(std::string name, bool for_writing /*= false*/) 
   }
 
   // todo: not for writing, check other locations...
-  BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("map doesn't exist"));
+  BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("map doesn't exist"));
   return world_file(""); // can't get here (the above line throws an exception)
 }
 
@@ -157,7 +157,7 @@ void world_file_entry::ensure_open(bool throw_on_error) {
   }
   if (_stream.fail()) {
     if (throw_on_error) {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(_full_path));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(_full_path));
     }
   }
 }
@@ -231,7 +231,7 @@ fs::path find_map(std::string name) {
   if (fs::is_directory(p))
     return p;
 
-  BOOST_THROW_EXCEPTION(fw::exception()
+  BOOST_THROW_EXCEPTION(fw::Exception()
       << fw::message_error_info("could not find map!")
       << fw::filename_error_info(name));
   return "";

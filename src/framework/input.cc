@@ -90,7 +90,7 @@ int input::bind_key(std::string const &keyname, input_bind_fn fn) {
         key_names_map::iterator it = g_key_names.find(part);
         if (it == g_key_names.end()) {
           BOOST_THROW_EXCEPTION(
-              fw::exception() << fw::message_error_info("No such key:" + part));
+              fw::Exception() << fw::message_error_info("No such key:" + part));
         }
 
         key_no = it->second;
@@ -98,7 +98,7 @@ int input::bind_key(std::string const &keyname, input_bind_fn fn) {
     }
 
     if (key_no == 0) {
-      BOOST_THROW_EXCEPTION(fw::exception()
+      BOOST_THROW_EXCEPTION(fw::Exception()
           << fw::message_error_info("Invalid binding, no key name specified"));
     }
 
@@ -113,7 +113,7 @@ int input::bind_key(std::string const &keyname, input_bind_fn fn) {
 int input::bind_key(std::string keyname, input_binding const &binding) {
   key_names_map::iterator it = g_key_names.find(keyname);
   if (it == g_key_names.end()) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No such key:" + keyname));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("No such key:" + keyname));
   }
 
   return fw::bind_key(it->second, binding);

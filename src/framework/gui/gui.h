@@ -17,7 +17,7 @@ class Widget;
  */
 class Gui {
 private:
-  fw::graphics *graphics_;
+  fw::Graphics *graphics_;
   DrawableManager *drawable_manager_;
   std::mutex top_level_widget_mutex_;
   std::vector<Widget *> top_level_widgets_;
@@ -36,7 +36,7 @@ public:
   ~Gui();
 
   /** Called to initialize the GUI system. */
-  void initialize(fw::graphics *graphics);
+  void initialize(fw::Graphics *graphics);
 
   /** Called on the update thread to update the GUI. */
   void update(float dt);

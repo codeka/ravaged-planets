@@ -48,7 +48,7 @@ void screen_stack::set_active_screen(std::string const &name,
   fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     auto it = _screens.find(name);
     if (it == _screens.end()) {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("invalid screen name!"));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("invalid screen name!"));
     }
 
     if (_active != name) {

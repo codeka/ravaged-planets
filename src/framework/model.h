@@ -13,8 +13,8 @@ class model_node;
 /** A model_mesh represents all the data needed for a single call to glDraw* - vertices, indices, etc. */
 class model_mesh {
 protected:
-  std::shared_ptr<vertex_buffer> _vb;
-  std::shared_ptr<index_buffer> _ib;
+  std::shared_ptr<VertexBuffer> _vb;
+  std::shared_ptr<IndexBuffer> _ib;
   std::shared_ptr<shader> _shader;
 
   virtual void setup_buffers() = 0;
@@ -23,11 +23,11 @@ public:
   model_mesh(int num_vertices, int num_indices);
   virtual ~model_mesh();
 
-  std::shared_ptr<vertex_buffer> get_vertex_buffer() {
+  std::shared_ptr<VertexBuffer> get_vertex_buffer() {
     setup_buffers();
     return _vb;
   }
-  std::shared_ptr<index_buffer> get_index_buffer() {
+  std::shared_ptr<IndexBuffer> get_index_buffer() {
     setup_buffers();
     return _ib;
   }

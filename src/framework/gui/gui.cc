@@ -23,7 +23,7 @@ Gui::~Gui() {
   }
 }
 
-void Gui::initialize(fw::graphics *graphics) {
+void Gui::initialize(fw::Graphics *graphics) {
   graphics_ = graphics;
 
   drawable_manager_ = new DrawableManager();

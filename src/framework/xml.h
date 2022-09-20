@@ -8,7 +8,7 @@
 #define XML_CHECK(fn) { \
   ::fw::xml::XMLError err = fn; \
   if (err != ::fw::xml::XML_NO_ERROR) { \
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::xml_error_info(err)); \
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::xml_error_info(err)); \
   } \
 }
 

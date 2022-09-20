@@ -133,7 +133,7 @@ void simulation_thread::add_ai_player(ai_player *plyr) {
 void simulation_thread::thread_proc() {
   fw::settings stg;
   if (!_host->listen(stg.get_value<std::string> ("listen-port"))) {
-    BOOST_THROW_EXCEPTION(fw::exception()
+    BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("could not listen on port(s): " + stg.get_value<std::string>("listen-port")));
   }
 

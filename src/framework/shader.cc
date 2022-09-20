@@ -69,7 +69,7 @@ std::string find_source(fw::xml_element const &root_elem, std::string source_nam
       return "#version 330\n\n" + process_includes(child_elem.get_text());
     }
   }
-  BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No source named '" + source_name + "' found."));
+  BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("No source named '" + source_name + "' found."));
   return ""; // Just to shut up the warning.
 }
 
@@ -122,7 +122,7 @@ void compile_shader(GLuint shader_id, std::string source) {
     std::stringstream msg;
     msg << "Error: " << error_message.data() << std::endl;
     msg << "Source:" << std::endl << source << std::endl;
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(msg.str()));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(msg.str()));
   }
 }
 
@@ -139,7 +139,7 @@ void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_sha
     std::vector<char> error_message(log_length);
     glGetProgramInfoLog(program_id, log_length, nullptr, &error_message[0]);
 
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(std::string(&error_message[0])));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(std::string(&error_message[0])));
   }
 }
 
@@ -370,7 +370,7 @@ shader::~shader() {
 }
 
 std::shared_ptr<shader> shader::create(std::string const &filename) {
-  fw::graphics *g = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *g = fw::framework::get_instance()->get_graphics();
 
   std::shared_ptr<shader> shdr = g_cache.get_shader(filename);
   if (!shdr) {
@@ -407,7 +407,7 @@ std::shared_ptr<shader_parameters> shader::create_parameters() {
   return params;
 }
 
-void shader::load(fw::graphics *g, fs::path const &full_path) {
+void shader::load(fw::Graphics *g, fs::path const &full_path) {
   _filename = full_path;
   xml_element root_elem = fw::load_xml(full_path, "shader", 1);
   for (xml_element child = root_elem.get_first_child();

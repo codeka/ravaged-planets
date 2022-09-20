@@ -22,7 +22,7 @@ public:
   typedef std::list<particle *> particle_list;
 
 private:
-  graphics *_graphics;
+  Graphics *_graphics;
   particle_renderer *_renderer;
   effect_list _effects;
   particle_list _particles;
@@ -39,7 +39,7 @@ public:
   particle_manager();
   ~particle_manager();
 
-  void initialize(graphics *g);
+  void initialize(Graphics *g);
   void update(float dt);
   void render(sg::scenegraph &scenegraph);
 

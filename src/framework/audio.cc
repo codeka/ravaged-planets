@@ -23,7 +23,7 @@ namespace fs = boost::filesystem;
 
 void AudioManager::initialize() {
   if (Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error initializing SDL_mixer"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error initializing SDL_mixer"));
   }
 
   // TODO: these are all just guesses (paraticularly frequency and chunksize)
@@ -33,7 +33,7 @@ void AudioManager::initialize() {
   uint16_t format;
   int channels;
   if (!Mix_QuerySpec(&frequency, &format, &channels)) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Error querying spec"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error querying spec"));
   }
 
   std::string format_name;
@@ -75,7 +75,7 @@ void AudioManager::check_error(int error_code, char const *fn_name) {
   if (error_code != 0) {
     char const *error_msg = Mix_GetError();
     fw::debug << "  error in audio_manager: " << error_code << " - " << error_msg << std::endl;
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(fn_name) << fw::audio_error_info(error_msg));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(fn_name) << fw::audio_error_info(error_msg));
   }
 }
 

@@ -31,18 +31,18 @@ typedef boost::error_info<struct tag_loadedmodules, std::vector<std::string> > l
 
 // this is an exception class that inherits from boost::exception and
 // provides some extra features for throwing errors from windows (and direct x)
-class exception: public boost::exception, public std::exception {
+class Exception: public boost::exception, public std::exception {
 private:
   void populate_stacktrace();
 
 public:
   // constructs a new win32_exception which will add the return value from
   // GetLastError to the exception
-  inline exception() {
+  inline Exception() {
     populate_stacktrace();
   }
 
-  inline virtual ~exception() throw () {
+  inline virtual ~Exception() throw () {
   }
 
   // this is just what we need to return for std::exception::what, it's just a

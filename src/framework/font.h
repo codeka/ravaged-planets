@@ -16,59 +16,59 @@ typedef struct FT_LibraryRec_ *FT_Library;
 typedef struct FT_FaceRec_*  FT_Face;
 
 namespace fw {
-class font_manager;
-class glyph;
-class string_cache_entry;
+class FontManager;
+class Glyph;
+class StringCacheEntry;
 
-class font_face {
+class FontFace {
 public:
   /** Flags we use to control how the string is drawn. */
-  enum draw_flags {
-    draw_default   = 0x0000,
-    align_baseline = 0x0000,
-    align_left     = 0x0000,
-    align_top      = 0x0001,
-    align_bottom   = 0x0002,
-    align_middle   = 0x0004,
-    align_centre   = 0x0008,
-    align_right    = 0x0010,
+  enum DrawFlags {
+    kDrawDefault   = 0x0000,
+    kAlignBaseline = 0x0000,
+    kAlignLeft     = 0x0000,
+    kAlignTop      = 0x0001,
+    kAlignBottom   = 0x0002,
+    kAlignMiddle   = 0x0004,
+    kAlignCenter   = 0x0008,
+    kAlignRight    = 0x0010,
   };
 
 private:
-  font_manager *_manager;
-  FT_Face _face;
-  int _size; //<! Size in pixels of this font.
-  std::mutex _mutex;
+  FontManager *manager_;
+  FT_Face face_;
+  int size_; //<! Size in pixels of this font.
+  std::mutex mutex_;
 
   // Glyphs are rendered into a bitmap and then copied to a texture as required, before we render
   // when draw is called.
-  std::shared_ptr<fw::Bitmap> _bitmap;
-  std::shared_ptr<fw::Texture> _texture;
-  bool _texture_dirty;
+  std::shared_ptr<fw::Bitmap> bitmap_;
+  std::shared_ptr<fw::Texture> texture_;
+  bool texture_dirty_;
 
   /** Mapping of UTF-32 character to glyph object describing the glyph. */
-  std::map<uint32_t, glyph *> _glyphs;
+  std::map<uint32_t, Glyph *> glyphs_;
 
   /**
    * Mapping of UTF-32 strings to a \ref string_cache_entry which caches the data we need to draw the
    * given string.
    */
-  std::map<std::basic_string<uint32_t>, std::shared_ptr<string_cache_entry>> _string_cache;
+  std::map<std::basic_string<uint32_t>, std::shared_ptr<StringCacheEntry>> string_cache_;
 
   void ensure_glyph(uint32_t ch);
   void ensure_glyphs(std::basic_string<uint32_t> const &str);
-  std::shared_ptr<string_cache_entry> get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
-  std::shared_ptr<string_cache_entry> create_cache_entry(std::basic_string<uint32_t> const &str);
+  std::shared_ptr<StringCacheEntry> get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
+  std::shared_ptr<StringCacheEntry> create_cache_entry(std::basic_string<uint32_t> const &str);
 public:
-  font_face(font_manager *manager, boost::filesystem::path const &filename);
-  ~font_face();
+  FontFace(FontManager *manager, boost::filesystem::path const &filename);
+  ~FontFace();
 
   /** Called by the font_managed every update frame. */
   void update(float dt);
 
   // Only useful for debugging, gets the atlas bitmap we're using to hold rendered glyphs
   std::shared_ptr<fw::Bitmap> get_bitmap() const {
-    return _bitmap;
+    return bitmap_;
   }
 
   /**
@@ -88,27 +88,27 @@ public:
   /**
    * Draws the given string on the screen at the given (x,y) coordinates.
    */
-  void draw_string(int x, int y, std::string const &str, draw_flags flags = draw_default,
+  void draw_string(int x, int y, std::string const &str, DrawFlags flags = kDrawDefault,
       fw::Color color = fw::Color::WHITE());
-  void draw_string(int x, int y, std::basic_string<uint32_t> const &str, draw_flags flags, fw::Color color);
+  void draw_string(int x, int y, std::basic_string<uint32_t> const &str, DrawFlags flags, fw::Color color);
 };
 
-class font_manager {
+class FontManager {
 private:
-  friend class font_face;
+  friend class FontFace;
 
-  FT_Library _library;
-  std::map<std::string, std::shared_ptr<font_face>> _faces;
+  FT_Library library_;
+  std::map<std::string, std::shared_ptr<FontFace>> faces_;
 
 public:
   void initialize();
   void update(float dt);
 
   /** Gets the default \ref font_face. */
-  std::shared_ptr<font_face> get_face();
+  std::shared_ptr<FontFace> get_face();
 
   /** Gets the \ref font_face for the font at the given path (assumed to be a .ttf file). */
-  std::shared_ptr<font_face> get_face(boost::filesystem::path const &filename);
+  std::shared_ptr<FontFace> get_face(boost::filesystem::path const &filename);
 };
 
 }

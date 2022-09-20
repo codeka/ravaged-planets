@@ -79,7 +79,7 @@ public:
   }
 };
 
-std::vector<std::string> exception::generate_stack_trace() {
+std::vector<std::string> Exception::generate_stack_trace() {
   std::vector<std::string> stacktrace;
   std::vector<std::string> modules;
   try {

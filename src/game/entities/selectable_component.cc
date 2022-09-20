@@ -17,8 +17,8 @@
 namespace ent {
 
 static std::shared_ptr<fw::shader> _shader;
-static std::shared_ptr<fw::vertex_buffer> _vb;
-static std::shared_ptr<fw::index_buffer> _ib;
+static std::shared_ptr<fw::VertexBuffer> _vb;
+static std::shared_ptr<fw::IndexBuffer> _ib;
 
 // register the selectable component with the entity_factory
 ENT_COMPONENT_REGISTER("Selectable", selectable_component);
@@ -40,7 +40,7 @@ void selectable_component::initialize() {
 // this is called when we start up, and also when our device is reset. we need to populate
 // the vertex buffer and index buffer
 void selectable_component::populate_buffers() {
-  std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_uv>();
+  std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_uv>();
   fw::vertex::xyz_uv vertices[4] = {
       fw::vertex::xyz_uv(-1.0f, 0.0f, -1.0f, 0.0f, 0.0f),
       fw::vertex::xyz_uv(-1.0f, 0.0f, 1.0f, 0.0f, 1.0f),
@@ -50,7 +50,7 @@ void selectable_component::populate_buffers() {
   vb->set_data(4, vertices);
   _vb = vb;
 
-  std::shared_ptr<fw::index_buffer> ib(new fw::index_buffer());
+  std::shared_ptr<fw::IndexBuffer> ib(new fw::IndexBuffer());
   uint16_t indices[6] = { 0, 1, 2, 0, 2, 3 };
   ib->set_data(6, indices);
   _ib = ib;

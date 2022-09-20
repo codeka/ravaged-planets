@@ -286,7 +286,7 @@ game::world_summary const &new_game_window::get_selected_world_summary() {
   Widget *selected_widget = _wnd->find<Listbox>(MAP_LIST_ID)->get_selected_item();
   if (selected_widget == nullptr) {
     // should never happen (unless you have no maps installed at all)
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("No selected world!"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("No selected world!"));
   }
 
   return boost::any_cast<game::world_summary const &>(selected_widget->get_data());

@@ -42,7 +42,7 @@ void game_screen::set_options(std::shared_ptr<screen_options> opt) {
 void game_screen::show() {
   if (_options == 0) {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("no game_screen_options has been set, cannot start new game!"));
+        fw::Exception() << fw::message_error_info("no game_screen_options has been set, cannot start new game!"));
   }
 
   std::shared_ptr<world_reader> reader(new world_reader());

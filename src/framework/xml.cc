@@ -66,7 +66,7 @@ xml_element load_xml(fs::path const &filepath, std::string const & format_name, 
   std::shared_ptr<xml::XMLDocument> doc(new xml::XMLDocument());
   doc->LoadFile(filepath.string().c_str());
   if (doc->Error()) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(filepath.string())
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(filepath.string())
         << fw::message_error_info(doc->ErrorName()));
   }
 
@@ -74,7 +74,7 @@ xml_element load_xml(fs::path const &filepath, std::string const & format_name, 
   xml::XMLElement *root = doch.FirstChildElement().ToElement();
   if (root != 0) {
     if (std::string(root->Value()) != format_name) {
-      BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(
           (boost::format("invalid root node, expected \"%1%\" found \"%2%\"") % format_name % root->Value()).str()));
     }
 
@@ -83,7 +83,7 @@ xml_element load_xml(fs::path const &filepath, std::string const & format_name, 
       actual_version = root->Attribute("version");
     }
     if (actual_version != boost::lexical_cast<std::string>(version)) {
-      BOOST_THROW_EXCEPTION(fw::exception()
+      BOOST_THROW_EXCEPTION(fw::Exception()
           << fw::message_error_info((boost::format("invalid %1% version: %2% (expected \"%3%\")")
               % format_name % actual_version % version).str()));
     }
@@ -159,7 +159,7 @@ std::string xml_element::get_text() const {
 std::string xml_element::get_attribute(std::string const &name) const {
   char const *value = _elem->Attribute(name.c_str());
   if (value == 0) {
-    BOOST_THROW_EXCEPTION(fw::exception()
+    BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info((boost::format("'%1%' attribute expected.") % name).str()));
   }
 

@@ -26,25 +26,25 @@ std::string to_string(gl_error_info const &err_info) {
 
 //--------------------------------------------------------------
 
-graphics::graphics() :
-    _wnd(nullptr), _context(nullptr), _windowed(false), _width(0), _height(0) {
+Graphics::Graphics() :
+    wnd_(nullptr), context_(nullptr), windowed_(false), width_(0), height_(0) {
 }
 
-graphics::~graphics() {
+Graphics::~Graphics() {
 }
 
-void graphics::initialize(char const *title) {
+void Graphics::initialize(char const *title) {
   settings stg;
 
-  _windowed = stg.is_set("windowed");
-  if (_windowed) {
-    _width = stg.get_value<int>("windowed-width");
-    _height = stg.get_value<int>("windowed-height");
+  windowed_ = stg.is_set("windowed");
+  if (windowed_) {
+    width_ = stg.get_value<int>("windowed-width");
+    height_ = stg.get_value<int>("windowed-height");
   } else {
-    _width = stg.get_value<int>("fullscreen-width");
-    _height = stg.get_value<int>("fullscreen-height");
+    width_ = stg.get_value<int>("fullscreen-width");
+    height_ = stg.get_value<int>("fullscreen-height");
   }
-  fw::debug << "Graphics initializing; window size=" << _width << "x" << _height << ", windowed=" << _windowed
+  fw::debug << "Graphics initializing; window size=" << width_ << "x" << height_ << ", windowed=" << windowed_
       << std::endl;
 
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -53,33 +53,33 @@ void graphics::initialize(char const *title) {
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
-  if (!_windowed) {
-    if (_width == 0 || _height == 0) {
+  if (!windowed_) {
+    if (width_ == 0 || height_ == 0) {
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     } else {
       flags |= SDL_WINDOW_FULLSCREEN;
     }
   }
-  _wnd = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, flags);
-  if (_wnd == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::sdl_error_info(SDL_GetError()));
+  wnd_ = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_, height_, flags);
+  if (wnd_ == nullptr) {
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::sdl_error_info(SDL_GetError()));
   }
 
   // If we didn't specify a width/height, we'll need to query the window for how big it is.
-  if (_width == 0 || _height == 0) {
-    SDL_GetWindowSize(_wnd, &_width, &_height);
+  if (width_ == 0 || height_ == 0) {
+    SDL_GetWindowSize(wnd_, &width_, &height_);
   }
 
-  _context = SDL_GL_CreateContext(_wnd);
-  if (_context == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::sdl_error_info(SDL_GetError()));
+  context_ = SDL_GL_CreateContext(wnd_);
+  if (context_ == nullptr) {
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::sdl_error_info(SDL_GetError()));
   }
-  SDL_GL_MakeCurrent(_wnd, _context);
+  SDL_GL_MakeCurrent(wnd_, context_);
 
   glewExperimental = GL_TRUE;
   GLenum glewError = glewInit();
   if(glewError != GLEW_OK) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::gl_error_info(glewError));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::gl_error_info(glewError));
   }
   GLenum err = glGetError();
   if (err == GL_INVALID_ENUM) {
@@ -87,7 +87,7 @@ void graphics::initialize(char const *title) {
     // See: https://www.opengl.org/wiki/OpenGL_Loading_Library
   } else if (err != GL_NO_ERROR) {
     // Something else happened!
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::gl_error_info(err));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::gl_error_info(err));
   }
 
   if(SDL_GL_SetSwapInterval(1) < 0) {
@@ -107,191 +107,191 @@ void graphics::initialize(char const *title) {
   }
 
   FW_CHECKED(glEnable(GL_DEPTH_TEST));
-  FW_CHECKED(glViewport(0, 0, _width, _height));
+  FW_CHECKED(glViewport(0, 0, width_, height_));
 }
 
-void graphics::destroy() {
-  SDL_GL_DeleteContext(_context);
-  _context = nullptr;
+void Graphics::destroy() {
+  SDL_GL_DeleteContext(context_);
+  context_ = nullptr;
 }
 
-void graphics::begin_scene(fw::Color clear_color /*= fw::color(1,0,0,0)*/) {
-  if (_framebuffer) {
-    FW_CHECKED(glViewport(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
-    FW_CHECKED(glScissor(0, 0, _framebuffer->get_width(), _framebuffer->get_height()));
+void Graphics::begin_scene(fw::Color clear_color /*= fw::color(1,0,0,0)*/) {
+  if (framebuffer_) {
+    FW_CHECKED(glViewport(0, 0, framebuffer_->get_width(), framebuffer_->get_height()));
+    FW_CHECKED(glScissor(0, 0, framebuffer_->get_width(), framebuffer_->get_height()));
     FW_CHECKED(glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a));
-    _framebuffer->clear();
+    framebuffer_->clear();
   } else {
-    FW_CHECKED(glViewport(0, 0, _width, _height));
-    FW_CHECKED(glScissor(0, 0, _width, _height));
+    FW_CHECKED(glViewport(0, 0, width_, height_));
+    FW_CHECKED(glScissor(0, 0, width_, height_));
     FW_CHECKED(glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a));
     FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
   }
 }
 
-void graphics::end_scene() {
+void Graphics::end_scene() {
 }
 
-void graphics::before_gui() {
+void Graphics::before_gui() {
   FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
   FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }
 
-void graphics::after_gui() {
+void Graphics::after_gui() {
 }
 
-void graphics::present() {
+void Graphics::present() {
   sig_before_present();
 
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
     // this might happen in Release mode, where we don't actually check errors on every single call (it's expensive).
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::gl_error_info(err));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::gl_error_info(err));
   }
 
-  SDL_GL_SwapWindow(_wnd);
+  SDL_GL_SwapWindow(wnd_);
 }
 
 /** Called on the render thread, after we've finished rendering. */
-void graphics::after_render() {
+void Graphics::after_render() {
   // Run any functions that were scheduled to run on the render thread
   {
-    std::lock_guard<std::mutex> lock(_run_queue_mutex);
-    BOOST_FOREACH(std::function<void()> fn, _run_queue) {
+    std::lock_guard<std::mutex> lock(run_queue_mutex_);
+    BOOST_FOREACH(std::function<void()> fn, run_queue_) {
       fn();
     }
-    _run_queue.clear();
+    run_queue_.clear();
   }
 }
 
-void graphics::run_on_render_thread(std::function<void()> fn) {
-  std::lock_guard<std::mutex> lock(_run_queue_mutex);
-  _run_queue.push_back(fn);
+void Graphics::run_on_render_thread(std::function<void()> fn) {
+  std::lock_guard<std::mutex> lock(run_queue_mutex_);
+  run_queue_.push_back(fn);
 }
 
-void graphics::set_render_target(std::shared_ptr<Framebuffer> fb) {
-  if (_framebuffer && !fb) {
-    _framebuffer->unbind();
-    _framebuffer = nullptr;
+void Graphics::set_render_target(std::shared_ptr<Framebuffer> fb) {
+  if (framebuffer_ && !fb) {
+    framebuffer_->unbind();
+    framebuffer_ = nullptr;
     return;
   }
 
-  _framebuffer = fb;
-  if (_framebuffer) {
-    _framebuffer->bind();
+  framebuffer_ = fb;
+  if (framebuffer_) {
+    framebuffer_->bind();
   }
 }
 
-void graphics::check_error(char const *msg) {
+void Graphics::check_error(char const *msg) {
   GLenum err = glGetError();
   if (err == GL_NO_ERROR)
     return;
 
-  BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info(msg) << fw::gl_error_info(err));
+  BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(msg) << fw::gl_error_info(err));
 }
 
-void graphics::ensure_render_thread() {
+void Graphics::ensure_render_thread() {
   std::thread::id this_thread_id = std::this_thread::get_id();
   if (this_thread_id != render_thread_id) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Expected to be running on the render thread."));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Expected to be running on the render thread."));
   }
 }
 
-void graphics::toggle_fullscreen() {
-  fw::debug << boost::format("switching to %1%...") % (_windowed ? "full-screen" : "windowed") << std::endl;
-  _windowed = !_windowed;
+void Graphics::toggle_fullscreen() {
+  fw::debug << boost::format("switching to %1%...") % (windowed_ ? "full-screen" : "windowed") << std::endl;
+  windowed_ = !windowed_;
 
   fw::settings stg;
-  if (_windowed) {
-    _width = stg.get_value<int>("windowed-width");
-    _height = stg.get_value<int>("windowed-height");
-    SDL_SetWindowFullscreen(_wnd, 0);
-    SDL_SetWindowSize(_wnd, _width, _height);
+  if (windowed_) {
+    width_ = stg.get_value<int>("windowed-width");
+    height_ = stg.get_value<int>("windowed-height");
+    SDL_SetWindowFullscreen(wnd_, 0);
+    SDL_SetWindowSize(wnd_, width_, height_);
   } else {
-    _width = stg.get_value<int>("fullscreen-width");
-    _height = stg.get_value<int>("fullscreen-height");
-    if (_width != 0 && _height != 0) {
-      SDL_SetWindowSize(_wnd, _width, _height);
-      SDL_SetWindowFullscreen(_wnd, SDL_WINDOW_FULLSCREEN);
+    width_ = stg.get_value<int>("fullscreen-width");
+    height_ = stg.get_value<int>("fullscreen-height");
+    if (width_ != 0 && height_ != 0) {
+      SDL_SetWindowSize(wnd_, width_, height_);
+      SDL_SetWindowFullscreen(wnd_, SDL_WINDOW_FULLSCREEN);
     } else {
-      SDL_SetWindowFullscreen(_wnd, SDL_WINDOW_FULLSCREEN_DESKTOP);
-      SDL_GetWindowSize(_wnd, &_width, &_height);
+      SDL_SetWindowFullscreen(wnd_, SDL_WINDOW_FULLSCREEN_DESKTOP);
+      SDL_GetWindowSize(wnd_, &width_, &height_);
     }
   }
 }
 
 //-----------------------------------------------------------------------------
 
-index_buffer::index_buffer(bool dynamic/*= false */) :
-    _num_indices(0), _id(0), _dynamic(dynamic) {
-  FW_CHECKED(glGenBuffers(1, &_id));
+IndexBuffer::IndexBuffer(bool dynamic/*= false */) :
+    num_indices_(0), id_(0), dynamic_(dynamic) {
+  FW_CHECKED(glGenBuffers(1, &id_));
 }
 
-index_buffer::~index_buffer() {
+IndexBuffer::~IndexBuffer() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glDeleteBuffers(1, &_id));
+  FW_CHECKED(glDeleteBuffers(1, &id_));
 }
 
-std::shared_ptr<index_buffer> index_buffer::create() {
-  return std::shared_ptr<index_buffer>(new index_buffer());
+std::shared_ptr<IndexBuffer> IndexBuffer::create() {
+  return std::shared_ptr<IndexBuffer>(new IndexBuffer());
 }
 
-void index_buffer::set_data(int num_indices, uint16_t const *indices, int flags) {
+void IndexBuffer::set_data(int num_indices, uint16_t const *indices, int flags) {
   FW_ENSURE_RENDER_THREAD();
-  _num_indices = num_indices;
+  num_indices_ = num_indices;
 
   if (flags <= 0)
-    flags = _dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+    flags = dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
-  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id));
+  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_));
   FW_CHECKED(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
       num_indices * sizeof(uint16_t), reinterpret_cast<void const *>(indices), flags));
 }
 
-void index_buffer::begin() {
+void IndexBuffer::begin() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _id));
+  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_));
 }
 
-void index_buffer::end() {
+void IndexBuffer::end() {
   FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
 //-----------------------------------------------------------------------------
 
-vertex_buffer::vertex_buffer(setup_fn setup, size_t vertex_size, bool dynamic /*= false */) :
-    _num_vertices(0), _vertex_size(vertex_size), _id(0), _dynamic(dynamic), _setup(setup) {
-  FW_CHECKED(glGenBuffers(1, &_id));
+VertexBuffer::VertexBuffer(setup_fn setup, size_t vertex_size, bool dynamic /*= false */) :
+    num_vertices_(0), vertex_size_(vertex_size), id_(0), dynamic_(dynamic), setup_(setup) {
+  FW_CHECKED(glGenBuffers(1, &id_));
 }
 
-vertex_buffer::~vertex_buffer() {
+VertexBuffer::~VertexBuffer() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glDeleteBuffers(1, &_id));
+  FW_CHECKED(glDeleteBuffers(1, &id_));
 }
 
-void vertex_buffer::set_data(int num_vertices, void *vertices, int flags /*= -1*/) {
+void VertexBuffer::set_data(int num_vertices, void *vertices, int flags /*= -1*/) {
   FW_ENSURE_RENDER_THREAD();
   if (flags <= 0) {
-    flags = _dynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+    flags = dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
   }
 
-  _num_vertices = num_vertices;
+  num_vertices_ = num_vertices;
 
-  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
-  FW_CHECKED(glBufferData(GL_ARRAY_BUFFER, _num_vertices * _vertex_size, vertices, flags));
+  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, id_));
+  FW_CHECKED(glBufferData(GL_ARRAY_BUFFER, num_vertices_ * vertex_size_, vertices, flags));
 }
 
-void vertex_buffer::begin() {
+void VertexBuffer::begin() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, _id));
-  _setup();
+  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, id_));
+  setup_();
 }
 
-void vertex_buffer::end() {
+void VertexBuffer::end() {
   FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, 0));
-  // todo: opposite of _setup()?
+  // todo: opposite of setup_()?
 }
 
 //-----------------------------------------------------------------------------

@@ -7,18 +7,18 @@ typedef struct SDL_Cursor SDL_Cursor;
 namespace fw {
 
 /** Class for setting the cursor, making it invisible and so on. */
-class cursor {
+class Cursor {
 private:
-  std::map<int, std::string> _cursor_stack;
-  std::map<std::string, SDL_Cursor *> _loaded_cursors;
-  bool _cursor_visible;
+  std::map<int, std::string> cursor_stack_;
+  std::map<std::string, SDL_Cursor *> loaded_cursors_;
+  bool cursor_visible_;
 
   SDL_Cursor *load_cursor(std::string const &name);
   void set_cursor_for_real(std::string const &name);
   void update_cursor();
 public:
-  cursor();
-  ~cursor();
+  Cursor();
+  ~Cursor();
 
   void initialize();
   void destroy();

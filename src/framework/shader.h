@@ -64,7 +64,7 @@ private:
   std::string _default_program_name;
 
   shader();
-  void load(fw::graphics *g, boost::filesystem::path const &full_path);
+  void load(fw::Graphics *g, boost::filesystem::path const &full_path);
 
 public:
   ~shader();

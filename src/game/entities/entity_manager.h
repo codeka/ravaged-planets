@@ -7,7 +7,7 @@
 #include <game/entities/entity.h>
 
 namespace fw {
-class graphics;
+class Graphics;
 }
 
 namespace ent {

@@ -144,7 +144,7 @@ void editor_terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
 
 void editor_terrain::build_collision_data(std::vector<bool> &vertices) {
   if (static_cast<int>(vertices.size()) < (_width * _length)) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("vertices vector is too small!"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("vertices vector is too small!"));
   }
 
   game::build_collision_data(vertices, _heights, _width, _length);

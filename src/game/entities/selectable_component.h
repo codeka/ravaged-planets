@@ -4,8 +4,8 @@
 #include <game/entities/entity.h>
 
 namespace fw {
-class vertex_buffer;
-class index_buffer;
+class VertexBuffer;
+class IndexBuffer;
 class texture;
 }
 

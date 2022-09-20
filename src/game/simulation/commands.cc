@@ -52,7 +52,7 @@ std::shared_ptr<command> create_command(uint8_t id, uint8_t player_no) {
   create_command_fn fn = (*g_command_registry)[id];
   if (fn == nullptr) {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("command does not exist: " + boost::lexical_cast<std::string>(id)));
+        fw::Exception() << fw::message_error_info("command does not exist: " + boost::lexical_cast<std::string>(id)));
   }
 
   return fn(player_no);
@@ -63,7 +63,7 @@ std::shared_ptr<command> create_command(uint8_t id) {
   create_command_fn fn = (*g_command_registry)[id];
   if (fn == nullptr) {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("command does not exist: " + boost::lexical_cast<std::string>(id)));
+        fw::Exception() << fw::message_error_info("command does not exist: " + boost::lexical_cast<std::string>(id)));
   }
 
   return fn(simulation_thread::get_instance()->get_local_player()->get_player_no());
@@ -111,7 +111,7 @@ ent::entity_id generate_entity_id() {
 
   if (entity_id > 0x00ffffff) {
     // this is probably pretty bad! I can't imagine a game that needs 16 million entities...
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("Too many entities have been created!!"));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Too many entities have been created!!"));
   }
 
   return static_cast<ent::entity_id>((static_cast<uint32_t>(player_id) << 24) | entity_id);

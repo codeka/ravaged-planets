@@ -195,11 +195,11 @@ void Button::render() {
     if (text_align_ == kLeft) {
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
           left + 4, top + height / 2, text_,
-          static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle));
+          static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
     } else if (text_align_ == kCenter) {
       fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
           left + width / 2, top + height / 2, text_,
-          static_cast<fw::font_face::draw_flags>(fw::font_face::align_centre | fw::font_face::align_middle));
+          static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignCenter | fw::FontFace::kAlignMiddle));
     }
   }
 }

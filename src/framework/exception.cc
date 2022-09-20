@@ -6,7 +6,7 @@
 
 namespace fw {
 
-char const *exception::what() const throw () {
+char const *Exception::what() const throw () {
   std::string const *msg = boost::get_error_info<message_error_info>(*this);
   if (msg != 0)
     return msg->c_str();
@@ -16,11 +16,11 @@ char const *exception::what() const throw () {
 /*
  * Adds a stacktrace_error_info to this exception, which contains a list of all the frames in the current stack.
  */
-void exception::populate_stacktrace() {
+void Exception::populate_stacktrace() {
   (*this) << stacktrace_error_info(generate_stack_trace());
 }
 
-void exception::log_stacktrace() {
+void Exception::log_stacktrace() {
   int n = 0;
   BOOST_FOREACH(std::string frame, generate_stack_trace()) {
     if (n++ < 2) {

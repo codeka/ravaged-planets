@@ -5,10 +5,10 @@
 #include <memory>
 
 namespace fw {
-class graphics;
+class Graphics;
 class framework;
-class font_manager;
-class debug_view;
+class FontManager;
+class DebugView;
 class model_manager;
 class timer;
 class Camera;
@@ -17,7 +17,7 @@ class particle_manager;
 struct screenshot_request;
 class AudioManager;
 class lang;
-class cursor;
+class Cursor;
 class input;
 
 namespace gui {
@@ -85,7 +85,7 @@ private:
   bool _active;
 
   input * _input;
-  graphics * _graphics;
+  Graphics * _graphics;
   base_app * _app;
   timer *_timer;
   Camera *_camera;
@@ -94,10 +94,10 @@ private:
   bool _paused;
   AudioManager *_audio_manager;
   model_manager *_model_manager;
-  cursor *_cursor;
+  Cursor *_cursor;
   lang *_lang;
-  font_manager *_font_manager;
-  debug_view *_debug_view;
+  FontManager *_font_manager;
+  DebugView *_debug_view;
   volatile bool _running;
 
   // game updates happen (synchronized) on this thread in constant timestep
@@ -163,7 +163,7 @@ public:
   input *get_input() const {
     return _input;
   }
-  graphics *get_graphics() const {
+  Graphics *get_graphics() const {
     return _graphics;
   }
   gui::Gui *get_gui() const {
@@ -172,7 +172,7 @@ public:
   base_app *get_app() const {
     return _app;
   }
-  font_manager *get_font_manager() const {
+  FontManager *get_font_manager() const {
     return _font_manager;
   }
   model_manager *get_model_manager() const {
@@ -181,7 +181,7 @@ public:
   particle_manager *get_particle_mgr() const {
     return _particle_mgr;
   }
-  cursor *get_cursor() const {
+  Cursor *get_cursor() const {
     return _cursor;
   }
   AudioManager *get_audio_manager() const {

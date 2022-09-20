@@ -27,7 +27,7 @@ std::string to_string(gl_error_info const & err_info);
 #if defined(DEBUG)
 #define FW_CHECKED(fn) \
   fn; \
-  fw::graphics::check_error(#fn)
+  fw::Graphics::check_error(#fn)
 #else
 // in release mode, we don't check errors on each call... but we'll still do it once per frame.
 #define FW_CHECKED(fn) \
@@ -36,26 +36,26 @@ std::string to_string(gl_error_info const & err_info);
 
 #if defined(DEBUG)
 #define FW_ENSURE_RENDER_THREAD() \
-  fw::graphics::ensure_render_thread()
+  fw::Graphics::ensure_render_thread()
 #else
 #define FW_ENSURE_RENDER_THREAD()
 #endif
 
-class graphics {
+class Graphics {
 private:
-  SDL_Window *_wnd;
-  SDL_GLContext _context;
-  std::mutex _run_queue_mutex;
-  std::vector<std::function<void()>> _run_queue;
-  std::shared_ptr<fw::Framebuffer> _framebuffer;
+  SDL_Window *wnd_;
+  SDL_GLContext context_;
+  std::mutex run_queue_mutex_;
+  std::vector<std::function<void()>> run_queue_;
+  std::shared_ptr<fw::Framebuffer> framebuffer_;
 
-  int _width;
-  int _height;
-  bool _windowed;
+  int width_;
+  int height_;
+  bool windowed_;
 
 public:
-  graphics();
-  ~graphics();
+  Graphics();
+  ~Graphics();
 
   void initialize(char const *title);
   void destroy();
@@ -75,8 +75,8 @@ public:
   // Sets the render target to the given framebuffer.
   void set_render_target(std::shared_ptr<fw::Framebuffer> fb);
 
-  inline int get_width() { return _width; }
-  inline int get_height() { return _height; }
+  inline int get_width() { return width_; }
+  inline int get_height() { return height_; }
 
   // This signal is fired just before the graphics present().
   boost::signals2::signal<void()> sig_before_present;
@@ -92,22 +92,23 @@ public:
 };
 
 /** An index buffer holds lists of indices into a vertex_buffer. */
-class index_buffer: private boost::noncopyable {
+class IndexBuffer {
 private:
-  GLuint _id;
-  int _num_indices;
-  bool _dynamic;
+  GLuint id_;
+  int num_indices_;
+  bool dynamic_;
 
 public:
-  index_buffer(bool dynamic = false);
-  ~index_buffer();
+  IndexBuffer(bool dynamic = false);
+  IndexBuffer(const IndexBuffer&) = delete;
+  ~IndexBuffer();
 
-  static std::shared_ptr<index_buffer> create();
+  static std::shared_ptr<IndexBuffer> create();
 
   void set_data(int num_indices, uint16_t const *indices, int flags = -1);
 
   inline int get_num_indices() const {
-    return _num_indices;
+    return num_indices_;
   }
 
   // Called just before and just after we're going to render with this index buffer.
@@ -116,34 +117,35 @@ public:
 };
 
 /** A wrapper around a vertex buffer. */
-class vertex_buffer: private boost::noncopyable {
+class VertexBuffer {
 public:
   typedef std::function<void()> setup_fn;
 
 private:
-  GLuint _id;
-  int _num_vertices;
-  size_t _vertex_size;
-  bool _dynamic;
+  GLuint id_;
+  int num_vertices_;
+  size_t vertex_size_;
+  bool dynamic_;
 
-  setup_fn _setup;
+  setup_fn setup_;
 
 public:
-  vertex_buffer(setup_fn setup, size_t vertex_size, bool dynamic = false);
-  virtual ~vertex_buffer();
+  VertexBuffer(setup_fn setup, size_t vertex_size, bool dynamic = false);
+  VertexBuffer(const VertexBuffer&) = delete;
+  virtual ~VertexBuffer();
 
   // Helper function that makes it easier to create vertex buffers by assuming that you're passing a type
   // defined in fw::vertex::xxx (or something compatible).
   template<typename T>
-  static inline std::shared_ptr<vertex_buffer> create(bool dynamic = false) {
-    return std::shared_ptr<vertex_buffer>(new vertex_buffer(
+  static inline std::shared_ptr<VertexBuffer> create(bool dynamic = false) {
+    return std::shared_ptr<VertexBuffer>(new VertexBuffer(
         T::get_setup_function(), sizeof(T), dynamic));
   }
 
   void set_data(int num_vertices, void *vertices, int flags = -1);
 
   inline int get_num_vertices() const {
-    return _num_vertices;
+    return num_vertices_;
   }
 
   void begin();

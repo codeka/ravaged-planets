@@ -9,8 +9,8 @@
 #include <framework/vector.h>
 
 namespace fw {
-class vertex_buffer;
-class index_buffer;
+class VertexBuffer;
+class IndexBuffer;
 class shader;
 class shader_parameters;
 
@@ -26,7 +26,7 @@ class world_writer;
 namespace game {
 
 struct terrain_patch {
-  std::shared_ptr<fw::vertex_buffer> vb;
+  std::shared_ptr<fw::VertexBuffer> vb;
   std::shared_ptr<fw::Texture> texture;
   std::shared_ptr<fw::shader_parameters> shader_params;
 };
@@ -37,7 +37,7 @@ public:
 
 private:
   std::vector<std::shared_ptr<terrain_patch> > _patches;
-  std::shared_ptr<fw::index_buffer> _ib;
+  std::shared_ptr<fw::IndexBuffer> _ib;
   std::shared_ptr<fw::shader> _shader;
 
 protected:

@@ -6,7 +6,7 @@
 #include <game/world/world_reader.h>
 
 namespace fw {
-class graphics;
+class Graphics;
 }
 
 namespace game {

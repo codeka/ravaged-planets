@@ -93,7 +93,7 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int wid
   if (patch_size == 0) {
     if (width != length) {
       BOOST_THROW_EXCEPTION(
-          fw::exception()
+          fw::Exception()
               << fw::message_error_info(
                   "If you don't specify a patch_size, width and height must be the same"));
     }

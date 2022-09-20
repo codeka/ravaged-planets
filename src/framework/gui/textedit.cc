@@ -23,7 +23,7 @@ namespace conv = boost::locale::conv;
 class TextEditBuffer {
 public:
   STB_TexteditState state;
-  std::shared_ptr<fw::font_face> font;
+  std::shared_ptr<fw::FontFace> font;
   std::basic_string<uint32_t> codepoints;
 
   inline TextEditBuffer() {
@@ -251,7 +251,7 @@ void TextEdit::render() {
   if (!buffer_->codepoints.empty()) {
     fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
         get_left(), get_top() + get_height() / 2, buffer_->codepoints,
-        static_cast<fw::font_face::draw_flags>(fw::font_face::align_left | fw::font_face::align_middle),
+        static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle),
         fw::Color::BLACK());
   }
 

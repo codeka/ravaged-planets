@@ -104,8 +104,8 @@ bool pathing_tool_window::on_simplify_click(Widget *w) {
 class collision_patch {
 private:
   int _patch_x, _patch_z;
-  static std::shared_ptr<fw::index_buffer> _ib;
-  std::shared_ptr<fw::vertex_buffer> _vb;
+  static std::shared_ptr<fw::IndexBuffer> _ib;
+  std::shared_ptr<fw::VertexBuffer> _vb;
 
 public:
   void bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z);
@@ -113,16 +113,16 @@ public:
   void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &world);
 };
 
-std::shared_ptr<fw::index_buffer> collision_patch::_ib;
-std::shared_ptr<fw::vertex_buffer> current_path_vb;
-std::shared_ptr<fw::index_buffer> current_path_ib;
+std::shared_ptr<fw::IndexBuffer> collision_patch::_ib;
+std::shared_ptr<fw::VertexBuffer> current_path_vb;
+std::shared_ptr<fw::IndexBuffer> current_path_ib;
 
 void collision_patch::bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
   if (!_ib) {
     std::vector<uint16_t> indices;
     game::generate_terrain_indices_wireframe(indices, PATCH_SIZE);
 
-    _ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+    _ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
     _ib->set_data(indices.size(), &indices[0]);
   }
 
@@ -140,7 +140,7 @@ void collision_patch::bake(std::vector<bool> &data, float *heights, int width, i
     }
   }
 
-  _vb = fw::vertex_buffer::create<fw::vertex::xyz_c>();
+  _vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
   _vb->set_data(vertices.size(), vertices.data());
 }
 
@@ -340,12 +340,12 @@ void pathing_tool::find_path() {
       }
     }
 
-    std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_c>();
+    std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
     vb->set_data(buffer.size(), &buffer[0]);
 
     current_path_vb = vb;
 
-    current_path_ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+    current_path_ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
     std::vector<uint16_t> indices(buffer.size());
     for (int i = 0; i < buffer.size(); i++) {
       indices[i] = i;

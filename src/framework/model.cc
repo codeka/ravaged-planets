@@ -26,10 +26,10 @@ void model_mesh_noanim::setup_buffers() {
   if (_vb)
     return;
 
-  _vb = vertex_buffer::create<vertex::xyz_n_uv>();
+  _vb = VertexBuffer::create<vertex::xyz_n_uv>();
   _vb->set_data(vertices.size(), &vertices[0]);
 
-  _ib = std::shared_ptr<index_buffer>(new index_buffer());
+  _ib = std::shared_ptr<IndexBuffer>(new IndexBuffer());
   _ib->set_data(indices.size(), &indices[0]);
 
   _shader = shader::create("entity.shader");

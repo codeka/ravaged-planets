@@ -215,7 +215,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
     bool render_gui /*= true*/) {
   ensure_primitive_type_map();
 
-  graphics *g = fw::framework::get_instance()->get_graphics();
+  Graphics *g = fw::framework::get_instance()->get_graphics();
 
   if (!shadow_shader) {
     shadow_shader = fw::shader::create("shadow.shader");
@@ -278,7 +278,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       std::shared_ptr<shader> shader = shader::create("gui.shader");
       std::shared_ptr<shader_parameters> shader_params = shader->create_parameters();
       // TODO: recalculating this every time seems wasteful
-      fw::graphics *g = fw::framework::get_instance()->get_graphics();
+      fw::Graphics *g = fw::framework::get_instance()->get_graphics();
       fw::Matrix pos_transform;
       cml::matrix_orthographic_RH(pos_transform, 0.0f,
           static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
@@ -287,7 +287,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       shader_params->set_matrix("uv_transform", fw::identity());
       shader_params->set_texture("texsampler", debug_shadowsrc->get_shadowmap()->get_color_buffer());
 
-      std::shared_ptr<vertex_buffer> vb = vertex_buffer::create<vertex::xyz_uv>();
+      std::shared_ptr<VertexBuffer> vb = VertexBuffer::create<vertex::xyz_uv>();
       fw::vertex::xyz_uv vertices[4];
       vertices[0] = fw::vertex::xyz_uv(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
       vertices[1] = fw::vertex::xyz_uv(0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
@@ -295,7 +295,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       vertices[3] = fw::vertex::xyz_uv(1.0f, 1.0f, 0.0f, 1.0f, 1.0f);
       vb->set_data(4, vertices);
 
-      std::shared_ptr<index_buffer> ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+      std::shared_ptr<IndexBuffer> ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
       uint16_t indices[4];
       indices[0] = 0;
       indices[1] = 1;

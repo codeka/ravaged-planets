@@ -17,7 +17,7 @@
 namespace ent {
 
 entity::entity(entity_manager *mgr, entity_id id) :
-    _mgr(mgr), _debug_view(0), _debug_flags(static_cast<entity_debug_flags>(0)), _id(id),
+    _mgr(mgr), _debug_view(0), _debug_flags(static_cast<entity_debug_flags>(0)), id_(id),
     _create_time(0) {
 }
 
@@ -31,7 +31,7 @@ void entity::add_component(entity_component *comp) {
   // you can only have one component of each type
   auto it = _components.find(comp->get_identifier());
   if (it != _components.end())
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::message_error_info("only one component of each type is allowed."));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("only one component of each type is allowed."));
 
   _components[comp->get_identifier()] = comp;
 }
@@ -54,7 +54,7 @@ void entity::add_attribute(entity_attribute const &attr) {
   auto it = _attributes.find(attr.get_name());
   if (it != _attributes.end()) {
     BOOST_THROW_EXCEPTION(
-        fw::exception() << fw::message_error_info("only one attribute with the same name is allowed"));
+        fw::Exception() << fw::message_error_info("only one attribute with the same name is allowed"));
   }
 
   _attributes[attr.get_name()] = attr;

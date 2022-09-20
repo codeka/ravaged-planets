@@ -71,7 +71,7 @@ fw::Matrix minimap_drawable::get_uv_transform() {
 }
 
 fw::Matrix minimap_drawable::get_pos_transform(float x, float y, float width, float height) {
-  fw::graphics *g = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *g = fw::framework::get_instance()->get_graphics();
   fw::Matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
@@ -169,7 +169,7 @@ void minimap_window::update_entity_display() {
   int width = game::world::get_instance()->get_terrain()->get_width();
   int height = game::world::get_instance()->get_terrain()->get_length();
 
-  fw::graphics *graphics = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *graphics = fw::framework::get_instance()->get_graphics();
   float screen_width = graphics->get_width();
   float screen_height = graphics->get_height();
 

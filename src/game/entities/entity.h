@@ -9,7 +9,7 @@
 #include <game/entities/entity_debug.h>
 
 namespace fw {
-class graphics;
+class Graphics;
 class xml_element;
 namespace sg {
 class scenegraph;
@@ -94,7 +94,7 @@ private:
   std::map<int, entity_component *> _components;
   std::map<std::string, entity_attribute> _attributes;
   std::weak_ptr<entity> _creator;
-  entity_id _id;
+  entity_id id_;
   float _create_time;
   std::string _name;
 
@@ -168,7 +168,7 @@ public:
 
   // gets the identifier for this entity
   entity_id get_id() const {
-    return _id;
+    return id_;
   }
 };
 

@@ -22,7 +22,7 @@ particle_manager::~particle_manager() {
   delete _renderer;
 }
 
-void particle_manager::initialize(graphics *g) {
+void particle_manager::initialize(Graphics *g) {
   _graphics = g;
   _renderer->initialize(g);
 }

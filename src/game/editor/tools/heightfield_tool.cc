@@ -251,7 +251,7 @@ void heightfield_tool_window::on_import_file_selected(ed::open_file_window *ofw)
   try {
     fw::Bitmap bmp(ofw->get_selected_file());
     _tool->import_heightfield(bmp);
-  } catch (fw::exception &e) {
+  } catch (fw::Exception &e) {
     // error, probably not a bitmap?
   }
 }

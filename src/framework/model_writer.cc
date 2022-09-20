@@ -31,7 +31,7 @@ void model_writer::write(std::string const &filename, model &mdl) {
   std::fstream outs;
   outs.open(filename.c_str(), std::ios::out);
   if (outs.fail()) {
-    BOOST_THROW_EXCEPTION(fw::exception() << fw::filename_error_info(filename));
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(filename));
   }
   pb_model.SerializeToOstream(&outs);
   outs.close();

@@ -26,7 +26,7 @@ public:
   typedef std::list<particle *> particle_list;
 
 private:
-  graphics *_graphics;
+  Graphics *_graphics;
   std::shared_ptr<shader> _shader;
   std::shared_ptr<shader_parameters> _shader_params;
   std::shared_ptr<Texture> _color_texture;
@@ -43,7 +43,7 @@ public:
   particle_renderer(particle_manager *mgr);
   ~particle_renderer();
 
-  void initialize(graphics *g);
+  void initialize(Graphics *g);
   void render(sg::scenegraph &scenegraph, particle_list &particles);
 };
 

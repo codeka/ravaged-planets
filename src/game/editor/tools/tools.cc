@@ -50,7 +50,7 @@ void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::Vec
   if (num_segments < 8)
     num_segments = 8;
 
-  std::shared_ptr<fw::vertex_buffer> vb = fw::vertex_buffer::create<fw::vertex::xyz_c>();
+  std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
   fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[num_segments + 1];
   for (int i = 0; i < num_segments; i++) {
     float factor = 2.0f * (float) M_PI * (i / (float) num_segments);
@@ -66,7 +66,7 @@ void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::Vec
   vb->set_data(num_segments + 1, vertices);
   delete[] vertices;
 
-  std::shared_ptr<fw::index_buffer> ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+  std::shared_ptr<fw::IndexBuffer> ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
   uint16_t *indices = new uint16_t[num_segments + 1];
   for (int i = 0; i < num_segments + 1; i++) {
     indices[i] = i;

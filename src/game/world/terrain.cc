@@ -27,7 +27,7 @@ void terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices(index_data, PATCH_SIZE);
-  _ib = std::shared_ptr<fw::index_buffer>(new fw::index_buffer());
+  _ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
   _ib->set_data(index_data.size(), &index_data[0], 0);
 
   // load the shader file that we'll use for rendering
@@ -105,8 +105,8 @@ void terrain::bake_patch(int patch_x, int patch_z) {
   ensure_patches();
 
   // if we haven't created the vertex buffer for this patch yet, do it now
-  if (_patches[index]->vb == std::shared_ptr<fw::vertex_buffer>()) {
-    _patches[index]->vb = fw::vertex_buffer::create<fw::vertex::xyz_n>();
+  if (_patches[index]->vb == std::shared_ptr<fw::VertexBuffer>()) {
+    _patches[index]->vb = fw::VertexBuffer::create<fw::vertex::xyz_n>();
   }
 
   fw::vertex::xyz_n *vert_data;
