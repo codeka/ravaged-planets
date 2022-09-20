@@ -106,7 +106,7 @@ bool framework::initialize(char const *title) {
     _particle_mgr = new particle_manager();
     _particle_mgr->initialize(_graphics);
 
-    _model_manager = new model_manager();
+    _model_manager = new ModelManager();
 
     _cursor = new Cursor();
     _cursor->initialize();

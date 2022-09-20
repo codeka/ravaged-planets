@@ -35,7 +35,7 @@ public:
   void render(fw::sg::scenegraph &scenegraph);
 };
 
-static std::shared_ptr<fw::model> g_model;
+static std::shared_ptr<fw::Model> g_model;
 static bool g_show_ground = false;
 static std::shared_ptr<fw::sg::node> g_ground;
 static bool g_rotating = false;

@@ -35,7 +35,7 @@ ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t p
   _upd_queue.update();
 
   int color_index = static_cast<int>(fw::random() * player_colors.size());
-  _color = player_colors[color_index];
+  color_ = player_colors[color_index];
 
   // create a new lua_context for our script, then add all of our global
   // functions and so on to it

@@ -25,12 +25,12 @@ join_request_packet::~join_request_packet() {
 
 void join_request_packet::serialize(fw::net::packet_buffer &buffer) {
   buffer << _user_id;
-  buffer << _color;
+  buffer << color_;
 }
 
 void join_request_packet::deserialize(fw::net::packet_buffer &buffer) {
   buffer >> _user_id;
-  buffer >> _color;
+  buffer >> color_;
 }
 
 //-------------------------------------------------------------------------

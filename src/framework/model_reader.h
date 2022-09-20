@@ -6,10 +6,10 @@
 
 namespace fw {
 
-/** This class is used to read models in from .mesh files. */
-class model_reader {
+// This class is used to read models in from .mesh files.
+class ModelReader {
 public:
-  std::shared_ptr<model> read(boost::filesystem::path const &filename);
+  std::shared_ptr<Model> read(boost::filesystem::path const &filename);
 };
 
 }

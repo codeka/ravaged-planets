@@ -27,11 +27,11 @@ void terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices(index_data, PATCH_SIZE);
-  _ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
-  _ib->set_data(index_data.size(), &index_data[0], 0);
+  ib_ = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
+  ib_->set_data(index_data.size(), &index_data[0], 0);
 
   // load the shader file that we'll use for rendering
-  _shader = fw::shader::create("terrain.shader");
+  shader_ = fw::shader::create("terrain.shader");
 
   // TODO: this should come from the world_reader
   set_layer(0, std::make_shared<fw::Bitmap>(fw::resolve("terrain/grass-01.jpg")));
@@ -116,7 +116,7 @@ void terrain::bake_patch(int patch_x, int patch_z) {
   patch->vb->set_data(num_verts, vert_data, 0);
   delete[] vert_data;
 
-  patch->shader_params = _shader->create_parameters();
+  patch->shader_params = shader_->create_parameters();
   if (_layers.size() >= 1)
     patch->shader_params->set_texture("layer1", _layers[0]);
   if (_layers.size() >= 2)
@@ -184,8 +184,8 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
 
       // we have to set up the scenegraph node with these manually
       node->set_vertex_buffer(patch->vb);
-      node->set_index_buffer(_ib);
-      node->set_shader(_shader);
+      node->set_index_buffer(ib_);
+      node->set_shader(shader_);
       node->set_shader_parameters(patch->shader_params);
       node->set_primitive_type(fw::sg::primitive_trianglestrip);
 

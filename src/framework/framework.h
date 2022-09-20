@@ -9,7 +9,7 @@ class Graphics;
 class framework;
 class FontManager;
 class DebugView;
-class model_manager;
+class ModelManager;
 class timer;
 class Camera;
 class Bitmap;
@@ -93,7 +93,7 @@ private:
   particle_manager *_particle_mgr;
   bool _paused;
   AudioManager *_audio_manager;
-  model_manager *_model_manager;
+  ModelManager *_model_manager;
   Cursor *_cursor;
   Lang *_lang;
   FontManager *_font_manager;
@@ -175,7 +175,7 @@ public:
   FontManager *get_font_manager() const {
     return _font_manager;
   }
-  model_manager *get_model_manager() const {
+  ModelManager *get_model_manager() const {
     return _model_manager;
   }
   particle_manager *get_particle_mgr() const {

@@ -6,7 +6,7 @@ namespace game {
 std::vector<fw::Color> player_colors;
 
 player::player() :
-    _user_id(0), _player_no(0), _is_ready_to_start(0), _color(0, 0, 0) {
+    _user_id(0), _player_no(0), _is_ready_to_start(0), color_(0, 0, 0) {
   if (player_colors.size() == 0) {
     player_colors.push_back(fw::Color(0.0f, 1.0f, 1.0f)); // aqua
     player_colors.push_back(fw::Color(1.0f, 1.0f, 1.0f)); // fuchsia

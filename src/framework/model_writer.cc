@@ -11,17 +11,17 @@
 
 namespace fw {
 
-void add_node(Node *pb_node, std::shared_ptr<model_node> node);
+void add_node(Node *pb_node, std::shared_ptr<ModelNode> node);
 
-void model_writer::write(std::string const &filename, std::shared_ptr<model> mdl) {
+void ModelWriter::write(std::string const &filename, std::shared_ptr<Model> mdl) {
   write(filename, *mdl.get());
 }
 
-void model_writer::write(std::string const &filename, model &mdl) {
-  Model pb_model;
+void ModelWriter::write(std::string const &filename, Model &mdl) {
+  ::Model pb_model;
   pb_model.set_name("TODO");
-  BOOST_FOREACH(std::shared_ptr<fw::model_mesh> mesh, mdl.meshes) {
-    std::shared_ptr<model_mesh_noanim> mesh_noanim = std::dynamic_pointer_cast<model_mesh_noanim>(mesh);
+  BOOST_FOREACH(std::shared_ptr<fw::ModelMesh> mesh, mdl.meshes) {
+    std::shared_ptr<ModelMeshNoanim> mesh_noanim = std::dynamic_pointer_cast<ModelMeshNoanim>(mesh);
     Mesh *pb_mesh = pb_model.add_meshes();
     pb_mesh->set_vertices(mesh_noanim->vertices.data(), mesh_noanim->vertices.size() * sizeof(vertex::xyz_n_uv));
     pb_mesh->set_indices(mesh_noanim->indices.data(), mesh_noanim->indices.size() * sizeof(uint16_t));
@@ -37,7 +37,7 @@ void model_writer::write(std::string const &filename, model &mdl) {
   outs.close();
 }
 
-void add_node(Node *pb_node, std::shared_ptr<model_node> node) {
+void add_node(Node *pb_node, std::shared_ptr<ModelNode> node) {
   pb_node->set_mesh_index(node->mesh_index);
   pb_node->set_name(node->node_name);
   for (int i = 0; i < 16; i++) {
@@ -45,7 +45,7 @@ void add_node(Node *pb_node, std::shared_ptr<model_node> node) {
   }
 
   for (int i = 0; i < node->get_num_children(); i++) {
-    std::shared_ptr<model_node> child_node = std::dynamic_pointer_cast<model_node>(node->get_child(i));
+    std::shared_ptr<ModelNode> child_node = std::dynamic_pointer_cast<ModelNode>(node->get_child(i));
     Node *pb_child_node = pb_node->add_children();
     add_node(pb_child_node, child_node);
   }

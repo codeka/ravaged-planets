@@ -7,45 +7,45 @@
 
 namespace fw {
 
-model_mesh::model_mesh(int /*num_vertices*/, int /*num_indices*/) {
+ModelMesh::ModelMesh(int /*num_vertices*/, int /*num_indices*/) {
 }
 
-model_mesh::~model_mesh() {
+ModelMesh::~ModelMesh() {
 }
 
 //-------------------------------------------------------------------------
 
-model_mesh_noanim::model_mesh_noanim(int num_vertices, int num_indices) :
-    model_mesh(num_vertices, num_indices), vertices(num_vertices), indices(num_indices) {
+ModelMeshNoanim::ModelMeshNoanim(int num_vertices, int num_indices) :
+    ModelMesh(num_vertices, num_indices), vertices(num_vertices), indices(num_indices) {
 }
 
-model_mesh_noanim::~model_mesh_noanim() {
+ModelMeshNoanim::~ModelMeshNoanim() {
 }
 
-void model_mesh_noanim::setup_buffers() {
-  if (_vb)
+void ModelMeshNoanim::setup_buffers() {
+  if (vb_)
     return;
 
-  _vb = VertexBuffer::create<vertex::xyz_n_uv>();
-  _vb->set_data(vertices.size(), &vertices[0]);
+  vb_ = VertexBuffer::create<vertex::xyz_n_uv>();
+  vb_->set_data(vertices.size(), &vertices[0]);
 
-  _ib = std::shared_ptr<IndexBuffer>(new IndexBuffer());
-  _ib->set_data(indices.size(), &indices[0]);
+  ib_ = std::shared_ptr<IndexBuffer>(new IndexBuffer());
+  ib_->set_data(indices.size(), &indices[0]);
 
-  _shader = shader::create("entity.shader");
+  shader_ = shader::create("entity.shader");
 }
 
 //-------------------------------------------------------------------------
 
-model::model() : _wireframe(false), _color(fw::Color(1, 1, 1)) {
+Model::Model() : wireframe_(false), color_(fw::Color(1, 1, 1)) {
 }
 
-model::~model() {
+Model::~Model() {
 }
 
-void model::render(sg::scenegraph &sg, fw::Matrix const &transform /*= fw::matrix::identity() */) {
+void Model::render(sg::scenegraph &sg, fw::Matrix const &transform /*= fw::matrix::identity() */) {
   root_node->set_world_matrix(transform);
-  root_node->set_color(_color);
+  root_node->set_color(color_);
   sg.add_node(root_node->clone());
 }
 

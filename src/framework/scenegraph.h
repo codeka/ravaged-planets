@@ -65,9 +65,9 @@ private:
   bool _cast_shadows;
 
   primitive_type _primitive_type;
-  std::shared_ptr<fw::VertexBuffer> _vb;
-  std::shared_ptr<fw::IndexBuffer> _ib;
-  std::shared_ptr<fw::shader> _shader;
+  std::shared_ptr<fw::VertexBuffer> vb_;
+  std::shared_ptr<fw::IndexBuffer> ib_;
+  std::shared_ptr<fw::shader> shader_;
   std::shared_ptr<fw::shader_parameters> _shader_params;
 
   // Renders the node if the shader file is null (basically just uses the basic shader).
@@ -104,21 +104,21 @@ public:
   }
 
   void set_vertex_buffer(std::shared_ptr<fw::VertexBuffer> vb) {
-    _vb = vb;
+    vb_ = vb;
   }
   std::shared_ptr<fw::VertexBuffer> get_vertex_buffer() const {
-    return _vb;
+    return vb_;
   }
 
   void set_index_buffer(std::shared_ptr<fw::IndexBuffer> ib) {
-    _ib = ib;
+    ib_ = ib;
   }
   std::shared_ptr<fw::IndexBuffer> get_index_buffer() const {
-    return _ib;
+    return ib_;
   }
 
   void set_shader(std::shared_ptr<fw::shader> shader) {
-    _shader = shader;
+    shader_ = shader;
   }
   std::shared_ptr<fw::shader> get_shader() const;
 

@@ -7,7 +7,7 @@ class pathing_tool_window;
 class collision_patch;
 
 namespace fw {
-class model;
+class Model;
 class timed_path_find;
 }
 
@@ -23,7 +23,7 @@ private:
   test_mode _test_mode;
   pathing_tool_window *_wnd;
   std::vector<bool> _collision_data;
-  std::shared_ptr<fw::model> _marker;
+  std::shared_ptr<fw::Model> _marker;
   fw::Vector _start_pos;
   bool _start_set;
   fw::Vector _end_pos;

@@ -22,7 +22,7 @@ local_player::local_player() :
 
   // start off with a random color as well
   int color_index = static_cast<int>(fw::random() * player_colors.size());
-  _color = player_colors[color_index];
+  color_ = player_colors[color_index];
 }
 
 local_player::~local_player() {

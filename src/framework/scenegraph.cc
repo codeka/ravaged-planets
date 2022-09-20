@@ -75,11 +75,11 @@ void node::remove_child(std::shared_ptr<node> child) {
 // Get the shader file to use. if we don't have one defined, look at our parent and keep looking up at our parents
 // until we find one.
 std::shared_ptr<fw::shader> node::get_shader() const {
-  std::shared_ptr<fw::shader> shader = _shader;
+  std::shared_ptr<fw::shader> shader = shader_;
   if (!shader) {
     node *parent = _parent;
     while (!shader && parent != 0) {
-      shader = parent->_shader;
+      shader = parent->shader_;
       parent = parent->_parent;
     }
   }
@@ -94,7 +94,7 @@ void node::render(scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
   }
 
   fw::Matrix transform(model_matrix * _world);
-  if (_vb) {
+  if (vb_) {
     std::shared_ptr<fw::shader> shader = get_shader();
     if (is_rendering_shadow) {
       shader = shadow_shader;
@@ -152,17 +152,17 @@ void node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera,
     }
   }
 
-  _vb->begin();
+  vb_->begin();
   shader->begin(parameters);
-  if (_ib) {
-    _ib->begin();
-    FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], _ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
-    _ib->end();
+  if (ib_) {
+    ib_->begin();
+    FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
+    ib_->end();
   } else {
-    FW_CHECKED(glDrawArrays(g_primitive_type_map[_primitive_type], 0, _vb->get_num_vertices()));
+    FW_CHECKED(glDrawArrays(g_primitive_type_map[_primitive_type], 0, vb_->get_num_vertices()));
   }
   shader->end();
-  _vb->end();
+  vb_->end();
 }
 
 void node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
@@ -176,9 +176,9 @@ void node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
 void node::populate_clone(std::shared_ptr<node> clone) {
   clone->_cast_shadows = _cast_shadows;
   clone->_primitive_type = _primitive_type;
-  clone->_vb = _vb;
-  clone->_ib = _ib;
-  clone->_shader = _shader;
+  clone->vb_ = vb_;
+  clone->ib_ = ib_;
+  clone->shader_ = shader_;
   if (_shader_params)
     clone->_shader_params = _shader_params->clone();
   clone->_parent = _parent;

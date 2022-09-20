@@ -7,13 +7,13 @@
 
 namespace fw {
 
-/** Manages models, keeps them cached in memory and so on. */
-class model_manager {
+// Manages models, keeps them cached in memory and so on.
+class ModelManager {
 private:
-  std::map<std::string, std::shared_ptr<model>> _models;
+  std::map<std::string, std::shared_ptr<Model>> models_;
 
 public:
-  /** Fetches the given model, must be called on the render thread. */
-  std::shared_ptr<model> get_model(std::string const &name);
+  /** Fetches the given Model, must be called on the render thread. */
+  std::shared_ptr<Model> get_model(std::string const &name);
 };
 }

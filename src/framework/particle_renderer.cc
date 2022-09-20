@@ -119,7 +119,7 @@ static buffer_cache g_buffer_cache;
 namespace fw {
 
 particle_renderer::particle_renderer(particle_manager *mgr) :
-    _graphics(nullptr), _shader(nullptr), _mgr(mgr), _draw_frame(1), _color_texture(new fw::Texture()) {
+    _graphics(nullptr), shader_(nullptr), _mgr(mgr), _draw_frame(1), _color_texture(new fw::Texture()) {
 }
 
 particle_renderer::~particle_renderer() {
@@ -129,8 +129,8 @@ void particle_renderer::initialize(Graphics *g) {
   _graphics = g;
 
   _color_texture->create(fw::resolve("particles/colors.png"));
-  _shader = fw::shader::create("particle.shader");
-  _shader_params = _shader->create_parameters();
+  shader_ = fw::shader::create("particle.shader");
+  _shader_params = shader_->create_parameters();
   _shader_params->set_texture("color_texture", _color_texture);
 }
 
@@ -263,7 +263,7 @@ void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::pa
 
   // create the render state that'll hold all our state variables
   render_state rs(scenegraph, particles);
-  rs.shader = _shader;
+  rs.shader = shader_;
   rs.shader_parameters = _shader_params;
   rs.particle_num = 0;
   rs.mode = particle_emitter_config::normal;

@@ -27,8 +27,8 @@ ENT_COMPONENT_REGISTER("Mesh", mesh_component);
 mesh_component::mesh_component() {
 }
 
-mesh_component::mesh_component(std::shared_ptr<fw::model> const &model) :
-    _model(model) {
+mesh_component::mesh_component(std::shared_ptr<fw::Model> const &Model) :
+    model_(Model) {
 }
 
 mesh_component::~mesh_component() {
@@ -51,18 +51,18 @@ void mesh_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &tr
   std::shared_ptr<entity> entity(_entity);
   position_component *pos = entity->get_component<position_component>();
   if (pos != nullptr) {
-    if (!_model) {
-      _model = fw::framework::get_instance()->get_model_manager()->get_model(_model_name);
+    if (!model_) {
+      model_ = fw::framework::get_instance()->get_model_manager()->get_model(_model_name);
     }
 
     if (_ownable_component != nullptr) {
       game::player *player = _ownable_component->get_owner();
       if (player != nullptr) {
-        _model->set_color(player->get_color());
+        model_->set_color(player->get_color());
       }
     }
 
-    _model->render(scenegraph, pos->get_transform() * transform);
+    model_->render(scenegraph, pos->get_transform() * transform);
   }
 }
 }

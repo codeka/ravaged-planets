@@ -10,17 +10,17 @@
 
 namespace fw {
 
-model_node::model_node() : transform(fw::identity()), mesh_index(-1) {
+ModelNode::ModelNode() : transform(fw::identity()), mesh_index(-1) {
 }
 
-model_node::~model_node() {
+ModelNode::~ModelNode() {
 }
 
-void model_node::initialize(model *mdl) {
-  _model = mdl;
+void ModelNode::initialize(Model *mdl) {
+  model_ = mdl;
 
   if (mesh_index >= 0) {
-    std::shared_ptr<model_mesh> mesh = mdl->meshes[mesh_index];
+    std::shared_ptr<ModelMesh> mesh = mdl->meshes[mesh_index];
     set_vertex_buffer(mesh->get_vertex_buffer());
     set_index_buffer(mesh->get_index_buffer());
     set_shader(mesh->get_shader());
@@ -35,47 +35,47 @@ void model_node::initialize(model *mdl) {
   }
 
   BOOST_FOREACH(std::shared_ptr<node> node, _children) {
-    std::dynamic_pointer_cast<model_node>(node)->initialize(mdl);
+    std::dynamic_pointer_cast<ModelNode>(node)->initialize(mdl);
   }
 }
 
-void model_node::render(sg::scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
-  if (_model->get_wireframe()) {
+void ModelNode::render(sg::scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
+  if (model_->get_wireframe()) {
 //    device = fw::framework::get_instance()->get_graphics()->get_device();
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
   }
 
   if (mesh_index >= 0) {
-    get_shader_parameters()->set_color("mesh_color", _color);
+    get_shader_parameters()->set_color("mesh_color", color_);
   }
 
   node::render(sg, transform * model_matrix);
 
-  if (_model->get_wireframe()) {
+  if (model_->get_wireframe()) {
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
   }
 }
 
-void model_node::populate_clone(std::shared_ptr<sg::node> clone) {
+void ModelNode::populate_clone(std::shared_ptr<sg::node> clone) {
   node::populate_clone(clone);
 
-  std::shared_ptr<model_node> mnclone(std::dynamic_pointer_cast<model_node>(clone));
-  mnclone->_model = _model;
+  std::shared_ptr<ModelNode> mnclone(std::dynamic_pointer_cast<ModelNode>(clone));
+  mnclone->model_ = model_;
   mnclone->mesh_index = mesh_index;
   mnclone->node_name = node_name;
   mnclone->transform = transform;
-  mnclone->_color = _color;
+  mnclone->color_ = color_;
 }
 
-void model_node::set_color(fw::Color color) {
-  _color = color;
+void ModelNode::set_color(fw::Color color) {
+  color_ = color;
   BOOST_FOREACH(std::shared_ptr<node> &child_node, _children) {
-    std::dynamic_pointer_cast<model_node>(child_node)->set_color(color);
+    std::dynamic_pointer_cast<ModelNode>(child_node)->set_color(color);
   }
 }
 
-std::shared_ptr<sg::node> model_node::clone() {
-  std::shared_ptr<sg::node> clone(new model_node());
+std::shared_ptr<sg::node> ModelNode::clone() {
+  std::shared_ptr<sg::node> clone(new ModelNode());
   populate_clone(clone);
   return clone;
 }

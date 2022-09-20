@@ -85,7 +85,7 @@ void remote_player::packet_handler(std::shared_ptr<fw::net::packet> const &pkt) 
 void remote_player::pkt_join_req(std::shared_ptr<fw::net::packet> pkt) {
   std::shared_ptr<join_request_packet> req(std::dynamic_pointer_cast<join_request_packet>(pkt));
   _user_id = req->get_user_id();
-  _color = req->get_color();
+  color_ = req->get_color();
 
   // call the session and confirm the fact that this player is valid and that.
   std::shared_ptr<game::session_request> sess_req = session::get_instance()->confirm_player(
@@ -101,7 +101,7 @@ void remote_player::pkt_join_resp(std::shared_ptr<fw::net::packet> pkt) {
   fw::debug << boost::format("connected to host, map is: %1%") % resp->get_map_name() << std::endl;
   BOOST_FOREACH(uint32_t other_user_id, resp->get_other_users()) {
     // the color that we sent will be echo'd back to us, usually
-    _color = resp->get_my_color();
+    color_ = resp->get_my_color();
 
     // we assume the first player is the host we're connect to, is that valid?
     if (_user_id == 0) {
@@ -189,26 +189,26 @@ void remote_player::join_complete(session_request &req) {
   _player_no = cpsr.get_player_no();
 
   // work out a random color they can have (which hasn't already been taken by another player)
-  if (_color == fw::Color(0, 0, 0) || color_already_taken(this, _color)) {
-    if (_color == fw::Color(0, 0, 0)) {
+  if (color_ == fw::Color(0, 0, 0) || color_already_taken(this, color_)) {
+    if (color_ == fw::Color(0, 0, 0)) {
       fw::debug << boost::format("remote player's color hasn't been set yet, choosing one now") << std::endl;
     } else {
       fw::debug << boost::format("remote player's color (%1%) is already taken, choosing another")
-          % _color << std::endl;
+          % color_ << std::endl;
     }
 
     do {
       int color_index = static_cast<int>(fw::random() * player_colors.size());
-      _color = player_colors[color_index];
-    } while (color_already_taken(this, _color));
+      color_ = player_colors[color_index];
+    } while (color_already_taken(this, color_));
 
-    fw::debug << boost::format("changing remote player's color to: %1%") % _color << std::endl;
+    fw::debug << boost::format("changing remote player's color to: %1%") % color_ << std::endl;
   }
 
   // once we get confirmation from the server, we can let the player know it's OK to join
   join_response_packet resp;
   resp.set_map_name(simulation_thread::get_instance()->get_map_name());
-  resp.set_your_color(_color);
+  resp.set_your_color(color_);
   resp.set_my_color(simulation_thread::get_instance()->get_local_player()->get_color());
   std::vector<player *> players = simulation_thread::get_instance()->get_players();
   BOOST_FOREACH(player *plyr, players) {

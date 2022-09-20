@@ -22,7 +22,7 @@ class command;
 class join_request_packet: public fw::net::packet {
 private:
   uint32_t _user_id;
-  fw::Color _color;
+  fw::Color color_;
 
 protected:
   virtual void serialize(fw::net::packet_buffer &buffer);
@@ -42,10 +42,10 @@ public:
   // gets or sets the color of the connecting player (only useful when connecting
   // to a peer, rather than the host)
   void set_color(fw::Color value) {
-    _color = value;
+    color_ = value;
   }
   fw::Color get_color() const {
-    return _color;
+    return color_;
   }
 
   static const int identifier = 1;

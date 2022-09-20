@@ -48,7 +48,7 @@ class entity_icon {
 private:
   float _rotation;
   std::string _template_name;
-  std::shared_ptr<fw::model> _model;
+  std::shared_ptr<fw::Model> model_;
   std::shared_ptr<fw::Framebuffer> _framebuffer;
   std::shared_ptr<fw::Texture> _color_texture;
   std::shared_ptr<fw::Texture> _depth_texture;
@@ -59,7 +59,7 @@ public:
   entity_icon();
 
   void initialize();
-  void set_model(std::string const &template_name, std::shared_ptr<fw::model> mdl);
+  void set_model(std::string const &template_name, std::shared_ptr<fw::Model> mdl);
   void update();
   void reset();
 
@@ -87,15 +87,15 @@ void entity_icon::initialize() {
   render();
 }
 
-void entity_icon::set_model(std::string const &template_name, std::shared_ptr<fw::model> mdl) {
+void entity_icon::set_model(std::string const &template_name, std::shared_ptr<fw::Model> mdl) {
   _template_name = template_name;
-  _model = mdl;
+  model_ = mdl;
   _rotation = 0.0f;
   render();
 }
 
 void entity_icon::render() {
-  if (!_model) {
+  if (!model_) {
     return;
   }
 
@@ -111,7 +111,7 @@ void entity_icon::render() {
   std::shared_ptr <fw::sg::light> light(new fw::sg::light(sun * 200.0f, sun * -1, true));
   sg.add_light(light);
 
-  _model->render(sg, fw::rotate_axis_angle(fw::Vector(0, 1, 0), _rotation));
+  model_->render(sg, fw::rotate_axis_angle(fw::Vector(0, 1, 0), _rotation));
   fw::render(sg, _framebuffer, false);
 }
 
@@ -243,7 +243,7 @@ void build_window::do_refresh() {
 
     std::string mesh_file_name = "";// luabind::object_cast<std::string>(tmpl["components"]["Mesh"]["FileName"]);
     fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
-      std::shared_ptr<fw::model> mdl =
+      std::shared_ptr<fw::Model> mdl =
           fw::framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
       mdl->set_color(game::simulation_thread::get_instance()->get_local_player()->get_color());
       icon->set_model(""/*luabind::object_cast<std::string>(tmpl["name"])*/, mdl);

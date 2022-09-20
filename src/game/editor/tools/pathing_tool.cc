@@ -104,8 +104,8 @@ bool pathing_tool_window::on_simplify_click(Widget *w) {
 class collision_patch {
 private:
   int _patch_x, _patch_z;
-  static std::shared_ptr<fw::IndexBuffer> _ib;
-  std::shared_ptr<fw::VertexBuffer> _vb;
+  static std::shared_ptr<fw::IndexBuffer> ib_;
+  std::shared_ptr<fw::VertexBuffer> vb_;
 
 public:
   void bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z);
@@ -113,17 +113,17 @@ public:
   void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &world);
 };
 
-std::shared_ptr<fw::IndexBuffer> collision_patch::_ib;
+std::shared_ptr<fw::IndexBuffer> collision_patch::ib_;
 std::shared_ptr<fw::VertexBuffer> current_path_vb;
 std::shared_ptr<fw::IndexBuffer> current_path_ib;
 
 void collision_patch::bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
-  if (!_ib) {
+  if (!ib_) {
     std::vector<uint16_t> indices;
     game::generate_terrain_indices_wireframe(indices, PATCH_SIZE);
 
-    _ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
-    _ib->set_data(indices.size(), &indices[0]);
+    ib_ = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
+    ib_->set_data(indices.size(), &indices[0]);
   }
 
   std::vector<fw::vertex::xyz_c> vertices((PATCH_SIZE + 1) * (PATCH_SIZE + 1));
@@ -140,8 +140,8 @@ void collision_patch::bake(std::vector<bool> &data, float *heights, int width, i
     }
   }
 
-  _vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
-  _vb->set_data(vertices.size(), vertices.data());
+  vb_ = fw::VertexBuffer::create<fw::vertex::xyz_c>();
+  vb_->set_data(vertices.size(), vertices.data());
 }
 
 void collision_patch::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &world) {
@@ -149,8 +149,8 @@ void collision_patch::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &w
   node->set_world_matrix(world);
 
   // we have to set up the scenegraph node with these manually
-  node->set_vertex_buffer(_vb);
-  node->set_index_buffer(_ib);
+  node->set_vertex_buffer(vb_);
+  node->set_index_buffer(ib_);
   node->set_primitive_type(fw::sg::primitive_linelist);
   std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
   std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();

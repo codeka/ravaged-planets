@@ -3,7 +3,7 @@
 #include <game/editor/tools/tools.h>
 
 namespace fw {
-class model;
+class Model;
 }
 
 class players_tool_window;
@@ -14,7 +14,7 @@ class world;
 class players_tool: public tool {
 private:
   players_tool_window *_wnd;
-  std::shared_ptr<fw::model> _marker;
+  std::shared_ptr<fw::Model> _marker;
   int _player_no;
 
   void on_key(std::string keyname, bool is_down);

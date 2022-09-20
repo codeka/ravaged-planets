@@ -19,7 +19,7 @@ protected:
   uint8_t _player_no;
   uint32_t _user_id;
   std::string _user_name;
-  fw::Color _color;
+  fw::Color color_;
 
   void player_ready();
 
@@ -58,12 +58,12 @@ public:
     return _player_no;
   }
   fw::Color get_color() const {
-    return _color;
+    return color_;
   }
 
   /** Sets our color to the given value. */
   void set_color(fw::Color const &col) {
-    _color = col;
+    color_ = col;
   }
 };
 

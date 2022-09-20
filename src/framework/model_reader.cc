@@ -14,11 +14,11 @@ namespace fs = boost::filesystem;
 
 namespace fw {
 
-void add_node(std::shared_ptr<model_node> node, Node const &pb_node);
+void add_node(std::shared_ptr<ModelNode> node, Node const &pb_node);
 
-std::shared_ptr<model> model_reader::read(fs::path const &filename) {
-  std::shared_ptr<model> model(new fw::model());
-  Model pb_model;
+std::shared_ptr<Model> ModelReader::read(fs::path const &filename) {
+  std::shared_ptr<Model> Model(new fw::Model());
+  ::Model pb_model;
 
   std::fstream ins;
   ins.open(filename.c_str(), std::ios::in | std::ifstream::binary);
@@ -30,7 +30,7 @@ std::shared_ptr<model> model_reader::read(fs::path const &filename) {
 
   for (int i = 0; i < pb_model.meshes_size(); i++) {
     Mesh const &pb_mesh = pb_model.meshes(i);
-    std::shared_ptr<model_mesh_noanim> mesh_noanim = std::shared_ptr<model_mesh_noanim>(new model_mesh_noanim(
+    std::shared_ptr<ModelMeshNoanim> mesh_noanim = std::shared_ptr<ModelMeshNoanim>(new ModelMeshNoanim(
         pb_mesh.vertices().size() / sizeof(vertex::xyz_n_uv),
         pb_mesh.indices().size() / sizeof(uint16_t)));
     vertex::xyz_n_uv const *vertex_begin = reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data());
@@ -42,17 +42,17 @@ std::shared_ptr<model> model_reader::read(fs::path const &filename) {
     uint16_t const *indices_end =
         reinterpret_cast<uint16_t const *>(pb_mesh.indices().data() + pb_mesh.indices().size());
     mesh_noanim->indices.assign(indices_begin, indices_end);
-    model->meshes.push_back(mesh_noanim);
+    Model->meshes.push_back(mesh_noanim);
   }
 
-  std::shared_ptr<model_node> root_node = std::shared_ptr<model_node>(new model_node());
+  std::shared_ptr<ModelNode> root_node = std::shared_ptr<ModelNode>(new ModelNode());
   add_node(root_node, pb_model.root_node());
-  model->root_node = root_node;
+  Model->root_node = root_node;
 
-  return model;
+  return Model;
 }
 
-void add_node(std::shared_ptr<model_node> node, Node const &pb_node) {
+void add_node(std::shared_ptr<ModelNode> node, Node const &pb_node) {
   node->mesh_index = pb_node.mesh_index();
   if (pb_node.transformation_size() == 16) {
     for (int i = 0; i < 16; i++) {
@@ -65,7 +65,7 @@ void add_node(std::shared_ptr<model_node> node, Node const &pb_node) {
 
   for (int i = 0; i < pb_node.children_size(); i++) {
     Node const &pb_child = pb_node.children(i);
-    std::shared_ptr<model_node> child = std::shared_ptr<model_node>(new model_node());
+    std::shared_ptr<ModelNode> child = std::shared_ptr<ModelNode>(new ModelNode());
     add_node(child, pb_child);
     node->add_child(child);
   }

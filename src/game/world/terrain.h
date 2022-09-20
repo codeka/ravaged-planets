@@ -37,8 +37,8 @@ public:
 
 private:
   std::vector<std::shared_ptr<terrain_patch> > _patches;
-  std::shared_ptr<fw::IndexBuffer> _ib;
-  std::shared_ptr<fw::shader> _shader;
+  std::shared_ptr<fw::IndexBuffer> ib_;
+  std::shared_ptr<fw::shader> shader_;
 
 protected:
   friend class ed::world_writer;

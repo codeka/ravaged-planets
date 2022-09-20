@@ -16,9 +16,9 @@
 
 namespace ent {
 
-static std::shared_ptr<fw::shader> _shader;
-static std::shared_ptr<fw::VertexBuffer> _vb;
-static std::shared_ptr<fw::IndexBuffer> _ib;
+static std::shared_ptr<fw::shader> shader_;
+static std::shared_ptr<fw::VertexBuffer> vb_;
+static std::shared_ptr<fw::IndexBuffer> ib_;
 
 // register the selectable component with the entity_factory
 ENT_COMPONENT_REGISTER("Selectable", selectable_component);
@@ -48,15 +48,15 @@ void selectable_component::populate_buffers() {
       fw::vertex::xyz_uv(1.0f, 0.0f, -1.0f, 1.0f, 0.0f)
   };
   vb->set_data(4, vertices);
-  _vb = vb;
+  vb_ = vb;
 
   std::shared_ptr<fw::IndexBuffer> ib(new fw::IndexBuffer());
   uint16_t indices[6] = { 0, 1, 2, 0, 2, 3 };
   ib->set_data(6, indices);
-  _ib = ib;
+  ib_ = ib;
 
-  if (!_shader) {
-    _shader = fw::shader::create("selection.shader");
+  if (!shader_) {
+    shader_ = fw::shader::create("selection.shader");
   }
 }
 
@@ -87,7 +87,7 @@ void selectable_component::unhighlight() {
 }
 
 void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform) {
-  if (!_vb) {
+  if (!vb_) {
     populate_buffers();
   }
 
@@ -107,7 +107,7 @@ void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix con
   std::shared_ptr<entity> entity(_entity);
   position_component *pos = entity->get_component<position_component>();
   if (pos != 0) {
-    std::shared_ptr<fw::shader_parameters> shader_params = _shader->create_parameters();
+    std::shared_ptr<fw::shader_parameters> shader_params = shader_->create_parameters();
     shader_params->set_color("selection_color", col);
 
     fw::Matrix m = pos->get_transform() * transform;
@@ -115,9 +115,9 @@ void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix con
     m = fw::scale(_selection_radius) * m; // scale it to the size of our selection radius
 
     std::shared_ptr<fw::sg::node> node(new fw::sg::node());
-    node->set_vertex_buffer(_vb);
-    node->set_index_buffer(_ib);
-    node->set_shader(_shader);
+    node->set_vertex_buffer(vb_);
+    node->set_index_buffer(ib_);
+    node->set_shader(shader_);
     node->set_shader_parameters(shader_params);
     node->set_world_matrix(m);
     node->set_primitive_type(fw::sg::primitive_trianglelist);
