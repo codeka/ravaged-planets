@@ -253,11 +253,11 @@ fw::Vector terrain::get_camera_lookat() {
 // in 3D-space. If it's close enough, we return that one...
 fw::Vector terrain::get_cursor_location() {
   fw::framework *frmwrk = fw::framework::get_instance();
-  fw::input *input = frmwrk->get_input();
+  fw::Input *Input = frmwrk->get_input();
   fw::Camera *camera = frmwrk->get_camera();
 
-  float mx = (float) input->mouse_x();
-  float my = (float) input->mouse_y();
+  float mx = (float) Input->mouse_x();
+  float my = (float) Input->mouse_y();
 
   mx = 1.0f - (2.0f * mx / frmwrk->get_graphics()->get_width());
   my = 1.0f - (2.0f * my / frmwrk->get_graphics()->get_height());

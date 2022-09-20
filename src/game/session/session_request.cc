@@ -23,7 +23,7 @@ void session_request::set_complete_handler(complete_handler_fn handler) {
 
 void session_request::begin(std::string base_url) {
   fw::xml_element xml(get_request_xml());
-  _post = fw::http::perform(fw::http::POST, base_url + get_url(), xml);
+  _post = fw::Http::perform(fw::Http::POST, base_url + get_url(), xml);
   fw::debug << get_description() << std::endl;
 }
 
@@ -82,7 +82,7 @@ void login_session_request::begin(std::string base_url) {
       % _listen_port).str();
 
   fw::xml_element xml(get_request_xml());
-  _post = fw::http::perform(fw::http::PUT, base_url + url);
+  _post = fw::Http::perform(fw::Http::PUT, base_url + url);
 
   fw::debug << get_description() << std::endl;
   session::get_instance()->set_state(session::logging_in);
@@ -118,7 +118,7 @@ void logout_session_request::begin(std::string base_url) {
   std::string url = (boost::format("Api/Session/%1%") % _session_id).str();
 
   fw::xml_element xml(get_request_xml());
-  _post = fw::http::perform(fw::http::DELETE, base_url + url);
+  _post = fw::Http::perform(fw::Http::DELETE, base_url + url);
 
   fw::debug << get_description() << std::endl;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 namespace fw {
-class http;
+class Http;
 class xml_element;
 }
 
@@ -40,7 +40,7 @@ private:
   bool parse_response();
 
 protected:
-  std::shared_ptr<fw::http> _post;
+  std::shared_ptr<fw::Http> _post;
   std::string _error_msg;
   uint64_t _session_id;
   uint32_t _user_id;

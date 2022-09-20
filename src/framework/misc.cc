@@ -19,7 +19,7 @@ namespace fw {
 
 float distance_between_line_and_point(Vector const &start,
     Vector const &direction, Vector const &point) {
-  // see: http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
+  // see: Http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
   Vector end = start + direction;
   float u = (point[0] - start[0]) * (end[0] - start[0])
       + (point[1] - start[1]) * (end[1] - start[1])
@@ -38,7 +38,7 @@ float distance_between_line_and_point(Vector const &start,
 // at the given line *segment*.
 float distance_between_line_segment_and_point(Vector const &start,
     Vector const &end, Vector const &point) {
-  // see: http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
+  // see: Http://local.wasp.uwa.edu.au/~pbourke/geometry/pointline/
   float u = (point[0] - start[0]) * (end[0] - start[0])
       + (point[1] - start[1]) * (end[1] - start[1])
       + (point[2] - start[2]) * (end[2] - start[2]);
@@ -67,7 +67,7 @@ float angle_between(Vector const &a, Vector const &b) {
 
 fw::Vector point_plane_intersect(Vector const &plane_pt,
     Vector const &plane_normal, Vector const &p_start, Vector const &p_dir) {
-  // see: http://local.wasp.uwa.edu.au/~pbourke/geometry/planeline/
+  // see: Http://local.wasp.uwa.edu.au/~pbourke/geometry/planeline/
   Vector end = p_start + p_dir;
 
   float numerator = cml::dot(plane_normal, plane_pt - p_start);

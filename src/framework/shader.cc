@@ -408,7 +408,7 @@ std::shared_ptr<shader_parameters> shader::create_parameters() {
 }
 
 void shader::load(fw::Graphics *g, fs::path const &full_path) {
-  _filename = full_path;
+  filename_ = full_path;
   xml_element root_elem = fw::load_xml(full_path, "shader", 1);
   for (xml_element child = root_elem.get_first_child();
       child.is_valid(); child = child.get_next_sibling()) {

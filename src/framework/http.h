@@ -17,30 +17,30 @@
 namespace fw {
 
 /**
- * Represents a single HTTP request/response. Use the \ref http::perform() methods to initiate a request, then use
- * \ref http::wait() to wait for it to complete.
+ * Represents a single HTTP request/response. Use the \ref Http::perform() methods to initiate a request, then use
+ * \ref Http::wait() to wait for it to complete.
  */
-class http {
+class Http {
 public:
-  enum http_verb {
+  enum HttpVerb {
     POST, PUT, DELETE, GET
   };
 
 private:
-  CURL *_handle;
-  std::string _url;
-  http_verb _verb;
-  std::map<std::string, std::string> _headers;
-  std::string _upload_data;
-  std::ostringstream _download_data;
-  std::mutex _mutex;
-  std::condition_variable _finished;
-  bool _is_finished;
-  CURLcode _last_error;
-  std::thread _thread;
+  CURL *handle_;
+  std::string url_;
+  HttpVerb verb_;
+  std::map<std::string, std::string> headers_;
+  std::string upload_data_;
+  std::ostringstream download_data_;
+  std::mutex mutex_;
+  std::condition_variable finished_;
+  bool is_finished_;
+  CURLcode last_error_;
+  std::thread thread_;
 
   // constructor is called by the \ref perform() static function.
-  http();
+  Http();
 
   // this is called by libcurl for debugging
   static int write_debug(CURL *handle, curl_infotype type, char *buffer, size_t len, void *userp);
@@ -48,7 +48,7 @@ private:
   // this is called by libcurl when data is received/sent
   static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
 
-  // this is called to check an error code. There's a macro in http.cpp that'll automatically
+  // this is called to check an error code. There's a macro in Http.cpp that'll automatically
   // populate the parameters for us
   void check_error(CURLcode err, char const *fn);
 
@@ -59,26 +59,26 @@ public:
   static void initialize();
   static void destroy();
 
-  ~http();
+  ~Http();
 
-  /** Constructs a new http, performs the specified verb on the specified URL. */
-  static std::shared_ptr<http> perform(http_verb verb, std::string const &url);
+  /** Constructs a new Http, performs the specified verb on the specified URL. */
+  static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url);
 
-  /* Constructs a new http, performs the specified verb on the specified URL (with the specified XML data). */
-  static std::shared_ptr<http> perform(http_verb verb, std::string const &url, xml_element &xml);
+  /* Constructs a new Http, performs the specified verb on the specified URL (with the specified XML data). */
+  static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url, xml_element &xml);
 
-  /** Constructs a new http, performs the specified verb on the specified URL (with the specified name/value data). */
-  static std::shared_ptr<http> perform(http_verb verb, std::string const &url,
+  /** Constructs a new Http, performs the specified verb on the specified URL (with the specified name/value data). */
+  static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url,
       std::map<std::string, std::string> const &data);
 
   /** Perform the given HTTP on the given URL. Cannot be called while a request is already in progress. */
-  void perform_action(http_verb verb, std::string const &url);
+  void perform_action(HttpVerb verb, std::string const &url);
 
   /** Perform the given HTTP on the given URL. Cannot be called while a request is already in progress. */
-  void perform_action(http_verb verb, std::string const &url, xml_element &xml);
+  void perform_action(HttpVerb verb, std::string const &url, xml_element &xml);
 
   /** Perform the given HTTP on the given URL. Cannot be called while a request is already in progress. */
-  void perform_action(http_verb verb, std::string const &url, std::map<std::string, std::string> const &data);
+  void perform_action(HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data);
 
   /** Gets a value which indicates whether we've finished downloading the response. */
   bool is_finished();

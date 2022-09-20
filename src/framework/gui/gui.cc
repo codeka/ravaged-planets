@@ -31,7 +31,7 @@ void Gui::initialize(fw::Graphics *graphics) {
 }
 
 void Gui::update(float dt) {
-  input *inp = fw::framework::get_instance()->get_input();
+  Input *inp = fw::framework::get_instance()->get_input();
   Widget *wdgt = get_widget_at(inp->mouse_x(), inp->mouse_y());
   if (wdgt != widget_under_mouse_) {
     if (widget_under_mouse_ != nullptr) {

@@ -91,17 +91,17 @@ bool STB_TEXTEDIT_INSERTCHARS(TextEditBuffer *buffer, int pos, const uint32_t* n
 }
 
 #define STB_TEXTEDIT_K_LEFT         SDLK_LEFT
-#define STB_TEXTEDIT_K_RIGHT        SDLK_RIGHT // keyboard input to move cursor right
-#define STB_TEXTEDIT_K_UP           SDLK_UP // keyboard input to move cursor up
-#define STB_TEXTEDIT_K_DOWN         SDLK_DOWN // keyboard input to move cursor down
-#define STB_TEXTEDIT_K_PGUP         SDLK_PAGEUP // keyboard input to move up one page
-#define STB_TEXTEDIT_K_PGDOWN       SDLK_PAGEDOWN // keyboard input to move down one page
-#define STB_TEXTEDIT_K_LINESTART    SDLK_HOME // keyboard input to move cursor to start of line
-#define STB_TEXTEDIT_K_LINEEND      SDLK_END // keyboard input to move cursor to end of line
-#define STB_TEXTEDIT_K_TEXTSTART    (1<<29 | 1)  // TODO // keyboard input to move cursor to start of text
-#define STB_TEXTEDIT_K_TEXTEND      (1<<29 | 2) // TODO // keyboard input to move cursor to end of text
-#define STB_TEXTEDIT_K_DELETE       SDLK_DELETE // keyboard input to delete selection or character under cursor
-#define STB_TEXTEDIT_K_BACKSPACE    SDLK_BACKSPACE // keyboard input to delete selection or character left of cursor
+#define STB_TEXTEDIT_K_RIGHT        SDLK_RIGHT // keyboard Input to move cursor right
+#define STB_TEXTEDIT_K_UP           SDLK_UP // keyboard Input to move cursor up
+#define STB_TEXTEDIT_K_DOWN         SDLK_DOWN // keyboard Input to move cursor down
+#define STB_TEXTEDIT_K_PGUP         SDLK_PAGEUP // keyboard Input to move up one page
+#define STB_TEXTEDIT_K_PGDOWN       SDLK_PAGEDOWN // keyboard Input to move down one page
+#define STB_TEXTEDIT_K_LINESTART    SDLK_HOME // keyboard Input to move cursor to start of line
+#define STB_TEXTEDIT_K_LINEEND      SDLK_END // keyboard Input to move cursor to end of line
+#define STB_TEXTEDIT_K_TEXTSTART    (1<<29 | 1)  // TODO // keyboard Input to move cursor to start of text
+#define STB_TEXTEDIT_K_TEXTEND      (1<<29 | 2) // TODO // keyboard Input to move cursor to end of text
+#define STB_TEXTEDIT_K_DELETE       SDLK_DELETE // keyboard Input to delete selection or character under cursor
+#define STB_TEXTEDIT_K_BACKSPACE    SDLK_BACKSPACE // keyboard Input to delete selection or character left of cursor
 #define STB_TEXTEDIT_K_UNDO         (1<<29 | 4) // TODO
 #define STB_TEXTEDIT_K_REDO         (1<<29 | 8) // TODO
 #define STB_TEXTEDIT_K_WORDLEFT     (1<<29 | 16) // TODO

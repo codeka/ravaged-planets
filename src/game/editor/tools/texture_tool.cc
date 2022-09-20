@@ -119,9 +119,9 @@ texture_tool::~texture_tool() {
 void texture_tool::activate() {
   tool::activate();
 
-  fw::input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::framework::get_instance()->get_input();
   _keybind_tokens.push_back(
-      inp->bind_key("Left-Mouse", fw::input_binding(std::bind(&texture_tool::on_key, this, _1, _2))));
+      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&texture_tool::on_key, this, _1, _2))));
 
   _wnd->show();
 }

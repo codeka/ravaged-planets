@@ -282,13 +282,13 @@ void Widget::update(float dt) {
   }
 }
 
-std::stack<fw::rectangle<float>> scissor_rectangles;
+std::stack<fw::Rectangle<float>> scissor_rectangles;
 
 bool Widget::prerender() {
-  fw::rectangle<float> rect(get_left(), get_top(), get_width(), get_height());
+  fw::Rectangle<float> rect(get_left(), get_top(), get_width(), get_height());
   if (!scissor_rectangles.empty()) {
-    fw::rectangle<float> const &top = scissor_rectangles.top();
-    rect = fw::rectangle<float>::intersect(top, rect);
+    fw::Rectangle<float> const &top = scissor_rectangles.top();
+    rect = fw::Rectangle<float>::intersect(top, rect);
   }
   if (rect.width <= 0 || rect.height <= 0) {
     return false;
@@ -311,7 +311,7 @@ void Widget::render() {
 void Widget::postrender() {
   scissor_rectangles.pop();
   if (!scissor_rectangles.empty()) {
-    fw::rectangle<float> const &top = scissor_rectangles.top();
+    fw::Rectangle<float> const &top = scissor_rectangles.top();
     FW_CHECKED(glScissor(top.left, gui_->get_height() - top.top - top.height, top.width, top.height));
   }
 }

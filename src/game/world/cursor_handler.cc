@@ -29,10 +29,10 @@ cursor_handler::~cursor_handler() {
 }
 
 void cursor_handler::initialize() {
-  fw::input *input = fw::framework::get_instance()->get_input();
-  _keybind_tokens.push_back(input->bind_function("select", std::bind(&cursor_handler::on_key_select, this, _1, _2)));
+  fw::Input *Input = fw::framework::get_instance()->get_input();
+  _keybind_tokens.push_back(Input->bind_function("select", std::bind(&cursor_handler::on_key_select, this, _1, _2)));
   _keybind_tokens.push_back(
-      input->bind_function("deselect", std::bind(&cursor_handler::on_key_deselect, this, _1, _2)));
+      Input->bind_function("deselect", std::bind(&cursor_handler::on_key_deselect, this, _1, _2)));
 
   _entities = game::world::get_instance()->get_entity_manager();
   _terrain = game::world::get_instance()->get_terrain();
@@ -93,9 +93,9 @@ void cursor_handler::update() {
 }
 
 void cursor_handler::destroy() {
-  fw::input *input = fw::framework::get_instance()->get_input();
+  fw::Input *Input = fw::framework::get_instance()->get_input();
   BOOST_FOREACH(int token, _keybind_tokens) {
-    input->unbind_key(token);
+    Input->unbind_key(token);
   }
   _keybind_tokens.clear();
 }

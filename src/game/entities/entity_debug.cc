@@ -51,7 +51,7 @@ void entity_debug::initialize() {
       ;
   fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
 
-  fw::input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::framework::get_instance()->get_input();
   inp->bind_key("Ctrl+D", std::bind(&entity_debug::on_key_press, this, _1, _2));
 }
 

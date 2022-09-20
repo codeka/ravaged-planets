@@ -15,14 +15,14 @@ namespace fs = boost::filesystem;
 namespace fw {
 
 //-------------------------------------------------------------------------
-// reads a line from the given .lang file and returns the key/value pair
+// reads a line from the given .Lang file and returns the key/value pair
 static bool get_lang_line(std::fstream &fs, std::string &key,
     std::string &value, std::string const &file_name, int &line_num);
 
 //-------------------------------------------------------------------------
 
-lang::lang(std::string const &lang_name) :
-    _lang_name(lang_name) {
+Lang::Lang(std::string const &lang_name) :
+    lang_name_(lang_name) {
   std::fstream ins;
 
   fs::path lang_path = fw::resolve("lang/" + lang_name);
@@ -38,7 +38,7 @@ lang::lang(std::string const &lang_name) :
     std::string key, value;
     int line_num = 0;
     while (get_lang_line(ins, key, value, lang_path.string(), line_num)) {
-      _strings[key] = value;
+      strings_[key] = value;
     }
   }
 
@@ -50,21 +50,21 @@ lang::lang(std::string const &lang_name) :
     std::string key, value;
     int line_num = 0;
     while (get_lang_line(ins, key, value, lang_path.string(), line_num)) {
-      _def_strings[key] = value;
+      def_strings_[key] = value;
     }
   }
 }
 
-std::string lang::get_string(std::string const &name) {
-  auto it = _strings.find(name);
-  if (it == _strings.end()) {
-    it = _def_strings.find(name);
-    if (it == _def_strings.end()) {
-      debug << boost::format("WARN: string \"%1%\" does not exist in %2% *or* in en.lang!") % name % _lang_name
+std::string Lang::get_string(std::string const &name) {
+  auto it = strings_.find(name);
+  if (it == strings_.end()) {
+    it = def_strings_.find(name);
+    if (it == def_strings_.end()) {
+      debug << boost::format("WARN: string \"%1%\" does not exist in %2% *or* in en.lang!") % name % lang_name_
           << std::endl;
       return name;
     } else {
-      debug << boost::format("WARN: string \"%1%\" does not exist in %2%") % name % _lang_name << std::endl;
+      debug << boost::format("WARN: string \"%1%\" does not exist in %2%") % name % lang_name_ << std::endl;
     }
   }
 
@@ -72,9 +72,9 @@ std::string lang::get_string(std::string const &name) {
 }
 
 //-------------------------------------------------------------------------
-std::vector<lang_description> g_langs;
+std::vector<LangDescription> g_langs;
 
-static void populate_lang_description(lang_description &desc, fs::path file_name) {
+static void populate_lang_description(LangDescription &desc, fs::path file_name) {
   desc.name = file_name.leaf().string();
   std::fstream ins(file_name.string().c_str());
 
@@ -82,14 +82,14 @@ static void populate_lang_description(lang_description &desc, fs::path file_name
   std::string key, value;
   while (get_lang_line(ins, key, value, file_name.string(), line_num)) {
     if (key == "lang.name") {
-      // once we find the "lang-name" line, we can ignore everything else
+      // once we find the "Lang-name" line, we can ignore everything else
       desc.display_name = value;
       return;
     }
   }
 }
 
-std::vector<lang_description> get_languages() {
+std::vector<LangDescription> get_languages() {
   if (g_langs.size() > 0)
     return g_langs;
 
@@ -100,7 +100,7 @@ std::vector<lang_description> get_languages() {
     if (it->path().extension() != ".lang")
       continue;
 
-    lang_description desc;
+    LangDescription desc;
     populate_lang_description(desc, it->path());
     g_langs.push_back(desc);
   }

@@ -53,7 +53,7 @@ public:
   /** Bring the given widget to the top. */
   void bring_to_top(Widget *widget);
 
-  /** Give the specified widget input focus. Keystrokes will be sent to this widget only. */
+  /** Give the specified widget Input focus. Keystrokes will be sent to this widget only. */
   void focus(Widget *widget);
 
   int get_width() const;

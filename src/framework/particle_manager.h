@@ -27,7 +27,7 @@ private:
   effect_list _effects;
   particle_list _particles;
   particle_list _to_add;
-  std::mutex _mutex;
+  std::mutex mutex_;
   float _wrap_x;
   float _wrap_z;
 

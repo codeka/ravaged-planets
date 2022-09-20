@@ -20,11 +20,11 @@ namespace fs = boost::filesystem;
 
 namespace fw {
 
-  log_wrapper debug;
+  LogWrapper debug;
   static std::mutex mutex;
   static bool log_to_console = false;
 
-  THREADLOCAL std::ostream *log_wrapper::_log;
+  THREADLOCAL std::ostream *LogWrapper::log_;
 
   void logging_initialize() {
     settings stg;
@@ -46,45 +46,45 @@ namespace fw {
   }
 
   //-------------------------------------------------------------------------
-  log_wrapper::log_wrapper() {
+  LogWrapper::LogWrapper() {
   }
 
-  void log_wrapper::initialize(fs::path const &filename) {
-    _filename = filename;
-    if (_filename != fs::path()) {
-      _sink.open(_filename);
+  void LogWrapper::initialize(fs::path const &filename) {
+    filename_ = filename;
+    if (filename_ != fs::path()) {
+      sink_.open(filename_);
     }
   }
 
   //-------------------------------------------------------------------------
-  log_sink::log_sink()
-    : _open(false), _outs(new std::ofstream()) {
+  LogSink::LogSink()
+    : open_(false), outs_(new std::ofstream()) {
   }
 
-  log_sink::log_sink(log_sink const &copy)
-    : _open(copy._open), _outs(copy._outs), _filename(copy._filename) {
+  LogSink::LogSink(LogSink const &copy)
+    : open_(copy.open_), outs_(copy.outs_), filename_(copy.filename_) {
   }
 
-  log_sink::~log_sink() {
+  LogSink::~LogSink() {
   }
 
-  void log_sink::open(fs::path const &filename) {
-    _filename = filename;
-    _outs->open(_filename.string().c_str());
-    _open = true;
+  void LogSink::open(fs::path const &filename) {
+    filename_ = filename;
+    outs_->open(filename_.string().c_str());
+    open_ = true;
   }
 
-  std::streamsize log_sink::write(const char *s, std::streamsize n) {
+  std::streamsize LogSink::write(const char *s, std::streamsize n) {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::time_t c_now = std::chrono::system_clock::to_time_t(now);
 
     {
       std::unique_lock<std::mutex> lock(mutex);
-      if (_open) {
+      if (open_) {
         try {
-          (*_outs) << std::put_time(std::localtime(&c_now), "%F %T") << " : ";
-          _outs->write(s, n);
-          _outs->flush();
+          (*outs_) << std::put_time(std::localtime(&c_now), "%F %T") << " : ";
+          outs_->write(s, n);
+          outs_->flush();
         } catch (std::exception &e) {
           std::cerr << e.what();
         }

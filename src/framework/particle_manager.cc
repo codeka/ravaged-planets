@@ -51,7 +51,7 @@ void particle_manager::update(float dt) {
 
 void particle_manager::render(sg::scenegraph &scenegraph) {
   {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::unique_lock<std::mutex> lock(mutex_);
     BOOST_FOREACH(particle *p, _to_add) {
       _particles.push_back(p);
     }
@@ -89,7 +89,7 @@ void particle_manager::remove_effect(particle_effect *effect) {
  * Because this is called on the update thread, we don't add directly to the _particles list until the render thread.
  */
 void particle_manager::add_particle(particle *p) {
-  std::unique_lock<std::mutex> lock(_mutex);
+  std::unique_lock<std::mutex> lock(mutex_);
   _to_add.push_back(p);
 }
 

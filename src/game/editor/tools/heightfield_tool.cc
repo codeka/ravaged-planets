@@ -291,11 +291,11 @@ heightfield_tool::~heightfield_tool() {
 void heightfield_tool::activate() {
   tool::activate();
 
-  fw::input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::framework::get_instance()->get_input();
   _keybind_tokens.push_back(
-      inp->bind_key("Left-Mouse", fw::input_binding(std::bind(&heightfield_tool::on_key, this, _1, _2))));
+      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&heightfield_tool::on_key, this, _1, _2))));
   _keybind_tokens.push_back(
-      inp->bind_key("Right-Mouse", fw::input_binding(std::bind(&heightfield_tool::on_key, this, _1, _2))));
+      inp->bind_key("Right-Mouse", fw::InputBinding(std::bind(&heightfield_tool::on_key, this, _1, _2))));
 
   if (_brush != nullptr) {
     delete _brush;

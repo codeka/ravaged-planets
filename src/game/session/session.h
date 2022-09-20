@@ -8,7 +8,7 @@
 #include <boost/signals2.hpp>
 
 namespace fw {
-class http;
+class Http;
 }
 
 namespace game {
@@ -33,7 +33,7 @@ private:
   std::string _user_name;
   std::string _error_msg;
 
-  std::mutex _mutex;
+  std::mutex mutex_;
 
   // this is called by the login static function. you use that to actually log in
   // and create the session object

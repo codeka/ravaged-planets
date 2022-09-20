@@ -116,7 +116,7 @@ bool framework::initialize(char const *title) {
   _audio_manager = new AudioManager();
   _audio_manager->initialize();
 
-  _input = new input();
+  _input = new Input();
   _input->initialize();
 
   _font_manager = new FontManager();
@@ -133,7 +133,7 @@ bool framework::initialize(char const *title) {
   }
 
   net::initialize();
-  http::initialize();
+  Http::initialize();
 
   debug << "framework initialization complete, application initialization starting..." << std::endl;
   if (!_app->initialize(this))
@@ -159,9 +159,9 @@ void framework::on_fullscreen_toggle(std::string keyname, bool is_down) {
 void framework::language_initialize() {
   settings stg;
 
-  std::vector<lang_description> langs = fw::get_languages();
+  std::vector<LangDescription> langs = fw::get_languages();
   debug << boost::format("%1% installed language(s):") % langs.size() << std::endl;
-  BOOST_FOREACH(lang_description &l, langs) {
+  BOOST_FOREACH(LangDescription &l, langs) {
     debug << boost::format(" %1% (%2%)") % l.name % l.display_name << std::endl;
   }
 
@@ -170,7 +170,7 @@ void framework::language_initialize() {
     lang_name += ".lang";
   }
 
-  _lang = new lang(lang_name);
+  _lang = new Lang(lang_name);
 }
 
 void framework::destroy() {
@@ -184,7 +184,7 @@ void framework::destroy() {
   if (_graphics != nullptr) {
     _graphics->destroy();
   }
-  http::destroy();
+  Http::destroy();
   net::destroy();
   if (_cursor != nullptr) {
     _cursor->destroy();

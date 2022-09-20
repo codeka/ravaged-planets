@@ -16,7 +16,7 @@
 
 namespace fs = boost::filesystem;
 
-// in order to keep the header clean of platform-specific details, and also since keyboard/mouse input
+// in order to keep the header clean of platform-specific details, and also since keyboard/mouse Input
 // is inherently singleton anyway, we have a bunch of global variables here. Sorry.
 
 typedef std::map<std::string, int, fw::iless<std::string>> key_names_map;
@@ -31,9 +31,9 @@ static float g_mdx, g_mdy;
 static float g_mwdx, g_mwdy;
 static bool g_mouse_inside;
 
-// maps a key to a list of input bindings, we don't necessarily call each binding on each
+// maps a key to a list of Input bindings, we don't necessarily call each binding on each
 // key press, it depends on things like whether Ctrl or Shift is pressed, etc
-typedef std::map<int, std::map<int, fw::input_binding> > callback_map;
+typedef std::map<int, std::map<int, fw::InputBinding> > callback_map;
 static callback_map g_callbacks;
 
 typedef std::map<int, std::vector<int> > multikey_binding_map;
@@ -45,28 +45,28 @@ namespace fw {
 // keycodes (that are platform-specific)
 void setup_keynames();
 
-// binds an input_binding to the specified keycode (basically, adds it to the g_callbacks
+// binds an InputBinding to the specified keycode (basically, adds it to the g_callbacks
 // collection)
-int bind_key(int keycode, input_binding const &binding);
+int bind_key(int keycode, InputBinding const &binding);
 
 // fires the callbacks associated when the specified key is pressed/released
 void callback(int key, Uint16 mod, bool is_down);
 
-input::input() {
+Input::Input() {
   if (g_key_names.size() == 0) {
     setup_keynames();
   }
 }
 
-input::~input() {
+Input::~Input() {
 }
 
-int input::bind_function(std::string const &name, input_bind_fn fn) {
+int Input::bind_function(std::string const &name, input_bind_fn fn) {
   settings stg;
   return bind_key(stg.get_value<std::string>("bind." + name), fn);
 }
 
-int input::bind_key(std::string const &keyname, input_bind_fn fn) {
+int Input::bind_key(std::string const &keyname, input_bind_fn fn) {
   // TODO: interlocked increment?
   int token = ++g_next_token;
 
@@ -77,7 +77,7 @@ int input::bind_key(std::string const &keyname, input_bind_fn fn) {
     std::vector<std::string> parts = split<std::string>(key, "+");
 
     int key_no = 0;
-    input_binding binding;
+    InputBinding binding;
     BOOST_FOREACH(std::string part, parts) {
       boost::trim(part);
       if (boost::iequals(part, "ctrl")) {
@@ -110,7 +110,7 @@ int input::bind_key(std::string const &keyname, input_bind_fn fn) {
   return token;
 }
 
-int input::bind_key(std::string keyname, input_binding const &binding) {
+int Input::bind_key(std::string keyname, InputBinding const &binding) {
   key_names_map::iterator it = g_key_names.find(keyname);
   if (it == g_key_names.end()) {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("No such key:" + keyname));
@@ -119,23 +119,23 @@ int input::bind_key(std::string keyname, input_binding const &binding) {
   return fw::bind_key(it->second, binding);
 }
 
-int bind_key(int keycode, input_binding const &binding) {
+int bind_key(int keycode, InputBinding const &binding) {
   // TODO: interlocked increment?
   int token = ++g_next_token;
 
   callback_map::iterator it = g_callbacks.find(keycode);
   if (it == g_callbacks.end()) {
-    g_callbacks[keycode] = std::map<int, input_binding>();
+    g_callbacks[keycode] = std::map<int, InputBinding>();
     it = g_callbacks.find(keycode);
   }
 
-  std::map<int, input_binding> &callbacks = (*it).second;
+  std::map<int, InputBinding> &callbacks = (*it).second;
   callbacks[token] = binding;
 
   return token;
 }
 
-void input::unbind_key(int token) {
+void Input::unbind_key(int token) {
   // it's either a multi-key binding token, or it's a "regular" token so we'll
   // have to unbind it as appropriate.
   multikey_binding_map::iterator it = g_multikey_bindings.find(token);
@@ -146,16 +146,16 @@ void input::unbind_key(int token) {
     }
   } else {
     BOOST_FOREACH(callback_map::value_type &callback_map, g_callbacks) {
-      std::map<int, input_binding> &callbacks = callback_map.second;
+      std::map<int, InputBinding> &callbacks = callback_map.second;
       callbacks.erase(token);
     }
   }
 }
 
-void input::initialize() {
+void Input::initialize() {
 }
 
-void input::update(float dt) {
+void Input::update(float dt) {
   // this is called each frame - we need to reset the _mdx and _mdy to zero (because if we
   // don't get an on_mouse_move, it means the mouse didn't move!)
   g_mdx = g_mdy = 0.0f;
@@ -163,7 +163,7 @@ void input::update(float dt) {
 }
 
 /** Called on the render thread when an event is received. We queue it up to actually run on the update thread. */
-void input::process_event(SDL_Event &event) {
+void Input::process_event(SDL_Event &event) {
   fw::gui::Gui *gui = fw::framework::get_instance()->get_gui();
   if (event.type == SDL_KEYDOWN) {
     if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), true)) {
@@ -199,47 +199,47 @@ void input::process_event(SDL_Event &event) {
   }
 }
 
-float input::mouse_x() const {
+float Input::mouse_x() const {
   return g_mx;
 }
-float input::mouse_y() const {
+float Input::mouse_y() const {
   return g_my;
 }
-float input::mouse_dx() const {
+float Input::mouse_dx() const {
   return g_mdx;
 }
-float input::mouse_dy() const {
+float Input::mouse_dy() const {
   return g_mdy;
 }
-float input::mouse_wheel_dx() const {
+float Input::mouse_wheel_dx() const {
   return g_mwdx;
 }
-float input::mouse_wheel_dy() const {
+float Input::mouse_wheel_dy() const {
   return g_mwdy;
 }
 
-bool input::key(std::string keyname) const {
+bool Input::key(std::string keyname) const {
   return false;
 }
 
 //-------------------------------------------------------------------------
 
-input_binding::input_binding() :
+InputBinding::InputBinding() :
     ctrl(false), shift(false), alt(false) {
 }
 
-input_binding::input_binding(input_bind_fn fn) :
+InputBinding::InputBinding(input_bind_fn fn) :
     fn(fn), ctrl(false), shift(false), alt(false) {
 }
 
-input_binding::input_binding(input_binding const &copy) :
+InputBinding::InputBinding(InputBinding const &copy) :
     fn(copy.fn), ctrl(copy.ctrl), shift(copy.shift), alt(copy.alt) {
 }
 
-input_binding::~input_binding() {
+InputBinding::~InputBinding() {
 }
 
-input_binding &input_binding::operator =(input_binding const &copy) {
+InputBinding &InputBinding::operator =(InputBinding const &copy) {
   fn = copy.fn;
   ctrl = copy.ctrl;
   shift = copy.shift;
@@ -252,10 +252,10 @@ input_binding &input_binding::operator =(input_binding const &copy) {
 void callback(int key, Uint16 mod, bool is_down) {
   callback_map::const_iterator it = g_callbacks.find(key);
   if (it != g_callbacks.end()) {
-    std::map<int, input_binding> const &list = (*it).second;
-    for (std::map<int, input_binding>::const_iterator it = list.begin();
+    std::map<int, InputBinding> const &list = (*it).second;
+    for (std::map<int, InputBinding>::const_iterator it = list.begin();
         it != list.end(); ++it) {
-      input_binding const &binding = it->second;
+      InputBinding const &binding = it->second;
 
       // check that the correct ctrl/shift/alt combination is pressed as well
       if (binding.ctrl && (mod & KMOD_CTRL) == 0)

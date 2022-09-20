@@ -92,7 +92,7 @@ void Camera::enable() {
 }
 
 void Camera::disable() {
-  input *inp = framework::get_instance()->get_input();
+  Input *inp = framework::get_instance()->get_input();
   for(int token : keybindings_) {
     inp->unbind_key(token);
   }
@@ -116,7 +116,7 @@ FirstPersonCamera::~FirstPersonCamera() {
 }
 
 void FirstPersonCamera::update(float dt) {
-  input *inp = framework::get_instance()->get_input();
+  Input *inp = framework::get_instance()->get_input();
 
   yaw((float) inp->mouse_dx() * dt);
   pitch((float) inp->mouse_dy() * dt);
@@ -235,7 +235,7 @@ TopDownCamera::~TopDownCamera() {
 void TopDownCamera::enable() {
   Camera::enable();
 
-  input *inp = framework::get_instance()->get_input();
+  Input *inp = framework::get_instance()->get_input();
   keybindings_.push_back(
       inp->bind_function("cam-forward", std::bind(&TopDownCamera::on_key_forward, this, _1, _2)));
   keybindings_.push_back(
@@ -262,7 +262,7 @@ void TopDownCamera::disable() {
 int a = 0;
 
 void TopDownCamera::update(float dt) {
-  input *inp = framework::get_instance()->get_input();
+  Input *inp = framework::get_instance()->get_input();
 
   if (zooming_) {
     fw::Vector start = get_location();

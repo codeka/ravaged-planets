@@ -16,9 +16,9 @@ class Bitmap;
 class particle_manager;
 struct screenshot_request;
 class AudioManager;
-class lang;
+class Lang;
 class Cursor;
-class input;
+class Input;
 
 namespace gui {
 class Gui;
@@ -84,7 +84,7 @@ private:
 
   bool _active;
 
-  input * _input;
+  Input * _input;
   Graphics * _graphics;
   base_app * _app;
   timer *_timer;
@@ -95,7 +95,7 @@ private:
   AudioManager *_audio_manager;
   model_manager *_model_manager;
   Cursor *_cursor;
-  lang *_lang;
+  Lang *_lang;
   FontManager *_font_manager;
   DebugView *_debug_view;
   volatile bool _running;
@@ -160,7 +160,7 @@ public:
   timer *get_timer() const {
     return _timer;
   }
-  input *get_input() const {
+  Input *get_input() const {
     return _input;
   }
   Graphics *get_graphics() const {
@@ -187,7 +187,7 @@ public:
   AudioManager *get_audio_manager() const {
     return _audio_manager;
   }
-  lang *get_lang() const {
+  Lang *get_lang() const {
     return _lang;
   }
 };

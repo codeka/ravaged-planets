@@ -118,9 +118,9 @@ void players_tool::activate() {
   tool::activate();
   _wnd->show();
 
-  fw::input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::framework::get_instance()->get_input();
   _keybind_tokens.push_back(
-      inp->bind_key("Left-Mouse", fw::input_binding(std::bind(&players_tool::on_key, this, _1, _2))));
+      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&players_tool::on_key, this, _1, _2))));
 }
 
 void players_tool::deactivate() {

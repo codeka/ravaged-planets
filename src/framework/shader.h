@@ -59,7 +59,7 @@ public:
 // this shader wraps shader files and allows us to automatically reload them, and so on.
 class shader {
 private:
-  boost::filesystem::path _filename;
+  boost::filesystem::path filename_;
   std::map<std::string, shader_program *> _programs;
   std::string _default_program_name;
 

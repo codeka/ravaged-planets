@@ -14,7 +14,7 @@ namespace fw {
 
 static bool g_enable_debug = false;
 
-void http::initialize() {
+void Http::initialize() {
   curl_global_init(0);
 
   curl_version_info_data *curl_version = curl_version_info(CURLVERSION_NOW);
@@ -31,21 +31,21 @@ void http::initialize() {
 #endif
 }
 
-void http::destroy() {
+void Http::destroy() {
   curl_global_cleanup();
 }
 
-http::http() :
-    _is_finished(false), _handle(nullptr), _last_error(CURLE_OK), _verb(GET) {
+Http::Http() :
+    is_finished_(false), handle_(nullptr), last_error_(CURLE_OK), verb_(GET) {
 }
 
-http::~http() {
-  if (_handle != nullptr) {
-    curl_easy_cleanup(_handle);
+Http::~Http() {
+  if (handle_ != nullptr) {
+    curl_easy_cleanup(handle_);
   }
 }
 
-int http::write_debug(CURL *, curl_infotype type, char *buffer, size_t len, void *) {
+int Http::write_debug(CURL *, curl_infotype type, char *buffer, size_t len, void *) {
   if (!g_enable_debug)
     return 0;
 
@@ -83,80 +83,80 @@ int http::write_debug(CURL *, curl_infotype type, char *buffer, size_t len, void
   return 0;
 }
 
-size_t http::write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
+size_t Http::write_data(void *buffer, size_t size, size_t nmemb, void *userp) {
   char *data = reinterpret_cast<char *>(buffer);
   std::string str(data, size * nmemb);
 
-  http *me = reinterpret_cast<http *>(userp);
-  me->_download_data << str;
+  Http *me = reinterpret_cast<Http *>(userp);
+  me->download_data_ << str;
   return nmemb;
 }
 
-std::shared_ptr<http> http::perform(http_verb verb, std::string const &url) {
-  std::shared_ptr<http> request(new http());
+std::shared_ptr<Http> Http::perform(HttpVerb verb, std::string const &url) {
+  std::shared_ptr<Http> request(new Http());
   request->perform_action(verb, url);
   return request;
 }
 
-std::shared_ptr<http> http::perform(http_verb verb, std::string const &url, xml_element &xml) {
-  std::shared_ptr<http> request(new http());
+std::shared_ptr<Http> Http::perform(HttpVerb verb, std::string const &url, xml_element &xml) {
+  std::shared_ptr<Http> request(new Http());
   request->perform_action(verb, url, xml);
   return request;
 }
 
-std::shared_ptr<http> http::perform(http_verb verb, std::string const &url, std::map<std::string, std::string> const &data) {
-  std::shared_ptr<http> request(new http());
+std::shared_ptr<Http> Http::perform(HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data) {
+  std::shared_ptr<Http> request(new Http());
   request->perform_action(verb, url, data);
   return request;
 }
 
-void http::perform_action(http_verb verb, std::string const &url) {
-  _url = url;
-  _verb = verb;
-  _upload_data.clear();
-  _download_data.clear();
+void Http::perform_action(HttpVerb verb, std::string const &url) {
+  url_ = url;
+  verb_ = verb;
+  upload_data_.clear();
+  download_data_.clear();
 
   // kick off the post in another thread, TODO: thread pool?
-  _thread = std::thread(std::bind(&http::do_action, this));
+  thread_ = std::thread(std::bind(&Http::do_action, this));
 }
 
-void http::perform_action(http_verb verb, std::string const &url, fw::xml_element &xml) {
-  _url = url;
-  _verb = verb;
-  _headers["Content-Type"] = "text/xml";
-  _upload_data = xml.to_string();
-  _download_data.clear();
+void Http::perform_action(HttpVerb verb, std::string const &url, fw::xml_element &xml) {
+  url_ = url;
+  verb_ = verb;
+  headers_["Content-Type"] = "text/xml";
+  upload_data_ = xml.to_string();
+  download_data_.clear();
 
   // kick off the post in another thread, TODO: thread pool?
-  _thread = std::thread(std::bind(&http::do_action, this));
+  thread_ = std::thread(std::bind(&Http::do_action, this));
 }
 
-void http::perform_action(http_verb verb, std::string const &url, std::map<std::string, std::string> const &data) {
-  _url = url;
-  _verb = verb;
-  _headers["Content-Type"] = "application/application/x-www-form-urlencoded";
-  //TODO: _upload_data = data();
-  _download_data.clear();
+void Http::perform_action(HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data) {
+  url_ = url;
+  verb_ = verb;
+  headers_["Content-Type"] = "application/application/x-www-form-urlencoded";
+  //TODO: upload_data_ = data();
+  download_data_.clear();
 
   // kick off the post in another thread, TODO: thread pool?
-  _thread = std::thread(std::bind(&http::do_action, this));
+  thread_ = std::thread(std::bind(&Http::do_action, this));
 }
 
-bool http::is_finished() {
-  std::unique_lock<std::mutex> lock(_mutex);
-  return _is_finished;
+bool Http::is_finished() {
+  std::unique_lock<std::mutex> lock(mutex_);
+  return is_finished_;
 }
 
 // waits for the response to be complete. This will block the current thread
-void http::wait() {
+void Http::wait() {
   // lock the mutex then wait for the condition to become notified
-  std::unique_lock<std::mutex> lock(_mutex);
-  while (!_is_finished) {
-    _finished.wait(lock);
+  std::unique_lock<std::mutex> lock(mutex_);
+  while (!is_finished_) {
+    finished_.wait(lock);
   }
 }
 
-std::string http::get_response() {
+std::string Http::get_response() {
   if (!is_finished())
     return ""; // TODO: something better than just empty string?
 
@@ -164,12 +164,12 @@ std::string http::get_response() {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(get_error_msg()));
   }
 
-  return _download_data.str();
+  return download_data_.str();
 }
 
 // parses the response as XML and returns a reference to it. if no response has
 // been received yet, an xml_element pointing to a NULL element is returned.
-xml_element http::get_xml_response() {
+xml_element Http::get_xml_response() {
   std::string response = get_response();
   if (response == "")
     return xml_element();
@@ -177,22 +177,22 @@ xml_element http::get_xml_response() {
   return xml_element(response);
 }
 
-bool http::is_error() const {
-  return (_last_error != CURLE_OK);
+bool Http::is_error() const {
+  return (last_error_ != CURLE_OK);
 }
 
-std::string http::get_error_msg() const {
-  if (_last_error == 0)
+std::string Http::get_error_msg() const {
+  if (last_error_ == 0)
     return "";
 
-  return curl_easy_strerror(_last_error);
+  return curl_easy_strerror(last_error_);
 }
 
-void http::check_error(CURLcode error, char const *fn) {
+void Http::check_error(CURLcode error, char const *fn) {
   if (error != CURLE_OK) {
-    _last_error = error;
+    last_error_ = error;
     debug << boost::format("WARN: error returned from libcurl call: %1%") % fn << std::endl;
-    debug << boost::format("  [%1%] %2%") % _last_error % curl_easy_strerror(_last_error) << std::endl;
+    debug << boost::format("  [%1%] %2%") % last_error_ % curl_easy_strerror(last_error_) << std::endl;
   }
 }
 
@@ -200,57 +200,57 @@ void http::check_error(CURLcode error, char const *fn) {
   check_error(fn, #fn)
 
 // once upload_data has been set, uploads the data
-void http::do_action() {
-  _handle = curl_easy_init();
-  if (_handle == 0) {
+void Http::do_action() {
+  handle_ = curl_easy_init();
+  if (handle_ == 0) {
     debug << "ERROR: Could not create curl handle, cannot post data!" << std::endl;
-    _last_error = CURLE_FAILED_INIT;
+    last_error_ = CURLE_FAILED_INIT;
   } else {
     if (g_enable_debug) {
-      debug << boost::format("CURL begin: %1%") % _url << std::endl;
-      CHECK(curl_easy_setopt(_handle, CURLOPT_VERBOSE, 1));
+      debug << boost::format("CURL begin: %1%") % url_ << std::endl;
+      CHECK(curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1));
     }
-    CHECK(curl_easy_setopt(_handle, CURLOPT_DEBUGFUNCTION, &write_debug));
-    CHECK(curl_easy_setopt(_handle, CURLOPT_DEBUGDATA, this));
-    CHECK(curl_easy_setopt(_handle, CURLOPT_WRITEFUNCTION, &write_data));
-    CHECK(curl_easy_setopt(_handle, CURLOPT_WRITEDATA, this));
-    CHECK(curl_easy_setopt(_handle, CURLOPT_URL, _url.c_str()));
+    CHECK(curl_easy_setopt(handle_, CURLOPT_DEBUGFUNCTION, &write_debug));
+    CHECK(curl_easy_setopt(handle_, CURLOPT_DEBUGDATA, this));
+    CHECK(curl_easy_setopt(handle_, CURLOPT_WRITEFUNCTION, &write_data));
+    CHECK(curl_easy_setopt(handle_, CURLOPT_WRITEDATA, this));
+    CHECK(curl_easy_setopt(handle_, CURLOPT_URL, url_.c_str()));
 
     curl_slist *headers = nullptr;
     std::pair<std::string, std::string> header;
-    BOOST_FOREACH(header, _headers) {
+    BOOST_FOREACH(header, headers_) {
       headers = curl_slist_append(headers, (header.first + ": " + header.second).c_str());
     }
 
-    switch (_verb) {
+    switch (verb_) {
     case POST:
-      CHECK(curl_easy_setopt(_handle, CURLOPT_POST, 1));
-      CHECK(curl_easy_setopt(_handle, CURLOPT_POSTFIELDS, &_upload_data[0]));
+      CHECK(curl_easy_setopt(handle_, CURLOPT_POST, 1));
+      CHECK(curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, &upload_data_[0]));
       break;
     case PUT:
-      CHECK(curl_easy_setopt(_handle, CURLOPT_PUT, 1));
-      if (!_upload_data.empty())
-        CHECK(curl_easy_setopt(_handle, CURLOPT_POSTFIELDS, &_upload_data[0]));
+      CHECK(curl_easy_setopt(handle_, CURLOPT_PUT, 1));
+      if (!upload_data_.empty())
+        CHECK(curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, &upload_data_[0]));
       break;
     case DELETE:
-      CHECK(curl_easy_setopt(_handle, CURLOPT_CUSTOMREQUEST, "DELETE"));
-      if (!_upload_data.empty())
-        CHECK(curl_easy_setopt(_handle, CURLOPT_POSTFIELDS, &_upload_data[0]));
+      CHECK(curl_easy_setopt(handle_, CURLOPT_CUSTOMREQUEST, "DELETE"));
+      if (!upload_data_.empty())
+        CHECK(curl_easy_setopt(handle_, CURLOPT_POSTFIELDS, &upload_data_[0]));
       break;
     case GET:
-      CHECK(curl_easy_setopt(_handle, CURLOPT_HTTPGET, 1));
+      CHECK(curl_easy_setopt(handle_, CURLOPT_HTTPGET, 1));
       break;
     }
 
-    CHECK(curl_easy_setopt(_handle, CURLOPT_HTTPHEADER, headers));
+    CHECK(curl_easy_setopt(handle_, CURLOPT_HTTPHEADER, headers));
 
-    CHECK(curl_easy_perform(_handle));
+    CHECK(curl_easy_perform(handle_));
     curl_slist_free_all(headers);
   }
 
-  std::unique_lock<std::mutex> lock(_mutex);
-  _is_finished = true;
-  _finished.notify_all();
+  std::unique_lock<std::mutex> lock(mutex_);
+  is_finished_ = true;
+  finished_.notify_all();
 }
 
 }

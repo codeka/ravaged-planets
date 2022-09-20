@@ -61,16 +61,16 @@ void world::initialize() {
   // tell the particle manager to wrap particles at the world boundary
   fw::framework::get_instance()->get_particle_mgr()->set_world_wrap(_terrain->get_width(), _terrain->get_length());
 
-  fw::input *input = fw::framework::get_instance()->get_input();
+  fw::Input *Input = fw::framework::get_instance()->get_input();
 
   world::set_instance(this);
 
   initialize_entities();
   if (_entities != nullptr) {
     _cursor->initialize();
-    _keybind_tokens.push_back(input->bind_function("pause", std::bind(&world::on_key_pause, this, _1, _2)));
+    _keybind_tokens.push_back(Input->bind_function("pause", std::bind(&world::on_key_pause, this, _1, _2)));
   }
-  _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
+  _keybind_tokens.push_back(Input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
 
   initialize_pathing();
 
@@ -81,9 +81,9 @@ void world::destroy() {
   _pathing->stop();
 
   // unbind all the keys we had bound
-  fw::input *input = fw::framework::get_instance()->get_input();
+  fw::Input *Input = fw::framework::get_instance()->get_input();
   BOOST_FOREACH(int token, _keybind_tokens) {
-    input->unbind_key(token);
+    Input->unbind_key(token);
   }
   _keybind_tokens.clear();
   _cursor->destroy();

@@ -33,7 +33,7 @@ private:
 
   std::shared_ptr<fw::path_find> _pather;
   terrain *_terrain;
-  std::thread _thread;
+  std::thread thread_;
   fw::work_queue<path_request_data> _work_queue;
 
   void thread_proc();

@@ -28,7 +28,7 @@ void pathing_thread::start() {
 
   // start the thread that will simply wait for jobs to arrive and
   // then process them in order.
-  _thread = std::thread(std::bind(&pathing_thread::thread_proc, this));
+  thread_ = std::thread(std::bind(&pathing_thread::thread_proc, this));
 }
 
 void pathing_thread::stop() {

@@ -191,9 +191,9 @@ void pathing_tool::activate() {
       new fw::timed_path_find(get_terrain()->get_width(), get_terrain()->get_length(), _collision_data));
   _path_find = pf;
 
-  fw::input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::framework::get_instance()->get_input();
   _keybind_tokens.push_back(
-      inp->bind_key("Left-Mouse", fw::input_binding(std::bind(&pathing_tool::on_key, this, _1, _2))));
+      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&pathing_tool::on_key, this, _1, _2))));
 }
 
 void pathing_tool::deactivate() {

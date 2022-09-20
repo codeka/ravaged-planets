@@ -153,7 +153,7 @@ public:
     return false;
   }
 
-  /** Override this if you want your widget to accept input focus. */
+  /** Override this if you want your widget to accept Input focus. */
   virtual bool can_focus() const {
     return false;
   }
@@ -163,10 +163,10 @@ public:
 
   virtual void update(float dt);
 
-  /** Called just before render. You should not override this, it define the scissor rectangle and stuff like that. */
+  /** Called just before render. You should not override this, it define the scissor Rectangle and stuff like that. */
   bool prerender();
   virtual void render();
-  /** Called just after render. You should not override this, it define the scissor rectangle and stuff like that. */
+  /** Called just after render. You should not override this, it define the scissor Rectangle and stuff like that. */
   void postrender();
 
   /** Signalled when the mouse moves out of this widget. */

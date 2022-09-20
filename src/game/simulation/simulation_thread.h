@@ -34,7 +34,7 @@ public:
 private:
   static simulation_thread *instance;
 
-  std::thread _thread;
+  std::thread thread_;
   bool _stopped;
   std::condition_variable _stopped_cond;
 
@@ -98,7 +98,7 @@ public:
   void send_chat_msg(std::string const &msg);
 
   /**
-   * This is the called by the input subsystem/game world when the user initiates a command (e.g. the click on terrain
+   * This is the called by the Input subsystem/game world when the user initiates a command (e.g. the click on terrain
    * to order a unit to move, etc). we must post the command to our command queue and notify remote players of the
    * pending command.
    */

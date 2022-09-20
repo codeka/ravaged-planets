@@ -30,9 +30,7 @@ float angle_between(Vector const &a, Vector const &b);
 Vector point_plane_intersect(Vector const &plane_pt, Vector const &plane_normal,
     Vector const &p_start, Vector const &p_dir);
 
-/**
- * Gets the name of the current user. Sometimes we may be able to return first name/last name, others just a username.
- */
+// Gets the name of the current user. Sometimes we may be able to return first name/last name, others just a username.
 std::string get_user_name();
 
 // max and min are #define'd by windows.h ?_?
@@ -138,23 +136,23 @@ struct ihash {
   }
 };
 
-/** Small utility class which represents a rectangle (x,y plus width,height). */
+/** Small utility class which represents a Rectangle (x,y plus width,height). */
 template<typename T>
-class rectangle {
+class Rectangle {
 public:
   T left;
   T top;
   T width;
   T height;
 
-  inline rectangle() : left(0), top(0), width(0), height(0) {
+  inline Rectangle() : left(0), top(0), width(0), height(0) {
   }
 
-  inline rectangle(T left, T top, T width, T height) : left(left), top(top), width(width), height(height) {
+  inline Rectangle(T left, T top, T width, T height) : left(left), top(top), width(width), height(height) {
   }
 
-  /** Returns the intersection of the two given rectangle. */
-  static inline rectangle intersect(rectangle const &one, rectangle const &two) {
+  /** Returns the intersection of the two given Rectangle. */
+  static inline Rectangle intersect(Rectangle const &one, Rectangle const &two) {
     const T x1 = one.left;
     const T x2 = one.left + one.width;
     const T x3 = two.left;
@@ -169,7 +167,7 @@ public:
     const T y5 = max(y1, y3);
     const T y6 = min(y2, y4);
 
-    return rectangle(x5, y5, x6-x5, y6-y5);
+    return Rectangle(x5, y5, x6-x5, y6-y5);
   }
 };
 

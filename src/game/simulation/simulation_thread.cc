@@ -35,13 +35,13 @@ void simulation_thread::initialize() {
   _players.push_back(_local_player);
 
   _host = new fw::net::host();
-  _thread = std::thread(std::bind(&simulation_thread::thread_proc, this));
+  thread_ = std::thread(std::bind(&simulation_thread::thread_proc, this));
 }
 
 void simulation_thread::destroy() {
   _stopped = true;
   _stopped_cond.notify_all();
-  _thread.join();
+  thread_.join();
 }
 
 void simulation_thread::connect(uint64_t game_id, std::string address, uint8_t player_no) {

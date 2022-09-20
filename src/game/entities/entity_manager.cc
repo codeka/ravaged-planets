@@ -134,9 +134,9 @@ std::list<std::weak_ptr<entity>> entity_manager::get_entities(std::function<bool
 
 std::weak_ptr<entity> entity_manager::get_entity_at_cursor() {
   fw::framework *frmwrk = fw::framework::get_instance();
-  fw::input *input = frmwrk->get_input();
-  float mx = (float) input->mouse_x();
-  float my = (float) input->mouse_y();
+  fw::Input *Input = frmwrk->get_input();
+  float mx = (float) Input->mouse_x();
+  float my = (float) Input->mouse_y();
 
   mx = 1.0f - (2.0f * mx / frmwrk->get_graphics()->get_width());
   my = 1.0f - (2.0f * my / frmwrk->get_graphics()->get_height());

@@ -30,8 +30,8 @@ void tool::activate() {
 
 void tool::deactivate() {
   // Loop through the keybind tokens and unbind them all
-  fw::input *input = fw::framework::get_instance()->get_input();
-  std::for_each(_keybind_tokens.begin(), _keybind_tokens.end(), std::bind(&fw::input::unbind_key, input, _1));
+  fw::Input *Input = fw::framework::get_instance()->get_input();
+  std::for_each(_keybind_tokens.begin(), _keybind_tokens.end(), std::bind(&fw::Input::unbind_key, Input, _1));
 }
 
 void tool::update() {

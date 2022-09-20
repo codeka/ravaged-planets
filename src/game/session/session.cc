@@ -66,7 +66,7 @@ std::shared_ptr<session_request> session::confirm_player(uint64_t game_id, uint3
 // adds a request to the queue (if the queue is empty, we'll post the request straight
 // away)
 void session::add_request(std::shared_ptr<session_request> req) {
-  std::unique_lock<std::mutex> lock(_mutex);
+  std::unique_lock<std::mutex> lock(mutex_);
 
   if (!_curr_req) {
     begin_request(req);
@@ -86,7 +86,7 @@ void session::begin_request(std::shared_ptr<session_request> req) {
 
 // this is called every frame or so to update our state
 void session::update() {
-  std::unique_lock<std::mutex> lock(_mutex);
+  std::unique_lock<std::mutex> lock(mutex_);
 
   if (!_curr_req)
     return;

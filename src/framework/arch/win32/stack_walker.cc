@@ -1,4 +1,4 @@
-// adapted from: http://www.codeproject.com/threads/StackWalker.asp
+// adapted from: Http://www.codeproject.com/threads/StackWalker.asp
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

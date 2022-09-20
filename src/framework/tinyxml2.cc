@@ -38,7 +38,7 @@ static const char SINGLE_QUOTE      = '\'';
 static const char DOUBLE_QUOTE      = '\"';
 
 // Bunch of unicode info at:
-//    http://www.unicode.org/faq/utf_bom.html
+//    Http://www.unicode.org/faq/utf_bom.html
 //  ef bb bf (Microsoft "lead bytes") - designates UTF-8
 
 static const unsigned char TIXML_UTF_LEAD_0 = 0xefU;
@@ -304,22 +304,22 @@ const char* XMLUtil::ReadBOM( const char* p, bool* bom )
 }
 
 
-void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length )
+void XMLUtil::ConvertUTF32ToUTF8( unsigned long Input, char* output, int* length )
 {
     const unsigned long BYTE_MASK = 0xBF;
     const unsigned long BYTE_MARK = 0x80;
     const unsigned long FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
-    if (input < 0x80) {
+    if (Input < 0x80) {
         *length = 1;
     }
-    else if ( input < 0x800 ) {
+    else if ( Input < 0x800 ) {
         *length = 2;
     }
-    else if ( input < 0x10000 ) {
+    else if ( Input < 0x10000 ) {
         *length = 3;
     }
-    else if ( input < 0x200000 ) {
+    else if ( Input < 0x200000 ) {
         *length = 4;
     }
     else {
@@ -333,22 +333,22 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long input, char* output, int* length
     switch (*length) {
         case 4:
             --output;
-            *output = (char)((input | BYTE_MARK) & BYTE_MASK);
-            input >>= 6;
+            *output = (char)((Input | BYTE_MARK) & BYTE_MASK);
+            Input >>= 6;
             // no break
         case 3:
             --output;
-            *output = (char)((input | BYTE_MARK) & BYTE_MASK);
-            input >>= 6;
+            *output = (char)((Input | BYTE_MARK) & BYTE_MASK);
+            Input >>= 6;
             // no break
         case 2:
             --output;
-            *output = (char)((input | BYTE_MARK) & BYTE_MASK);
-            input >>= 6;
+            *output = (char)((Input | BYTE_MARK) & BYTE_MASK);
+            Input >>= 6;
             // no break
         case 1:
             --output;
-            *output = (char)(input | FIRST_BYTE_MARK[*length]);
+            *output = (char)(Input | FIRST_BYTE_MARK[*length]);
             break;
         default:
             TIXMLASSERT( false );

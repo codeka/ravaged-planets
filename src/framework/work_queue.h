@@ -14,7 +14,7 @@ template<typename T>
 class work_queue {
 private:
   std::queue<T> _q;
-  std::mutex _mutex;
+  std::mutex mutex_;
   std::condition_variable _condition;
 
 public:
@@ -27,7 +27,7 @@ public:
 
 template<typename T>
 T work_queue<T>::dequeue() {
-  std::unique_lock<std::mutex> lock(_mutex);
+  std::unique_lock<std::mutex> lock(mutex_);
   while (_q.size() == 0) {
     _condition.wait(lock);
   }
@@ -41,7 +41,7 @@ T work_queue<T>::dequeue() {
 template<typename T>
 void work_queue<T>::enqueue(T const &val) {
   {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::unique_lock<std::mutex> lock(mutex_);
     _q.push(val);
   }
 

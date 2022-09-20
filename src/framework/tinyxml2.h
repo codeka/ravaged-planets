@@ -120,7 +120,7 @@ inline int TIXML_SNPRINTF( char* buffer, size_t size, const char* format, ... )
 #endif
 
 /* Versioning, past 1.0.14:
-  http://semver.org/
+  Http://semver.org/
 */
 static const int TIXML2_MAJOR_VERSION = 3;
 static const int TIXML2_MINOR_VERSION = 0;
@@ -604,7 +604,7 @@ public:
     // p is the starting location,
     // the UTF-8 value of the entity will be placed in value, and length filled in.
     static const char* GetCharacterRef( const char* p, char* value, int* length );
-    static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
+    static void ConvertUTF32ToUTF8( unsigned long Input, char* output, int* length );
 
     // converts primitive types to strings
     static void ToStr( int v, char* buffer, int bufferSize );
@@ -873,8 +873,8 @@ public:
 
       The interface has been based on ideas from:
 
-      - http://www.saxproject.org/
-      - http://c2.com/cgi/wiki?HierarchicalVisitorPattern
+      - Http://www.saxproject.org/
+      - Http://c2.com/cgi/wiki?HierarchicalVisitorPattern
 
       Which are both good references for "visiting".
 

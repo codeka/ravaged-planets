@@ -8,7 +8,7 @@ namespace fw {
 
 /**
  * This is a special camera implementation for rendering the shadow map. basically, we don't
- * link to any input controls, etc.
+ * link to any Input controls, etc.
  */
 class light_camera: public Camera {
 public:
