@@ -21,11 +21,11 @@ namespace game {
 simulation_thread *simulation_thread::instance = new simulation_thread();
 
 simulation_thread::simulation_thread() :
-    _host(nullptr), _turn(0), _game_id(0), _local_player(nullptr), _stopped(false) {
+    host_(nullptr), _turn(0), _game_id(0), _local_player(nullptr), _stopped(false) {
 }
 
 simulation_thread::~simulation_thread() {
-  delete _host;
+  delete host_;
   delete _local_player;
 }
 
@@ -34,7 +34,7 @@ void simulation_thread::initialize() {
   _local_player = new local_player();
   _players.push_back(_local_player);
 
-  _host = new fw::net::host();
+  host_ = new fw::net::Host();
   thread_ = std::thread(std::bind(&simulation_thread::thread_proc, this));
 }
 
@@ -52,13 +52,13 @@ void simulation_thread::connect(uint64_t game_id, std::string address, uint8_t p
   // join the game.
   _local_player->set_player_no(player_no);
 
-  // create a new remote_player for the host player and connect to it
-  remote_player *player = remote_player::connect(_host, address);
+  // create a new remote_player for the Host player and connect to it
+  remote_player *player = remote_player::connect(host_, address);
   _players.push_back(player);
 }
 
 void simulation_thread::connect_player(std::string address) {
-  remote_player *player = remote_player::connect(_host, address);
+  remote_player *player = remote_player::connect(host_, address);
   _players.push_back(player);
 }
 
@@ -68,7 +68,7 @@ void simulation_thread::new_game(uint64_t game_id) {
 }
 
 int simulation_thread::get_listen_port() const {
-  return _host->get_listen_port();
+  return host_->get_listen_port();
 }
 
 void simulation_thread::set_map_name(std::string const &value) {
@@ -132,7 +132,7 @@ void simulation_thread::add_ai_player(ai_player *plyr) {
 /** This is the thread procedure for running the simulation thread. */
 void simulation_thread::thread_proc() {
   fw::settings stg;
-  if (!_host->listen(stg.get_value<std::string> ("listen-port"))) {
+  if (!host_->listen(stg.get_value<std::string> ("listen-port"))) {
     BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("could not listen on port(s): " + stg.get_value<std::string>("listen-port")));
   }
@@ -141,17 +141,17 @@ void simulation_thread::thread_proc() {
 
   while (!_stopped) {
     fw::chrono_clock::time_point start(fw::chrono_clock::now());
-    _host->update();
+    host_->update();
     _turn++;
 
     // at the start of each turn, we post the commands for the *next* turn
     enqueue_posted_commands();
 
-    // next, check for any new connections that the host has detected for us, this shouldn't happen
+    // next, check for any new connections that the Host has detected for us, this shouldn't happen
     // once the game is underway, but you never know (in that case, we need to reject them!)
-    std::vector<fw::net::peer *> new_connections = _host->get_new_connections();
-    BOOST_FOREACH(fw::net::peer *new_peer, new_connections) {
-      _players.push_back(new remote_player(_host, new_peer, true));
+    std::vector<fw::net::Peer *> new_connections = host_->get_new_connections();
+    BOOST_FOREACH(fw::net::Peer *new_peer, new_connections) {
+      _players.push_back(new remote_player(host_, new_peer, true));
       sig_players_changed();
     }
 

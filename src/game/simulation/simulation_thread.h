@@ -10,7 +10,7 @@
 
 namespace fw {
 namespace net {
-class host;
+class Host;
 }
 }
 
@@ -38,7 +38,7 @@ private:
   bool _stopped;
   std::condition_variable _stopped_cond;
 
-  fw::net::host *_host;
+  fw::net::Host *host_;
   local_player *_local_player;
   std::vector<player *> _players;
   std::string _map_name;
@@ -136,10 +136,10 @@ public:
   /** Gets a pointer to the player with the given player_no. */
   player *get_player(uint8_t player_no) const;
 
-  /** Gets the port number we're listening for peer connections on. */
+  /** Gets the port number we're listening for Peer connections on. */
   int get_listen_port() const;
-  fw::net::host *get_host() const {
-    return _host;
+  fw::net::Host *get_host() const {
+    return host_;
   }
   uint64_t get_game_id() const {
     return _game_id;

@@ -648,16 +648,16 @@ XMLNode::~XMLNode()
 
 const char* XMLNode::Value() const
 {
-    return _value.GetStr();
+    return value_.GetStr();
 }
 
 void XMLNode::SetValue( const char* str, bool staticMem )
 {
     if ( staticMem ) {
-        _value.SetInternedStr( str );
+        value_.SetInternedStr( str );
     }
     else {
-        _value.SetStr( str );
+        value_.SetStr( str );
     }
 }
 
@@ -895,7 +895,7 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
             // We read the end tag. Return it to the parent.
             if ( ele->ClosingType() == XMLElement::CLOSING ) {
                 if ( parentEnd ) {
-                    ele->_value.TransferTo( parentEnd );
+                    ele->value_.TransferTo( parentEnd );
                 }
                 node->_memPool->SetTracked();   // created and then immediately deleted.
                 DeleteNode( node );
@@ -955,7 +955,7 @@ char* XMLText::ParseDeep( char* p, StrPair* )
 {
     const char* start = p;
     if ( this->CData() ) {
-        p = _value.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+        p = value_.ParseText( p, "]]>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
         if ( !p ) {
             _document->SetError( XML_ERROR_PARSING_CDATA, start, 0 );
         }
@@ -967,7 +967,7 @@ char* XMLText::ParseDeep( char* p, StrPair* )
             flags |= StrPair::COLLAPSE_WHITESPACE;
         }
 
-        p = _value.ParseText( p, "<", flags );
+        p = value_.ParseText( p, "<", flags );
         if ( p && *p ) {
             return p-1;
         }
@@ -1020,7 +1020,7 @@ char* XMLComment::ParseDeep( char* p, StrPair* )
 {
     // Comment parses as text.
     const char* start = p;
-    p = _value.ParseText( p, "-->", StrPair::COMMENT );
+    p = value_.ParseText( p, "-->", StrPair::COMMENT );
     if ( p == 0 ) {
         _document->SetError( XML_ERROR_PARSING_COMMENT, start, 0 );
     }
@@ -1070,7 +1070,7 @@ char* XMLDeclaration::ParseDeep( char* p, StrPair* )
 {
     // Declaration parses as text.
     const char* start = p;
-    p = _value.ParseText( p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+    p = value_.ParseText( p, "?>", StrPair::NEEDS_NEWLINE_NORMALIZATION );
     if ( p == 0 ) {
         _document->SetError( XML_ERROR_PARSING_DECLARATION, start, 0 );
     }
@@ -1120,7 +1120,7 @@ char* XMLUnknown::ParseDeep( char* p, StrPair* )
     // Unknown parses as text.
     const char* start = p;
 
-    p = _value.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION );
+    p = value_.ParseText( p, ">", StrPair::NEEDS_NEWLINE_NORMALIZATION );
     if ( !p ) {
         _document->SetError( XML_ERROR_PARSING_UNKNOWN, start, 0 );
     }
@@ -1161,7 +1161,7 @@ const char* XMLAttribute::Name() const
 
 const char* XMLAttribute::Value() const
 {
-    return _value.GetStr();
+    return value_.GetStr();
 }
 
 char* XMLAttribute::ParseDeep( char* p, bool processEntities )
@@ -1187,7 +1187,7 @@ char* XMLAttribute::ParseDeep( char* p, bool processEntities )
     char endTag[2] = { *p, 0 };
     ++p;  // move past opening quote
 
-    p = _value.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES );
+    p = value_.ParseText( p, endTag, processEntities ? StrPair::ATTRIBUTE_VALUE : StrPair::ATTRIBUTE_VALUE_LEAVE_ENTITIES );
     return p;
 }
 
@@ -1245,7 +1245,7 @@ XMLError XMLAttribute::QueryDoubleValue( double* value ) const
 
 void XMLAttribute::SetAttribute( const char* v )
 {
-    _value.SetStr( v );
+    value_.SetStr( v );
 }
 
 
@@ -1253,7 +1253,7 @@ void XMLAttribute::SetAttribute( int v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
-    _value.SetStr( buf );
+    value_.SetStr( buf );
 }
 
 
@@ -1261,7 +1261,7 @@ void XMLAttribute::SetAttribute( unsigned v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
-    _value.SetStr( buf );
+    value_.SetStr( buf );
 }
 
 
@@ -1269,21 +1269,21 @@ void XMLAttribute::SetAttribute( bool v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
-    _value.SetStr( buf );
+    value_.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( double v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
-    _value.SetStr( buf );
+    value_.SetStr( buf );
 }
 
 void XMLAttribute::SetAttribute( float v )
 {
     char buf[BUF_SIZE];
     XMLUtil::ToStr( v, buf, BUF_SIZE );
-    _value.SetStr( buf );
+    value_.SetStr( buf );
 }
 
 
@@ -1586,8 +1586,8 @@ char* XMLElement::ParseDeep( char* p, StrPair* strPair )
         ++p;
     }
 
-    p = _value.ParseName( p );
-    if ( _value.Empty() ) {
+    p = value_.ParseName( p );
+    if ( value_.Empty() ) {
         return 0;
     }
 
@@ -2010,7 +2010,7 @@ XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
     _restrictedEntityFlag[(unsigned char)'&'] = true;
     _restrictedEntityFlag[(unsigned char)'<'] = true;
     _restrictedEntityFlag[(unsigned char)'>'] = true; // not required, but consistency is nice
-    _buffer.Push( 0 );
+    buffer_.Push( 0 );
 }
 
 
@@ -2041,8 +2041,8 @@ void XMLPrinter::Print( const char* format, ... )
         // Close out and re-start the va-args
         va_end( va );
         va_start( va, format );
-        TIXMLASSERT( _buffer.Size() > 0 && _buffer[_buffer.Size() - 1] == 0 );
-        char* p = _buffer.PushArr( len ) - 1; // back up over the null terminator.
+        TIXMLASSERT( buffer_.Size() > 0 && buffer_[buffer_.Size() - 1] == 0 );
+        char* p = buffer_.PushArr( len ) - 1; // back up over the null terminator.
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
     #if defined(WINCE)
     _vsnprintf( p, len+1, format, va );

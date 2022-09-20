@@ -72,7 +72,7 @@ public:
   // when joining a game, the "Enable Multiplayer" checkbox needs to be removed
   void set_enable_multiplayer_visible(bool visible);
 
-  // selects the map with the given name. This is usually done to keep our selection in sync with the host.
+  // selects the map with the given name. This is usually done to keep our selection in sync with the Host.
   void select_map(std::string const &map_name);
 };
 

@@ -6,8 +6,7 @@
 #include <framework/packet.h>
 #include <framework/packet_buffer.h>
 
-namespace fw {
-namespace net {
+namespace fw::net {
 
 void initialize() {
   fw::debug << "initializing networking..." << std::endl;
@@ -21,18 +20,18 @@ void destroy() {
 }
 
 //-------------------------------------------------------------------------
-peer::peer(host *hst, ENetPeer *peer, bool connected) :
-    _host(hst), _peer(peer), _connected(connected) {
+Peer::Peer(Host *hst, ENetPeer *Peer, bool connected) :
+    host_(hst), peer_(Peer), connected_(connected) {
 }
 
-peer::~peer() {
-  if (_peer != nullptr) {
+Peer::~Peer() {
+  if (peer_ != nullptr) {
     // this is technically an error, we'll throw an exception or something (but not yet)
   }
 }
 
-void peer::send(packet &pkt, int channel /*= 0*/) {
-  packet_buffer buff(pkt.get_identifier());
+void Peer::send(Packet &pkt, int channel /*= 0*/) {
+  PacketBuffer buff(pkt.get_identifier());
   pkt.serialize(buff);
 
   enet_uint32 flags = 0;
@@ -40,41 +39,41 @@ void peer::send(packet &pkt, int channel /*= 0*/) {
     flags |= ENET_PACKET_FLAG_RELIABLE;
   }
 
-  ENetPacket *packet = enet_packet_create(buff.get_buffer(), buff.get_size(), flags);
-  enet_peer_send(_peer, static_cast<enet_uint8>(channel), packet);
+  ENetPacket *Packet = enet_packet_create(buff.get_buffer(), buff.get_size(), flags);
+  enet_peer_send(peer_, static_cast<enet_uint8>(channel), Packet);
 }
 
-void peer::on_connect() {
-  fw::debug << boost::format("connected to peer %1%:%2%") % _peer->address.host % _peer->address.port << std::endl;
-  _connected = true;
+void Peer::on_connect() {
+  fw::debug << boost::format("connected to peer %1%:%2%") % peer_->address.host % peer_->address.port << std::endl;
+  connected_ = true;
 }
 
-void peer::on_receive(ENetPacket *packet, enet_uint8 /*channel*/) {
+void Peer::on_receive(ENetPacket *Packet, enet_uint8 /*channel*/) {
   fw::debug << boost::format("packet received from %1%:%2%")
-      % _peer->address.host % _peer->address.port << std::endl;
+      % peer_->address.host % peer_->address.port << std::endl;
 
-  if (_handler) {
-    packet_buffer buff(reinterpret_cast<char *>(packet->data), packet->dataLength);
-    std::shared_ptr<net::packet> pkt(create_packet(buff));
+  if (handler_) {
+    PacketBuffer buff(reinterpret_cast<char *>(Packet->data), Packet->dataLength);
+    std::shared_ptr<net::Packet> pkt(create_packet(buff));
     pkt->deserialize(buff);
-    _handler(pkt);
+    handler_(pkt);
   }
 }
 
-void peer::on_disconnect() {
+void Peer::on_disconnect() {
   fw::debug << "peer disconnected" << std::endl;
 }
 
 //-------------------------------------------------------------------------
 
-host::host() :
-    _host(0), _listen_port(0) {
+Host::Host() :
+    host_(0), _listen_port(0) {
 }
 
-host::~host() {
+Host::~Host() {
 }
 
-bool host::listen(std::string port_range) {
+bool Host::listen(std::string port_range) {
   int min_port, max_port;
 
   std::vector<std::string> ports;
@@ -92,7 +91,7 @@ bool host::listen(std::string port_range) {
   return listen(min_port, max_port);
 }
 
-bool host::listen(int min_port, int max_port) {
+bool Host::listen(int min_port, int max_port) {
   for (int port = min_port; port <= max_port; port++) {
     if (try_listen(port)) {
       _listen_port = port;
@@ -103,8 +102,8 @@ bool host::listen(int min_port, int max_port) {
   return false;
 }
 
-peer *host::connect(std::string address) {
-  if (_host == nullptr)
+Peer *Host::connect(std::string address) {
+  if (host_ == nullptr)
     try_listen(0);
 
   std::vector<std::string> parts;
@@ -118,58 +117,58 @@ peer *host::connect(std::string address) {
   addr.port = boost::lexical_cast<int>(parts[1]);
 
   // connect to the server (we'll create 10 channels to begin with, maybe that'll change)
-  ENetPeer *peer = enet_host_connect(_host, &addr, 10, 0);
-  if (peer == nullptr) {
+  ENetPeer *Peer = enet_host_connect(host_, &addr, 10, 0);
+  if (Peer == nullptr) {
     fw::debug << boost::format("error connecting to peer, no peer object created.") << std::endl;
     return 0;
   }
 
-  net::peer *new_peer = new net::peer(this, peer, false);
-  peer->data = new_peer;
+  net::Peer *new_peer = new net::Peer(this, Peer, false);
+  Peer->data = new_peer;
   return new_peer;
 }
 
-void host::update() {
-  if (_host == nullptr)
+void Host::update() {
+  if (host_ == nullptr)
     return;
 
   ENetEvent evnt;
-  while (enet_host_service(_host, &evnt, 0) > 0) {
-    net::peer *peer = static_cast<net::peer *>(evnt.peer->data);
+  while (enet_host_service(host_, &evnt, 0) > 0) {
+    net::Peer *Peer = static_cast<net::Peer *>(evnt.peer->data);
 
     switch (evnt.type) {
     case ENET_EVENT_TYPE_CONNECT:
-      if (peer == nullptr) {
+      if (Peer == nullptr) {
         on_peer_connect(evnt.peer);
       } else {
-        peer->on_connect();
+        Peer->on_connect();
       }
       break;
 
     case ENET_EVENT_TYPE_RECEIVE:
-      if (peer != nullptr) {
-        peer->on_receive(evnt.packet, evnt.channelID);
+      if (Peer != nullptr) {
+        Peer->on_receive(evnt.packet, evnt.channelID);
       }
       enet_packet_destroy(evnt.packet);
       break;
 
     case ENET_EVENT_TYPE_DISCONNECT:
-      if (peer != nullptr) {
-        peer->on_disconnect();
+      if (Peer != nullptr) {
+        Peer->on_disconnect();
       }
       break;
     }
   }
 }
 
-bool host::try_listen(int port) {
+bool Host::try_listen(int port) {
   ENetAddress addr;
   addr.host = ENET_HOST_ANY;
   addr.port = static_cast<enet_uint16>(port);
 
   // 32 connections allowed, unlimited bandwidth
-  _host = enet_host_create(port == 0 ? 0 : &addr, 32, ENET_PROTOCOL_MAXIMUM_CHANNEL_COUNT, 0, 0);
-  if (_host == nullptr) {
+  host_ = enet_host_create(port == 0 ? 0 : &addr, 32, ENET_PROTOCOL_MAXIMUM_CHANNEL_COUNT, 0, 0);
+  if (host_ == nullptr) {
     fw::debug << boost::format("error listening on port %1%") % port << std::endl;
     return false;
   }
@@ -177,21 +176,20 @@ bool host::try_listen(int port) {
   return true;
 }
 
-void host::on_peer_connect(ENetPeer *peer) {
-  fw::debug << boost::format("new connection received from %1%:%2%") % peer->address.host % peer->address.port
+void Host::on_peer_connect(ENetPeer *Peer) {
+  fw::debug << boost::format("new connection received from %1%:%2%") % Peer->address.host % Peer->address.port
       << std::endl;
 
-  net::peer *new_peer = new net::peer(this, peer, true);
+  net::Peer *new_peer = new net::Peer(this, Peer, true);
   _new_connections.push_back(new_peer);
-  peer->data = new_peer;
+  Peer->data = new_peer;
 }
 
-std::vector<peer *> host::get_new_connections() {
-  std::vector<peer *> new_conns;
+std::vector<Peer *> Host::get_new_connections() {
+  std::vector<Peer *> new_conns;
   std::swap(new_conns, _new_connections);
 
   return new_conns;
 }
 
-}
 }

@@ -36,7 +36,7 @@ public:
   virtual void update();
   virtual void send_chat_msg(std::string const &msg);
 
-  /** This is called when our local player is ready to start the game, we should notify our peer that we're ready. */
+  /** This is called when our local player is ready to start the game, we should notify our Peer that we're ready. */
   virtual void local_player_is_ready() = 0;
 
   /** Gets a value which indicates whether this player is ready to start the game. */

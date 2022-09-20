@@ -17,7 +17,7 @@ namespace game {
 local_player::local_player() :
     _last_session_state(session::disconnected), _session_id(0) {
   // by default, our player# is 1, which is what we get if we're playing
-  // a non-networked game, or if we're the host of a networked game
+  // a non-networked game, or if we're the Host of a networked game
   _player_no = 1;
 
   // start off with a random color as well

@@ -8,7 +8,7 @@
 
 namespace fw {
 namespace net {
-class packet_buffer;
+class PacketBuffer;
 }
 }
 
@@ -16,17 +16,17 @@ namespace game {
 class command;
 
 /**
- * This is the first packet you send to a host when you want to join the game. we'll response with a join_response
+ * This is the first Packet you send to a Host when you want to join the game. we'll response with a join_response
  * detailing the players that already exist in the game, the initial state and so on.
  */
-class join_request_packet: public fw::net::packet {
+class join_request_packet: public fw::net::Packet {
 private:
   uint32_t _user_id;
   fw::Color color_;
 
 protected:
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
 public:
   join_request_packet();
@@ -40,7 +40,7 @@ public:
   }
 
   // gets or sets the color of the connecting player (only useful when connecting
-  // to a peer, rather than the host)
+  // to a Peer, rather than the Host)
   void set_color(fw::Color value) {
     color_ = value;
   }
@@ -55,7 +55,7 @@ public:
 };
 
 // this is the response from a join request
-class join_response_packet: public fw::net::packet {
+class join_response_packet: public fw::net::Packet {
 private:
   std::string _map_name;
   std::vector<uint32_t> _other_users;
@@ -63,8 +63,8 @@ private:
   fw::Color _your_color;
 
 protected:
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
 public:
   join_response_packet();
@@ -90,7 +90,7 @@ public:
   }
 
   // gets or sets the color we'll allow you to have (this is only useful when coming
-  // from the host of the game - you can ignore it from other peers)
+  // from the Host of the game - you can ignore it from other peers)
   fw::Color get_your_color() const {
     return _your_color;
   }
@@ -104,14 +104,14 @@ public:
   }
 };
 
-// a chat packet contains a short textual message to display for this player
-class chat_packet: public fw::net::packet {
+// a chat Packet contains a short textual message to display for this player
+class chat_packet: public fw::net::Packet {
 private:
   std::string _msg;
 
 protected:
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
 public:
   chat_packet();
@@ -130,11 +130,11 @@ public:
   }
 };
 
-// this packet is sent to use when our peer is ready to start the game
-class start_game_packet: public fw::net::packet {
+// this Packet is sent to use when our Peer is ready to start the game
+class start_game_packet: public fw::net::Packet {
 protected:
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
 public:
   start_game_packet();
@@ -146,15 +146,15 @@ public:
   }
 };
 
-// this packet is sent at the end of each turn and notifies our peer
+// this Packet is sent at the end of each turn and notifies our Peer
 // of our commands that are queued for the next turn
-class command_packet: public fw::net::packet {
+class command_packet: public fw::net::Packet {
 private:
   std::vector<std::shared_ptr<command> > _commands;
 
 protected:
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
 public:
   command_packet();

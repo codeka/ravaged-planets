@@ -23,12 +23,12 @@ join_request_packet::join_request_packet() : _user_id(-1) {
 join_request_packet::~join_request_packet() {
 }
 
-void join_request_packet::serialize(fw::net::packet_buffer &buffer) {
+void join_request_packet::serialize(fw::net::PacketBuffer &buffer) {
   buffer << _user_id;
   buffer << color_;
 }
 
-void join_request_packet::deserialize(fw::net::packet_buffer &buffer) {
+void join_request_packet::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> _user_id;
   buffer >> color_;
 }
@@ -41,7 +41,7 @@ join_response_packet::join_response_packet() {
 join_response_packet::~join_response_packet() {
 }
 
-void join_response_packet::serialize(fw::net::packet_buffer &buffer) {
+void join_response_packet::serialize(fw::net::PacketBuffer &buffer) {
   buffer << _map_name;
   buffer << _other_users.size();
   BOOST_FOREACH(uint32_t sess_id, _other_users) {
@@ -51,7 +51,7 @@ void join_response_packet::serialize(fw::net::packet_buffer &buffer) {
   buffer << _your_color;
 }
 
-void join_response_packet::deserialize(fw::net::packet_buffer &buffer) {
+void join_response_packet::deserialize(fw::net::PacketBuffer &buffer) {
   typedef std::vector<std::string>::size_type size_type;
 
   buffer >> _map_name;
@@ -75,11 +75,11 @@ chat_packet::chat_packet() :
 chat_packet::~chat_packet() {
 }
 
-void chat_packet::serialize(fw::net::packet_buffer &buffer) {
+void chat_packet::serialize(fw::net::PacketBuffer &buffer) {
   buffer << _msg;
 }
 
-void chat_packet::deserialize(fw::net::packet_buffer &buffer) {
+void chat_packet::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> _msg;
 }
 
@@ -91,10 +91,10 @@ start_game_packet::start_game_packet() {
 start_game_packet::~start_game_packet() {
 }
 
-void start_game_packet::serialize(fw::net::packet_buffer &) {
+void start_game_packet::serialize(fw::net::PacketBuffer &) {
 }
 
-void start_game_packet::deserialize(fw::net::packet_buffer &) {
+void start_game_packet::deserialize(fw::net::PacketBuffer &) {
 }
 
 //----------------------------------------------------------------------------
@@ -105,7 +105,7 @@ command_packet::command_packet() {
 command_packet::~command_packet() {
 }
 
-void command_packet::serialize(fw::net::packet_buffer &buffer) {
+void command_packet::serialize(fw::net::PacketBuffer &buffer) {
   uint8_t num_commands = static_cast<uint8_t>(_commands.size());
   buffer << num_commands;
 
@@ -122,7 +122,7 @@ void command_packet::serialize(fw::net::packet_buffer &buffer) {
   }
 }
 
-void command_packet::deserialize(fw::net::packet_buffer &buffer) {
+void command_packet::deserialize(fw::net::PacketBuffer &buffer) {
   uint8_t num_commands;
   buffer >> num_commands;
 

@@ -3,45 +3,45 @@
 namespace fw {
 namespace net {
 
-packet_buffer::packet_buffer(uint16_t packet_type) :
-    _flushed(false) {
+PacketBuffer::PacketBuffer(uint16_t packet_type) :
+    flushed_(false) {
   (*this) << packet_type;
 }
 
-packet_buffer::packet_buffer(char const *bytes, std::size_t n) :
-    _buffer(std::string(bytes, n)), _flushed(false) {
-  (*this) >> _packet_type;
+PacketBuffer::PacketBuffer(char const *bytes, std::size_t n) :
+    buffer_(std::string(bytes, n)), flushed_(false) {
+  (*this) >> packet_type_;
 }
 
-packet_buffer::~packet_buffer() {
+PacketBuffer::~PacketBuffer() {
 }
 
-void packet_buffer::add_bytes(char const *bytes, std::size_t offset, std::size_t n) {
-  _flushed = false;
-  _buffer.write(bytes + offset, n);
+void PacketBuffer::add_bytes(char const *bytes, std::size_t offset, std::size_t n) {
+  flushed_ = false;
+  buffer_.write(bytes + offset, n);
 }
 
-void packet_buffer::get_bytes(char *bytes, std::size_t offset, std::size_t n) {
-  _buffer.read(bytes + offset, n);
+void PacketBuffer::get_bytes(char *bytes, std::size_t offset, std::size_t n) {
+  buffer_.read(bytes + offset, n);
 }
 
-void packet_buffer::flush() {
-  if (_flushed)
+void PacketBuffer::flush() {
+  if (flushed_)
     return;
 
-  _buffer.flush();
-  _value = _buffer.str();
-  _flushed = true;
+  buffer_.flush();
+  value_ = buffer_.str();
+  flushed_ = true;
 }
 
-char const *packet_buffer::get_buffer() {
+char const *PacketBuffer::get_buffer() {
   flush();
-  return _value.c_str();
+  return value_.c_str();
 }
 
-std::size_t packet_buffer::get_size() {
+std::size_t PacketBuffer::get_size() {
   flush();
-  return _value.length();
+  return value_.length();
 }
 
 }

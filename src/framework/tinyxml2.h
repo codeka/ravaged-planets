@@ -864,7 +864,7 @@ public:
     virtual bool ShallowEqual( const XMLNode* compare ) const = 0;
 
     /** Accept a hierarchical visit of the nodes in the TinyXML-2 DOM. Every node in the
-      XML tree will be conditionally visited and the host will be called back
+      XML tree will be conditionally visited and the Host will be called back
       via the XMLVisitor interface.
 
       This is essentially a SAX interface for TinyXML-2. (Note however it doesn't re-parse
@@ -895,7 +895,7 @@ protected:
 
     XMLDocument*  _document;
     XMLNode*    _parent;
-    mutable StrPair _value;
+    mutable StrPair value_;
 
     XMLNode*    _firstChild;
     XMLNode*    _lastChild;
@@ -1165,7 +1165,7 @@ private:
     char* ParseDeep( char* p, bool processEntities );
 
     mutable StrPair _name;
-    mutable StrPair _value;
+    mutable StrPair value_;
     XMLAttribute*   _next;
     MemPool*        _memPool;
 };
@@ -1852,24 +1852,24 @@ public:
         return XMLHandle( _node ? _node->LastChild() : 0 );
     }
     /// Get the last child element of this handle.
-    XMLHandle LastChildElement( const char* _value=0 )            {
-        return XMLHandle( _node ? _node->LastChildElement( _value ) : 0 );
+    XMLHandle LastChildElement( const char* value_=0 )            {
+        return XMLHandle( _node ? _node->LastChildElement( value_ ) : 0 );
     }
     /// Get the previous sibling of this handle.
     XMLHandle PreviousSibling()                       {
         return XMLHandle( _node ? _node->PreviousSibling() : 0 );
     }
     /// Get the previous sibling element of this handle.
-    XMLHandle PreviousSiblingElement( const char* _value=0 )        {
-        return XMLHandle( _node ? _node->PreviousSiblingElement( _value ) : 0 );
+    XMLHandle PreviousSiblingElement( const char* value_=0 )        {
+        return XMLHandle( _node ? _node->PreviousSiblingElement( value_ ) : 0 );
     }
     /// Get the next sibling of this handle.
     XMLHandle NextSibling()                         {
         return XMLHandle( _node ? _node->NextSibling() : 0 );
     }
     /// Get the next sibling element of this handle.
-    XMLHandle NextSiblingElement( const char* _value=0 )          {
-        return XMLHandle( _node ? _node->NextSiblingElement( _value ) : 0 );
+    XMLHandle NextSiblingElement( const char* value_=0 )          {
+        return XMLHandle( _node ? _node->NextSiblingElement( value_ ) : 0 );
     }
 
     /// Safe cast to XMLNode. This can return null.
@@ -1929,20 +1929,20 @@ public:
     const XMLConstHandle LastChild()  const                   {
         return XMLConstHandle( _node ? _node->LastChild() : 0 );
     }
-    const XMLConstHandle LastChildElement( const char* _value=0 ) const       {
-        return XMLConstHandle( _node ? _node->LastChildElement( _value ) : 0 );
+    const XMLConstHandle LastChildElement( const char* value_=0 ) const       {
+        return XMLConstHandle( _node ? _node->LastChildElement( value_ ) : 0 );
     }
     const XMLConstHandle PreviousSibling() const                  {
         return XMLConstHandle( _node ? _node->PreviousSibling() : 0 );
     }
-    const XMLConstHandle PreviousSiblingElement( const char* _value=0 ) const   {
-        return XMLConstHandle( _node ? _node->PreviousSiblingElement( _value ) : 0 );
+    const XMLConstHandle PreviousSiblingElement( const char* value_=0 ) const   {
+        return XMLConstHandle( _node ? _node->PreviousSiblingElement( value_ ) : 0 );
     }
     const XMLConstHandle NextSibling() const                    {
         return XMLConstHandle( _node ? _node->NextSibling() : 0 );
     }
-    const XMLConstHandle NextSiblingElement( const char* _value=0 ) const     {
-        return XMLConstHandle( _node ? _node->NextSiblingElement( _value ) : 0 );
+    const XMLConstHandle NextSiblingElement( const char* value_=0 ) const     {
+        return XMLConstHandle( _node ? _node->NextSiblingElement( value_ ) : 0 );
     }
 
 
@@ -2073,7 +2073,7 @@ public:
       the XML file in memory.
     */
     const char* CStr() const {
-        return _buffer.Mem();
+        return buffer_.Mem();
     }
     /**
       If in print to memory mode, return the size
@@ -2081,15 +2081,15 @@ public:
       includes the terminating null.)
     */
     int CStrSize() const {
-        return _buffer.Size();
+        return buffer_.Size();
     }
     /**
       If in print to memory mode, reset the buffer to the
       beginning.
     */
     void ClearBuffer() {
-        _buffer.Clear();
-        _buffer.Push(0);
+        buffer_.Clear();
+        buffer_.Push(0);
     }
 
 protected:
@@ -2122,7 +2122,7 @@ private:
     bool _entityFlag[ENTITY_RANGE];
     bool _restrictedEntityFlag[ENTITY_RANGE];
 
-    DynArray< char, 20 > _buffer;
+    DynArray< char, 20 > buffer_;
 };
 
 

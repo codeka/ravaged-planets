@@ -47,7 +47,7 @@ command_registrar::command_registrar(uint8_t id, create_command_fn fn) {
   (*g_command_registry)[id] = fn;
 }
 
-// creates the packet object from the given command identifier
+// creates the Packet object from the given command identifier
 std::shared_ptr<command> create_command(uint8_t id, uint8_t player_no) {
   create_command_fn fn = (*g_command_registry)[id];
   if (fn == nullptr) {
@@ -58,7 +58,7 @@ std::shared_ptr<command> create_command(uint8_t id, uint8_t player_no) {
   return fn(player_no);
 }
 
-// creates the packet object from the given command identifier
+// creates the Packet object from the given command identifier
 std::shared_ptr<command> create_command(uint8_t id) {
   create_command_fn fn = (*g_command_registry)[id];
   if (fn == nullptr) {
@@ -93,10 +93,10 @@ connect_player_command::connect_player_command(uint8_t player_no) :
 connect_player_command::~connect_player_command() {
 }
 
-void connect_player_command::serialize(fw::net::packet_buffer &) {
+void connect_player_command::serialize(fw::net::PacketBuffer &) {
 }
 
-void connect_player_command::deserialize(fw::net::packet_buffer &) {
+void connect_player_command::deserialize(fw::net::PacketBuffer &) {
 }
 
 void connect_player_command::execute() {
@@ -125,14 +125,14 @@ create_entity_command::create_entity_command(uint8_t player_no) :
 create_entity_command::~create_entity_command() {
 }
 
-void create_entity_command::serialize(fw::net::packet_buffer &buffer) {
+void create_entity_command::serialize(fw::net::PacketBuffer &buffer) {
   buffer << _entity_id;
   buffer << template_name;
   buffer << initial_position;
   buffer << initial_goal;
 }
 
-void create_entity_command::deserialize(fw::net::packet_buffer &buffer) {
+void create_entity_command::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> _entity_id;
   buffer >> template_name;
   buffer >> initial_position;
@@ -168,13 +168,13 @@ order_command::order_command(uint8_t player_no) :
 order_command::~order_command() {
 }
 
-void order_command::serialize(fw::net::packet_buffer &buffer) {
+void order_command::serialize(fw::net::PacketBuffer &buffer) {
   buffer << entity;
   buffer << order->get_identifier();
   order->serialize(buffer);
 }
 
-void order_command::deserialize(fw::net::packet_buffer &buffer) {
+void order_command::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> entity;
 
   uint16_t order_id;

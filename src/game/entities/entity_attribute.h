@@ -17,7 +17,7 @@ namespace ent {
 class entity_attribute {
 private:
   std::string _name;
-  boost::any _value;
+  boost::any value_;
 
 public:
   entity_attribute();
@@ -32,7 +32,7 @@ public:
   }
 
   boost::any const &get_value() const {
-    return _value;
+    return value_;
   }
   void set_value(boost::any value);
 

@@ -4,9 +4,9 @@
 
 namespace fw {
 namespace net {
-class peer;
-class host;
-class packet;
+class Peer;
+class Host;
+class Packet;
 }
 }
 
@@ -16,20 +16,20 @@ class session_request;
 /** This class represents a remote player which is connected to us via the internet. */
 class remote_player: public player {
 private:
-  fw::net::host *_host;
-  fw::net::peer *_peer;
-  bool _connected;
+  fw::net::Host *host_;
+  fw::net::Peer *peer_;
+  bool connected_;
 
-  /** This is called whenever we receive a packet from our peer. */
-  void packet_handler(std::shared_ptr<fw::net::packet> const &pkt);
+  /** This is called whenever we receive a Packet from our Peer. */
+  void packet_handler(std::shared_ptr<fw::net::Packet> const &pkt);
 
-  // the following are the individual "handler" functions for each of the packet
-  // types we handle. The return value is the respone packet we'll respond with.
-  void pkt_join_req(std::shared_ptr<fw::net::packet> pkt);
-  void pkt_join_resp(std::shared_ptr<fw::net::packet> pkt);
-  void pkt_chat(std::shared_ptr<fw::net::packet> pkt);
-  void pkt_start_game(std::shared_ptr<fw::net::packet> pkt);
-  void pkt_command(std::shared_ptr<fw::net::packet> pkt);
+  // the following are the individual "handler" functions for each of the Packet
+  // types we handle. The return value is the respone Packet we'll respond with.
+  void pkt_join_req(std::shared_ptr<fw::net::Packet> pkt);
+  void pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt);
+  void pkt_chat(std::shared_ptr<fw::net::Packet> pkt);
+  void pkt_start_game(std::shared_ptr<fw::net::Packet> pkt);
+  void pkt_command(std::shared_ptr<fw::net::Packet> pkt);
 
   // when we get a pkt_join, we ask the server to confirm the user. when the server
   // gets back to us, it'll call this method and we can respond to the original
@@ -41,19 +41,19 @@ private:
   // the other player and it's time to actually connect to them
   void new_player_confirmed(session_request &req);
 
-  // when we get a response to our pkt_join, we ask the server to confirm the host of
+  // when we get a response to our pkt_join, we ask the server to confirm the Host of
   // the game. when it's done that, we'll call this to set up the user_name and such
   void connect_complete(session_request &req);
 
 public:
-  remote_player(fw::net::host *host, fw::net::peer *peer, bool connected);
+  remote_player(fw::net::Host *Host, fw::net::Peer *Peer, bool connected);
   virtual ~remote_player();
 
   // connect to the specified remote player
-  static remote_player *connect(fw::net::host *host, std::string address);
+  static remote_player *connect(fw::net::Host *Host, std::string address);
 
   // this is called when our local player is ready to start the game, we should notify
-  // our peer that we're ready.
+  // our Peer that we're ready.
   virtual void local_player_is_ready();
 
   // posts the given commands to this player for the next turn

@@ -6,7 +6,7 @@
 
 namespace fw {
 namespace net {
-class packet_buffer;
+class PacketBuffer;
 }
 }
 
@@ -30,8 +30,8 @@ protected:
 public:
   virtual ~order();
 
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
   /**
    * This is called by the orderable_component when this order hits the front of the queue for entity. You can
@@ -72,8 +72,8 @@ public:
   virtual void begin(std::weak_ptr<ent::entity> const &ent);
   virtual bool is_complete();
 
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
   std::string template_name;
 
@@ -92,8 +92,8 @@ public:
   virtual void begin(std::weak_ptr<ent::entity> const &ent);
   virtual bool is_complete();
 
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
   fw::Vector goal;
 
@@ -114,8 +114,8 @@ public:
   virtual void begin(std::weak_ptr<ent::entity> const &ent);
   virtual bool is_complete();
 
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
   // ID of the entity we want to attack.
   ent::entity_id target;

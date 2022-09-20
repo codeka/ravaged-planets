@@ -69,10 +69,10 @@ void order::begin(std::weak_ptr<ent::entity> const &ent) {
   _entity = ent;
 }
 
-void order::serialize(fw::net::packet_buffer &) {
+void order::serialize(fw::net::PacketBuffer &) {
 }
 
-void order::deserialize(fw::net::packet_buffer &) {
+void order::deserialize(fw::net::PacketBuffer &) {
 }
 
 //-------------------------------------------------------------------------
@@ -101,11 +101,11 @@ bool build_order::is_complete() {
   return !_builder->is_building();
 }
 
-void build_order::serialize(fw::net::packet_buffer &buffer) {
+void build_order::serialize(fw::net::PacketBuffer &buffer) {
   buffer << template_name;
 }
 
-void build_order::deserialize(fw::net::packet_buffer &buffer) {
+void build_order::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> template_name;
 }
 
@@ -150,11 +150,11 @@ bool move_order::is_complete() {
   return true;
 }
 
-void move_order::serialize(fw::net::packet_buffer &buffer) {
+void move_order::serialize(fw::net::PacketBuffer &buffer) {
   buffer << goal;
 }
 
-void move_order::deserialize(fw::net::packet_buffer &buffer) {
+void move_order::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> goal;
 }
 
@@ -201,11 +201,11 @@ bool attack_order::is_complete() {
   return false;
 }
 
-void attack_order::serialize(fw::net::packet_buffer &buffer) {
+void attack_order::serialize(fw::net::PacketBuffer &buffer) {
   buffer << target;
 }
 
-void attack_order::deserialize(fw::net::packet_buffer &buffer) {
+void attack_order::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> target;
 }
 

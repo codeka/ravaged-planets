@@ -7,7 +7,7 @@
 
 namespace fw {
 namespace net {
-class packet_buffer;
+class PacketBuffer;
 }
 }
 
@@ -29,8 +29,8 @@ protected:
 public:
   virtual ~command();
 
-  virtual void serialize(fw::net::packet_buffer &buffer) = 0;
-  virtual void deserialize(fw::net::packet_buffer &buffer) = 0;
+  virtual void serialize(fw::net::PacketBuffer &buffer) = 0;
+  virtual void deserialize(fw::net::PacketBuffer &buffer) = 0;
 
   /** Gets an instance of the player who executed this command. */
   player *get_player() const {
@@ -49,7 +49,7 @@ public:
 
 /**
  * This command is sent to another player when we want to notify them about a new player (i.e. when we first connect
- * to them [as a non-host], or when we add a new AI player)
+ * to them [as a non-Host], or when we add a new AI player)
  */
 class connect_player_command: public command {
 private:
@@ -58,8 +58,8 @@ public:
   connect_player_command(uint8_t player_no);
   virtual ~connect_player_command();
 
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
   virtual void execute();
 
@@ -85,8 +85,8 @@ public:
   create_entity_command(uint8_t player_no);
   virtual ~create_entity_command();
 
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
   virtual void execute();
 
@@ -108,8 +108,8 @@ public:
   order_command(uint8_t player_no);
   virtual ~order_command();
 
-  virtual void serialize(fw::net::packet_buffer &buffer);
-  virtual void deserialize(fw::net::packet_buffer &buffer);
+  virtual void serialize(fw::net::PacketBuffer &buffer);
+  virtual void deserialize(fw::net::PacketBuffer &buffer);
 
   virtual void execute();
 
@@ -119,7 +119,7 @@ public:
   }
 };
 
-// creates the packet object from the given command identifier
+// creates the Packet object from the given command identifier
 std::shared_ptr<command> create_command(uint8_t id);
 std::shared_ptr<command> create_command(uint8_t id, uint8_t player_no);
 

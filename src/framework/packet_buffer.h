@@ -6,20 +6,20 @@
 
 namespace fw::net {
 
-/* This class represents a "buffer" we use for reading/writing packets that get sent between net_peers. */
-class packet_buffer {
+// This class represents a "buffer" we use for reading/writing packets that get sent between net_peers.
+class PacketBuffer {
 private:
-  bool _flushed;
-  std::string _value;
-  std::stringstream _buffer;
-  uint16_t _packet_type;
+  bool flushed_;
+  std::string value_;
+  std::stringstream buffer_;
+  uint16_t packet_type_;
 
   void flush();
 
 public:
-  packet_buffer(uint16_t packet_type);
-  packet_buffer(char const *bytes, std::size_t n);
-  ~packet_buffer();
+  PacketBuffer(uint16_t packet_type);
+  PacketBuffer(char const *bytes, std::size_t n);
+  ~PacketBuffer();
 
   void add_bytes(char const *bytes, std::size_t offset, std::size_t n);
   void get_bytes(char *bytes, std::size_t offset, std::size_t n);
@@ -27,76 +27,76 @@ public:
   char const *get_buffer();
   std::size_t get_size();
   uint16_t get_packet_type() const {
-    return _packet_type;
+    return packet_type_;
   }
 };
 
-inline packet_buffer &operator <<(packet_buffer &lhs, int32_t rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, int32_t rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(&rhs), 0, 4);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, int32_t &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, int32_t &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(&rhs), 0, 4);
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, uint32_t rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, uint32_t rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(&rhs), 0, 4);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, uint32_t &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, uint32_t &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(&rhs), 0, 4);
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, int16_t rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, int16_t rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(&rhs), 0, 2);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, int16_t &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, int16_t &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(&rhs), 0, 2);
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, uint16_t rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, uint16_t rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(&rhs), 0, 2);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, uint16_t &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, uint16_t &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(&rhs), 0, 2);
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, int64_t rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, int64_t rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(&rhs), 0, 8);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, int64_t &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, int64_t &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(&rhs), 0, 8);
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, uint64_t rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, uint64_t rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(&rhs), 0, 8);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, uint64_t &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, uint64_t &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(&rhs), 0, 8);
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, uint8_t rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, uint8_t rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(&rhs), 0, 1);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, uint8_t &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, uint8_t &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(&rhs), 0, 1);
   return lhs;
 }
@@ -116,30 +116,30 @@ inline packet_buffer &operator >>(packet_buffer &lhs, size_t &rhs) {
 
 #endif
 
-inline packet_buffer &operator <<(packet_buffer &lhs, fw::Vector const &rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, fw::Vector const &rhs) {
   lhs.add_bytes(reinterpret_cast<char const *>(rhs.data()), 0, sizeof(float) * 3);
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, fw::Vector &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, fw::Vector &rhs) {
   lhs.get_bytes(reinterpret_cast<char *>(rhs.data()), 0, sizeof(float) * 3);
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, Color const &rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, Color const &rhs) {
   uint32_t rgba = rhs.to_rgba();
   lhs.add_bytes(reinterpret_cast<char const *>(&rgba), 0, sizeof(uint32_t));
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, Color &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, Color &rhs) {
   uint32_t rgba;
   lhs.get_bytes(reinterpret_cast<char *>(&rgba), 0, sizeof(uint32_t));
   rhs = fw::Color(rgba);
   return lhs;
 }
 
-inline packet_buffer &operator <<(packet_buffer &lhs, std::string const &rhs) {
+inline PacketBuffer &operator <<(PacketBuffer &lhs, std::string const &rhs) {
   // strings are length-prefixed
   uint16_t length = static_cast<uint16_t>(rhs.length());
   lhs << length;
@@ -147,7 +147,7 @@ inline packet_buffer &operator <<(packet_buffer &lhs, std::string const &rhs) {
   return lhs;
 }
 
-inline packet_buffer &operator >>(packet_buffer &lhs, std::string &rhs) {
+inline PacketBuffer &operator >>(PacketBuffer &lhs, std::string &rhs) {
   uint16_t length;
   lhs >> length;
 
