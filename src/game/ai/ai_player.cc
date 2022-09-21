@@ -1,7 +1,6 @@
 #include <functional>
 #include <boost/bind/arg.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 
 //#include <luabind/luabind.hpp>
 //#include <luabind/raw_policy.hpp>
@@ -111,7 +110,7 @@ void ai_player::fire_event(std::string const &event_name, std::map<std::string, 
     //lua_params[it->first] = it->second;
   }
 
-  BOOST_FOREACH(luabind::object obj, it->second) {
+  for(auto& obj : it->second) {
 //    try {
 //      obj(event_name);
  //   } catch (luabind::error &e) {
@@ -187,7 +186,7 @@ public:
 
     // check that it's one of the players we've asked for
     bool wrong_player = true;
-    BOOST_FOREACH(uint8_t player_no, _player_nos) {
+    for(uint8_t player_no : _player_nos) {
       if (player_no == ownable->get_owner()->get_player_no()) {
         wrong_player = false;
         break;
@@ -242,7 +241,7 @@ luabind::object ai_player::l_find_units(luabind::object params, lua_State *L) {
   std::list<std::weak_ptr<ent::entity>> entities = entmgr->get_entities(pred);
 
   int index = 1;
-  BOOST_FOREACH(std::weak_ptr<ent::entity> &wp, entities) {
+  for(std::weak_ptr<ent::entity> &wp : entities) {
     luabind::object wrapper = get_unit_wrapper(wp);
 //    if (!wrapper) {
 //      continue;

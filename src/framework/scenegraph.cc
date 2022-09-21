@@ -1,8 +1,6 @@
 
 #include <memory>
 
-#include <boost/foreach.hpp>
-
 #include <framework/scenegraph.h>
 #include <framework/graphics.h>
 #include <framework/framework.h>
@@ -113,7 +111,7 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
   }
 
   // render the children as well (todo: pass transformations)
-  BOOST_FOREACH(std::shared_ptr<Node> &child_node, _children) {
+  for(auto &child_node : _children) {
     child_node->render(sg, transform);
   }
 }
@@ -185,7 +183,7 @@ void Node::populate_clone(std::shared_ptr<Node> clone) {
   clone->_world = _world;
 
   // clone the children as well!
-  BOOST_FOREACH(std::shared_ptr<Node> child, _children) {
+  for(auto& child : _children) {
     clone->_children.push_back(child->clone());
   }
 }
@@ -211,7 +209,7 @@ Scenegraph::~Scenegraph() {
 static const bool g_shadow_debug = false;
 
 // renders the scene!
-void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_target /*= nullptr*/,
+void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_target /*= nullptr*/,
     bool render_gui /*= true*/) {
   ensure_primitive_type_map();
 
@@ -223,7 +221,7 @@ void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_
 
   // set up the shadow sources that we'll need to render from first to get the various shadows going.
   std::vector<std::shared_ptr<ShadowSource>> shadows;
-  for(auto it = Scenegraph.get_lights().begin(); it != Scenegraph.get_lights().end(); ++it) {
+  for(auto it = scenegraph.get_lights().begin(); it != scenegraph.get_lights().end(); ++it) {
     if ((*it)->get_cast_shadows()) {
       std::shared_ptr<ShadowSource> shdwsrc(new ShadowSource());
       shdwsrc->initialize(g_shadow_debug);
@@ -238,15 +236,15 @@ void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_
 
   // render the shadowmap(s) first
   is_rendering_shadow = true;
-  BOOST_FOREACH(shadowsrc, shadows) {
+  for(auto shadowsrc : shadows) {
     shadowsrc->begin_scene();
-    Scenegraph.push_camera(&shadowsrc->get_camera());
+    scenegraph.push_camera(&shadowsrc->get_camera());
     g->begin_scene();
-    BOOST_FOREACH(std::shared_ptr<fw::sg::Node> Node, Scenegraph.get_nodes()) {
-      Node->render(&Scenegraph);
+    for(auto& node : scenegraph.get_nodes()) {
+      node->render(&scenegraph);
     }
     g->end_scene();
-    Scenegraph.pop_camera();
+    scenegraph.pop_camera();
     shadowsrc->end_scene();
   }
   is_rendering_shadow = false;
@@ -256,9 +254,9 @@ void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_
   }
 
   // now, render the main scene
-  g->begin_scene(Scenegraph.get_clear_color());
-  BOOST_FOREACH(std::shared_ptr<fw::sg::Node> Node, Scenegraph.get_nodes()) {
-    Node->render(&Scenegraph);
+  g->begin_scene(scenegraph.get_clear_color());
+  for(auto& node : scenegraph.get_nodes()) {
+    node->render(&scenegraph);
   }
 
   // make sure the shadowsrc is empty

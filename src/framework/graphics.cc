@@ -2,8 +2,6 @@
 #include <list>
 #include <thread>
 
-#include <boost/foreach.hpp>
-
 #include <SDL2/SDL.h>
 
 #include <framework/exception.h>
@@ -157,7 +155,7 @@ void Graphics::after_render() {
   // Run any functions that were scheduled to run on the render thread
   {
     std::lock_guard<std::mutex> lock(run_queue_mutex_);
-    BOOST_FOREACH(std::function<void()> fn, run_queue_) {
+    for(std::function<void()> fn : run_queue_) {
       fn();
     }
     run_queue_.clear();

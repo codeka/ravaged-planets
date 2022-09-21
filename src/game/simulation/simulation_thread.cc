@@ -1,6 +1,5 @@
 
 #include <thread>
-#include <boost/foreach.hpp>
 
 #include <framework/logging.h>
 #include <framework/lua.h>
@@ -80,13 +79,13 @@ void simulation_thread::set_map_name(std::string const &ParticleRotation) {
 }
 
 void simulation_thread::send_chat_msg(std::string const &msg) {
-  BOOST_FOREACH(player *plyr, _players) {
+  for(player *plyr : _players) {
     plyr->send_chat_msg(msg);
   }
 }
 
 player *simulation_thread::get_player(uint8_t player_no) const {
-  BOOST_FOREACH(player *plyr, _players) {
+  for (player *plyr : _players) {
     if (plyr->get_player_no() == player_no) {
       return plyr;
     }
@@ -100,11 +99,11 @@ void simulation_thread::post_command(std::shared_ptr<command> &cmd) {
 }
 
 void simulation_thread::enqueue_posted_commands() {
-  BOOST_FOREACH(std::shared_ptr<command> &cmd, _posted_commands) {
+  for (std::shared_ptr<command> &cmd : _posted_commands) {
     enqueue_command(cmd);
   }
 
-  BOOST_FOREACH(player *p, _players) {
+  for (player *p : _players) {
     p->post_commands(_posted_commands);
   }
 
@@ -150,7 +149,7 @@ void simulation_thread::thread_proc() {
     // next, check for any new connections that the Host has detected for us, this shouldn't happen
     // once the game is underway, but you never know (in that case, we need to reject them!)
     std::vector<fw::net::Peer *> new_connections = host_->get_new_connections();
-    BOOST_FOREACH(fw::net::Peer *new_peer, new_connections) {
+    for (fw::net::Peer *new_peer : new_connections) {
       _players.push_back(new remote_player(host_, new_peer, true));
       sig_players_changed();
     }
@@ -159,7 +158,7 @@ void simulation_thread::thread_proc() {
     command_queue::iterator it = _commands.find(_turn);
     if (it != _commands.end()) {
       command_queue::mapped_type &command_list = it->second;
-      BOOST_FOREACH(std::shared_ptr<command> &cmd, command_list) {
+      for (std::shared_ptr<command> &cmd : command_list) {
         cmd->execute();
       }
 
@@ -168,7 +167,7 @@ void simulation_thread::thread_proc() {
     }
 
     // finally, update each player.
-    BOOST_FOREACH(player *plyr, _players) {
+    for (player *plyr : _players) {
       plyr->update();
     }
 

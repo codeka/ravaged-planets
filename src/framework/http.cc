@@ -1,6 +1,5 @@
 #include <functional>
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 
 #include <framework/http.h>
@@ -74,7 +73,7 @@ int Http::write_debug(CURL *, curl_infotype type, char *buffer, size_t len, void
 
   std::vector<std::string> lines;
   boost::split(lines, msg, boost::algorithm::is_any_of("\r\n"), boost::algorithm::token_compress_on);
-  BOOST_FOREACH(std::string line, lines) {
+  for(std::string line : lines) {
     std::string trimmed = boost::trim_copy(line);
     if (trimmed != "") {
       debug << "  CURL " << type_name << trimmed << std::endl;
@@ -218,7 +217,7 @@ void Http::do_action() {
 
     curl_slist *headers = nullptr;
     std::pair<std::string, std::string> header;
-    BOOST_FOREACH(header, headers_) {
+    for(auto& header : headers_) {
       headers = curl_slist_append(headers, (header.first + ": " + header.second).c_str());
     }
 

@@ -1,5 +1,4 @@
 #include <functional>
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 #include <framework/graphics.h>
@@ -78,7 +77,7 @@ void damageable_component::explode() {
   if (our_position != nullptr) {
     std::list<std::weak_ptr<ent::entity>> entities;
     our_position->get_entities_within_radius(5.0f, std::back_inserter(entities));
-    BOOST_FOREACH(std::weak_ptr<ent::entity> const &wp, entities) {
+    for(std::weak_ptr<ent::entity> const &wp : entities) {
       std::shared_ptr<ent::entity> ent = wp.lock();
 
       // don't damange ourselves...

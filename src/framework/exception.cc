@@ -1,4 +1,3 @@
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 
 #include <framework/logging.h>
@@ -22,7 +21,7 @@ void Exception::populate_stacktrace() {
 
 void Exception::log_stacktrace() {
   int n = 0;
-  BOOST_FOREACH(std::string frame, generate_stack_trace()) {
+  for(std::string frame : generate_stack_trace()) {
     if (n++ < 2) {
       // Ignore the first two frame, they'll be this function and generate_stack_trace itself.
       continue;

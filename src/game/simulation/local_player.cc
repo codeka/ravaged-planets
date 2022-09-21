@@ -1,4 +1,3 @@
-#include <boost/foreach.hpp>
 
 #include <framework/misc.h>
 #include <framework/logging.h>
@@ -30,7 +29,7 @@ local_player::~local_player() {
 
 void local_player::local_player_is_ready() {
   // let all the other players know that we're ready to start
-  BOOST_FOREACH(player *p, simulation_thread::get_instance()->get_players()) {
+  for (player *p : simulation_thread::get_instance()->get_players()) {
     // obviously, we don't have to tell ourselves...
     if (p == this)
       continue;

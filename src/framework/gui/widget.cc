@@ -5,8 +5,6 @@
 #include <stack>
 #include <vector>
 
-#include <boost/foreach.hpp>
-
 #include <framework/graphics.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/widget.h>

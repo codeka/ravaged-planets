@@ -1,6 +1,4 @@
 
-#include <boost/foreach.hpp>
-
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
@@ -25,7 +23,7 @@ void editor_terrain::render(fw::sg::Scenegraph &Scenegraph) {
   int num_baked = 0;
   {
     std::unique_lock<std::mutex> lock(_patches_to_bake_mutex);
-    BOOST_FOREACH(auto patch, _patches_to_bake) {
+    for(auto patch : _patches_to_bake) {
       bake_patch(std::get<0>(patch), std::get<1>(patch));
       num_baked++;
     }
@@ -56,7 +54,7 @@ void editor_terrain::set_vertex_height(int x, int z, float height) {
   bool found = false;
 
   std::unique_lock<std::mutex> lock(_patches_to_bake_mutex);
-  BOOST_FOREACH(auto patch, _patches_to_bake) {
+  for(auto patch : _patches_to_bake) {
     if (patch == this_patch) {
       found = true;
       break;

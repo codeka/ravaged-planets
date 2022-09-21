@@ -1,6 +1,5 @@
 
 #include <functional>
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 #include <framework/camera.h>
@@ -329,12 +328,12 @@ void pathing_tool::find_path() {
     std::vector<fw::vertex::xyz_c> buffer;
 
     if (_simplify) {
-      BOOST_FOREACH(fw::Vector loc, path) {
+      for(fw::Vector loc : path) {
         float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
         buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));
       }
     } else {
-      BOOST_FOREACH(fw::Vector loc, full_path) {
+      for(fw::Vector loc : full_path) {
         float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
         buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));
       }

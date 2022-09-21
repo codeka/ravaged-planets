@@ -1,5 +1,4 @@
 #include <functional>
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 #include <framework/camera.h>
@@ -77,7 +76,7 @@ std::shared_ptr<entity> entity_manager::create_entity(std::shared_ptr<entity> cr
 
   fw::debug << boost::format("created entity: %1% (identifier: %2%)") % template_name % id << std::endl;
 
-  BOOST_FOREACH(auto &pair, ent->_components) {
+  for (auto& pair : ent->_components) {
     entity_component *comp = pair.second;
     if (comp->allow_get_by_component()) {
       std::list<std::weak_ptr<entity>> &entities_by_component = get_entities_by_component(comp->get_identifier());
@@ -105,7 +104,7 @@ void entity_manager::destroy(std::weak_ptr<entity> entity) {
 std::weak_ptr<entity> entity_manager::get_entity(std::function<float(std::shared_ptr<entity> &)> pred) {
   std::shared_ptr<entity> curr_entity;
   float last_pred = 0.0f;
-  BOOST_FOREACH(std::shared_ptr<entity> &ent, _all_entities) {
+  for(std::shared_ptr<entity> &ent : _all_entities) {
     if (!curr_entity) {
       curr_entity = ent;
       last_pred = pred(ent);
@@ -123,7 +122,7 @@ std::weak_ptr<entity> entity_manager::get_entity(std::function<float(std::shared
 
 std::list<std::weak_ptr<entity>> entity_manager::get_entities(std::function<bool(std::shared_ptr<entity> &)> pred) {
   std::list<std::weak_ptr<entity>> entities;
-  BOOST_FOREACH(std::shared_ptr<entity> &ent, _all_entities) {
+  for (std::shared_ptr<entity>& ent : _all_entities) {
     if (pred(ent)) {
       entities.push_back(std::weak_ptr<entity > (ent));
     }
@@ -192,7 +191,7 @@ std::weak_ptr<entity> entity_manager::get_entity(fw::Vector const &start, fw::Ve
 
 std::weak_ptr<entity> entity_manager::get_entity(entity_id id) {
   // obviously, this is dumb... we should index entities by the identifier for fast access
-  BOOST_FOREACH(std::shared_ptr<entity> &ent, _all_entities) {
+  for (std::shared_ptr<entity>& ent : _all_entities) {
     if (ent->get_id() == id)
       return std::weak_ptr<entity>(ent);
   }
@@ -230,7 +229,7 @@ void entity_manager::add_selection(std::weak_ptr<entity> ent) {
 
 void entity_manager::clear_selection() {
   // make sure all the currently-selected components know they're no longer selected
-  BOOST_FOREACH(auto const &sel_entity, _selected_entities) {
+  for(auto const &sel_entity : _selected_entities) {
     std::shared_ptr<entity> ent = sel_entity.lock();
     if (!ent) {
       continue;
@@ -249,7 +248,7 @@ void entity_manager::clear_selection() {
 
 void entity_manager::cleanup_destroyed() {
   // go through the destroyed list and destroy all entities that have been marked as such
-  BOOST_FOREACH(auto ent, _destroyed_entities) {
+  for(auto ent : _destroyed_entities) {
     for (auto it = _all_entities.begin(); it != _all_entities.end();) {
       if (*it == ent) {
         it = _all_entities.erase(it);
@@ -263,7 +262,7 @@ void entity_manager::cleanup_destroyed() {
   // clear the other entity list(s) of entities that have been destroyed
   _selected_entities.remove_if(std::bind(&std::weak_ptr<entity> ::expired, _1));
 
-  BOOST_FOREACH(auto it, _entities_by_component) {
+  for(auto it : _entities_by_component) {
     it.second.remove_if(std::bind(&std::weak_ptr<entity>::expired, _1));
   }
 }
@@ -286,7 +285,7 @@ void entity_manager::update() {
 
   // update all of the entities
   float dt = fw::framework::get_instance()->get_timer()->get_frame_time();
-  BOOST_FOREACH(auto &ent, _all_entities) {
+  for(auto &ent : _all_entities) {
     ent->update(dt);
   }
 

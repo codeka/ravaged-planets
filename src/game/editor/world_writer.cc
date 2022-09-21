@@ -1,5 +1,4 @@
 #include <memory>
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 #include <framework/logging.h>
@@ -196,7 +195,7 @@ void world_writer::write_collision_data(game::world_file &wf) {
   wfe.write(&width, sizeof(int));
   wfe.write(&length, sizeof(int));
 
-  BOOST_FOREACH(bool b, collision_data) {
+  for(bool b : collision_data) {
     uint8_t n = static_cast<uint8_t>(b);
     wfe.write(&n, 1);
   }

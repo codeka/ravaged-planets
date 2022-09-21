@@ -1,5 +1,4 @@
-#include <functional>
-#include <boost/foreach.hpp>
+#include <functional>\
 
 #include <framework/camera.h>
 #include <framework/exception.h>

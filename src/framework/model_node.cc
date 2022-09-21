@@ -1,5 +1,4 @@
 #include <memory>
-#include <boost/foreach.hpp>
 
 #include <framework/model.h>
 #include <framework/model_node.h>
@@ -34,7 +33,7 @@ void ModelNode::initialize(Model *mdl) {
     set_shader_parameters(params);
   }
 
-  BOOST_FOREACH(std::shared_ptr<Node> Node, _children) {
+  for(std::shared_ptr<Node> Node : _children) {
     std::dynamic_pointer_cast<ModelNode>(Node)->initialize(mdl);
   }
 }
@@ -69,7 +68,7 @@ void ModelNode::populate_clone(std::shared_ptr<sg::Node> clone) {
 
 void ModelNode::set_color(fw::Color color) {
   color_ = color;
-  BOOST_FOREACH(std::shared_ptr<Node> &child_node, _children) {
+  for(std::shared_ptr<Node> &child_node: _children) {
     std::dynamic_pointer_cast<ModelNode>(child_node)->set_color(color);
   }
 }

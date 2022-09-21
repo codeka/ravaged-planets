@@ -1,7 +1,6 @@
 #include <unordered_set>
 
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 #include <boost/unordered_set.hpp>
 
 #include <SDL2/SDL.h>
@@ -72,13 +71,13 @@ int Input::bind_key(std::string const &keyname, input_bind_fn fn) {
 
   std::vector<int> tokens;
   std::vector<std::string> keys = split<std::string>(keyname, ",");
-  BOOST_FOREACH(std::string key, keys) {
+  for(std::string key : keys) {
     boost::trim(key);
     std::vector<std::string> parts = split<std::string>(key, "+");
 
     int key_no = 0;
     InputBinding binding;
-    BOOST_FOREACH(std::string part, parts) {
+    for(std::string part : parts) {
       boost::trim(part);
       if (boost::iequals(part, "ctrl")) {
         binding.ctrl = true;
@@ -141,11 +140,11 @@ void Input::unbind_key(int token) {
   multikey_binding_map::iterator it = g_multikey_bindings.find(token);
   if (it != g_multikey_bindings.end()) {
     std::vector<int> &tokens = (*it).second;
-    BOOST_FOREACH(int t, tokens) {
+    for(int t : tokens) {
       unbind_key(t);
     }
   } else {
-    BOOST_FOREACH(callback_map::value_type &callback_map, g_callbacks) {
+    for(auto &callback_map : g_callbacks) {
       std::map<int, InputBinding> &callbacks = callback_map.second;
       callbacks.erase(token);
     }
@@ -330,7 +329,7 @@ void setup_keynames() {
   g_key_names["Quote"] = SDLK_QUOTEDBL;
 
   // now construct the reverse mapping, which is pretty easy...
-  BOOST_FOREACH(key_names_map::value_type &key, g_key_names) {
+  for(auto &key : g_key_names) {
     g_key_codes[key.second] = key.first;
   }
 }

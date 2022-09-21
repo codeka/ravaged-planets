@@ -1,4 +1,3 @@
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 #include <framework/graphics.h>
@@ -22,7 +21,7 @@ entity::entity(entity_manager *mgr, entity_id id) :
 }
 
 entity::~entity() {
-  BOOST_FOREACH(auto &pair, _components) {
+  for(auto &pair : _components) {
     delete pair.second;
   }
 }
@@ -70,19 +69,19 @@ entity_attribute *entity::get_attribute(std::string const &name) {
 
 void entity::initialize() {
   _create_time = fw::framework::get_instance()->get_timer()->get_total_time();
-  BOOST_FOREACH(auto &pair, _components) {
+  for(auto &pair : _components) {
     pair.second->initialize();
   }
 }
 
 void entity::update(float dt) {
-  BOOST_FOREACH(auto &pair, _components) {
+  for (auto& pair : _components) {
     pair.second->update(dt);
   }
 }
 
 void entity::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
-  BOOST_FOREACH(auto &pair, _components) {
+  for (auto& pair : _components) {
     pair.second->render(Scenegraph, transform);
   }
 

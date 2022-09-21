@@ -1,4 +1,3 @@
-#include <boost/foreach.hpp>
 
 #include <framework/packet_buffer.h>
 #include <framework/exception.h>
@@ -44,7 +43,7 @@ join_response_packet::~join_response_packet() {
 void join_response_packet::serialize(fw::net::PacketBuffer &buffer) {
   buffer << _map_name;
   buffer << _other_users.size();
-  BOOST_FOREACH(uint32_t sess_id, _other_users) {
+  for (uint32_t sess_id : _other_users) {
     buffer << sess_id;
   }
   buffer << _my_color;
@@ -109,7 +108,7 @@ void command_packet::serialize(fw::net::PacketBuffer &buffer) {
   uint8_t num_commands = static_cast<uint8_t>(_commands.size());
   buffer << num_commands;
 
-  BOOST_FOREACH(std::shared_ptr<command> &cmd, _commands) {
+  for (std::shared_ptr<command> &cmd : _commands) {
     buffer << cmd->get_identifier();
 
     if (cmd->get_player() != nullptr) {

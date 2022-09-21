@@ -2,7 +2,6 @@
 #include <memory>
 #include <string>
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 
 #include <framework/framework.h>
@@ -125,7 +124,7 @@ void new_game_window::show() {
 
   world_vfs vfs;
   _map_list = vfs.list_maps();
-  BOOST_FOREACH(world_summary &ws, _map_list) {
+  for (world_summary &ws : _map_list) {
     std::string title = ws.get_name();
     _wnd->find<Listbox>(MAP_LIST_ID)->add_item(
         Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
@@ -166,11 +165,11 @@ void new_game_window::update() {
 
   // check which players are now ready that weren't ready before
   int num_players = 0;
-  BOOST_FOREACH(player * p, simulation_thread::get_instance()->get_players()) {
+  for (player* p : simulation_thread::get_instance()->get_players()) {
     num_players++;
     if (p->is_ready()) {
       bool was_ready_before = false;
-      BOOST_FOREACH(uint32_t user_id, _ready_players) {
+      for (uint32_t user_id : _ready_players) {
         if (user_id == p->get_user_id()) {
           was_ready_before = true;
         }
@@ -255,7 +254,7 @@ void new_game_window::refresh_players() {
 
   Listbox *players_list = _wnd->find<Listbox>(PLAYER_LIST_ID);
   players_list->clear();
-  BOOST_FOREACH(player *plyr, players) {
+  for (player *plyr : players) {
     int player_no = static_cast<int>(plyr->get_player_no());
 
     std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";

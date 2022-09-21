@@ -58,7 +58,7 @@ void new_ai_player_window::initialize(new_game_window *new_game_window) {
   // add each of the scripts to the "scripts" combobox so the user can choose which one he wants
   ai_scriptmgr scriptmgr;
   std::vector<script_desc> &scripts = scriptmgr.get_scripts();
-  BOOST_FOREACH(script_desc &desc, scripts) {
+  for (script_desc &desc : scripts) {
     _wnd->find<Listbox>(AI_LIST_ID)->add_item(
         Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(desc.name) << Widget::data(desc));
   }
@@ -74,7 +74,7 @@ void new_ai_player_window::show() {
   _wnd->set_visible(true);
 
   int max_player_no = 0;
-  BOOST_FOREACH(player *plyr, simulation_thread::get_instance()->get_players()) {
+  for (player *plyr : simulation_thread::get_instance()->get_players()) {
     int player_no = plyr->get_player_no();
     if (player_no > max_player_no)
       max_player_no = player_no;

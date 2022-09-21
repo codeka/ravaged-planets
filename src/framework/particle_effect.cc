@@ -1,6 +1,4 @@
 
-#include <boost/foreach.hpp>
-
 #include <framework/particle_effect.h>
 #include <framework/particle_manager.h>
 #include <framework/particle_config.h>

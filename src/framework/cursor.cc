@@ -1,6 +1,4 @@
 
-#include <boost/foreach.hpp>
-
 #include <SDL2/SDL.h>
 
 #include <framework/bitmap.h>

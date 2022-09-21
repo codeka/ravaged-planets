@@ -1,6 +1,4 @@
 
-#include <boost/foreach.hpp>
-
 #include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
@@ -38,7 +36,7 @@ screen_stack::screen_stack() {
 }
 
 screen_stack::~screen_stack() {
-  BOOST_FOREACH(auto screen, _screens) {
+  for (auto screen : _screens) {
     delete screen.second;
   }
 }

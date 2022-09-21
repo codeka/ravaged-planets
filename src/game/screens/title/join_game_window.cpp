@@ -118,8 +118,7 @@ namespace ww {
 		_games = games;
 
 		_games_list->resetList();
-		BOOST_FOREACH(remote_game &game, _games)
-		{
+		for (remote_game &game : _games) {
 			add_game(game);
 		}
 	}

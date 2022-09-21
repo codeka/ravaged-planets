@@ -1,5 +1,4 @@
 #include <functional>
-#include <boost/foreach.hpp>
 
 #include <framework/cursor.h>
 #include <framework/input.h>
@@ -93,9 +92,9 @@ void cursor_handler::update() {
 }
 
 void cursor_handler::destroy() {
-  fw::Input *Input = fw::framework::get_instance()->get_input();
-  BOOST_FOREACH(int token, _keybind_tokens) {
-    Input->unbind_key(token);
+  fw::Input *input = fw::framework::get_instance()->get_input();
+  for (int token : _keybind_tokens) {
+    input->unbind_key(token);
   }
   _keybind_tokens.clear();
 }

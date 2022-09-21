@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <thread>
 #include <vector>
-#include <boost/foreach.hpp>
 
 #include <SDL2/SDL.h>
 
@@ -159,9 +158,9 @@ void framework::on_fullscreen_toggle(std::string keyname, bool is_down) {
 void framework::language_initialize() {
   Settings stg;
 
-  std::vector<LangDescription> langs = fw::get_languages();
+  const std::vector<LangDescription> langs = fw::get_languages();
   debug << boost::format("%1% installed language(s):") % langs.size() << std::endl;
-  BOOST_FOREACH(LangDescription &l, langs) {
+  for(const LangDescription &l : langs) {
     debug << boost::format(" %1% (%2%)") % l.name % l.display_name << std::endl;
   }
 

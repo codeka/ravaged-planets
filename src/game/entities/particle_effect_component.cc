@@ -1,4 +1,3 @@
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 #include <framework/particle_manager.h>
@@ -18,7 +17,7 @@ particle_effect_component::particle_effect_component() : _our_position(nullptr) 
 }
 
 particle_effect_component::~particle_effect_component() {
-  BOOST_FOREACH(auto kvp, effects_) {
+  for(auto& kvp : effects_) {
     effect_info const &effect_info = kvp.second;
     if (effect_info.effect) {
       effect_info.effect->destroy();
@@ -72,7 +71,7 @@ void particle_effect_component::stop_effect(std::string const &name) {
 }
 
 void particle_effect_component::update(float) {
-  BOOST_FOREACH(auto kvp, effects_) {
+  for (auto& kvp : effects_) {
     effect_info const &effect_info = kvp.second;
     if (!effect_info.effect) {
       continue;
@@ -90,7 +89,7 @@ void particle_effect_component::update(float) {
 
 void particle_effect_component::render(fw::sg::Scenegraph &, fw::Matrix const &) {
   fw::ParticleManager *mgr = fw::framework::get_instance()->get_particle_mgr();
-  BOOST_FOREACH(auto &kvp, effects_) {
+  for (auto& kvp : effects_) {
     effect_info &effect_info = kvp.second;
     if (effect_info.started && !effect_info.effect) {
       effect_info.effect = mgr->create_effect(effect_info.name);

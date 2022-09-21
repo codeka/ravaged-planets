@@ -1,7 +1,6 @@
 #include <functional>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <framework/exception.h>
@@ -130,7 +129,7 @@ void open_file_window::refresh() {
   });
 
   // Now add them to the listbox
-  BOOST_FOREACH(fs::path path, paths) {
+  for(fs::path path : paths) {
     add_row(lbx, path.filename().string());
   }
 

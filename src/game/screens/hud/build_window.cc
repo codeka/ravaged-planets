@@ -1,6 +1,5 @@
 
 #include <memory>
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 #include <framework/bitmap.h>
@@ -221,7 +220,7 @@ void build_window::do_refresh() {
   ent_factory.get_buildable_templates(_build_group, templates);
 
   int index = 0;
-  BOOST_FOREACH(luabind::object const &tmpl, templates) {
+  for(luabind::object const &tmpl : templates) {
     fw::debug << " checking " << ""/*tmpl["name"]*/ << std::endl;
     Button *btn = _wnd->find<Button>(FIRST_BUILD_BUTTON_ID + index);
     if (btn == nullptr) {

@@ -122,7 +122,7 @@ void main_menu_window::hide() {
  */
 void main_menu_window::global_click_handler(int button, bool is_down, fw::gui::Widget *w) {
   std::vector<Window *> menus = {_file_menu, _tool_menu};
-  BOOST_FOREACH(Window *menu, menus) {
+  for(Window *menu : menus) {
     if (is_down && menu->is_visible() && !menu->is_child(w)) {
       menu->set_visible(false);
     }

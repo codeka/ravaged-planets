@@ -1,7 +1,6 @@
 
 #include <functional>
 
-#include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
 
 #include <framework/bitmap.h>
@@ -54,23 +53,23 @@ void world::initialize() {
 
   _terrain->initialize();
 
-  BOOST_FOREACH(auto it, _reader->get_player_starts()) {
+  for (auto it : _reader->get_player_starts()) {
     _player_starts[it.first] = it.second;
   }
 
   // tell the Particle manager to wrap particles at the world boundary
   fw::framework::get_instance()->get_particle_mgr()->set_world_wrap(_terrain->get_width(), _terrain->get_length());
 
-  fw::Input *Input = fw::framework::get_instance()->get_input();
+  fw::Input *input = fw::framework::get_instance()->get_input();
 
   world::set_instance(this);
 
   initialize_entities();
   if (_entities != nullptr) {
     _cursor->initialize();
-    _keybind_tokens.push_back(Input->bind_function("pause", std::bind(&world::on_key_pause, this, _1, _2)));
+    _keybind_tokens.push_back(input->bind_function("pause", std::bind(&world::on_key_pause, this, _1, _2)));
   }
-  _keybind_tokens.push_back(Input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
+  _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
 
   initialize_pathing();
 
@@ -82,7 +81,7 @@ void world::destroy() {
 
   // unbind all the keys we had bound
   fw::Input *Input = fw::framework::get_instance()->get_input();
-  BOOST_FOREACH(int token, _keybind_tokens) {
+  for (int token : _keybind_tokens) {
     Input->unbind_key(token);
   }
   _keybind_tokens.clear();

@@ -1,5 +1,4 @@
 #include <functional>
-#include <boost/foreach.hpp>
 
 #include <framework/misc.h>
 #include <framework/logging.h>
@@ -245,7 +244,7 @@ patch_manager::patch_manager(float size_x, float size_z) {
 }
 
 patch_manager::~patch_manager() {
-  BOOST_FOREACH(patch_list::value_type patch, _patches) {
+  for(patch_list::value_type patch : _patches) {
     delete patch;
   }
   _patches.clear();

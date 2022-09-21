@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 

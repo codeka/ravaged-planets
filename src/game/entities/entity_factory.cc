@@ -1,5 +1,4 @@
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 
 #include <framework/xml.h>
 #include <framework/logging.h>
@@ -77,7 +76,7 @@ luabind::object entity_factory::get_template(std::string name) {
 
 // gets the complete list of entity_templates
 void entity_factory::get_templates(std::vector<luabind::object> &templates) {
-  BOOST_FOREACH(auto &kvp, *entity_templates){
+  for(auto &kvp : *entity_templates) {
     fw::lua::LuaContext *ctx = kvp.second;
 //    templates.push_back(luabind::globals(*ctx)["Entity"]);
   }
@@ -86,7 +85,7 @@ void entity_factory::get_templates(std::vector<luabind::object> &templates) {
 // helper method that populates a vector with entities that are buildable (and in the given build_group)
 void entity_factory::get_buildable_templates(std::string const &build_group,
       std::vector<luabind::object> &templates) {
-  BOOST_FOREACH(entity_template_map::value_type & kvp, *entity_templates) {
+  for(entity_template_map::value_type &kvp : *entity_templates) {
     fw::lua::LuaContext *ctx = kvp.second;
 //    luabind::object const &tmpl = luabind::globals(*ctx)["Entity"];
 

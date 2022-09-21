@@ -1,6 +1,4 @@
 
-#include <boost/foreach.hpp>
-
 #include <framework/camera.h>
 #include <framework/exception.h>
 #include <framework/framework.h>
@@ -53,7 +51,7 @@ void game_screen::show() {
   _world->initialize();
 
   // notify all of the players that the world is loaded
-  BOOST_FOREACH(player * plyr, simulation_thread::get_instance()->get_players()) {
+  for(player * plyr : simulation_thread::get_instance()->get_players()) {
     plyr->world_loaded();
   }
 

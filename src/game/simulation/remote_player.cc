@@ -1,6 +1,5 @@
 #include <functional>
 #include <memory>
-#include <boost/foreach.hpp>
 
 #include <framework/net.h>
 #include <framework/logging.h>
@@ -99,7 +98,7 @@ void remote_player::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
   std::shared_ptr<join_response_packet> resp(std::dynamic_pointer_cast<join_response_packet>(pkt));
 
   fw::debug << boost::format("connected to host, map is: %1%") % resp->get_map_name() << std::endl;
-  BOOST_FOREACH(uint32_t other_user_id, resp->get_other_users()) {
+  for (uint32_t other_user_id : resp->get_other_users()) {
     // the color that we sent will be echo'd back to us, usually
     color_ = resp->get_my_color();
 
@@ -120,7 +119,7 @@ void remote_player::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
       // but first, check whether we've already connected to them
       bool need_connect = true;
       if (other_user_id != 0) { // (it'll be zero if this is an AI player)
-        BOOST_FOREACH(player *plyr, simulation_thread::get_instance()->get_players()) {
+        for (player *plyr : simulation_thread::get_instance()->get_players()) {
           if (plyr->get_user_id() == other_user_id) {
             fw::debug
                 << boost::format("Already connected to player with user_id #%1%, not connecting again")
@@ -159,7 +158,7 @@ void remote_player::pkt_start_game(std::shared_ptr<fw::net::Packet> pkt) {
 // for the next turn.
 void remote_player::pkt_command(std::shared_ptr<fw::net::Packet> pkt) {
   std::shared_ptr<command_packet> command_pkt(std::dynamic_pointer_cast<command_packet>(pkt));
-  BOOST_FOREACH(std::shared_ptr<command> &cmd, command_pkt->get_commands()) {
+  for (std::shared_ptr<command> &cmd : command_pkt->get_commands()) {
     fw::debug << "got command, id: " << static_cast<int>(cmd->get_identifier()) << std::endl;
     simulation_thread::get_instance()->enqueue_command(cmd);
   }
@@ -167,7 +166,7 @@ void remote_player::pkt_command(std::shared_ptr<fw::net::Packet> pkt) {
 
 // checks whether the given color is already taken (ignoring the given player)
 bool color_already_taken(player *except_for, fw::Color &col) {
-  BOOST_FOREACH(player *plyr, simulation_thread::get_instance()->get_players()) {
+  for (player *plyr : simulation_thread::get_instance()->get_players()) {
     if (plyr != except_for && plyr->get_color() == col) {
       return true;
     }
@@ -211,7 +210,7 @@ void remote_player::join_complete(session_request &req) {
   resp.set_your_color(color_);
   resp.set_my_color(simulation_thread::get_instance()->get_local_player()->get_color());
   std::vector<player *> players = simulation_thread::get_instance()->get_players();
-  BOOST_FOREACH(player *plyr, players) {
+  for (player *plyr : players) {
     if (plyr == this) {
       continue;
     }

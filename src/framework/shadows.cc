@@ -1,4 +1,3 @@
-#include <boost/foreach.hpp>
 
 #include <framework/shadows.h>
 #include <framework/shader.h>

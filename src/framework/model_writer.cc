@@ -1,6 +1,5 @@
 #include <memory>
 #include <fstream>
-#include <boost/foreach.hpp>
 
 #include <framework/model.h>
 #include <framework/model_writer.h>

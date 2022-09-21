@@ -1,5 +1,4 @@
 #include <functional>
-#include <boost/foreach.hpp>
 
 #include <framework/framework.h>
 #include <framework/input.h>
@@ -101,7 +100,7 @@ void entity_debug::on_key_press(std::string /*key*/, bool is_down) {
 bool entity_debug::on_show_steering_changed(Widget *w) {
   Checkbox *cbx = dynamic_cast<Checkbox *>(w);
 
-  BOOST_FOREACH(std::weak_ptr<entity> const &wp, mgr_->get_selection()) {
+  for(std::weak_ptr<entity> const &wp : mgr_->get_selection()) {
     std::shared_ptr<entity> ent = wp.lock();
     if (!ent) {
       continue;

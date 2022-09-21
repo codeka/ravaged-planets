@@ -1,7 +1,6 @@
 
 #include <functional>
 #include <memory>
-#include <boost/foreach.hpp>
 
 #include <framework/bitmap.h>
 #include <framework/camera.h>
@@ -185,7 +184,7 @@ void minimap_window::update_entity_display() {
 
   // go through each minimap_visible entity and draw it on our bitmap
   ent::entity_manager *ent_mgr = game::world::get_instance()->get_entity_manager();
-  BOOST_FOREACH(std::weak_ptr<ent::entity> wp, ent_mgr->get_entities_by_component<ent::minimap_visible_component>()) {
+  for (std::weak_ptr<ent::entity> wp : ent_mgr->get_entities_by_component<ent::minimap_visible_component>()) {
     std::shared_ptr<ent::entity> ent = wp.lock();
     if (!ent) {
       continue;

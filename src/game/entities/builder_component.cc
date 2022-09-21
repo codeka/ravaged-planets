@@ -1,5 +1,4 @@
 #include <functional>
-#include <boost/foreach.hpp>
 
 #include <game/entities/entity_factory.h>
 #include <game/entities/builder_component.h>
