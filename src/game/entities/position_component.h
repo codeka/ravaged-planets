@@ -84,8 +84,8 @@ class position_component: public entity_component {
 private:
   friend class entity_patch;
 
-  fw::Vector _pos;
-  fw::Vector _dir;
+  fw::Vector pos_;
+  fw::Vector dir_;
   fw::Vector _up;
   bool _pos_updated;
   bool _sit_on_terrain;

@@ -13,86 +13,86 @@
 
 namespace fw::sg {
 
-class scenegraph;
+class Scenegraph;
 
-enum primitive_type {
-  primitive_linestrip,
-  primitive_linelist,
-  primitive_trianglestrip,
-  primitive_trianglelist,
-  primitive_whatever
+enum PrimitiveType {
+  kUnknownPrimitiveType,
+  kLineStrip,
+  kLineList,
+  kTriangleStrip,
+  kTriangleList
 };
 
-// represents the properties of a light that we'll need to add to the
-// scene (we'll need at least one light-source of course!
-class light {
+// represents the properties of a Light that we'll need to add to the
+// scene (we'll need at least one Light-source of course!
+class Light {
 private:
-  fw::Vector _pos;
-  fw::Vector _dir;
-  bool _cast_shadows;
+  fw::Vector pos_;
+  fw::Vector dir_;
+  bool cast_shadows_;
 
 public:
-  light();
-  light(fw::Vector const &pos, fw::Vector const &dir, bool cast_shadows);
-  light(light const &copy);
-  ~light();
+  Light();
+  Light(fw::Vector const &pos, fw::Vector const &dir, bool cast_shadows);
+  Light(Light const &copy);
+  ~Light();
 
   void set_position(fw::Vector const &pos) {
-    _pos = pos;
+    pos_ = pos;
   }
   fw::Vector get_position() const {
-    return _pos;
+    return pos_;
   }
 
   void set_direction(fw::Vector const &dir) {
-    _dir = dir;
+    dir_ = dir;
   }
   fw::Vector get_direction() const {
-    return _dir;
+    return dir_;
   }
 
   void set_cast_shadows(bool cast_shadows) {
-    _cast_shadows = cast_shadows;
+    cast_shadows_ = cast_shadows;
   }
   bool get_cast_shadows() const {
-    return _cast_shadows;
+    return cast_shadows_;
   }
 };
 
-// this is the base "scene graph node"
-class node {
+// this is the base "scene graph Node"
+class Node {
 private:
-  bool _cast_shadows;
+  bool cast_shadows_;
 
-  primitive_type _primitive_type;
+  PrimitiveType _primitive_type;
   std::shared_ptr<fw::VertexBuffer> vb_;
   std::shared_ptr<fw::IndexBuffer> ib_;
   std::shared_ptr<fw::shader> shader_;
   std::shared_ptr<fw::shader_parameters> shader_params_;
 
-  // Renders the node if the shader file is null (basically just uses the basic shader).
+  // Renders the Node if the shader file is null (basically just uses the basic shader).
   void render_noshader(fw::Camera *camera, fw::Matrix const &transform);
 
 protected:
-  node *_parent;
-  std::vector<std::shared_ptr<node> > _children;
+  Node *_parent;
+  std::vector<std::shared_ptr<Node> > _children;
   fw::Matrix _world;
 
   // this is called when we're rendering a given shader
   virtual void render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera, fw::Matrix const &transform);
 
   // called by clone() to populate the clone
-  virtual void populate_clone(std::shared_ptr<node> clone);
+  virtual void populate_clone(std::shared_ptr<Node> clone);
 public:
-  node();
-  virtual ~node();
+  Node();
+  virtual ~Node();
 
-  void add_child(std::shared_ptr<node> child);
-  void remove_child(std::shared_ptr<node> child);
+  void add_child(std::shared_ptr<Node> child);
+  void remove_child(std::shared_ptr<Node> child);
   int get_num_children() const {
     return _children.size();
   }
-  std::shared_ptr<node> get_child(int index) const {
+  std::shared_ptr<Node> get_child(int index) const {
     return _children[index];
   }
 
@@ -130,80 +130,80 @@ public:
   }
 
   void set_cast_shadows(bool cast_shadows) {
-    _cast_shadows = cast_shadows;
+    cast_shadows_ = cast_shadows;
   }
   bool get_cast_shadows() const {
-    return _cast_shadows;
+    return cast_shadows_;
   }
 
-  void set_primitive_type(primitive_type pt) {
+  void set_primitive_type(PrimitiveType pt) {
     _primitive_type = pt;
   }
-  primitive_type get_primitive_type() const {
+  PrimitiveType get_primitive_type() const {
     return _primitive_type;
   }
 
-  // this is called by the scenegraph itself when it's time to render
-  virtual void render(scenegraph *sg, fw::Matrix const &model_matrix = fw::identity());
+  // this is called by the Scenegraph itself when it's time to render
+  virtual void render(Scenegraph *sg, fw::Matrix const &model_matrix = fw::identity());
 
-  // Creates a clone of this node (it's a "shallow" clone in that the vertex_buffer, index_buffer and shader will be
+  // Creates a clone of this Node (it's a "shallow" clone in that the vertex_buffer, index_buffer and shader will be
   // shared but matrix and shader_parameters will be new)
-  virtual std::shared_ptr<node> clone();
+  virtual std::shared_ptr<Node> clone();
 };
 
 // this class manages the scene graph.
-class scenegraph {
+class Scenegraph {
 public:
-  typedef std::vector<std::shared_ptr<light> > light_coll;
-  typedef std::vector<std::shared_ptr<node> > node_coll;
+  typedef std::vector<std::shared_ptr<Light> > light_coll;
+  typedef std::vector<std::shared_ptr<Node> > node_coll;
 
 private:
-  light_coll _lights;
-  node_coll _root_nodes;
-  fw::Color _clear_color;
-  std::stack<fw::Camera *> _camera_stack;
+  light_coll lights_;
+  node_coll root_nodes_;
+  fw::Color clear_color_;
+  std::stack<fw::Camera *> camera_stack_;
 
 public:
-  scenegraph();
-  ~scenegraph();
+  Scenegraph();
+  ~Scenegraph();
 
-  // add a light to the scene. the pointer must be valid for the
-  void add_light(std::shared_ptr<light> &l) {
-    _lights.push_back(l);
+  // add a Light to the scene. the pointer must be valid for the
+  void add_light(std::shared_ptr<Light> &l) {
+    lights_.push_back(l);
   }
   light_coll const &get_lights() const {
-    return _lights;
+    return lights_;
   }
 
-  void add_node(std::shared_ptr<node> node) {
-    _root_nodes.push_back(node);
+  void add_node(std::shared_ptr<Node> Node) {
+    root_nodes_.push_back(Node);
   }
   node_coll const &get_nodes() const {
-    return _root_nodes;
+    return root_nodes_;
   }
 
   void set_clear_color(fw::Color color) {
-    _clear_color = color;
+    clear_color_ = color;
   }
   fw::Color get_clear_color() const {
-    return _clear_color;
+    return clear_color_;
   }
 
   void push_camera(fw::Camera *cam) {
-    _camera_stack.push(cam);
+    camera_stack_.push(cam);
   }
   void pop_camera() {
-    _camera_stack.pop();
+    camera_stack_.pop();
   }
   fw::Camera *get_camera() const {
-    if (_camera_stack.empty()) {
+    if (camera_stack_.empty()) {
       return nullptr;
     }
-    return _camera_stack.top();
+    return camera_stack_.top();
   }
 };
 }
 
 namespace fw {
-void render(fw::sg::scenegraph &sg, std::shared_ptr<fw::Framebuffer> render_target = nullptr, bool render_gui = true);
+void render(fw::sg::Scenegraph &sg, std::shared_ptr<fw::Framebuffer> render_target = nullptr, bool render_gui = true);
 }

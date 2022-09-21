@@ -356,7 +356,7 @@ void heightfield_tool::import_heightfield(fw::Bitmap &bm) {
   }
 }
 
-void heightfield_tool::render(fw::sg::scenegraph &scenegraph) {
-  draw_circle(scenegraph, _terrain, _terrain->get_cursor_location(), (float) _radius);
+void heightfield_tool::render(fw::sg::Scenegraph &Scenegraph) {
+  draw_circle(Scenegraph, _terrain, _terrain->get_cursor_location(), (float) _radius);
 }
 }

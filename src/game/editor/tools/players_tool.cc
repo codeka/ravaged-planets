@@ -128,7 +128,7 @@ void players_tool::deactivate() {
   _wnd->hide();
 }
 
-void players_tool::render(fw::sg::scenegraph &scenegraph) {
+void players_tool::render(fw::sg::Scenegraph &Scenegraph) {
   if (_player_no <= 0)
     return;
 
@@ -143,7 +143,7 @@ void players_tool::render(fw::sg::scenegraph &scenegraph) {
   fw::Matrix loc(fw::translation(it->second));
 
   _marker->set_color(fw::Color(0.75f, 0.0f, 1.0f, 0.0f));
-  _marker->render(scenegraph, loc);
+  _marker->render(Scenegraph, loc);
 }
 
 void players_tool::set_curr_player(int player_no) {

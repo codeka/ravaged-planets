@@ -21,16 +21,16 @@ static std::shared_ptr<fw::shader> basic_shader;
 static bool is_rendering_shadow = false;
 static std::shared_ptr<fw::shadow_source> shadowsrc;
 
-static std::map<fw::sg::primitive_type, uint32_t> g_primitive_type_map;
+static std::map<fw::sg::PrimitiveType, uint32_t> g_primitive_type_map;
 
 static void ensure_primitive_type_map() {
   if (g_primitive_type_map.size() > 0)
     return;
 
-  g_primitive_type_map[fw::sg::primitive_linestrip] = GL_LINE_STRIP;
-  g_primitive_type_map[fw::sg::primitive_linelist] = GL_LINES;
-  g_primitive_type_map[fw::sg::primitive_trianglelist] = GL_TRIANGLES;
-  g_primitive_type_map[fw::sg::primitive_trianglestrip] = GL_TRIANGLE_STRIP;
+  g_primitive_type_map[fw::sg::PrimitiveType::kLineStrip] = GL_LINE_STRIP;
+  g_primitive_type_map[fw::sg::PrimitiveType::kLineList] = GL_LINES;
+  g_primitive_type_map[fw::sg::PrimitiveType::kTriangleList] = GL_TRIANGLES;
+  g_primitive_type_map[fw::sg::PrimitiveType::kTriangleStrip] = GL_TRIANGLE_STRIP;
 }
 
 namespace fw {
@@ -38,35 +38,35 @@ namespace fw {
 namespace sg {
 
 //-------------------------------------------------------------------------------------
-light::light() :
-    _cast_shadows(false) {
+Light::Light() :
+    cast_shadows_(false) {
 }
 
-light::light(fw::Vector const &pos, fw::Vector const &dir, bool cast_shadows) :
-    _pos(pos), _dir(dir), _cast_shadows(cast_shadows) {
+Light::Light(fw::Vector const &pos, fw::Vector const &dir, bool cast_shadows) :
+    pos_(pos), dir_(dir), cast_shadows_(cast_shadows) {
 }
 
-light::light(light const &copy) :
-    _pos(copy._pos), _dir(copy._dir), _cast_shadows(copy._cast_shadows) {
+Light::Light(Light const &copy) :
+    pos_(copy.pos_), dir_(copy.dir_), cast_shadows_(copy.cast_shadows_) {
 }
 
-light::~light() {
+Light::~Light() {
 }
 
 //-------------------------------------------------------------------------------------
-node::node() :
-    _world(fw::identity()), _parent(0), _cast_shadows(true), _primitive_type(primitive_whatever) {
+Node::Node() :
+    _world(fw::identity()), _parent(0), cast_shadows_(true), _primitive_type(PrimitiveType::kUnknownPrimitiveType) {
 }
 
-node::~node() {
+Node::~Node() {
 }
 
-void node::add_child(std::shared_ptr<node> child) {
+void Node::add_child(std::shared_ptr<Node> child) {
   child->_parent = this;
   _children.push_back(child);
 }
 
-void node::remove_child(std::shared_ptr<node> child) {
+void Node::remove_child(std::shared_ptr<Node> child) {
   auto it = std::find(_children.begin(), _children.end(), child);
   if (it != _children.end())
     _children.erase(it);
@@ -74,10 +74,10 @@ void node::remove_child(std::shared_ptr<node> child) {
 
 // Get the shader file to use. if we don't have one defined, look at our parent and keep looking up at our parents
 // until we find one.
-std::shared_ptr<fw::shader> node::get_shader() const {
+std::shared_ptr<fw::shader> Node::get_shader() const {
   std::shared_ptr<fw::shader> shader = shader_;
   if (!shader) {
-    node *parent = _parent;
+    Node *parent = _parent;
     while (!shader && parent != 0) {
       shader = parent->shader_;
       parent = parent->_parent;
@@ -87,9 +87,9 @@ std::shared_ptr<fw::shader> node::get_shader() const {
   return shader;
 }
 
-void node::render(scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
-  // if we're not a shadow caster, and we're rendering shadows, don't render the node this time around
-  if (is_rendering_shadow && !_cast_shadows) {
+void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
+  // if we're not a shadow caster, and we're rendering shadows, don't render the Node this time around
+  if (is_rendering_shadow && !cast_shadows_) {
     return;
   }
 
@@ -113,13 +113,13 @@ void node::render(scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
   }
 
   // render the children as well (todo: pass transformations)
-  BOOST_FOREACH(std::shared_ptr<node> &child_node, _children) {
+  BOOST_FOREACH(std::shared_ptr<Node> &child_node, _children) {
     child_node->render(sg, transform);
   }
 }
 
 // this is called when we're rendering a given shader
-void node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera, fw::Matrix const &transform) {
+void Node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera, fw::Matrix const &transform) {
   std::shared_ptr<fw::shader_parameters> parameters;
   if (shader_params_) {
     parameters = shader_params_;
@@ -165,7 +165,7 @@ void node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera,
   vb_->end();
 }
 
-void node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
+void Node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
   if (!basic_shader) {
     basic_shader = fw::shader::create("basic.shader");
   }
@@ -173,8 +173,8 @@ void node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
   render_shader(basic_shader, camera, transform);
 }
 
-void node::populate_clone(std::shared_ptr<node> clone) {
-  clone->_cast_shadows = _cast_shadows;
+void Node::populate_clone(std::shared_ptr<Node> clone) {
+  clone->cast_shadows_ = cast_shadows_;
   clone->_primitive_type = _primitive_type;
   clone->vb_ = vb_;
   clone->ib_ = ib_;
@@ -185,24 +185,24 @@ void node::populate_clone(std::shared_ptr<node> clone) {
   clone->_world = _world;
 
   // clone the children as well!
-  BOOST_FOREACH(std::shared_ptr<node> child, _children) {
+  BOOST_FOREACH(std::shared_ptr<Node> child, _children) {
     clone->_children.push_back(child->clone());
   }
 }
 
-std::shared_ptr<node> node::clone() {
-  std::shared_ptr<node> clone(new node());
+std::shared_ptr<Node> Node::clone() {
+  std::shared_ptr<Node> clone(new Node());
   populate_clone(clone);
   return clone;
 }
 
 //-----------------------------------------------------------------------------------------
 
-scenegraph::scenegraph()
-    : _clear_color(fw::Color(1, 0, 0, 0)) {
+Scenegraph::Scenegraph()
+    : clear_color_(fw::Color(1, 0, 0, 0)) {
 }
 
-scenegraph::~scenegraph() {
+Scenegraph::~Scenegraph() {
 }
 
 }
@@ -211,7 +211,7 @@ scenegraph::~scenegraph() {
 static const bool g_shadow_debug = false;
 
 // renders the scene!
-void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_target /*= nullptr*/,
+void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_target /*= nullptr*/,
     bool render_gui /*= true*/) {
   ensure_primitive_type_map();
 
@@ -223,7 +223,7 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
 
   // set up the shadow sources that we'll need to render from first to get the various shadows going.
   std::vector<std::shared_ptr<shadow_source>> shadows;
-  for(auto it = scenegraph.get_lights().begin(); it != scenegraph.get_lights().end(); ++it) {
+  for(auto it = Scenegraph.get_lights().begin(); it != Scenegraph.get_lights().end(); ++it) {
     if ((*it)->get_cast_shadows()) {
       std::shared_ptr<shadow_source> shdwsrc(new shadow_source());
       shdwsrc->initialize(g_shadow_debug);
@@ -240,13 +240,13 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   is_rendering_shadow = true;
   BOOST_FOREACH(shadowsrc, shadows) {
     shadowsrc->begin_scene();
-    scenegraph.push_camera(&shadowsrc->get_camera());
+    Scenegraph.push_camera(&shadowsrc->get_camera());
     g->begin_scene();
-    BOOST_FOREACH(std::shared_ptr<fw::sg::node> node, scenegraph.get_nodes()) {
-      node->render(&scenegraph);
+    BOOST_FOREACH(std::shared_ptr<fw::sg::Node> Node, Scenegraph.get_nodes()) {
+      Node->render(&Scenegraph);
     }
     g->end_scene();
-    scenegraph.pop_camera();
+    Scenegraph.pop_camera();
     shadowsrc->end_scene();
   }
   is_rendering_shadow = false;
@@ -256,9 +256,9 @@ void render(sg::scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   }
 
   // now, render the main scene
-  g->begin_scene(scenegraph.get_clear_color());
-  BOOST_FOREACH(std::shared_ptr<fw::sg::node> node, scenegraph.get_nodes()) {
-    node->render(&scenegraph);
+  g->begin_scene(Scenegraph.get_clear_color());
+  BOOST_FOREACH(std::shared_ptr<fw::sg::Node> Node, Scenegraph.get_nodes()) {
+    Node->render(&Scenegraph);
   }
 
   // make sure the shadowsrc is empty

@@ -9,20 +9,20 @@
 namespace fw {
 
 /**
- * This is a specialization of the scenegraph node used by models. It basically just contains a bit of extra info
+ * This is a specialization of the Scenegraph Node used by models. It basically just contains a bit of extra info
  * that we want to keep around to make loading/saving them easier.
  */
-class ModelNode: public sg::node {
+class ModelNode: public sg::Node {
 private:
   Model *model_;
   fw::Color color_;
 
 protected:
-  /* Renders the Model node. */
-  virtual void render(sg::scenegraph *sg, fw::Matrix const &model_matrix = fw::identity());
+  /* Renders the Model Node. */
+  virtual void render(sg::Scenegraph *sg, fw::Matrix const &model_matrix = fw::identity());
 
   /** Called by clone() to populate the clone. */
-  virtual void populate_clone(std::shared_ptr<sg::node> clone);
+  virtual void populate_clone(std::shared_ptr<sg::Node> clone);
 public:
   ModelNode();
   virtual ~ModelNode();
@@ -30,7 +30,7 @@ public:
   /** The index into the array of meshes that we got our data from. */
   int mesh_index;
 
-  /** The name of this node, used to reference this node in other parts of the Model, usually (e.g. in bones). */
+  /** The name of this Node, used to reference this Node in other parts of the Model, usually (e.g. in bones). */
   std::string node_name;
 
   /** The transform used to move the Model into position in the world. */
@@ -38,10 +38,10 @@ public:
 
   void set_color(fw::Color color);
 
-  /** You can call this after setting mesh_index to set up the node. */
+  /** You can call this after setting mesh_index to set up the Node. */
   void initialize(Model *mdl);
 
-  virtual std::shared_ptr<sg::node> clone();
+  virtual std::shared_ptr<sg::Node> clone();
 };
 
 }

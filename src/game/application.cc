@@ -63,10 +63,10 @@ void application::update(float dt) {
   session::get_instance()->update();
 }
 
-void application::render(fw::sg::scenegraph &scenegraph) {
+void application::render(fw::sg::Scenegraph &Scenegraph) {
   screen *active = _screen->get_active_screen();
   if (active != nullptr) {
-    active->render(scenegraph);
+    active->render(Scenegraph);
   }
 }
 

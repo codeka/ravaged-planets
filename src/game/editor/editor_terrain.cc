@@ -21,7 +21,7 @@ editor_terrain::editor_terrain() {
 editor_terrain::~editor_terrain() {
 }
 
-void editor_terrain::render(fw::sg::scenegraph &scenegraph) {
+void editor_terrain::render(fw::sg::Scenegraph &Scenegraph) {
   int num_baked = 0;
   {
     std::unique_lock<std::mutex> lock(_patches_to_bake_mutex);
@@ -32,7 +32,7 @@ void editor_terrain::render(fw::sg::scenegraph &scenegraph) {
     _patches_to_bake.clear();
   }
 
-  terrain::render(scenegraph);
+  terrain::render(Scenegraph);
 }
 
 // set the height of the given vertex to the given value.

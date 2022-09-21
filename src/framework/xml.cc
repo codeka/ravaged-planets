@@ -148,9 +148,9 @@ std::string xml_element::get_value() const {
 }
 
 std::string xml_element::get_text() const {
-  xml::XMLNode *node = _elem->FirstChild();
-  if (node != nullptr) {
-    return std::string(node->Value());
+  xml::XMLNode *Node = _elem->FirstChild();
+  if (Node != nullptr) {
+    return std::string(Node->Value());
   }
 
   return "";

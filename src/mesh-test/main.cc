@@ -26,18 +26,18 @@ namespace po = boost::program_options;
 
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
-void initialize_ground(std::shared_ptr<fw::sg::node> node);
+void initialize_ground(std::shared_ptr<fw::sg::Node> Node);
 
 class application: public fw::base_app {
 public:
   bool initialize(fw::framework *frmwrk);
   void update(float dt);
-  void render(fw::sg::scenegraph &scenegraph);
+  void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 static std::shared_ptr<fw::Model> g_model;
 static bool g_show_ground = false;
-static std::shared_ptr<fw::sg::node> g_ground;
+static std::shared_ptr<fw::sg::Node> g_ground;
 static bool g_rotating = false;
 static float g_rotate_angle = 0.0f;
 
@@ -90,7 +90,7 @@ bool application::initialize(fw::framework *frmwrk) {
 
   fw::settings stg;
   g_model = frmwrk->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
-  g_ground = std::shared_ptr<fw::sg::node>(new fw::sg::node());
+  g_ground = std::shared_ptr<fw::sg::Node>(new fw::sg::Node());
   initialize_ground(g_ground);
   return true;
 }
@@ -101,26 +101,26 @@ void application::update(float dt) {
   }
 }
 
-void application::render(fw::sg::scenegraph &scenegraph) {
-  scenegraph.set_clear_color(fw::Color(1, 0, 1, 0));
+void application::render(fw::sg::Scenegraph &Scenegraph) {
+  Scenegraph.set_clear_color(fw::Color(1, 0, 1, 0));
 
-  // set up the properties of the sun that we'll use to light and also cast shadows
+  // set up the properties of the sun that we'll use to Light and also cast shadows
   fw::Vector sun(0.485f, 0.485f, 0.727f);
   fw::Vector lookat(0, 0, 0);
-  std::shared_ptr <fw::sg::light> light(new fw::sg::light(lookat + sun * 300.0f, sun * -1, true));
-  scenegraph.add_light(light);
+  std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(lookat + sun * 300.0f, sun * -1, true));
+  Scenegraph.add_light(Light);
 
   if (g_show_ground) {
-    scenegraph.add_node(g_ground);
+    Scenegraph.add_node(g_ground);
   }
 
   g_model->set_color(fw::Color(1.0f, 1.0f, 0.0f, 0.0f));
-  g_model->render(scenegraph, fw::rotate_axis_angle(fw::Vector(0, 1, 0), g_rotate_angle));
+  g_model->render(Scenegraph, fw::rotate_axis_angle(fw::Vector(0, 1, 0), g_rotate_angle));
 }
 
 //-----------------------------------------------------------------------------
 
-void initialize_ground(std::shared_ptr<fw::sg::node> node) {
+void initialize_ground(std::shared_ptr<fw::sg::Node> Node) {
   fw::vertex::xyz_n_uv vertices[] = {
       fw::vertex::xyz_n_uv(-100.0f, 0.0f, -100.0f,      0.0f, 1.0f, 0.0f,       0.0f,  0.0f),
       fw::vertex::xyz_n_uv(-100.0f, 0.0f,  100.0f,      0.0f, 1.0f, 0.0f,       0.0f,  8.0f),
@@ -143,12 +143,12 @@ void initialize_ground(std::shared_ptr<fw::sg::node> node) {
   std::shared_ptr<fw::shader_parameters> params = shader->create_parameters();
   params->set_texture("tex_sampler", texture);
 
-  node->set_vertex_buffer(vb);
-  node->set_index_buffer(ib);
-  node->set_shader(shader);
-  node->set_shader_parameters(params);
-  node->set_cast_shadows(false);
-  node->set_primitive_type(fw::sg::primitive_trianglelist);
+  Node->set_vertex_buffer(vb);
+  Node->set_index_buffer(ib);
+  Node->set_shader(shader);
+  Node->set_shader_parameters(params);
+  Node->set_cast_shadows(false);
+  Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
 }
 
 //-----------------------------------------------------------------------------

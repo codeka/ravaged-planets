@@ -15,7 +15,7 @@ class shader;
 class shader_parameters;
 
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 }
 
@@ -82,7 +82,7 @@ public:
   void create(int width, int length, bool create_height_data = true);
 
   virtual void update();
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 
   virtual void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap);
 

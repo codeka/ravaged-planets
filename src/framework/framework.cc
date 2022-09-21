@@ -306,15 +306,15 @@ void framework::render() {
   _timer->render();
 
   // populate the scene graph by calling into the application itself
-  sg::scenegraph scenegraph;
-  _app->render(scenegraph);
-  _particle_mgr->render(scenegraph);
+  sg::Scenegraph Scenegraph;
+  _app->render(Scenegraph);
+  _particle_mgr->render(Scenegraph);
 
-  fw::render(scenegraph);
+  fw::render(Scenegraph);
 
   // if we've been asked for some screenshots, take them after we've done the normal render.
   if (_screenshots.size() > 0)
-    take_screenshots(scenegraph);
+    take_screenshots(Scenegraph);
 
   graphics_->after_render();
 }
@@ -371,7 +371,7 @@ void call_callacks_thread_proc(std::shared_ptr<std::list<screenshot_request *>> 
  * This is called at the end of a frame if there are pending screenshot callbacks. We'll grab the contents of the,
  * frame buffer, then (on another thread) call the callbacks.
  */
-void framework::take_screenshots(sg::scenegraph &scenegraph) {
+void framework::take_screenshots(sg::Scenegraph &Scenegraph) {
   if (_screenshots.empty()) {
     return;
   }
@@ -389,7 +389,7 @@ void framework::take_screenshots(sg::scenegraph &scenegraph) {
     framebuffer->set_color_buffer(color_target);
     framebuffer->set_depth_buffer(depth_target);
 
-    fw::render(scenegraph, framebuffer, request->include_gui);
+    fw::render(Scenegraph, framebuffer, request->include_gui);
 
     request->bitmap = std::make_shared<fw::Bitmap>(*color_target.get());
     requests->push_back(request);

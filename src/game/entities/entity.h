@@ -12,7 +12,7 @@ namespace fw {
 class Graphics;
 class xml_element;
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 }
 
@@ -52,8 +52,8 @@ public:
   virtual void update(float) {
   }
 
-  /** This is called when it's time to render. generate a scenegraph node and add it to the scenegraph. */
-  virtual void render(fw::sg::scenegraph &, fw::Matrix const &) {
+  /** This is called when it's time to render. generate a Scenegraph Node and add it to the Scenegraph. */
+  virtual void render(fw::sg::Scenegraph &, fw::Matrix const &) {
   }
 
   /** Loads this component with data from the given component template (Lua object). */
@@ -147,7 +147,7 @@ public:
 
   // these are called each frame to update and then render the entity
   void update(float dt);
-  void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform);
+  void render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform);
 
   // this is a helper that you can use to move an entity directly to somewhere on the map.
   void set_position(fw::Vector const &pos);

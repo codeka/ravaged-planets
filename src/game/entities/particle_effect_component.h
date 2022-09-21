@@ -40,7 +40,7 @@ public:
 
   virtual void initialize();
   virtual void update(float dt);
-  virtual void render(fw::sg::scenegraph &, fw::Matrix const &);
+  virtual void render(fw::sg::Scenegraph &, fw::Matrix const &);
 
   void start_effect(std::string const &name);
   void stop_effect(std::string const &name);

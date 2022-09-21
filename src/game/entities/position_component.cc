@@ -19,7 +19,7 @@ namespace ent {
 ENT_COMPONENT_REGISTER("Position", position_component);
 
 position_component::position_component() :
-    _pos(0, 0, 0), _dir(0, 0, 1), _up(0, 1, 0), _pos_updated(true), _sit_on_terrain(false),
+    pos_(0, 0, 0), dir_(0, 0, 1), _up(0, 1, 0), _pos_updated(true), _sit_on_terrain(false),
     _orient_to_terrain(false), _patch(0) {
 }
 
@@ -51,30 +51,30 @@ void position_component::set_final_position() {
     game::terrain *terrain = game::world::get_instance()->get_terrain();
     if (_sit_on_terrain) {
       // if we're supposed to sit on the terrain, make sure we're doing that now.
-      _pos = fw::Vector(_pos[0], terrain->get_height(_pos[0], _pos[2]), _pos[2]);
+      pos_ = fw::Vector(pos_[0], terrain->get_height(pos_[0], pos_[2]), pos_[2]);
     }
 
     if (_orient_to_terrain) {
       // if we're supposed to orient ourselves with the terrain (so it looks like we're sitting flat on the
       // terrain, rather than perfectly horizontal) do that as well. Basically, we sample the terrain at three
       // places, calculate the normal and orient ourselves to that.
-      fw::Vector right = cml::cross(_up, _dir).normalize();
-      fw::Vector v1 = _pos + _dir;
-      fw::Vector v2 = _pos + right;
-      fw::Vector v3 = _pos - right;
+      fw::Vector right = cml::cross(_up, dir_).normalize();
+      fw::Vector v1 = pos_ + dir_;
+      fw::Vector v2 = pos_ + right;
+      fw::Vector v3 = pos_ - right;
 
       v1[1] = terrain->get_height(v1[0], v1[2]);
       v2[1] = terrain->get_height(v2[0], v2[2]);
       v3[1] = terrain->get_height(v3[0], v3[2]);
 
       _up = cml::cross(v2 - v1, v3 - v1).normalize();
-      _dir = fw::Vector(_dir[0], 0.0f, _dir[2]).normalize();
+      dir_ = fw::Vector(dir_[0], 0.0f, dir_[2]).normalize();
     }
 
     // constrain our position to the map's dimensions
-    float x = fw::constrain(_pos[0], static_cast<float>(terrain->get_width()), 0.0f);
-    float z = fw::constrain(_pos[2], static_cast<float>(terrain->get_length()), 0.0f);
-    _pos = fw::Vector(x, _pos[1], z);
+    float x = fw::constrain(pos_[0], static_cast<float>(terrain->get_width()), 0.0f);
+    float z = fw::constrain(pos_[2], static_cast<float>(terrain->get_length()), 0.0f);
+    pos_ = fw::Vector(x, pos_[1], z);
 
     // make sure we "exist" in the correct patch as well...
     std::shared_ptr<ent::entity> entity(_entity);
@@ -99,7 +99,7 @@ void position_component::set_position(fw::Vector const &pos) {
   float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
   float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
-  _pos = fw::Vector(fw::constrain(pos[0], world_width, 0.0f), pos[1], fw::constrain(pos[2], world_length, 0.0f));
+  pos_ = fw::Vector(fw::constrain(pos[0], world_width, 0.0f), pos[1], fw::constrain(pos[2], world_length, 0.0f));
 
   _pos_updated = true;
 }
@@ -108,29 +108,29 @@ fw::Vector position_component::get_position(bool allow_update) {
   if (allow_update) {
     set_final_position();
   }
-  return _pos;
+  return pos_;
 }
 
 void position_component::set_direction(fw::Vector const &dir) {
-  _dir = dir;
+  dir_ = dir;
   _pos_updated = true;
 }
 
 fw::Vector position_component::get_direction() const {
-  return _dir;
+  return dir_;
 }
 
 fw::Matrix position_component::get_transform() const {
   fw::Matrix m = fw::identity();
-  m *= fw::rotate(fw::Vector(0, 0, 1), _dir);
+  m *= fw::rotate(fw::Vector(0, 0, 1), dir_);
   m *= fw::rotate(fw::Vector(0, 1, 0), _up);
-  m *= fw::translation(_pos);
+  m *= fw::translation(pos_);
 
   return m;
 }
 
 fw::Vector position_component::get_direction_to(fw::Vector const &point) const {
-  fw::Vector dir = point - _pos;
+  fw::Vector dir = point - pos_;
 
   std::shared_ptr<ent::entity> entity(_entity);
   float width = entity->get_manager()->get_patch_manager()->get_world_width();
@@ -138,7 +138,7 @@ fw::Vector position_component::get_direction_to(fw::Vector const &point) const {
   for (int z = -1; z <= 1; z++) {
     for (int x = -1; x <= 1; x++) {
       fw::Vector another_point(point[0] + (x * width), point[1], point[2] + (z * length));
-      fw::Vector another_dir = another_point - _pos;
+      fw::Vector another_dir = another_point - pos_;
 
       if (another_dir.length_squared() < dir.length_squared())
         dir = another_dir;

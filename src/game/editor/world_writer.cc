@@ -84,7 +84,7 @@ void world_writer::write_mapdesc(game::world_file &wf) {
 
 // The minimap background consist of basically one pixel per vertex. We calculate the color
 // of the pixel as a combination of the height of the terrain at that point and the texture that
-// is displayed on the terrain at that point (so "high" and "grass" would be a light green, etc)
+// is displayed on the terrain at that point (so "high" and "grass" would be a Light green, etc)
 void world_writer::write_minimap_background(game::world_file &wf) {
   game::terrain *trn = _world->get_terrain();
   int width = trn->get_width();

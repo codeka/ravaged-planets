@@ -3,7 +3,7 @@
 namespace fw {
 class Graphics;
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 }
 
@@ -52,7 +52,7 @@ public:
   virtual void deactivate();
 
   virtual void update();
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 typedef tool *(*create_tool_fn)(editor_world *wrld);
@@ -73,7 +73,7 @@ public:
 
 // draws a circle, centred at the given point, with the given radius. The circle will be
 // in the x/z plane
-void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain,
+void draw_circle(fw::sg::Scenegraph &Scenegraph, game::terrain *terrain,
     fw::Vector const &center, float radius);
 
 }

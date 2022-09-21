@@ -43,7 +43,7 @@ Model::Model() : wireframe_(false), color_(fw::Color(1, 1, 1)) {
 Model::~Model() {
 }
 
-void Model::render(sg::scenegraph &sg, fw::Matrix const &transform /*= fw::matrix::identity() */) {
+void Model::render(sg::Scenegraph &sg, fw::Matrix const &transform /*= fw::matrix::identity() */) {
   root_node->set_world_matrix(transform);
   root_node->set_color(color_);
   sg.add_node(root_node->clone());

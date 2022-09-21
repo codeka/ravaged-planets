@@ -6,7 +6,7 @@
 
 namespace fw {
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 }
 
@@ -51,7 +51,7 @@ public:
   virtual void update();
 
   /** Renders this screen, this is only called if we're the active screen. */
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 /**

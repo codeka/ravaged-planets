@@ -40,7 +40,7 @@ public:
   // reset the render target
   void end_scene();
 
-  // gets the camera which you can use to "direct" the light source
+  // gets the camera which you can use to "direct" the Light source
   light_camera &get_camera() {
     return _camera;
   }

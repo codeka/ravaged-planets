@@ -41,7 +41,7 @@ public:
 
   void initialize(Graphics *g);
   void update(float dt);
-  void render(sg::scenegraph &scenegraph);
+  void render(sg::Scenegraph &Scenegraph);
 
   // created the named effect (we load the properties from the given .wwpart file)
   std::shared_ptr<ParticleEffect> create_effect(std::string const &name);

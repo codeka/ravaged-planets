@@ -8,7 +8,7 @@ class collision_patch;
 
 namespace fw {
 class Model;
-class timed_path_find;
+class TimedPathFind;
 }
 
 namespace ed {
@@ -30,7 +30,7 @@ private:
   bool _end_set;
   bool _simplify;
   std::vector<std::shared_ptr<collision_patch>> _patches;
-  std::shared_ptr<fw::timed_path_find> _path_find;
+  std::shared_ptr<fw::TimedPathFind> _path_find;
 
   void on_key(std::string keyname, bool is_down);
   std::shared_ptr<collision_patch> bake_patch(int patch_x, int patch_z);
@@ -42,7 +42,7 @@ public:
   virtual void activate();
   virtual void deactivate();
 
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 
   void set_simplify(bool enabled);
   void set_test_start();

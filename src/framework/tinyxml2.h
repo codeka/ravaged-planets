@@ -458,7 +458,7 @@ private:
   are simply called with Visit().
 
   If you return 'true' from a Visit method, recursive parsing will continue. If you return
-  false, <b>no children of this node or its siblings</b> will be visited.
+  false, <b>no children of this Node or its siblings</b> will be visited.
 
   All flavors of Visit methods have a default implementation that returns 'true' (continue
   visiting). You need to only override methods that are interesting to you.
@@ -496,15 +496,15 @@ public:
     virtual bool Visit( const XMLDeclaration& /*declaration*/ )   {
         return true;
     }
-    /// Visit a text node.
+    /// Visit a text Node.
     virtual bool Visit( const XMLText& /*text*/ )         {
         return true;
     }
-    /// Visit a comment node.
+    /// Visit a comment Node.
     virtual bool Visit( const XMLComment& /*comment*/ )       {
         return true;
     }
-    /// Visit an unknown node.
+    /// Visit an unknown Node.
     virtual bool Visit( const XMLUnknown& /*unknown*/ )       {
         return true;
     }
@@ -625,7 +625,7 @@ public:
 /** XMLNode is a base class for every object that is in the
   XML Document Object Model (DOM), except XMLAttributes.
   Nodes have siblings, a parent, and children which can
-  be navigated. A node is always in a XMLDocument.
+  be navigated. A Node is always in a XMLDocument.
   The type of a XMLNode can be queried, and it can
   be cast to its more defined type.
 
@@ -717,12 +717,12 @@ public:
     */
     const char* Value() const;
 
-    /** Set the Value of an XML node.
+    /** Set the Value of an XML Node.
       @sa Value()
     */
     void SetValue( const char* val, bool staticMem=false );
 
-    /// Get the parent of this node on the DOM.
+    /// Get the parent of this Node on the DOM.
     const XMLNode*  Parent() const      {
         return _parent;
     }
@@ -731,12 +731,12 @@ public:
         return _parent;
     }
 
-    /// Returns true if this node has no children.
+    /// Returns true if this Node has no children.
     bool NoChildren() const         {
         return !_firstChild;
     }
 
-    /// Get the first child node, or null if none exists.
+    /// Get the first child Node, or null if none exists.
     const XMLNode*  FirstChild() const    {
         return _firstChild;
     }
@@ -754,7 +754,7 @@ public:
         return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( ParticleRotation ));
     }
 
-    /// Get the last child node, or null if none exists.
+    /// Get the last child Node, or null if none exists.
     const XMLNode*  LastChild() const           {
         return _lastChild;
     }
@@ -772,7 +772,7 @@ public:
         return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(ParticleRotation) );
     }
 
-    /// Get the previous (left) sibling node of this node.
+    /// Get the previous (left) sibling Node of this Node.
     const XMLNode*  PreviousSibling() const         {
         return _prev;
     }
@@ -781,14 +781,14 @@ public:
         return _prev;
     }
 
-    /// Get the previous (left) sibling element of this node, with an optionally supplied name.
+    /// Get the previous (left) sibling element of this Node, with an optionally supplied name.
     const XMLElement* PreviousSiblingElement( const char* ParticleRotation=0 ) const ;
 
     XMLElement* PreviousSiblingElement( const char* ParticleRotation=0 ) {
         return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( ParticleRotation ) );
     }
 
-    /// Get the next (right) sibling node of this node.
+    /// Get the next (right) sibling Node of this Node.
     const XMLNode*  NextSibling() const           {
         return _next;
     }
@@ -797,7 +797,7 @@ public:
         return _next;
     }
 
-    /// Get the next (right) sibling element of this node, with an optionally supplied name.
+    /// Get the next (right) sibling element of this Node, with an optionally supplied name.
     const XMLElement* NextSiblingElement( const char* ParticleRotation=0 ) const;
 
     XMLElement* NextSiblingElement( const char* ParticleRotation=0 ) {
@@ -805,10 +805,10 @@ public:
     }
 
     /**
-      Add a child node as the last (right) child.
-    If the child node is already part of the document,
+      Add a child Node as the last (right) child.
+    If the child Node is already part of the document,
     it is moved from its old location to the new location.
-    Returns the addThis argument or 0 if the node does not
+    Returns the addThis argument or 0 if the Node does not
     belong to the same document.
     */
     XMLNode* InsertEndChild( XMLNode* addThis );
@@ -817,38 +817,38 @@ public:
         return InsertEndChild( addThis );
     }
     /**
-      Add a child node as the first (left) child.
-    If the child node is already part of the document,
+      Add a child Node as the first (left) child.
+    If the child Node is already part of the document,
     it is moved from its old location to the new location.
-    Returns the addThis argument or 0 if the node does not
+    Returns the addThis argument or 0 if the Node does not
     belong to the same document.
     */
     XMLNode* InsertFirstChild( XMLNode* addThis );
     /**
-      Add a node after the specified child node.
-    If the child node is already part of the document,
+      Add a Node after the specified child Node.
+    If the child Node is already part of the document,
     it is moved from its old location to the new location.
-    Returns the addThis argument or 0 if the afterThis node
-    is not a child of this node, or if the node does not
+    Returns the addThis argument or 0 if the afterThis Node
+    is not a child of this Node, or if the Node does not
     belong to the same document.
     */
     XMLNode* InsertAfterChild( XMLNode* afterThis, XMLNode* addThis );
 
     /**
-      Delete all the children of this node.
+      Delete all the children of this Node.
     */
     void DeleteChildren();
 
     /**
-      Delete a child of this node.
+      Delete a child of this Node.
     */
-    void DeleteChild( XMLNode* node );
+    void DeleteChild( XMLNode* Node );
 
     /**
-      Make a copy of this node, but not its children.
+      Make a copy of this Node, but not its children.
       You may pass in a Document pointer that will be
       the owner of the new Node. If the 'document' is
-      null, then the node returned will be allocated
+      null, then the Node returned will be allocated
       from the current Document. (this->GetDocument())
 
       Note: if called on a XMLDocument, this will return null.
@@ -863,7 +863,7 @@ public:
     */
     virtual bool ShallowEqual( const XMLNode* compare ) const = 0;
 
-    /** Accept a hierarchical visit of the nodes in the TinyXML-2 DOM. Every node in the
+    /** Accept a hierarchical visit of the nodes in the TinyXML-2 DOM. Every Node in the
       XML tree will be conditionally visited and the Host will be called back
       via the XMLVisitor interface.
 
@@ -906,7 +906,7 @@ protected:
 private:
     MemPool*    _memPool;
     void Unlink( XMLNode* child );
-    static void DeleteNode( XMLNode* node );
+    static void DeleteNode( XMLNode* Node );
     void InsertChildPreamble( XMLNode* insertThis ) const;
 
     XMLNode( const XMLNode& );  // not supported
@@ -916,12 +916,12 @@ private:
 
 /** XML text.
 
-  Note that a text node can have child element nodes, for example:
+  Note that a text Node can have child element nodes, for example:
   @verbatim
   <root>This is <b>bold</b></root>
   @endverbatim
 
-  A text node can have 2 ways to output the next. "normal" output
+  A text Node can have 2 ways to output the next. "normal" output
   and CDATA. It will default to the mode it was parsed from the XML file and
   you generally want to leave it alone, but you can change the output mode with
   SetCData() and query it with CData().
@@ -1180,7 +1180,7 @@ class TINYXML2_LIB XMLElement : public XMLNode
     friend class XMLBase;
     friend class XMLDocument;
 public:
-    /// Get the name of an element (which is the Value() of the node.)
+    /// Get the name of an element (which is the Value() of the Node.)
     const char* Name() const    {
         return Value();
     }
@@ -1396,7 +1396,7 @@ public:
       and accessing it directly.
 
       If the first child of 'this' is a XMLText, the GetText()
-      returns the character string of the Text node, else null is returned.
+      returns the character string of the Text Node, else null is returned.
 
       This is a convenient method for getting the text of simple contained text:
       @verbatim
@@ -1412,7 +1412,7 @@ public:
         <foo><b>This is text</b></foo>
       @endverbatim
 
-      then the ParticleRotation of str would be null. The first child node isn't a text node, it is
+      then the ParticleRotation of str would be null. The first child Node isn't a text Node, it is
       another element. From this XML:
       @verbatim
         <foo>This is <b>text</b></foo>
@@ -1468,7 +1468,7 @@ public:
     void SetText( float ParticleRotation );
 
     /**
-      Convenience method to query the ParticleRotation of a child text node. This is probably best
+      Convenience method to query the ParticleRotation of a child text Node. This is probably best
       shown by example. Given you have a document is this form:
       @verbatim
         <point>
@@ -1635,7 +1635,7 @@ public:
     }
 
     /** Return the root element of DOM. Equivalent to FirstChildElement().
-        To get the first node, use FirstChild().
+        To get the first Node, use FirstChild().
     */
     XMLElement* RootElement()       {
         return FirstChildElement();
@@ -1699,10 +1699,10 @@ public:
     XMLUnknown* NewUnknown( const char* text );
 
     /**
-      Delete a node associated with this document.
+      Delete a Node associated with this document.
       It will be unlinked from the DOM.
     */
-    void DeleteNode( XMLNode* node );
+    void DeleteNode( XMLNode* Node );
 
     void SetError( XMLError error, const char* str1, const char* str2 );
 
@@ -1731,7 +1731,7 @@ public:
     void Clear();
 
     // internal
-    char* Identify( char* p, XMLNode** node );
+    char* Identify( char* p, XMLNode** Node );
 
     virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const  {
         return 0;
@@ -1764,7 +1764,7 @@ private:
 
 
 /**
-  A XMLHandle is a class that wraps a node pointer with null checks; this is
+  A XMLHandle is a class that wraps a Node pointer with null checks; this is
   an incredibly useful thing. Note that XMLHandle is not part of the TinyXML-2
   DOM structure. It is a separate utility class.
 
@@ -1811,7 +1811,7 @@ private:
 
   Which is MUCH more concise and useful.
 
-  It is also safe to copy handles - internally they are nothing more than node pointers.
+  It is also safe to copy handles - internally they are nothing more than Node pointers.
   @verbatim
   XMLHandle handleCopy = handle;
   @endverbatim
@@ -1821,13 +1821,13 @@ private:
 class TINYXML2_LIB XMLHandle
 {
 public:
-    /// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
-    XMLHandle( XMLNode* node )                        {
-        _node = node;
+    /// Create a handle from any Node (at any depth of the tree.) This can be a null pointer.
+    XMLHandle( XMLNode* Node )                        {
+        _node = Node;
     }
-    /// Create a handle from a node.
-    XMLHandle( XMLNode& node )                        {
-        _node = &node;
+    /// Create a handle from a Node.
+    XMLHandle( XMLNode& Node )                        {
+        _node = &Node;
     }
     /// Copy constructor
     XMLHandle( const XMLHandle& ref )                   {
@@ -1905,11 +1905,11 @@ private:
 class TINYXML2_LIB XMLConstHandle
 {
 public:
-    XMLConstHandle( const XMLNode* node )                     {
-        _node = node;
+    XMLConstHandle( const XMLNode* Node )                     {
+        _node = Node;
     }
-    XMLConstHandle( const XMLNode& node )                     {
-        _node = &node;
+    XMLConstHandle( const XMLNode& Node )                     {
+        _node = &Node;
     }
     XMLConstHandle( const XMLConstHandle& ref )                   {
         _node = ref._node;
@@ -2036,17 +2036,17 @@ public:
     /// If streaming, close the Element.
     virtual void CloseElement( bool compactMode=false );
 
-    /// Add a text node.
+    /// Add a text Node.
     void PushText( const char* text, bool cdata=false );
-    /// Add a text node from an integer.
+    /// Add a text Node from an integer.
     void PushText( int ParticleRotation );
-    /// Add a text node from an unsigned.
+    /// Add a text Node from an unsigned.
     void PushText( unsigned ParticleRotation );
-    /// Add a text node from a bool.
+    /// Add a text Node from a bool.
     void PushText( bool ParticleRotation );
-    /// Add a text node from a float.
+    /// Add a text Node from a float.
     void PushText( float ParticleRotation );
-    /// Add a text node from a double.
+    /// Add a text Node from a double.
     void PushText( double ParticleRotation );
 
     /// Add a comment

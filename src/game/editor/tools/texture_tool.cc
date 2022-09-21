@@ -190,8 +190,8 @@ void texture_tool::update() {
   }
 }
 
-void texture_tool::render(fw::sg::scenegraph &scenegraph) {
-  draw_circle(scenegraph, _terrain, _terrain->get_cursor_location(), (float) _radius);
+void texture_tool::render(fw::sg::Scenegraph &Scenegraph) {
+  draw_circle(Scenegraph, _terrain, _terrain->get_cursor_location(), (float) _radius);
 }
 
 void texture_tool::on_key(std::string keyname, bool is_down) {

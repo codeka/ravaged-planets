@@ -85,8 +85,8 @@ public:
     return color_;
   }
 
-  /** Renders the mesh to the given scenegraph. */
-  void render(sg::scenegraph &sg, fw::Matrix const &transform = fw::identity());
+  /** Renders the mesh to the given Scenegraph. */
+  void render(sg::Scenegraph &sg, fw::Matrix const &transform = fw::identity());
 };
 
 }

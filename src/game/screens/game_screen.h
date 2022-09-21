@@ -5,7 +5,7 @@
 
 namespace fw {
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 }
 
@@ -34,7 +34,7 @@ public:
   virtual void hide();
 
   virtual void update();
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 }

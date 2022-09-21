@@ -99,7 +99,7 @@ void entity_icon::render() {
     return;
   }
 
-  fw::sg::scenegraph sg;
+  fw::sg::Scenegraph sg;
   sg.set_clear_color(fw::Color(0, 0, 0, 0));
 
   fw::LookAtCamera cam;
@@ -108,8 +108,8 @@ void entity_icon::render() {
   sg.push_camera(&cam);
 
   fw::Vector sun(0.485f, 0.485f, 0.727f);
-  std::shared_ptr <fw::sg::light> light(new fw::sg::light(sun * 200.0f, sun * -1, true));
-  sg.add_light(light);
+  std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
+  sg.add_light(Light);
 
   model_->render(sg, fw::rotate_axis_angle(fw::Vector(0, 1, 0), _rotation));
   fw::render(sg, _framebuffer, false);

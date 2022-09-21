@@ -165,15 +165,15 @@ void world::update() {
     _entities->update();
 }
 
-void world::render(fw::sg::scenegraph &scenegraph) {
+void world::render(fw::sg::Scenegraph &Scenegraph) {
   if (!_initialized) {
     return;
   }
 
-  _terrain->render(scenegraph);
+  _terrain->render(Scenegraph);
 
   if (_entities != nullptr) {
-    _entities->render(scenegraph);
+    _entities->render(Scenegraph);
   }
 }
 

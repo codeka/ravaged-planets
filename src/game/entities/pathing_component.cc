@@ -41,7 +41,7 @@ void pathing_component::update(float dt) {
     fw::Vector dir = position_->get_direction_to(goal);
     dir[1] = 0.0f; // ignore height component
     if (dir.length_squared() <= 1.0f) {
-      // if we're "at" this node, increment the _curr_goal_node and try again
+      // if we're "at" this Node, increment the _curr_goal_node and try again
       _curr_goal_node++;
       continue;
     }

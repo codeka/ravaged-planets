@@ -75,27 +75,27 @@ void editor_screen::update() {
     _tool->update();
 }
 
-void editor_screen::render(fw::sg::scenegraph &scenegraph) {
+void editor_screen::render(fw::sg::Scenegraph &Scenegraph) {
   if (_world != nullptr) {
-    // set up the properties of the sun that we'll use to light and also cast shadows
+    // set up the properties of the sun that we'll use to Light and also cast shadows
     fw::Vector sun(0.485f, 0.485f, 0.727f);
     fw::Camera *old_cam = fw::framework::get_instance()->get_camera();
     fw::Vector cam_pos = old_cam->get_position();
     fw::Vector cam_dir = old_cam->get_forward();
     fw::Vector lookat = _world->get_terrain()->get_cursor_location(cam_pos, cam_dir);
 
-    std::shared_ptr <fw::sg::light> light(new fw::sg::light(lookat + sun * 200.0f, sun * -1, true));
-    scenegraph.add_light(light);
+    std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(lookat + sun * 200.0f, sun * -1, true));
+    Scenegraph.add_light(Light);
   }
 
   if (_world != nullptr) {
-    _world->render(scenegraph);
+    _world->render(Scenegraph);
   }
 
   if (_tool != nullptr) {
     // Only render the tool if the mouse isn't currently over a widget.
     if (!fw::framework::get_instance()->get_gui()->is_mouse_over_widget()) {
-      _tool->render(scenegraph);
+      _tool->render(Scenegraph);
     }
   }
 }

@@ -11,7 +11,7 @@ class Bitmap;
 class texture;
 
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 }
 
@@ -66,7 +66,7 @@ public:
   virtual void initialize();
   virtual void destroy();
   virtual void update();
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 
   void pause();
   void unpause();

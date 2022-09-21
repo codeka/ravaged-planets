@@ -93,7 +93,7 @@ public:
   }
 
   void update();
-  void render(fw::sg::scenegraph &scenegraph);
+  void render(fw::sg::Scenegraph &Scenegraph);
 
   // gets the patch_manager which manages the patches of entities.
   patch_manager *get_patch_manager() const {

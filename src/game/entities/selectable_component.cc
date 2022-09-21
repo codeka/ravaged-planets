@@ -86,7 +86,7 @@ void selectable_component::unhighlight() {
   _is_highlighted = false;
 }
 
-void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform) {
+void selectable_component::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
   if (!vb_) {
     populate_buffers();
   }
@@ -114,15 +114,15 @@ void selectable_component::render(fw::sg::scenegraph &scenegraph, fw::Matrix con
     m *= fw::translation(fw::Vector(0.0f, 0.2f, 0.0f)); // lift it off the ground a bit
     m = fw::scale(_selection_radius) * m; // scale it to the size of our selection radius
 
-    std::shared_ptr<fw::sg::node> node(new fw::sg::node());
-    node->set_vertex_buffer(vb_);
-    node->set_index_buffer(ib_);
-    node->set_shader(shader_);
-    node->set_shader_parameters(shader_params);
-    node->set_world_matrix(m);
-    node->set_primitive_type(fw::sg::primitive_trianglelist);
-    node->set_cast_shadows(false);
-    scenegraph.add_node(node);
+    std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
+    Node->set_vertex_buffer(vb_);
+    Node->set_index_buffer(ib_);
+    Node->set_shader(shader_);
+    Node->set_shader_parameters(shader_params);
+    Node->set_world_matrix(m);
+    Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
+    Node->set_cast_shadows(false);
+    Scenegraph.add_node(Node);
   }
 }
 }

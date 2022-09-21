@@ -25,7 +25,7 @@ class Gui;
 }
 
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 
 // This is the "interface" that the main game class must implement.
@@ -53,8 +53,8 @@ public:
   }
 
   // This is called each frame to perform the "render" phase - we need to basically add
-  // nodes to the given scenegraph object
-  virtual void render(sg::scenegraph &scenegraph) {
+  // nodes to the given Scenegraph object
+  virtual void render(sg::Scenegraph &Scenegraph) {
   }
 };
 
@@ -104,7 +104,7 @@ private:
   void update_proc();
 
   std::list<screenshot_request *> _screenshots;
-  void take_screenshots(sg::scenegraph &scenegraph);
+  void take_screenshots(sg::Scenegraph &Scenegraph);
 
   void language_initialize();
 

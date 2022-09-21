@@ -81,13 +81,13 @@ void entity::update(float dt) {
   }
 }
 
-void entity::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform) {
+void entity::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
   BOOST_FOREACH(auto &pair, _components) {
-    pair.second->render(scenegraph, transform);
+    pair.second->render(Scenegraph, transform);
   }
 
   if (_debug_view != nullptr) {
-    _debug_view->render(scenegraph, transform);
+    _debug_view->render(Scenegraph, transform);
   }
 }
 

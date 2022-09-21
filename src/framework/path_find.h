@@ -3,51 +3,45 @@
 #include <framework/vector.h>
 
 namespace fw {
-struct path_node;
+struct PathNode;
 
-/** Class for finding a path between point "A" and point "B" in a grid. */
-class path_find {
+// Class for finding a path between point "A" and point "B" in a grid.
+class PathFfind {
 private:
   int _width;
   int _length;
-  path_node *_nodes;
+  PathNode *_nodes;
   int _run_no;
 
-  path_node *get_node(fw::Vector const &loc) const;
+  PathNode *get_node(fw::Vector const &loc) const;
   bool is_passable(fw::Vector const &start, fw::Vector const &end) const;
 
 public:
-  path_find(int width, int length, std::vector<bool> const &passability);
-  virtual ~path_find();
+  PathFfind(int width, int length, std::vector<bool> const &passability);
+  virtual ~PathFfind();
 
-  /**
-   * Finds a path between the given 'start' and 'end' vectors. We ignore the y component of the vectors and just look
-   * at the (x,y) components. The 'path' is populated with the path we found and we'll assume the agent will travel
-   * between it's current location and the first element of path, then to the second element and so on traveling in a
-   * straight line each time.
-   *
-   * Returns true if a path was found, false if no path exists
-   */
+  // Finds a path between the given 'start' and 'end' vectors. We ignore the y component of the vectors and just look
+  // at the (x,y) components. The 'path' is populated with the path we found and we'll assume the agent will travel
+  // between it's current location and the first element of path, then to the second element and so on traveling in a
+  // straight line each time.
+  //
+  // Returns true if a path was found, false if no path exists
   virtual bool find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end);
 
-  /**
-   * Simplifies the given path by removing any unneeded nodes. For example, if you have an "L" shaped path where a
-   * straight line will do, this will turn the path into a straight line. Also, if you have lots of nodes in a straight
-   * line, this will remove all but the first & last, etc.
-   *
-   * Note: the path in full_path is not modified, but the simplified path is built up in new_path.
-   */
+  // Simplifies the given path by removing any unneeded nodes. For example, if you have an "L" shaped path where a
+  // straight line will do, this will turn the path into a straight line. Also, if you have lots of nodes in a straight
+  // line, this will remove all but the first & last, etc.
+  //
+  // Note: the path in full_path is not modified, but the simplified path is built up in new_path.
   virtual void simplify_path(std::vector<fw::Vector> const &full_path, std::vector<fw::Vector> &new_path);
 };
 
-/**
- * This specialization of path_find adds some timing methods and it also keeps the final node structure around
- * for visualization
- */
-class timed_path_find: public path_find {
+// This specialization of PathFfind adds some timing methods and it also keeps the final Node structure around
+// for visualization
+class TimedPathFind: public PathFfind {
 public:
-  timed_path_find(int width, int length, std::vector<bool> &passability);
-  virtual ~timed_path_find();
+  TimedPathFind(int width, int length, std::vector<bool> &passability);
+  virtual ~TimedPathFind();
 
   // the total time the last find() call took, in seconds.
   float total_time;

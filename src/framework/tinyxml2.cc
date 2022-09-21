@@ -537,14 +537,14 @@ bool XMLUtil::ToDouble( const char* str, double* ParticleRotation )
 }
 
 
-char* XMLDocument::Identify( char* p, XMLNode** node )
+char* XMLDocument::Identify( char* p, XMLNode** Node )
 {
-    TIXMLASSERT( node );
+    TIXMLASSERT( Node );
     TIXMLASSERT( p );
     char* const start = p;
     p = XMLUtil::SkipWhiteSpace( p );
     if( !*p ) {
-        *node = 0;
+        *Node = 0;
         TIXMLASSERT( p );
         return p;
     }
@@ -607,7 +607,7 @@ char* XMLDocument::Identify( char* p, XMLNode** node )
 
     TIXMLASSERT( returnNode );
     TIXMLASSERT( p );
-    *node = returnNode;
+    *Node = returnNode;
     return p;
 }
 
@@ -616,8 +616,8 @@ bool XMLDocument::Accept( XMLVisitor* visitor ) const
 {
     TIXMLASSERT( visitor );
     if ( visitor->VisitEnter( *this ) ) {
-        for ( const XMLNode* node=FirstChild(); node; node=node->NextSibling() ) {
-            if ( !node->Accept( visitor ) ) {
+        for ( const XMLNode* Node=FirstChild(); Node; Node=Node->NextSibling() ) {
+            if ( !Node->Accept( visitor ) ) {
                 break;
             }
         }
@@ -667,10 +667,10 @@ void XMLNode::DeleteChildren()
     while( _firstChild ) {
         TIXMLASSERT( _lastChild );
         TIXMLASSERT( _firstChild->_document == _document );
-        XMLNode* node = _firstChild;
-        Unlink( node );
+        XMLNode* Node = _firstChild;
+        Unlink( Node );
 
-        DeleteNode( node );
+        DeleteNode( Node );
     }
     _firstChild = _lastChild = 0;
 }
@@ -698,12 +698,12 @@ void XMLNode::Unlink( XMLNode* child )
 }
 
 
-void XMLNode::DeleteChild( XMLNode* node )
+void XMLNode::DeleteChild( XMLNode* Node )
 {
-    TIXMLASSERT( node );
-    TIXMLASSERT( node->_document == _document );
-    TIXMLASSERT( node->_parent == this );
-    DeleteNode( node );
+    TIXMLASSERT( Node );
+    TIXMLASSERT( Node->_document == _document );
+    TIXMLASSERT( Node->_parent == this );
+    DeleteNode( Node );
 }
 
 
@@ -784,7 +784,7 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
     }
 
     if ( afterThis->_next == 0 ) {
-        // The last node or the only node.
+        // The last Node or the only Node.
         return InsertEndChild( addThis );
     }
     InsertChildPreamble( addThis );
@@ -801,8 +801,8 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 
 const XMLElement* XMLNode::FirstChildElement( const char* ParticleRotation ) const
 {
-    for( const XMLNode* node = _firstChild; node; node = node->_next ) {
-        const XMLElement* element = node->ToElement();
+    for( const XMLNode* Node = _firstChild; Node; Node = Node->_next ) {
+        const XMLElement* element = Node->ToElement();
         if ( element ) {
             if ( !ParticleRotation || XMLUtil::StringEqual( element->Name(), ParticleRotation ) ) {
                 return element;
@@ -815,8 +815,8 @@ const XMLElement* XMLNode::FirstChildElement( const char* ParticleRotation ) con
 
 const XMLElement* XMLNode::LastChildElement( const char* ParticleRotation ) const
 {
-    for( const XMLNode* node = _lastChild; node; node = node->_prev ) {
-        const XMLElement* element = node->ToElement();
+    for( const XMLNode* Node = _lastChild; Node; Node = Node->_prev ) {
+        const XMLElement* element = Node->ToElement();
         if ( element ) {
             if ( !ParticleRotation || XMLUtil::StringEqual( element->Name(), ParticleRotation ) ) {
                 return element;
@@ -829,10 +829,10 @@ const XMLElement* XMLNode::LastChildElement( const char* ParticleRotation ) cons
 
 const XMLElement* XMLNode::NextSiblingElement( const char* ParticleRotation ) const
 {
-    for( const XMLNode* node = _next; node; node = node->_next ) {
-        const XMLElement* element = node->ToElement();
+    for( const XMLNode* Node = _next; Node; Node = Node->_next ) {
+        const XMLElement* element = Node->ToElement();
         if ( element
-                && (!ParticleRotation || XMLUtil::StringEqual( ParticleRotation, node->Value() ))) {
+                && (!ParticleRotation || XMLUtil::StringEqual( ParticleRotation, Node->Value() ))) {
             return element;
         }
     }
@@ -842,10 +842,10 @@ const XMLElement* XMLNode::NextSiblingElement( const char* ParticleRotation ) co
 
 const XMLElement* XMLNode::PreviousSiblingElement( const char* ParticleRotation ) const
 {
-    for( const XMLNode* node = _prev; node; node = node->_prev ) {
-        const XMLElement* element = node->ToElement();
+    for( const XMLNode* Node = _prev; Node; Node = Node->_prev ) {
+        const XMLElement* element = Node->ToElement();
         if ( element
-                && (!ParticleRotation || XMLUtil::StringEqual( ParticleRotation, node->Value() ))) {
+                && (!ParticleRotation || XMLUtil::StringEqual( ParticleRotation, Node->Value() ))) {
             return element;
         }
     }
@@ -869,36 +869,36 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
     // element, and the names must match. BUT the tricky bit is that the closing
     // element will be read by the child.
     //
-    // 'endTag' is the end tag for this node, it is returned by a call to a child.
+    // 'endTag' is the end tag for this Node, it is returned by a call to a child.
     // 'parentEnd' is the end tag for the parent, which is filled in and returned.
 
     while( p && *p ) {
-        XMLNode* node = 0;
+        XMLNode* Node = 0;
 
-        p = _document->Identify( p, &node );
-        if ( node == 0 ) {
+        p = _document->Identify( p, &Node );
+        if ( Node == 0 ) {
             break;
         }
 
         StrPair endTag;
-        p = node->ParseDeep( p, &endTag );
+        p = Node->ParseDeep( p, &endTag );
         if ( !p ) {
-            DeleteNode( node );
+            DeleteNode( Node );
             if ( !_document->Error() ) {
                 _document->SetError( XML_ERROR_PARSING, 0, 0 );
             }
             break;
         }
 
-        XMLElement* ele = node->ToElement();
+        XMLElement* ele = Node->ToElement();
         if ( ele ) {
             // We read the end tag. Return it to the parent.
             if ( ele->ClosingType() == XMLElement::CLOSING ) {
                 if ( parentEnd ) {
                     ele->value_.TransferTo( parentEnd );
                 }
-                node->_memPool->SetTracked();   // created and then immediately deleted.
-                DeleteNode( node );
+                Node->_memPool->SetTracked();   // created and then immediately deleted.
+                DeleteNode( Node );
                 return p;
             }
 
@@ -914,29 +914,29 @@ char* XMLNode::ParseDeep( char* p, StrPair* parentEnd )
                 if ( ele->ClosingType() != XMLElement::OPEN ) {
                     mismatch = true;
                 }
-                else if ( !XMLUtil::StringEqual( endTag.GetStr(), node->Value() ) ) {
+                else if ( !XMLUtil::StringEqual( endTag.GetStr(), Node->Value() ) ) {
                     mismatch = true;
                 }
             }
             if ( mismatch ) {
-                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, node->Value(), 0 );
-                DeleteNode( node );
+                _document->SetError( XML_ERROR_MISMATCHED_ELEMENT, Node->Value(), 0 );
+                DeleteNode( Node );
                 break;
             }
         }
-        InsertEndChild( node );
+        InsertEndChild( Node );
     }
     return 0;
 }
 
-void XMLNode::DeleteNode( XMLNode* node )
+void XMLNode::DeleteNode( XMLNode* Node )
 {
-    if ( node == 0 ) {
+    if ( Node == 0 ) {
         return;
     }
-    MemPool* pool = node->_memPool;
-    node->~XMLNode();
-    pool->Free( node );
+    MemPool* pool = Node->_memPool;
+    Node->~XMLNode();
+    pool->Free( Node );
 }
 
 void XMLNode::InsertChildPreamble( XMLNode* insertThis ) const
@@ -1645,8 +1645,8 @@ bool XMLElement::Accept( XMLVisitor* visitor ) const
 {
     TIXMLASSERT( visitor );
     if ( visitor->VisitEnter( *this, _rootAttribute ) ) {
-        for ( const XMLNode* node=FirstChild(); node; node=node->NextSibling() ) {
-            if ( !node->Accept( visitor ) ) {
+        for ( const XMLNode* Node=FirstChild(); Node; Node=Node->NextSibling() ) {
+            if ( !Node->Accept( visitor ) ) {
                 break;
             }
         }
@@ -1799,20 +1799,20 @@ static FILE* callfopen( const char* filepath, const char* mode )
     return fp;
 }
 
-void XMLDocument::DeleteNode( XMLNode* node ) {
-    TIXMLASSERT( node );
-    TIXMLASSERT(node->_document == this );
-    if (node->_parent) {
-        node->_parent->DeleteChild( node );
+void XMLDocument::DeleteNode( XMLNode* Node ) {
+    TIXMLASSERT( Node );
+    TIXMLASSERT(Node->_document == this );
+    if (Node->_parent) {
+        Node->_parent->DeleteChild( Node );
     }
     else {
         // Isn't in the tree.
         // Use the parent delete.
         // Also, we need to mark it tracked: we 'know'
         // it was never used.
-        node->_memPool->SetTracked();
+        Node->_memPool->SetTracked();
         // Call the static XMLNode version:
-        XMLNode::DeleteNode(node);
+        XMLNode::DeleteNode(Node);
     }
 }
 

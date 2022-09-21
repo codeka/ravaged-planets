@@ -23,7 +23,7 @@ public:
   virtual void update();
 
   // renders this screen, this is only called if we're the active screen
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 
   // create a new map to edit
   void new_map(int width, int height);

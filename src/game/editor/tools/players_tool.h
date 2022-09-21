@@ -26,7 +26,7 @@ public:
   virtual void activate();
   virtual void deactivate();
 
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 
   // sets the current player_number we're editing the starting location for
   void set_curr_player(int player_no);

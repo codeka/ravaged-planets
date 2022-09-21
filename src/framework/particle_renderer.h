@@ -15,7 +15,7 @@ class Particle;
 class ParticleManager;
 
 /**
- * The ParticleRenderer is responsible for rendering particles. We create our own special scenegraph node that does
+ * The ParticleRenderer is responsible for rendering particles. We create our own special Scenegraph Node that does
  * the main work.
  */
 class ParticleRenderer {
@@ -44,7 +44,7 @@ public:
   ~ParticleRenderer();
 
   void initialize(Graphics *g);
-  void render(sg::scenegraph &scenegraph, ParticleList &particles);
+  void render(sg::Scenegraph &Scenegraph, ParticleList &particles);
 };
 
 }

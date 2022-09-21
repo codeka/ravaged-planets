@@ -9,7 +9,7 @@ class Window;
 class Widget;
 }
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 }
 
@@ -72,7 +72,7 @@ public:
   void add_circle(fw::Vector const &center, float radius,
       fw::Color const &col);
 
-  void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform);
+  void render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform);
 };
 
 }

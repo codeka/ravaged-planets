@@ -24,7 +24,7 @@ void ModelNode::initialize(Model *mdl) {
     set_vertex_buffer(mesh->get_vertex_buffer());
     set_index_buffer(mesh->get_index_buffer());
     set_shader(mesh->get_shader());
-    set_primitive_type(sg::primitive_trianglelist);
+    set_primitive_type(sg::kTriangleList);
 
     std::shared_ptr<shader_parameters> params = get_shader()->create_parameters();
     if (mdl->texture) {
@@ -34,12 +34,12 @@ void ModelNode::initialize(Model *mdl) {
     set_shader_parameters(params);
   }
 
-  BOOST_FOREACH(std::shared_ptr<node> node, _children) {
-    std::dynamic_pointer_cast<ModelNode>(node)->initialize(mdl);
+  BOOST_FOREACH(std::shared_ptr<Node> Node, _children) {
+    std::dynamic_pointer_cast<ModelNode>(Node)->initialize(mdl);
   }
 }
 
-void ModelNode::render(sg::scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
+void ModelNode::render(sg::Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
   if (model_->get_wireframe()) {
 //    device = fw::framework::get_instance()->get_graphics()->get_device();
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
@@ -49,15 +49,15 @@ void ModelNode::render(sg::scenegraph *sg, fw::Matrix const &model_matrix /*= fw
     get_shader_parameters()->set_color("mesh_color", color_);
   }
 
-  node::render(sg, transform * model_matrix);
+  Node::render(sg, transform * model_matrix);
 
   if (model_->get_wireframe()) {
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
   }
 }
 
-void ModelNode::populate_clone(std::shared_ptr<sg::node> clone) {
-  node::populate_clone(clone);
+void ModelNode::populate_clone(std::shared_ptr<sg::Node> clone) {
+  Node::populate_clone(clone);
 
   std::shared_ptr<ModelNode> mnclone(std::dynamic_pointer_cast<ModelNode>(clone));
   mnclone->model_ = model_;
@@ -69,13 +69,13 @@ void ModelNode::populate_clone(std::shared_ptr<sg::node> clone) {
 
 void ModelNode::set_color(fw::Color color) {
   color_ = color;
-  BOOST_FOREACH(std::shared_ptr<node> &child_node, _children) {
+  BOOST_FOREACH(std::shared_ptr<Node> &child_node, _children) {
     std::dynamic_pointer_cast<ModelNode>(child_node)->set_color(color);
   }
 }
 
-std::shared_ptr<sg::node> ModelNode::clone() {
-  std::shared_ptr<sg::node> clone(new ModelNode());
+std::shared_ptr<sg::Node> ModelNode::clone() {
+  std::shared_ptr<sg::Node> clone(new ModelNode());
   populate_clone(clone);
   return clone;
 }

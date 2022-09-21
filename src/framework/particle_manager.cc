@@ -47,7 +47,7 @@ void ParticleManager::update(float dt) {
   }
 }
 
-void ParticleManager::render(sg::scenegraph &scenegraph) {
+void ParticleManager::render(sg::Scenegraph &Scenegraph) {
   {
     std::unique_lock<std::mutex> lock(mutex_);
     for(Particle *p : to_add_) {
@@ -56,7 +56,7 @@ void ParticleManager::render(sg::scenegraph &scenegraph) {
     to_add_.clear();
   }
 
-  renderer_->render(scenegraph, particles_);
+  renderer_->render(Scenegraph, particles_);
 
   // remove any dead particles
   particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [](Particle const *p) {

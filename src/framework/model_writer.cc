@@ -11,7 +11,7 @@
 
 namespace fw {
 
-void add_node(Node *pb_node, std::shared_ptr<ModelNode> node);
+void add_node(Node *pb_node, std::shared_ptr<ModelNode> Node);
 
 void ModelWriter::write(std::string const &filename, std::shared_ptr<Model> mdl) {
   write(filename, *mdl.get());
@@ -20,7 +20,7 @@ void ModelWriter::write(std::string const &filename, std::shared_ptr<Model> mdl)
 void ModelWriter::write(std::string const &filename, Model &mdl) {
   ::Model pb_model;
   pb_model.set_name("TODO");
-  BOOST_FOREACH(std::shared_ptr<fw::ModelMesh> mesh, mdl.meshes) {
+  for(auto& mesh : mdl.meshes) {
     std::shared_ptr<ModelMeshNoanim> mesh_noanim = std::dynamic_pointer_cast<ModelMeshNoanim>(mesh);
     Mesh *pb_mesh = pb_model.add_meshes();
     pb_mesh->set_vertices(mesh_noanim->vertices.data(), mesh_noanim->vertices.size() * sizeof(vertex::xyz_n_uv));

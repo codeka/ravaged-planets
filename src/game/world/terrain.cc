@@ -158,7 +158,7 @@ void terrain::update() {
   }
 }
 
-void terrain::render(fw::sg::scenegraph &scenegraph) {
+void terrain::render(fw::sg::Scenegraph &Scenegraph) {
   if (_layers.size() == 0)
     return;
 
@@ -176,20 +176,20 @@ void terrain::render(fw::sg::scenegraph &scenegraph) {
       std::shared_ptr<terrain_patch> patch(_patches[patch_index]);
 
       // set up the world matrix for this patch so that it's being rendered at the right offset
-      std::shared_ptr<fw::sg::node> node(new fw::sg::node());
+      std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
       fw::Matrix world = fw::translation(
           static_cast<float>(patch_x * PATCH_SIZE), 0,
           static_cast<float>(patch_z * PATCH_SIZE));
-      node->set_world_matrix(world);
+      Node->set_world_matrix(world);
 
-      // we have to set up the scenegraph node with these manually
-      node->set_vertex_buffer(patch->vb);
-      node->set_index_buffer(ib_);
-      node->set_shader(shader_);
-      node->set_shader_parameters(patch->shader_params);
-      node->set_primitive_type(fw::sg::primitive_trianglestrip);
+      // we have to set up the Scenegraph Node with these manually
+      Node->set_vertex_buffer(patch->vb);
+      Node->set_index_buffer(ib_);
+      Node->set_shader(shader_);
+      Node->set_shader_parameters(patch->shader_params);
+      Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleStrip);
 
-      scenegraph.add_node(node);
+      Scenegraph.add_node(Node);
     }
   }
 }
@@ -274,7 +274,7 @@ fw::Vector terrain::get_cursor_location(fw::Vector const &start, fw::Vector cons
   fw::Vector evec = start + (direction * 150.0f);
   fw::Vector svec = start + (direction * 5.0f);
 
-  // todo: we use the same algorithm here and in path_find::is_passable(fw::Vector const &start, fw::Vector const &end)
+  // todo: we use the same algorithm here and in PathFfind::is_passable(fw::Vector const &start, fw::Vector const &end)
   // can we factor it out?
   int sx = static_cast<int>(floor(svec[0] + 0.5f));
   int sz = static_cast<int>(floor(svec[2] + 0.5f));

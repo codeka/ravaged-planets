@@ -9,41 +9,41 @@
 
 namespace fw {
 
-struct path_node {
-  path_node *previous;
+struct PathNode {
+  PathNode *previous;
   float cost_to_goal;
   float cost_from_start;
   fw::Vector loc;
   bool passable;
 
   struct cost_comparer {
-    bool operator()(path_node const *lhs, path_node const *rhs) const {
+    bool operator()(PathNode const *lhs, PathNode const *rhs) const {
       float lhs_total_cost = lhs->cost_to_goal + lhs->cost_from_start;
       float rhs_total_cost = rhs->cost_to_goal + rhs->cost_from_start;
       return lhs_total_cost < rhs_total_cost;
     }
   };
 
-  std::multiset<path_node *, cost_comparer>::iterator open_it;
+  std::multiset<PathNode *, cost_comparer>::iterator open_it;
   int open_run_no;  // the run_no we were last inserted into the open set
   int closed_run_no;  // the run_no we were last inserted into the closed set
 };
 
-path_find::path_find(int width, int length, std::vector<bool> const &passability) :
+PathFfind::PathFfind(int width, int length, std::vector<bool> const &passability) :
     _width(width), _length(length), _run_no(0) {
-  _nodes = new path_node[_width * _length];
+  _nodes = new PathNode[_width * _length];
   for (int z = 0; z < _length; z++) {
     for (int x = 0; x < _width; x++) {
-      path_node &node = _nodes[(z * _width) + x];
-      node.loc = fw::Vector(x, 0, z);
-      node.open_run_no = 0;
-      node.closed_run_no = 0;
-      node.passable = passability[(z * _width) + x];
+      PathNode &Node = _nodes[(z * _width) + x];
+      Node.loc = fw::Vector(x, 0, z);
+      Node.open_run_no = 0;
+      Node.closed_run_no = 0;
+      Node.passable = passability[(z * _width) + x];
     }
   }
 }
 
-path_find::~path_find() {
+PathFfind::~PathFfind() {
   delete[] _nodes;
 }
 
@@ -52,28 +52,28 @@ float estimate_cost(fw::Vector const &from, fw::Vector const &to) {
   return abs(from[0] - to[0]) + abs(from[2] - to[2]);
 }
 
-void construct_path(std::vector<fw::Vector> &path, path_node const *goal_node) {
-  path_node const *node = goal_node;
-  while (node != 0) {
-    path.insert(path.begin(), node->loc);
-    node = node->previous;
+void construct_path(std::vector<fw::Vector> &path, PathNode const *goal_node) {
+  PathNode const *Node = goal_node;
+  while (Node != 0) {
+    path.insert(path.begin(), Node->loc);
+    Node = Node->previous;
   }
 }
 
-path_node *path_find::get_node(fw::Vector const &loc) const {
+PathNode *PathFfind::get_node(fw::Vector const &loc) const {
   int x = fw::constrain(static_cast<int>(loc[0]), _width);
   int z = fw::constrain(static_cast<int>(loc[2]), _length);
   return &_nodes[(z * _width) + x];
 }
 
-bool path_find::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
-  std::multiset<path_node *, path_node::cost_comparer> open_set;
+bool PathFfind::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
+  std::multiset<PathNode *, PathNode::cost_comparer> open_set;
 
   // increment the run_no (basically invalidating all the current path_nodes)
   _run_no++;
 
-  // add the initial node to the open set
-  path_node *start_node = get_node(start);
+  // add the initial Node to the open set
+  PathNode *start_node = get_node(start);
   start_node->previous = 0;
   start_node->open_run_no = _run_no;
   start_node->cost_to_goal = estimate_cost(start_node->loc, end);
@@ -82,8 +82,8 @@ bool path_find::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw:
 
   auto open_it = open_set.begin();
   while (open_it != open_set.end()) {
-    // grab the first node from the open set
-    path_node *curr = *open_it;
+    // grab the first Node from the open set
+    PathNode *curr = *open_it;
 
     // work out if we're at the goal
     float cost_to_goal = curr->cost_to_goal;
@@ -92,7 +92,7 @@ bool path_find::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw:
       return true;
     }
 
-    // we've now processed this node, add it to the closed set
+    // we've now processed this Node, add it to the closed set
     curr->closed_run_no = _run_no;
     curr->open_run_no = 0;
     open_set.erase(curr->open_it);
@@ -100,30 +100,30 @@ bool path_find::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw:
     // find all the neighbours and add them to the open set
     for (int dz = -1; dz <= 1; dz++) {
       for (int dx = -1; dx <= 1; dx++) {
-        // skip the current node!!
+        // skip the current Node!!
         if (dx == 0 && dz == 0)
           continue;
 
-        // find the node, if we've already visited and discounted it,
+        // find the Node, if we've already visited and discounted it,
         // don't visit it again
-        path_node *n = get_node(fw::Vector(curr->loc[0] + dx, 0.0f, curr->loc[2] + dz));
+        PathNode *n = get_node(fw::Vector(curr->loc[0] + dx, 0.0f, curr->loc[2] + dz));
 
         // if it's in the closed list already or not passable, don't even consider it
         if (n->closed_run_no == _run_no || !n->passable)
           continue;
 
-        // estimate the cost to the goal from this node
+        // estimate the cost to the goal from this Node
         float new_cost_to_goal = estimate_cost(n->loc, end);
 
         // the actual cost from the start: sqrt(2) for diagonals; 1 for straights
         // (that's the actual length of the line...)
         float new_cost_from_start = curr->cost_from_start + (dx == 0 || dz == 0 ? 1.0f : 1.41421356f);
 
-        // if it's a non-visited node, or if it's cheaper to travel this path than
+        // if it's a non-visited Node, or if it's cheaper to travel this path than
         // go directly from that one, then use this path instead
         if (n->open_run_no != _run_no
             || (new_cost_from_start + new_cost_to_goal) < (n->cost_from_start + n->cost_to_goal)) {
-          // the next closest node to this one is the one we're already looking at
+          // the next closest Node to this one is the one we're already looking at
           n->previous = curr;
 
           n->cost_to_goal = new_cost_to_goal;
@@ -148,7 +148,7 @@ bool path_find::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw:
   return false;
 }
 
-bool path_find::is_passable(fw::Vector const &start, fw::Vector const &end) const {
+bool PathFfind::is_passable(fw::Vector const &start, fw::Vector const &end) const {
   // we need to determine whether a straight line from start to end is passable
   // or not. We'll trace a line from start to end then look up all the nodes
   // in between
@@ -172,8 +172,8 @@ bool path_find::is_passable(fw::Vector const &start, fw::Vector const &end) cons
   float x = static_cast<float>(sx);
   float z = static_cast<float>(sz);
   for (int i = 0; i <= steps; i++) {
-    path_node *node = get_node(fw::Vector(x, 0, z));
-    if (!node->passable)
+    PathNode *Node = get_node(fw::Vector(x, 0, z));
+    if (!Node->passable)
       return false;
 
     x += xinc;
@@ -183,22 +183,22 @@ bool path_find::is_passable(fw::Vector const &start, fw::Vector const &end) cons
   return true;
 }
 
-void path_find::simplify_path(std::vector<fw::Vector> const &full_path, std::vector<fw::Vector> &new_path) {
+void PathFfind::simplify_path(std::vector<fw::Vector> const &full_path, std::vector<fw::Vector> &new_path) {
   std::vector<fw::Vector>::const_iterator fp_it = full_path.begin();
   if (fp_it == full_path.end())
     return;
 
-  // the first node in full_path is also the first node in new_path
+  // the first Node in full_path is also the first Node in new_path
   new_path.push_back(*fp_it);
   fw::Vector start = new_path[0];
 
-  ++fp_it; // move to the second node now...
+  ++fp_it; // move to the second Node now...
   for (; fp_it != full_path.end(); ++fp_it) {
     fw::Vector end = *fp_it;
 
     if (!is_passable(start, end)) {
       // if we can't go from start to end without passing over an impassable
-      // node, then we'll have to add (fp_it-1) to the new_path and start again
+      // Node, then we'll have to add (fp_it-1) to the new_path and start again
       // from there
 
       new_path.push_back(*(fp_it - 1));
@@ -213,18 +213,18 @@ void path_find::simplify_path(std::vector<fw::Vector> const &full_path, std::vec
 
 //-------------------------------------------------------------------------
 
-timed_path_find::timed_path_find(int width, int length, std::vector<bool> &passability) :
-    path_find(width, length, passability), total_time(0) {
+TimedPathFind::TimedPathFind(int width, int length, std::vector<bool> &passability) :
+    PathFfind(width, length, passability), total_time(0) {
 }
 
-timed_path_find::~timed_path_find() {
+TimedPathFind::~TimedPathFind() {
 }
 
-bool timed_path_find::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
+bool TimedPathFind::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
   fw::timer tmr;
   tmr.start();
 
-  bool found = path_find::find(path, start, end);
+  bool found = PathFfind::find(path, start, end);
 
   tmr.stop();
   total_time = tmr.get_total_time();

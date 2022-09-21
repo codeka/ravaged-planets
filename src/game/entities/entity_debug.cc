@@ -160,7 +160,7 @@ void entity_debug_view::add_circle(fw::Vector const &center, float radius, fw::C
   add_line(last_point, first_point, col);
 }
 
-void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform) {
+void entity_debug_view::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
   if (_lines.size() == 0)
     return;
 
@@ -191,14 +191,14 @@ void entity_debug_view::render(fw::sg::scenegraph &scenegraph, fw::Matrix const 
   std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
   shader_params->set_program_name("notexture");
 
-  std::shared_ptr<fw::sg::node> node(new fw::sg::node());
-  node->set_world_matrix(transform);
-  node->set_vertex_buffer(vb);
-  node->set_primitive_type(fw::sg::primitive_linelist);
-  node->set_shader(shader);
-  node->set_shader_parameters(shader_params);
-  node->set_cast_shadows(false);
-  scenegraph.add_node(node);
+  std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
+  Node->set_world_matrix(transform);
+  Node->set_vertex_buffer(vb);
+  Node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
+  Node->set_shader(shader);
+  Node->set_shader_parameters(shader_params);
+  Node->set_cast_shadows(false);
+  Scenegraph.add_node(Node);
 }
 
 }

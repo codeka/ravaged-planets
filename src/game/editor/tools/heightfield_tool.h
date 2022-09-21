@@ -45,7 +45,7 @@ public:
   void set_brush(heightfield_brush *brush);
 
   virtual void update();
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 }

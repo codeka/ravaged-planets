@@ -110,7 +110,7 @@ private:
 public:
   void bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z);
 
-  void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &world);
+  void render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &world);
 };
 
 std::shared_ptr<fw::IndexBuffer> collision_patch::ib_;
@@ -144,21 +144,21 @@ void collision_patch::bake(std::vector<bool> &data, float *heights, int width, i
   vb_->set_data(vertices.size(), vertices.data());
 }
 
-void collision_patch::render(fw::sg::scenegraph &scenegraph, fw::Matrix const &world) {
-  std::shared_ptr<fw::sg::node> node(new fw::sg::node());
-  node->set_world_matrix(world);
+void collision_patch::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &world) {
+  std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
+  Node->set_world_matrix(world);
 
-  // we have to set up the scenegraph node with these manually
-  node->set_vertex_buffer(vb_);
-  node->set_index_buffer(ib_);
-  node->set_primitive_type(fw::sg::primitive_linelist);
+  // we have to set up the Scenegraph Node with these manually
+  Node->set_vertex_buffer(vb_);
+  Node->set_index_buffer(ib_);
+  Node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
   std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
   std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
   shader_params->set_program_name("notexture");
-  node->set_shader(shader);
-  node->set_shader_parameters(shader_params);
+  Node->set_shader(shader);
+  Node->set_shader_parameters(shader_params);
 
-  scenegraph.add_node(node);
+  Scenegraph.add_node(Node);
 }
 
 //-----------------------------------------------------------------------------
@@ -187,8 +187,8 @@ void pathing_tool::activate() {
 
   _patches.resize((width / PATCH_SIZE) * (length / PATCH_SIZE));
 
-  std::shared_ptr<fw::timed_path_find> pf(
-      new fw::timed_path_find(get_terrain()->get_width(), get_terrain()->get_length(), _collision_data));
+  std::shared_ptr<fw::TimedPathFind> pf(
+      new fw::TimedPathFind(get_terrain()->get_width(), get_terrain()->get_length(), _collision_data));
   _path_find = pf;
 
   fw::Input *inp = fw::framework::get_instance()->get_input();
@@ -214,7 +214,7 @@ int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_len
   return patch_z * patches_width + patch_x;
 }
 
-void pathing_tool::render(fw::sg::scenegraph &scenegraph) {
+void pathing_tool::render(fw::sg::Scenegraph &Scenegraph) {
   // we want to render the patches centred on where the camera is looking
   fw::Camera *camera = fw::framework::get_instance()->get_camera();
   fw::Vector cam_loc = camera->get_position();
@@ -237,35 +237,35 @@ void pathing_tool::render(fw::sg::scenegraph &scenegraph) {
       fw::Matrix world = fw::translation(static_cast<float>(patch_x * PATCH_SIZE), 0,
           static_cast<float>(patch_z * PATCH_SIZE));
 
-      _patches[patch_index]->render(scenegraph, world);
+      _patches[patch_index]->render(Scenegraph, world);
     }
   }
 
   if (_start_set) {
     fw::Matrix loc(fw::translation(_start_pos));
     _marker->set_color(fw::Color(1, 0.1f, 1, 0.1f));
-    _marker->render(scenegraph, loc);
+    _marker->render(Scenegraph, loc);
   }
 
   if (_end_set) {
     fw::Matrix loc(fw::translation(_end_pos));
     _marker->set_color(fw::Color(1, 1, 0.1f, 0.1f));
-    _marker->render(scenegraph, loc);
+    _marker->render(Scenegraph, loc);
   }
 
   if (current_path_vb) {
-    std::shared_ptr<fw::sg::node> sgnode(new fw::sg::node());
+    std::shared_ptr<fw::sg::Node> sgnode(new fw::sg::Node());
     sgnode->set_vertex_buffer(current_path_vb);
     sgnode->set_index_buffer(current_path_ib);
     sgnode->set_cast_shadows(false);
-    sgnode->set_primitive_type(fw::sg::primitive_linelist);
+    sgnode->set_primitive_type(fw::sg::PrimitiveType::kLineList);
     std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
     std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
     shader_params->set_program_name("notexture");
     sgnode->set_shader(shader);
     sgnode->set_shader_parameters(shader_params);
 
-    scenegraph.add_node(sgnode);
+    Scenegraph.add_node(sgnode);
   }
 }
 

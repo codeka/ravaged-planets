@@ -9,7 +9,7 @@
 #include <framework/work_queue.h>
 
 namespace fw {
-class path_find;
+class PathFfind;
 }
 
 namespace game {
@@ -31,7 +31,7 @@ private:
     callback_fn callback;
   };
 
-  std::shared_ptr<fw::path_find> _pather;
+  std::shared_ptr<fw::PathFfind> _pather;
   terrain *_terrain;
   std::thread thread_;
   fw::work_queue<path_request_data> _work_queue;

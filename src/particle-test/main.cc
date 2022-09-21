@@ -33,7 +33,7 @@ class application: public fw::base_app {
 public:
   bool initialize(fw::framework *frmwrk);
   void update(float dt);
-  void render(fw::sg::scenegraph &scenegraph);
+  void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 void update_effect_position() {
@@ -118,8 +118,8 @@ void application::update(float dt) {
   }
 }
 
-void application::render(fw::sg::scenegraph &scenegraph) {
-  scenegraph.set_clear_color(fw::Color(1, 0, 0.0, 0));
+void application::render(fw::sg::Scenegraph &Scenegraph) {
+  Scenegraph.set_clear_color(fw::Color(1, 0, 0.0, 0));
 }
 
 //-----------------------------------------------------------------------------

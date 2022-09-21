@@ -52,7 +52,7 @@ public:
   // holds a single boolean flag - true means "passable", false means "impassable"
   void build_collision_data(std::vector<bool> &vertices);
 
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 }

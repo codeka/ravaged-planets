@@ -48,7 +48,7 @@ const int max_vertices = batch_size * 4;
 const int max_indices = batch_size * 6;
 
 struct RenderState {
-  fw::sg::scenegraph &scenegraph;
+  fw::sg::Scenegraph &Scenegraph;
   int particle_num;
   std::vector<fw::vertex::xyz_c_uv> vertices;
   std::vector<uint16_t> indices;
@@ -61,8 +61,8 @@ struct RenderState {
   std::vector<std::shared_ptr<fw::VertexBuffer>> vertex_buffers;
   std::vector<std::shared_ptr<fw::IndexBuffer>> index_buffers;
 
-  inline RenderState(fw::sg::scenegraph &sg, fw::ParticleRenderer::ParticleList &particles) :
-      scenegraph(sg), particles(particles), mode(fw::ParticleEmitterConfig::kAdditive), particle_num(0) {
+  inline RenderState(fw::sg::Scenegraph &sg, fw::ParticleRenderer::ParticleList &particles) :
+      Scenegraph(sg), particles(particles), mode(fw::ParticleEmitterConfig::kAdditive), particle_num(0) {
   }
 };
 
@@ -161,14 +161,14 @@ void generate_scenegraph_node(RenderState &rs) {
   shader_params->set_program_name(get_program_name(rs.mode));
   shader_params->set_texture("particle_texture", rs.texture);
 
-  std::shared_ptr<sg::node> node(new sg::node());
-  node->set_vertex_buffer(vb);
-  node->set_index_buffer(ib);
-  node->set_shader(rs.shader);
-  node->set_shader_parameters(shader_params);
-  node->set_primitive_type(fw::sg::primitive_trianglelist);
-  node->set_cast_shadows(false);
-  rs.scenegraph.add_node(node);
+  std::shared_ptr<sg::Node> Node(new sg::Node());
+  Node->set_vertex_buffer(vb);
+  Node->set_index_buffer(ib);
+  Node->set_shader(rs.shader);
+  Node->set_shader_parameters(shader_params);
+  Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
+  Node->set_cast_shadows(false);
+  rs.Scenegraph.add_node(Node);
 }
 
 bool ParticleRenderer::add_particle(RenderState &rs, int base_index, Particle *p, float offset_x, float offset_z) {
@@ -247,7 +247,7 @@ void ParticleRenderer::render_particles(RenderState &rs, float offset_x, float o
   }
 }
 
-void ParticleRenderer::render(sg::scenegraph &scenegraph, ParticleRenderer::ParticleList &particles) {
+void ParticleRenderer::render(sg::Scenegraph &Scenegraph, ParticleRenderer::ParticleList &particles) {
   if (particles.size() == 0)
     return;
 
@@ -260,7 +260,7 @@ void ParticleRenderer::render(sg::scenegraph &scenegraph, ParticleRenderer::Part
   sort_particles(particles);
 
   // create the render state that'll hold all our state variables
-  RenderState rs(scenegraph, particles);
+  RenderState rs(Scenegraph, particles);
   rs.shader = shader_;
   rs.shader_parameters = shader_params_;
   rs.particle_num = 0;

@@ -26,7 +26,7 @@ void screen::hide() {
 void screen::update() {
 }
 
-void screen::render(fw::sg::scenegraph &) {
+void screen::render(fw::sg::Scenegraph &) {
 }
 
 //-------------------------------------------------------------------------

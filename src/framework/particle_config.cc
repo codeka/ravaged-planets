@@ -65,7 +65,7 @@ std::shared_ptr<ParticleEffectConfig> ParticleEffectConfig::load(std::string con
   return std::shared_ptr<ParticleEffectConfig>();
 }
 
-// loads from the root node of the document
+// loads from the root Node of the document
 bool ParticleEffectConfig::load_document(xml_element const &root) {
   try {
     for (xml_element child = root.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {

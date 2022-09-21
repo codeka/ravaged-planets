@@ -6,7 +6,7 @@ class texture_tool_window;
 
 namespace fw {
 namespace sg {
-class scenegraph;
+class Scenegraph;
 }
 }
 
@@ -48,7 +48,7 @@ public:
   }
 
   virtual void update();
-  virtual void render(fw::sg::scenegraph &scenegraph);
+  virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 }

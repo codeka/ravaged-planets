@@ -294,7 +294,7 @@ void entity_manager::update() {
   _debug->update();
 }
 
-void entity_manager::render(fw::sg::scenegraph &scenegraph) {
+void entity_manager::render(fw::sg::Scenegraph &Scenegraph) {
   fw::Vector location = get_view_centre();
 
   int centre_patch_x = (int) (location[0] / patch_manager::PATCH_SIZE);
@@ -315,7 +315,7 @@ void entity_manager::render(fw::sg::scenegraph &scenegraph) {
         if (!entity)
           continue;
 
-        entity->render(scenegraph, trans);
+        entity->render(Scenegraph, trans);
       }
     }
   }

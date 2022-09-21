@@ -14,7 +14,7 @@ public:
   virtual bool initialize(fw::framework *frmwrf);
   virtual void destroy();
   virtual void update(float dt);
-  virtual void render(fw::sg::scenegraph &sg);
+  virtual void render(fw::sg::Scenegraph &sg);
 
   screen_stack *get_screen() {
     return _screen;
