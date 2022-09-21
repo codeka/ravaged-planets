@@ -1,6 +1,4 @@
 
-#include <boost/foreach.hpp>
-
 #include <framework/particle_manager.h>
 #include <framework/particle_emitter.h>
 #include <framework/particle_effect.h>
@@ -13,84 +11,84 @@
 
 namespace fw {
 
-particle_manager::particle_manager() :
-    _renderer(nullptr), _graphics(nullptr), _wrap_x(0.0f), _wrap_z(0.0f) {
-  _renderer = new particle_renderer(this);
+ParticleManager::ParticleManager() :
+    renderer_(nullptr), graphics_(nullptr), wrap_x_(0.0f), wrap_z_(0.0f) {
+  renderer_ = new ParticleRenderer(this);
 }
 
-particle_manager::~particle_manager() {
-  delete _renderer;
+ParticleManager::~ParticleManager() {
+  delete renderer_;
 }
 
-void particle_manager::initialize(Graphics *g) {
-  _graphics = g;
-  _renderer->initialize(g);
+void ParticleManager::initialize(Graphics *g) {
+  graphics_ = g;
+  renderer_->initialize(g);
 }
 
-void particle_manager::set_world_wrap(float x, float z) {
-  _wrap_x = x;
-  _wrap_z = z;
+void ParticleManager::set_world_wrap(float x, float z) {
+  wrap_x_ = x;
+  wrap_z_ = z;
 }
 
-void particle_manager::update(float dt) {
-  for (std::vector<particle_effect *>::iterator dit = _dead_effects.begin(); dit != _dead_effects.end(); dit++) {
-    particle_effect *effect = *dit;
-    for (effect_list::iterator it = _effects.begin(); it != _effects.end(); it++) {
+void ParticleManager::update(float dt) {
+  for (std::vector<ParticleEffect *>::iterator dit = dead_effects_.begin(); dit != dead_effects_.end(); dit++) {
+    ParticleEffect *effect = *dit;
+    for (EffectList::iterator it = effects_.begin(); it != effects_.end(); it++) {
       if ((*it).get() == effect) {
-        _effects.erase(it);
+        effects_.erase(it);
         break;
       }
     }
   }
-  _dead_effects.clear();
+  dead_effects_.clear();
 
-  for (effect_list::iterator it = _effects.begin(); it != _effects.end(); ++it) {
+  for (EffectList::iterator it = effects_.begin(); it != effects_.end(); ++it) {
     (*it)->update(dt);
   }
 }
 
-void particle_manager::render(sg::scenegraph &scenegraph) {
+void ParticleManager::render(sg::scenegraph &scenegraph) {
   {
     std::unique_lock<std::mutex> lock(mutex_);
-    BOOST_FOREACH(particle *p, _to_add) {
-      _particles.push_back(p);
+    for(Particle *p : to_add_) {
+      particles_.push_back(p);
     }
-    _to_add.clear();
+    to_add_.clear();
   }
 
-  _renderer->render(scenegraph, _particles);
+  renderer_->render(scenegraph, particles_);
 
   // remove any dead particles
-  _particles.erase(std::remove_if(_particles.begin(), _particles.end(), [](particle const *p) {
+  particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [](Particle const *p) {
     return p->age >= 1.0f;
-  }), _particles.end());
+  }), particles_.end());
 }
 
-long particle_manager::get_num_active_particles() const {
+long ParticleManager::get_num_active_particles() const {
   // some may have died but not been removed yet, that's OK as this is just to give us an idea.
-  return _particles.size();
+  return particles_.size();
 }
 
-std::shared_ptr<particle_effect> particle_manager::create_effect(std::string const &name) {
+std::shared_ptr<ParticleEffect> ParticleManager::create_effect(std::string const &name) {
   FW_ENSURE_RENDER_THREAD();
 
-  std::shared_ptr<particle_effect_config> config = particle_effect_config::load(name);
-  std::shared_ptr <particle_effect> effect(new particle_effect(this, config));
+  auto config = ParticleEffectConfig::load(name);
+  std::shared_ptr <ParticleEffect> effect(new ParticleEffect(this, config));
   effect->initialize();
-  _effects.push_back(effect);
+  effects_.push_back(effect);
   return effect;
 }
 
-void particle_manager::remove_effect(particle_effect *effect) {
-  _dead_effects.push_back(effect);
+void ParticleManager::remove_effect(ParticleEffect *effect) {
+  dead_effects_.push_back(effect);
 }
 
 /**
- * Because this is called on the update thread, we don't add directly to the _particles list until the render thread.
+ * Because this is called on the update thread, we don't add directly to the particles_ list until the render thread.
  */
-void particle_manager::add_particle(particle *p) {
+void ParticleManager::add_particle(Particle *p) {
   std::unique_lock<std::mutex> lock(mutex_);
-  _to_add.push_back(p);
+  to_add_.push_back(p);
 }
 
 }

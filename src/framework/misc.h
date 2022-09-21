@@ -47,10 +47,10 @@ inline T min(T a, T b) {
   return (a < b ? a : b);
 }
 
-// constrain the given value to the given max/min. If it's outside, we'll wrap back (not clamp)
+// constrain the given ParticleRotation to the given max/min. If it's outside, we'll wrap back (not clamp)
 template<typename T>
-inline T constrain(T value, T max_value, T min_value = 0) {
-  T tmp = value;
+inline T constrain(T ParticleRotation, T max_value, T min_value = 0) {
+  T tmp = ParticleRotation;
   T range = max_value - min_value;
 
   while (tmp < min_value) {
@@ -63,14 +63,14 @@ inline T constrain(T value, T max_value, T min_value = 0) {
   return tmp;
 }
 
-// constrain the given value to the given max/min. If it's outside, we'll clamp (not wrap)
+// constrain the given ParticleRotation to the given max/min. If it's outside, we'll clamp (not wrap)
 template<typename T>
-inline T clamp(T value, T max_value, T min_value = 0) {
-  if (value < min_value)
+inline T clamp(T ParticleRotation, T max_value, T min_value = 0) {
+  if (ParticleRotation < min_value)
     return min_value;
-  if (value > max_value)
+  if (ParticleRotation > max_value)
     return max_value;
-  return value;
+  return ParticleRotation;
 }
 
 // split a string into an array, using the given list of delimiters
@@ -89,7 +89,7 @@ inline std::vector<T> split(std::string s, std::string delim = " \r\n\t") {
 // generates a random float between 0 and 1.
 float random();
 
-// Seeds our random number generator with a value based on current time. Call on app startup.
+// Seeds our Random number generator with a ParticleRotation based on current time. Call on app startup.
 void random_initialize();
 
 // these are used to calculate distances and directions in a world that wraps
@@ -98,7 +98,7 @@ fw::Vector get_direction_to(fw::Vector const &from, fw::Vector const &to,
 float calculate_distance(fw::Vector const &from, fw::Vector const &to,
     float wrap_x, float wrap_z);
 
-// linearly interpolates between the two given values, given a value between 0
+// linearly interpolates between the two given values, given a ParticleRotation between 0
 // (meaning "last") and 1 (meaning "next")
 template<typename T>
 inline T lerp(T const &last, T const &next, float t) {

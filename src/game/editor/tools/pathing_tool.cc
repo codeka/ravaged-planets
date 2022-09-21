@@ -276,8 +276,8 @@ std::shared_ptr<collision_patch> pathing_tool::bake_patch(int patch_x, int patch
   return patch;
 }
 
-void pathing_tool::set_simplify(bool value) {
-  _simplify = value;
+void pathing_tool::set_simplify(bool ParticleRotation) {
+  _simplify = ParticleRotation;
   find_path();
 }
 

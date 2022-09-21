@@ -32,7 +32,7 @@ enum entity_debug_flags {
  */
 class entity_debug {
 private:
-  entity_manager *_mgr;
+  entity_manager *mgr_;
   fw::gui::Window *_wnd;
 
   bool _just_shown;
@@ -69,7 +69,7 @@ public:
 
   void add_line(fw::Vector const &from, fw::Vector const &to,
       fw::Color const &col);
-  void add_circle(fw::Vector const &centre, float radius,
+  void add_circle(fw::Vector const &center, float radius,
       fw::Color const &col);
 
   void render(fw::sg::scenegraph &scenegraph, fw::Matrix const &transform);

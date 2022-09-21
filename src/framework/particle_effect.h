@@ -7,26 +7,24 @@
 #include <framework/vector.h>
 
 namespace fw {
-class particle_manager;
-class particle_effect_config;
+class ParticleManager;
+class ParticleEffectConfig;
 
-/**
- * A particle effect represents, basically, a collection of particle_emitters and is what you get when you "load"
- * an effect.
- */
-class particle_effect {
+// A Particle effect represents, basically, a collection of particle_emitters and is what you get when you "load"
+// an effect.
+class ParticleEffect {
 public:
-  typedef std::vector<std::shared_ptr<particle_emitter>> emitter_list;
+  typedef std::vector<std::shared_ptr<ParticleEmitter>> EmitterList;
 
 private:
-  std::shared_ptr<particle_effect_config> _config;
-  particle_manager *_mgr;
-  emitter_list _emitters;
-  bool _dead;
+  std::shared_ptr<ParticleEffectConfig> config_;
+  ParticleManager *mgr_;
+  EmitterList emitters_;
+  bool dead_;
 
 public:
-  particle_effect(particle_manager *mgr, std::shared_ptr<particle_effect_config> const &config);
-  ~particle_effect();
+  ParticleEffect(ParticleManager *mgr, std::shared_ptr<ParticleEffectConfig> const &config);
+  ~ParticleEffect();
 
   void initialize();
   void destroy();
@@ -35,7 +33,7 @@ public:
   void update(float dt);
 
   bool is_dead() const {
-    return _dead;
+    return dead_;
   }
 };
 

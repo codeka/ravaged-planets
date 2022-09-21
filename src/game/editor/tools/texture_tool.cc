@@ -53,7 +53,7 @@ texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
       << (Builder<Slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
           << Slider::limits(10, 100) << Slider::on_update(std::bind(&texture_tool_window::on_radius_updated, this, _1))
-          << Slider::value(40))
+          << Slider::ParticleRotation(40))
       << (Builder<Listbox>(px(4), px(48), sum(pct(100), px(-8)), px(80)) << Widget::id(TEXTURES_ID)
           << Listbox::item_selected(std::bind(&texture_tool_window::on_texture_selected, this, _1)))
       << (Builder<Label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << Widget::id(TEXTURE_PREVIEW_ID))
@@ -92,8 +92,8 @@ void texture_tool_window::on_texture_selected(int index) {
   _tool->set_layer(index);
 }
 
-void texture_tool_window::on_radius_updated(int value) {
-  int radius = value / 10;
+void texture_tool_window::on_radius_updated(int ParticleRotation) {
+  int radius = ParticleRotation / 10;
   _tool->set_radius(radius);
 }
 
@@ -162,7 +162,7 @@ void texture_tool::update() {
     int centre_x = static_cast<int>(centre_u * splatt.get_width());
     int centre_y = static_cast<int>(centre_v * splatt.get_height());
 
-    fw::Vector centre(static_cast<float>(centre_x), static_cast<float>(centre_y), 0.0f);
+    fw::Vector center(static_cast<float>(centre_x), static_cast<float>(centre_y), 0.0f);
 
     // we have to take a copy of the splatt's pixels cause we'll be modifying them
     std::vector<uint32_t> data = splatt.get_pixels();
@@ -176,7 +176,7 @@ void texture_tool::update() {
           continue;
 
         fw::Vector v(static_cast<float>(x), static_cast<float>(y), 0.0f);
-        if ((v - centre).length() > (_radius * scale_x))
+        if ((v - center).length() > (_radius * scale_x))
           continue;
 
         data[(y * splatt.get_width()) + x] = new_value;

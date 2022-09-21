@@ -133,7 +133,7 @@ void moveable_component::update(float dt) {
           // temporarily adjust the "goal" so as to avoid the obstacle
           fw::Vector up = cml::cross(_position_component->get_direction(), obstacle_dir);
           if (up.length_squared() < 0.01f) {
-            // if they're *directly* in front of us, just choose a random direction, left or right. we'll choose... left
+            // if they're *directly* in front of us, just choose a Random direction, left or right. we'll choose... left
             up = fw::Vector(0, 1, 0);
           }
           fw::Vector avoid_dir = cml::cross(cml::normalize(_position_component->get_direction()), cml::normalize(up));

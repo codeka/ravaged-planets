@@ -27,7 +27,7 @@ public:
   }
 };
 
-/** Property that sets the current value of the slider. */
+/** Property that sets the current ParticleRotation of the slider. */
 class SliderValueProperty : public Property {
 private:
   int curr_value_;
@@ -69,7 +69,7 @@ Property *Slider::limits(int min_value, int max_value) {
   return new SliderLimitsProperty(min_value, max_value);
 }
 
-Property *Slider::value(int curr_value) {
+Property *Slider::ParticleRotation(int curr_value) {
   return new SliderValueProperty(curr_value);
 }
 

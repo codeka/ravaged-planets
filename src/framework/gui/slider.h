@@ -9,7 +9,7 @@
 
 namespace fw::gui {
 
-// Sliders let you drag a thumb from the left to the right to choose a numeric value.
+// Sliders let you drag a thumb from the left to the right to choose a numeric ParticleRotation.
 class Slider : public Widget {
 protected:
   friend class SliderLimitsProperty;
@@ -31,7 +31,7 @@ public:
   virtual ~Slider();
 
   static Property *limits(int min_value, int max_value);
-  static Property *value(int curr_value);
+  static Property *ParticleRotation(int curr_value);
   static Property *on_update(std::function<void(int)> fn);
 
   void on_attached_to_parent(Widget *parent);

@@ -41,7 +41,7 @@ void tool::render(fw::sg::scenegraph &) {
 }
 
 // This is used by a number of of the tools for giving a basic indication of it's area of effect.
-void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::Vector const &centre, float radius) {
+void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::Vector const &center, float radius) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * M_PI * radius);
@@ -54,8 +54,8 @@ void draw_circle(fw::sg::scenegraph &scenegraph, game::terrain *terrain, fw::Vec
   fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[num_segments + 1];
   for (int i = 0; i < num_segments; i++) {
     float factor = 2.0f * (float) M_PI * (i / (float) num_segments);
-    vertices[i].x = centre[0] + radius * sin(factor);
-    vertices[i].z = centre[2] + radius * cos(factor);
+    vertices[i].x = center[0] + radius * sin(factor);
+    vertices[i].z = center[2] + radius * cos(factor);
     vertices[i].y = terrain->get_height(vertices[i].x, vertices[i].z) + 0.5f;
     vertices[i].color = fw::Color(1, 1, 1).to_rgba();
   }

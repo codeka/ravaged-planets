@@ -39,7 +39,7 @@ std::string to_string(errno_error_info const &err_info) {
 std::string to_string(stacktrace_error_info const &err_info) {
   std::stringstream ss;
   ss << std::endl;
-  BOOST_FOREACH(std::string line, err_info.value()) {
+  for(std::string line : err_info.value()) {
     ss << "  " << line << std::endl;
   }
 
@@ -49,7 +49,7 @@ std::string to_string(stacktrace_error_info const &err_info) {
 std::string to_string(loaded_modules_error_info const &err_info) {
   std::stringstream ss;
   ss << std::endl;
-  BOOST_FOREACH(std::string line, err_info.value()) {
+  for(std::string line : err_info.value()) {
     ss << line << std::endl;
   }
 

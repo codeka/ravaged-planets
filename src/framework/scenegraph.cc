@@ -121,8 +121,8 @@ void node::render(scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
 // this is called when we're rendering a given shader
 void node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera, fw::Matrix const &transform) {
   std::shared_ptr<fw::shader_parameters> parameters;
-  if (_shader_params) {
-    parameters = _shader_params;
+  if (shader_params_) {
+    parameters = shader_params_;
   } else {
     parameters = shader->create_parameters();
   }
@@ -179,8 +179,8 @@ void node::populate_clone(std::shared_ptr<node> clone) {
   clone->vb_ = vb_;
   clone->ib_ = ib_;
   clone->shader_ = shader_;
-  if (_shader_params)
-    clone->_shader_params = _shader_params->clone();
+  if (shader_params_)
+    clone->shader_params_ = shader_params_->clone();
   clone->_parent = _parent;
   clone->_world = _world;
 

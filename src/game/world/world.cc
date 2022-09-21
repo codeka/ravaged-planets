@@ -58,7 +58,7 @@ void world::initialize() {
     _player_starts[it.first] = it.second;
   }
 
-  // tell the particle manager to wrap particles at the world boundary
+  // tell the Particle manager to wrap particles at the world boundary
   fw::framework::get_instance()->get_particle_mgr()->set_world_wrap(_terrain->get_width(), _terrain->get_length());
 
   fw::Input *Input = fw::framework::get_instance()->get_input();

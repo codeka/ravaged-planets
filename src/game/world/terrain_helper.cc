@@ -69,16 +69,16 @@ fw::Vector get_vertex(int x, int z, float *height, int width, int length) {
 
 // calculates the normal at the given location in the map
 fw::Vector calculate_normal(float *heights, int width, int length, int x, int z) {
-  fw::Vector centre = get_vertex(x, z, heights, width, length);
+  fw::Vector center = get_vertex(x, z, heights, width, length);
   fw::Vector north = get_vertex(x, z + 1, heights, width, length);
   fw::Vector south = get_vertex(x, z - 1, heights, width, length);
   fw::Vector east = get_vertex(x + 1, z, heights, width, length);
   fw::Vector west = get_vertex(x - 1, z, heights, width, length);
 
-  fw::Vector a = north - centre;
-  fw::Vector b = east - centre;
-  fw::Vector c = south - centre;
-  fw::Vector d = west - centre;
+  fw::Vector a = north - center;
+  fw::Vector b = east - center;
+  fw::Vector c = south - center;
+  fw::Vector d = west - center;
 
   fw::Vector normal(0, 0, 0);
   normal += cml::cross(a, b);
@@ -106,11 +106,11 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int wid
     for (int x = 0; x <= patch_size; x++) {
       int ix = (patch_x * patch_size) + x;
       int iz = (patch_z * patch_size) + z;
-      fw::Vector centre = get_vertex(ix, iz, height, width, length);
+      fw::Vector center = get_vertex(ix, iz, height, width, length);
       fw::Vector normal = calculate_normal(height, width, length, ix, iz);
 
       int verts_index = z * (patch_size + 1) + x;
-      (*buffer)[verts_index] = fw::vertex::xyz_n(x, centre[1], z, normal[0],
+      (*buffer)[verts_index] = fw::vertex::xyz_n(x, center[1], z, normal[0],
           normal[1], normal[2]);
     }
   }

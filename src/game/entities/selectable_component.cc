@@ -73,8 +73,8 @@ void selectable_component::apply_template(luabind::object const &tmpl) {
 //  }
 }
 
-void selectable_component::set_selection_radius(float value) {
-  _selection_radius = value;
+void selectable_component::set_selection_radius(float ParticleRotation) {
+  _selection_radius = ParticleRotation;
 }
 
 void selectable_component::highlight(fw::Color const &col) {

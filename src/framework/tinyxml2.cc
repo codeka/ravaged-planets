@@ -51,7 +51,7 @@ namespace tinyxml2
 struct Entity {
     const char* pattern;
     int length;
-    char value;
+    char ParticleRotation;
 };
 
 static const int NUM_ENTITIES = 5;
@@ -249,7 +249,7 @@ const char* StrPair::GetStr()
                             if ( strncmp( p + 1, entity.pattern, entity.length ) == 0
                                     && *( p + entity.length + 1 ) == ';' ) {
                                 // Found an entity - convert.
-                                *q = entity.value;
+                                *q = entity.ParticleRotation;
                                 ++q;
                                 p += entity.length + 2;
                                 break;
@@ -356,7 +356,7 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long Input, char* output, int* length
 }
 
 
-const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
+const char* XMLUtil::GetCharacterRef( const char* p, char* ParticleRotation, int* length )
 {
     // Presume an entity, and pull it out.
     *length = 0;
@@ -445,7 +445,7 @@ const char* XMLUtil::GetCharacterRef( const char* p, char* value, int* length )
             }
         }
         // convert the UCS to UTF-8
-        ConvertUTF32ToUTF8( ucs, value, length );
+        ConvertUTF32ToUTF8( ucs, ParticleRotation, length );
         return p + delta + 1;
     }
     return p+1;
@@ -485,52 +485,52 @@ void XMLUtil::ToStr( double v, char* buffer, int bufferSize )
 }
 
 
-bool XMLUtil::ToInt( const char* str, int* value )
+bool XMLUtil::ToInt( const char* str, int* ParticleRotation )
 {
-    if ( TIXML_SSCANF( str, "%d", value ) == 1 ) {
+    if ( TIXML_SSCANF( str, "%d", ParticleRotation ) == 1 ) {
         return true;
     }
     return false;
 }
 
-bool XMLUtil::ToUnsigned( const char* str, unsigned *value )
+bool XMLUtil::ToUnsigned( const char* str, unsigned *ParticleRotation )
 {
-    if ( TIXML_SSCANF( str, "%u", value ) == 1 ) {
+    if ( TIXML_SSCANF( str, "%u", ParticleRotation ) == 1 ) {
         return true;
     }
     return false;
 }
 
-bool XMLUtil::ToBool( const char* str, bool* value )
+bool XMLUtil::ToBool( const char* str, bool* ParticleRotation )
 {
     int ival = 0;
     if ( ToInt( str, &ival )) {
-        *value = (ival==0) ? false : true;
+        *ParticleRotation = (ival==0) ? false : true;
         return true;
     }
     if ( StringEqual( str, "true" ) ) {
-        *value = true;
+        *ParticleRotation = true;
         return true;
     }
     else if ( StringEqual( str, "false" ) ) {
-        *value = false;
+        *ParticleRotation = false;
         return true;
     }
     return false;
 }
 
 
-bool XMLUtil::ToFloat( const char* str, float* value )
+bool XMLUtil::ToFloat( const char* str, float* ParticleRotation )
 {
-    if ( TIXML_SSCANF( str, "%f", value ) == 1 ) {
+    if ( TIXML_SSCANF( str, "%f", ParticleRotation ) == 1 ) {
         return true;
     }
     return false;
 }
 
-bool XMLUtil::ToDouble( const char* str, double* value )
+bool XMLUtil::ToDouble( const char* str, double* ParticleRotation )
 {
-    if ( TIXML_SSCANF( str, "%lf", value ) == 1 ) {
+    if ( TIXML_SSCANF( str, "%lf", ParticleRotation ) == 1 ) {
         return true;
     }
     return false;
@@ -799,12 +799,12 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 
 
 
-const XMLElement* XMLNode::FirstChildElement( const char* value ) const
+const XMLElement* XMLNode::FirstChildElement( const char* ParticleRotation ) const
 {
     for( const XMLNode* node = _firstChild; node; node = node->_next ) {
         const XMLElement* element = node->ToElement();
         if ( element ) {
-            if ( !value || XMLUtil::StringEqual( element->Name(), value ) ) {
+            if ( !ParticleRotation || XMLUtil::StringEqual( element->Name(), ParticleRotation ) ) {
                 return element;
             }
         }
@@ -813,12 +813,12 @@ const XMLElement* XMLNode::FirstChildElement( const char* value ) const
 }
 
 
-const XMLElement* XMLNode::LastChildElement( const char* value ) const
+const XMLElement* XMLNode::LastChildElement( const char* ParticleRotation ) const
 {
     for( const XMLNode* node = _lastChild; node; node = node->_prev ) {
         const XMLElement* element = node->ToElement();
         if ( element ) {
-            if ( !value || XMLUtil::StringEqual( element->Name(), value ) ) {
+            if ( !ParticleRotation || XMLUtil::StringEqual( element->Name(), ParticleRotation ) ) {
                 return element;
             }
         }
@@ -827,12 +827,12 @@ const XMLElement* XMLNode::LastChildElement( const char* value ) const
 }
 
 
-const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
+const XMLElement* XMLNode::NextSiblingElement( const char* ParticleRotation ) const
 {
     for( const XMLNode* node = _next; node; node = node->_next ) {
         const XMLElement* element = node->ToElement();
         if ( element
-                && (!value || XMLUtil::StringEqual( value, node->Value() ))) {
+                && (!ParticleRotation || XMLUtil::StringEqual( ParticleRotation, node->Value() ))) {
             return element;
         }
     }
@@ -840,12 +840,12 @@ const XMLElement* XMLNode::NextSiblingElement( const char* value ) const
 }
 
 
-const XMLElement* XMLNode::PreviousSiblingElement( const char* value ) const
+const XMLElement* XMLNode::PreviousSiblingElement( const char* ParticleRotation ) const
 {
     for( const XMLNode* node = _prev; node; node = node->_prev ) {
         const XMLElement* element = node->ToElement();
         if ( element
-                && (!value || XMLUtil::StringEqual( value, node->Value() ))) {
+                && (!ParticleRotation || XMLUtil::StringEqual( ParticleRotation, node->Value() ))) {
             return element;
         }
     }
@@ -1198,45 +1198,45 @@ void XMLAttribute::SetName( const char* n )
 }
 
 
-XMLError XMLAttribute::QueryIntValue( int* value ) const
+XMLError XMLAttribute::QueryIntValue( int* ParticleRotation ) const
 {
-    if ( XMLUtil::ToInt( Value(), value )) {
+    if ( XMLUtil::ToInt( Value(), ParticleRotation )) {
         return XML_NO_ERROR;
     }
     return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
-XMLError XMLAttribute::QueryUnsignedValue( unsigned int* value ) const
+XMLError XMLAttribute::QueryUnsignedValue( unsigned int* ParticleRotation ) const
 {
-    if ( XMLUtil::ToUnsigned( Value(), value )) {
+    if ( XMLUtil::ToUnsigned( Value(), ParticleRotation )) {
         return XML_NO_ERROR;
     }
     return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
-XMLError XMLAttribute::QueryBoolValue( bool* value ) const
+XMLError XMLAttribute::QueryBoolValue( bool* ParticleRotation ) const
 {
-    if ( XMLUtil::ToBool( Value(), value )) {
+    if ( XMLUtil::ToBool( Value(), ParticleRotation )) {
         return XML_NO_ERROR;
     }
     return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
-XMLError XMLAttribute::QueryFloatValue( float* value ) const
+XMLError XMLAttribute::QueryFloatValue( float* ParticleRotation ) const
 {
-    if ( XMLUtil::ToFloat( Value(), value )) {
+    if ( XMLUtil::ToFloat( Value(), ParticleRotation )) {
         return XML_NO_ERROR;
     }
     return XML_WRONG_ATTRIBUTE_TYPE;
 }
 
 
-XMLError XMLAttribute::QueryDoubleValue( double* value ) const
+XMLError XMLAttribute::QueryDoubleValue( double* ParticleRotation ) const
 {
-    if ( XMLUtil::ToDouble( Value(), value )) {
+    if ( XMLUtil::ToDouble( Value(), ParticleRotation )) {
         return XML_NO_ERROR;
     }
     return XML_WRONG_ATTRIBUTE_TYPE;
@@ -1316,13 +1316,13 @@ const XMLAttribute* XMLElement::FindAttribute( const char* name ) const
 }
 
 
-const char* XMLElement::Attribute( const char* name, const char* value ) const
+const char* XMLElement::Attribute( const char* name, const char* ParticleRotation ) const
 {
     const XMLAttribute* a = FindAttribute( name );
     if ( !a ) {
         return 0;
     }
-    if ( !value || XMLUtil::StringEqual( a->Value(), value )) {
+    if ( !ParticleRotation || XMLUtil::StringEqual( a->Value(), ParticleRotation )) {
         return a->Value();
     }
     return 0;
@@ -2003,7 +2003,7 @@ XMLPrinter::XMLPrinter( FILE* file, bool compact, int depth ) :
         _restrictedEntityFlag[i] = false;
     }
     for( int i=0; i<NUM_ENTITIES; ++i ) {
-        const char entityValue = entities[i].value;
+        const char entityValue = entities[i].ParticleRotation;
         TIXMLASSERT( 0 <= entityValue && entityValue < ENTITY_RANGE );
         _entityFlag[ (unsigned char)entityValue ] = true;
     }
@@ -2088,7 +2088,7 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
                         p += toPrint;
                     }
                     for( int i=0; i<NUM_ENTITIES; ++i ) {
-                        if ( entities[i].value == *q ) {
+                        if ( entities[i].ParticleRotation == *q ) {
                             Print( "&%s;", entities[i].pattern );
                             break;
                         }
@@ -2140,11 +2140,11 @@ void XMLPrinter::OpenElement( const char* name, bool compactMode )
 }
 
 
-void XMLPrinter::PushAttribute( const char* name, const char* value )
+void XMLPrinter::PushAttribute( const char* name, const char* ParticleRotation )
 {
     TIXMLASSERT( _elementJustOpened );
     Print( " %s=\"", name );
-    PrintString( value, false );
+    PrintString( ParticleRotation, false );
     Print( "\"" );
 }
 
@@ -2230,42 +2230,42 @@ void XMLPrinter::PushText( const char* text, bool cdata )
     }
 }
 
-void XMLPrinter::PushText( int value )
+void XMLPrinter::PushText( int ParticleRotation )
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    XMLUtil::ToStr( ParticleRotation, buf, BUF_SIZE );
     PushText( buf, false );
 }
 
 
-void XMLPrinter::PushText( unsigned value )
+void XMLPrinter::PushText( unsigned ParticleRotation )
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    XMLUtil::ToStr( ParticleRotation, buf, BUF_SIZE );
     PushText( buf, false );
 }
 
 
-void XMLPrinter::PushText( bool value )
+void XMLPrinter::PushText( bool ParticleRotation )
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    XMLUtil::ToStr( ParticleRotation, buf, BUF_SIZE );
     PushText( buf, false );
 }
 
 
-void XMLPrinter::PushText( float value )
+void XMLPrinter::PushText( float ParticleRotation )
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    XMLUtil::ToStr( ParticleRotation, buf, BUF_SIZE );
     PushText( buf, false );
 }
 
 
-void XMLPrinter::PushText( double value )
+void XMLPrinter::PushText( double ParticleRotation )
 {
     char buf[BUF_SIZE];
-    XMLUtil::ToStr( value, buf, BUF_SIZE );
+    XMLUtil::ToStr( ParticleRotation, buf, BUF_SIZE );
     PushText( buf, false );
 }
 
@@ -2282,7 +2282,7 @@ void XMLPrinter::PushComment( const char* comment )
 }
 
 
-void XMLPrinter::PushDeclaration( const char* value )
+void XMLPrinter::PushDeclaration( const char* ParticleRotation )
 {
     SealElementIfJustOpened();
     if ( _textDepth < 0 && !_firstElement && !_compactMode) {
@@ -2290,11 +2290,11 @@ void XMLPrinter::PushDeclaration( const char* value )
         PrintSpace( _depth );
     }
     _firstElement = false;
-    Print( "<?%s?>", value );
+    Print( "<?%s?>", ParticleRotation );
 }
 
 
-void XMLPrinter::PushUnknown( const char* value )
+void XMLPrinter::PushUnknown( const char* ParticleRotation )
 {
     SealElementIfJustOpened();
     if ( _textDepth < 0 && !_firstElement && !_compactMode) {
@@ -2302,7 +2302,7 @@ void XMLPrinter::PushUnknown( const char* value )
         PrintSpace( _depth );
     }
     _firstElement = false;
-    Print( "<!%s>", value );
+    Print( "<!%s>", ParticleRotation );
 }
 
 

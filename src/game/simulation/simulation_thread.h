@@ -83,7 +83,7 @@ public:
    */
   void new_game(uint64_t game_id);
 
-  void set_map_name(std::string const &value);
+  void set_map_name(std::string const &ParticleRotation);
   std::string const &get_map_name() const {
     return _map_name;
   }

@@ -66,9 +66,9 @@ public:
   std::shared_ptr<fw::ModelNode> root_node;
   std::shared_ptr<fw::Texture> texture;
 
-  /** Sets a value which indicates whether we want to render in wireframe mode or not. */
-  inline void set_wireframe(bool value) {
-    wireframe_ = value;
+  /** Sets a ParticleRotation which indicates whether we want to render in wireframe mode or not. */
+  inline void set_wireframe(bool ParticleRotation) {
+    wireframe_ = ParticleRotation;
   }
   inline bool get_wireframe() const {
     return wireframe_;

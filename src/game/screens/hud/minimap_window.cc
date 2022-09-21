@@ -151,7 +151,7 @@ void minimap_window::update_drawable() {
       0);
   // Make it go from -0.5 -> 0.5
   cam_pos = fw::Vector(cam_pos[0] - 0.5f, cam_pos[1] - .5f, 0);
-  // Make it 1/3 the size, because we expand the drawable by 3 (size you're always in the centre of a 3x3 grid)
+  // Make it 1/3 the size, because we expand the drawable by 3 (size you're always in the center of a 3x3 grid)
   cam_pos = fw::Vector(cam_pos[0] / 3.0f, cam_pos[1] / 3.0f, 0);
   fw::Matrix transform = fw::translation(cam_pos);
 

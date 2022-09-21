@@ -13,7 +13,7 @@ class ModelManager;
 class timer;
 class Camera;
 class Bitmap;
-class particle_manager;
+class ParticleManager;
 struct screenshot_request;
 class AudioManager;
 class Lang;
@@ -85,12 +85,12 @@ private:
   bool _active;
 
   Input * _input;
-  Graphics * _graphics;
+  Graphics * graphics_;
   base_app * _app;
   timer *_timer;
   Camera *_camera;
   gui::Gui *_gui;
-  particle_manager *_particle_mgr;
+  ParticleManager *_particle_mgr;
   bool _paused;
   AudioManager *_audio_manager;
   ModelManager *_model_manager;
@@ -164,7 +164,7 @@ public:
     return _input;
   }
   Graphics *get_graphics() const {
-    return _graphics;
+    return graphics_;
   }
   gui::Gui *get_gui() const {
     return _gui;
@@ -178,7 +178,7 @@ public:
   ModelManager *get_model_manager() const {
     return _model_manager;
   }
-  particle_manager *get_particle_mgr() const {
+  ParticleManager *get_particle_mgr() const {
     return _particle_mgr;
   }
   Cursor *get_cursor() const {

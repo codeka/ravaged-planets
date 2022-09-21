@@ -74,7 +74,7 @@ public:
   // gets the entity that's currently under the cursor (if any)
   std::weak_ptr<entity> get_entity_at_cursor();
 
-  // gets the current centre of the "view" (basically, where the camera currently sits)
+  // gets the current center of the "view" (basically, where the camera currently sits)
   fw::Vector get_view_centre() const {
     return _view_centre;
   }

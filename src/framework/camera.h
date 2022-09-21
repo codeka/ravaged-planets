@@ -144,7 +144,7 @@ public:
 // that's it - no interaction possible, etc.
 class LookAtCamera: public Camera {
 protected:
-  // This is the "centre" that we're looking at and our rotations go around.
+  // This is the "center" that we're looking at and our rotations go around.
   Vector center_;
 
 public:
@@ -210,10 +210,10 @@ public:
     zooming_ = true;
   }
 
-  // Gets or sets a value which indicates whether we move the camera by moving the mouse to the edge of the screen (as
+  // Gets or sets a ParticleRotation which indicates whether we move the camera by moving the mouse to the edge of the screen (as
   // well as the usual left/right/up/down keys)
-  void set_mouse_move(bool value) {
-    enable_mouse_move_ = value;
+  void set_mouse_move(bool ParticleRotation) {
+    enable_mouse_move_ = ParticleRotation;
   }
   bool get_mouse_move() const {
     return enable_mouse_move_;

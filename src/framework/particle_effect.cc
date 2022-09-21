@@ -8,57 +8,57 @@
 
 namespace fw {
 
-particle_effect::particle_effect(particle_manager *mgr, std::shared_ptr<particle_effect_config> const &config) :
-    _mgr(mgr), _config(config), _dead(false) {
+ParticleEffect::ParticleEffect(ParticleManager *mgr, std::shared_ptr<ParticleEffectConfig> const &config) :
+    mgr_(mgr), config_(config), dead_(false) {
 }
 
-particle_effect::~particle_effect() {
+ParticleEffect::~ParticleEffect() {
 }
 
-void particle_effect::initialize() {
-  for (auto it = _config->emitter_config_begin(); it != _config->emitter_config_end(); ++it) {
-    std::shared_ptr<particle_emitter> emitter(new particle_emitter(_mgr, *it));
+void ParticleEffect::initialize() {
+  for (auto it = config_->emitter_config_begin(); it != config_->emitter_config_end(); ++it) {
+    std::shared_ptr<ParticleEmitter> emitter(new ParticleEmitter(mgr_, *it));
     emitter->initialize();
-    _emitters.push_back(emitter);
+    emitters_.push_back(emitter);
   }
 }
 
-void particle_effect::destroy() {
+void ParticleEffect::destroy() {
   // destroy any emitters that are still running
-  BOOST_FOREACH(emitter_list::value_type &emitter, _emitters) {
+  for(auto &emitter : emitters_) {
     emitter->destroy();
   }
 
   // and set our own "dead" flag. when all emitters have finished, we'll destroy ourselves.
-  _dead = true;
+  dead_ = true;
 }
 
-void particle_effect::set_position(fw::Vector const &pos) {
-  BOOST_FOREACH(emitter_list::value_type & emitter, _emitters) {
+void ParticleEffect::set_position(fw::Vector const &pos) {
+  for(auto& emitter : emitters_) {
     emitter->set_position(pos);
   }
 }
 
-void particle_effect::update(float dt) {
-  std::vector<particle_emitter *> to_delete;
+void ParticleEffect::update(float dt) {
+  std::vector<ParticleEmitter *> to_delete;
 
-  BOOST_FOREACH(emitter_list::value_type & emitter, _emitters) {
+  for(auto& emitter : emitters_) {
     if (!emitter->update(dt)) {
       to_delete.push_back(emitter.get());
     }
   }
 
-  for (std::vector<particle_emitter *>::iterator dit = to_delete.begin(); dit != to_delete.end(); ++dit) {
-    for (emitter_list::iterator it = _emitters.begin(); it != _emitters.end(); ++it) {
+  for (auto dit = to_delete.begin(); dit != to_delete.end(); ++dit) {
+    for (auto it = emitters_.begin(); it != emitters_.end(); ++it) {
       if ((*it).get() == *dit) {
-        _emitters.erase(it);
+        emitters_.erase(it);
         break;
       }
     }
   }
 
-  if (_dead && _emitters.size() == 0) {
-    _mgr->remove_effect(this);
+  if (dead_ && emitters_.size() == 0) {
+    mgr_->remove_effect(this);
   }
 }
 

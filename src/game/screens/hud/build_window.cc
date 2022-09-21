@@ -50,7 +50,7 @@ private:
   std::string _template_name;
   std::shared_ptr<fw::Model> model_;
   std::shared_ptr<fw::Framebuffer> _framebuffer;
-  std::shared_ptr<fw::Texture> _color_texture;
+  std::shared_ptr<fw::Texture> color_texture_;
   std::shared_ptr<fw::Texture> _depth_texture;
   std::shared_ptr<Drawable> _drawable;
 
@@ -71,18 +71,18 @@ entity_icon::entity_icon() : _rotation(0.0f) {
 }
 
 void entity_icon::initialize() {
-  _color_texture = std::shared_ptr<fw::Texture>(new fw::Texture());
-  _color_texture->create(64, 64, false);
+  color_texture_ = std::shared_ptr<fw::Texture>(new fw::Texture());
+  color_texture_->create(64, 64, false);
 
   _depth_texture = std::shared_ptr<fw::Texture>(new fw::Texture());
   _depth_texture->create(64, 64, true);
 
   _framebuffer = std::shared_ptr<fw::Framebuffer>(new fw::Framebuffer());
-  _framebuffer->set_color_buffer(_color_texture);
+  _framebuffer->set_color_buffer(color_texture_);
   _framebuffer->set_depth_buffer(_depth_texture);
 
   _drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
-      ->build_drawable(_color_texture, 7, 7, 50, 50);
+      ->build_drawable(color_texture_, 7, 7, 50, 50);
   std::dynamic_pointer_cast<BitmapDrawable>(_drawable)->set_flipped(true);
   render();
 }

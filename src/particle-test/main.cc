@@ -25,7 +25,7 @@ namespace po = boost::program_options;
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 
-static std::shared_ptr<fw::particle_effect> g_effect;
+static std::shared_ptr<fw::ParticleEffect> g_effect;
 static bool is_moving = false;
 static float angle;
 

@@ -68,7 +68,7 @@ private:
   std::shared_ptr<fw::VertexBuffer> vb_;
   std::shared_ptr<fw::IndexBuffer> ib_;
   std::shared_ptr<fw::shader> shader_;
-  std::shared_ptr<fw::shader_parameters> _shader_params;
+  std::shared_ptr<fw::shader_parameters> shader_params_;
 
   // Renders the node if the shader file is null (basically just uses the basic shader).
   void render_noshader(fw::Camera *camera, fw::Matrix const &transform);
@@ -123,10 +123,10 @@ public:
   std::shared_ptr<fw::shader> get_shader() const;
 
   void set_shader_parameters(std::shared_ptr<fw::shader_parameters> shader_params) {
-    _shader_params = shader_params;
+    shader_params_ = shader_params;
   }
   std::shared_ptr<fw::shader_parameters> get_shader_parameters() const {
-    return _shader_params;
+    return shader_params_;
   }
 
   void set_cast_shadows(bool cast_shadows) {

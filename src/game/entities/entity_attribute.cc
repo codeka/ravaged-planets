@@ -8,8 +8,8 @@ namespace ent {
 entity_attribute::entity_attribute() {
 }
 
-entity_attribute::entity_attribute(std::string name, boost::any value) :
-    _name(name), value_(value) {
+entity_attribute::entity_attribute(std::string name, boost::any ParticleRotation) :
+    _name(name), value_(ParticleRotation) {
 }
 
 entity_attribute::entity_attribute(entity_attribute const &copy) :
@@ -26,14 +26,14 @@ entity_attribute &entity_attribute::operator =(entity_attribute const &copy) {
   return (*this);
 }
 
-void entity_attribute::set_value(boost::any value) {
-  if (value_.type() != value.type()) {
+void entity_attribute::set_value(boost::any ParticleRotation) {
+  if (value_.type() != ParticleRotation.type()) {
     fw::debug << boost::format("WARN: cannot set value of type %1% to value of type %2%")
-        % value_.type().name() % value.type().name() << std::endl;
+        % value_.type().name() % ParticleRotation.type().name() << std::endl;
     return;
   }
 
-  value_ = value;
+  value_ = ParticleRotation;
   sig_value_changed(_name, value_);
 }
 

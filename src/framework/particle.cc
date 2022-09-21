@@ -7,18 +7,18 @@
 namespace fw {
 
 //-------------------------------------------------------------------------
-particle::life_state::life_state() :
-    age(0), size(0), color_row(0), alpha(0), rotation_speed(0), rotation_kind(rotation_kind::random), speed(0),
+Particle::LifeState::LifeState() :
+    age(0), size(0), color_row(0), alpha(0), rotation_speed(0), rotation(ParticleRotation::kRandom), speed(0),
     direction(fw::Vector(0, 0, 0)), gravity(0) {
 }
 
-particle::life_state::life_state(particle::life_state const &copy) {
+Particle::LifeState::LifeState(Particle::LifeState const &copy) {
   age = copy.age;
   size = copy.size;
   color_row = copy.color_row;
   alpha = copy.alpha;
   rotation_speed = copy.rotation_speed;
-  rotation_kind = copy.rotation_kind;
+  rotation = copy.rotation;
   speed = copy.speed;
   direction = copy.direction;
   gravity = copy.gravity;
@@ -26,8 +26,8 @@ particle::life_state::life_state(particle::life_state const &copy) {
 
 //-------------------------------------------------------------------------
 
-particle::particle(std::shared_ptr<particle_emitter_config> const &config) :
-    config(config), rotation_kind(rotation_kind::random), alpha(0), color1(0), color2(0), age(0), _max_age(0),
+Particle::Particle(std::shared_ptr<ParticleEmitterConfig> const &config) :
+    config(config), rotation(ParticleRotation::kRandom), alpha(0), color1(0), color2(0), age(0), max_age_(0),
     color_factor(0) {
   random = fw::random();
   angle = 0.0f;
@@ -36,34 +36,34 @@ particle::particle(std::shared_ptr<particle_emitter_config> const &config) :
 
   if (config->billboard.areas.size() < 1) {
     rect.left = rect.top = 0.0f;
-    rect.right = rect.bottom = 1.0f;
+    rect.width = rect.height = 1.0f;
   } else {
     int index = static_cast<int>(random * (config->billboard.areas.size() - 1));
     rect = config->billboard.areas[index];
   }
 }
 
-particle::~particle() {
+Particle::~Particle() {
 }
 
-void particle::initialize() {
-  _max_age = config->max_age.get_value();
-  _states.clear();
+void Particle::initialize() {
+  max_age_ = config->max_age.get_value();
+  states_.clear();
   for (auto it = config->life.begin(); it != config->life.end(); it++) {
-    life_state state;
+    LifeState state;
     state.age = (*it).age;
     state.size = (*it).size.get_value();
     state.color_row = (*it).color_row;
     state.alpha = (*it).alpha;
     state.rotation_speed = (*it).rotation_speed.get_value();
-    state.rotation_kind = (*it).rotation_kind;
+    state.rotation = (*it).rotation;
     state.speed = (*it).speed.get_value();
     state.gravity = (*it).gravity.get_value();
     state.direction = (*it).direction.get_value();
     if (state.direction.length_squared() > 0.001f) {
       state.direction.normalize();
     }
-    _states.push_back(state);
+    states_.push_back(state);
   }
 
   direction = fw::Vector(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f).normalize();
@@ -71,28 +71,28 @@ void particle::initialize() {
   age = 0.0f;
 }
 
-bool particle::update(float dt) {
-  float ndt = dt / _max_age;
+bool Particle::update(float dt) {
+  float ndt = dt / max_age_;
   age += ndt;
   if (age > 1.0f) {
     return false;
   }
 
-  std::vector<life_state>::iterator prev_it;
-  std::vector<life_state>::iterator next_it;
-  for (prev_it = _states.begin(); prev_it != _states.end(); ++prev_it) {
+  std::vector<LifeState>::iterator prev_it;
+  std::vector<LifeState>::iterator next_it;
+  for (prev_it = states_.begin(); prev_it != states_.end(); ++prev_it) {
     next_it = prev_it + 1;
 
-    if (next_it == _states.end() || (*next_it).age > age) {
+    if (next_it == states_.end() || (*next_it).age > age) {
       break;
     }
   }
 
   float t;
-  life_state const *next;
-  life_state const *prev;
+  LifeState const *next;
+  LifeState const *prev;
 
-  if (next_it == _states.end()) {
+  if (next_it == states_.end()) {
     next = &(*prev_it);
     prev = &(*prev_it);
     t = 0.0f;
@@ -108,7 +108,7 @@ bool particle::update(float dt) {
     t = (age - prev->age) / age_diff;
   }
 
-  // adjust the particle's direction based on it's gravity factor
+  // adjust the Particle's direction based on it's gravity factor
   fw::Vector gravity = fw::Vector(0, -1, 0) * (fw::lerp(prev->gravity, next->gravity, t));
   if (prev->direction.length_squared() < 0.001f || next->direction.length_squared() < 0.001f) {
     direction += gravity * dt;
@@ -119,8 +119,8 @@ bool particle::update(float dt) {
   }
 
   float rotation_speed = 0.0f;
-  rotation_kind = prev->rotation_kind;
-  if (rotation_kind == rotation_kind::random) {
+  rotation = prev->rotation;
+  if (rotation == ParticleRotation::kRandom) {
     rotation_speed = fw::lerp(prev->rotation_speed, next->rotation_speed, t);
     angle += rotation_speed * dt;
   }

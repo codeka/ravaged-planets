@@ -31,7 +31,7 @@ enum ids {
 };
 
 entity_debug::entity_debug(entity_manager *mgr) :
-    _mgr(mgr), _just_shown(false), _wnd(nullptr) {
+    mgr_(mgr), _just_shown(false), _wnd(nullptr) {
 }
 
 entity_debug::~entity_debug() {
@@ -62,10 +62,10 @@ void entity_debug::update() {
   std::string new_pos_value;
   std::string new_goal_value;
 
-  std::list<std::weak_ptr<entity> > selection = _mgr->get_selection();
+  std::list<std::weak_ptr<entity> > selection = mgr_->get_selection();
   if (selection.size() > 0) {
     // we display some info about the selected entity (if there's more than one, we just use the first one from the
-    // list - essentially a random one)
+    // list - essentially a Random one)
     std::shared_ptr<entity> entity = selection.front().lock();
     if (!entity) {
       return;
@@ -101,7 +101,7 @@ void entity_debug::on_key_press(std::string /*key*/, bool is_down) {
 bool entity_debug::on_show_steering_changed(Widget *w) {
   Checkbox *cbx = dynamic_cast<Checkbox *>(w);
 
-  BOOST_FOREACH(std::weak_ptr<entity> const &wp, _mgr->get_selection()) {
+  BOOST_FOREACH(std::weak_ptr<entity> const &wp, mgr_->get_selection()) {
     std::shared_ptr<entity> ent = wp.lock();
     if (!ent) {
       continue;
@@ -136,7 +136,7 @@ void entity_debug_view::add_line(fw::Vector const &from, fw::Vector const &to, f
   _lines.push_back(l);
 }
 
-void entity_debug_view::add_circle(fw::Vector const &centre, float radius, fw::Color const &col) {
+void entity_debug_view::add_circle(fw::Vector const &center, float radius, fw::Color const &col) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * M_PI * radius);
@@ -149,14 +149,14 @@ void entity_debug_view::add_circle(fw::Vector const &centre, float radius, fw::C
   for (int i = 0; i < num_segments; i++) {
     float factor = 2.0f * (float) M_PI * (i / (float) num_segments);
 
-    fw::Vector point(centre[0] + radius * sin(factor), centre[1], centre[2] + radius * cos(factor));
+    fw::Vector point(center[0] + radius * sin(factor), center[1], center[2] + radius * cos(factor));
     if (i > 0) {
       add_line(last_point, point, col);
     }
     last_point = point;
   }
 
-  fw::Vector first_point(centre[0] + radius * sin(0.0f), centre[1], centre[2] + radius * cos(0.0f));
+  fw::Vector first_point(center[0] + radius * sin(0.0f), center[1], center[2] + radius * cos(0.0f));
   add_line(last_point, first_point, col);
 }
 

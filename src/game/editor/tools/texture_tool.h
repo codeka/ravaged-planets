@@ -34,8 +34,8 @@ public:
   virtual void activate();
   virtual void deactivate();
 
-  void set_radius(int value) {
-    _radius = value;
+  void set_radius(int ParticleRotation) {
+    _radius = ParticleRotation;
   }
   int get_radius() const {
     return _radius;

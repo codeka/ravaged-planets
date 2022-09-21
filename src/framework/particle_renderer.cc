@@ -1,6 +1,4 @@
 
-#include <boost/foreach.hpp>
-
 #include <framework/particle_renderer.h>
 #include <framework/particle_manager.h>
 #include <framework/particle.h>
@@ -19,14 +17,14 @@
 //-----------------------------------------------------------------------------
 // This structure is used to sort particles first by texture and then by z-order (to avoid state changes and
 // ordering issues)
-struct particle_sorter {
-  fw::Vector _cam_pos;
+struct ParticleSorter {
+  fw::Vector cam_pos_;
 
-  particle_sorter(fw::Vector camera_pos) :
-      _cam_pos(camera_pos) {
+  ParticleSorter(fw::Vector camera_pos) :
+      cam_pos_(camera_pos) {
   }
 
-  bool operator()(fw::particle const *lhs, fw::particle const *rhs) {
+  bool operator()(fw::Particle const *lhs, fw::Particle const *rhs) {
     if (lhs->config->billboard.texture != rhs->config->billboard.texture) {
       // it doesn't matter which order we choose for the textures,
       // as long TextureA always appears on the "same side" of TextureB.
@@ -37,8 +35,8 @@ struct particle_sorter {
       return (lhs->config->billboard.mode > rhs->config->billboard.mode);
     }
 
-    float lhs_len = (lhs->pos - _cam_pos).length();
-    float rhs_len = (rhs->pos - _cam_pos).length();
+    float lhs_len = (lhs->pos - cam_pos_).length();
+    float rhs_len = (rhs->pos - cam_pos_).length();
     return lhs_len > rhs_len;
   }
 };
@@ -49,32 +47,32 @@ const int batch_size = 1024;
 const int max_vertices = batch_size * 4;
 const int max_indices = batch_size * 6;
 
-struct render_state {
+struct RenderState {
   fw::sg::scenegraph &scenegraph;
   int particle_num;
   std::vector<fw::vertex::xyz_c_uv> vertices;
   std::vector<uint16_t> indices;
   std::shared_ptr<fw::Texture> texture;
-  fw::particle_emitter_config::billboard_mode mode;
-  fw::particle_renderer::particle_list &particles;
+  fw::ParticleEmitterConfig::BillboardMode mode;
+  fw::ParticleRenderer::ParticleList &particles;
   std::shared_ptr<fw::shader> shader;
   std::shared_ptr<fw::shader_parameters> shader_parameters;
 
   std::vector<std::shared_ptr<fw::VertexBuffer>> vertex_buffers;
   std::vector<std::shared_ptr<fw::IndexBuffer>> index_buffers;
 
-  inline render_state(fw::sg::scenegraph &sg, fw::particle_renderer::particle_list &particles) :
-      scenegraph(sg), particles(particles), mode(fw::particle_emitter_config::additive), particle_num(0) {
+  inline RenderState(fw::sg::scenegraph &sg, fw::ParticleRenderer::ParticleList &particles) :
+      scenegraph(sg), particles(particles), mode(fw::ParticleEmitterConfig::kAdditive), particle_num(0) {
   }
 };
 
 //-----------------------------------------------------------------------------
 // This class holds the index and vertex buffer(s) while we're not using them...
 // so that we don't have to continually create/destroy them
-class buffer_cache {
+class BufferCache {
 private:
-  std::vector<std::shared_ptr<fw::VertexBuffer>> _vertex_buffers;
-  std::vector<std::shared_ptr<fw::IndexBuffer>> _index_buffers;
+  std::vector<std::shared_ptr<fw::VertexBuffer>> vertex_buffers_;
+  std::vector<std::shared_ptr<fw::IndexBuffer>> index_buffers_;
 
 public:
   std::shared_ptr<fw::VertexBuffer> get_vertex_buffer();
@@ -84,62 +82,62 @@ public:
   void release_index_buffer(std::shared_ptr<fw::IndexBuffer> ib);
 };
 
-std::shared_ptr<fw::VertexBuffer> buffer_cache::get_vertex_buffer() {
-  if (_vertex_buffers.size() > 0) {
-    std::shared_ptr<fw::VertexBuffer> vb(_vertex_buffers.back());
-    _vertex_buffers.pop_back();
+std::shared_ptr<fw::VertexBuffer> BufferCache::get_vertex_buffer() {
+  if (vertex_buffers_.size() > 0) {
+    std::shared_ptr<fw::VertexBuffer> vb(vertex_buffers_.back());
+    vertex_buffers_.pop_back();
     return vb;
   } else {
     return fw::VertexBuffer::create<fw::vertex::xyz_c_uv>(true);
   }
 }
 
-std::shared_ptr<fw::IndexBuffer> buffer_cache::get_index_buffer() {
-  if (_index_buffers.size() > 0) {
-    std::shared_ptr<fw::IndexBuffer> ib(_index_buffers.back());
-    _index_buffers.pop_back();
+std::shared_ptr<fw::IndexBuffer> BufferCache::get_index_buffer() {
+  if (index_buffers_.size() > 0) {
+    std::shared_ptr<fw::IndexBuffer> ib(index_buffers_.back());
+    index_buffers_.pop_back();
     return ib;
   } else {
     return std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer(true));
   }
 }
 
-void buffer_cache::release_vertex_buffer(std::shared_ptr<fw::VertexBuffer> vb) {
-  _vertex_buffers.push_back(vb);
+void BufferCache::release_vertex_buffer(std::shared_ptr<fw::VertexBuffer> vb) {
+  vertex_buffers_.push_back(vb);
 }
 
-void buffer_cache::release_index_buffer(std::shared_ptr<fw::IndexBuffer> ib) {
-  _index_buffers.push_back(ib);
+void BufferCache::release_index_buffer(std::shared_ptr<fw::IndexBuffer> ib) {
+  index_buffers_.push_back(ib);
 }
 
-static buffer_cache g_buffer_cache;
+static BufferCache g_buffer_cache;
 
 //-----------------------------------------------------------------------------
 
 namespace fw {
 
-particle_renderer::particle_renderer(particle_manager *mgr) :
-    _graphics(nullptr), shader_(nullptr), _mgr(mgr), _draw_frame(1), _color_texture(new fw::Texture()) {
+ParticleRenderer::ParticleRenderer(ParticleManager *mgr) :
+    graphics_(nullptr), shader_(nullptr), mgr_(mgr), _draw_frame(1), color_texture_(new fw::Texture()) {
 }
 
-particle_renderer::~particle_renderer() {
+ParticleRenderer::~ParticleRenderer() {
 }
 
-void particle_renderer::initialize(Graphics *g) {
-  _graphics = g;
+void ParticleRenderer::initialize(Graphics *g) {
+  graphics_ = g;
 
-  _color_texture->create(fw::resolve("particles/colors.png"));
+  color_texture_->create(fw::resolve("particles/colors.png"));
   shader_ = fw::shader::create("particle.shader");
-  _shader_params = shader_->create_parameters();
-  _shader_params->set_texture("color_texture", _color_texture);
+  shader_params_ = shader_->create_parameters();
+  shader_params_->set_texture("color_texture", color_texture_);
 }
 
-/** Gets the name of the program in the particle.shader file we'll use for the given billboard_mode. */
-std::string get_program_name(particle_emitter_config::billboard_mode mode) {
+/** Gets the name of the program in the Particle.shader file we'll use for the given BillboardMode. */
+std::string get_program_name(ParticleEmitterConfig::BillboardMode mode) {
   switch (mode) {
-  case particle_emitter_config::normal:
+  case ParticleEmitterConfig::kNormal:
     return "particle-normal";
-  case particle_emitter_config::additive:
+  case ParticleEmitterConfig::kAdditive:
     return "particle-additive";
   default:
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Unknown billboard_mode!"));
@@ -148,7 +146,7 @@ std::string get_program_name(particle_emitter_config::billboard_mode mode) {
   }
 }
 
-void generate_scenegraph_node(render_state &rs) {
+void generate_scenegraph_node(RenderState &rs) {
   std::shared_ptr<fw::VertexBuffer> vb = g_buffer_cache.get_vertex_buffer();
   vb->set_data(rs.vertices.size(), &rs.vertices[0]);
   rs.vertices.clear();
@@ -173,7 +171,7 @@ void generate_scenegraph_node(render_state &rs) {
   rs.scenegraph.add_node(node);
 }
 
-bool particle_renderer::add_particle(render_state &rs, int base_index, particle *p, float offset_x, float offset_z) {
+bool ParticleRenderer::add_particle(RenderState &rs, int base_index, Particle *p, float offset_x, float offset_z) {
   fw::Camera *cam = fw::framework::get_instance()->get_camera();
   fw::Vector pos(p->pos[0] + offset_x, p->pos[1], p->pos[2] + offset_z);
 
@@ -182,19 +180,19 @@ bool particle_renderer::add_particle(render_state &rs, int base_index, particle 
   if (dir_to_cam.length_squared() > (50.0f * 50.0f))
     return false;
 
-  // if we've already drawn the particle this frame, don't do it again.
+  // if we've already drawn the Particle this frame, don't do it again.
   if (p->draw_frame == _draw_frame)
     return false;
   p->draw_frame = _draw_frame;
 
   // the color_row is divided by this value to get the value between 0 and 1.
-  float color_texture_factor = 1.0f / this->_color_texture->get_height();
+  float color_texture_factor = 1.0f / this->color_texture_->get_height();
 
   fw::Color color(p->alpha, (static_cast<float>(p->color1) + 0.5f) * color_texture_factor,
       (static_cast<float>(p->color2) + 0.5f) * color_texture_factor, p->color_factor);
 
   Matrix m = fw::scale(p->size);
-  if (p->rotation_kind != rotation_kind::direction) {
+  if (p->rotation != ParticleRotation::kDirection) {
     m *= fw::rotate_axis_angle(Vector(0, 0, 1), p->angle);
 
     Matrix m2;
@@ -207,16 +205,16 @@ bool particle_renderer::add_particle(render_state &rs, int base_index, particle 
   }
   m *= fw::translation(pos);
 
-  float aspect = (p->rect.bottom - p->rect.top) / (p->rect.right - p->rect.left);
+  float aspect = p->rect.height / p->rect.width;
 
   fw::Vector v = cml::transform_point(m, fw::Vector(-0.5f, -0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.bottom));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.top + p->rect.height));
   v = cml::transform_point(m, fw::Vector(-0.5f, 0.5f * aspect, 0));
   rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.top));
   v = cml::transform_point(m, fw::Vector(0.5f, 0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.right, p->rect.top));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left + p->rect.width, p->rect.top));
   v = cml::transform_point(m, fw::Vector(0.5f, -0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.right, p->rect.bottom));
+  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left + p->rect.width, p->rect.top + p->rect.height));
 
   rs.indices.push_back(base_index);
   rs.indices.push_back(base_index + 1);
@@ -228,9 +226,9 @@ bool particle_renderer::add_particle(render_state &rs, int base_index, particle 
   return true;
 }
 
-void particle_renderer::render_particles(render_state &rs, float offset_x, float offset_z) {
-  for (particle_renderer::particle_list::iterator it = rs.particles.begin(); it != rs.particles.end(); ++it) {
-    particle *p = *it;
+void ParticleRenderer::render_particles(RenderState &rs, float offset_x, float offset_z) {
+  for (ParticleRenderer::ParticleList::iterator it = rs.particles.begin(); it != rs.particles.end(); ++it) {
+    Particle *p = *it;
 
     if (rs.texture != p->config->billboard.texture || rs.particle_num >= batch_size
         || rs.mode != p->config->billboard.mode) {
@@ -249,12 +247,12 @@ void particle_renderer::render_particles(render_state &rs, float offset_x, float
   }
 }
 
-void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::particle_list &particles) {
+void ParticleRenderer::render(sg::scenegraph &scenegraph, ParticleRenderer::ParticleList &particles) {
   if (particles.size() == 0)
     return;
 
-  // make sure the particle's pos is update
-  BOOST_FOREACH(particle *p, particles) {
+  // make sure the Particle's pos is update
+  for(Particle *p : particles) {
     p->pos = p->new_pos;
   }
 
@@ -262,17 +260,17 @@ void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::pa
   sort_particles(particles);
 
   // create the render state that'll hold all our state variables
-  render_state rs(scenegraph, particles);
+  RenderState rs(scenegraph, particles);
   rs.shader = shader_;
-  rs.shader_parameters = _shader_params;
+  rs.shader_parameters = shader_params_;
   rs.particle_num = 0;
-  rs.mode = particle_emitter_config::normal;
+  rs.mode = ParticleEmitterConfig::kNormal;
 
-  if (_mgr->get_wrap_x() > 1.0f && _mgr->get_wrap_z() > 1.0f) {
+  if (mgr_->get_wrap_x() > 1.0f && mgr_->get_wrap_z() > 1.0f) {
     for (int z = -1; z <= 1; z++) {
       for (int x = -1; x <= 1; x++) {
-        float offset_x = x * _mgr->get_wrap_x();
-        float offset_z = z * _mgr->get_wrap_z();
+        float offset_x = x * mgr_->get_wrap_x();
+        float offset_z = z * mgr_->get_wrap_z();
         render_particles(rs, offset_x, offset_z);
       }
     }
@@ -287,10 +285,10 @@ void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::pa
   // release the vertex and index buffers back into the cache (even though
   // they're still technically in use by the scene graph, we won't need them
   // again until the next frame so we can do this here)
-  BOOST_FOREACH(std::shared_ptr<fw::VertexBuffer> vb, rs.vertex_buffers) {
+  for(const auto& vb : rs.vertex_buffers) {
     g_buffer_cache.release_vertex_buffer(vb);
   }
-  BOOST_FOREACH(std::shared_ptr<fw::IndexBuffer> ib, rs.index_buffers) {
+  for(const auto& ib : rs.index_buffers) {
     g_buffer_cache.release_index_buffer(ib);
   }
 
@@ -298,11 +296,11 @@ void particle_renderer::render(sg::scenegraph &scenegraph, particle_renderer::pa
   _draw_frame++;
 }
 
-void particle_renderer::sort_particles(particle_renderer::particle_list &particles) {
+void ParticleRenderer::sort_particles(ParticleRenderer::ParticleList &particles) {
   fw::Camera *cam = fw::framework::get_instance()->get_camera();
   fw::Vector const &cam_pos = cam->get_position();
 
-  particles.sort(particle_sorter(cam_pos));
+  particles.sort(ParticleSorter(cam_pos));
 }
 
 }

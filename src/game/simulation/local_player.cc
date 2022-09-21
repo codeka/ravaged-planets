@@ -20,7 +20,7 @@ local_player::local_player() :
   // a non-networked game, or if we're the Host of a networked game
   _player_no = 1;
 
-  // start off with a random color as well
+  // start off with a Random color as well
   int color_index = static_cast<int>(fw::random() * player_colors.size());
   color_ = player_colors[color_index];
 }
@@ -49,7 +49,7 @@ void local_player::world_loaded() {
   if (start_it == game::world::get_instance()->get_player_starts().end()) {
     fw::debug << boost::format("WARN: no player_start defined for player %1%, choosing random") % _player_no
         << std::endl;
-    start_loc = fw::Vector(13.0f, 0, 13.0f); // <todo, random
+    start_loc = fw::Vector(13.0f, 0, 13.0f); // <todo, Random
   } else {
     start_loc = start_it->second;
   }

@@ -50,7 +50,7 @@ public:
   void highlight(fw::Color const &col);
   void unhighlight();
 
-  void set_selection_radius(float value);
+  void set_selection_radius(float ParticleRotation);
   float get_selection_radius() const {
     return _selection_radius;
   }

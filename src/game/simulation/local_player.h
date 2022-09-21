@@ -34,8 +34,8 @@ public:
   virtual void world_loaded();
 
   /** Our player# gets updated when we connect to a remote game. */
-  void set_player_no(uint8_t value) {
-    _player_no = value;
+  void set_player_no(uint8_t ParticleRotation) {
+    _player_no = ParticleRotation;
   }
 };
 

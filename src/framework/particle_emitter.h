@@ -7,32 +7,32 @@
 #include <framework/xml.h>
 
 namespace fw {
-class particle_manager;
-class particle;
-class particle_emitter_config;
-class emit_policy;
+class ParticleManager;
+class Particle;
+class ParticleEmitterConfig;
+class EmitPolicy;
 
 /**
- * This class represents the particle emitter, whose job it is to "emit" particles into the world with the correct
+ * This class represents the Particle emitter, whose job it is to "emit" particles into the world with the correct
  * initial parameters and so on.
  */
-class particle_emitter {
+class ParticleEmitter {
 private:
-  std::shared_ptr<particle_emitter_config> _config;
-  particle_manager *_mgr;
-  float _age;
-  int _initial_count;
+  std::shared_ptr<ParticleEmitterConfig> config_;
+  ParticleManager *mgr_;
+  float age_;
+  int initial_count_;
 
-  typedef std::list<particle *> particle_list;
-  particle_list _particles;
+  typedef std::list<Particle *> ParticleList;
+  ParticleList particles_;
 
-  fw::Vector _position;
-  emit_policy *_emit_policy;
-  bool _dead;
+  fw::Vector position_;
+  EmitPolicy *emit_policy_;
+  bool dead_;
 
 public:
-  particle_emitter(particle_manager *mgr, std::shared_ptr<particle_emitter_config> config);
-  ~particle_emitter();
+  ParticleEmitter(ParticleManager *mgr, std::shared_ptr<ParticleEmitterConfig> config);
+  ~ParticleEmitter();
 
   void initialize();
   bool update(float dt);
@@ -44,79 +44,73 @@ public:
   void destroy();
 
   void set_position(fw::Vector const &pos) {
-    _position = pos;
+    position_ = pos;
   }
   fw::Vector const &get_position() const {
-    return _position;
+    return position_;
   }
 
-  particle_manager *get_manager() const {
-    return _mgr;
+  ParticleManager *get_manager() const {
+    return mgr_;
   }
 
-  /** This is called by the emit_policy when it decides to emit a new particle. */
-  particle *emit(fw::Vector pos, float time_offset = 0.0f);
+  /** This is called by the EmitPolicy when it decides to emit a new Particle. */
+  Particle *emit(fw::Vector pos, float time_offset = 0.0f);
 };
 
-/**
- * This is the base class for the "policy" which decide how and when we emit new particles. It might be an "x per
- * second" policy or a "when the new particle will be x units from the last emitted particle".
- */
-class emit_policy {
+// This is the base class for the "policy" which decide how and when we emit new particles. It might be an "x per
+// second" policy or a "when the new Particle will be x units from the last emitted Particle".
+class EmitPolicy {
 protected:
-  particle_emitter *_emitter;
+  ParticleEmitter *emitter_;
 
 public:
-  emit_policy() :
-      _emitter(0) {
+  EmitPolicy() :
+      emitter_(0) {
   }
-  virtual ~emit_policy() {
+  virtual ~EmitPolicy() {
   }
 
-  virtual void initialize(particle_emitter *emitter);
+  virtual void initialize(ParticleEmitter *emitter);
 
   virtual void check_emit(float) {
   }
 };
 
-/** This is an emit_policy which emits particles at a certain rate every second. */
-class timed_emit_policy: public emit_policy {
+// This is an EmitPolicy which emits particles at a certain rate every second.
+class TimedEmitPolicy: public EmitPolicy {
 private:
-  float _particles_per_second;
-  float _time_since_last_particle;
-  fw::Vector _last_position;
+  float particles_per_second_;
+  float time_since_last_particle_;
+  fw::Vector last_position_;
 
 public:
-  timed_emit_policy(float value);
-  virtual ~timed_emit_policy();
+  TimedEmitPolicy(float ParticleRotation);
+  virtual ~TimedEmitPolicy();
 
   virtual void check_emit(float dt);
 };
 
-/**
- * This is an emit_policy that emits particles when the distance between the last one we emitted and the next one
- * becomes greater than some threshold.
- */
-class distance_emit_policy: public emit_policy {
+// This is an EmitPolicy that emits particles when the distance between the last one we emitted and the next one
+// becomes greater than some threshold.
+class DistanceEmitPolicy: public EmitPolicy {
 private:
-  particle *_last_particle;
-  float _max_distance;
+  Particle *last_particle_;
+  float max_distance_;
 
 public:
-  distance_emit_policy(float value);
-  virtual ~distance_emit_policy();
+  DistanceEmitPolicy(float ParticleRotation);
+  virtual ~DistanceEmitPolicy();
 
   virtual void check_emit(float dt);
 };
 
-/**
- * This is an emit_policy that doesn't ever actually emit anything. Presumably, you'd couple this with an "initial"
- * count of particles to be emitted as soon as the emitter is started.
- */
-class no_emit_policy: public emit_policy {
+// This is an EmitPolicy that doesn't ever actually emit anything. Presumably, you'd couple this with an "initial"
+// count of particles to be emitted as soon as the emitter is started.
+class NoEmitPolicy: public EmitPolicy {
 public:
-  no_emit_policy(float value);
-  virtual ~no_emit_policy();
+  NoEmitPolicy(float ParticleRotation);
+  virtual ~NoEmitPolicy();
 
   virtual void check_emit(float dt);
 };

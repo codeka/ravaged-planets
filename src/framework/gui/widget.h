@@ -23,7 +23,7 @@ private:
   float value_;
 
 public:
-  PixelDimension(float value);
+  PixelDimension(float ParticleRotation);
   virtual ~PixelDimension();
 
   float get_value(fw::gui::Widget *w, float parent_value);
@@ -34,7 +34,7 @@ private:
   float value_;
 
 public:
-  PercentDimension(float value);
+  PercentDimension(float ParticleRotation);
   virtual ~PercentDimension();
 
   float get_value(fw::gui::Widget *w, float parent_value);
@@ -74,12 +74,12 @@ public:
   float get_value(fw::gui::Widget *w, float parent_value);
 };
 
-inline std::shared_ptr<Dimension> px(float value) {
-  return std::shared_ptr<Dimension>(new PixelDimension(value));
+inline std::shared_ptr<Dimension> px(float ParticleRotation) {
+  return std::shared_ptr<Dimension>(new PixelDimension(ParticleRotation));
 }
 
-inline std::shared_ptr<Dimension> pct(float value) {
-  return std::shared_ptr<Dimension>(new PercentDimension(value));
+inline std::shared_ptr<Dimension> pct(float ParticleRotation) {
+  return std::shared_ptr<Dimension>(new PercentDimension(ParticleRotation));
 }
 
 inline std::shared_ptr<Dimension> sum(std::shared_ptr<Dimension> one, std::shared_ptr<Dimension> two) {

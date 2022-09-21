@@ -212,7 +212,7 @@ float terrain::get_vertex_height(int x, int z) {
 
 //
 // this method is pretty simple. we basically get the height at (x, z) then interpolate that
-// value between (x+1, z+1).
+// ParticleRotation between (x+1, z+1).
 //
 float terrain::get_height(float x, float z) {
   int x0 = (int) floor(x);
@@ -239,9 +239,9 @@ fw::Vector terrain::get_camera_lookat() {
   fw::framework *frmwrk = fw::framework::get_instance();
   fw::Camera *camera = frmwrk->get_camera();
 
-  fw::Vector centre = camera->unproject(0.0f, 0.0f);
+  fw::Vector center = camera->unproject(0.0f, 0.0f);
   fw::Vector start = camera->get_position();
-  fw::Vector direction = (centre - start).normalize();
+  fw::Vector direction = (center - start).normalize();
 
   return get_cursor_location(start, direction);
 }

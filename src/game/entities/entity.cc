@@ -17,7 +17,7 @@
 namespace ent {
 
 entity::entity(entity_manager *mgr, entity_id id) :
-    _mgr(mgr), _debug_view(0), _debug_flags(static_cast<entity_debug_flags>(0)), id_(id),
+    mgr_(mgr), _debug_view(0), _debug_flags(static_cast<entity_debug_flags>(0)), id_(id),
     _create_time(0) {
 }
 

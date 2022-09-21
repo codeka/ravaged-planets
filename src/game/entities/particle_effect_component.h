@@ -4,21 +4,21 @@
 #include <game/entities/entity.h>
 
 namespace fw {
-class particle_effect;
+class ParticleEffect;
 }
 
 namespace ent {
 class position_component;
 
 /**
- * This component holds a bunch of particle_emitters, and allows an entity to act as a particle emitter as well
- * (basically, the particle_emitter follows the entity around).
+ * This component holds a bunch of particle_emitters, and allows an entity to act as a Particle emitter as well
+ * (basically, the ParticleEmitter follows the entity around).
  */
 class particle_effect_component: public entity_component {
 private:
   struct effect_info {
     std::string name;
-    std::shared_ptr<fw::particle_effect> effect;
+    std::shared_ptr<fw::ParticleEffect> effect;
     fw::Vector offset;
     bool destroy_entity_on_complete;
     bool started;
@@ -27,7 +27,7 @@ private:
     }
   };
 
-  std::map<std::string, effect_info> _effects;
+  std::map<std::string, effect_info> effects_;
   position_component *_our_position;
 
 public:

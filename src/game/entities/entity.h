@@ -100,7 +100,7 @@ private:
 
   entity_debug_flags _debug_flags;
   entity_debug_view *_debug_view;
-  entity_manager *_mgr;
+  entity_manager *mgr_;
 public:
   ~entity();
 
@@ -117,7 +117,7 @@ public:
 
   // gets the entity_manager we were created by
   entity_manager *get_manager() const {
-    return _mgr;
+    return mgr_;
   }
 
   // gets a reference to the entity which created us (e.g. if we're a missile

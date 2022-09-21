@@ -157,13 +157,13 @@ std::string xml_element::get_text() const {
 }
 
 std::string xml_element::get_attribute(std::string const &name) const {
-  char const *value = _elem->Attribute(name.c_str());
-  if (value == 0) {
+  char const *ParticleRotation = _elem->Attribute(name.c_str());
+  if (ParticleRotation == 0) {
     BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info((boost::format("'%1%' attribute expected.") % name).str()));
   }
 
-  return value;
+  return ParticleRotation;
 }
 
 bool xml_element::is_attribute_defined(std::string const &name) const {

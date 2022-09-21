@@ -46,15 +46,15 @@ static framework *only_instance = 0;
 
 framework::framework(base_app* app) :
     _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(nullptr),
-    _graphics(nullptr), _timer(nullptr), _audio_manager(nullptr), _input(nullptr), _lang(nullptr),
+    graphics_(nullptr), _timer(nullptr), _audio_manager(nullptr), _input(nullptr), _lang(nullptr),
     _gui(nullptr), _font_manager(nullptr), _model_manager(nullptr), _cursor(nullptr),
     _debug_view(nullptr), _running(true) {
   only_instance = this;
 }
 
 framework::~framework() {
-  if (_graphics != nullptr)
-    delete _graphics;
+  if (graphics_ != nullptr)
+    delete graphics_;
   if (_gui != nullptr)
     delete _gui;
   if (_lang != nullptr)
@@ -100,11 +100,11 @@ bool framework::initialize(char const *title) {
 
   // initialize graphics
   if (_app->wants_graphics()) {
-    _graphics = new Graphics();
-    _graphics->initialize(title);
+    graphics_ = new Graphics();
+    graphics_->initialize(title);
 
-    _particle_mgr = new particle_manager();
-    _particle_mgr->initialize(_graphics);
+    _particle_mgr = new ParticleManager();
+    _particle_mgr->initialize(graphics_);
 
     _model_manager = new ModelManager();
 
@@ -124,7 +124,7 @@ bool framework::initialize(char const *title) {
 
   if (_app->wants_graphics()) {
     _gui = new gui::Gui();
-    _gui->initialize(_graphics);
+    _gui->initialize(graphics_);
   }
 
   if (stg.is_set("debug-view") && _app->wants_graphics()) {
@@ -152,7 +152,7 @@ bool framework::initialize(char const *title) {
 
 void framework::on_fullscreen_toggle(std::string keyname, bool is_down) {
   if (!is_down) {
-    _graphics->toggle_fullscreen();
+    graphics_->toggle_fullscreen();
   }
 }
 
@@ -181,8 +181,8 @@ void framework::destroy() {
     _debug_view->destroy();
   }
 
-  if (_graphics != nullptr) {
-    _graphics->destroy();
+  if (graphics_ != nullptr) {
+    graphics_->destroy();
   }
   Http::destroy();
   net::destroy();
@@ -204,7 +204,7 @@ void framework::run() {
   // kick off the update thread
   std::thread update_thread(std::bind(&framework::update_proc, this));
   try {
-    if (_graphics == nullptr) {
+    if (graphics_ == nullptr) {
       wait_events();
       _running = false;
     } else {
@@ -299,7 +299,7 @@ void framework::update(float dt) {
 }
 
 void framework::render() {
-  if (_graphics == nullptr) {
+  if (graphics_ == nullptr) {
     return;
   }
 
@@ -316,7 +316,7 @@ void framework::render() {
   if (_screenshots.size() > 0)
     take_screenshots(scenegraph);
 
-  _graphics->after_render();
+  graphics_->after_render();
 }
 
 bool framework::poll_events() {
@@ -346,8 +346,8 @@ bool framework::wait_events() {
 void framework::take_screenshot(int width, int height, std::function<void(std::shared_ptr<fw::Bitmap> bmp)> callback_fn,
     bool include_gui /*= true */) {
   if (width == 0 || height == 0) {
-    width = _graphics->get_width();
-    height = _graphics->get_height();
+    width = graphics_->get_width();
+    height = graphics_->get_height();
   }
 
   screenshot_request *request = new screenshot_request();

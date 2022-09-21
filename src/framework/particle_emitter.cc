@@ -6,155 +6,155 @@
 
 namespace fw {
 
-particle_emitter::particle_emitter(particle_manager *mgr, std::shared_ptr<particle_emitter_config> config) :
-    _mgr(mgr), _emit_policy(0), _config(config), _dead(false), _age(0.0f), _position(0, 0, 0) {
-  if (_config->emit_policy_name == "distance") {
-    _emit_policy = new distance_emit_policy(_config->emit_policy_value);
-  } else if (_config->emit_policy_name == "timed") {
-    _emit_policy = new timed_emit_policy(_config->emit_policy_value);
-  } else { // if (_config->emit_policy_name == "none")
-    _emit_policy = new no_emit_policy(_config->emit_policy_value);
+ParticleEmitter::ParticleEmitter(ParticleManager *mgr, std::shared_ptr<ParticleEmitterConfig> config) :
+    mgr_(mgr), emit_policy_(0), config_(config), dead_(false), age_(0.0f), position_(0, 0, 0) {
+  if (config_->emit_policy_name == "distance") {
+    emit_policy_ = new DistanceEmitPolicy(config_->emit_policy_value);
+  } else if (config_->emit_policy_name == "timed") {
+    emit_policy_ = new TimedEmitPolicy(config_->emit_policy_value);
+  } else { // if (config_->emit_policy_name == "none")
+    emit_policy_ = new NoEmitPolicy(config_->emit_policy_value);
   }
 
-  _initial_count = _config->initial_count;
+  initial_count_ = config_->initial_count;
 }
 
-particle_emitter::~particle_emitter() {
+ParticleEmitter::~ParticleEmitter() {
 }
 
-void particle_emitter::initialize() {
-  _emit_policy->initialize(this);
+void ParticleEmitter::initialize() {
+  emit_policy_->initialize(this);
 }
 
-bool particle_emitter::update(float dt) {
-  _age += dt;
+bool ParticleEmitter::update(float dt) {
+  age_ += dt;
 
   // if we're not supposed to have started yet, don't do anything
-  if (_config->start_time > _age)
+  if (config_->start_time > age_)
     return true;
 
-  if (!_dead && _config->end_time > 0 && _age > _config->end_time) {
+  if (!dead_ && config_->end_time > 0 && age_ > config_->end_time) {
     destroy();
   }
 
-  // check whether we need to emit a new particle
-  if (!_dead) {
-    while (_initial_count > 0) {
+  // check whether we need to emit a new Particle
+  if (!dead_) {
+    while (initial_count_ > 0) {
       emit(get_position());
-      _initial_count--;
+      initial_count_--;
     }
 
-    _emit_policy->check_emit(dt);
+    emit_policy_->check_emit(dt);
   }
 
-  std::vector<particle_list::iterator> to_remove;
+  std::vector<ParticleList::iterator> to_remove;
 
-  // go through each particle and update it's various properties
-  for (particle_list::iterator it = _particles.begin(); it != _particles.end(); ++it) {
-    particle *p = *it;
+  // go through each Particle and update it's various properties
+  for (ParticleList::iterator it = particles_.begin(); it != particles_.end(); ++it) {
+    Particle *p = *it;
     if (!p->update(dt))
       to_remove.push_back(it);
   }
 
   // remove any particles that are too old
-  for (std::vector<particle_list::iterator>::iterator it = to_remove.begin(); it != to_remove.end(); ++it) {
-    _particles.erase(*it);
+  for (std::vector<ParticleList::iterator>::iterator it = to_remove.begin(); it != to_remove.end(); ++it) {
+    particles_.erase(*it);
   }
 
-  return (!_dead || _particles.size() != 0);
+  return (!dead_ || particles_.size() != 0);
 }
 
-void particle_emitter::destroy() {
-  _dead = true;
+void ParticleEmitter::destroy() {
+  dead_ = true;
 }
 
-// This is called when it's time to emit a new particle.
+// This is called when it's time to emit a new Particle.
 // The offset is used when emitting "extra" particles, we need to offset
 // their age and position a bit
-particle *particle_emitter::emit(fw::Vector pos, float time_offset /*= 0.0f*/) {
-  particle *p = new particle(_config);
+Particle *ParticleEmitter::emit(fw::Vector pos, float time_offset /*= 0.0f*/) {
+  Particle *p = new Particle(config_);
   p->initialize();
   p->pos += pos;
   p->new_pos = p->pos;
   p->age = time_offset;
 
-  _particles.push_back(p);
-  _mgr->add_particle(p);
+  particles_.push_back(p);
+  mgr_->add_particle(p);
 
   return p;
 }
 
 //-------------------------------------------------------------------------
 
-void emit_policy::initialize(particle_emitter *emitter) {
-  _emitter = emitter;
+void EmitPolicy::initialize(ParticleEmitter *emitter) {
+  emitter_ = emitter;
 }
 
 //-------------------------------------------------------------------------
 
-timed_emit_policy::timed_emit_policy(float value) :
-    _particles_per_second(0.0f), _time_since_last_particle(0.0f), _last_position(0, 0, 0) {
-  _particles_per_second = value;
+TimedEmitPolicy::TimedEmitPolicy(float ParticleRotation) :
+    particles_per_second_(0.0f), time_since_last_particle_(0.0f), last_position_(0, 0, 0) {
+  particles_per_second_ = ParticleRotation;
 }
 
-timed_emit_policy::~timed_emit_policy() {
+TimedEmitPolicy::~TimedEmitPolicy() {
 }
 
-void timed_emit_policy::check_emit(float dt) {
-  float _seconds_per_particle = 1.0f / _particles_per_second;
+void TimedEmitPolicy::check_emit(float dt) {
+  float _seconds_per_particle = 1.0f / particles_per_second_;
 
-  bool offset_pos = (_time_since_last_particle != 0.0f);
+  bool offset_pos = (time_since_last_particle_ != 0.0f);
 
-  _time_since_last_particle += dt;
+  time_since_last_particle_ += dt;
   float time_offset = dt;
 
-  fw::Vector pos = _emitter->get_position();
-  fw::Vector dir = (pos - _last_position).normalize();
+  fw::Vector pos = emitter_->get_position();
+  fw::Vector dir = (pos - last_position_).normalize();
 
-  while (_time_since_last_particle > _seconds_per_particle) {
+  while (time_since_last_particle_ > _seconds_per_particle) {
     time_offset -= _seconds_per_particle;
-    _time_since_last_particle -= _seconds_per_particle;
+    time_since_last_particle_ -= _seconds_per_particle;
 
-    fw::Vector curr_pos = offset_pos ? _last_position + (dir * _seconds_per_particle) : pos;
+    fw::Vector curr_pos = offset_pos ? last_position_ + (dir * _seconds_per_particle) : pos;
 
-    _emitter->emit(curr_pos, time_offset);
+    emitter_->emit(curr_pos, time_offset);
   }
 
-  _last_position = pos;
+  last_position_ = pos;
 }
 
 //-------------------------------------------------------------------------
 
-distance_emit_policy::distance_emit_policy(float value) :
-    _max_distance(0.0f), _last_particle(0) {
-  _max_distance = value;
+DistanceEmitPolicy::DistanceEmitPolicy(float ParticleRotation) :
+    max_distance_(0.0f), last_particle_(0) {
+  max_distance_ = ParticleRotation;
 }
 
-distance_emit_policy::~distance_emit_policy() {
+DistanceEmitPolicy::~DistanceEmitPolicy() {
 }
 
-void distance_emit_policy::check_emit(float) {
-  if (_last_particle == nullptr) {
-    _last_particle = _emitter->emit(_emitter->get_position());
+void DistanceEmitPolicy::check_emit(float) {
+  if (last_particle_ == nullptr) {
+    last_particle_ = emitter_->emit(emitter_->get_position());
     return;
   }
 
-  float wrap_x = _emitter->get_manager()->get_wrap_x();
-  float wrap_z = _emitter->get_manager()->get_wrap_z();
+  float wrap_x = emitter_->get_manager()->get_wrap_x();
+  float wrap_z = emitter_->get_manager()->get_wrap_z();
 
-  fw::Vector next_pos = _emitter->get_position();
-  fw::Vector last_pos = _last_particle->pos;
+  fw::Vector next_pos = emitter_->get_position();
+  fw::Vector last_pos = last_particle_->pos;
   fw::Vector dir = get_direction_to(last_pos, next_pos, wrap_x, wrap_z).normalize();
-  fw::Vector curr_pos = last_pos + (dir * _max_distance);
+  fw::Vector curr_pos = last_pos + (dir * max_distance_);
 
   float time_offset = 0.0f; // todo: this should be non-zero...
 
   float this_distance = calculate_distance(curr_pos, next_pos, wrap_x, wrap_z);
   float last_distance = this_distance + 1.0f;
   while (last_distance >= this_distance) {
-    _last_particle = _emitter->emit(curr_pos, time_offset);
+    last_particle_ = emitter_->emit(curr_pos, time_offset);
 
-    curr_pos += dir * _max_distance;
+    curr_pos += dir * max_distance_;
 
     last_distance = this_distance;
     this_distance = (curr_pos - next_pos).length();
@@ -163,16 +163,16 @@ void distance_emit_policy::check_emit(float) {
 
 //-------------------------------------------------------------------------
 
-no_emit_policy::no_emit_policy(float) {
+NoEmitPolicy::NoEmitPolicy(float) {
 }
 
-no_emit_policy::~no_emit_policy() {
+NoEmitPolicy::~NoEmitPolicy() {
 }
 
-void no_emit_policy::check_emit(float) {
+void NoEmitPolicy::check_emit(float) {
   // we destroy ourselves because we're actually never going to
   // do anything
-  _emitter->destroy();
+  emitter_->destroy();
 }
 
 }

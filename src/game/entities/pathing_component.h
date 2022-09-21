@@ -15,7 +15,7 @@ private:
   float _last_request_time;
   size_t _curr_goal_node;
   std::vector<fw::Vector> _path;
-  position_component *_position;
+  position_component *position_;
   moveable_component *_moveable;
 
   void on_path_found(std::vector<fw::Vector> const &path);

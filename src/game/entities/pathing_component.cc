@@ -20,7 +20,7 @@ using namespace std::placeholders;
 ENT_COMPONENT_REGISTER("Pathing", pathing_component);
 
 pathing_component::pathing_component() :
-    _position(nullptr), _moveable(nullptr), _curr_goal_node(0), _last_request_time(0.0f) {
+    position_(nullptr), _moveable(nullptr), _curr_goal_node(0), _last_request_time(0.0f) {
 }
 
 pathing_component::~pathing_component() {
@@ -29,7 +29,7 @@ pathing_component::~pathing_component() {
 void pathing_component::initialize() {
   std::shared_ptr<entity> ent = _entity.lock();
   if (ent) {
-    _position = ent->get_component<position_component>();
+    position_ = ent->get_component<position_component>();
     _moveable = ent->get_component<moveable_component>();
   }
 }
@@ -38,7 +38,7 @@ void pathing_component::update(float dt) {
   // follow the path... todo: this can be done SOOOOOO much better!
   while (is_following_path()) {
     fw::Vector goal = _path[_curr_goal_node];
-    fw::Vector dir = _position->get_direction_to(goal);
+    fw::Vector dir = position_->get_direction_to(goal);
     dir[1] = 0.0f; // ignore height component
     if (dir.length_squared() <= 1.0f) {
       // if we're "at" this node, increment the _curr_goal_node and try again
@@ -78,7 +78,7 @@ void pathing_component::set_goal(fw::Vector const &goal) {
   _last_request_goal = goal;
 
   auto pathing_thread = game::world::get_instance()->get_pathing();
-  pathing_thread->request_path(_position->get_position(), goal,
+  pathing_thread->request_path(position_->get_position(), goal,
       std::bind(&pathing_component::on_path_found, this, _1));
 }
 

@@ -4,50 +4,41 @@
 #include <vector>
 
 #include <framework/color.h>
+#include <framework/misc.h>
 #include <framework/texture.h>
 #include <framework/vector.h>
 
 namespace fw {
-class particle_emitter_config;
+class ParticleEmitterConfig;
 
-namespace rotation_kind {
-enum value {
-  random, direction
-};
-}
-
-/**
- * This simply controls the top,left and bottom,right corners of the billboard texture we apply for a given particle.
- * By default, it's 0,0 1,1.
- */
-struct billboard_rect {
-  float left, top, right, bottom;
+enum ParticleRotation {
+  kRandom, kDirection
 };
 
-/** Represents a single particle. */
-class particle {
+// Represents a single particle.
+class Particle {
 public:
-  struct life_state {
+  struct LifeState {
     float age;
     float size;
     float rotation_speed;
-    rotation_kind::value rotation_kind;
+    ParticleRotation rotation;
     float alpha;
     float speed;
     fw::Vector direction;
     float gravity;
     int color_row;
 
-    life_state();
-    life_state(life_state const &copy);
+    LifeState();
+    LifeState(LifeState const &copy);
   };
 
 private:
-  float _max_age;
-  std::vector<life_state> _states;
+  float max_age_;
+  std::vector<LifeState> states_;
 
 public:
-  std::shared_ptr<particle_emitter_config> config;
+  std::shared_ptr<ParticleEmitterConfig> config;
   fw::Vector direction;
   // We cannot update the "real" pos in the update thread, because the render thread needs to query it to sort, and if
   // we update it in the update thread, we risk making the sort non-strict weak ordering. That's bad. So the update
@@ -61,21 +52,21 @@ public:
   float size;
   float age;
   float angle;
-  rotation_kind::value rotation_kind;
-  billboard_rect rect;
+  ParticleRotation rotation;
+  Rectangle<float> rect;
 
   /**
-   * The renderer wants to make sure it only draws each particle once per frame, so this is a number that is
-   * incrememnted each frame and compared when we go to draw the particle. If if the same, we know we've already
-   * drawn this particle this frame.
+   * The renderer wants to make sure it only draws each Particle once per frame, so this is a number that is
+   * incrememnted each frame and compared when we go to draw the Particle. If if the same, we know we've already
+   * drawn this Particle this frame.
    */
   int draw_frame;
 
-  /** A random number between 0 and 1 that we can use to calculate various characteristics of this particle's life. */
+  /** A random number between 0 and 1 that we can use to calculate various characteristics of this Particle's life. */
   float random;
 
-  particle(std::shared_ptr<particle_emitter_config> const &config);
-  ~particle();
+  Particle(std::shared_ptr<ParticleEmitterConfig> const &config);
+  ~Particle();
 
   void initialize();
   bool update(float dt);

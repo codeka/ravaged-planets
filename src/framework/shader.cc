@@ -156,16 +156,16 @@ private:
   friend class fw::shader_parameters;
 
   std::string _name;
-  std::map<std::string, std::string> _states;
+  std::map<std::string, std::string> states_;
   GLuint _program_id;
   std::map<std::string, fw::shader_variable> _shader_variables;
 
   /**
-   * Called during begin to set the given GL state to the given value.
+   * Called during begin to set the given GL state to the given ParticleRotation.
    *
    * The names and values of the states are just strings, which we need to translate into actual GL function calls.
    */
-  void apply_state(std::string const &name, std::string const &value);
+  void apply_state(std::string const &name, std::string const &ParticleRotation);
 
 public:
   shader_program(fw::xml_element &program_elem);
@@ -188,7 +188,7 @@ shader_program::shader_program(fw::xml_element &program_elem) : _program_id(0) {
     } else if (child_elem.get_name() == "fragment-shader") {
       fragment_shader_source = find_source(program_elem.get_root(), child_elem.get_attribute("source"));
     } else if (child_elem.get_name() == "state") {
-      _states[child_elem.get_attribute("name")] = child_elem.get_attribute("value");
+      states_[child_elem.get_attribute("name")] = child_elem.get_attribute("value");
     }
   }
   compile_shader(vertex_shader_id, vertex_shader_source);
@@ -229,31 +229,31 @@ void shader_program::begin() {
   }
 #endif
 
-  BOOST_FOREACH(auto it, _states) {
+  BOOST_FOREACH(auto it, states_) {
     apply_state(it.first, it.second);
   }
 }
 
-void shader_program::apply_state(std::string const &name, std::string const &value) {
+void shader_program::apply_state(std::string const &name, std::string const &ParticleRotation) {
   // TODO: we could probably do something better than this (e.g. at load time rather than at run time)
   if (name == "z-write") {
-    if (value == "on") {
+    if (ParticleRotation == "on") {
       FW_CHECKED(glDepthMask(GL_TRUE));
     } else {
       FW_CHECKED(glDepthMask(GL_FALSE));
     }
   } else if (name == "z-test") {
-    if (value == "on") {
+    if (ParticleRotation == "on") {
       FW_CHECKED(glEnable(GL_DEPTH_TEST));
       FW_CHECKED(glDepthFunc(GL_LEQUAL));
     } else {
       FW_CHECKED(glDisable(GL_DEPTH_TEST));
     }
   } else if (name == "blend") {
-    if (value == "alpha") {
+    if (ParticleRotation == "alpha") {
       FW_CHECKED(glEnable(GL_BLEND));
       FW_CHECKED(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    } else if (value == "additive") {
+    } else if (ParticleRotation == "additive") {
       FW_CHECKED(glEnable(GL_BLEND));
       FW_CHECKED(glBlendFunc(GL_ONE, GL_ONE));
     } else {

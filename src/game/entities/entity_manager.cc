@@ -271,7 +271,7 @@ void entity_manager::cleanup_destroyed() {
 void entity_manager::update() {
   cleanup_destroyed();
 
-  // work out the current "view centre" which is used for things like drawing
+  // work out the current "view center" which is used for things like drawing
   // the entities centred around the camera and so on.
   game::world *wrld = game::world::get_instance();
   fw::Camera *camera = fw::framework::get_instance()->get_camera();

@@ -188,7 +188,7 @@ void remote_player::join_complete(session_request &req) {
   _user_name = cpsr.get_user_name();
   _player_no = cpsr.get_player_no();
 
-  // work out a random color they can have (which hasn't already been taken by another player)
+  // work out a Random color they can have (which hasn't already been taken by another player)
   if (color_ == fw::Color(0, 0, 0) || color_already_taken(this, color_)) {
     if (color_ == fw::Color(0, 0, 0)) {
       fw::debug << boost::format("remote player's color hasn't been set yet, choosing one now") << std::endl;

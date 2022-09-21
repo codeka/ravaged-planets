@@ -15,9 +15,9 @@ namespace fs = boost::filesystem;
 namespace fw {
 
 //-------------------------------------------------------------------------
-// reads a line from the given .Lang file and returns the key/value pair
+// reads a line from the given .Lang file and returns the key/ParticleRotation pair
 static bool get_lang_line(std::fstream &fs, std::string &key,
-    std::string &value, std::string const &file_name, int &line_num);
+    std::string &ParticleRotation, std::string const &file_name, int &line_num);
 
 //-------------------------------------------------------------------------
 
@@ -35,10 +35,10 @@ Lang::Lang(std::string const &lang_name) :
   } else {
     debug << boost::format("loading language: \"%1%\"") % lang_path.string() << std::endl;
 
-    std::string key, value;
+    std::string key, ParticleRotation;
     int line_num = 0;
-    while (get_lang_line(ins, key, value, lang_path.string(), line_num)) {
-      strings_[key] = value;
+    while (get_lang_line(ins, key, ParticleRotation, lang_path.string(), line_num)) {
+      strings_[key] = ParticleRotation;
     }
   }
 
@@ -47,10 +47,10 @@ Lang::Lang(std::string const &lang_name) :
     lang_path = fw::resolve("lang/en.lang");
     ins.open(lang_path.string().c_str());
 
-    std::string key, value;
+    std::string key, ParticleRotation;
     int line_num = 0;
-    while (get_lang_line(ins, key, value, lang_path.string(), line_num)) {
-      def_strings_[key] = value;
+    while (get_lang_line(ins, key, ParticleRotation, lang_path.string(), line_num)) {
+      def_strings_[key] = ParticleRotation;
     }
   }
 }
@@ -79,11 +79,11 @@ static void populate_lang_description(LangDescription &desc, fs::path file_name)
   std::fstream ins(file_name.string().c_str());
 
   int line_num = 0;
-  std::string key, value;
-  while (get_lang_line(ins, key, value, file_name.string(), line_num)) {
+  std::string key, ParticleRotation;
+  while (get_lang_line(ins, key, ParticleRotation, file_name.string(), line_num)) {
     if (key == "lang.name") {
       // once we find the "Lang-name" line, we can ignore everything else
-      desc.display_name = value;
+      desc.display_name = ParticleRotation;
       return;
     }
   }
@@ -109,10 +109,10 @@ std::vector<LangDescription> get_languages() {
 }
 
 //-------------------------------------------------------------------------
-bool get_lang_line(std::fstream &fs, std::string &key, std::string &value,
+bool get_lang_line(std::fstream &fs, std::string &key, std::string &ParticleRotation,
     std::string const &file_name, int &line_num) {
   key.clear();
-  value.clear();
+  ParticleRotation.clear();
 
   std::string line;
   while (std::getline(fs, line)) {
@@ -144,16 +144,16 @@ bool get_lang_line(std::fstream &fs, std::string &key, std::string &value,
       }
 
       key = boost::trim_right_copy(line.substr(0, equals));
-      value = boost::trim_left_copy(line.substr(equals + 1));
+      ParticleRotation = boost::trim_left_copy(line.substr(equals + 1));
     } else {
-      // if this is a continuation from a previous line, just append it to the value
-      value += line;
+      // if this is a continuation from a previous line, just append it to the ParticleRotation
+      ParticleRotation += line;
     }
 
-    if (value[value.size() - 1] == '\\') {
+    if (ParticleRotation[ParticleRotation.size() - 1] == '\\') {
       // if the last character in the line is a '\' it means the line
       // continues on to the next line. strip off the \ and keep looping
-      value = value.substr(0, value.size() - 1);
+      ParticleRotation = ParticleRotation.substr(0, ParticleRotation.size() - 1);
     } else {
       // otherwise, we've found a valid string!
       return true;
