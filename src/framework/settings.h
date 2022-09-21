@@ -12,7 +12,7 @@ public:
   Settings();
   ~Settings();
 
-  // You must call this at program startup (*before* you call the framework::initialize() method!) it'll parse
+  // You must call this at program startup (*before* you call the Framework::initialize() method!) it'll parse
   // the command-line options, read the .conf file and so on.
   static void initialize(boost::program_options::options_description const &additional_options,
       int argc, char **argv, std::string const &options_file = "default.conf");

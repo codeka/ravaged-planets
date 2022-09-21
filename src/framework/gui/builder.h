@@ -49,7 +49,7 @@ inline Builder<WidgetType>::~Builder() {
 
 template<class WidgetType>
 inline Builder<WidgetType>::operator WidgetType*() {
-  WidgetType *new_widget = new WidgetType(fw::framework::get_instance()->get_gui());
+  WidgetType *new_widget = new WidgetType(fw::Framework::get_instance()->get_gui());
   for (Property *prop : properties_) {
     prop->apply(new_widget);
   }

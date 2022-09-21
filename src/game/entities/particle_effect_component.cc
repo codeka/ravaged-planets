@@ -88,7 +88,7 @@ void particle_effect_component::update(float) {
 }
 
 void particle_effect_component::render(fw::sg::Scenegraph &, fw::Matrix const &) {
-  fw::ParticleManager *mgr = fw::framework::get_instance()->get_particle_mgr();
+  fw::ParticleManager *mgr = fw::Framework::get_instance()->get_particle_mgr();
   for (auto& kvp : effects_) {
     effect_info &effect_info = kvp.second;
     if (effect_info.started && !effect_info.effect) {

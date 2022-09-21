@@ -5,11 +5,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
 
-#include "framework/settings.h"
-#include "framework/logging.h"
-#include "framework/misc.h"
+#include <framework/settings.h>
+#include <framework/logging.h>
+#include <framework/misc.h>
 
-#include "game/application.h"
+#include <game/application.h>
 
 namespace game {
   void settings_initialize(int argc, char** argv);
@@ -24,10 +24,10 @@ int main(int argc, char** argv) {
     game::settings_initialize(argc, argv);
 
     game::application app;
-    new fw::framework(&app);
-    fw::framework::get_instance()->initialize("Ravaged Planet");
+    new fw::Framework(&app);
+    fw::Framework::get_instance()->initialize("Ravaged Planet");
 
-    fw::framework::get_instance()->run();
+    fw::Framework::get_instance()->run();
   } catch(std::exception &e) {
     std::string msg = boost::diagnostic_information(e);
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;

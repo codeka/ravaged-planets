@@ -57,11 +57,11 @@ players_tool_window::players_tool_window(ed::players_tool *tool) : _tool(tool) {
       << (Builder<Label>(px(4), px(80), sum(pct(100), px(-8)), px(1)) << Label::background("filler"))
       << (Builder<Listbox>(px(4), px(88), sum(pct(100), px(-8)), px(108)) << Widget::id(PLAYER_LIST_ID)
           << Listbox::item_selected(std::bind(&players_tool_window::selection_changed, this, _1)));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 players_tool_window::~players_tool_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void players_tool_window::refresh_player_list() {
@@ -107,7 +107,7 @@ REGISTER_TOOL("players", players_tool);
 
 players_tool::players_tool(editor_world *wrld) : _wnd(nullptr), _player_no(1), tool(wrld) {
   _wnd = new players_tool_window(this);
-  _marker = fw::framework::get_instance()->get_model_manager()->get_model("marker");
+  _marker = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
 }
 
 players_tool::~players_tool() {
@@ -118,7 +118,7 @@ void players_tool::activate() {
   tool::activate();
   _wnd->show();
 
-  fw::Input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
   _keybind_tokens.push_back(
       inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&players_tool::on_key, this, _1, _2))));
 }

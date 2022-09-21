@@ -40,7 +40,7 @@ void ModelNode::initialize(Model *mdl) {
 
 void ModelNode::render(sg::Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
   if (model_->get_wireframe()) {
-//    device = fw::framework::get_instance()->get_graphics()->get_device();
+//    device = fw::Framework::get_instance()->get_graphics()->get_device();
 //    device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
   }
 

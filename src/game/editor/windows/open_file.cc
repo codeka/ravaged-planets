@@ -42,7 +42,7 @@ open_file_window::open_file_window() : _wnd(nullptr), _show_hidden(false) {
 }
 
 open_file_window::~open_file_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void open_file_window::initialize() {
@@ -60,7 +60,7 @@ void open_file_window::initialize() {
           << Button::text("Cancel") << Button::click(std::bind(&open_file_window::on_cancel_clicked, this, _1)))
       << (Builder<Checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18)) << Checkbox::text("Show hidden files")
           << Widget::click(std::bind(&open_file_window::on_show_hidden_clicked, this, _1)));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
   _curr_directory = fw::user_base_path();
 }
 
@@ -180,7 +180,7 @@ void open_file_window::on_item_selected(int index) {
 
         std::shared_ptr<fw::Texture> texture = std::shared_ptr<fw::Texture>(new fw::Texture());
         texture->create(bmp);
-        std::shared_ptr<Drawable> drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
+        std::shared_ptr<Drawable> drawable = fw::Framework::get_instance()->get_gui()->get_drawable_manager()
             ->build_drawable(texture, 0, 0, bmp_width, bmp_height);
         preview->set_background(drawable, true);
       } catch (fw::Exception &e) {

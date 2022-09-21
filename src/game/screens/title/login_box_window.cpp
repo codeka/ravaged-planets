@@ -137,7 +137,7 @@ namespace ww {
 
 		_wait_anim.update();
 
-		float dt = fw::framework::get_instance()->get_timer()->get_frame_time();
+		float dt = fw::Framework::get_instance()->get_timer()->get_frame_time();
 		float curr_height = get_window()->getPixelSize().d_height;
 		if (curr_height != _desired_height)
 		{

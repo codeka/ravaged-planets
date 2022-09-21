@@ -100,7 +100,7 @@ void main_menu_window::initialize() {
       << (Builder<menu_item>(px(0), px(60), px(100), px(20)) << Button::text("Pathing")
           << Widget::click(std::bind(&main_menu_window::tool_clicked, this, _1, "pathing")));
 
-  fw::framework *frmwrk = fw::framework::get_instance();
+  fw::Framework *frmwrk = fw::Framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
   frmwrk->get_gui()->attach_widget(_file_menu);
   frmwrk->get_gui()->attach_widget(_tool_menu);
@@ -162,7 +162,7 @@ bool main_menu_window::file_open_clicked(fw::gui::Widget *w) {
 
 bool main_menu_window::file_quit_clicked(fw::gui::Widget *w) {
   // we don't actually "exit" the whole application, just go back to the title screen
-  game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
+  game::application *app = dynamic_cast<game::application *>(fw::Framework::get_instance()->get_app());
   game::screen_stack *ss = app->get_screen();
   ss->set_active_screen("title");
   return true;
@@ -170,7 +170,7 @@ bool main_menu_window::file_quit_clicked(fw::gui::Widget *w) {
 
 void main_menu_window::map_screenshot_clicked_finished(std::shared_ptr<fw::Bitmap> bmp) {
 /*  // re-show the UI, we don't need to hide it anymore!
-  fw::framework::get_instance()->get_gui()->get_root_window()->setVisible(true);
+  fw::Framework::get_instance()->get_gui()->get_root_window()->setVisible(true);
 
   // create a "thumbnail" version, 160x120
   fw::bitmap thumbnail(bmp);
@@ -183,11 +183,11 @@ void main_menu_window::map_screenshot_clicked_finished(std::shared_ptr<fw::Bitma
 // We want to take a screenshot of the map at the current camera view to display
 // in the "New Game" and "Join Game" windows
 bool main_menu_window::map_screenshot_clicked(fw::gui::Widget *w) {
-  //fw::framework::get_instance()->get_gui()->get_root_window()->setVisible(false);
+  //fw::Framework::get_instance()->get_gui()->get_root_window()->setVisible(false);
 
   // we take the screenshot in 1024x768 because the maps expect a 4:3 image. We
   // then resize it ourselves to ensure it's nice & anti-aliased, etc.
-  fw::framework::get_instance()->take_screenshot(1024, 768,
+  fw::Framework::get_instance()->take_screenshot(1024, 768,
       std::bind(&main_menu_window::map_screenshot_clicked_finished, this, std::placeholders::_1));
 
   return true;
@@ -213,7 +213,7 @@ void statusbar_window::initialize() {
   _wnd = Builder<Window>(px(0), sum(pct(100), px(-20)), pct(100), px(20)) << Window::background("frame")
       << Widget::visible(false)
       << (Builder<Label>(px(0), px(0), pct(100), pct(100)) << Widget::id(STATUS_MESSAGE_ID));
-  fw::framework *frmwrk = fw::framework::get_instance();
+  fw::Framework *frmwrk = fw::Framework::get_instance();
   frmwrk->get_gui()->attach_widget(_wnd);
 }
 

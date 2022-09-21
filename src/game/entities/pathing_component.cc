@@ -66,7 +66,7 @@ void pathing_component::set_path(std::vector<fw::Vector> const &path) {
 void pathing_component::set_goal(fw::Vector const &goal) {
   // request a path from the entity's current position to the given goal and get the pathing_thread to call our
   // set_path method when it's done
-  float now = fw::framework::get_instance()->get_timer()->get_total_time();
+  float now = fw::Framework::get_instance()->get_timer()->get_total_time();
   if ((goal - _last_request_goal).length() < 1.0f) {
     // it's the same path as we're already following, don't request a new path more than one every few seconds
     // since there's really no point

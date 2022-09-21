@@ -48,13 +48,13 @@ void ShadowSource::initialize(bool debug /*= false */) {
 }
 
 void ShadowSource::begin_scene() {
-  framework *frmwrk = fw::framework::get_instance();
+  Framework *frmwrk = fw::Framework::get_instance();
   camera_.update(frmwrk->get_timer()->get_frame_time());
   frmwrk->get_graphics()->set_render_target(shadowbuffer_);
 }
 
 void ShadowSource::end_scene() {
-  framework *frmwrk = fw::framework::get_instance();
+  Framework *frmwrk = fw::Framework::get_instance();
 
   // reset the render target and camera back to the "real" one
   frmwrk->get_graphics()->set_render_target(nullptr);

@@ -60,7 +60,7 @@ void local_player::world_loaded() {
   simulation_thread::get_instance()->post_command(cmd);
 
   // move the camera to the start location as well.
-  fw::framework::get_instance()->get_camera()->set_location(start_loc);
+  fw::Framework::get_instance()->get_camera()->set_location(start_loc);
 }
 
 void local_player::update() {

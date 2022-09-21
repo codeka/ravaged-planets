@@ -70,7 +70,7 @@ fw::Matrix minimap_drawable::get_uv_transform() {
 }
 
 fw::Matrix minimap_drawable::get_pos_transform(float x, float y, float width, float height) {
-  fw::Graphics *g = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
   fw::Matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
@@ -92,7 +92,7 @@ minimap_window::minimap_window() :
 }
 
 minimap_window::~minimap_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void minimap_window::initialize() {
@@ -103,7 +103,7 @@ void minimap_window::initialize() {
           << Widget::id(MINIMAP_IMAGE_ID))
       << (Builder<Label>(sum(pct(50), px(-10)), sum(pct(50), px(-22)), px(19), px(31))
           << Label::background("hud_minimap_crosshair"));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 void minimap_window::show() {
@@ -113,7 +113,7 @@ void minimap_window::show() {
   _wnd->find<Label>(MINIMAP_IMAGE_ID)->set_background(_drawable);
 
   // bind to the camera's sig_updated signal, to be notified when you move the camera around
-  _camera_updated_connection = fw::framework::get_instance()->get_camera()->sig_updated
+  _camera_updated_connection = fw::Framework::get_instance()->get_camera()->sig_updated
       .connect(std::bind(&minimap_window::on_camera_updated, this));
 
   _wnd->set_visible(true);
@@ -128,7 +128,7 @@ void minimap_window::hide() {
 }
 
 void minimap_window::update() {
-  float gt = fw::framework::get_instance()->get_timer()->get_total_time();
+  float gt = fw::Framework::get_instance()->get_timer()->get_total_time();
   if ((gt - 1.0f) > _last_entity_display_update) {
     _last_entity_display_update = gt;
     update_entity_display();
@@ -140,7 +140,7 @@ void minimap_window::on_camera_updated() {
 }
 
 void minimap_window::update_drawable() {
-  fw::Camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Camera *camera = fw::Framework::get_instance()->get_camera();
   game::terrain *terrain = game::world::get_instance()->get_terrain();
 
   // Offset so that it shows up in the correct position relative to where the camera is
@@ -168,7 +168,7 @@ void minimap_window::update_entity_display() {
   int width = game::world::get_instance()->get_terrain()->get_width();
   int height = game::world::get_instance()->get_terrain()->get_length();
 
-  fw::Graphics *graphics = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *graphics = fw::Framework::get_instance()->get_graphics();
   float screen_width = graphics->get_width();
   float screen_height = graphics->get_height();
 
@@ -219,7 +219,7 @@ void minimap_window::update_entity_display() {
   }
 
   fw::Bitmap bm(width, height, pixels.data());
-  fw::framework::get_instance()->get_graphics()->run_on_render_thread([this, bm]() {
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this, bm]() {
     _texture->create(bm);
   });
 }

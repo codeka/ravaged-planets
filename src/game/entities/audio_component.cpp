@@ -30,7 +30,7 @@ namespace ent {
 	{
 		entity_component_template::load(elem);
 
-		fw::audio_manager *audio_mgr = fw::framework::get_instance()->get_audio();
+		fw::audio_manager *audio_mgr = fw::Framework::get_instance()->get_audio();
 
 		for(fw::XmlElement child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling())
 		{
@@ -94,7 +94,7 @@ namespace ent {
 		{
 			shared_ptr<cue> &c = (*it).second;
 
-			shared_ptr<fw::audio_source> src(fw::framework::get_instance()->get_audio()->create_source());
+			shared_ptr<fw::audio_source> src(fw::Framework::get_instance()->get_audio()->create_source());
 			src->play(c->audio);
 			_active_sources.push_back(src);
 		}

@@ -13,7 +13,7 @@ namespace fw::gui {
 class Widget;
 
 /**
- * This is the main entry point into the GUI subsystem. You get an instance of this class from \ref fw::framework.
+ * This is the main entry point into the GUI subsystem. You get an instance of this class from \ref fw::Framework.
  */
 class Gui {
 private:

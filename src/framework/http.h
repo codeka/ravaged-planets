@@ -55,7 +55,7 @@ private:
   // once upload_data has been set, uploads the data
   void do_action();
 public:
-  // this is called automatically by the framework to initialize cURL
+  // this is called automatically by the Framework to initialize cURL
   static void initialize();
   static void destroy();
 

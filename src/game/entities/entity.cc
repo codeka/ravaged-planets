@@ -16,7 +16,7 @@
 namespace ent {
 
 entity::entity(entity_manager *mgr, entity_id id) :
-    mgr_(mgr), _debug_view(0), _debug_flags(static_cast<entity_debug_flags>(0)), id_(id),
+    mgr_(mgr), debug_view_(0), _debug_flags(static_cast<entity_debug_flags>(0)), id_(id),
     _create_time(0) {
 }
 
@@ -68,7 +68,7 @@ entity_attribute *entity::get_attribute(std::string const &name) {
 }
 
 void entity::initialize() {
-  _create_time = fw::framework::get_instance()->get_timer()->get_total_time();
+  _create_time = fw::Framework::get_instance()->get_timer()->get_total_time();
   for(auto &pair : _components) {
     pair.second->initialize();
   }
@@ -85,8 +85,8 @@ void entity::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform)
     pair.second->render(Scenegraph, transform);
   }
 
-  if (_debug_view != nullptr) {
-    _debug_view->render(Scenegraph, transform);
+  if (debug_view_ != nullptr) {
+    debug_view_->render(Scenegraph, transform);
   }
 }
 
@@ -103,7 +103,7 @@ void entity::set_position(fw::Vector const &pos) {
 }
 
 float entity::get_age() const {
-  float curr_time = fw::framework::get_instance()->get_timer()->get_total_time();
+  float curr_time = fw::Framework::get_instance()->get_timer()->get_total_time();
   return (curr_time - _create_time);
 }
 
@@ -111,13 +111,13 @@ float entity::get_age() const {
 // we'll draw along with this entity for debugging purposes.
 entity_debug_view *entity::get_debug_view() {
   if (_debug_flags != 0) {
-    if (_debug_view == nullptr) {
-      _debug_view = new entity_debug_view();
+    if (debug_view_ == nullptr) {
+      debug_view_ = new entity_debug_view();
     }
 
-    return _debug_view;
+    return debug_view_;
   } else {
-    delete _debug_view;
+    delete debug_view_;
     return 0;
   }
 }

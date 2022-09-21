@@ -100,7 +100,7 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
 
     fw::Camera *camera = sg->get_camera();
     if (camera == nullptr) {
-      camera = fw::framework::get_instance()->get_camera();
+      camera = fw::Framework::get_instance()->get_camera();
     }
 
     if (!Shader) {
@@ -213,7 +213,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
     bool render_gui /*= true*/) {
   ensure_primitive_type_map();
 
-  Graphics *g = fw::framework::get_instance()->get_graphics();
+  Graphics *g = fw::Framework::get_instance()->get_graphics();
 
   if (!shadow_shader) {
     shadow_shader = fw::Shader::create("shadow.shader");
@@ -276,7 +276,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       std::shared_ptr<Shader> Shader = Shader::create("gui.shader");
       std::shared_ptr<ShaderParameters> shader_params = Shader->create_parameters();
       // TODO: recalculating this every time seems wasteful
-      fw::Graphics *g = fw::framework::get_instance()->get_graphics();
+      fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
       fw::Matrix pos_transform;
       cml::matrix_orthographic_RH(pos_transform, 0.0f,
           static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
@@ -310,7 +310,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       vb->end();
     }
 
-    framework::get_instance()->get_gui()->render();
+    Framework::get_instance()->get_gui()->render();
     g->after_gui();
   }
 

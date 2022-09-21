@@ -1,7 +1,7 @@
 /*
 #include "message_box.h"
-#include "../../framework/framework.h"
-#include "../../framework/gui/cegui.h"
+#include "../../Framework/Framework.h"
+#include "../../Framework/gui/cegui.h"
 
 #include <CEGUIWindow.h>
 #include <elements/CEGUIPushButton.h>

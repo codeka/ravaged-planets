@@ -29,7 +29,7 @@ main_menu_window::main_menu_window() : _exiting(false), _new_game_window(nullptr
 
 main_menu_window::~main_menu_window() {
   if (_wnd != nullptr) {
-    fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+    fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
   }
 }
 
@@ -53,7 +53,7 @@ void main_menu_window::initialize(new_game_window *new_game_window) {
       // "v1.2.3"
       << (Builder<Label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
           << Label::text(fw::version_str));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 void main_menu_window::show() {
@@ -69,7 +69,7 @@ void main_menu_window::update() {
   if (_exiting
       && (session::get_instance()->get_state() == session::disconnected
           || session::get_instance()->get_state() == session::in_error)) {
-    fw::framework::get_instance()->exit();
+    fw::Framework::get_instance()->exit();
   }
 }
 
@@ -86,7 +86,7 @@ bool main_menu_window::join_game_clicked(Widget *w) {
 }
 
 bool main_menu_window::editor_clicked(Widget *w) {
-  application *app = dynamic_cast<application *>(fw::framework::get_instance()->get_app());
+  application *app = dynamic_cast<application *>(fw::Framework::get_instance()->get_app());
   screen_stack *ss = app->get_screen();
 
   ss->set_active_screen("editor");
@@ -113,7 +113,7 @@ bool main_menu_window::quit_clicked(Widget *w) {
 //    overlay->moveToFront();
   } else {
     // if we're not logged in, just quit
-    fw::framework::get_instance()->exit();
+    fw::Framework::get_instance()->exit();
   }
 
   return true;

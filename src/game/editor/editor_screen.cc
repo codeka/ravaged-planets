@@ -79,7 +79,7 @@ void editor_screen::render(fw::sg::Scenegraph &Scenegraph) {
   if (_world != nullptr) {
     // set up the properties of the sun that we'll use to Light and also cast shadows
     fw::Vector sun(0.485f, 0.485f, 0.727f);
-    fw::Camera *old_cam = fw::framework::get_instance()->get_camera();
+    fw::Camera *old_cam = fw::Framework::get_instance()->get_camera();
     fw::Vector cam_pos = old_cam->get_position();
     fw::Vector cam_dir = old_cam->get_forward();
     fw::Vector lookat = _world->get_terrain()->get_cursor_location(cam_pos, cam_dir);
@@ -94,7 +94,7 @@ void editor_screen::render(fw::sg::Scenegraph &Scenegraph) {
 
   if (_tool != nullptr) {
     // Only render the tool if the mouse isn't currently over a widget.
-    if (!fw::framework::get_instance()->get_gui()->is_mouse_over_widget()) {
+    if (!fw::Framework::get_instance()->get_gui()->is_mouse_over_widget()) {
       _tool->render(Scenegraph);
     }
   }
@@ -148,7 +148,7 @@ void editor_screen::set_active_tool(std::string const &name) {
 }
 
 editor_screen *editor_screen::get_instance() {
-  game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
+  game::application *app = dynamic_cast<game::application *>(fw::Framework::get_instance()->get_app());
   return dynamic_cast<editor_screen *>(app->get_screen()->get_active_screen());
 }
 

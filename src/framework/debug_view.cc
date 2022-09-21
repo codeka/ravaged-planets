@@ -34,13 +34,13 @@ void DebugView::initialize() {
     wnd_ = Builder<Window>(sum(pct(100), px(-200)), sum(pct(100), px(-50)), px(190), px(40))
       << (Builder<Label>(px(0), px(0), px(190), px(20)) << Label::text_align(Label::Alignment::kRight) << Widget::id(FPS_ID))
       << (Builder<Label>(px(0), px(20), px(190), px(20)) << Label::text_align(Label::Alignment::kRight) << Widget::id(PARTICLES_ID));
-    framework::get_instance()->get_gui()->attach_widget(wnd_);
+    Framework::get_instance()->get_gui()->attach_widget(wnd_);
   }
 }
 
 void DebugView::destroy() {
   if (wnd_ != nullptr) {
-    framework::get_instance()->get_gui()->detach_widget(wnd_);
+    Framework::get_instance()->get_gui()->detach_widget(wnd_);
   }
 }
 
@@ -51,7 +51,7 @@ void DebugView::update(float dt) {
 
   time_to_update_ -= dt;
   if (time_to_update_ <= 0.0f) {
-    fw::framework *frmwrk = fw::framework::get_instance();
+    fw::Framework *frmwrk = fw::Framework::get_instance();
 
     Label *fps = wnd_->find<Label>(FPS_ID);
     fps->set_text((boost::format("%1% fps") % frmwrk->get_timer()->get_fps()).str());

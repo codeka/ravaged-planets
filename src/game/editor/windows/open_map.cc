@@ -40,7 +40,7 @@ void open_map_window::initialize() {
           << Widget::click(std::bind(&open_map_window::open_clicked, this, _1)))
       << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Cancel")
           << Widget::click(std::bind(&open_map_window::cancel_clicked, this, _1)));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 
   game::world_vfs vfs;
   std::vector<game::world_summary> map_list = vfs.list_maps();

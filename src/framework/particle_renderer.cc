@@ -172,7 +172,7 @@ void generate_scenegraph_node(RenderState &rs) {
 }
 
 bool ParticleRenderer::add_particle(RenderState &rs, int base_index, Particle *p, float offset_x, float offset_z) {
-  fw::Camera *cam = fw::framework::get_instance()->get_camera();
+  fw::Camera *cam = fw::Framework::get_instance()->get_camera();
   fw::Vector pos(p->pos[0] + offset_x, p->pos[1], p->pos[2] + offset_z);
 
   // only render if the (absolute, not wrapped) distance to the camera is < 50
@@ -297,7 +297,7 @@ void ParticleRenderer::render(sg::Scenegraph &Scenegraph, ParticleRenderer::Part
 }
 
 void ParticleRenderer::sort_particles(ParticleRenderer::ParticleList &particles) {
-  fw::Camera *cam = fw::framework::get_instance()->get_camera();
+  fw::Camera *cam = fw::Framework::get_instance()->get_camera();
   fw::Vector const &cam_pos = cam->get_position();
 
   particles.sort(ParticleSorter(cam_pos));

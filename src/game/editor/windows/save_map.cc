@@ -52,7 +52,7 @@ void save_map_window::initialize() {
           << Widget::click(std::bind(&save_map_window::save_clicked, this, _1)))
       << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-38)), px(80), px(30)) << Button::text("Cancel")
           << Widget::click(std::bind(&save_map_window::cancel_clicked, this, _1)));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 // when we go to show, we have to update our controls with what we currently know about the map we're editing.
@@ -83,7 +83,7 @@ void save_map_window::update_screenshot() {
 
 bool save_map_window::screenshot_clicked(Widget *w) {
   auto world = dynamic_cast<editor_world *>(game::world::get_instance());
-  fw::framework::get_instance()->take_screenshot(
+  fw::Framework::get_instance()->take_screenshot(
       1024, 768, std::bind(&save_map_window::screenshot_complete, this, _1), false);
   return true;
 }
@@ -93,7 +93,7 @@ void save_map_window::screenshot_complete(std::shared_ptr<fw::Bitmap> bitmap) {
 
   auto world = dynamic_cast<editor_world *>(game::world::get_instance());
   world->set_screenshot(bitmap);
-  fw::framework::get_instance()->get_graphics()->run_on_render_thread([this]() {
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this]() {
     update_screenshot();
   });
 }

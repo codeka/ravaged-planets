@@ -28,9 +28,9 @@ void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 void initialize_ground(std::shared_ptr<fw::sg::Node> Node);
 
-class application: public fw::base_app {
+class application: public fw::BaseApp {
 public:
-  bool initialize(fw::framework *frmwrk);
+  bool initialize(fw::Framework *frmwrk);
   void update(float dt);
   void render(fw::sg::Scenegraph &Scenegraph);
 };
@@ -43,7 +43,7 @@ static float g_rotate_angle = 0.0f;
 
 bool restart_handler(fw::gui::Widget *wdgt) {
   fw::Settings stg;
-  g_model = fw::framework::get_instance()->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
+  g_model = fw::Framework::get_instance()->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
   return true;
 }
 
@@ -69,7 +69,7 @@ bool rotate_handler(fw::gui::Widget *wdgt) {
   return true;
 }
 
-bool application::initialize(fw::framework *frmwrk) {
+bool application::initialize(fw::Framework *frmwrk) {
   fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
@@ -158,9 +158,9 @@ int main(int argc, char** argv) {
     settings_initialize(argc, argv);
 
     application app;
-    new fw::framework(&app);
-    fw::framework::get_instance()->initialize("Mesh Test");
-    fw::framework::get_instance()->run();
+    new fw::Framework(&app);
+    fw::Framework::get_instance()->initialize("Mesh Test");
+    fw::Framework::get_instance()->run();
   } catch (std::exception &e) {
     std::string msg = boost::diagnostic_information(e);
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;

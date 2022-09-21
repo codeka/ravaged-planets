@@ -80,7 +80,7 @@ void entity_icon::initialize() {
   _framebuffer->set_color_buffer(color_texture_);
   _framebuffer->set_depth_buffer(_depth_texture);
 
-  _drawable = fw::framework::get_instance()->get_gui()->get_drawable_manager()
+  _drawable = fw::Framework::get_instance()->get_gui()->get_drawable_manager()
       ->build_drawable(color_texture_, 7, 7, 50, 50);
   std::dynamic_pointer_cast<BitmapDrawable>(_drawable)->set_flipped(true);
   render();
@@ -115,15 +115,15 @@ void entity_icon::render() {
 }
 
 void entity_icon::update() {
-  _rotation += 3.14159f * fw::framework::get_instance()->get_timer()->get_frame_time();
-  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+  _rotation += 3.14159f * fw::Framework::get_instance()->get_timer()->get_frame_time();
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     render();
   });
 }
 
 void entity_icon::reset() {
   _rotation = 0.0f;
-  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     render();
   });
 }
@@ -142,7 +142,7 @@ build_window::build_window() : _wnd(nullptr), _require_refresh(false), _mouse_ov
 }
 
 build_window::~build_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void build_window::initialize() {
@@ -157,7 +157,7 @@ void build_window::initialize() {
       << (Builder<Button>(px(10), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 6))
       << (Builder<Button>(px(73), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 7))
       << (Builder<Button>(px(136), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 8));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 
   for (int i = 0; i < 9; i++) {
     int id = FIRST_BUILD_BUTTON_ID + i;
@@ -234,16 +234,16 @@ void build_window::do_refresh() {
     } else {
       icon = std::shared_ptr<entity_icon>(new entity_icon());
       btn->set_data(icon);
-      fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+      fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
         icon->initialize();
         btn->set_icon(icon->get_drawable());
       });
     }
 
     std::string mesh_file_name = "";// luabind::object_cast<std::string>(tmpl["components"]["Mesh"]["FileName"]);
-    fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
       std::shared_ptr<fw::Model> mdl =
-          fw::framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
+          fw::Framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
       mdl->set_color(game::simulation_thread::get_instance()->get_local_player()->get_color());
       icon->set_model(""/*luabind::object_cast<std::string>(tmpl["name"])*/, mdl);
     });

@@ -35,7 +35,7 @@ private:
   ent::entity_manager *_entities;
   pathing_thread *_pathing;
   std::vector<int> _keybind_tokens;
-  cursor_handler *_cursor;
+  cursor_handler *cursor_;
   std::shared_ptr<fw::Bitmap> _minimap_background;
   std::map<int, fw::Vector> _player_starts;
 

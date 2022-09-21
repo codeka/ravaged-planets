@@ -6,12 +6,12 @@ namespace game {
 class world;
 class screen_stack;
 
-class application: public fw::base_app {
+class application: public fw::BaseApp {
 public:
   application();
   ~application();
 
-  virtual bool initialize(fw::framework *frmwrf);
+  virtual bool initialize(fw::Framework *frmwrf);
   virtual void destroy();
   virtual void update(float dt);
   virtual void render(fw::sg::Scenegraph &sg);
@@ -21,7 +21,7 @@ public:
   }
 
 private:
-  fw::framework *_framework;
+  fw::Framework *_framework;
   screen_stack *_screen;
 };
 

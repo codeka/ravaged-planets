@@ -368,7 +368,7 @@ Shader::~Shader() {
 }
 
 std::shared_ptr<Shader> Shader::create(std::string const &filename) {
-  fw::Graphics *g = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
 
   std::shared_ptr<Shader> shdr = g_cache.get_shader(filename);
   if (!shdr) {

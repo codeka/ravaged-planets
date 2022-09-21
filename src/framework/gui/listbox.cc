@@ -83,7 +83,7 @@ ListboxItem::~ListboxItem() {
 // When you click a listbox item, we want to make sure it's the selected one.
 bool ListboxItem::on_mouse_down(float x, float y) {
   listbox_->select_item(index_);
-  float now = fw::framework::get_instance()->get_timer()->get_total_time();
+  float now = fw::Framework::get_instance()->get_timer()->get_total_time();
   if (now - last_down_time_ < (ACTIVATE_TIME_MS / 1000.0f)) {
     listbox_->activate_item(index_);
   }

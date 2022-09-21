@@ -24,7 +24,7 @@ pause_window::pause_window() : _wnd(nullptr) {
 }
 
 pause_window::~pause_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void pause_window::initialize() {
@@ -42,19 +42,19 @@ void pause_window::initialize() {
           << Button::text(fw::text("hud.pause.exit-game"))
           << Button::click(std::bind(&pause_window::on_exit_game_clicked, this, _1)))
       ;
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 bool pause_window::on_resume_clicked(Widget *w) {
-  fw::framework::get_instance()->unpause();
+  fw::Framework::get_instance()->unpause();
   hide();
   return true;
 }
 
 bool pause_window::on_exit_to_menu_clicked(Widget *w) {
-  fw::framework::get_instance()->unpause();
+  fw::Framework::get_instance()->unpause();
 
-  application *app = dynamic_cast<application *>(fw::framework::get_instance()->get_app());
+  application *app = dynamic_cast<application *>(fw::Framework::get_instance()->get_app());
   screen_stack *ss = app->get_screen();
   ss->set_active_screen("title");
 
@@ -62,8 +62,8 @@ bool pause_window::on_exit_to_menu_clicked(Widget *w) {
 }
 
 bool pause_window::on_exit_game_clicked(Widget *w) {
-  fw::framework::get_instance()->unpause();
-  fw::framework::get_instance()->exit();
+  fw::Framework::get_instance()->unpause();
+  fw::Framework::get_instance()->exit();
   return true;
 }
 

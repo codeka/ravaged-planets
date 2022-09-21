@@ -23,14 +23,14 @@ tool::~tool() {
 }
 
 void tool::activate() {
-  game::application *app = dynamic_cast<game::application *>(fw::framework::get_instance()->get_app());
+  game::application *app = dynamic_cast<game::application *>(fw::Framework::get_instance()->get_app());
   _editor = dynamic_cast<editor_screen *>(app->get_screen()->get_active_screen());
   _terrain = dynamic_cast<editor_terrain *>(_world->get_terrain());
 }
 
 void tool::deactivate() {
   // Loop through the keybind tokens and unbind them all
-  fw::Input *Input = fw::framework::get_instance()->get_input();
+  fw::Input *Input = fw::Framework::get_instance()->get_input();
   std::for_each(_keybind_tokens.begin(), _keybind_tokens.end(), std::bind(&fw::Input::unbind_key, Input, _1));
 }
 

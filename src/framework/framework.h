@@ -6,7 +6,7 @@
 
 namespace fw {
 class Graphics;
-class framework;
+class Framework;
 class FontManager;
 class DebugView;
 class ModelManager;
@@ -14,7 +14,7 @@ class Timer;
 class Camera;
 class Bitmap;
 class ParticleManager;
-struct screenshot_request;
+struct ScreenshotRequest;
 class AudioManager;
 class Lang;
 class Cursor;
@@ -29,18 +29,18 @@ class Scenegraph;
 }
 
 // This is the "interface" that the main game class must implement.
-class base_app {
+class BaseApp {
 public:
-  virtual ~base_app() {
+  virtual ~BaseApp() {
   }
 
-  /** Override and return false if you don't want graphics to be initialized. */
+  // Override and return false if you don't want graphics to be initialized.
   virtual bool wants_graphics() {
     return true;
   }
 
   // This is called to initialize the application
-  virtual bool initialize(framework *frmwrk) {
+  virtual bool initialize(Framework *frmwrk) {
     return false;
   }
 
@@ -58,12 +58,12 @@ public:
   }
 };
 
-/** A \ref base_app class that you can use when you don't want graphics. */
-class tool_application: public fw::base_app {
+/** A \ref BaseApp class that you can use when you don't want graphics. */
+class ToolApplication: public fw::BaseApp {
 public:
-  tool_application() {
+  ToolApplication() {
   }
-  ~tool_application() {
+  ~ToolApplication() {
   }
 
   virtual bool wants_graphics() {
@@ -71,8 +71,8 @@ public:
   }
 };
 
-// This is the main "framework" class, which contains the interface for working with windows and so on.
-class framework {
+// This is the main "Framework" class, which contains the interface for working with windows and so on.
+class Framework {
 private:
 
   void on_create_device();
@@ -82,28 +82,28 @@ private:
   bool wait_events();
   bool poll_events();
 
-  bool _active;
+  bool active_;
 
-  Input * _input;
+  Input * input_;
   Graphics * graphics_;
-  base_app * _app;
-  Timer *_timer;
+  BaseApp * app_;
+  Timer *timer_;
   Camera *camera_;
-  gui::Gui *_gui;
-  ParticleManager *_particle_mgr;
-  bool _paused;
-  AudioManager *_audio_manager;
-  ModelManager *_model_manager;
-  Cursor *_cursor;
-  Lang *_lang;
-  FontManager *_font_manager;
-  DebugView *_debug_view;
-  volatile bool _running;
+  gui::Gui *gui_;
+  ParticleManager *particle_mgr_;
+  bool paused_;
+  AudioManager *audio_manager_;
+  ModelManager *model_manager_;
+  Cursor *cursor_;
+  Lang *lang_;
+  FontManager *font_manager_;
+  DebugView *debug_view_;
+  volatile bool running_;
 
   // game updates happen (synchronized) on this thread in constant timestep
   void update_proc();
 
-  std::list<screenshot_request *> _screenshots;
+  std::list<ScreenshotRequest *> screenshots_;
   void take_screenshots(sg::Scenegraph &Scenegraph);
 
   void language_initialize();
@@ -111,25 +111,25 @@ private:
   void on_fullscreen_toggle(std::string keyname, bool is_down);
 
 public:
-  // construct a new framework that'll call the methods of the given base_app
-  framework(base_app* app);
+  // construct a new Framework that'll call the methods of the given BaseApp
+  Framework(BaseApp* app);
 
-  // this is called when the framework shuts down.
-  ~framework();
+  // this is called when the Framework shuts down.
+  ~Framework();
 
-  static framework *get_instance();
+  static Framework *get_instance();
 
   void deactivate();
   void reactivate();
 
   void pause() {
-    _paused = true;
+    paused_ = true;
   }
   void unpause() {
-    _paused = false;
+    paused_ = false;
   }
   bool is_paused() const {
-    return _paused;
+    return paused_;
   }
 
   // takes a screenshot at the end of the next frame, saves it to an fw::Bitmap and
@@ -147,7 +147,7 @@ public:
   // Initializes the game and gets everything ready to go.
   bool initialize(char const *title);
 
-  // shutdown the framework, this is called automatically when the main window
+  // shutdown the Framework, this is called automatically when the main window
   // is closed/destroyed.
   void destroy();
 
@@ -158,37 +158,37 @@ public:
   void exit();
 
   Timer *get_timer() const {
-    return _timer;
+    return timer_;
   }
   Input *get_input() const {
-    return _input;
+    return input_;
   }
   Graphics *get_graphics() const {
     return graphics_;
   }
   gui::Gui *get_gui() const {
-    return _gui;
+    return gui_;
   }
-  base_app *get_app() const {
-    return _app;
+  BaseApp *get_app() const {
+    return app_;
   }
   FontManager *get_font_manager() const {
-    return _font_manager;
+    return font_manager_;
   }
   ModelManager *get_model_manager() const {
-    return _model_manager;
+    return model_manager_;
   }
   ParticleManager *get_particle_mgr() const {
-    return _particle_mgr;
+    return particle_mgr_;
   }
   Cursor *get_cursor() const {
-    return _cursor;
+    return cursor_;
   }
   AudioManager *get_audio_manager() const {
-    return _audio_manager;
+    return audio_manager_;
   }
   Lang *get_lang() const {
-    return _lang;
+    return lang_;
   }
 };
 

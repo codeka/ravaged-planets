@@ -40,7 +40,7 @@ void update_queue::push(float timeout, std::function<void()> fn) {
 
 void update_queue::update() {
   // update the _now time
-  _now = fw::framework::get_instance()->get_timer()->get_total_time();
+  _now = fw::Framework::get_instance()->get_timer()->get_total_time();
 
   for (;;) {
     // if there's nothing queued, we're done.

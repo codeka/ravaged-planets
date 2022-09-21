@@ -115,7 +115,7 @@ void new_game_window::initialize(main_menu_window *main_menu_window, new_ai_play
           << Widget::click(std::bind(&new_game_window::on_start_game_clicked, this, _1)))
       << (Builder<Label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
           << Label::text(fw::version_str));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
   _game_options = std::shared_ptr<game_screen_options>(new game_screen_options());
 }
 
@@ -359,7 +359,7 @@ void new_game_window::start_game() {
 
   hide();
 
-  application *app = dynamic_cast<application *>(fw::framework::get_instance()->get_app());
+  application *app = dynamic_cast<application *>(fw::Framework::get_instance()->get_app());
   screen_stack *ss = app->get_screen();
   ss->set_active_screen("game", _game_options);
 }

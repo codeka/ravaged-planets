@@ -138,7 +138,7 @@ void terrain::ensure_patches() {
 }
 
 void terrain::update() {
-  fw::Camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Camera *camera = fw::Framework::get_instance()->get_camera();
 
   // if the camera has moved off the edge of the map, wrap it back around
   fw::Vector old_loc = camera->get_location();
@@ -163,7 +163,7 @@ void terrain::render(fw::sg::Scenegraph &Scenegraph) {
     return;
 
   // we want to render the terrain centered on where the camera is looking
-  fw::Camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Camera *camera = fw::Framework::get_instance()->get_camera();
   fw::Vector location = get_cursor_location(camera->get_position(), camera->get_direction());
 
   int centre_patch_x = (int) (location[0] / PATCH_SIZE);
@@ -236,7 +236,7 @@ float terrain::get_height(float x, float z) {
 
 // gets the point on the terrain that the camera is currently looking at
 fw::Vector terrain::get_camera_lookat() {
-  fw::framework *frmwrk = fw::framework::get_instance();
+  fw::Framework *frmwrk = fw::Framework::get_instance();
   fw::Camera *camera = frmwrk->get_camera();
 
   fw::Vector center = camera->unproject(0.0f, 0.0f);
@@ -252,7 +252,7 @@ fw::Vector terrain::get_camera_lookat() {
 // 2D point on that line, we check how close the ray is to that point
 // in 3D-space. If it's close enough, we return that one...
 fw::Vector terrain::get_cursor_location() {
-  fw::framework *frmwrk = fw::framework::get_instance();
+  fw::Framework *frmwrk = fw::Framework::get_instance();
   fw::Input *Input = frmwrk->get_input();
   fw::Camera *camera = frmwrk->get_camera();
 

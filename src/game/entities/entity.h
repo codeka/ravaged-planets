@@ -99,7 +99,7 @@ private:
   std::string _name;
 
   entity_debug_flags _debug_flags;
-  entity_debug_view *_debug_view;
+  entity_debug_view *debug_view_;
   entity_manager *mgr_;
 public:
   ~entity();

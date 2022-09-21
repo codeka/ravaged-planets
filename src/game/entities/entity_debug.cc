@@ -34,7 +34,7 @@ entity_debug::entity_debug(entity_manager *mgr) :
 }
 
 entity_debug::~entity_debug() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void entity_debug::initialize() {
@@ -48,9 +48,9 @@ void entity_debug::initialize() {
       << (Builder<Label>(px(10), px(76), sum(pct(100), px(-20)), px(20))
           << Label::text("Goal: ") << Widget::id(GOAL_ID))
       ;
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 
-  fw::Input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
   inp->bind_key("Ctrl+D", std::bind(&entity_debug::on_key_press, this, _1, _2));
 }
 

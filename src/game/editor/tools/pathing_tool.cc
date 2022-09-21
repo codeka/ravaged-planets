@@ -62,11 +62,11 @@ pathing_tool_window::pathing_tool_window(ed::pathing_tool *tool) :
           << Widget::click(std::bind(&pathing_tool_window::on_end_click, this, _1)))
       << (Builder<Checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18)) << Checkbox::text("Simplify")
           << Widget::click(std::bind(&pathing_tool_window::on_simplify_click, this, _1)));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 pathing_tool_window::~pathing_tool_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void pathing_tool_window::show() {
@@ -168,7 +168,7 @@ REGISTER_TOOL("pathing", pathing_tool);
 pathing_tool::pathing_tool(editor_world *wrld) :
     tool(wrld), _start_set(false), _end_set(false), _test_mode(test_none), _simplify(true) {
   _wnd = new pathing_tool_window(this);
-  _marker = fw::framework::get_instance()->get_model_manager()->get_model("marker");
+  _marker = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
 }
 
 pathing_tool::~pathing_tool() {
@@ -190,7 +190,7 @@ void pathing_tool::activate() {
       new fw::TimedPathFind(get_terrain()->get_width(), get_terrain()->get_length(), _collision_data));
   _path_find = pf;
 
-  fw::Input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
   _keybind_tokens.push_back(
       inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&pathing_tool::on_key, this, _1, _2))));
 }
@@ -215,7 +215,7 @@ int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_len
 
 void pathing_tool::render(fw::sg::Scenegraph &Scenegraph) {
   // we want to render the patches centred on where the camera is looking
-  fw::Camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Camera *camera = fw::Framework::get_instance()->get_camera();
   fw::Vector cam_loc = camera->get_position();
   fw::Vector cam_dir = camera->get_direction();
   fw::Vector location = get_terrain()->get_cursor_location(cam_loc, cam_dir);

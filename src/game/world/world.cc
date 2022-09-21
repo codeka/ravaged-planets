@@ -33,12 +33,12 @@ world *world::_instance = nullptr;
 
 world::world(std::shared_ptr<world_reader> reader) :
     _reader(reader), _entities(nullptr), _terrain(nullptr), _pathing(nullptr), _initialized(false) {
-  _cursor = new cursor_handler();
+  cursor_ = new cursor_handler();
 }
 
 world::~world() {
   world::set_instance(nullptr);
-  delete _cursor;
+  delete cursor_;
   if (_pathing != nullptr)
     delete _pathing;
 }
@@ -58,15 +58,15 @@ void world::initialize() {
   }
 
   // tell the Particle manager to wrap particles at the world boundary
-  fw::framework::get_instance()->get_particle_mgr()->set_world_wrap(_terrain->get_width(), _terrain->get_length());
+  fw::Framework::get_instance()->get_particle_mgr()->set_world_wrap(_terrain->get_width(), _terrain->get_length());
 
-  fw::Input *input = fw::framework::get_instance()->get_input();
+  fw::Input *input = fw::Framework::get_instance()->get_input();
 
   world::set_instance(this);
 
   initialize_entities();
   if (_entities != nullptr) {
-    _cursor->initialize();
+    cursor_->initialize();
     _keybind_tokens.push_back(input->bind_function("pause", std::bind(&world::on_key_pause, this, _1, _2)));
   }
   _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
@@ -80,12 +80,12 @@ void world::destroy() {
   _pathing->stop();
 
   // unbind all the keys we had bound
-  fw::Input *Input = fw::framework::get_instance()->get_input();
+  fw::Input *Input = fw::Framework::get_instance()->get_input();
   for (int token : _keybind_tokens) {
     Input->unbind_key(token);
   }
   _keybind_tokens.clear();
-  _cursor->destroy();
+  cursor_->destroy();
 }
 
 void world::initialize_pathing() {
@@ -101,18 +101,18 @@ void world::initialize_entities() {
 // this is called when the "pause" button is pressed (usually "ESC")
 void world::on_key_pause(std::string, bool is_down) {
   if (!is_down) {
-    if (fw::framework::get_instance()->is_paused()) {
-      fw::framework::get_instance()->unpause();
+    if (fw::Framework::get_instance()->is_paused()) {
+      fw::Framework::get_instance()->unpause();
     } else {
       hud_pause->show();
-      fw::framework::get_instance()->pause();
+      fw::Framework::get_instance()->pause();
     }
   }
 }
 
 void world::on_key_screenshot(std::string, bool is_down) {
   if (!is_down) {
-    fw::framework::get_instance()->take_screenshot(0, 0, std::bind(&world::screenshot_callback, this, _1));
+    fw::Framework::get_instance()->take_screenshot(0, 0, std::bind(&world::screenshot_callback, this, _1));
   }
 }
 
@@ -157,7 +157,7 @@ void world::update() {
     hud_pause->hide();
   }
 
-  _cursor->update();
+  cursor_->update();
   _terrain->update();
 
   if (_entities != nullptr)

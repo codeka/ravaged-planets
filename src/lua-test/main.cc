@@ -105,9 +105,9 @@ int main(int argc, char** argv) {
   try {
     settings_initialize(argc, argv);
 
-    fw::tool_application app;
-    new fw::framework(&app);
-    fw::framework::get_instance()->initialize("Lua Test");
+    fw::ToolApplication app;
+    new fw::Framework(&app);
+    fw::Framework::get_instance()->initialize("Lua Test");
 
     fw::lua::LuaContext ctx;
 

@@ -23,7 +23,7 @@ application::application()
 application::~application() {
 }
 
-bool application::initialize(fw::framework *frmwrk) {
+bool application::initialize(fw::Framework *frmwrk) {
   _framework = frmwrk;
   _framework->get_cursor()->set_visible(true);
 

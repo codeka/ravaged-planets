@@ -27,7 +27,7 @@ public:
   std::basic_string<uint32_t> codepoints;
 
   inline TextEditBuffer() {
-    font = fw::framework::get_instance()->get_font_manager()->get_face();
+    font = fw::Framework::get_instance()->get_font_manager()->get_face();
   }
 };
 
@@ -249,7 +249,7 @@ void TextEdit::render() {
   }
 
   if (!buffer_->codepoints.empty()) {
-    fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+    fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
         get_left(), get_top() + get_height() / 2, buffer_->codepoints,
         static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle),
         fw::Color::BLACK());

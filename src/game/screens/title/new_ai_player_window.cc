@@ -33,7 +33,7 @@ new_ai_player_window::new_ai_player_window() : _wnd(nullptr), _new_game_window(n
 }
 
 new_ai_player_window::~new_ai_player_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void new_ai_player_window::initialize(new_game_window *new_game_window) {
@@ -53,7 +53,7 @@ void new_ai_player_window::initialize(new_game_window *new_game_window) {
       << (Builder<Button>(sum(pct(100), px(-110)), sum(pct(100), px(-40)), px(100), px(30))
           << Button::text("Cancel")
           << Button::click(std::bind(&new_ai_player_window::on_cancel_clicked, this, _1)));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 
   // add each of the scripts to the "scripts" combobox so the user can choose which one he wants
   ai_scriptmgr scriptmgr;

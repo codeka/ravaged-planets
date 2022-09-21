@@ -1,6 +1,6 @@
 #pragma once
 /*
-#include "../../../framework/gui/window.h"
+#include "../../../Framework/gui/window.h"
 
 namespace fw {
 	class color_chooser;

@@ -12,7 +12,7 @@ namespace fw {
 namespace net {
 class Peer;
 
-// The framework automatically calls fw::net::initialize() and fw::net::destroy() to ensure we're all ready to go.
+// The Framework automatically calls fw::net::initialize() and fw::net::destroy() to ensure we're all ready to go.
 void initialize();
 void destroy();
 

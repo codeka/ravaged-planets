@@ -28,7 +28,7 @@ cursor_handler::~cursor_handler() {
 }
 
 void cursor_handler::initialize() {
-  fw::Input *Input = fw::framework::get_instance()->get_input();
+  fw::Input *Input = fw::Framework::get_instance()->get_input();
   _keybind_tokens.push_back(Input->bind_function("select", std::bind(&cursor_handler::on_key_select, this, _1, _2)));
   _keybind_tokens.push_back(
       Input->bind_function("deselect", std::bind(&cursor_handler::on_key_deselect, this, _1, _2)));
@@ -76,7 +76,7 @@ void cursor_handler::update() {
     }
   }
 
-  fw::framework::get_instance()->get_cursor()->set_cursor(1, cursor_name);
+  fw::Framework::get_instance()->get_cursor()->set_cursor(1, cursor_name);
 
   std::shared_ptr<ent::entity> last_highlighted = _last_highlighted.lock();
   if (last_highlighted) {
@@ -92,7 +92,7 @@ void cursor_handler::update() {
 }
 
 void cursor_handler::destroy() {
-  fw::Input *input = fw::framework::get_instance()->get_input();
+  fw::Input *input = fw::Framework::get_instance()->get_input();
   for (int token : _keybind_tokens) {
     input->unbind_key(token);
   }

@@ -1,8 +1,8 @@
 #pragma once
 /*
-#include "../../../framework/gui/window.h"
-#include "../../../framework/gui/default_button.h"
-#include "../../../framework/gui/wait_animation.h"
+#include "../../../Framework/gui/window.h"
+#include "../../../Framework/gui/default_button.h"
+#include "../../../Framework/gui/wait_animation.h"
 #include "../../session/session.h"
 
 namespace CEGUI {

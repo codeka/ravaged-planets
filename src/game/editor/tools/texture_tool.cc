@@ -58,11 +58,11 @@ texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
           << Listbox::item_selected(std::bind(&texture_tool_window::on_texture_selected, this, _1)))
       << (Builder<Label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << Widget::id(TEXTURE_PREVIEW_ID))
       << (Builder<Button>(px(4), px(228), sum(pct(100), px(-8)), px(30)) << Button::text("Change"));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 texture_tool_window::~texture_tool_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void texture_tool_window::show() {
@@ -86,7 +86,7 @@ void texture_tool_window::on_texture_selected(int index) {
   layer->create(_tool->get_terrain()->get_layer(index));
 
   std::shared_ptr<Drawable> drawable =
-      fw::framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
+      fw::Framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
         layer, 0, 0, layer->get_width(), layer->get_height());
   _wnd->find<Label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
   _tool->set_layer(index);
@@ -119,7 +119,7 @@ texture_tool::~texture_tool() {
 void texture_tool::activate() {
   tool::activate();
 
-  fw::Input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
   _keybind_tokens.push_back(
       inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&texture_tool::on_key, this, _1, _2))));
 
@@ -184,7 +184,7 @@ void texture_tool::update() {
     }
 
     splatt.set_pixels(data);
-    fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
       _terrain->set_splatt(patch_x, patch_z, splatt);
     });
   }

@@ -43,31 +43,31 @@ screen_stack::~screen_stack() {
 
 void screen_stack::set_active_screen(std::string const &name,
     std::shared_ptr<screen_options> options /*= std::shared_ptr<screen_options>()*/) {
-  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     auto it = _screens.find(name);
     if (it == _screens.end()) {
       BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("invalid screen name!"));
     }
 
-    if (_active != name) {
-      if (_active != "") {
-        std::string old_active = _active;
-        _active = "";
+    if (active_ != name) {
+      if (active_ != "") {
+        std::string old_active = active_;
+        active_ = "";
         _screens[old_active]->hide();
       }
       _screens[name]->set_options(options);
       _screens[name]->show();
-      _active = name;
+      active_ = name;
     }
   });
 }
 
 screen *screen_stack::get_active_screen() {
-  if (_active == "") {
+  if (active_ == "") {
     return nullptr;
   }
 
-  return _screens[_active];
+  return _screens[active_];
 }
 
 }

@@ -74,7 +74,7 @@ void game_screen::render(fw::sg::Scenegraph &Scenegraph) {
 
   // set up the properties of the sun that we'll use to Light and also cast shadows
   fw::Vector sun(0.485f, 0.485f, 0.727f);
-  fw::Camera *old_cam = fw::framework::get_instance()->get_camera();
+  fw::Camera *old_cam = fw::Framework::get_instance()->get_camera();
   fw::Vector cam_pos = old_cam->get_position();
   fw::Vector cam_dir = old_cam->get_forward();
   fw::Vector lookat = _world->get_terrain()->get_cursor_location(cam_pos, cam_dir);

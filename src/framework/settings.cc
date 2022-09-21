@@ -50,7 +50,7 @@ fs::path Settings::get_executable_path() const {
   return g_executable_path;
 }
 
-// you must call this at program startup (*before* you call the framework::initialize() method!) it'll parse the
+// you must call this at program startup (*before* you call the Framework::initialize() method!) it'll parse the
 // command-line options and so on.
 void Settings::initialize(po::options_description const &additional_options, int argc, char **argv,
     std::string const &options_file/* = "default.conf"*/) {

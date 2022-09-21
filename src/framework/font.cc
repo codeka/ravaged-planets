@@ -117,7 +117,7 @@ FontFace::~FontFace() {
 
 void FontFace::update(float dt) {
   // We actually want this to run on the render thread.
-  fw::framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     std::unique_lock<std::mutex> lock(mutex_);
     auto it = string_cache_.begin();
     while (it != string_cache_.end()) {
@@ -240,7 +240,7 @@ void FontFace::draw_string(int x, int y, std::basic_string<uint32_t> const &str,
   }
 
   // TODO: recalculating this every time seems wasteful
-  fw::Graphics *g = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
   fw::Matrix pos_transform;
   cml::matrix_orthographic_RH(pos_transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);

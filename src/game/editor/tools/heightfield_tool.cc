@@ -96,9 +96,9 @@ void raise_lower_brush::on_key(std::string keyname, bool is_down) {
 void raise_lower_brush::update(fw::Vector const &cursor_loc) {
   float dy = 0.0f;
   if (_raise_direction == up) {
-    dy += 5.0f * fw::framework::get_instance()->get_timer()->get_frame_time();
+    dy += 5.0f * fw::Framework::get_instance()->get_timer()->get_frame_time();
   } else if (_raise_direction == down) {
-    dy -= 5.0f * fw::framework::get_instance()->get_timer()->get_frame_time();
+    dy -= 5.0f * fw::Framework::get_instance()->get_timer()->get_frame_time();
   }
 
   if (dy != 0.0f) {
@@ -173,7 +173,7 @@ void level_brush::update(fw::Vector const &cursor_loc) {
     for (int z = sz; z < ez; z++) {
       for (int x = sx; x < ex; x++) {
         float height = _terrain->get_vertex_height(x, z);
-        float diff = (_level_height - height) * fw::framework::get_instance()->get_timer()->get_frame_time();
+        float diff = (_level_height - height) * fw::Framework::get_instance()->get_timer()->get_frame_time();
         float distance = sqrt((float) ((x - cx) * (x - cx) + (z - cz) * (z - cz))) / _tool->get_radius();
         if (distance < 1.0f) {
           _terrain->set_vertex_height(x, z, height + (diff * (1.0f - distance)));
@@ -222,11 +222,11 @@ heightfield_tool_window::heightfield_tool_window(ed::heightfield_tool *tool) :
           << Slider::on_update(std::bind(&heightfield_tool_window::on_radius_updated, this, _1)))
       << (Builder<Button>(px(4), px(96), sum(pct(100), px(-8)), px(30)) << Button::text("Import")
           << Button::click(std::bind(&heightfield_tool_window::on_import_clicked, this, _1)));
-  fw::framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
 }
 
 heightfield_tool_window::~heightfield_tool_window() {
-  fw::framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
 }
 
 void heightfield_tool_window::show() {
@@ -291,7 +291,7 @@ heightfield_tool::~heightfield_tool() {
 void heightfield_tool::activate() {
   tool::activate();
 
-  fw::Input *inp = fw::framework::get_instance()->get_input();
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
   _keybind_tokens.push_back(
       inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&heightfield_tool::on_key, this, _1, _2))));
   _keybind_tokens.push_back(

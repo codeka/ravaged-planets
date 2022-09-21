@@ -132,7 +132,7 @@ std::list<std::weak_ptr<entity>> entity_manager::get_entities(std::function<bool
 }
 
 std::weak_ptr<entity> entity_manager::get_entity_at_cursor() {
-  fw::framework *frmwrk = fw::framework::get_instance();
+  fw::Framework *frmwrk = fw::Framework::get_instance();
   fw::Input *Input = frmwrk->get_input();
   float mx = (float) Input->mouse_x();
   float my = (float) Input->mouse_y();
@@ -273,7 +273,7 @@ void entity_manager::update() {
   // work out the current "view center" which is used for things like drawing
   // the entities centred around the camera and so on.
   game::world *wrld = game::world::get_instance();
-  fw::Camera *camera = fw::framework::get_instance()->get_camera();
+  fw::Camera *camera = fw::Framework::get_instance()->get_camera();
   fw::Vector cam_loc = camera->get_position();
   fw::Vector cam_dir = camera->get_direction();
 
@@ -284,7 +284,7 @@ void entity_manager::update() {
       fw::constrain(location[2], this->get_patch_manager()->get_world_length(), 0.0f));
 
   // update all of the entities
-  float dt = fw::framework::get_instance()->get_timer()->get_frame_time();
+  float dt = fw::Framework::get_instance()->get_timer()->get_frame_time();
   for(auto &ent : _all_entities) {
     ent->update(dt);
   }

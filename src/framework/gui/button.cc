@@ -93,7 +93,7 @@ Button::Button(Gui *gui) : Widget(gui), text_align_(kCenter), is_pressed_(false)
   sig_mouse_over.connect(std::bind(&Button::on_mouse_over, this));
 
   if (!g_hover_sound) {
-    g_hover_sound = fw::framework::get_instance()->get_audio_manager()->get_audio_buffer("gui/sounds/click.ogg");
+    g_hover_sound = fw::Framework::get_instance()->get_audio_manager()->get_audio_buffer("gui/sounds/click.ogg");
   }
 }
 
@@ -193,11 +193,11 @@ void Button::render() {
 
   if (text_.length() > 0) {
     if (text_align_ == kLeft) {
-      fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+      fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
           left + 4, top + height / 2, text_,
           static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
     } else if (text_align_ == kCenter) {
-      fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+      fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
           left + width / 2, top + height / 2, text_,
           static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignCenter | fw::FontFace::kAlignMiddle));
     }

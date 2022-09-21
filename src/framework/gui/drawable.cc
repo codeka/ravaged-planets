@@ -97,7 +97,7 @@ fw::Matrix BitmapDrawable::get_uv_transform() {
 }
 
 fw::Matrix BitmapDrawable::get_pos_transform(float x, float y, float width, float height) {
-  fw::Graphics *g = fw::framework::get_instance()->get_graphics();
+  fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
   fw::Matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);

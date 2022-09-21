@@ -60,7 +60,7 @@ public:
 class screen_stack {
 private:
   std::map<std::string, screen *> _screens;
-  std::string _active;
+  std::string active_;
 
 public:
   screen_stack();

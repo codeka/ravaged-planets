@@ -31,7 +31,7 @@ void Gui::initialize(fw::Graphics *graphics) {
 }
 
 void Gui::update(float dt) {
-  Input *inp = fw::framework::get_instance()->get_input();
+  Input *inp = fw::Framework::get_instance()->get_input();
   Widget *wdgt = get_widget_at(inp->mouse_x(), inp->mouse_y());
   if (wdgt != widget_under_mouse_) {
     if (widget_under_mouse_ != nullptr) {
@@ -40,9 +40,9 @@ void Gui::update(float dt) {
     widget_under_mouse_ = wdgt;
     if (widget_under_mouse_ != nullptr) {
       widget_under_mouse_->sig_mouse_over();
-      fw::framework::get_instance()->get_cursor()->set_cursor(2, widget_under_mouse_->get_cursor_name());
+      fw::Framework::get_instance()->get_cursor()->set_cursor(2, widget_under_mouse_->get_cursor_name());
     } else {
-      fw::framework::get_instance()->get_cursor()->set_cursor(2, "");
+      fw::Framework::get_instance()->get_cursor()->set_cursor(2, "");
     }
   }
   if (widget_under_mouse_ != nullptr && (inp->mouse_dx() != 0.0f || inp->mouse_dy() != 0.0f)) {

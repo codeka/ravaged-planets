@@ -97,7 +97,7 @@ void Checkbox::render() {
   }
 
   if (text_.length() > 0) {
-    fw::framework::get_instance()->get_font_manager()->get_face()->draw_string(
+    fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
         left + height + 4, top + height / 2, text_,
         static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
   }

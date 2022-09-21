@@ -54,7 +54,7 @@ public:
 //----------------------------------------------------------------------------
 extern LogWrapper debug;
 
-// this is called automatically in framework::initialize()
+// this is called automatically in Framework::initialize()
 void logging_initialize();
 
 // This is the main implementation. Basically, we get the instance

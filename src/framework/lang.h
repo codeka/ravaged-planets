@@ -30,7 +30,7 @@ struct LangDescription {
 std::vector<LangDescription> get_languages();
 
 inline std::string text(std::string const &name) {
-  fw::Lang *l = fw::framework::get_instance()->get_lang();
+  fw::Lang *l = fw::Framework::get_instance()->get_lang();
   return l->get_string(name);
 }
 

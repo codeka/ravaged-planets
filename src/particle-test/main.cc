@@ -29,9 +29,9 @@ static std::shared_ptr<fw::ParticleEffect> g_effect;
 static bool is_moving = false;
 static float angle;
 
-class application: public fw::base_app {
+class application: public fw::BaseApp {
 public:
-  bool initialize(fw::framework *frmwrk);
+  bool initialize(fw::Framework *frmwrk);
   void update(float dt);
   void render(fw::sg::Scenegraph &Scenegraph);
 };
@@ -45,7 +45,7 @@ void update_effect_position() {
 bool restart_handler(fw::gui::Widget *wdgt) {
   fw::Settings stg;
   g_effect->destroy();
-  g_effect = fw::framework::get_instance()->get_particle_mgr()->create_effect(
+  g_effect = fw::Framework::get_instance()->get_particle_mgr()->create_effect(
       stg.get_value<std::string>("particle-file"));
   update_effect_position();
   return true;
@@ -53,12 +53,12 @@ bool restart_handler(fw::gui::Widget *wdgt) {
 
 bool pause_handler(fw::gui::Widget *wdgt) {
   fw::gui::Button *btn = dynamic_cast<fw::gui::Button *>(wdgt);
-  fw::framework *framework = fw::framework::get_instance();
-  if (framework->is_paused()) {
-    framework->unpause();
+  fw::Framework *Framework = fw::Framework::get_instance();
+  if (Framework->is_paused()) {
+    Framework->unpause();
     btn->set_text("Pause");
   } else {
-    framework->pause();
+    Framework->pause();
     btn->set_text("Unpause");
   }
 
@@ -79,7 +79,7 @@ bool movement_handler(fw::gui::Widget *wdgt) {
   return true;
 }
 
-bool application::initialize(fw::framework *frmwrk) {
+bool application::initialize(fw::Framework *frmwrk) {
   fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
@@ -129,9 +129,9 @@ int main(int argc, char** argv) {
     settings_initialize(argc, argv);
 
     application app;
-    new fw::framework(&app);
-    fw::framework::get_instance()->initialize("Particle Test");
-    fw::framework::get_instance()->run();
+    new fw::Framework(&app);
+    fw::Framework::get_instance()->initialize("Particle Test");
+    fw::Framework::get_instance()->run();
   } catch (std::exception &e) {
     std::string msg = boost::diagnostic_information(e);
     fw::debug

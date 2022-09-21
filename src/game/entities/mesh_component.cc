@@ -51,7 +51,7 @@ void mesh_component::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &tr
   position_component *pos = entity->get_component<position_component>();
   if (pos != nullptr) {
     if (!model_) {
-      model_ = fw::framework::get_instance()->get_model_manager()->get_model(_model_name);
+      model_ = fw::Framework::get_instance()->get_model_manager()->get_model(_model_name);
     }
 
     if (_ownable_component != nullptr) {
