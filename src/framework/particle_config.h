@@ -25,8 +25,8 @@ private:
 
   ParticleEffectConfig();
 
-  bool load_document(xml_element const &root);
-  void load_emitter(xml_element const &elem);
+  bool load_document(XmlElement const &root);
+  void load_emitter(XmlElement const &elem);
 
 public:
   static std::shared_ptr<ParticleEffectConfig> load(std::string const &name);
@@ -128,15 +128,15 @@ public:
 private:
   ParticleEmitterConfig();
 
-  void load_emitter(xml_element const &elem);
-  void load_position(xml_element const &elem);
-  void load_billboard(xml_element const &elem);
-  void load_life(xml_element const &elem);
-  void load_emit_policy(xml_element const &elem);
-  void parse_life_state(LifeState &state, xml_element const &elem);
-  void parse_random_float(Random<float> &ParticleRotation, xml_element const &elem);
-  void parse_random_color(Random<fw::Color> &ParticleRotation, xml_element const &elem);
-  void parse_random_vector(Random<fw::Vector> &ParticleRotation, xml_element const &elem);
+  void load_emitter(XmlElement const &elem);
+  void load_position(XmlElement const &elem);
+  void load_billboard(XmlElement const &elem);
+  void load_life(XmlElement const &elem);
+  void load_emit_policy(XmlElement const &elem);
+  void parse_life_state(LifeState &state, XmlElement const &elem);
+  void parse_random_float(Random<float> &ParticleRotation, XmlElement const &elem);
+  void parse_random_color(Random<fw::Color> &ParticleRotation, XmlElement const &elem);
+  void parse_random_vector(Random<fw::Vector> &ParticleRotation, XmlElement const &elem);
 
 public:
 

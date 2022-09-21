@@ -42,7 +42,7 @@ static bool g_rotating = false;
 static float g_rotate_angle = 0.0f;
 
 bool restart_handler(fw::gui::Widget *wdgt) {
-  fw::settings stg;
+  fw::Settings stg;
   g_model = fw::framework::get_instance()->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
   return true;
 }
@@ -88,7 +88,7 @@ bool application::initialize(fw::framework *frmwrk) {
           << fw::gui::Widget::click(std::bind<bool>(rotate_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
-  fw::settings stg;
+  fw::Settings stg;
   g_model = frmwrk->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
   g_ground = std::shared_ptr<fw::sg::Node>(new fw::sg::Node());
   initialize_ground(g_ground);
@@ -135,17 +135,17 @@ void initialize_ground(std::shared_ptr<fw::sg::Node> Node) {
   std::shared_ptr<fw::IndexBuffer> ib(new fw::IndexBuffer());
   ib->set_data(6, indices);
 
-  std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
+  std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
 
   std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(fw::resolve("terrain/grass-01.jpg"));
 
-  std::shared_ptr<fw::shader_parameters> params = shader->create_parameters();
+  std::shared_ptr<fw::ShaderParameters> params = Shader->create_parameters();
   params->set_texture("tex_sampler", texture);
 
   Node->set_vertex_buffer(vb);
   Node->set_index_buffer(ib);
-  Node->set_shader(shader);
+  Node->set_shader(Shader);
   Node->set_shader_parameters(params);
   Node->set_cast_shadows(false);
   Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
@@ -191,5 +191,5 @@ void settings_initialize(int argc, char** argv) {
       po::value<std::string>()->default_value("factory"),
       "Name of the mesh file to load, we assume it can be fw::resolve'd.");
 
-  fw::settings::initialize(options, argc, argv, "font-test.conf");
+  fw::Settings::initialize(options, argc, argv, "font-test.conf");
 }

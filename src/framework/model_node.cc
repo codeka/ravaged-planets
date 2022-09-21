@@ -26,7 +26,7 @@ void ModelNode::initialize(Model *mdl) {
     set_shader(mesh->get_shader());
     set_primitive_type(sg::kTriangleList);
 
-    std::shared_ptr<shader_parameters> params = get_shader()->create_parameters();
+    std::shared_ptr<ShaderParameters> params = get_shader()->create_parameters();
     if (mdl->texture) {
       params->set_texture("entity_texture", mdl->texture);
     }

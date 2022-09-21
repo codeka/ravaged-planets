@@ -4,44 +4,44 @@
 
 namespace fw {
 
-typedef std::chrono::high_resolution_clock chrono_clock;
+typedef std::chrono::high_resolution_clock Clock;
 
-// This class represents a timer which lets us time various events and so on.
-class timer {
+// This class represents a Timer which lets us time various events and so on.
+class Timer {
 private:
-  chrono_clock::time_point _start_time_point;
-  chrono_clock::time_point _curr_time_point;
-  float _total_time_seconds;
-  float _frame_time_seconds;
-  chrono_clock::duration _frame_time;
-  bool _stopped;
+  Clock::time_point start_time_point_;
+  Clock::time_point curr_time_point_;
+  float total_time_seconds_;
+  float frame_time_seconds_;
+  Clock::duration frame_time_;
+  bool stopped_;
 
-  chrono_clock::time_point _last_fps_update;
-  unsigned int _num_frames;
-  float _fps;
+  Clock::time_point last_fps_update_;
+  unsigned int num_frames_;
+  float fps_;
 
 public:
-  timer();
+  Timer();
   void start();
   void stop();
   void update();
   void render();
 
   inline bool is_stopped() const {
-    return _stopped;
+    return stopped_;
   }
   inline float get_fps() const {
-    return _fps;
+    return fps_;
   }
   inline float get_total_time() const {
-    return _total_time_seconds;
+    return total_time_seconds_;
   }
   inline float get_frame_time() const {
-    return _stopped ? 0.000001f : _frame_time_seconds;
+    return stopped_ ? 0.000001f : frame_time_seconds_;
   }
 
-  chrono_clock::duration get_frame_duration() const {
-    return _frame_time;
+  Clock::duration get_frame_duration() const {
+    return frame_time_;
   }
 };
 

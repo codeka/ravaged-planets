@@ -41,7 +41,7 @@ fs::path user_base_path() {
  */
 fs::path install_base_path() {
   if (g_install_base_path.empty()) {
-    settings stg;
+    Settings stg;
     std::string data_path = stg.get_value<std::string>("data-path");
     if (!data_path.empty()) {
       g_install_base_path = data_path;

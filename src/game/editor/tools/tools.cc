@@ -78,10 +78,10 @@ void draw_circle(fw::sg::Scenegraph &Scenegraph, game::terrain *terrain, fw::Vec
   Node->set_vertex_buffer(vb);
   Node->set_index_buffer(ib);
   Node->set_primitive_type(fw::sg::PrimitiveType::kLineStrip);
-  std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
-  std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
+  std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
+  std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
   shader_params->set_program_name("notexture");
-  Node->set_shader(shader);
+  Node->set_shader(Shader);
   Node->set_shader_parameters(shader_params);
   Scenegraph.add_node(Node);
 }

@@ -5,54 +5,54 @@ namespace fw {
 
 const float _fps_update_interval_microseconds = 2.0f * 1000000.0f;
 
-timer::timer() :
-    _num_frames(0), _total_time_seconds(0), _frame_time_seconds(0), _fps(0), _stopped(true) {
+Timer::Timer() :
+    num_frames_(0), total_time_seconds_(0), frame_time_seconds_(0), fps_(0), stopped_(true) {
 }
 
-void timer::start() {
-  if (!_stopped)
+void Timer::start() {
+  if (!stopped_)
     return;
 
-  _start_time_point = _curr_time_point = chrono_clock::now();
-  _stopped = false;
+  start_time_point_ = curr_time_point_ = Clock::now();
+  stopped_ = false;
 }
 
-void timer::stop() {
+void Timer::stop() {
   update();
-  _stopped = true;
+  stopped_ = true;
 }
 
-// this needs to be called each frame in order to keep the correct _fps count
-void timer::update() {
-  if (_stopped)
+// this needs to be called each frame in order to keep the correct fps_ count
+void Timer::update() {
+  if (stopped_)
     return;
 
-  auto now = chrono_clock::now();
+  auto now = Clock::now();
 
   // note: the counter for _total_time will wrap around eventually, but for all intents
   // and purposes, it doesn't matter.
-  _frame_time = now - _curr_time_point;
-  auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(_frame_time).count();
-  _frame_time_seconds = ((float) microseconds / 1000000.f)/* / 10.0f*/;
+  frame_time_ = now - curr_time_point_;
+  auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(frame_time_).count();
+  frame_time_seconds_ = ((float) microseconds / 1000000.f)/* / 10.0f*/;
 
-  microseconds = std::chrono::duration_cast<std::chrono::microseconds>(now - _start_time_point).count();
-  _total_time_seconds = (float) microseconds / 1000000.0f;
+  microseconds = std::chrono::duration_cast<std::chrono::microseconds>(now - start_time_point_).count();
+  total_time_seconds_ = (float) microseconds / 1000000.0f;
 
-  _curr_time_point = now;
+  curr_time_point_ = now;
 }
 
 /** Called on the render thread whenever we render a frame. We use this to update FPS. */
-void timer::render() {
+void Timer::render() {
   // update the fps counter every now and then
-  _num_frames++;
+  num_frames_++;
   auto micros_since_fps_update =
-    std::chrono::duration_cast<std::chrono::microseconds>(_curr_time_point - _last_fps_update).count();
+    std::chrono::duration_cast<std::chrono::microseconds>(curr_time_point_ - last_fps_update_).count();
   if (micros_since_fps_update >= _fps_update_interval_microseconds) {
     double time = static_cast<double>(micros_since_fps_update) / 1000000.0;
-    _fps = static_cast<float>(static_cast<double>(_num_frames) / time);
+    fps_ = static_cast<float>(static_cast<double>(num_frames_) / time);
 
-    _last_fps_update = _curr_time_point;
-    _num_frames = 0;
+    last_fps_update_ = curr_time_point_;
+    num_frames_ = 0;
   }
 }
 

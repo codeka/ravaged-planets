@@ -25,8 +25,8 @@ std::vector<script_desc> &ai_scriptmgr::get_scripts() {
   return g_scripts;
 }
 
-void parse_ai(fs::path containing_dir, fw::xml_element &root, script_desc &desc) {
-  for (fw::xml_element elem = root.get_first_child(); elem.is_valid(); elem = elem.get_next_sibling()) {
+void parse_ai(fs::path containing_dir, fw::XmlElement &root, script_desc &desc) {
+  for (fw::XmlElement elem = root.get_first_child(); elem.is_valid(); elem = elem.get_next_sibling()) {
     if (elem.get_value() == "description") {
       desc.name = elem.get_attribute("name");
       desc.desc = elem.get_text();
@@ -51,7 +51,7 @@ void enumerate_files(fs::path dir, std::vector<script_desc> &desc_list) {
     if (fs::is_directory(it->status())) {
       enumerate_files(it->path(), desc_list);
     } else if (it->path().extension() == ".ai") {
-      fw::xml_element root = fw::load_xml(it->path(), "ai", 1);
+      fw::XmlElement root = fw::load_xml(it->path(), "ai", 1);
 
       script_desc desc;
       parse_ai(dir, root, desc);

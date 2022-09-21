@@ -10,7 +10,7 @@
 #include <game/entities/entity_attribute.h>
 
 namespace fw {
-class xml_element;
+class XmlElement;
 }
 
 /** This is a helper macro for registering component types with the entity_factory. */

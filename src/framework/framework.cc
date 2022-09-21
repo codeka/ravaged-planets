@@ -45,7 +45,7 @@ struct screenshot_request {
 static framework *only_instance = 0;
 
 framework::framework(base_app* app) :
-    _app(app), _active(true), _camera(nullptr), _paused(false), _particle_mgr(nullptr),
+    _app(app), _active(true), camera_(nullptr), _paused(false), _particle_mgr(nullptr),
     graphics_(nullptr), _timer(nullptr), _audio_manager(nullptr), _input(nullptr), _lang(nullptr),
     _gui(nullptr), _font_manager(nullptr), _model_manager(nullptr), _cursor(nullptr),
     _debug_view(nullptr), _running(true) {
@@ -82,7 +82,7 @@ framework *framework::get_instance() {
 }
 
 bool framework::initialize(char const *title) {
-  settings stg;
+  Settings stg;
   if (stg.is_set("help")) {
     stg.print_help();
     return false;
@@ -96,7 +96,7 @@ bool framework::initialize(char const *title) {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::sdl_error_info(SDL_GetError()));
   }
 
-  _timer = new timer();
+  _timer = new Timer();
 
   // initialize graphics
   if (_app->wants_graphics()) {
@@ -141,7 +141,7 @@ bool framework::initialize(char const *title) {
 
   debug << "application initialization complete, running..." << std::endl;
 
-  // start the game timer that'll record fps, elapsed time, etc.
+  // start the game Timer that'll record fps, elapsed time, etc.
   _timer->start();
 
 
@@ -157,7 +157,7 @@ void framework::on_fullscreen_toggle(std::string keyname, bool is_down) {
 }
 
 void framework::language_initialize() {
-  settings stg;
+  Settings stg;
 
   std::vector<LangDescription> langs = fw::get_languages();
   debug << boost::format("%1% installed language(s):") % langs.size() << std::endl;
@@ -234,13 +234,13 @@ void framework::exit() {
 }
 
 void framework::set_camera(Camera *cam) {
-  if (_camera != 0)
-    _camera->disable();
+  if (camera_ != 0)
+    camera_->disable();
 
-  _camera = cam;
+  camera_ = cam;
 
-  if (_camera != 0)
-    _camera->enable();
+  if (camera_ != 0)
+    camera_->enable();
 }
 
 void framework::update_proc() {
@@ -292,8 +292,8 @@ void framework::update(float dt) {
     _debug_view->update(dt);
   }
 
-  if (_camera != nullptr)
-    _camera->update(dt);
+  if (camera_ != nullptr)
+    camera_->update(dt);
 
   _input->update(dt);
 }

@@ -27,7 +27,7 @@ namespace fw {
   THREADLOCAL std::ostream *LogWrapper::log_;
 
   void logging_initialize() {
-    settings stg;
+    Settings stg;
 
     fs::path log_path;
     std::string logfilename = stg.get_value<std::string>("debug-logfile");

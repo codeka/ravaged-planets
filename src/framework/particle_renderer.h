@@ -27,8 +27,8 @@ public:
 
 private:
   Graphics *graphics_;
-  std::shared_ptr<shader> shader_;
-  std::shared_ptr<shader_parameters> shader_params_;
+  std::shared_ptr<Shader> shader_;
+  std::shared_ptr<ShaderParameters> shader_params_;
   std::shared_ptr<Texture> color_texture_;
   ParticleManager *mgr_;
   int _draw_frame;

@@ -10,30 +10,30 @@ namespace fw {
  * This is a special camera implementation for rendering the shadow map. basically, we don't
  * link to any Input controls, etc.
  */
-class light_camera: public Camera {
+class LightCamera: public Camera {
 public:
-  light_camera();
-  virtual ~light_camera();
+  LightCamera();
+  virtual ~LightCamera();
 };
 
 /**
  * This class represents a "shadow source". It contains the camera we use to render the shadow texture, and the shadow
  * texture itself. the graphics class has one instance of us per shadow source in the scene.
  */
-class shadow_source: private boost::noncopyable {
+class ShadowSource: private boost::noncopyable {
 private:
-  light_camera _camera;
-  std::shared_ptr<Framebuffer> _shadowbuffer;
+  LightCamera camera_;
+  std::shared_ptr<Framebuffer> shadowbuffer_;
 
 public:
-  shadow_source();
-  ~shadow_source();
+  ShadowSource();
+  ~ShadowSource();
 
   void initialize(bool debug = false);
   void destroy();
 
   // this should be called before you call graphics::begin_scene to
-  // set up this shadow_source as the render target
+  // set up this ShadowSource as the render target
   void begin_scene();
 
   // this should be called after you call graphics::end_scene to
@@ -41,13 +41,13 @@ public:
   void end_scene();
 
   // gets the camera which you can use to "direct" the Light source
-  light_camera &get_camera() {
-    return _camera;
+  LightCamera &get_camera() {
+    return camera_;
   }
 
   // gets the actual framebuffer object
   std::shared_ptr<Framebuffer> get_shadowmap() {
-    return _shadowbuffer;
+    return shadowbuffer_;
   }
 };
 

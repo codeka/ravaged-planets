@@ -54,7 +54,7 @@ std::shared_ptr<ParticleEffectConfig> ParticleEffectConfig::load(std::string con
 
     filepath = fw::resolve("particles/" + name + ".part").string();
   }
-  fw::xml_element xmldoc = fw::load_xml(filepath, "particle", 1);
+  fw::XmlElement xmldoc = fw::load_xml(filepath, "particle", 1);
 
   std::shared_ptr<ParticleEffectConfig> config(new ParticleEffectConfig());
   if (config->load_document(xmldoc)) {
@@ -66,9 +66,9 @@ std::shared_ptr<ParticleEffectConfig> ParticleEffectConfig::load(std::string con
 }
 
 // loads from the root Node of the document
-bool ParticleEffectConfig::load_document(xml_element const &root) {
+bool ParticleEffectConfig::load_document(XmlElement const &root) {
   try {
-    for (xml_element child = root.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+    for (XmlElement child = root.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
       if (child.get_value() == "emitter") {
         load_emitter(child);
       } else {
@@ -85,7 +85,7 @@ bool ParticleEffectConfig::load_document(xml_element const &root) {
   }
 }
 
-void ParticleEffectConfig::load_emitter(xml_element const &elem) {
+void ParticleEffectConfig::load_emitter(XmlElement const &elem) {
   std::shared_ptr<ParticleEmitterConfig> emitter_config(new ParticleEmitterConfig());
   emitter_config->load_emitter(elem);
 
@@ -150,7 +150,7 @@ ParticleEmitterConfig::ParticleEmitterConfig() {
   initial_count = 0;
 }
 
-void ParticleEmitterConfig::load_emitter(xml_element const &emitter_elem) {
+void ParticleEmitterConfig::load_emitter(XmlElement const &emitter_elem) {
   if (emitter_elem.is_attribute_defined("start")) {
     start_time = emitter_elem.get_attribute<float>("start");
   }
@@ -163,7 +163,7 @@ void ParticleEmitterConfig::load_emitter(xml_element const &emitter_elem) {
     initial_count = emitter_elem.get_attribute<int>("initial");
   }
 
-  for (xml_element child = emitter_elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (XmlElement child = emitter_elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_value() == "position") {
       load_position(child);
     } else if (child.get_value() == "billboard") {
@@ -180,7 +180,7 @@ void ParticleEmitterConfig::load_emitter(xml_element const &emitter_elem) {
   }
 }
 
-void ParticleEmitterConfig::load_position(xml_element const &elem) {
+void ParticleEmitterConfig::load_position(XmlElement const &elem) {
   std::vector<float> components = fw::split<float>(elem.get_attribute("offset"));
   if (components.size() != 3) {
     BOOST_THROW_EXCEPTION(fw::Exception()
@@ -206,7 +206,7 @@ void ParticleEmitterConfig::load_position(xml_element const &elem) {
   }
 }
 
-void ParticleEmitterConfig::load_billboard(xml_element const &elem) {
+void ParticleEmitterConfig::load_billboard(XmlElement const &elem) {
   std::string filename = elem.get_attribute("texture");
   std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(fw::resolve("particles/" + filename));
@@ -221,7 +221,7 @@ void ParticleEmitterConfig::load_billboard(xml_element const &elem) {
     }
   }
 
-  for (fw::xml_element child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (fw::XmlElement child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_value() == "area") {
       std::vector<float> components = fw::split<float>(child.get_attribute("rect"));
       if (components.size() != 4) {
@@ -240,9 +240,9 @@ void ParticleEmitterConfig::load_billboard(xml_element const &elem) {
   }
 }
 
-void ParticleEmitterConfig::load_life(xml_element const &elem) {
+void ParticleEmitterConfig::load_life(XmlElement const &elem) {
   LifeState last_state;
-  for (xml_element child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (XmlElement child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_value() == "state") {
       LifeState state(last_state);
       parse_life_state(state, child);
@@ -254,7 +254,7 @@ void ParticleEmitterConfig::load_life(xml_element const &elem) {
   }
 }
 
-void ParticleEmitterConfig::load_emit_policy(xml_element const &elem) {
+void ParticleEmitterConfig::load_emit_policy(XmlElement const &elem) {
   emit_policy_name = elem.get_attribute("policy");
   if (elem.is_attribute_defined("value"))
     emit_policy_value = elem.get_attribute<float>("value");
@@ -262,10 +262,10 @@ void ParticleEmitterConfig::load_emit_policy(xml_element const &elem) {
     emit_policy_value = 0.0f;
 }
 
-void ParticleEmitterConfig::parse_life_state(LifeState &state, xml_element const &elem) {
+void ParticleEmitterConfig::parse_life_state(LifeState &state, XmlElement const &elem) {
   state.age = boost::lexical_cast<float>(elem.get_attribute("age"));
 
-  for (xml_element child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (XmlElement child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_value() == "size") {
       parse_random_float(state.size, child);
     } else if (child.get_value() == "color") {
@@ -301,12 +301,12 @@ void ParticleEmitterConfig::parse_life_state(LifeState &state, xml_element const
   }
 }
 
-void ParticleEmitterConfig::parse_random_float(Random<float> &ParticleRotation, xml_element const &elem) {
+void ParticleEmitterConfig::parse_random_float(Random<float> &ParticleRotation, XmlElement const &elem) {
   ParticleRotation.min = boost::lexical_cast<float>(elem.get_attribute("min"));
   ParticleRotation.max = boost::lexical_cast<float>(elem.get_attribute("max"));
 }
 
-void ParticleEmitterConfig::parse_random_color(Random<fw::Color> &ParticleRotation, xml_element const &elem) {
+void ParticleEmitterConfig::parse_random_color(Random<fw::Color> &ParticleRotation, XmlElement const &elem) {
   std::vector<float> min_components = fw::split<float>(elem.get_attribute("min"));
   std::vector<float> max_components = fw::split<float>(elem.get_attribute("max"));
 
@@ -329,7 +329,7 @@ void ParticleEmitterConfig::parse_random_color(Random<fw::Color> &ParticleRotati
   }
 }
 
-void ParticleEmitterConfig::parse_random_vector(Random<fw::Vector> &ParticleRotation, xml_element const &elem) {
+void ParticleEmitterConfig::parse_random_vector(Random<fw::Vector> &ParticleRotation, XmlElement const &elem) {
   std::vector<float> min_components = fw::split<float>(elem.get_attribute("min"));
   std::vector<float> max_components = fw::split<float>(elem.get_attribute("max"));
 

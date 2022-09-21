@@ -21,18 +21,18 @@ namespace ent {
 	class audio_component_template : public entity_component_template
 	{
 	public:
-		virtual bool load(fw::xml_element const &elem);
+		virtual bool load(fw::XmlElement const &elem);
 
 		audio_component::cue_list cues;
 	};
 
-	bool audio_component_template::load(fw::xml_element const &elem)
+	bool audio_component_template::load(fw::XmlElement const &elem)
 	{
 		entity_component_template::load(elem);
 
 		fw::audio_manager *audio_mgr = fw::framework::get_instance()->get_audio();
 
-		for(fw::xml_element child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling())
+		for(fw::XmlElement child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling())
 		{
 			if (child.get_value() == "sound")
 			{

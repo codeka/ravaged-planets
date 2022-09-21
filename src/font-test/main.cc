@@ -61,5 +61,5 @@ void settings_initialize(int argc, char** argv) {
       ("font-file", po::value<std::string>()->default_value("gui/SaccoVanzetti.ttf"), "Name of the font to load, we assume it can be fw::resolve'd.")
     ;
 
-  fw::settings::initialize(options, argc, argv, "font-test.conf");
+  fw::Settings::initialize(options, argc, argv, "font-test.conf");
 }

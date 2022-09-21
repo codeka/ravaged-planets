@@ -11,8 +11,8 @@
 namespace fw {
 class VertexBuffer;
 class IndexBuffer;
-class shader;
-class shader_parameters;
+class Shader;
+class ShaderParameters;
 
 namespace sg {
 class Scenegraph;
@@ -28,7 +28,7 @@ namespace game {
 struct terrain_patch {
   std::shared_ptr<fw::VertexBuffer> vb;
   std::shared_ptr<fw::Texture> texture;
-  std::shared_ptr<fw::shader_parameters> shader_params;
+  std::shared_ptr<fw::ShaderParameters> shader_params;
 };
 
 class terrain {
@@ -38,7 +38,7 @@ public:
 private:
   std::vector<std::shared_ptr<terrain_patch> > _patches;
   std::shared_ptr<fw::IndexBuffer> ib_;
-  std::shared_ptr<fw::shader> shader_;
+  std::shared_ptr<fw::Shader> shader_;
 
 protected:
   friend class ed::world_writer;
@@ -64,7 +64,7 @@ protected:
       int *new_patch_z = 0);
 
   // bake a patch's height values into a texture, ready to be
-  // passed to our vertex shader. cool!
+  // passed to our vertex Shader. cool!
   void bake_patch(int patch_x, int patch_z);
 
   // gets or sets the splatt texture for the given patch

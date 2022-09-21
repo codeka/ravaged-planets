@@ -30,8 +30,8 @@ void terrain::initialize() {
   ib_ = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
   ib_->set_data(index_data.size(), &index_data[0], 0);
 
-  // load the shader file that we'll use for rendering
-  shader_ = fw::shader::create("terrain.shader");
+  // load the Shader file that we'll use for rendering
+  shader_ = fw::Shader::create("terrain.shader");
 
   // TODO: this should come from the world_reader
   set_layer(0, std::make_shared<fw::Bitmap>(fw::resolve("terrain/grass-01.jpg")));

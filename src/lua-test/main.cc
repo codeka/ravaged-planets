@@ -65,7 +65,7 @@ char const ai_player::class_name[] = "Player";
 fw::lua_registrar<ai_player>::method_definition ai_player::methods[] = {
   {"say", &ai_player::l_say},
   {"find", &ai_player::l_find},
-  {"timer", &ai_player::l_timer},
+  {"Timer", &ai_player::l_timer},
   {nullptr, nullptr}
 };
 
@@ -154,5 +154,5 @@ void display_exception(std::string const &msg) {
 void settings_initialize(int argc, char** argv) {
   po::options_description options("Additional options");
 
-  fw::settings::initialize(options, argc, argv, "lua-test.conf");
+  fw::Settings::initialize(options, argc, argv, "lua-test.conf");
 }

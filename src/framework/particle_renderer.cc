@@ -55,8 +55,8 @@ struct RenderState {
   std::shared_ptr<fw::Texture> texture;
   fw::ParticleEmitterConfig::BillboardMode mode;
   fw::ParticleRenderer::ParticleList &particles;
-  std::shared_ptr<fw::shader> shader;
-  std::shared_ptr<fw::shader_parameters> shader_parameters;
+  std::shared_ptr<fw::Shader> Shader;
+  std::shared_ptr<fw::ShaderParameters> ShaderParameters;
 
   std::vector<std::shared_ptr<fw::VertexBuffer>> vertex_buffers;
   std::vector<std::shared_ptr<fw::IndexBuffer>> index_buffers;
@@ -127,12 +127,12 @@ void ParticleRenderer::initialize(Graphics *g) {
   graphics_ = g;
 
   color_texture_->create(fw::resolve("particles/colors.png"));
-  shader_ = fw::shader::create("particle.shader");
+  shader_ = fw::Shader::create("particle.shader");
   shader_params_ = shader_->create_parameters();
   shader_params_->set_texture("color_texture", color_texture_);
 }
 
-/** Gets the name of the program in the Particle.shader file we'll use for the given BillboardMode. */
+/** Gets the name of the program in the Particle.Shader file we'll use for the given BillboardMode. */
 std::string get_program_name(ParticleEmitterConfig::BillboardMode mode) {
   switch (mode) {
   case ParticleEmitterConfig::kNormal:
@@ -157,14 +157,14 @@ void generate_scenegraph_node(RenderState &rs) {
   rs.indices.clear();
   rs.index_buffers.push_back(ib);
 
-  std::shared_ptr<fw::shader_parameters> shader_params = rs.shader_parameters->clone();
+  std::shared_ptr<fw::ShaderParameters> shader_params = rs.ShaderParameters->clone();
   shader_params->set_program_name(get_program_name(rs.mode));
   shader_params->set_texture("particle_texture", rs.texture);
 
   std::shared_ptr<sg::Node> Node(new sg::Node());
   Node->set_vertex_buffer(vb);
   Node->set_index_buffer(ib);
-  Node->set_shader(rs.shader);
+  Node->set_shader(rs.Shader);
   Node->set_shader_parameters(shader_params);
   Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
   Node->set_cast_shadows(false);
@@ -261,8 +261,8 @@ void ParticleRenderer::render(sg::Scenegraph &Scenegraph, ParticleRenderer::Part
 
   // create the render state that'll hold all our state variables
   RenderState rs(Scenegraph, particles);
-  rs.shader = shader_;
-  rs.shader_parameters = shader_params_;
+  rs.Shader = shader_;
+  rs.ShaderParameters = shader_params_;
   rs.particle_num = 0;
   rs.mode = ParticleEmitterConfig::kNormal;
 

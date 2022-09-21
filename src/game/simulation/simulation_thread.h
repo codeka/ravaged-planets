@@ -35,7 +35,7 @@ private:
   static simulation_thread *instance;
 
   std::thread thread_;
-  bool _stopped;
+  bool stopped_;
   std::condition_variable _stopped_cond;
 
   fw::net::Host *host_;

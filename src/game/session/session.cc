@@ -120,7 +120,7 @@ void session::set_state(session_state state) {
 }
 
 std::string session::get_base_url() const {
-  fw::settings stg;
+  fw::Settings stg;
   std::string base_url = stg.get_value<std::string>("server-url");
   if (base_url[base_url.length() - 1] != '/') {
     base_url += "/";

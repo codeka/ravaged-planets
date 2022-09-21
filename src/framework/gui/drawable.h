@@ -45,8 +45,8 @@ protected:
   BitmapDrawable(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement* elem);
 
   std::shared_ptr<fw::Texture> texture_;
-  std::shared_ptr<fw::shader> shader_;
-  std::shared_ptr<fw::shader_parameters> shader_params_;
+  std::shared_ptr<fw::Shader> shader_;
+  std::shared_ptr<fw::ShaderParameters> shader_params_;
 
   virtual fw::Matrix get_pos_transform(float x, float y, float width, float height);
   virtual fw::Matrix get_uv_transform();

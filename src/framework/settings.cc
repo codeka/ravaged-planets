@@ -19,20 +19,20 @@ static po::variables_map g_variables_map;
 static po::options_description g_option_descriptions;
 static fs::path g_executable_path;
 
-settings::settings() {
+Settings::Settings() {
   if (!is_initialized) {
     BOOST_THROW_EXCEPTION(fw::Exception() << message_error_info("settings::initialize() has not been called."));
   }
 }
 
-settings::~settings() {
+Settings::~Settings() {
 }
 
-po::variables_map& settings::get_variables() const {
+po::variables_map& Settings::get_variables() const {
   return g_variables_map;
 }
 
-po::variable_value const &settings::get_variable_value(std::string const &name) const {
+po::variable_value const &Settings::get_variable_value(std::string const &name) const {
   po::variable_value const &val = g_variables_map[name];
   if (val.empty()) {
     BOOST_THROW_EXCEPTION(fw::Exception()
@@ -42,17 +42,17 @@ po::variable_value const &settings::get_variable_value(std::string const &name) 
   return val;
 }
 
-void settings::print_help() {
+void Settings::print_help() {
   std::cerr << g_option_descriptions << std::endl;
 }
 
-fs::path settings::get_executable_path() const {
+fs::path Settings::get_executable_path() const {
   return g_executable_path;
 }
 
 // you must call this at program startup (*before* you call the framework::initialize() method!) it'll parse the
 // command-line options and so on.
-void settings::initialize(po::options_description const &additional_options, int argc, char **argv,
+void Settings::initialize(po::options_description const &additional_options, int argc, char **argv,
     std::string const &options_file/* = "default.conf"*/) {
   g_executable_path = argv[0];
 

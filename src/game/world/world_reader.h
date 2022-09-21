@@ -6,7 +6,7 @@
 
 namespace fw {
 class Bitmap;
-class xml_element;
+class XmlElement;
 }
 
 namespace game {
@@ -28,8 +28,8 @@ protected:
   std::string _description;
   std::string _author;
 
-  void read_mapdesc(fw::xml_element root);
-  void read_mapdesc_players(fw::xml_element players_node);
+  void read_mapdesc(fw::XmlElement root);
+  void read_mapdesc_players(fw::XmlElement players_node);
   void read_collision_data(world_file_entry &wfe);
 
 public:

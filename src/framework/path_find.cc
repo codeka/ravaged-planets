@@ -221,7 +221,7 @@ TimedPathFind::~TimedPathFind() {
 }
 
 bool TimedPathFind::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
-  fw::timer tmr;
+  fw::Timer tmr;
   tmr.start();
 
   bool found = PathFfind::find(path, start, end);

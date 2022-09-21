@@ -27,7 +27,7 @@ DebugView::~DebugView() {
 }
 
 void DebugView::initialize() {
-  settings stg;
+  Settings stg;
   if (stg.is_set("debug-view")) {
     time_to_update_ = 1.0f;
 

@@ -8,8 +8,8 @@
 #include <framework/vector.h>
 
 namespace fw {
-class shader;
-class shader_parameters;
+class Shader;
+class ShaderParameters;
 class VertexBuffer;
 class IndexBuffer;
 namespace gui {

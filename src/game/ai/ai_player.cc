@@ -46,7 +46,7 @@ ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t p
 //          .def("set_ready", &ai_player::l_set_ready)
 //          .def("say", &ai_player::l_say)
 //          .def("local_say", &ai_player::l_local_say)
-//          .def("timer", &ai_player::l_timer)
+//          .def("Timer", &ai_player::l_timer)
 //          .def("event", &ai_player::l_event)
 //          .def("register_unit", &ai_player::l_register_unit)
 //          .def("find_units", &ai_player::l_find_units, luabind::raw(_3))

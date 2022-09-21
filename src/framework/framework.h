@@ -10,7 +10,7 @@ class framework;
 class FontManager;
 class DebugView;
 class ModelManager;
-class timer;
+class Timer;
 class Camera;
 class Bitmap;
 class ParticleManager;
@@ -87,8 +87,8 @@ private:
   Input * _input;
   Graphics * graphics_;
   base_app * _app;
-  timer *_timer;
-  Camera *_camera;
+  Timer *_timer;
+  Camera *camera_;
   gui::Gui *_gui;
   ParticleManager *_particle_mgr;
   bool _paused;
@@ -141,7 +141,7 @@ public:
   // gets or sets the camera we'll use for camera control
   void set_camera(Camera *cam);
   Camera *get_camera() {
-    return _camera;
+    return camera_;
   }
 
   // Initializes the game and gets everything ready to go.
@@ -157,7 +157,7 @@ public:
   // exit the game
   void exit();
 
-  timer *get_timer() const {
+  Timer *get_timer() const {
     return _timer;
   }
   Input *get_input() const {

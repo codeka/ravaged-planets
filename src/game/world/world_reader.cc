@@ -74,7 +74,7 @@ void world_reader::read(std::string name) {
   if (wfe.exists()) {
     wfe.close();
 
-    fw::xml_element root(fw::load_xml(wfe.get_full_path(), "mapdesc", 1));
+    fw::XmlElement root(fw::load_xml(wfe.get_full_path(), "mapdesc", 1));
     read_mapdesc(root);
   }
 
@@ -103,8 +103,8 @@ void world_reader::read_collision_data(world_file_entry &wfe) {
   }
 }
 
-void world_reader::read_mapdesc(fw::xml_element root) {
-  for (fw::xml_element child = root.get_first_child(); child.is_valid(); child =
+void world_reader::read_mapdesc(fw::XmlElement root) {
+  for (fw::XmlElement child = root.get_first_child(); child.is_valid(); child =
       child.get_next_sibling()) {
     if (child.get_value() == "description") {
       _description = child.get_text();
@@ -120,8 +120,8 @@ void world_reader::read_mapdesc(fw::xml_element root) {
   }
 }
 
-void world_reader::read_mapdesc_players(fw::xml_element players_node) {
-  for (fw::xml_element child = players_node.get_first_child(); child.is_valid();
+void world_reader::read_mapdesc_players(fw::XmlElement players_node) {
+  for (fw::XmlElement child = players_node.get_first_child(); child.is_valid();
       child = child.get_next_sibling()) {
     if (child.get_value() != "player") {
       BOOST_THROW_EXCEPTION(fw::Exception()

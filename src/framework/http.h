@@ -65,7 +65,7 @@ public:
   static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url);
 
   /* Constructs a new Http, performs the specified verb on the specified URL (with the specified XML data). */
-  static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url, xml_element &xml);
+  static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url, XmlElement &xml);
 
   /** Constructs a new Http, performs the specified verb on the specified URL (with the specified name/value data). */
   static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url,
@@ -75,7 +75,7 @@ public:
   void perform_action(HttpVerb verb, std::string const &url);
 
   /** Perform the given HTTP on the given URL. Cannot be called while a request is already in progress. */
-  void perform_action(HttpVerb verb, std::string const &url, xml_element &xml);
+  void perform_action(HttpVerb verb, std::string const &url, XmlElement &xml);
 
   /** Perform the given HTTP on the given URL. Cannot be called while a request is already in progress. */
   void perform_action(HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data);
@@ -90,10 +90,10 @@ public:
   std::string get_response();
 
   /**
-   * Parses the response as XML and returns a reference to it. if no response has been received yet, an xml_element
+   * Parses the response as XML and returns a reference to it. if no response has been received yet, an XmlElement
    * pointing to a NULL element is returned.
    */
-  xml_element get_xml_response();
+  XmlElement get_xml_response();
 
   /** Returns a value which indicates whether there was an error making the request. */
   bool is_error() const;

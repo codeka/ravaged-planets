@@ -2,7 +2,7 @@
 
 namespace fw {
 class Http;
-class xml_element;
+class XmlElement;
 }
 
 namespace game {
@@ -61,7 +61,7 @@ protected:
   }
 
   // parses the response from the server
-  virtual bool parse_response(fw::xml_element &xml);
+  virtual bool parse_response(fw::XmlElement &xml);
 
 public:
   session_request();
@@ -109,7 +109,7 @@ private:
 
 protected:
   virtual std::string get_description();
-  virtual bool parse_response(fw::xml_element &xml);
+  virtual bool parse_response(fw::XmlElement &xml);
 
 public:
   login_session_request(std::string const &username, std::string const &password);
@@ -123,7 +123,7 @@ public:
 class logout_session_request: public session_request {
 protected:
   virtual std::string get_description();
-  virtual bool parse_response(fw::xml_element &xml);
+  virtual bool parse_response(fw::XmlElement &xml);
 
 public:
   logout_session_request();
@@ -139,7 +139,7 @@ protected:
   virtual std::string get_request_xml();
   virtual std::string get_url();
   virtual std::string get_description();
-  virtual bool parse_response(fw::xml_element &xml);
+  virtual bool parse_response(fw::XmlElement &xml);
 
 public:
   create_game_session_request();
@@ -155,7 +155,7 @@ protected:
   virtual std::string get_request_xml();
   virtual std::string get_url();
   virtual std::string get_description();
-  virtual bool parse_response(fw::xml_element &xml);
+  virtual bool parse_response(fw::XmlElement &xml);
 
   // this is the callback we'll call once we've fetched the game list
   callback_fn _callback;
@@ -175,7 +175,7 @@ protected:
   virtual std::string get_request_xml();
   virtual std::string get_url();
   virtual std::string get_description();
-  virtual bool parse_response(fw::xml_element &xml);
+  virtual bool parse_response(fw::XmlElement &xml);
 
 public:
   join_game_session_request(uint64_t game_id);
@@ -201,7 +201,7 @@ protected:
   virtual std::string get_request_xml();
   virtual std::string get_url();
   virtual std::string get_description();
-  virtual bool parse_response(fw::xml_element &xml);
+  virtual bool parse_response(fw::XmlElement &xml);
 
 public:
   confirm_player_session_request(uint64_t game_id, uint32_t user_id);

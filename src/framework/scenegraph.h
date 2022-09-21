@@ -67,10 +67,10 @@ private:
   PrimitiveType _primitive_type;
   std::shared_ptr<fw::VertexBuffer> vb_;
   std::shared_ptr<fw::IndexBuffer> ib_;
-  std::shared_ptr<fw::shader> shader_;
-  std::shared_ptr<fw::shader_parameters> shader_params_;
+  std::shared_ptr<fw::Shader> shader_;
+  std::shared_ptr<fw::ShaderParameters> shader_params_;
 
-  // Renders the Node if the shader file is null (basically just uses the basic shader).
+  // Renders the Node if the Shader file is null (basically just uses the basic Shader).
   void render_noshader(fw::Camera *camera, fw::Matrix const &transform);
 
 protected:
@@ -78,8 +78,8 @@ protected:
   std::vector<std::shared_ptr<Node> > _children;
   fw::Matrix _world;
 
-  // this is called when we're rendering a given shader
-  virtual void render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera, fw::Matrix const &transform);
+  // this is called when we're rendering a given Shader
+  virtual void render_shader(std::shared_ptr<fw::Shader> Shader, fw::Camera *camera, fw::Matrix const &transform);
 
   // called by clone() to populate the clone
   virtual void populate_clone(std::shared_ptr<Node> clone);
@@ -117,15 +117,15 @@ public:
     return ib_;
   }
 
-  void set_shader(std::shared_ptr<fw::shader> shader) {
-    shader_ = shader;
+  void set_shader(std::shared_ptr<fw::Shader> Shader) {
+    shader_ = Shader;
   }
-  std::shared_ptr<fw::shader> get_shader() const;
+  std::shared_ptr<fw::Shader> get_shader() const;
 
-  void set_shader_parameters(std::shared_ptr<fw::shader_parameters> shader_params) {
+  void set_shader_parameters(std::shared_ptr<fw::ShaderParameters> shader_params) {
     shader_params_ = shader_params;
   }
-  std::shared_ptr<fw::shader_parameters> get_shader_parameters() const {
+  std::shared_ptr<fw::ShaderParameters> get_shader_parameters() const {
     return shader_params_;
   }
 
@@ -146,8 +146,8 @@ public:
   // this is called by the Scenegraph itself when it's time to render
   virtual void render(Scenegraph *sg, fw::Matrix const &model_matrix = fw::identity());
 
-  // Creates a clone of this Node (it's a "shallow" clone in that the vertex_buffer, index_buffer and shader will be
-  // shared but matrix and shader_parameters will be new)
+  // Creates a clone of this Node (it's a "shallow" clone in that the vertex_buffer, index_buffer and Shader will be
+  // shared but matrix and ShaderParameters will be new)
   virtual std::shared_ptr<Node> clone();
 };
 

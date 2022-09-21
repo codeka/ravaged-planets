@@ -3,7 +3,6 @@
 #include <map>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 
 #include <framework/misc.h>
@@ -23,47 +22,48 @@
 namespace fs = boost::filesystem;
 
 //-------------------------------------------------------------------------
-// This is a cache of .shader files, so we don't have to load them over and over.
-class shader_cache {
+// This is a cache of .Shader files, so we don't have to load them over and over.
+class ShaderCache {
 private:
-  typedef std::map<fs::path, std::shared_ptr<fw::shader> > shader_map;
-  shader_map _shaders;
+  typedef std::map<fs::path, std::shared_ptr<fw::Shader> > shader_map;
+  shader_map shaders_;
 
 public:
-  std::shared_ptr<fw::shader> get_shader(fs::path const &name);
-  void add_shader(fs::path const &name, std::shared_ptr<fw::shader> data);
+  std::shared_ptr<fw::Shader> get_shader(fs::path const &name);
+  void add_shader(fs::path const &name, std::shared_ptr<fw::Shader> data);
 
   void clear_cache();
 };
 
-std::shared_ptr<fw::shader> shader_cache::get_shader(fs::path const &name) {
-  shader_map::iterator it = _shaders.find(name);
-  if (it == _shaders.end())
-    return std::shared_ptr<fw::shader>();
+std::shared_ptr<fw::Shader> ShaderCache::get_shader(fs::path const &name) {
+  shader_map::iterator it = shaders_.find(name);
+  if (it == shaders_.end())
+    return std::shared_ptr<fw::Shader>();
 
   return it->second;
 }
 
-void shader_cache::add_shader(fs::path const &name, std::shared_ptr<fw::shader> data) {
-  _shaders[name] = data;
+void ShaderCache::add_shader(fs::path const &name, std::shared_ptr<fw::Shader> data) {
+  shaders_[name] = data;
 }
 
-void shader_cache::clear_cache() {
-  _shaders.clear();
+void ShaderCache::clear_cache() {
+  shaders_.clear();
 }
 
 //-----------------------------------------------------------------------------
 
 namespace {
-shader_cache g_cache;
+
+ShaderCache g_cache;
 void compile_shader(GLuint shader_id, std::string filename);
 void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id);
-std::string find_source(fw::xml_element const &root_elem, std::string source_name);
+std::string find_source(fw::XmlElement const &root_elem, std::string source_name);
 std::string process_includes(std::string source);
 std::string load_include(std::string const &file, std::string const &function_name);
 
-std::string find_source(fw::xml_element const &root_elem, std::string source_name) {
-  for (fw::xml_element child_elem = root_elem.get_first_child();
+std::string find_source(fw::XmlElement const &root_elem, std::string source_name) {
+  for (fw::XmlElement child_elem = root_elem.get_first_child();
       child_elem.is_valid(); child_elem = child_elem.get_next_sibling()) {
     if (child_elem.get_name() == "source" && child_elem.get_attribute("name") == source_name) {
       return "#version 330\n\n" + process_includes(child_elem.get_text());
@@ -96,8 +96,8 @@ std::string process_includes(std::string source) {
 }
 
 std::string load_include(std::string const &file, std::string const &function_name) {
-  fw::xml_element root_elem = fw::load_xml(fw::resolve("shaders/" + file), "shader", 1);
-  for (fw::xml_element child = root_elem.get_first_child();
+  fw::XmlElement root_elem = fw::load_xml(fw::resolve("shaders/" + file), "shader", 1);
+  for (fw::XmlElement child = root_elem.get_first_child();
       child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_name() == "function" && child.get_attribute("name") == function_name) {
       return process_includes(child.get_text());
@@ -143,22 +143,20 @@ void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_sha
   }
 }
 
-}
+} // namespace
 
 namespace fw {
 //-------------------------------------------------------------------------
-/**
- * A shader_program represents the details of a shader program within a .shader file.
- * It refers to the fragment/vertex shader code + OpenGL states they correspond to.
- */
-class shader_program {
+// A ShaderProgram represents the details of a Shader program within a .Shader file.
+// It refers to the fragment/vertex Shader code + OpenGL states they correspond to.
+class ShaderProgram {
 private:
-  friend class fw::shader_parameters;
+  friend class fw::ShaderParameters;
 
   std::string _name;
   std::map<std::string, std::string> states_;
   GLuint _program_id;
-  std::map<std::string, fw::shader_variable> _shader_variables;
+  std::map<std::string, fw::ShaderVariable> _shader_variables;
 
   /**
    * Called during begin to set the given GL state to the given ParticleRotation.
@@ -168,20 +166,20 @@ private:
   void apply_state(std::string const &name, std::string const &ParticleRotation);
 
 public:
-  shader_program(fw::xml_element &program_elem);
-  ~shader_program();
+  ShaderProgram(fw::XmlElement &program_elem);
+  ~ShaderProgram();
 
   void begin();
 };
 
-shader_program::shader_program(fw::xml_element &program_elem) : _program_id(0) {
+ShaderProgram::ShaderProgram(fw::XmlElement &program_elem) : _program_id(0) {
   GLint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
   GLint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
   _program_id = glCreateProgram();
 
   std::string vertex_shader_source;
   std::string fragment_shader_source;
-  for (fw::xml_element child_elem = program_elem.get_first_child();
+  for (fw::XmlElement child_elem = program_elem.get_first_child();
       child_elem.is_valid(); child_elem = child_elem.get_next_sibling()) {
     if (child_elem.get_name() == "vertex-shader") {
       vertex_shader_source = find_source(program_elem.get_root(), child_elem.get_attribute("source"));
@@ -205,14 +203,14 @@ shader_program::shader_program(fw::xml_element &program_elem) : _program_id(0) {
     FW_CHECKED(glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer));
     GLint location = glGetUniformLocation(_program_id, buffer);
     std::string name(buffer);
-    _shader_variables[name] = fw::shader_variable(location, name, size, type);
+    _shader_variables[name] = fw::ShaderVariable(location, name, size, type);
   }
 }
 
-shader_program::~shader_program() {
+ShaderProgram::~ShaderProgram() {
 }
 
-void shader_program::begin() {
+void ShaderProgram::begin() {
   FW_CHECKED(glUseProgram(_program_id));
 
 #ifdef DEBUG
@@ -229,12 +227,12 @@ void shader_program::begin() {
   }
 #endif
 
-  BOOST_FOREACH(auto it, states_) {
+  for(auto it : states_) {
     apply_state(it.first, it.second);
   }
 }
 
-void shader_program::apply_state(std::string const &name, std::string const &ParticleRotation) {
+void ShaderProgram::apply_state(std::string const &name, std::string const &ParticleRotation) {
   // TODO: we could probably do something better than this (e.g. at load time rather than at run time)
   if (name == "z-write") {
     if (ParticleRotation == "on") {
@@ -263,50 +261,50 @@ void shader_program::apply_state(std::string const &name, std::string const &Par
 }
 
 //-------------------------------------------------------------------------
-shader_parameters::shader_parameters() {
+ShaderParameters::ShaderParameters() {
 }
 
-shader_parameters::~shader_parameters() {
+ShaderParameters::~ShaderParameters() {
 }
 
-void shader_parameters::set_program_name(std::string const &name) {
-  _program_name = name;
+void ShaderParameters::set_program_name(std::string const &name) {
+  program_name_ = name;
 }
 
-void shader_parameters::set_texture(std::string const &name, std::shared_ptr<Texture> const &tex) {
-  _textures[name] = tex;
+void ShaderParameters::set_texture(std::string const &name, std::shared_ptr<Texture> const &tex) {
+  textures_[name] = tex;
 }
 
-void shader_parameters::set_matrix(std::string const &name, Matrix const &m) {
-  _matrices[name] = m;
+void ShaderParameters::set_matrix(std::string const &name, Matrix const &m) {
+  matrices_[name] = m;
 }
 
-void shader_parameters::set_vector(std::string const &name, Vector const &v) {
-  _vectors[name] = v;
+void ShaderParameters::set_vector(std::string const &name, Vector const &v) {
+  vectors_[name] = v;
 }
 
-void shader_parameters::set_color(std::string const &name, Color const &c) {
-  _colors[name] = c;
+void ShaderParameters::set_color(std::string const &name, Color const &c) {
+  colors_[name] = c;
 }
 
-void shader_parameters::set_scalar(std::string const &name, float f) {
-  _scalars[name] = f;
+void ShaderParameters::set_scalar(std::string const &name, float f) {
+  scalars_[name] = f;
 }
 
-std::shared_ptr<shader_parameters> shader_parameters::clone() {
-  std::shared_ptr<shader_parameters> clone(new shader_parameters());
-  clone->_textures = _textures;
-  clone->_matrices = _matrices;
-  clone->_vectors = _vectors;
-  clone->_colors = _colors;
-  clone->_scalars = _scalars;
+std::shared_ptr<ShaderParameters> ShaderParameters::clone() {
+  std::shared_ptr<ShaderParameters> clone(new ShaderParameters());
+  clone->textures_ = textures_;
+  clone->matrices_ = matrices_;
+  clone->vectors_ = vectors_;
+  clone->colors_ = colors_;
+  clone->scalars_ = scalars_;
   return clone;
 }
 
-void shader_parameters::apply(shader_program *prog) const {
+void ShaderParameters::apply(ShaderProgram *prog) const {
   int texture_unit = 0;
-  for (auto it = _textures.begin(); it != _textures.end(); ++it) {
-    shader_variable const &var = prog->_shader_variables[it->first];
+  for (auto it = textures_.begin(); it != textures_.end(); ++it) {
+    ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
       std::shared_ptr<fw::Texture> texture = it->second;
@@ -323,29 +321,29 @@ void shader_parameters::apply(shader_program *prog) const {
     texture_unit++;
   }
 
-  for (std::map<std::string, Matrix>::const_iterator it = _matrices.begin(); it != _matrices.end(); ++it) {
-    shader_variable const &var = prog->_shader_variables[it->first];
+  for (auto& it = matrices_.begin(); it != matrices_.end(); ++it) {
+    ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.data()));
     }
   }
 
-  for (std::map<std::string, Vector>::const_iterator it = _vectors.begin(); it != _vectors.end(); ++it) {
-    shader_variable const &var = prog->_shader_variables[it->first];
+  for (auto& it = vectors_.begin(); it != vectors_.end(); ++it) {
+    ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform3fv(var.location, 1, it->second.data()));
     }
   }
 
-  for (std::map<std::string, Color>::const_iterator it = _colors.begin(); it != _colors.end(); ++it) {
-    shader_variable const &var = prog->_shader_variables[it->first];
+  for (auto& it = colors_.begin(); it != colors_.end(); ++it) {
+    ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a));
     }
   }
 
-  for (std::map<std::string, float>::const_iterator it = _scalars.begin(); it != _scalars.end(); ++it) {
-    shader_variable const &var = prog->_shader_variables[it->first];
+  for (auto& it = scalars_.begin(); it != scalars_.end(); ++it) {
+    ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform1f(var.location, it->second));
     }
@@ -354,27 +352,27 @@ void shader_parameters::apply(shader_program *prog) const {
 
 //-------------------------------------------------------------------------
 
-shader_variable::shader_variable() :
+ShaderVariable::ShaderVariable() :
   location(-1), name(""), size(0), type(0), valid(false) {
 }
 
-shader_variable::shader_variable(GLint location, std::string name, GLint size, GLenum type) :
+ShaderVariable::ShaderVariable(GLint location, std::string name, GLint size, GLenum type) :
   location(location), name(name), size(size), type(type), valid(true) {
 }
 
 //-------------------------------------------------------------------------
-shader::shader() {
+Shader::Shader() {
 }
 
-shader::~shader() {
+Shader::~Shader() {
 }
 
-std::shared_ptr<shader> shader::create(std::string const &filename) {
+std::shared_ptr<Shader> Shader::create(std::string const &filename) {
   fw::Graphics *g = fw::framework::get_instance()->get_graphics();
 
-  std::shared_ptr<shader> shdr = g_cache.get_shader(filename);
+  std::shared_ptr<Shader> shdr = g_cache.get_shader(filename);
   if (!shdr) {
-    shdr = std::shared_ptr<shader>(new shader());
+    shdr = std::shared_ptr<Shader>(new Shader());
     shdr->load(g, fw::resolve("shaders/" + filename));
     g_cache.add_shader(filename, shdr);
   }
@@ -382,15 +380,15 @@ std::shared_ptr<shader> shader::create(std::string const &filename) {
   return shdr;
 }
 
-void shader::begin(std::shared_ptr<shader_parameters> parameters) {
-  shader_program *prog;
-  std::string program_name = _default_program_name;
-  if (parameters && parameters->_program_name != "") {
-    program_name = parameters->_program_name;
+void Shader::begin(std::shared_ptr<ShaderParameters> parameters) {
+  ShaderProgram *prog;
+  std::string program_name = default_program_name_;
+  if (parameters && parameters->program_name_ != "") {
+    program_name = parameters->program_name_;
   }
-  prog = _programs[program_name];
+  prog = programs_[program_name];
   if (prog == nullptr) {
-    prog = _programs[_default_program_name];
+    prog = programs_[default_program_name_];
   }
   prog->begin();
   if (parameters) {
@@ -398,29 +396,29 @@ void shader::begin(std::shared_ptr<shader_parameters> parameters) {
   }
 }
 
-void shader::end() {
+void Shader::end() {
   FW_CHECKED(glUseProgram(0));
 }
 
-std::shared_ptr<shader_parameters> shader::create_parameters() {
-  std::shared_ptr<shader_parameters> params(new shader_parameters());
+std::shared_ptr<ShaderParameters> Shader::create_parameters() {
+  std::shared_ptr<ShaderParameters> params(new ShaderParameters());
   return params;
 }
 
-void shader::load(fw::Graphics *g, fs::path const &full_path) {
+void Shader::load(fw::Graphics *g, fs::path const &full_path) {
   filename_ = full_path;
-  xml_element root_elem = fw::load_xml(full_path, "shader", 1);
-  for (xml_element child = root_elem.get_first_child();
+  XmlElement root_elem = fw::load_xml(full_path, "shader", 1);
+  for (XmlElement child = root_elem.get_first_child();
       child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_name() != "program") {
       continue;
     }
-    shader_program *program = new shader_program(child);
+    ShaderProgram *program = new ShaderProgram(child);
     std::string program_name = child.get_attribute("name");
-    if (_default_program_name == "") {
-      _default_program_name = program_name;
+    if (default_program_name_ == "") {
+      default_program_name_ = program_name;
     }
-    _programs[program_name] = program;
+    programs_[program_name] = program;
   }
 }
 

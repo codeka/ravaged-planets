@@ -152,10 +152,10 @@ void collision_patch::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &w
   Node->set_vertex_buffer(vb_);
   Node->set_index_buffer(ib_);
   Node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
-  std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
-  std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
+  std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
+  std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
   shader_params->set_program_name("notexture");
-  Node->set_shader(shader);
+  Node->set_shader(Shader);
   Node->set_shader_parameters(shader_params);
 
   Scenegraph.add_node(Node);
@@ -259,10 +259,10 @@ void pathing_tool::render(fw::sg::Scenegraph &Scenegraph) {
     sgnode->set_index_buffer(current_path_ib);
     sgnode->set_cast_shadows(false);
     sgnode->set_primitive_type(fw::sg::PrimitiveType::kLineList);
-    std::shared_ptr<fw::shader> shader = fw::shader::create("basic.shader");
-    std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
+    std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
+    std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
     shader_params->set_program_name("notexture");
-    sgnode->set_shader(shader);
+    sgnode->set_shader(Shader);
     sgnode->set_shader_parameters(shader_params);
 
     Scenegraph.add_node(sgnode);

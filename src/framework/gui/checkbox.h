@@ -9,7 +9,7 @@
 
 namespace fw::gui {
 
-// Checkbox allow you toggle settings.
+// Checkbox allow you toggle Settings.
 class Checkbox : public Widget {
 public:
   enum Alignment {

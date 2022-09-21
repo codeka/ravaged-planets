@@ -34,7 +34,7 @@ Graphics::~Graphics() {
 }
 
 void Graphics::initialize(char const *title) {
-  settings stg;
+  Settings stg;
 
   windowed_ = stg.is_set("windowed");
   if (windowed_) {
@@ -201,7 +201,7 @@ void Graphics::toggle_fullscreen() {
   fw::debug << boost::format("switching to %1%...") % (windowed_ ? "full-screen" : "windowed") << std::endl;
   windowed_ = !windowed_;
 
-  fw::settings stg;
+  fw::Settings stg;
   if (windowed_) {
     width_ = stg.get_value<int>("windowed-width");
     height_ = stg.get_value<int>("windowed-height");

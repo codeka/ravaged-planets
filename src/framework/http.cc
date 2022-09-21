@@ -98,7 +98,7 @@ std::shared_ptr<Http> Http::perform(HttpVerb verb, std::string const &url) {
   return request;
 }
 
-std::shared_ptr<Http> Http::perform(HttpVerb verb, std::string const &url, xml_element &xml) {
+std::shared_ptr<Http> Http::perform(HttpVerb verb, std::string const &url, XmlElement &xml) {
   std::shared_ptr<Http> request(new Http());
   request->perform_action(verb, url, xml);
   return request;
@@ -120,7 +120,7 @@ void Http::perform_action(HttpVerb verb, std::string const &url) {
   thread_ = std::thread(std::bind(&Http::do_action, this));
 }
 
-void Http::perform_action(HttpVerb verb, std::string const &url, fw::xml_element &xml) {
+void Http::perform_action(HttpVerb verb, std::string const &url, fw::XmlElement &xml) {
   url_ = url;
   verb_ = verb;
   headers_["Content-Type"] = "text/xml";
@@ -168,13 +168,13 @@ std::string Http::get_response() {
 }
 
 // parses the response as XML and returns a reference to it. if no response has
-// been received yet, an xml_element pointing to a NULL element is returned.
-xml_element Http::get_xml_response() {
+// been received yet, an XmlElement pointing to a NULL element is returned.
+XmlElement Http::get_xml_response() {
   std::string response = get_response();
   if (response == "")
-    return xml_element();
+    return XmlElement();
 
-  return xml_element(response);
+  return XmlElement(response);
 }
 
 bool Http::is_error() const {

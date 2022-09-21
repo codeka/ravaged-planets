@@ -55,11 +55,11 @@ std::string to_string(xml_error_info const &err_info) {
   }
 }
 
-xml_element load_xml(fs::path const &filepath, std::string const & format_name, int version) {
+XmlElement load_xml(fs::path const &filepath, std::string const & format_name, int version) {
   if (!fs::is_regular_file(filepath)) {
     debug << boost::format("error: could not load %1% \"%2%\": no such file") % format_name % filepath.string()
         << std::endl;
-    return xml_element();
+    return XmlElement();
   }
   debug << boost::format("loading %1%: \"%2%\"") % format_name % filepath.string() << std::endl;
 
@@ -89,66 +89,66 @@ xml_element load_xml(fs::path const &filepath, std::string const & format_name, 
     }
   }
 
-  return xml_element(doc, root);
+  return XmlElement(doc, root);
 }
 
 //-------------------------------------------------------------------------
 
-xml_element::xml_element() :
-    _elem(0) {
+XmlElement::XmlElement() :
+    elem_(0) {
 }
 
-xml_element::xml_element(std::shared_ptr<xml::XMLDocument> doc, xml::XMLElement *elem) :
-    _doc(doc), _elem(elem) {
+XmlElement::XmlElement(std::shared_ptr<xml::XMLDocument> doc, xml::XMLElement *elem) :
+    doc_(doc), elem_(elem) {
 }
 
-xml_element::xml_element(xml_element const &copy) :
-    _doc(copy._doc), _elem(copy._elem) {
+XmlElement::XmlElement(XmlElement const &copy) :
+    doc_(copy.doc_), elem_(copy.elem_) {
 }
 
-xml_element::xml_element(std::string const &xml) {
+XmlElement::XmlElement(std::string const &xml) {
   std::shared_ptr<xml::XMLDocument> doc(new xml::XMLDocument());
   doc->Parse(xml.c_str());
 
-  _doc = doc;
-  _elem = doc->FirstChildElement();
+  doc_ = doc;
+  elem_ = doc->FirstChildElement();
 }
 
-xml_element::~xml_element() {
+XmlElement::~XmlElement() {
 }
 
-xml_element &xml_element::operator =(xml_element const &copy) {
-  _doc = copy._doc;
-  _elem = copy._elem;
+XmlElement &XmlElement::operator =(XmlElement const &copy) {
+  doc_ = copy.doc_;
+  elem_ = copy.elem_;
   return *this;
 }
 
-std::shared_ptr<xml::XMLDocument> xml_element::get_document() const {
-  return _doc;
+std::shared_ptr<xml::XMLDocument> XmlElement::get_document() const {
+  return doc_;
 }
 
-xml_element xml_element::get_root() const {
-  return xml_element(_doc, _doc->FirstChildElement());
+XmlElement XmlElement::get_root() const {
+  return XmlElement(doc_, doc_->FirstChildElement());
 }
 
-xml::XMLElement *xml_element::get_element() const {
-  return _elem;
+xml::XMLElement *XmlElement::get_element() const {
+  return elem_;
 }
 
-bool xml_element::is_valid() const {
-  return (_elem != nullptr);
+bool XmlElement::is_valid() const {
+  return (elem_ != nullptr);
 }
 
-std::string xml_element::get_name() const {
-  return std::string(_elem->Name());
+std::string XmlElement::get_name() const {
+  return std::string(elem_->Name());
 }
 
-std::string xml_element::get_value() const {
-  return std::string(_elem->Value());
+std::string XmlElement::get_value() const {
+  return std::string(elem_->Value());
 }
 
-std::string xml_element::get_text() const {
-  xml::XMLNode *Node = _elem->FirstChild();
+std::string XmlElement::get_text() const {
+  xml::XMLNode *Node = elem_->FirstChild();
   if (Node != nullptr) {
     return std::string(Node->Value());
   }
@@ -156,8 +156,8 @@ std::string xml_element::get_text() const {
   return "";
 }
 
-std::string xml_element::get_attribute(std::string const &name) const {
-  char const *ParticleRotation = _elem->Attribute(name.c_str());
+std::string XmlElement::get_attribute(std::string const &name) const {
+  char const *ParticleRotation = elem_->Attribute(name.c_str());
   if (ParticleRotation == 0) {
     BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info((boost::format("'%1%' attribute expected.") % name).str()));
@@ -166,27 +166,27 @@ std::string xml_element::get_attribute(std::string const &name) const {
   return ParticleRotation;
 }
 
-bool xml_element::is_attribute_defined(std::string const &name) const {
-  return (_elem->Attribute(name.c_str()) != 0);
+bool XmlElement::is_attribute_defined(std::string const &name) const {
+  return (elem_->Attribute(name.c_str()) != 0);
 }
 
-xml_element xml_element::get_first_child() const {
-  return xml_element(_doc, _elem->FirstChildElement());
+XmlElement XmlElement::get_first_child() const {
+  return XmlElement(doc_, elem_->FirstChildElement());
 }
 
-xml_element xml_element::get_next_sibling() const {
-  return xml_element(_doc, _elem->NextSiblingElement());
+XmlElement XmlElement::get_next_sibling() const {
+  return XmlElement(doc_, elem_->NextSiblingElement());
 }
 
-std::string xml_element::to_string() const {
+std::string XmlElement::to_string() const {
   xml::XMLPrinter printer(nullptr, true);
-  _elem->Accept(&printer);
+  elem_->Accept(&printer);
   return printer.CStr();
 }
 
-std::string xml_element::to_pretty_string() const {
+std::string XmlElement::to_pretty_string() const {
   xml::XMLPrinter printer(nullptr, false);
-  _elem->Accept(&printer);
+  elem_->Accept(&printer);
   return printer.CStr();
 }
 

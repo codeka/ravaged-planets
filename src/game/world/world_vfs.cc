@@ -48,9 +48,9 @@ void world_summary::ensure_extra_loaded() const {
 }
 
 void world_summary::parse_mapdesc_file(fs::path const &filename) const {
-  fw::xml_element xml = fw::load_xml(filename, "mapdesc", 1);
+  fw::XmlElement xml = fw::load_xml(filename, "mapdesc", 1);
 
-  for (fw::xml_element child = xml.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (fw::XmlElement child = xml.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_value() == "description") {
       _description = child.get_text();
     } else if (child.get_value() == "author") {
@@ -60,7 +60,7 @@ void world_summary::parse_mapdesc_file(fs::path const &filename) const {
       _height = boost::lexical_cast<int>(child.get_attribute("height"));
     } else if (child.get_value() == "players") {
       _num_players = 0;
-      for (fw::xml_element player = child.get_first_child(); player.is_valid(); player = player.get_next_sibling()) {
+      for (fw::XmlElement player = child.get_first_child(); player.is_valid(); player = player.get_next_sibling()) {
         if (player.get_value() == "player") {
           _num_players ++;
         } else {

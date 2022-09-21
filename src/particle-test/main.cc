@@ -43,7 +43,7 @@ void update_effect_position() {
 }
 
 bool restart_handler(fw::gui::Widget *wdgt) {
-  fw::settings stg;
+  fw::Settings stg;
   g_effect->destroy();
   g_effect = fw::framework::get_instance()->get_particle_mgr()->create_effect(
       stg.get_value<std::string>("particle-file"));
@@ -106,7 +106,7 @@ bool application::initialize(fw::framework *frmwrk) {
           << fw::gui::Widget::click(std::bind<bool>(movement_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
-  fw::settings stg;
+  fw::Settings stg;
   g_effect = frmwrk->get_particle_mgr()->create_effect(stg.get_value<std::string>("particle-file"));
   return true;
 }
@@ -166,5 +166,5 @@ void settings_initialize(int argc, char** argv) {
       po::value<std::string>()->default_value("explosion-01"),
       "Name of the particle file to load, we assume it can be fw::resolve'd.");
 
-  fw::settings::initialize(options, argc, argv, "font-test.conf");
+  fw::Settings::initialize(options, argc, argv, "font-test.conf");
 }

@@ -9,11 +9,11 @@
 
 namespace fw {
 
-light_camera::light_camera() {
+LightCamera::LightCamera() {
   set_projection_matrix(cml::constantsf::pi() / 8.0f, 1.0f, 200.0f, 500.0f);
 }
 
-light_camera::~light_camera() {
+LightCamera::~LightCamera() {
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -21,40 +21,40 @@ light_camera::~light_camera() {
 // over and over (as shadow_sources get created/destroyed)
 static std::list<std::shared_ptr<Framebuffer>> g_shadowbuffers;
 
-shadow_source::shadow_source() {
+ShadowSource::ShadowSource() {
 }
 
-shadow_source::~shadow_source() {
-  if (_shadowbuffer) {
-    g_shadowbuffers.push_front(_shadowbuffer);
+ShadowSource::~ShadowSource() {
+  if (shadowbuffer_) {
+    g_shadowbuffers.push_front(shadowbuffer_);
   }
 }
 
-void shadow_source::initialize(bool debug /*= false */) {
+void ShadowSource::initialize(bool debug /*= false */) {
   if (g_shadowbuffers.empty()) {
-    _shadowbuffer = std::shared_ptr<Framebuffer>(new Framebuffer());
+    shadowbuffer_ = std::shared_ptr<Framebuffer>(new Framebuffer());
     std::shared_ptr<fw::Texture> depth_texture(new Texture());
     depth_texture->create(1024, 1024, true);
-    _shadowbuffer->set_depth_buffer(depth_texture);
+    shadowbuffer_->set_depth_buffer(depth_texture);
 
     if (debug) {
       std::shared_ptr<fw::Texture> color_texture(new Texture());
       color_texture->create(1024, 1024, false);
-      _shadowbuffer->set_color_buffer(color_texture);
+      shadowbuffer_->set_color_buffer(color_texture);
     }
   } else {
-    _shadowbuffer = g_shadowbuffers.front();
+    shadowbuffer_ = g_shadowbuffers.front();
     g_shadowbuffers.pop_front();
   }
 }
 
-void shadow_source::begin_scene() {
+void ShadowSource::begin_scene() {
   framework *frmwrk = fw::framework::get_instance();
-  _camera.update(frmwrk->get_timer()->get_frame_time());
-  frmwrk->get_graphics()->set_render_target(_shadowbuffer);
+  camera_.update(frmwrk->get_timer()->get_frame_time());
+  frmwrk->get_graphics()->set_render_target(shadowbuffer_);
 }
 
-void shadow_source::end_scene() {
+void ShadowSource::end_scene() {
   framework *frmwrk = fw::framework::get_instance();
 
   // reset the render target and camera back to the "real" one

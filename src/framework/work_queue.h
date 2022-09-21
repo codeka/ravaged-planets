@@ -6,16 +6,14 @@
 
 namespace fw {
 
-/**
- * A work queue is basically a thread-safe queue that, when you call dequeue, it'll block until a work-item
- * is available.
- */
+// A work queue is basically a thread-safe queue that, when you call dequeue, it'll block until a work-item
+// is available.
 template<typename T>
-class work_queue {
+class WorkQueue {
 private:
-  std::queue<T> _q;
+  std::queue<T> q_;
   std::mutex mutex_;
-  std::condition_variable _condition;
+  std::condition_variable condition_;
 
 public:
   /** Remove an item from the queue, wait until an item is available if the queue is currently empty. */
@@ -26,26 +24,26 @@ public:
 };
 
 template<typename T>
-T work_queue<T>::dequeue() {
+T WorkQueue<T>::dequeue() {
   std::unique_lock<std::mutex> lock(mutex_);
-  while (_q.size() == 0) {
-    _condition.wait(lock);
+  while (q_.size() == 0) {
+    condition_.wait(lock);
   }
 
-  T val = _q.front();
-  _q.pop();
+  T val = q_.front();
+  q_.pop();
 
   return val;
 }
 
 template<typename T>
-void work_queue<T>::enqueue(T const &val) {
+void WorkQueue<T>::enqueue(T const &val) {
   {
     std::unique_lock<std::mutex> lock(mutex_);
-    _q.push(val);
+    q_.push(val);
   }
 
-  _condition.notify_one();
+  condition_.notify_one();
 }
 
 }

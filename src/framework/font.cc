@@ -70,23 +70,23 @@ public:
   float time_since_use;
   std::shared_ptr<VertexBuffer> vb;
   std::shared_ptr<IndexBuffer> ib;
-  std::shared_ptr<fw::shader> shader;
-  std::shared_ptr<shader_parameters> shader_params;
+  std::shared_ptr<fw::Shader> Shader;
+  std::shared_ptr<ShaderParameters> shader_params;
   fw::Point size;
   float distance_to_top;
   float distance_to_bottom;
 
   StringCacheEntry(std::shared_ptr<VertexBuffer> vb, std::shared_ptr<IndexBuffer> ib,
-      std::shared_ptr<fw::shader> shader, std::shared_ptr<shader_parameters> shader_params,
+      std::shared_ptr<fw::Shader> Shader, std::shared_ptr<ShaderParameters> shader_params,
       fw::Point size, float distance_to_top, float distance_to_bottom);
   ~StringCacheEntry();
 };
 
 StringCacheEntry::StringCacheEntry(std::shared_ptr<VertexBuffer> vb,
-    std::shared_ptr<IndexBuffer> ib, std::shared_ptr<fw::shader> shader,
-    std::shared_ptr<shader_parameters> shader_params, fw::Point size,
+    std::shared_ptr<IndexBuffer> ib, std::shared_ptr<fw::Shader> Shader,
+    std::shared_ptr<ShaderParameters> shader_params, fw::Point size,
     float distance_to_top, float distance_to_bottom) :
-      vb(vb), ib(ib), shader(shader), shader_params(shader_params), time_since_use(0), size(size),
+      vb(vb), ib(ib), Shader(Shader), shader_params(shader_params), time_since_use(0), size(size),
       distance_to_top(distance_to_top), distance_to_bottom(distance_to_bottom) {
 }
 
@@ -253,13 +253,13 @@ void FontFace::draw_string(int x, int y, std::basic_string<uint32_t> const &str,
 
   data->vb->begin();
   data->ib->begin();
-  data->shader->begin(data->shader_params);
+  data->Shader->begin(data->shader_params);
   FW_CHECKED(glDrawElements(GL_TRIANGLES, data->ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
-  data->shader->end();
+  data->Shader->end();
   data->ib->end();
   data->vb->end();
 
-  // Reset the timer so we keep this string cached.
+  // Reset the Timer so we keep this string cached.
   data->time_since_use = 0.0f;
 }
 
@@ -320,11 +320,11 @@ std::shared_ptr<StringCacheEntry> FontFace::create_cache_entry(std::basic_string
   std::shared_ptr<fw::IndexBuffer> ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
   ib->set_data(indices.size(), indices.data());
 
-  std::shared_ptr<fw::shader> shader = fw::shader::create("gui.shader");
-  std::shared_ptr<fw::shader_parameters> shader_params = shader->create_parameters();
+  std::shared_ptr<fw::Shader> Shader = fw::Shader::create("gui.shader");
+  std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
   shader_params->set_program_name("font");
 
-  return std::shared_ptr<StringCacheEntry>(new StringCacheEntry(vb, ib, shader, shader_params,
+  return std::shared_ptr<StringCacheEntry>(new StringCacheEntry(vb, ib, Shader, shader_params,
       fw::Point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom));
 }
 

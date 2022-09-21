@@ -16,7 +16,7 @@
 
 namespace ent {
 
-static std::shared_ptr<fw::shader> shader_;
+static std::shared_ptr<fw::Shader> shader_;
 static std::shared_ptr<fw::VertexBuffer> vb_;
 static std::shared_ptr<fw::IndexBuffer> ib_;
 
@@ -56,7 +56,7 @@ void selectable_component::populate_buffers() {
   ib_ = ib;
 
   if (!shader_) {
-    shader_ = fw::shader::create("selection.shader");
+    shader_ = fw::Shader::create("selection.shader");
   }
 }
 
@@ -107,7 +107,7 @@ void selectable_component::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix con
   std::shared_ptr<entity> entity(_entity);
   position_component *pos = entity->get_component<position_component>();
   if (pos != 0) {
-    std::shared_ptr<fw::shader_parameters> shader_params = shader_->create_parameters();
+    std::shared_ptr<fw::ShaderParameters> shader_params = shader_->create_parameters();
     shader_params->set_color("selection_color", col);
 
     fw::Matrix m = pos->get_transform() * transform;

@@ -74,7 +74,7 @@ BitmapDrawable::BitmapDrawable(std::shared_ptr<fw::Texture> texture) :
     g_index_buffer->set_data(4, indices);
   }
 
-  shader_ = fw::shader::create("gui.shader");
+  shader_ = fw::Shader::create("gui.shader");
   shader_params_ = shader_->create_parameters();
   shader_params_->set_texture("texsampler", texture_);
 }
@@ -134,7 +134,7 @@ NinePatchDrawable::NinePatchDrawable(std::shared_ptr<fw::Texture> texture, fw::x
     }
   }
 
-  shader_ = fw::shader::create("gui.shader");
+  shader_ = fw::Shader::create("gui.shader");
   shader_params_ = shader_->create_parameters();
   shader_params_->set_program_name("ninepatch");
   shader_params_->set_texture("texsampler", texture_);

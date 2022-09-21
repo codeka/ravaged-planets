@@ -21,7 +21,7 @@ namespace game {
 simulation_thread *simulation_thread::instance = new simulation_thread();
 
 simulation_thread::simulation_thread() :
-    host_(nullptr), _turn(0), _game_id(0), _local_player(nullptr), _stopped(false) {
+    host_(nullptr), _turn(0), _game_id(0), _local_player(nullptr), stopped_(false) {
 }
 
 simulation_thread::~simulation_thread() {
@@ -39,7 +39,7 @@ void simulation_thread::initialize() {
 }
 
 void simulation_thread::destroy() {
-  _stopped = true;
+  stopped_ = true;
   _stopped_cond.notify_all();
   thread_.join();
 }
@@ -131,7 +131,7 @@ void simulation_thread::add_ai_player(ai_player *plyr) {
 
 /** This is the thread procedure for running the simulation thread. */
 void simulation_thread::thread_proc() {
-  fw::settings stg;
+  fw::Settings stg;
   if (!host_->listen(stg.get_value<std::string> ("listen-port"))) {
     BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("could not listen on port(s): " + stg.get_value<std::string>("listen-port")));
@@ -139,8 +139,8 @@ void simulation_thread::thread_proc() {
 
   std::mutex mutex;
 
-  while (!_stopped) {
-    fw::chrono_clock::time_point start(fw::chrono_clock::now());
+  while (!stopped_) {
+    fw::Clock::time_point start(fw::Clock::now());
     host_->update();
     _turn++;
 

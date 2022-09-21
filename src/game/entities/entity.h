@@ -10,7 +10,7 @@
 
 namespace fw {
 class Graphics;
-class xml_element;
+class XmlElement;
 namespace sg {
 class Scenegraph;
 }

@@ -15,11 +15,11 @@
 #include <framework/texture.h>
 #include <framework/gui/gui.h>
 
-static std::shared_ptr<fw::shader> shadow_shader;
-static std::shared_ptr<fw::shader> basic_shader;
+static std::shared_ptr<fw::Shader> shadow_shader;
+static std::shared_ptr<fw::Shader> basic_shader;
 
 static bool is_rendering_shadow = false;
-static std::shared_ptr<fw::shadow_source> shadowsrc;
+static std::shared_ptr<fw::ShadowSource> shadowsrc;
 
 static std::map<fw::sg::PrimitiveType, uint32_t> g_primitive_type_map;
 
@@ -72,19 +72,19 @@ void Node::remove_child(std::shared_ptr<Node> child) {
     _children.erase(it);
 }
 
-// Get the shader file to use. if we don't have one defined, look at our parent and keep looking up at our parents
+// Get the Shader file to use. if we don't have one defined, look at our parent and keep looking up at our parents
 // until we find one.
-std::shared_ptr<fw::shader> Node::get_shader() const {
-  std::shared_ptr<fw::shader> shader = shader_;
-  if (!shader) {
+std::shared_ptr<fw::Shader> Node::get_shader() const {
+  std::shared_ptr<fw::Shader> Shader = shader_;
+  if (!Shader) {
     Node *parent = _parent;
-    while (!shader && parent != 0) {
-      shader = parent->shader_;
+    while (!Shader && parent != 0) {
+      Shader = parent->shader_;
       parent = parent->_parent;
     }
   }
 
-  return shader;
+  return Shader;
 }
 
 void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
@@ -95,9 +95,9 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
 
   fw::Matrix transform(model_matrix * _world);
   if (vb_) {
-    std::shared_ptr<fw::shader> shader = get_shader();
+    std::shared_ptr<fw::Shader> Shader = get_shader();
     if (is_rendering_shadow) {
-      shader = shadow_shader;
+      Shader = shadow_shader;
     }
 
     fw::Camera *camera = sg->get_camera();
@@ -105,10 +105,10 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
       camera = fw::framework::get_instance()->get_camera();
     }
 
-    if (!shader) {
+    if (!Shader) {
       render_noshader(camera, transform);
     } else {
-      render_shader(shader, camera, transform);
+      render_shader(Shader, camera, transform);
     }
   }
 
@@ -118,13 +118,13 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
   }
 }
 
-// this is called when we're rendering a given shader
-void Node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera, fw::Matrix const &transform) {
-  std::shared_ptr<fw::shader_parameters> parameters;
+// this is called when we're rendering a given Shader
+void Node::render_shader(std::shared_ptr<fw::Shader> Shader, fw::Camera *camera, fw::Matrix const &transform) {
+  std::shared_ptr<fw::ShaderParameters> parameters;
   if (shader_params_) {
     parameters = shader_params_;
   } else {
-    parameters = shader->create_parameters();
+    parameters = Shader->create_parameters();
   }
 
   // add the world_view and world_view_proj parameters as well as shadow parameters
@@ -153,7 +153,7 @@ void Node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera,
   }
 
   vb_->begin();
-  shader->begin(parameters);
+  Shader->begin(parameters);
   if (ib_) {
     ib_->begin();
     FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
@@ -161,13 +161,13 @@ void Node::render_shader(std::shared_ptr<fw::shader> shader, fw::Camera *camera,
   } else {
     FW_CHECKED(glDrawArrays(g_primitive_type_map[_primitive_type], 0, vb_->get_num_vertices()));
   }
-  shader->end();
+  Shader->end();
   vb_->end();
 }
 
 void Node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
   if (!basic_shader) {
-    basic_shader = fw::shader::create("basic.shader");
+    basic_shader = fw::Shader::create("basic.shader");
   }
 
   render_shader(basic_shader, camera, transform);
@@ -218,17 +218,17 @@ void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_
   Graphics *g = fw::framework::get_instance()->get_graphics();
 
   if (!shadow_shader) {
-    shadow_shader = fw::shader::create("shadow.shader");
+    shadow_shader = fw::Shader::create("shadow.shader");
   }
 
   // set up the shadow sources that we'll need to render from first to get the various shadows going.
-  std::vector<std::shared_ptr<shadow_source>> shadows;
+  std::vector<std::shared_ptr<ShadowSource>> shadows;
   for(auto it = Scenegraph.get_lights().begin(); it != Scenegraph.get_lights().end(); ++it) {
     if ((*it)->get_cast_shadows()) {
-      std::shared_ptr<shadow_source> shdwsrc(new shadow_source());
+      std::shared_ptr<ShadowSource> shdwsrc(new ShadowSource());
       shdwsrc->initialize(g_shadow_debug);
 
-      light_camera &cam = shdwsrc->get_camera();
+      LightCamera &cam = shdwsrc->get_camera();
       cam.set_location((*it)->get_position());
       cam.set_direction((*it)->get_direction());
 
@@ -262,7 +262,7 @@ void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_
   }
 
   // make sure the shadowsrc is empty
-  std::shared_ptr<shadow_source> debug_shadowsrc;
+  std::shared_ptr<ShadowSource> debug_shadowsrc;
   if (g_shadow_debug) {
     debug_shadowsrc = shadowsrc;
   }
@@ -275,8 +275,8 @@ void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_
     g->before_gui();
 
     if (g_shadow_debug && debug_shadowsrc) {
-      std::shared_ptr<shader> shader = shader::create("gui.shader");
-      std::shared_ptr<shader_parameters> shader_params = shader->create_parameters();
+      std::shared_ptr<Shader> Shader = Shader::create("gui.shader");
+      std::shared_ptr<ShaderParameters> shader_params = Shader->create_parameters();
       // TODO: recalculating this every time seems wasteful
       fw::Graphics *g = fw::framework::get_instance()->get_graphics();
       fw::Matrix pos_transform;
@@ -305,9 +305,9 @@ void render(sg::Scenegraph &Scenegraph, std::shared_ptr<fw::Framebuffer> render_
 
       vb->begin();
       ib->begin();
-      shader->begin(shader_params);
+      Shader->begin(shader_params);
       FW_CHECKED(glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr));
-      shader->end();
+      Shader->end();
       ib->end();
       vb->end();
     }

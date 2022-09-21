@@ -26,6 +26,6 @@ namespace game {
 
     po::options_description options;
     options.add(additional_options).add(keybinding_options);
-    fw::settings::initialize(options, argc, argv, "default.conf");
+    fw::Settings::initialize(options, argc, argv, "default.conf");
   }
 }

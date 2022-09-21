@@ -15,7 +15,7 @@ class ModelMesh {
 protected:
   std::shared_ptr<VertexBuffer> vb_;
   std::shared_ptr<IndexBuffer> ib_;
-  std::shared_ptr<shader> shader_;
+  std::shared_ptr<Shader> shader_;
 
   virtual void setup_buffers() = 0;
 
@@ -31,7 +31,7 @@ public:
     setup_buffers();
     return ib_;
   }
-  std::shared_ptr<shader> get_shader() {
+  std::shared_ptr<Shader> get_shader() {
     setup_buffers();
     return shader_;
   }
