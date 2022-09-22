@@ -111,7 +111,13 @@ int main(int argc, char** argv) {
 
     fw::lua::LuaContext ctx;
 
-    ctx.globals();
+    ctx.globals()["foo"] = "bar";
+    ctx.globals()["baz"] = 123;
+
+    fw::lua::Value obj = ctx.create_table();
+    obj["test"] = "I passed the test!";
+    obj["test2"] = "and I will go into the West and remain Galadriel";
+    ctx.globals()["test"] = obj;
 
     ctx.add_path("D:\\src\\ravaged-planets\\lua");
     ctx.load_script("D:\\src\\ravaged-planets\\lua\\main.lua");

@@ -35,6 +35,10 @@ public:
   // Gets a reference to the globals.
   Value globals();
 
+  // Creates a brand new table, adds it to the registry. You can add your methods, fields etc to this table
+  // then make it a global or pass it to a function or whatever you need.
+  Value create_table();
+
   // If something returns an error, this'll return a string version of the last error that occurred.
   std::string get_last_error() const { return last_error_; }
 };

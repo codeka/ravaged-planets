@@ -80,6 +80,13 @@ Value LuaContext::globals() {
   return Value(l_, -1);
 }
 
+Value LuaContext::create_table() {
+  lua_newtable(l_);
+  impl::PopStack pop(l_, 1);
+
+  return Value(l_, -1);
+}
+
 //-------------------------------------------------------------------------
 
 void l_log_debug(const std::string &msg) {
