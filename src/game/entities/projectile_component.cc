@@ -29,7 +29,7 @@ projectile_component::~projectile_component() {
 }
 
 void projectile_component::initialize() {
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
   _our_moveable = entity->get_component<moveable_component>();
   _our_position = entity->get_component<position_component>();
 
@@ -47,7 +47,7 @@ void projectile_component::set_target(std::weak_ptr<entity> target) {
 
 void projectile_component::update(float) {
   bool exploded = false;
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
 
   // find the nearest damagable entity - if it's closer than the "hit" distance, then we've hit them!
   std::shared_ptr<ent::entity> nearest =
@@ -92,7 +92,7 @@ void projectile_component::explode(std::shared_ptr<entity> hit) {
   }
 
   // now, just set our health to zero and let our damageable_component handle it
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
   entity_attribute *attr = entity->get_attribute("health");
   attr->set_value(0.0f);
 }

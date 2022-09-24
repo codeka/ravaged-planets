@@ -33,7 +33,7 @@ enum entity_debug_flags {
 class entity_debug {
 private:
   entity_manager *mgr_;
-  fw::gui::Window *_wnd;
+  fw::gui::Window *wnd_;
 
   bool _just_shown;
 

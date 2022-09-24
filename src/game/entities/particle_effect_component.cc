@@ -45,7 +45,7 @@ void particle_effect_component::apply_template(luabind::object const &tmpl) {
 }
 
 void particle_effect_component::initialize() {
-  _our_position = std::shared_ptr<entity>(_entity)->get_component<position_component>();
+  _our_position = std::shared_ptr<entity>(entity_)->get_component<position_component>();
 }
 
 void particle_effect_component::start_effect(std::string const &name) {
@@ -82,7 +82,7 @@ void particle_effect_component::update(float) {
     }
 
     if (effect_info.destroy_entity_on_complete && effect_info.effect->is_dead()) {
-      std::shared_ptr<entity>(_entity)->get_manager()->destroy(_entity);
+      std::shared_ptr<entity>(entity_)->get_manager()->destroy(entity_);
     }
   }
 }

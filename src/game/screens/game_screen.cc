@@ -16,39 +16,39 @@
 
 namespace game {
 
-game_screen::game_screen() : _world(nullptr) {
-  hud_build = new build_window();
-  hud_minimap = new minimap_window();
-  hud_pause = new pause_window();
+GameScreen::GameScreen() : world_(nullptr) {
+  hud_build = new BuildWindow();
+  hud_minimap = new MinimapWindow();
+  hud_pause = new PauseWindow();
 
   hud_build->initialize();
   hud_minimap->initialize();
   hud_pause->initialize();
 }
 
-game_screen::~game_screen() {
-  delete _world;
+GameScreen::~GameScreen() {
+  delete world_;
   delete hud_pause;
   delete hud_minimap;
   delete hud_build;
 }
 
-void game_screen::set_options(std::shared_ptr<screen_options> opt) {
-  _options = std::dynamic_pointer_cast<game_screen_options>(opt);
+void GameScreen::set_options(std::shared_ptr<ScreenOptions> opt) {
+  options_ = std::dynamic_pointer_cast<GameScreenOptions>(opt);
 }
 
-void game_screen::show() {
-  if (_options == 0) {
+void GameScreen::show() {
+  if (options_ == 0) {
     BOOST_THROW_EXCEPTION(
-        fw::Exception() << fw::message_error_info("no game_screen_options has been set, cannot start new game!"));
+        fw::Exception() << fw::message_error_info("no GameScreenOptions has been set, cannot start new game!"));
   }
 
   std::shared_ptr<world_reader> reader(new world_reader());
-  reader->read(_options->map_name);
-  _world = new world(reader);
+  reader->read(options_->map_name);
+  world_ = new world(reader);
 
   // initialize the world
-  _world->initialize();
+  world_->initialize();
 
   // notify all of the players that the world is loaded
   for(player * plyr : simulation_thread::get_instance()->get_players()) {
@@ -60,15 +60,15 @@ void game_screen::show() {
   hud_minimap->show();
 }
 
-void game_screen::update() {
-  _world->update();
+void GameScreen::update() {
+  world_->update();
 
   hud_build->update();
   hud_minimap->update();
 }
 
-void game_screen::render(fw::sg::Scenegraph &Scenegraph) {
-  if (_world == nullptr) {
+void GameScreen::render(fw::sg::Scenegraph &Scenegraph) {
+  if (world_ == nullptr) {
     return;
   }
 
@@ -77,16 +77,16 @@ void game_screen::render(fw::sg::Scenegraph &Scenegraph) {
   fw::Camera *old_cam = fw::Framework::get_instance()->get_camera();
   fw::Vector cam_pos = old_cam->get_position();
   fw::Vector cam_dir = old_cam->get_forward();
-  fw::Vector lookat = _world->get_terrain()->get_cursor_location(cam_pos, cam_dir);
+  fw::Vector lookat = world_->get_terrain()->get_cursor_location(cam_pos, cam_dir);
 
   std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
   Scenegraph.add_light(Light);
 
-  _world->render(Scenegraph);
+  world_->render(Scenegraph);
 }
 
-void game_screen::hide() {
-  _world->destroy();
+void GameScreen::hide() {
+  world_->destroy();
 
   hud_minimap->hide();
 }

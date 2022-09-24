@@ -29,16 +29,16 @@ enum ids {
   PLAYER_NAME_ID
 };
 
-new_ai_player_window::new_ai_player_window() : _wnd(nullptr), _new_game_window(nullptr) {
+NewAIPlayerWindow::NewAIPlayerWindow() : wnd_(nullptr), new_game_window_(nullptr) {
 }
 
-new_ai_player_window::~new_ai_player_window() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+NewAIPlayerWindow::~NewAIPlayerWindow() {
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void new_ai_player_window::initialize(new_game_window *new_game_window) {
-  _new_game_window = new_game_window;
-  _wnd = Builder<Window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
+void NewAIPlayerWindow::initialize(NewGameWindow *NewGameWindow) {
+  new_game_window_ = NewGameWindow;
+  wnd_ = Builder<Window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
       << Window::background("frame")
       << Widget::visible(false)
       << (Builder<Listbox>(px(10), px(10), px(250), sum(pct(100), px(-60)))
@@ -49,29 +49,29 @@ void new_ai_player_window::initialize(new_game_window *new_game_window) {
           << Widget::id(PLAYER_NAME_ID))
       << (Builder<Button>(sum(pct(100), px(-220)), sum(pct(100), px(-40)), px(100), px(30))
           << Button::text("Add player")
-          << Button::click(std::bind(&new_ai_player_window::on_ok_clicked, this, _1)))
+          << Button::click(std::bind(&NewAIPlayerWindow::on_ok_clicked, this, _1)))
       << (Builder<Button>(sum(pct(100), px(-110)), sum(pct(100), px(-40)), px(100), px(30))
           << Button::text("Cancel")
-          << Button::click(std::bind(&new_ai_player_window::on_cancel_clicked, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+          << Button::click(std::bind(&NewAIPlayerWindow::on_cancel_clicked, this, _1)));
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
   // add each of the scripts to the "scripts" combobox so the user can choose which one he wants
   ai_scriptmgr scriptmgr;
   std::vector<script_desc> &scripts = scriptmgr.get_scripts();
   for (script_desc &desc : scripts) {
-    _wnd->find<Listbox>(AI_LIST_ID)->add_item(
+    wnd_->find<Listbox>(AI_LIST_ID)->add_item(
         Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(desc.name) << Widget::data(desc));
   }
 
   // if there's at least one script (which there should be...) we'll want the default
   // one to be the first one in the list.
   if (scripts.size() > 0) {
-    _wnd->find<Listbox>(AI_LIST_ID)->select_item(0);
+    wnd_->find<Listbox>(AI_LIST_ID)->select_item(0);
   }
 }
 
-void new_ai_player_window::show() {
-  _wnd->set_visible(true);
+void NewAIPlayerWindow::show() {
+  wnd_->set_visible(true);
 
   int max_player_no = 0;
   for (player *plyr : simulation_thread::get_instance()->get_players()) {
@@ -82,14 +82,14 @@ void new_ai_player_window::show() {
 
   std::stringstream ss;
   ss << "Player " << (max_player_no + 1);
-  _wnd->find<TextEdit>(PLAYER_NAME_ID)->set_text(ss.str());
+  wnd_->find<TextEdit>(PLAYER_NAME_ID)->set_text(ss.str());
 }
 
-bool new_ai_player_window::on_ok_clicked(Widget *w) {
-  _wnd->find<TextEdit>(PLAYER_NAME_ID)->get_text();
+bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
+  wnd_->find<TextEdit>(PLAYER_NAME_ID)->get_text();
   std::string name("Player 2");
 
-  Widget *selected_item = _wnd->find<Listbox>(AI_LIST_ID)->get_selected_item();
+  Widget *selected_item = wnd_->find<Listbox>(AI_LIST_ID)->get_selected_item();
   if (selected_item == nullptr) {
     return false;
   }
@@ -103,7 +103,7 @@ bool new_ai_player_window::on_ok_clicked(Widget *w) {
 
     ai_player *ply = new ai_player(name, desc, static_cast<uint8_t>(num_players + 1));
     if (!ply->is_valid_state()) {
-      _new_game_window->append_chat("Error loading player script, check error log.");
+      new_game_window_->append_chat("Error loading player script, check error log.");
     } else {
       //ply->set_color(_color_chooser->get_color());
       simulation_thread::get_instance()->add_ai_player(ply);
@@ -115,12 +115,12 @@ bool new_ai_player_window::on_ok_clicked(Widget *w) {
         % game_id << std::endl;
   }
 
-  _wnd->set_visible(false);
+  wnd_->set_visible(false);
   return true;
 }
 
-bool new_ai_player_window::on_cancel_clicked(Widget *w) {
-  _wnd->set_visible(false);
+bool NewAIPlayerWindow::on_cancel_clicked(Widget *w) {
+  wnd_->set_visible(false);
   return true;
 }
 

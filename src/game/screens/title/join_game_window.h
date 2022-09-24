@@ -16,7 +16,7 @@ namespace ww {
 	class join_game_window : public fw::gui::window
 	{
 	private:
-		ww::session::session_state _sess_state;
+		ww::session::session_state sess_state_;
 		std::vector<remote_game> _games;
 
 		CEGUI::MultiColumnList *_games_list;

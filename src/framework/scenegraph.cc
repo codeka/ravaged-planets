@@ -53,7 +53,7 @@ Light::~Light() {
 
 //-------------------------------------------------------------------------------------
 Node::Node() :
-    _world(fw::identity()), _parent(0), cast_shadows_(true), _primitive_type(PrimitiveType::kUnknownPrimitiveType) {
+    world_(fw::identity()), _parent(0), cast_shadows_(true), _primitive_type(PrimitiveType::kUnknownPrimitiveType) {
 }
 
 Node::~Node() {
@@ -91,7 +91,7 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
     return;
   }
 
-  fw::Matrix transform(model_matrix * _world);
+  fw::Matrix transform(model_matrix * world_);
   if (vb_) {
     std::shared_ptr<fw::Shader> Shader = get_shader();
     if (is_rendering_shadow) {
@@ -180,7 +180,7 @@ void Node::populate_clone(std::shared_ptr<Node> clone) {
   if (shader_params_)
     clone->shader_params_ = shader_params_->clone();
   clone->_parent = _parent;
-  clone->_world = _world;
+  clone->world_ = world_;
 
   // clone the children as well!
   for(auto& child : _children) {

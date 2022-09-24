@@ -312,7 +312,7 @@ private:
     }
 
     uint64_t file_version = 0;
-    if ((_parent->_options & StackWalker::retrieve_file_version) != 0) {
+    if ((_parent->options_ & StackWalker::retrieve_file_version) != 0) {
       VS_FIXEDFILEINFO *ff_info = 0;
       DWORD handle;
       DWORD size = ::GetFileVersionInfoSize(file_name, &handle);
@@ -404,7 +404,7 @@ public:
 // ---------------------------------------------------------------------------
 
 StackWalker::StackWalker(DWORD process_id, HANDLE process) {
-  _options = options_all;
+  options_ = options_all;
   _modules_loaded = false;
   _process = process;
   _process_id = process_id;
@@ -414,7 +414,7 @@ StackWalker::StackWalker(DWORD process_id, HANDLE process) {
 }
 
 StackWalker::StackWalker(int options, char const *symbol_path, DWORD process_id, HANDLE process) {
-  _options = options;
+  options_ = options;
   _modules_loaded = false;
   _process = process;
   _process_id = process_id;
@@ -424,7 +424,7 @@ StackWalker::StackWalker(int options, char const *symbol_path, DWORD process_id,
 
   if (symbol_path != 0) {
     _symbol_path = symbol_path;
-    _options |= sym_build_path;
+    options_ |= sym_build_path;
   }
 }
 
@@ -437,7 +437,7 @@ bool StackWalker::load_modules() {
 
   // build the symbol-path:
   std::vector<char> symbol_path;
-  if ((_options & sym_build_path) != 0) {
+  if ((options_ & sym_build_path) != 0) {
     symbol_path.resize(4096);
     symbol_path[0] = 0;
 

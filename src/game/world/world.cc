@@ -123,7 +123,7 @@ void world::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
     fs::create_directories(base_path);
   }
 
-  // create a file called "screen-nnnn.png" where nnnn is a number from 1 to 9999 and make
+  // create a file called "Screen-nnnn.png" where nnnn is a number from 1 to 9999 and make
   // sure the name is unique
   int max_file_number = 0;
   for (fs::directory_iterator it(base_path); it != fs::directory_iterator(); ++it) {

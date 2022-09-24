@@ -16,16 +16,16 @@ using namespace std::placeholders;
 namespace ed {
 
 tool::tool(editor_world *wrld) :
-    _world(wrld), _terrain(nullptr), _editor(nullptr) {
+    world_(wrld), _terrain(nullptr), _editor(nullptr) {
 }
 
 tool::~tool() {
 }
 
 void tool::activate() {
-  game::application *app = dynamic_cast<game::application *>(fw::Framework::get_instance()->get_app());
-  _editor = dynamic_cast<editor_screen *>(app->get_screen()->get_active_screen());
-  _terrain = dynamic_cast<editor_terrain *>(_world->get_terrain());
+  game::Application *app = dynamic_cast<game::Application *>(fw::Framework::get_instance()->get_app());
+  _editor = dynamic_cast<editor_screen *>(app->get_screen_stack()->get_active_screen());
+  _terrain = dynamic_cast<editor_terrain *>(world_->get_terrain());
 }
 
 void tool::deactivate() {

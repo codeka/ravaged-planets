@@ -14,7 +14,7 @@ namespace ed {
 
 class save_map_window {
 private:
-  fw::gui::Window *_wnd;
+  fw::gui::Window *wnd_;
 
   bool save_clicked(fw::gui::Widget *w);
   bool cancel_clicked(fw::gui::Widget *w);

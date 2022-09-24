@@ -19,7 +19,7 @@ public:
 
 private:
   int _radius;
-  heightfield_tool_window *_wnd;
+  heightfield_tool_window *wnd_;
   heightfield_brush *_brush;
 
   void on_key(std::string keyname, bool is_down);

@@ -12,37 +12,35 @@
 
 namespace game {
 
-using namespace std::placeholders;
-
-title_screen::title_screen() : _main_menu_window(nullptr), _new_game_window(nullptr) {
+TitleScreen::TitleScreen() : main_menu_window_(nullptr), new_game_window_(nullptr) {
 }
 
-title_screen::~title_screen() {
+TitleScreen::~TitleScreen() {
 }
 
-void title_screen::show() {
-  _main_menu_window = new main_menu_window();
-  _new_ai_player_window = new new_ai_player_window();
-  _new_game_window = new new_game_window();
-  _main_menu_window->initialize(_new_game_window);
-  _new_game_window->initialize(_main_menu_window, _new_ai_player_window);
-  _new_ai_player_window->initialize(_new_game_window);
+void TitleScreen::show() {
+  main_menu_window_ = new MainMenuWindow();
+  new_ai_player_window_ = new NewAIPlayerWindow();
+  new_game_window_ = new NewGameWindow();
+  main_menu_window_->initialize(new_game_window_);
+  new_game_window_->initialize(main_menu_window_, new_ai_player_window_);
+  new_ai_player_window_->initialize(new_game_window_);
 
-  _main_menu_window->show();
+  main_menu_window_->show();
 }
 
-void title_screen::hide() {
-  delete _main_menu_window;
-  _main_menu_window = nullptr;
-  delete _new_ai_player_window;
-  _new_ai_player_window = nullptr;
-  delete _new_game_window;
-  _new_game_window = nullptr;
+void TitleScreen::hide() {
+  delete main_menu_window_;
+  main_menu_window_ = nullptr;
+  delete new_ai_player_window_;
+  new_ai_player_window_ = nullptr;
+  delete new_game_window_;
+  new_game_window_ = nullptr;
 }
 
-void title_screen::update() {
-  _main_menu_window->update();
-  _new_game_window->update();
+void TitleScreen::update() {
+  main_menu_window_->update();
+  new_game_window_->update();
 }
 
 }

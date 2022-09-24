@@ -38,7 +38,7 @@ enum IDS {
 
 class pathing_tool_window {
 private:
-  Window *_wnd;
+  Window *wnd_;
   ed::pathing_tool *_tool;
 
   bool on_start_click(Widget *w);
@@ -54,42 +54,42 @@ public:
 };
 
 pathing_tool_window::pathing_tool_window(ed::pathing_tool *tool) :
-    _tool(tool), _wnd(nullptr) {
-  _wnd = Builder<Window>(px(10), px(30), px(100), px(94)) << Window::background("frame")
+    _tool(tool), wnd_(nullptr) {
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(94)) << Window::background("frame")
       << (Builder<Button>(px(4), px(4), sum(pct(100), px(-8)), px(30)) << Button::text("Start") << Widget::id(START_ID)
           << Widget::click(std::bind(&pathing_tool_window::on_start_click, this, _1)))
       << (Builder<Button>(px(4), px(38), sum(pct(100), px(-8)), px(30)) << Button::text("End") << Widget::id(END_ID)
           << Widget::click(std::bind(&pathing_tool_window::on_end_click, this, _1)))
       << (Builder<Checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18)) << Checkbox::text("Simplify")
           << Widget::click(std::bind(&pathing_tool_window::on_simplify_click, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
 pathing_tool_window::~pathing_tool_window() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
 void pathing_tool_window::show() {
-  _wnd->set_visible(true);
+  wnd_->set_visible(true);
 }
 
 void pathing_tool_window::hide() {
-  _wnd->set_visible(false);
+  wnd_->set_visible(false);
 }
 
 bool pathing_tool_window::on_start_click(Widget *w) {
   ed::statusbar->set_message("Set test start...");
   _tool->set_test_start();
-  _wnd->find<Button>(START_ID)->set_pressed(true);
-  _wnd->find<Button>(END_ID)->set_pressed(false);
+  wnd_->find<Button>(START_ID)->set_pressed(true);
+  wnd_->find<Button>(END_ID)->set_pressed(false);
   return true;
 }
 
 bool pathing_tool_window::on_end_click(Widget *w) {
   ed::statusbar->set_message("Set test end...");
   _tool->set_test_end();
-  _wnd->find<Button>(START_ID)->set_pressed(false);
-  _wnd->find<Button>(END_ID)->set_pressed(true);
+  wnd_->find<Button>(START_ID)->set_pressed(false);
+  wnd_->find<Button>(END_ID)->set_pressed(true);
   return true;
 }
 
@@ -167,17 +167,17 @@ REGISTER_TOOL("pathing", pathing_tool);
 
 pathing_tool::pathing_tool(editor_world *wrld) :
     tool(wrld), _start_set(false), _end_set(false), _test_mode(test_none), _simplify(true) {
-  _wnd = new pathing_tool_window(this);
+  wnd_ = new pathing_tool_window(this);
   _marker = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
 }
 
 pathing_tool::~pathing_tool() {
-  delete _wnd;
+  delete wnd_;
 }
 
 void pathing_tool::activate() {
   tool::activate();
-  _wnd->show();
+  wnd_->show();
 
   int width = get_terrain()->get_width();
   int length = get_terrain()->get_length();
@@ -197,7 +197,7 @@ void pathing_tool::activate() {
 
 void pathing_tool::deactivate() {
   tool::deactivate();
-  _wnd->hide();
+  wnd_->hide();
 }
 
 int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_length, int *new_patch_x,

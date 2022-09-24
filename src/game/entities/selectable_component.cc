@@ -32,7 +32,7 @@ selectable_component::~selectable_component() {
 void selectable_component::initialize() {
   // grab a reference to the ownable component of our entity so we can refer to it
   // later on.
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   _ownable = entity->get_component<ownable_component>();
 }
 
@@ -103,7 +103,7 @@ void selectable_component::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix con
   if (!draw)
     return;
 
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   position_component *pos = entity->get_component<position_component>();
   if (pos != 0) {
     std::shared_ptr<fw::ShaderParameters> shader_params = shader_->create_parameters();

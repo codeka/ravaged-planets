@@ -29,7 +29,7 @@ static std::shared_ptr<fw::ParticleEffect> g_effect;
 static bool is_moving = false;
 static float angle;
 
-class application: public fw::BaseApp {
+class Application: public fw::BaseApp {
 public:
   bool initialize(fw::Framework *frmwrk);
   void update(float dt);
@@ -79,7 +79,7 @@ bool movement_handler(fw::gui::Widget *wdgt) {
   return true;
 }
 
-bool application::initialize(fw::Framework *frmwrk) {
+bool Application::initialize(fw::Framework *frmwrk) {
   fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
@@ -111,14 +111,14 @@ bool application::initialize(fw::Framework *frmwrk) {
   return true;
 }
 
-void application::update(float dt) {
+void Application::update(float dt) {
   if (is_moving) {
     angle += 3.1415f * dt;
     update_effect_position();
   }
 }
 
-void application::render(fw::sg::Scenegraph &Scenegraph) {
+void Application::render(fw::sg::Scenegraph &Scenegraph) {
   Scenegraph.set_clear_color(fw::Color(1, 0, 0.0, 0));
 }
 
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
   try {
     settings_initialize(argc, argv);
 
-    application app;
+    Application app;
     new fw::Framework(&app);
     fw::Framework::get_instance()->initialize("Particle Test");
     fw::Framework::get_instance()->run();

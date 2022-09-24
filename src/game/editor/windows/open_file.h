@@ -23,7 +23,7 @@ public:
   typedef std::function<void(open_file_window *)> file_selected_handler;
 
 private:
-  fw::gui::Window *_wnd;
+  fw::gui::Window *wnd_;
   boost::filesystem::path _curr_directory;
   file_selected_handler _file_selected_handler;
   std::vector<std::string> _items;

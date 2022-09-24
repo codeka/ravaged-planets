@@ -34,34 +34,34 @@ using namespace std::placeholders;
 namespace game {
 
 /** This is the special drawble implementation we use to draw the rotated bitmap for the minimap. */
-class minimap_drawable : public fw::gui::BitmapDrawable {
+class MinimapDrawable : public fw::gui::BitmapDrawable {
 protected:
-  fw::Matrix _transform;
+  fw::Matrix transform_;
   fw::Matrix get_pos_transform(float x, float y, float width, float height);
   fw::Matrix get_uv_transform();
 
 public:
-  minimap_drawable(std::shared_ptr<fw::Texture> texture);
-  virtual ~minimap_drawable();
+  MinimapDrawable(std::shared_ptr<fw::Texture> texture);
+  virtual ~MinimapDrawable();
 
   void update(fw::Matrix transform);
 };
 
-minimap_drawable::minimap_drawable(std::shared_ptr<fw::Texture> texture)
+MinimapDrawable::MinimapDrawable(std::shared_ptr<fw::Texture> texture)
     : fw::gui::BitmapDrawable(texture) {
   top_ = left_ = 0;
   width_ = texture->get_width() * 3;
   height_ = texture->get_height() * 3;
 }
 
-minimap_drawable::~minimap_drawable() {
+MinimapDrawable::~MinimapDrawable() {
 }
 
-void minimap_drawable::update(fw::Matrix transform) {
-  _transform = transform;
+void MinimapDrawable::update(fw::Matrix transform) {
+  transform_ = transform;
 }
 
-fw::Matrix minimap_drawable::get_uv_transform() {
+fw::Matrix MinimapDrawable::get_uv_transform() {
   float x = static_cast<float>(left_) / static_cast<float>(texture_->get_width());
   float y = static_cast<float>(top_) / static_cast<float>(texture_->get_height());
   float width = static_cast<float>(width_) / static_cast<float>(texture_->get_width());
@@ -69,77 +69,77 @@ fw::Matrix minimap_drawable::get_uv_transform() {
   return fw::scale(fw::Vector(width, height, 0.0f)) * fw::translation(fw::Vector(x, y, 0));
 }
 
-fw::Matrix minimap_drawable::get_pos_transform(float x, float y, float width, float height) {
+fw::Matrix MinimapDrawable::get_pos_transform(float x, float y, float width, float height) {
   fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
   fw::Matrix transform;
   cml::matrix_orthographic_RH(transform, 0.0f,
       static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
   transform = fw::translation(fw::Vector(x - width, y - height, 0)) * transform;
   transform = fw::scale(fw::Vector(width * 3, height * 3, 0.0f)) * transform;
-  return _transform * transform;
+  return transform_ * transform;
 }
 
 //-----------------------------------------------------------------------------
 
-minimap_window *hud_minimap = nullptr;
+MinimapWindow *hud_minimap = nullptr;
 
 enum ids {
   MINIMAP_IMAGE_ID = 9733,
 };
 
-minimap_window::minimap_window() :
-    _last_entity_display_update(0.0f), _texture(new fw::Texture()), _wnd(nullptr) {
+MinimapWindow::MinimapWindow() :
+    last_entity_display_update_(0.0f), texture_(new fw::Texture()), wnd_(nullptr) {
 }
 
-minimap_window::~minimap_window() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+MinimapWindow::~MinimapWindow() {
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void minimap_window::initialize() {
-  _wnd = Builder<Window>(sum(pct(100), px(-210)), px(10), px(200), px(200))
+void MinimapWindow::initialize() {
+  wnd_ = Builder<Window>(sum(pct(100), px(-210)), px(10), px(200), px(200))
       << Window::background("frame")
           << Widget::visible(false)
       << (Builder<Label>(px(8), px(8), sum(pct(100), px(-16)), sum(pct(100), px(-16)))
           << Widget::id(MINIMAP_IMAGE_ID))
       << (Builder<Label>(sum(pct(50), px(-10)), sum(pct(50), px(-22)), px(19), px(31))
           << Label::background("hud_minimap_crosshair"));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
-void minimap_window::show() {
+void MinimapWindow::show() {
   game::terrain *trn = game::world::get_instance()->get_terrain();
-  _texture->create(trn->get_width(), trn->get_length());
-  _drawable = std::shared_ptr<minimap_drawable>(new minimap_drawable(_texture));
-  _wnd->find<Label>(MINIMAP_IMAGE_ID)->set_background(_drawable);
+  texture_->create(trn->get_width(), trn->get_length());
+  drawable_ = std::shared_ptr<MinimapDrawable>(new MinimapDrawable(texture_));
+  wnd_->find<Label>(MINIMAP_IMAGE_ID)->set_background(drawable_);
 
   // bind to the camera's sig_updated signal, to be notified when you move the camera around
-  _camera_updated_connection = fw::Framework::get_instance()->get_camera()->sig_updated
-      .connect(std::bind(&minimap_window::on_camera_updated, this));
+  camera_updated_connection_ = fw::Framework::get_instance()->get_camera()->sig_updated
+      .connect(std::bind(&MinimapWindow::on_camera_updated, this));
 
-  _wnd->set_visible(true);
+  wnd_->set_visible(true);
   update_drawable();
 }
 
-void minimap_window::hide() {
-  _wnd->set_visible(false);
+void MinimapWindow::hide() {
+  wnd_->set_visible(false);
 
   // disconnect our signals - we don't want to keep showing the minimap!
-  _camera_updated_connection.disconnect();
+  camera_updated_connection_.disconnect();
 }
 
-void minimap_window::update() {
+void MinimapWindow::update() {
   float gt = fw::Framework::get_instance()->get_timer()->get_total_time();
-  if ((gt - 1.0f) > _last_entity_display_update) {
-    _last_entity_display_update = gt;
+  if ((gt - 1.0f) > last_entity_display_update_) {
+    last_entity_display_update_ = gt;
     update_entity_display();
   }
 }
 
-void minimap_window::on_camera_updated() {
+void MinimapWindow::on_camera_updated() {
   update_drawable();
 }
 
-void minimap_window::update_drawable() {
+void MinimapWindow::update_drawable() {
   fw::Camera *camera = fw::Framework::get_instance()->get_camera();
   game::terrain *terrain = game::world::get_instance()->get_terrain();
 
@@ -161,10 +161,10 @@ void minimap_window::update_drawable() {
   transform *= fw::rotate(fw::Vector(0, 1, 0), cam_dir);
   transform *= fw::translation(0.5f, 0.5f, 0);
 
-  _drawable->update(transform);
+  drawable_->update(transform);
 }
 
-void minimap_window::update_entity_display() {
+void MinimapWindow::update_entity_display() {
   int width = game::world::get_instance()->get_terrain()->get_width();
   int height = game::world::get_instance()->get_terrain()->get_length();
 
@@ -172,8 +172,8 @@ void minimap_window::update_entity_display() {
   float screen_width = graphics->get_width();
   float screen_height = graphics->get_height();
 
-  int wnd_width = _wnd->get_width();
-  int wnd_height = _wnd->get_height();
+  int wnd_width = wnd_->get_width();
+  int wnd_height = wnd_->get_height();
 
   // we want to draw pixels that are big enough that you can actually see them on the map...
   int pixel_width = 1 + static_cast<int>(0.5f + width / wnd_width);
@@ -220,7 +220,7 @@ void minimap_window::update_entity_display() {
 
   fw::Bitmap bm(width, height, pixels.data());
   fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this, bm]() {
-    _texture->create(bm);
+    texture_->create(bm);
   });
 }
 

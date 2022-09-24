@@ -30,15 +30,15 @@ enum ids {
 };
 
 entity_debug::entity_debug(entity_manager *mgr) :
-    mgr_(mgr), _just_shown(false), _wnd(nullptr) {
+    mgr_(mgr), _just_shown(false), wnd_(nullptr) {
 }
 
 entity_debug::~entity_debug() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
 void entity_debug::initialize() {
-  _wnd = Builder<Window>(px(10), px(10), px(200), px(106))
+  wnd_ = Builder<Window>(px(10), px(10), px(200), px(106))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Checkbox>(px(10), px(10), sum(pct(100), px(-20)), px(26))
           << Checkbox::text("Show steering") << Widget::id(SHOW_STEERING_ID)
@@ -48,14 +48,14 @@ void entity_debug::initialize() {
       << (Builder<Label>(px(10), px(76), sum(pct(100), px(-20)), px(20))
           << Label::text("Goal: ") << Widget::id(GOAL_ID))
       ;
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
   fw::Input *inp = fw::Framework::get_instance()->get_input();
   inp->bind_key("Ctrl+D", std::bind(&entity_debug::on_key_press, this, _1, _2));
 }
 
 void entity_debug::update() {
-  if (_wnd == nullptr)
+  if (wnd_ == nullptr)
     initialize();
 
   std::string new_pos_value;
@@ -84,13 +84,13 @@ void entity_debug::update() {
     }
   }
 
-  _wnd->find<Label>(POSITION_ID)->set_text(new_pos_value);
-  _wnd->find<Label>(GOAL_ID)->set_text(new_goal_value);
+  wnd_->find<Label>(POSITION_ID)->set_text(new_pos_value);
+  wnd_->find<Label>(GOAL_ID)->set_text(new_goal_value);
 }
 
 void entity_debug::on_key_press(std::string /*key*/, bool is_down) {
   if (is_down && !_just_shown) {
-    _wnd->set_visible(!_wnd->is_visible());
+    wnd_->set_visible(!wnd_->is_visible());
     _just_shown = true;
   } else if (!is_down) {
     _just_shown = false;

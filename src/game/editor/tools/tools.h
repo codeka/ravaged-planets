@@ -27,7 +27,7 @@ class editor_world;
 // put up various bits of UI for controlling it, etc.
 class tool {
 protected:
-  editor_world *_world;
+  editor_world *world_;
   editor_terrain *_terrain;
   editor_screen *_editor;
 
@@ -44,7 +44,7 @@ public:
     return _terrain;
   }
   editor_world *get_world() const {
-    return _world;
+    return world_;
   }
 
   // this is called when this tool becomes, or stops being the active tool
@@ -58,7 +58,7 @@ public:
 typedef tool *(*create_tool_fn)(editor_world *wrld);
 
 // This class is used by the REGISTER_TOOL macro to register a tool
-// at application startup.
+// at Application startup.
 class tool_factory_registrar {
 public:
   tool_factory_registrar(std::string const &name, create_tool_fn fn);

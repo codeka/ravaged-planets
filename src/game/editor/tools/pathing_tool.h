@@ -21,7 +21,7 @@ private:
   };
 
   test_mode _test_mode;
-  pathing_tool_window *_wnd;
+  pathing_tool_window *wnd_;
   std::vector<bool> _collision_data;
   std::shared_ptr<fw::Model> _marker;
   fw::Vector _start_pos;

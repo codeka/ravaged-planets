@@ -162,7 +162,7 @@ public:
   // searches for all the entities within the given radius
   template<typename inserter_t>
   inline void get_entities_within_radius(float radius, inserter_t ins) const {
-    std::shared_ptr<entity> us(_entity);
+    std::shared_ptr<entity> us(entity_);
 
     std::list<std::weak_ptr<entity>> patch_entities = _patch->get_entities();
     for (auto it = patch_entities.begin(); it != patch_entities.end(); ++it) {

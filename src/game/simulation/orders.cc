@@ -66,7 +66,7 @@ order::~order() {
 }
 
 void order::begin(std::weak_ptr<ent::entity> const &ent) {
-  _entity = ent;
+  entity_ = ent;
 }
 
 void order::serialize(fw::net::PacketBuffer &) {
@@ -87,7 +87,7 @@ build_order::~build_order() {
 void build_order::begin(std::weak_ptr<ent::entity> const &ent) {
   order::begin(ent);
 
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
   _builder = entity->get_component<ent::builder_component>();
   if (_builder != nullptr) {
     _builder->build(template_name);
@@ -120,7 +120,7 @@ move_order::~move_order() {
 
 void move_order::begin(std::weak_ptr<ent::entity> const &ent) {
   order::begin(ent);
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
 
   // move towards the component, if we don't have a moveable component, nothing will happen.
   auto moveable = entity->get_component<ent::moveable_component>();
@@ -136,7 +136,7 @@ void move_order::begin(std::weak_ptr<ent::entity> const &ent) {
 }
 
 bool move_order::is_complete() {
-  std::shared_ptr<ent::entity> entity = _entity.lock();
+  std::shared_ptr<ent::entity> entity = entity_.lock();
   if (entity) {
     ent::pathing_component *pathing = entity->get_component<ent::pathing_component>();
     if (pathing != nullptr) {
@@ -169,7 +169,7 @@ attack_order::~attack_order() {
 
 void attack_order::begin(std::weak_ptr<ent::entity> const &ent) {
   order::begin(ent);
-  std::shared_ptr<ent::entity> entity = _entity.lock();
+  std::shared_ptr<ent::entity> entity = entity_.lock();
   if (entity) {
     std::weak_ptr<ent::entity> target_entity_wp = game::world::get_instance()->get_entity_manager()->get_entity(target);
     std::shared_ptr<ent::entity> target_entity = target_entity_wp.lock();
@@ -188,7 +188,7 @@ void attack_order::attack(std::shared_ptr<ent::entity> entity, std::shared_ptr<e
 
 bool attack_order::is_complete() {
   // attack is complete when either of us is dead
-  std::shared_ptr<ent::entity> entity = _entity.lock();
+  std::shared_ptr<ent::entity> entity = entity_.lock();
   if (!entity) {
     return true;
   }

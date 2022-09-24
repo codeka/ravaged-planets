@@ -76,7 +76,7 @@ void position_component::set_final_position() {
     pos_ = fw::Vector(x, pos_[1], z);
 
     // make sure we "exist" in the correct patch as well...
-    std::shared_ptr<ent::entity> entity(_entity);
+    std::shared_ptr<ent::entity> entity(entity_);
     entity_manager *emgr = entity->get_manager();
     patch_manager *pmgr = emgr->get_patch_manager();
     patch *new_patch = pmgr->get_patch(x, z);
@@ -94,7 +94,7 @@ void position_component::set_final_position() {
 }
 
 void position_component::set_position(fw::Vector const &pos) {
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
   float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
   float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
@@ -131,7 +131,7 @@ fw::Matrix position_component::get_transform() const {
 fw::Vector position_component::get_direction_to(fw::Vector const &point) const {
   fw::Vector dir = point - pos_;
 
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
   float width = entity->get_manager()->get_patch_manager()->get_world_width();
   float length = entity->get_manager()->get_patch_manager()->get_world_length();
   for (int z = -1; z <= 1; z++) {
@@ -161,7 +161,7 @@ std::weak_ptr<entity> position_component::get_nearest_entity(
   std::shared_ptr<entity> closest;
   float closest_distance = 0.0f;
 
-  std::shared_ptr<entity> us(_entity);
+  std::shared_ptr<entity> us(entity_);
   std::list<std::weak_ptr<entity>> patch_entities = _patch->get_entities();
   for (auto it = patch_entities.begin(); it != patch_entities.end(); ++it) {
     std::shared_ptr<entity> ent = (*it).lock();

@@ -9,43 +9,43 @@
 
 namespace game {
 
-screen::screen() {
+Screen::Screen() {
 }
 
-screen::~screen() {
+Screen::~Screen() {
 }
 
-void screen::show() {
+void Screen::show() {
 }
 
-void screen::hide() {
+void Screen::hide() {
 }
 
-void screen::update() {
+void Screen::update() {
 }
 
-void screen::render(fw::sg::Scenegraph &) {
+void Screen::render(fw::sg::Scenegraph &) {
 }
 
 //-------------------------------------------------------------------------
 
-screen_stack::screen_stack() {
-  _screens["title"] = new title_screen();
-  _screens["game"] = new game_screen();
-  _screens["editor"] = new ed::editor_screen();
+ScreenStack::ScreenStack() {
+  screens_["title"] = new TitleScreen();
+  screens_["game"] = new GameScreen();
+  screens_["editor"] = new ed::editor_screen();
 }
 
-screen_stack::~screen_stack() {
-  for (auto screen : _screens) {
-    delete screen.second;
+ScreenStack::~ScreenStack() {
+  for (auto Screen : screens_) {
+    delete Screen.second;
   }
 }
 
-void screen_stack::set_active_screen(std::string const &name,
-    std::shared_ptr<screen_options> options /*= std::shared_ptr<screen_options>()*/) {
+void ScreenStack::set_active_screen(std::string const &name,
+    std::shared_ptr<ScreenOptions> options /*= std::shared_ptr<ScreenOptions>()*/) {
   fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
-    auto it = _screens.find(name);
-    if (it == _screens.end()) {
+    auto it = screens_.find(name);
+    if (it == screens_.end()) {
       BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("invalid screen name!"));
     }
 
@@ -53,21 +53,21 @@ void screen_stack::set_active_screen(std::string const &name,
       if (active_ != "") {
         std::string old_active = active_;
         active_ = "";
-        _screens[old_active]->hide();
+        screens_[old_active]->hide();
       }
-      _screens[name]->set_options(options);
-      _screens[name]->show();
+      screens_[name]->set_options(options);
+      screens_[name]->show();
       active_ = name;
     }
   });
 }
 
-screen *screen_stack::get_active_screen() {
+Screen *ScreenStack::get_active_screen() {
   if (active_ == "") {
     return nullptr;
   }
 
-  return _screens[active_];
+  return screens_[active_];
 }
 
 }

@@ -304,7 +304,7 @@ void Framework::render() {
 
   timer_->render();
 
-  // populate the scene graph by calling into the application itself
+  // populate the scene graph by calling into the Application itself
   sg::Scenegraph Scenegraph;
   app_->render(Scenegraph);
   particle_mgr_->render(Scenegraph);

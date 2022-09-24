@@ -33,7 +33,7 @@ enum widget_ids {
 class players_tool_window {
 private:
   ed::players_tool *_tool;
-  Window *_wnd;
+  Window *wnd_;
 
   void selection_changed(int index);
   bool num_players_updated_click(fw::gui::Widget *w);
@@ -48,7 +48,7 @@ public:
 };
 
 players_tool_window::players_tool_window(ed::players_tool *tool) : _tool(tool) {
-  _wnd = Builder<Window>(px(10), px(30), px(100), px(200)) << Window::background("frame")
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(200)) << Window::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Num players:"))
       << (Builder<TextEdit>(px(4), px(26), sum(pct(100), px(-8)), px(20))
           << TextEdit::text("4") << Widget::id(NUM_PLAYERS_ID))
@@ -57,15 +57,15 @@ players_tool_window::players_tool_window(ed::players_tool *tool) : _tool(tool) {
       << (Builder<Label>(px(4), px(80), sum(pct(100), px(-8)), px(1)) << Label::background("filler"))
       << (Builder<Listbox>(px(4), px(88), sum(pct(100), px(-8)), px(108)) << Widget::id(PLAYER_LIST_ID)
           << Listbox::item_selected(std::bind(&players_tool_window::selection_changed, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
 players_tool_window::~players_tool_window() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
 void players_tool_window::refresh_player_list() {
-  Listbox *lb = _wnd->find<Listbox>(PLAYER_LIST_ID);
+  Listbox *lb = wnd_->find<Listbox>(PLAYER_LIST_ID);
   lb->clear();
   for (int i = 0; i < _tool->get_world()->get_player_starts().size(); i++) {
     lb->add_item(Builder<Label>(px(4), px(0), pct(100), px(20))
@@ -74,16 +74,16 @@ void players_tool_window::refresh_player_list() {
 }
 
 void players_tool_window::show() {
-  _wnd->set_visible(true);
+  wnd_->set_visible(true);
   refresh_player_list();
 }
 
 void players_tool_window::hide() {
-  _wnd->set_visible(false);
+  wnd_->set_visible(false);
 }
 
 bool players_tool_window::num_players_updated_click(fw::gui::Widget *w) {
-  TextEdit *te = _wnd->find<TextEdit>(NUM_PLAYERS_ID);
+  TextEdit *te = wnd_->find<TextEdit>(NUM_PLAYERS_ID);
   int num_players = boost::lexical_cast<int>(te->get_text());
   std::map<int, fw::Vector> &player_starts = _tool->get_world()->get_player_starts();
   if (player_starts.size() < num_players) {
@@ -105,18 +105,18 @@ void players_tool_window::selection_changed(int index) {
 namespace ed {
 REGISTER_TOOL("players", players_tool);
 
-players_tool::players_tool(editor_world *wrld) : _wnd(nullptr), _player_no(1), tool(wrld) {
-  _wnd = new players_tool_window(this);
+players_tool::players_tool(editor_world *wrld) : wnd_(nullptr), _player_no(1), tool(wrld) {
+  wnd_ = new players_tool_window(this);
   _marker = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
 }
 
 players_tool::~players_tool() {
-  delete _wnd;
+  delete wnd_;
 }
 
 void players_tool::activate() {
   tool::activate();
-  _wnd->show();
+  wnd_->show();
 
   fw::Input *inp = fw::Framework::get_instance()->get_input();
   _keybind_tokens.push_back(
@@ -125,14 +125,14 @@ void players_tool::activate() {
 
 void players_tool::deactivate() {
   tool::deactivate();
-  _wnd->hide();
+  wnd_->hide();
 }
 
 void players_tool::render(fw::sg::Scenegraph &Scenegraph) {
   if (_player_no <= 0)
     return;
 
-  std::map<int, fw::Vector> &starts = _world->get_player_starts();
+  std::map<int, fw::Vector> &starts = world_->get_player_starts();
   std::map<int, fw::Vector>::iterator it = starts.find(_player_no);
 
   // if there's no player_no in the collection, this player isn't enabled
@@ -156,7 +156,7 @@ void players_tool::on_key(std::string keyname, bool is_down) {
       return;
     }
 
-    std::map<int, fw::Vector> &starts = _world->get_player_starts();
+    std::map<int, fw::Vector> &starts = world_->get_player_starts();
     std::map<int, fw::Vector>::iterator it = starts.find(_player_no);
     if (it == starts.end()) {
       return;

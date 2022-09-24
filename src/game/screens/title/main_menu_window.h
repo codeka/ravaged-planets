@@ -8,16 +8,14 @@ class Widget;
 }
 
 namespace game {
-class new_game_window;
+class NewGameWindow;
 
-/**
- * This is the main menu, it's got such things as the "New Game", "Join Game", etc buttons.
- */
-class main_menu_window {
+// This is the main menu, it's got such things as the "New Game", "Join Game", etc buttons.
+class MainMenuWindow {
 private:
-  new_game_window *_new_game_window;
-  fw::gui::Window *_wnd;
-  bool _exiting;
+  NewGameWindow *new_game_window_;
+  fw::gui::Window *wnd_;
+  bool exiting_;
 
   bool new_game_clicked(fw::gui::Widget *w);
   bool join_game_clicked(fw::gui::Widget *w);
@@ -25,9 +23,9 @@ private:
   bool editor_clicked(fw::gui::Widget *w);
 
 public:
-  main_menu_window();
-  ~main_menu_window();
-  void initialize(new_game_window *new_game_window);
+  MainMenuWindow();
+  ~MainMenuWindow();
+  void initialize(NewGameWindow *new_game_window);
 
   void update();
   void show();

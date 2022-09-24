@@ -38,15 +38,15 @@ enum IDS {
 
 open_file_window *open_file = nullptr;
 
-open_file_window::open_file_window() : _wnd(nullptr), _show_hidden(false) {
+open_file_window::open_file_window() : wnd_(nullptr), _show_hidden(false) {
 }
 
 open_file_window::~open_file_window() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
 void open_file_window::initialize() {
-  _wnd = Builder<Window>(sum(pct(50), px(-200)), sum(pct(40), px(-150)), px(400), px(300))
+  wnd_ = Builder<Window>(sum(pct(50), px(-200)), sum(pct(40), px(-150)), px(400), px(300))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<TextEdit>(px(8), px(8), sum(pct(100), px(-16)), px(18)) << Widget::id(FILENAME_ID))
       << (Builder<Listbox>(px(8), px(30), sum(pct(66), px(-12)), sum(pct(100), px(-76))) << Widget::id(FILE_LIST_ID)
@@ -60,18 +60,18 @@ void open_file_window::initialize() {
           << Button::text("Cancel") << Button::click(std::bind(&open_file_window::on_cancel_clicked, this, _1)))
       << (Builder<Checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18)) << Checkbox::text("Show hidden files")
           << Widget::click(std::bind(&open_file_window::on_show_hidden_clicked, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
   _curr_directory = fw::user_base_path();
 }
 
 void open_file_window::show(file_selected_handler fn) {
   _file_selected_handler = fn;
-  _wnd->set_visible(true);
+  wnd_->set_visible(true);
   refresh();
 }
 
 void open_file_window::hide() {
-  _wnd->set_visible(false);
+  wnd_->set_visible(false);
 }
 
 void open_file_window::add_row(Listbox *lbx, std::string const &name) {
@@ -94,7 +94,7 @@ void open_file_window::add_row(Listbox *lbx, std::string const &name) {
 }
 
 void open_file_window::refresh() {
-  Listbox*lbx = _wnd->find<Listbox>(FILE_LIST_ID);
+  Listbox*lbx = wnd_->find<Listbox>(FILE_LIST_ID);
   lbx->clear();
   _items.clear();
 
@@ -134,11 +134,11 @@ void open_file_window::refresh() {
   }
 
   // we also want to set the "Path" to be the full path that we're currently displaying
-  _wnd->find<TextEdit>(FILENAME_ID)->set_text(_curr_directory.string());
+  wnd_->find<TextEdit>(FILENAME_ID)->set_text(_curr_directory.string());
 }
 
 fs::path open_file_window::get_selected_file() const {
-  return fs::path(_wnd->find<TextEdit>(FILENAME_ID)->get_text());
+  return fs::path(wnd_->find<TextEdit>(FILENAME_ID)->get_text());
 }
 
 void open_file_window::navigate_to_directory(fs::path const &new_directory) {
@@ -148,7 +148,7 @@ void open_file_window::navigate_to_directory(fs::path const &new_directory) {
 
 void open_file_window::on_item_selected(int index) {
   fs::path item_path = _curr_directory / _items[index];
-  _wnd->find<TextEdit>(FILENAME_ID)->set_text(item_path.string());
+  wnd_->find<TextEdit>(FILENAME_ID)->set_text(item_path.string());
 
   if (fs::is_regular_file(item_path)) {
     std::string ext = item_path.extension().string();
@@ -159,7 +159,7 @@ void open_file_window::on_item_selected(int index) {
         fw::Bitmap bmp(item_path);
         is_image = true; // if we loaded it, then we know it's an image
 
-        Label *preview = _wnd->find<Label>(IMAGE_PREVIEW_ID);
+        Label *preview = wnd_->find<Label>(IMAGE_PREVIEW_ID);
         float width = preview->get_width();
         float height = preview->get_height();
         float bmp_width = bmp.get_width();
@@ -190,14 +190,14 @@ void open_file_window::on_item_selected(int index) {
     }
 
     if (!is_image) {
-      Label *preview = _wnd->find<Label>(IMAGE_PREVIEW_ID);
+      Label *preview = wnd_->find<Label>(IMAGE_PREVIEW_ID);
       preview->set_background(std::shared_ptr<Drawable>());
     }
   }
 }
 
 void open_file_window::on_item_activated(int index) {
-  on_ok_clicked(_wnd->find<Button>(OK_ID));
+  on_ok_clicked(wnd_->find<Button>(OK_ID));
 }
 
 bool open_file_window::on_show_hidden_clicked(Widget *w) {
@@ -207,7 +207,7 @@ bool open_file_window::on_show_hidden_clicked(Widget *w) {
 }
 
 bool open_file_window::on_ok_clicked(Widget *w) {
-  fs::path item_path = fs::path(_wnd->find<TextEdit>(FILENAME_ID)->get_text());
+  fs::path item_path = fs::path(wnd_->find<TextEdit>(FILENAME_ID)->get_text());
   if (fs::is_directory(item_path)) {
     _curr_directory = item_path;
     refresh();

@@ -76,7 +76,7 @@ private:
 protected:
   Node *_parent;
   std::vector<std::shared_ptr<Node> > _children;
-  fw::Matrix _world;
+  fw::Matrix world_;
 
   // this is called when we're rendering a given Shader
   virtual void render_shader(std::shared_ptr<fw::Shader> Shader, fw::Camera *camera, fw::Matrix const &transform);
@@ -97,10 +97,10 @@ public:
   }
 
   void set_world_matrix(fw::Matrix const &m) {
-    _world = m;
+    world_ = m;
   }
   fw::Matrix &get_world_matrix() {
-    return _world;
+    return world_;
   }
 
   void set_vertex_buffer(std::shared_ptr<fw::VertexBuffer> vb) {

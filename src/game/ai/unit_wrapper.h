@@ -17,7 +17,7 @@ namespace game {
  */
 class unit_wrapper {
 private:
-  std::weak_ptr<ent::entity> _entity;
+  std::weak_ptr<ent::entity> entity_;
   ent::ownable_component *_ownable;
   ent::orderable_component *_orderable;
 
@@ -32,7 +32,7 @@ public:
   // this must be called before you do anything with this wrapper
   void set_entity(std::weak_ptr<ent::entity> const &ent);
   std::weak_ptr<ent::entity> get_entity() const {
-    return _entity;
+    return entity_;
   }
 };
 

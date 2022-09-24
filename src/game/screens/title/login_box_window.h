@@ -12,7 +12,7 @@ namespace CEGUI {
 
 namespace ww {
 
-	// The login box is always visible on the title screen. It's in the top-right
+	// The login box is always visible on the title Screen. It's in the top-right
 	// and lets you login/logout. We also handle auto-login, if that's configured.
 	class login_box_window : public fw::gui::window
 	{
@@ -20,7 +20,7 @@ namespace ww {
 		CEGUI::Editbox *_username;
 		CEGUI::Editbox *_password;
 		fw::gui::wait_animation _wait_anim;
-		boost::signals::connection _sig_session_state_changed;
+		boost::signals::connection sig_session_state_changed_;
 
 		float _reset_time;
 		int _desired_height;

@@ -14,7 +14,7 @@ class editor_world;
  */
 class world_writer {
 private:
-  editor_world *_world;
+  editor_world *world_;
   std::string _name;
   fw::Color _base_minimap_colors[4];
 

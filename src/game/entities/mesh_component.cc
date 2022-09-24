@@ -42,12 +42,12 @@ void mesh_component::apply_template(luabind::object const &tmpl) {
 }
 
 void mesh_component::initialize() {
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   _ownable_component = entity->get_component<ownable_component>();
 }
 
 void mesh_component::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   position_component *pos = entity->get_component<position_component>();
   if (pos != nullptr) {
     if (!model_) {

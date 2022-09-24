@@ -15,22 +15,22 @@ class entity;
 }
 namespace game {
 
-// The build_window shows all of the units an entity with builder_component can build.
-class build_window {
+// The BuildWindow shows all of the units an entity with builder_component can build.
+class BuildWindow {
 private:
-  fw::gui::Window *_wnd;
-  std::weak_ptr<ent::entity> _entity;
-  std::string _build_group;
-  bool _require_refresh;
-  int _mouse_over_button_id;
+  fw::gui::Window *wnd_;
+  std::weak_ptr<ent::entity> entity_;
+  std::string build_group_;
+  bool require_refresh_;
+  int mouse_over_button_id_;
 
   void do_refresh();
   void on_mouse_over_button(int id);
   void on_mouse_out_button(int id);
   bool on_build_clicked(fw::gui::Widget *w, int id);
 public:
-  build_window();
-  virtual ~build_window();
+  BuildWindow();
+  virtual ~BuildWindow();
 
   void refresh(std::weak_ptr<ent::entity> entity, std::string build_group);
 
@@ -40,6 +40,6 @@ public:
   void hide();
 };
 
-extern build_window *hud_build;
+extern BuildWindow *hud_build;
 
 }

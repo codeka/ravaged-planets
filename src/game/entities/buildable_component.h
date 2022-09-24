@@ -9,7 +9,7 @@ namespace ent {
  */
 class buildable_component: public entity_component {
 private:
-  std::string _build_group;
+  std::string build_group_;
 
 public:
   static const int identifier = 350;

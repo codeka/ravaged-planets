@@ -63,7 +63,7 @@ namespace ww {
 	{
 		fw::gui::window::show();
 
-		_sig_session_state_changed = session::get_instance()->sig_state_changed.connect(
+		sig_session_state_changed_ = session::get_instance()->sig_state_changed.connect(
 			boost::bind(&login_box_window::on_session_state_changed, this, _1));
 	}
 
@@ -71,7 +71,7 @@ namespace ww {
 	{
 		fw::gui::window::hide();
 
-		_sig_session_state_changed.disconnect();
+		sig_session_state_changed_.disconnect();
 	}
 
 	void login_box_window::on_session_state_changed(session::session_state new_state)

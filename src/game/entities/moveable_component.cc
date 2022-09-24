@@ -38,7 +38,7 @@ void moveable_component::apply_template(luabind::object const &tmpl) {
 }
 
 void moveable_component::initialize() {
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   _pathing_component = entity->get_component<pathing_component>();
   _position_component = entity->get_component<position_component>();
   _goal = _position_component->get_position();
@@ -47,7 +47,7 @@ void moveable_component::initialize() {
 
 // TODO: skip_pathing is such a hack
 void moveable_component::set_goal(fw::Vector goal, bool skip_pathing /*= false*/) {
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
   float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
@@ -64,7 +64,7 @@ void moveable_component::set_goal(fw::Vector goal, bool skip_pathing /*= false*/
 }
 
 void moveable_component::set_intermediate_goal(fw::Vector goal) {
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
   float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
@@ -98,7 +98,7 @@ void moveable_component::update(float dt) {
     return;
   }
 
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   bool show_steering = (entity->get_debug_view() != 0 && (entity->get_debug_flags() & debug_show_steering) != 0);
 
   // if we're avoiding obstacles, we'll need to figure out what is the closest entity to us
@@ -205,7 +205,7 @@ fw::Vector moveable_component::steer(fw::Vector pos, fw::Vector curr_direction, 
   steer = cml::dot(steer, goal_direction) < 0.0f ? steer * -1.0f : steer;
 
   if (show_steering) {
-    std::shared_ptr<entity> entity(_entity);
+    std::shared_ptr<entity> entity(entity_);
     entity_debug_view *edv = entity->get_debug_view();
 
     // draw the current "up" and "forward" vectors

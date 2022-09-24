@@ -47,7 +47,7 @@ public:
   /** Register a new top-level widget. */
   void attach_widget(Widget *widget);
 
-  /** Destroys the given top-level widget, unhooks any signals and removes it from the screen. */
+  /** Destroys the given top-level widget, unhooks any signals and removes it from the Screen. */
   void detach_widget(Widget *widget);
 
   /** Bring the given widget to the top. */

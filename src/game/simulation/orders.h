@@ -23,7 +23,7 @@ private:
   std::string _state_name;
 
 protected:
-  std::weak_ptr<ent::entity> _entity;
+  std::weak_ptr<ent::entity> entity_;
 
   order(std::string const &state_name);
 

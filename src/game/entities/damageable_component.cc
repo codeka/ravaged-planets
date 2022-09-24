@@ -31,7 +31,7 @@ void damageable_component::apply_template(luabind::object const &tmpl) {
 }
 
 void damageable_component::initialize() {
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   entity_attribute *health = entity->get_attribute("health");
   if (health != nullptr) {
     health->sig_value_changed.connect(std::bind(&damageable_component::check_explode, this, _2));
@@ -39,7 +39,7 @@ void damageable_component::initialize() {
 }
 
 void damageable_component::apply_damage(float amt) {
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   entity_attribute *attr = entity->get_attribute("health");
   if (attr != nullptr) {
     float curr_value = attr->get_value<float>();
@@ -65,8 +65,8 @@ void apply_damage(std::shared_ptr<entity> ent, float amt) {
 }
 
 void damageable_component::explode() {
-  std::shared_ptr<entity> entity(_entity); // entity is always valid while we're valid...
-  entity->get_manager()->destroy(_entity);
+  std::shared_ptr<entity> entity(entity_); // entity is always valid while we're valid...
+  entity->get_manager()->destroy(entity_);
 
   if (_expl_name != "") {
     // create an explosion entity

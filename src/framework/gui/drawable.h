@@ -13,7 +13,7 @@
 
 namespace fw::gui {
 
-// A Drawable is any object that appears on the screen. It's typically a nine-patch or image and is used at the
+// A Drawable is any object that appears on the Screen. It's typically a nine-patch or image and is used at the
 // background of widgets and windows.
 class Drawable {
 protected:

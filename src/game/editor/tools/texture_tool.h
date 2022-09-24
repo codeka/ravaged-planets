@@ -21,7 +21,7 @@ public:
 private:
   int _radius;
   int _layer;
-  texture_tool_window *_wnd;
+  texture_tool_window *wnd_;
   bool _is_painting;
 
   void on_key(std::string keyname, bool is_down);

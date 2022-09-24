@@ -28,7 +28,7 @@ void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 void initialize_ground(std::shared_ptr<fw::sg::Node> Node);
 
-class application: public fw::BaseApp {
+class Application: public fw::BaseApp {
 public:
   bool initialize(fw::Framework *frmwrk);
   void update(float dt);
@@ -69,7 +69,7 @@ bool rotate_handler(fw::gui::Widget *wdgt) {
   return true;
 }
 
-bool application::initialize(fw::Framework *frmwrk) {
+bool Application::initialize(fw::Framework *frmwrk) {
   fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
@@ -95,13 +95,13 @@ bool application::initialize(fw::Framework *frmwrk) {
   return true;
 }
 
-void application::update(float dt) {
+void Application::update(float dt) {
   if (g_rotating) {
     g_rotate_angle += 3.14159f * dt;
   }
 }
 
-void application::render(fw::sg::Scenegraph &Scenegraph) {
+void Application::render(fw::sg::Scenegraph &Scenegraph) {
   Scenegraph.set_clear_color(fw::Color(1, 0, 1, 0));
 
   // set up the properties of the sun that we'll use to Light and also cast shadows
@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
   try {
     settings_initialize(argc, argv);
 
-    application app;
+    Application app;
     new fw::Framework(&app);
     fw::Framework::get_instance()->initialize("Mesh Test");
     fw::Framework::get_instance()->run();

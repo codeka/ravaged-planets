@@ -13,7 +13,7 @@ class world;
 
 class players_tool: public tool {
 private:
-  players_tool_window *_wnd;
+  players_tool_window *wnd_;
   std::shared_ptr<fw::Model> _marker;
   int _player_no;
 

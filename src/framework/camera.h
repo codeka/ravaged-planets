@@ -55,7 +55,7 @@ public:
   virtual void enable();
   virtual void disable();
 
-  // Projects the given screen (x,y) coordinates to a point in front of the camera in 3D space. You can then use this
+  // Projects the given Screen (x,y) coordinates to a point in front of the camera in 3D space. You can then use this
   // vector to select objects, etc etc...
   Vector unproject(float x, float y);
 
@@ -210,7 +210,7 @@ public:
     zooming_ = true;
   }
 
-  // Gets or sets a ParticleRotation which indicates whether we move the camera by moving the mouse to the edge of the screen (as
+  // Gets or sets a ParticleRotation which indicates whether we move the camera by moving the mouse to the edge of the Screen (as
   // well as the usual left/right/up/down keys)
   void set_mouse_move(bool ParticleRotation) {
     enable_mouse_move_ = ParticleRotation;

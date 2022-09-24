@@ -15,30 +15,30 @@ class Widget;
 
 namespace game {
 class world_summary;
-class game_screen_options;
-class main_menu_window;
-class new_ai_player_window;
+class GameScreenOptions;
+class MainMenuWindow;
+class NewAIPlayerWindow;
 
-/** This is the "new game" window where you can choose the map, number of players and so on. */
-class new_game_window {
+// This is the "new game" window where you can choose the map, number of players and so on.
+class NewGameWindow {
 private:
-  main_menu_window *_main_menu_window;
-  new_ai_player_window *_new_ai_player_window;
-  fw::gui::Window *_wnd;
-  std::shared_ptr<game_screen_options> _game_options;
-  game::session::session_state _sess_state;
-  boost::signals2::connection _sig_players_changed_conn;
-  boost::signals2::connection _sig_chat_conn;
-  boost::signals2::connection _sig_session_state_changed;
-  std::vector<uint32_t> _ready_players;
+  MainMenuWindow *main_menu_window_;
+  NewAIPlayerWindow *new_ai_player_window_;
+  fw::gui::Window *wnd_;
+  std::shared_ptr<GameScreenOptions> game_options_;
+  game::session::session_state sess_state_;
+  boost::signals2::connection sig_players_changed_conn_;
+  boost::signals2::connection sig_chat_conn_;
+  boost::signals2::connection sig_session_state_changed_;
+  std::vector<uint32_t> ready_players_;
 
-  /** Set to true when we need to refresh the player list. */
-  bool _need_refresh_players;
+  // Set to true when we need to refresh the player list.
+  bool need_refresh_players_;
 
   void on_players_changed();
   void refresh_players();
 
-  std::vector<world_summary> _map_list;
+  std::vector<world_summary> map_list_;
 
   bool on_start_game_clicked(fw::gui::Widget *w);
   bool on_cancel_clicked(fw::gui::Widget *w);
@@ -58,10 +58,10 @@ private:
 
   game::world_summary const &get_selected_world_summary();
 public:
-  new_game_window();
-  ~new_game_window();
+  NewGameWindow();
+  ~NewGameWindow();
 
-  void initialize(main_menu_window *main_menu_window, new_ai_player_window *new_ai_player_window);
+  void initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow *NewAIPlayerWindow);
   void show();
   void hide();
   void update();

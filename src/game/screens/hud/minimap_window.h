@@ -18,19 +18,19 @@ class Window;
 }
 
 namespace game {
-class minimap_drawable;
+class MinimapDrawable;
 
-// The minimap_window shows a graphic with the current map and all the friendlies/enemies/etc
-class minimap_window {
+// The MinimapWindow shows a graphic with the current map and all the friendlies/enemies/etc
+class MinimapWindow {
 private:
-  fw::gui::Window *_wnd;
-  std::shared_ptr<fw::Texture> _texture;
-  std::shared_ptr<minimap_drawable> _drawable;
-  float _last_entity_display_update;
+  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::Texture> texture_;
+  std::shared_ptr<MinimapDrawable> drawable_;
+  float last_entity_display_update_;
 
   // this is fired when the camera is moved/rotated/etc - we have to update our matrix
   void on_camera_updated();
-  boost::signals2::connection _camera_updated_connection;
+  boost::signals2::connection camera_updated_connection_;
 
   // this is called every now&then to update the display of entities on the map
   void update_entity_display();
@@ -38,8 +38,8 @@ private:
   void update_drawable();
 
 public:
-  minimap_window();
-  virtual ~minimap_window();
+  MinimapWindow();
+  virtual ~MinimapWindow();
 
   void initialize();
   void update();
@@ -47,6 +47,6 @@ public:
   void hide();
 };
 
-extern minimap_window *hud_minimap;
+extern MinimapWindow *hud_minimap;
 
 }

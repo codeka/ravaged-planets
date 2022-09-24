@@ -191,7 +191,7 @@ enum IDS {
 
 class heightfield_tool_window {
 private:
-  Window *_wnd;
+  Window *wnd_;
   ed::heightfield_tool *_tool;
 
   void on_radius_updated(int ParticleRotation);
@@ -209,7 +209,7 @@ public:
 
 heightfield_tool_window::heightfield_tool_window(ed::heightfield_tool *tool) :
     _tool(tool) {
-  _wnd = Builder<Window>(px(10), px(30), px(100), px(130)) << Window::background("frame")
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(130)) << Window::background("frame")
       << (Builder<Button>(px(8), px(8), px(36), px(36)) << Widget::id(RAISE_LOWER_BRUSH_ID)
           << Button::icon("editor_hightfield_raiselower")
           << Button::click(std::bind(&heightfield_tool_window::on_tool_clicked, this, _1)))
@@ -222,19 +222,19 @@ heightfield_tool_window::heightfield_tool_window(ed::heightfield_tool *tool) :
           << Slider::on_update(std::bind(&heightfield_tool_window::on_radius_updated, this, _1)))
       << (Builder<Button>(px(4), px(96), sum(pct(100), px(-8)), px(30)) << Button::text("Import")
           << Button::click(std::bind(&heightfield_tool_window::on_import_clicked, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
 heightfield_tool_window::~heightfield_tool_window() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
 void heightfield_tool_window::show() {
-  _wnd->set_visible(true);
+  wnd_->set_visible(true);
 }
 
 void heightfield_tool_window::hide() {
-  _wnd->set_visible(false);
+  wnd_->set_visible(false);
 }
 
 void heightfield_tool_window::on_radius_updated(int ParticleRotation) {
@@ -257,8 +257,8 @@ void heightfield_tool_window::on_import_file_selected(ed::open_file_window *ofw)
 }
 
 bool heightfield_tool_window::on_tool_clicked(fw::gui::Widget *w) {
-  Button *raise_lower = _wnd->find<Button>(RAISE_LOWER_BRUSH_ID);
-  Button *level = _wnd->find<Button>(LEVEL_BRUSH_ID);
+  Button *raise_lower = wnd_->find<Button>(RAISE_LOWER_BRUSH_ID);
+  Button *level = wnd_->find<Button>(LEVEL_BRUSH_ID);
 
   raise_lower->set_pressed(false);
   level->set_pressed(false);
@@ -281,11 +281,11 @@ float heightfield_tool::max_radius = 6;
 
 heightfield_tool::heightfield_tool(editor_world *wrld) :
     tool(wrld), _radius(4), _brush(nullptr) {
-  _wnd = new heightfield_tool_window(this);
+  wnd_ = new heightfield_tool_window(this);
 }
 
 heightfield_tool::~heightfield_tool() {
-  delete _wnd;
+  delete wnd_;
 }
 
 void heightfield_tool::activate() {
@@ -302,13 +302,13 @@ void heightfield_tool::activate() {
   }
   set_brush(new raise_lower_brush());
 
-  _wnd->show();
+  wnd_->show();
 }
 
 void heightfield_tool::deactivate() {
   tool::deactivate();
 
-  _wnd->hide();
+  wnd_->hide();
 }
 
 void heightfield_tool::set_brush(heightfield_brush *brush) {

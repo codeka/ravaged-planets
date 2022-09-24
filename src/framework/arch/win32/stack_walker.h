@@ -111,7 +111,7 @@ protected:
   uint32_t _process_id;
   bool _modules_loaded;
   std::string _symbol_path;
-  int _options;
+  int options_;
 
   static BOOL __stdcall my_read_memory_function(HANDLE hProcess, DWORD64 qwBaseAddress, PVOID lpBuffer, DWORD nSize,
       LPDWORD lpNumberOfBytesRead);

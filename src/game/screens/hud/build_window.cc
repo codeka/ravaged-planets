@@ -32,7 +32,7 @@ using namespace std::placeholders;
 
 namespace game {
 
-build_window *hud_build = nullptr;
+BuildWindow *hud_build = nullptr;
 
 enum ids {
   FIRST_BUILD_BUTTON_ID = 34636,
@@ -51,7 +51,7 @@ private:
   std::shared_ptr<fw::Framebuffer> _framebuffer;
   std::shared_ptr<fw::Texture> color_texture_;
   std::shared_ptr<fw::Texture> _depth_texture;
-  std::shared_ptr<Drawable> _drawable;
+  std::shared_ptr<Drawable> drawable_;
 
   void render();
 public:
@@ -80,9 +80,9 @@ void entity_icon::initialize() {
   _framebuffer->set_color_buffer(color_texture_);
   _framebuffer->set_depth_buffer(_depth_texture);
 
-  _drawable = fw::Framework::get_instance()->get_gui()->get_drawable_manager()
+  drawable_ = fw::Framework::get_instance()->get_gui()->get_drawable_manager()
       ->build_drawable(color_texture_, 7, 7, 50, 50);
-  std::dynamic_pointer_cast<BitmapDrawable>(_drawable)->set_flipped(true);
+  std::dynamic_pointer_cast<BitmapDrawable>(drawable_)->set_flipped(true);
   render();
 }
 
@@ -133,20 +133,20 @@ std::string entity_icon::get_template_name() {
 }
 
 std::shared_ptr<Drawable> entity_icon::get_drawable() {
-  return _drawable;
+  return drawable_;
 }
 
 //-----------------------------------------------------------------------------
 
-build_window::build_window() : _wnd(nullptr), _require_refresh(false), _mouse_over_button_id(-1) {
+BuildWindow::BuildWindow() : wnd_(nullptr), require_refresh_(false), mouse_over_button_id_(-1) {
 }
 
-build_window::~build_window() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+BuildWindow::~BuildWindow() {
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void build_window::initialize() {
-  _wnd = Builder<Window>(sum(pct(100), px(-210)), px(220), px(200), px(200))
+void BuildWindow::initialize() {
+  wnd_ = Builder<Window>(sum(pct(100), px(-210)), px(220), px(200), px(200))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Button>(px(10), px(10), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 0))
       << (Builder<Button>(px(73), px(10), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 1))
@@ -157,37 +157,37 @@ void build_window::initialize() {
       << (Builder<Button>(px(10), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 6))
       << (Builder<Button>(px(73), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 7))
       << (Builder<Button>(px(136), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 8));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
   for (int i = 0; i < 9; i++) {
     int id = FIRST_BUILD_BUTTON_ID + i;
-    Button *btn = _wnd->find<Button>(id);
-    btn->sig_mouse_over.connect(std::bind(&build_window::on_mouse_over_button, this, id));
-    btn->sig_mouse_out.connect(std::bind(&build_window::on_mouse_out_button, this, id));
-    btn->set_on_click(std::bind(&build_window::on_build_clicked, this, _1, id));
+    Button *btn = wnd_->find<Button>(id);
+    btn->sig_mouse_over.connect(std::bind(&BuildWindow::on_mouse_over_button, this, id));
+    btn->sig_mouse_out.connect(std::bind(&BuildWindow::on_mouse_out_button, this, id));
+    btn->set_on_click(std::bind(&BuildWindow::on_build_clicked, this, _1, id));
   }
 }
 
-void build_window::show() {
-  _wnd->set_visible(true);
+void BuildWindow::show() {
+  wnd_->set_visible(true);
 }
 
-void build_window::hide() {
-  _wnd->set_visible(false);
+void BuildWindow::hide() {
+  wnd_->set_visible(false);
 }
 
-void build_window::refresh(std::weak_ptr<ent::entity> entity, std::string build_group) {
-  _entity = entity;
-  _build_group = build_group;
-  _require_refresh = true;
+void BuildWindow::refresh(std::weak_ptr<ent::entity> entity, std::string build_group) {
+  entity_ = entity;
+  build_group_ = build_group;
+  require_refresh_ = true;
 }
 
-bool build_window::on_build_clicked(Widget *w, int id) {
+bool BuildWindow::on_build_clicked(Widget *w, int id) {
   Button *btn = dynamic_cast<Button *>(w);
   auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
   if (iconp != nullptr) {
     std::string tmpl_name = (*iconp)->get_template_name();
-    std::shared_ptr<ent::entity> entity(_entity);
+    std::shared_ptr<ent::entity> entity(entity_);
     if (entity) {
       entity->get_component<ent::builder_component>()->build(tmpl_name);
     }
@@ -196,13 +196,13 @@ bool build_window::on_build_clicked(Widget *w, int id) {
   return true;
 }
 
-void build_window::on_mouse_over_button(int id) {
-  _mouse_over_button_id = id;
+void BuildWindow::on_mouse_over_button(int id) {
+  mouse_over_button_id_ = id;
 }
 
-void build_window::on_mouse_out_button(int id) {
-  if (_mouse_over_button_id == id) {
-    Button *btn = _wnd->find<Button>(_mouse_over_button_id);
+void BuildWindow::on_mouse_out_button(int id) {
+  if (mouse_over_button_id_ == id) {
+    Button *btn = wnd_->find<Button>(mouse_over_button_id_);
     if (btn != nullptr) {
       auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
       if (iconp != nullptr) {
@@ -210,19 +210,19 @@ void build_window::on_mouse_out_button(int id) {
       }
     }
 
-    _mouse_over_button_id = -1;
+    mouse_over_button_id_ = -1;
   }
 }
 
-void build_window::do_refresh() {
+void BuildWindow::do_refresh() {
   std::vector<luabind::object> templates;
   ent::entity_factory ent_factory;
-  ent_factory.get_buildable_templates(_build_group, templates);
+  ent_factory.get_buildable_templates(build_group_, templates);
 
   int index = 0;
   for(luabind::object const &tmpl : templates) {
     fw::debug << " checking " << ""/*tmpl["name"]*/ << std::endl;
-    Button *btn = _wnd->find<Button>(FIRST_BUILD_BUTTON_ID + index);
+    Button *btn = wnd_->find<Button>(FIRST_BUILD_BUTTON_ID + index);
     if (btn == nullptr) {
       continue; // TODO
     }
@@ -252,15 +252,15 @@ void build_window::do_refresh() {
   }
 }
 
-void build_window::update() {
-  if (_require_refresh) {
+void BuildWindow::update() {
+  if (require_refresh_) {
     do_refresh();
-    _require_refresh = false;
+    require_refresh_ = false;
   }
 
   // if the mouse is over a button, call the icon's update so that it rotates the icon.
-  if (_mouse_over_button_id > 0) {
-    Button *btn = _wnd->find<Button>(_mouse_over_button_id);
+  if (mouse_over_button_id_ > 0) {
+    Button *btn = wnd_->find<Button>(mouse_over_button_id_);
     if (btn != nullptr) {
       auto icon = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
       if (icon != nullptr) {

@@ -4,25 +4,25 @@
 
 namespace game {
 class world;
-class screen_stack;
+class ScreenStack;
 
-class application: public fw::BaseApp {
+class Application: public fw::BaseApp {
 public:
-  application();
-  ~application();
+  Application();
+  ~Application();
 
   virtual bool initialize(fw::Framework *frmwrf);
   virtual void destroy();
   virtual void update(float dt);
   virtual void render(fw::sg::Scenegraph &sg);
 
-  screen_stack *get_screen() {
-    return _screen;
+  ScreenStack *get_screen_stack() {
+    return screen_stack_;
   }
 
 private:
-  fw::Framework *_framework;
-  screen_stack *_screen;
+  fw::Framework *framework_;
+  ScreenStack *screen_stack_;
 };
 
 }

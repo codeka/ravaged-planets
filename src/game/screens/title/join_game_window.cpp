@@ -21,7 +21,7 @@
 namespace ww {
 
 	join_game_window::join_game_window()
-		: fw::gui::window("JoinGame"), _sess_state(ww::session::disconnected)
+		: fw::gui::window("JoinGame"), sess_state_(ww::session::disconnected)
 	{
 	}
 
@@ -59,11 +59,11 @@ namespace ww {
 		}
 
 		session::session_state curr_state = session::get_instance()->get_state();
-		if (curr_state != _sess_state)
+		if (curr_state != sess_state_)
 		{
-			_sess_state = curr_state;
+			sess_state_ = curr_state;
 
-			if (_sess_state == session::logged_in)
+			if (sess_state_ == session::logged_in)
 			{
 				refresh_games_list();
 			}

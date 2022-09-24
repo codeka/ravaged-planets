@@ -18,7 +18,7 @@
 namespace ed {
 
 world_writer::world_writer(editor_world *wrld) :
-    _world(wrld) {
+    world_(wrld) {
 }
 
 world_writer::~world_writer() {
@@ -36,14 +36,14 @@ void world_writer::write(std::string name) {
   write_collision_data(wf);
 
   // write the screenshot as well, which is pretty simple...
-  if (_world->get_screenshot()) {
+  if (world_->get_screenshot()) {
     game::world_file_entry wfe = wf.get_entry("screenshot.png", true /* for_write */);
-    _world->get_screenshot()->save_bitmap(wfe.get_full_path());
+    world_->get_screenshot()->save_bitmap(wfe.get_full_path());
   }
 }
 
 void world_writer::write_terrain(game::world_file &wf) {
-  editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
+  editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
   int version = 1;
   int trn_width = trn->get_width();
   int trn_length = trn->get_length();
@@ -68,12 +68,12 @@ void world_writer::write_terrain(game::world_file &wf) {
 void world_writer::write_mapdesc(game::world_file &wf) {
   game::world_file_entry wfe = wf.get_entry(_name + ".mapdesc", true /* for_write */);
   wfe.write("<mapdesc version=\"1\">");
-  wfe.write((boost::format("  <description>%1%</description>") % _world->get_description()).str());
-  wfe.write((boost::format("  <author>%1%</author>") % _world->get_author()).str());
+  wfe.write((boost::format("  <description>%1%</description>") % world_->get_description()).str());
+  wfe.write((boost::format("  <author>%1%</author>") % world_->get_author()).str());
   wfe.write("  <size width=\"3\" height=\"3\" />");
   wfe.write("  <players>");
-  for (std::map<int, fw::Vector>::iterator it = _world->get_player_starts().begin();
-      it != _world->get_player_starts().end(); ++it) {
+  for (std::map<int, fw::Vector>::iterator it = world_->get_player_starts().begin();
+      it != world_->get_player_starts().end(); ++it) {
     wfe.write(
         (boost::format("    <player no=\"%1%\" start=\"%2% %3%\" />") % it->first % it->second[0] % it->second[2]).str());
   }
@@ -85,7 +85,7 @@ void world_writer::write_mapdesc(game::world_file &wf) {
 // of the pixel as a combination of the height of the terrain at that point and the texture that
 // is displayed on the terrain at that point (so "high" and "grass" would be a Light green, etc)
 void world_writer::write_minimap_background(game::world_file &wf) {
-  game::terrain *trn = _world->get_terrain();
+  game::terrain *trn = world_->get_terrain();
   int width = trn->get_width();
   int height = trn->get_length();
 
@@ -145,7 +145,7 @@ fw::Color world_writer::get_terrain_color(int x, int z) {
   int patch_x = static_cast<int>(static_cast<float>(x) / game::terrain::PATCH_SIZE);
   int patch_z = static_cast<int>(static_cast<float>(z) / game::terrain::PATCH_SIZE);
 
-  editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
+  editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
   fw::Bitmap &bmp = trn->get_splatt(patch_x, patch_z);
 
   // centre_u and centre_v are the texture coordinates (in the range [0..1])
@@ -171,7 +171,7 @@ fw::Color world_writer::get_terrain_color(int x, int z) {
 }
 
 void world_writer::calculate_base_minimap_colors() {
-  editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
+  editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
   for (int i = 0; i < 4; i++) {
      // Use the average color of this layer
     std::shared_ptr<fw::Bitmap> layer_bmp = trn->get_layer(i);
@@ -181,7 +181,7 @@ void world_writer::calculate_base_minimap_colors() {
 }
 
 void world_writer::write_collision_data(game::world_file &wf) {
-  editor_terrain *trn = dynamic_cast<editor_terrain *>(_world->get_terrain());
+  editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
   int width = trn->get_width();
   int length = trn->get_length();
 

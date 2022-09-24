@@ -26,33 +26,33 @@ enum ids {
   MAP_LIST
 };
 
-open_map_window::open_map_window() : _wnd(nullptr) {
+open_map_window::open_map_window() : wnd_(nullptr) {
 }
 
 open_map_window::~open_map_window() {
 }
 
 void open_map_window::initialize() {
-  _wnd = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-150)), px(200), px(200))
+  wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-150)), px(200), px(200))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Listbox>(px(10), px(10), sum(pct(100), px(-20)), sum(pct(100), px(-50))) << Widget::id(MAP_LIST))
       << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Open")
           << Widget::click(std::bind(&open_map_window::open_clicked, this, _1)))
       << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Cancel")
           << Widget::click(std::bind(&open_map_window::cancel_clicked, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
   game::world_vfs vfs;
   std::vector<game::world_summary> map_list = vfs.list_maps();
   for(game::world_summary &ws : map_list) {
     std::string title = ws.get_name();
-    _wnd->find<Listbox>(MAP_LIST)->add_item(
+    wnd_->find<Listbox>(MAP_LIST)->add_item(
         Builder<Label>(px(0), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
   }
 }
 
 bool open_map_window::open_clicked(Widget *w) {
-  Widget *selected_widget = _wnd->find<Listbox>(MAP_LIST)->get_selected_item();
+  Widget *selected_widget = wnd_->find<Listbox>(MAP_LIST)->get_selected_item();
   if (selected_widget == nullptr) {
     return true;
   }
@@ -70,11 +70,11 @@ bool open_map_window::cancel_clicked(Widget *w) {
 }
 
 void open_map_window::show() {
-  _wnd->set_visible(true);
+  wnd_->set_visible(true);
 }
 
 void open_map_window::hide() {
-  _wnd->set_visible(false);
+  wnd_->set_visible(false);
 }
 
 }

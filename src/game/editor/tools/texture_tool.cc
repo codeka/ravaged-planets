@@ -34,7 +34,7 @@ enum IDS {
 class texture_tool_window {
 private:
   ed::texture_tool *_tool;
-  Window *_wnd;
+  Window *wnd_;
 
   void on_radius_updated(int new_radius);
   void on_texture_selected(int index);
@@ -49,7 +49,7 @@ public:
 };
 
 texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
-  _wnd = Builder<Window>(px(10), px(30), px(100), px(262)) << Window::background("frame")
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(262)) << Window::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
       << (Builder<Slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
           << Slider::limits(10, 100) << Slider::on_update(std::bind(&texture_tool_window::on_radius_updated, this, _1))
@@ -58,17 +58,17 @@ texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
           << Listbox::item_selected(std::bind(&texture_tool_window::on_texture_selected, this, _1)))
       << (Builder<Label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << Widget::id(TEXTURE_PREVIEW_ID))
       << (Builder<Button>(px(4), px(228), sum(pct(100), px(-8)), px(30)) << Button::text("Change"));
-  fw::Framework::get_instance()->get_gui()->attach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
 texture_tool_window::~texture_tool_window() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(_wnd);
+  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
 void texture_tool_window::show() {
-  _wnd->set_visible(true);
+  wnd_->set_visible(true);
 
-  Listbox *lbx = _wnd->find<Listbox>(TEXTURES_ID);
+  Listbox *lbx = wnd_->find<Listbox>(TEXTURES_ID);
   lbx->clear();
   for (int i = 0; i < _tool->get_terrain()->get_num_layers(); i++) {
     fs::path filename = _tool->get_terrain()->get_layer(i)->get_filename();
@@ -78,7 +78,7 @@ void texture_tool_window::show() {
 }
 
 void texture_tool_window::hide() {
-  _wnd->set_visible(false);
+  wnd_->set_visible(false);
 }
 
 void texture_tool_window::on_texture_selected(int index) {
@@ -88,7 +88,7 @@ void texture_tool_window::on_texture_selected(int index) {
   std::shared_ptr<Drawable> drawable =
       fw::Framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
         layer, 0, 0, layer->get_width(), layer->get_height());
-  _wnd->find<Label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
+  wnd_->find<Label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
   _tool->set_layer(index);
 }
 
@@ -109,11 +109,11 @@ float texture_tool::max_radius = 10;
 
 texture_tool::texture_tool(editor_world *wrld) :
     tool(wrld), _radius(4), _is_painting(false), _layer(0) {
-  _wnd = new texture_tool_window(this);
+  wnd_ = new texture_tool_window(this);
 }
 
 texture_tool::~texture_tool() {
-  delete _wnd;
+  delete wnd_;
 }
 
 void texture_tool::activate() {
@@ -123,13 +123,13 @@ void texture_tool::activate() {
   _keybind_tokens.push_back(
       inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&texture_tool::on_key, this, _1, _2))));
 
-  _wnd->show();
+  wnd_->show();
 }
 
 void texture_tool::deactivate() {
   tool::deactivate();
 
-  _wnd->hide();
+  wnd_->hide();
 }
 
 void texture_tool::update() {

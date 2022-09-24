@@ -49,7 +49,7 @@ void weapon_component::update(float dt) {
   if (_time_to_fire < 0)
     _time_to_fire = 0.0f;
 
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
   std::shared_ptr<ent::entity> target = _target.lock();
   if (target) {
     position_component *our_pos = entity->get_component<position_component>();
@@ -80,7 +80,7 @@ void weapon_component::update(float dt) {
 }
 
 void weapon_component::fire() {
-  std::shared_ptr<ent::entity> entity(_entity);
+  std::shared_ptr<ent::entity> entity(entity_);
   // TODO: entity_id
   std::shared_ptr<ent::entity> ent = entity->get_manager()->create_entity(entity, _fire_entity_name, 0);
 
@@ -97,7 +97,7 @@ void weapon_component::fire() {
   }
 
   // fire our "Fire" audio cue
-  //audio_component *our_audio = _entity->get_component<audio_component>();
+  //audio_component *our_audio = entity_->get_component<audio_component>();
   //if (our_audio != nullptr) {
   //  our_audio->play_cue("Fire");
   //}

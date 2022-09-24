@@ -39,12 +39,12 @@ public:
     return true;
   }
 
-  // This is called to initialize the application
+  // This is called to initialize the Application
   virtual bool initialize(Framework *frmwrk) {
     return false;
   }
 
-  // This is called when the application is exiting.
+  // This is called when the Application is exiting.
   virtual void destroy() {
   }
 

@@ -86,7 +86,7 @@ public:
   fw::Point measure_glyph(uint32_t ch);
 
   /**
-   * Draws the given string on the screen at the given (x,y) coordinates.
+   * Draws the given string on the Screen at the given (x,y) coordinates.
    */
   void draw_string(int x, int y, std::string const &str, DrawFlags flags = kDrawDefault,
       fw::Color color = fw::Color::WHITE());

@@ -35,7 +35,7 @@ typedef uint32_t entity_id;
 
 class entity_component {
 protected:
-  std::weak_ptr<entity> _entity;
+  std::weak_ptr<entity> entity_;
 
 public:
   entity_component();
@@ -65,7 +65,7 @@ public:
    * instead wait for initialize() to be called.
    */
   void set_entity(std::weak_ptr<entity> ent) {
-    _entity = ent;
+    entity_ = ent;
   }
 
   /**

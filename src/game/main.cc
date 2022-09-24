@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   try {
     game::settings_initialize(argc, argv);
 
-    game::application app;
+    game::Application app;
     new fw::Framework(&app);
     fw::Framework::get_instance()->initialize("Ravaged Planet");
 

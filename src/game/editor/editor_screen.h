@@ -7,10 +7,10 @@ class tool;
 class editor_terrain;
 class editor_world;
 
-class editor_screen: public game::screen {
+class editor_screen: public game::Screen {
 private:
   tool *_tool;
-  editor_world *_world;
+  editor_world *world_;
 
 public:
   editor_screen();
@@ -19,10 +19,10 @@ public:
   virtual void show();
   virtual void hide();
 
-  // updates the "world", this is only called if we're the active screen
+  // updates the "world", this is only called if we're the active Screen
   virtual void update();
 
-  // renders this screen, this is only called if we're the active screen
+  // renders this Screen, this is only called if we're the active Screen
   virtual void render(fw::sg::Scenegraph &Scenegraph);
 
   // create a new map to edit

@@ -1548,7 +1548,7 @@ enum Whitespace {
 
 
 /** A Document binds together all the functionality.
-  It can be saved, loaded, and printed to the screen.
+  It can be saved, loaded, and printed to the Screen.
   All Nodes are connected and allocated to a Document.
   If the Document is deleted, all its Nodes are also deleted.
 */

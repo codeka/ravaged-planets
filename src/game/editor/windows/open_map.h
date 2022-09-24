@@ -11,7 +11,7 @@ namespace ed {
 
 class open_map_window {
 private:
-  fw::gui::Window *_wnd;
+  fw::gui::Window *wnd_;
 
   bool open_clicked(fw::gui::Widget *w);
   bool cancel_clicked(fw::gui::Widget *w);

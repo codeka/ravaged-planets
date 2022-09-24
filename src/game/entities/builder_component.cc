@@ -26,7 +26,7 @@ builder_component::~builder_component() {
 }
 
 void builder_component::initialize() {
-  std::shared_ptr<entity> entity(_entity);
+  std::shared_ptr<entity> entity(entity_);
   selectable_component *sel = entity->get_component<selectable_component>();
   if (sel != nullptr) {
     sel->sig_selected.connect(std::bind(&builder_component::on_selected, this, _1));
@@ -37,7 +37,7 @@ void builder_component::initialize() {
 void builder_component::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "BuildGroup") {
-//      _build_group = luabind::object_cast<std::string>(*it);
+//      build_group_ = luabind::object_cast<std::string>(*it);
 //    }
 //  }
 }
@@ -46,7 +46,7 @@ void builder_component::apply_template(luabind::object const &tmpl) {
 void builder_component::on_selected(bool selected) {
   if (selected) {
     game::hud_build->show();
-    game::hud_build->refresh(_entity, _build_group);
+    game::hud_build->refresh(entity_, build_group_);
   } else {
     game::hud_build->hide();
   }
@@ -84,7 +84,7 @@ void builder_component::update(float dt) {
     entry.percent_complete = 100.0f;
 
     // we've finished so actually create the entity
-    std::shared_ptr<entity> entity(_entity);
+    std::shared_ptr<entity> entity(entity_);
     ownable_component *our_ownable = entity->get_component<ownable_component>();
     if (our_ownable != nullptr && our_ownable->is_local_or_ai_player()) {
       position_component *our_pos = entity->get_component<position_component>();

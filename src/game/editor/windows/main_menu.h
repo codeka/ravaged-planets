@@ -12,9 +12,9 @@ namespace ed {
 class editor_screen;
 
 // Represents the main menu ("File", "Edit", and all that jazz)
-class main_menu_window {
+class MainMenuWindow {
 private:
-  fw::gui::Window *_wnd;
+  fw::gui::Window *wnd_;
   fw::gui::Window *_file_menu;
   fw::gui::Window *_tool_menu;
 
@@ -31,8 +31,8 @@ private:
   bool map_screenshot_clicked(fw::gui::Widget *w);
 
 public:
-  main_menu_window();
-  ~main_menu_window();
+  MainMenuWindow();
+  ~MainMenuWindow();
 
   void initialize();
   void show();
@@ -42,7 +42,7 @@ public:
 // represents the statusbar
 class statusbar_window {
 private:
-  fw::gui::Window *_wnd;
+  fw::gui::Window *wnd_;
 public:
   statusbar_window();
   ~statusbar_window();
@@ -54,7 +54,7 @@ public:
   void set_message(std::string const &msg);
 };
 
-extern main_menu_window *main_menu;
+extern MainMenuWindow *main_menu;
 extern statusbar_window *statusbar;
 
 }
