@@ -4,6 +4,8 @@
 #include <boost/program_options.hpp>
 
 #include <framework/lua.h>
+#include <framework/lua/method.h>
+#include <framework/lua/table.h>
 #include <framework/settings.h>
 #include <framework/framework.h>
 #include <framework/logging.h>
@@ -13,53 +15,54 @@ namespace po = boost::program_options;
 
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
-/*
-std::shared_ptr<fw::lua_callback> g_callback;
 
 //-----------------------------------------------------------------------------
-class unit_wrapper {
+
+/*
+class UnitWrapper {
 private:
-  int l_attack(fw::lua_context &ctx);
+  int l_attack(fw::lua::MethodContext &ctx);
 
   void attack(std::string const &msg);
 public:
   static char const class_name[];
   static fw::lua_registrar<unit_wrapper>::method_definition methods[];
 
-  unit_wrapper();
+  UnitWrapper();
 };
 
-class ai_player {
-private:
-  int l_say(fw::lua_context &ctx);
-  int l_find(fw::lua_context &ctx);
-  int l_timer(fw::lua_context &ctx);
-
-  void say(std::string const &msg);
-  std::vector<unit_wrapper *> find();
-public:
-  static char const class_name[];
-  static fw::lua_registrar<ai_player>::method_definition methods[];
-};
-
-char const unit_wrapper::class_name[] = "Unit";
+char const UnitWrapper::class_name[] = "Unit";
 fw::lua_registrar<unit_wrapper>::method_definition unit_wrapper::methods[] = {
   {"attack", &unit_wrapper::l_attack},
   {nullptr, nullptr}
 };
 
-unit_wrapper::unit_wrapper() {
+UnitWrapper::UnitWrapper() {
 }
 
-int unit_wrapper::l_attack(fw::lua_context &ctx) {
+int UnitWrapper::l_attack(fw::lua::MethodContext& ctx) {
   char const *msg = luaL_checkstring(ctx.get_state(), 1);
   attack(msg);
   return 1;
 }
 
-void unit_wrapper::attack(std::string const &msg) {
+void UnitWrapper::attack(std::string const &msg) {
   fw::debug << "ATTACK: " << msg << std::endl;
 }
+*/
+/*
+class ai_player {
+private:
+  int l_say(fw::lua_context& ctx);
+  int l_find(fw::lua_context& ctx);
+  int l_timer(fw::lua_context& ctx);
+
+  void say(std::string const& msg);
+  std::vector<unit_wrapper*> find();
+public:
+  static char const class_name[];
+  static fw::lua_registrar<ai_player>::method_definition methods[];
+};
 
 char const ai_player::class_name[] = "Player";
 fw::lua_registrar<ai_player>::method_definition ai_player::methods[] = {
@@ -99,6 +102,27 @@ std::vector<unit_wrapper *> ai_player::find() {
   return units;
 }
 */
+
+class LogWrapper {
+private:
+  static void l_debug(fw::lua::MethodContext<LogWrapper>& ctx) {
+    ctx.owner()->debug(ctx.arg<std::string>(0));
+  }
+
+public:
+  void debug(std::string msg) {
+    fw::debug << msg << std::endl;
+  }
+
+  static fw::lua::Metatable<LogWrapper> metatable;
+};
+
+fw::lua::Metatable<LogWrapper> LogWrapper::metatable =
+    fw::lua::Metatable<LogWrapper>("log", fw::lua::TableBuilder<LogWrapper>()
+        .method("debug", LogWrapper::l_debug));
+
+LogWrapper log_wrapper;
+
 //-----------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
@@ -118,6 +142,8 @@ int main(int argc, char** argv) {
     obj["test"] = "I passed the test!";
     obj["test2"] = "and I will go into the West and remain Galadriel";
     ctx.globals()["test"] = obj;
+
+    ctx.globals()["log"] = ctx.wrap(&log_wrapper);
 
     ctx.add_path("D:\\src\\ravaged-planets\\lua");
     ctx.load_script("D:\\src\\ravaged-planets\\lua\\main.lua");

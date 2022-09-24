@@ -21,6 +21,11 @@ public:
 
   ~Reference();
 
+  // Evaluates to true if we are not nil.
+  operator bool() const {
+    return l_ != nullptr;
+  }
+
   void swap(Reference& other);
   Reference& operator=(Reference other);
 

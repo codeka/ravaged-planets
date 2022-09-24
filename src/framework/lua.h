@@ -5,6 +5,8 @@
 #include <boost/filesystem.hpp>
 
 #include <framework/lua/base.h>
+#include <framework/lua/table.h>
+#include <framework/lua/userdata.h>
 #include <framework/lua/value.h>
 
 namespace fw::lua {
@@ -38,6 +40,22 @@ public:
   // Creates a brand new table, adds it to the registry. You can add your methods, fields etc to this table
   // then make it a global or pass it to a function or whatever you need.
   Value create_table();
+
+  // Wrap the given object in a Userdata and return it so that you can push it onto the stack,
+  // assign it to a global or whatever. The reference type T must have a public static field
+  // named lua_registry_entry in order for us to wrap it.
+  template<typename T>
+  inline Value wrap(T* object) {
+    Userdata<T>* userdata = new(lua_newuserdata(l_, sizeof(Userdata<T>))) Userdata<T>(l_, object);
+    impl::PopStack pop(l_, 1);
+
+    Metatable<T>& metatable = T::metatable;
+    metatable.push(l_);
+
+    lua_setmetatable(l_, -2);
+
+    return Value(l_, -1);
+  }
 
   // If something returns an error, this'll return a string version of the last error that occurred.
   std::string get_last_error() const { return last_error_; }

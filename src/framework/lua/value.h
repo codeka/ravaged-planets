@@ -50,7 +50,7 @@ public:
   operator Value();
 
   template<typename T>
-  IndexValue& operator=(const T& value) {
+  inline IndexValue& operator=(const T& value) {
     // Push the table (which is next_), then push the key (again), push the new value, call set table with the value
     // below the key. Pop the table again once we're done (lua_settable automatically pops the key & value).
     lua::push(l_, next_);
@@ -60,10 +60,19 @@ public:
     return *this;
   }
 
+  template<class T>
+  inline IndexValue<IndexValue> operator[](const T& key) {
+    return IndexValue<IndexValue>(*this, ref_.l(), key);
+  }
+
   inline void push() {
     lua_pushvalue(l_, key_);
     lua_gettable(l_, -2);
     lua_remove(l_, -2);
+  }
+
+  inline bool is_nil() {
+    return !ref_;
   }
 
 private:
