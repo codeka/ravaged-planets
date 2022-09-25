@@ -70,7 +70,7 @@ public:
 };
 
 /**
- * This class is issues when a new entity is to be created (e.g. when a factory has finished building, when a unit is
+ * This class is issues when a new Entity is to be created (e.g. when a factory has finished building, when a unit is
  * about it fire it's weapon, etc).
  */
 class create_entity_command: public command {
@@ -97,12 +97,12 @@ public:
 };
 
 /**
- * This is the command that is executed when an entity is about to begin executing an order. The actual queuing and
+ * This is the command that is executed when an Entity is about to begin executing an order. The actual queuing and
  * so on happens on the client-side and this command is executed only when the command reaches the front of the queue.
  */
 class order_command: public command {
 public:
-  ent::entity_id entity;
+  ent::entity_id Entity;
   std::shared_ptr<game::order> order;
 
   order_command(uint8_t player_no);

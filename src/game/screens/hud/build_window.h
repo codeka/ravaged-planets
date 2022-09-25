@@ -11,15 +11,15 @@ class Widget;
 }
 
 namespace ent {
-class entity;
+class Entity;
 }
 namespace game {
 
-// The BuildWindow shows all of the units an entity with builder_component can build.
+// The BuildWindow shows all of the units an Entity with BuilderComponent can build.
 class BuildWindow {
 private:
   fw::gui::Window *wnd_;
-  std::weak_ptr<ent::entity> entity_;
+  std::weak_ptr<ent::Entity> entity_;
   std::string build_group_;
   bool require_refresh_;
   int mouse_over_button_id_;
@@ -32,7 +32,7 @@ public:
   BuildWindow();
   virtual ~BuildWindow();
 
-  void refresh(std::weak_ptr<ent::entity> entity, std::string build_group);
+  void refresh(std::weak_ptr<ent::Entity> Entity, std::string build_group);
 
   void initialize();
   void update();

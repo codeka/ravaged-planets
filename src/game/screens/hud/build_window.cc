@@ -41,7 +41,7 @@ enum ids {
 //-----------------------------------------------------------------------------
 
 /**
- * Holds information nessecary to render an icon for a given entity.
+ * Holds information nessecary to render an icon for a given Entity.
  */
 class entity_icon {
 private:
@@ -176,8 +176,8 @@ void BuildWindow::hide() {
   wnd_->set_visible(false);
 }
 
-void BuildWindow::refresh(std::weak_ptr<ent::entity> entity, std::string build_group) {
-  entity_ = entity;
+void BuildWindow::refresh(std::weak_ptr<ent::Entity> Entity, std::string build_group) {
+  entity_ = Entity;
   build_group_ = build_group;
   require_refresh_ = true;
 }
@@ -187,9 +187,9 @@ bool BuildWindow::on_build_clicked(Widget *w, int id) {
   auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
   if (iconp != nullptr) {
     std::string tmpl_name = (*iconp)->get_template_name();
-    std::shared_ptr<ent::entity> entity(entity_);
-    if (entity) {
-      entity->get_component<ent::builder_component>()->build(tmpl_name);
+    std::shared_ptr<ent::Entity> Entity(entity_);
+    if (Entity) {
+      Entity->get_component<ent::BuilderComponent>()->build(tmpl_name);
     }
   }
 
@@ -216,7 +216,7 @@ void BuildWindow::on_mouse_out_button(int id) {
 
 void BuildWindow::do_refresh() {
   std::vector<luabind::object> templates;
-  ent::entity_factory ent_factory;
+  ent::EntityFactory ent_factory;
   ent_factory.get_buildable_templates(build_group_, templates);
 
   int index = 0;

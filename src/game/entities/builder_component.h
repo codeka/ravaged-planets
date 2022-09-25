@@ -7,12 +7,12 @@
 
 namespace ent {
 class entity_template;
-class particle_effect_component;
+class ParticleEffectComponent;
 
 /**
  * This component is attached to entities who have the ability to build things (units, buildings, etc).
  */
-class builder_component: public entity_component, public boost::signals2::trackable {
+class BuilderComponent : public EntityComponent, public boost::signals2::trackable {
 private:
   struct queue_entry {
     luabind::object tmpl;
@@ -20,7 +20,7 @@ private:
     float time_remaining;
     float percent_complete;
   };
-  particle_effect_component *_particle_effect_component;
+  ParticleEffectComponent *_particle_effect_component;
   std::string build_group_;
   std::queue<queue_entry> _build_queue;
 
@@ -32,8 +32,8 @@ public:
     return identifier;
   }
 
-  builder_component();
-  ~builder_component();
+  BuilderComponent();
+  ~BuilderComponent();
 
   void build(std::string name);
   bool is_building() const;

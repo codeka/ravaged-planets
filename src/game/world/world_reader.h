@@ -24,7 +24,7 @@ protected:
   virtual terrain *create_terrain(int width, int length);
 
   std::map<int, fw::Vector> _player_starts;
-  std::string _name;
+  std::string name_;
   std::string _description;
   std::string _author;
 
@@ -53,7 +53,7 @@ public:
     return _screenshot;
   }
   std::string get_name() const {
-    return _name;
+    return name_;
   }
   std::string get_description() const {
     return _description;

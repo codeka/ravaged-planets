@@ -7,36 +7,36 @@
 
 namespace ent {
 
-ENT_COMPONENT_REGISTER("Ownable", ownable_component);
+ENT_COMPONENT_REGISTER("Ownable", OwnableComponent);
 
-ownable_component::ownable_component() :
-    _owner(nullptr) {
+OwnableComponent::OwnableComponent() :
+    owner_(nullptr) {
 }
 
-ownable_component::~ownable_component() {
+OwnableComponent::~OwnableComponent() {
 }
 
-void ownable_component::set_owner(game::player *owner) {
-  _owner = owner;
+void OwnableComponent::set_owner(game::player *owner) {
+  owner_ = owner;
   owner_changed_event(this);
 }
 
-bool ownable_component::is_local_player() const {
-  if (_owner == nullptr)
+bool OwnableComponent::is_local_player() const {
+  if (owner_ == nullptr)
     return false;
 
   game::player *local_player = game::simulation_thread::get_instance()->get_local_player();
-  return (local_player == _owner);
+  return (local_player == owner_);
 }
 
-bool ownable_component::is_local_or_ai_player() const {
-  if (_owner == nullptr)
+bool OwnableComponent::is_local_or_ai_player() const {
+  if (owner_ == nullptr)
     return false;
 
   if (is_local_player())
     return true;
 
-  game::ai_player *ai_owner = dynamic_cast<game::ai_player *>(_owner);
+  game::ai_player *ai_owner = dynamic_cast<game::ai_player *>(owner_);
   if (ai_owner != nullptr)
     return true;
 

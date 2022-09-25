@@ -16,7 +16,7 @@ class Scenegraph;
 }
 
 namespace ent {
-class entity_manager;
+class EntityManager;
 }
 
 namespace game {
@@ -32,7 +32,7 @@ class world {
 private:
   std::shared_ptr<world_reader> _reader;
   terrain *_terrain;
-  ent::entity_manager *_entities;
+  ent::EntityManager *_entities;
   pathing_thread *_pathing;
   std::vector<int> _keybind_tokens;
   cursor_handler *cursor_;
@@ -40,7 +40,7 @@ private:
   std::map<int, fw::Vector> _player_starts;
 
   std::string _description;
-  std::string _name;
+  std::string name_;
   std::string _author;
   bool _initialized;
 
@@ -93,7 +93,7 @@ public:
   terrain *get_terrain() const {
     return _terrain;
   }
-  ent::entity_manager *get_entity_manager() const {
+  ent::EntityManager *get_entity_manager() const {
     return _entities;
   }
   pathing_thread *get_pathing() const {
@@ -108,10 +108,10 @@ public:
   }
 
   std::string get_name() const {
-    return _name;
+    return name_;
   }
   void set_name(std::string name) {
-    _name = name;
+    name_ = name;
   }
 
   std::string get_author() const {

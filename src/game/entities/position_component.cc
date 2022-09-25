@@ -15,17 +15,17 @@ using namespace std::placeholders;
 namespace ent {
 
 // register the position component with the entity_factory
-ENT_COMPONENT_REGISTER("Position", position_component);
+ENT_COMPONENT_REGISTER("Position", PositionComponent);
 
-position_component::position_component() :
-    pos_(0, 0, 0), dir_(0, 0, 1), _up(0, 1, 0), _pos_updated(true), _sit_on_terrain(false),
-    _orient_to_terrain(false), _patch(0) {
+PositionComponent::PositionComponent() :
+    pos_(0, 0, 0), dir_(0, 0, 1), up_(0, 1, 0), pos_updated_(true), sit_on_terrain_(false),
+    orient_to_terrain_(false), patch_(0) {
 }
 
-position_component::~position_component() {
+PositionComponent::~PositionComponent() {
 }
 
-void position_component::apply_template(luabind::object const &tmpl) {
+void PositionComponent::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "SitOnTerrain") {
 //      set_sit_on_terrain(luabind::object_cast<bool>(*it));
@@ -35,29 +35,29 @@ void position_component::apply_template(luabind::object const &tmpl) {
 //  }
 }
 
-void position_component::set_sit_on_terrain(bool sit_on_terrain) {
-  _sit_on_terrain = sit_on_terrain;
-  if (_sit_on_terrain)
-    _orient_to_terrain = true;
+void PositionComponent::set_sit_on_terrain(bool sit_on_terrain) {
+  sit_on_terrain_ = sit_on_terrain;
+  if (sit_on_terrain_)
+    orient_to_terrain_ = true;
 }
 
-void position_component::update(float) {
+void PositionComponent::update(float) {
   set_final_position();
 }
 
-void position_component::set_final_position() {
-  if (_pos_updated) {
+void PositionComponent::set_final_position() {
+  if (pos_updated_) {
     game::terrain *terrain = game::world::get_instance()->get_terrain();
-    if (_sit_on_terrain) {
+    if (sit_on_terrain_) {
       // if we're supposed to sit on the terrain, make sure we're doing that now.
       pos_ = fw::Vector(pos_[0], terrain->get_height(pos_[0], pos_[2]), pos_[2]);
     }
 
-    if (_orient_to_terrain) {
+    if (orient_to_terrain_) {
       // if we're supposed to orient ourselves with the terrain (so it looks like we're sitting flat on the
       // terrain, rather than perfectly horizontal) do that as well. Basically, we sample the terrain at three
       // places, calculate the normal and orient ourselves to that.
-      fw::Vector right = cml::cross(_up, dir_).normalize();
+      fw::Vector right = cml::cross(up_, dir_).normalize();
       fw::Vector v1 = pos_ + dir_;
       fw::Vector v2 = pos_ + right;
       fw::Vector v3 = pos_ - right;
@@ -66,7 +66,7 @@ void position_component::set_final_position() {
       v2[1] = terrain->get_height(v2[0], v2[2]);
       v3[1] = terrain->get_height(v3[0], v3[2]);
 
-      _up = cml::cross(v2 - v1, v3 - v1).normalize();
+      up_ = cml::cross(v2 - v1, v3 - v1).normalize();
       dir_ = fw::Vector(dir_[0], 0.0f, dir_[2]).normalize();
     }
 
@@ -76,64 +76,64 @@ void position_component::set_final_position() {
     pos_ = fw::Vector(x, pos_[1], z);
 
     // make sure we "exist" in the correct patch as well...
-    std::shared_ptr<ent::entity> entity(entity_);
-    entity_manager *emgr = entity->get_manager();
-    patch_manager *pmgr = emgr->get_patch_manager();
-    patch *new_patch = pmgr->get_patch(x, z);
-    if (new_patch != _patch) {
-      if (_patch != nullptr) {
-        _patch->remove_entity(entity);
+    std::shared_ptr<ent::Entity> Entity(entity_);
+    EntityManager *emgr = Entity->get_manager();
+    PatchManager *pmgr = emgr->get_patch_manager();
+    Patch *new_patch = pmgr->get_patch(x, z);
+    if (new_patch != patch_) {
+      if (patch_ != nullptr) {
+        patch_->remove_entity(Entity);
       }
 
-      new_patch->add_entity(entity);
-      _patch = new_patch;
+      new_patch->add_entity(Entity);
+      patch_ = new_patch;
     }
 
-    _pos_updated = false;
+    pos_updated_ = false;
   }
 }
 
-void position_component::set_position(fw::Vector const &pos) {
-  std::shared_ptr<ent::entity> entity(entity_);
-  float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
-  float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
+void PositionComponent::set_position(fw::Vector const &pos) {
+  std::shared_ptr<ent::Entity> Entity(entity_);
+  float world_width = Entity->get_manager()->get_patch_manager()->get_world_width();
+  float world_length = Entity->get_manager()->get_patch_manager()->get_world_length();
 
   pos_ = fw::Vector(fw::constrain(pos[0], world_width, 0.0f), pos[1], fw::constrain(pos[2], world_length, 0.0f));
 
-  _pos_updated = true;
+  pos_updated_ = true;
 }
 
-fw::Vector position_component::get_position(bool allow_update) {
+fw::Vector PositionComponent::get_position(bool allow_update) {
   if (allow_update) {
     set_final_position();
   }
   return pos_;
 }
 
-void position_component::set_direction(fw::Vector const &dir) {
+void PositionComponent::set_direction(fw::Vector const &dir) {
   dir_ = dir;
-  _pos_updated = true;
+  pos_updated_ = true;
 }
 
-fw::Vector position_component::get_direction() const {
+fw::Vector PositionComponent::get_direction() const {
   return dir_;
 }
 
-fw::Matrix position_component::get_transform() const {
+fw::Matrix PositionComponent::get_transform() const {
   fw::Matrix m = fw::identity();
   m *= fw::rotate(fw::Vector(0, 0, 1), dir_);
-  m *= fw::rotate(fw::Vector(0, 1, 0), _up);
+  m *= fw::rotate(fw::Vector(0, 1, 0), up_);
   m *= fw::translation(pos_);
 
   return m;
 }
 
-fw::Vector position_component::get_direction_to(fw::Vector const &point) const {
+fw::Vector PositionComponent::get_direction_to(fw::Vector const &point) const {
   fw::Vector dir = point - pos_;
 
-  std::shared_ptr<ent::entity> entity(entity_);
-  float width = entity->get_manager()->get_patch_manager()->get_world_width();
-  float length = entity->get_manager()->get_patch_manager()->get_world_length();
+  std::shared_ptr<ent::Entity> Entity(entity_);
+  float width = Entity->get_manager()->get_patch_manager()->get_world_width();
+  float length = Entity->get_manager()->get_patch_manager()->get_world_length();
   for (int z = -1; z <= 1; z++) {
     for (int x = -1; x <= 1; x++) {
       fw::Vector another_point(point[0] + (x * width), point[1], point[2] + (z * length));
@@ -147,24 +147,24 @@ fw::Vector position_component::get_direction_to(fw::Vector const &point) const {
   return dir;
 }
 
-fw::Vector position_component::get_direction_to(std::shared_ptr<entity> entity) const {
-  position_component *their_position = entity->get_component<position_component>();
+fw::Vector PositionComponent::get_direction_to(std::shared_ptr<Entity> Entity) const {
+  PositionComponent *their_position = Entity->get_component<PositionComponent>();
   if (their_position != nullptr)
     return get_direction_to(their_position->get_position());
 
   return fw::Vector(0, 0, 0);
 }
 
-// searches for the nearest entity to us which matches the given predicate
-std::weak_ptr<entity> position_component::get_nearest_entity(
-    std::function<bool(std::shared_ptr<entity> const &)> pred) const {
-  std::shared_ptr<entity> closest;
+// searches for the nearest Entity to us which matches the given predicate
+std::weak_ptr<Entity> PositionComponent::get_nearest_entity(
+    std::function<bool(std::shared_ptr<Entity> const &)> pred) const {
+  std::shared_ptr<Entity> closest;
   float closest_distance = 0.0f;
 
-  std::shared_ptr<entity> us(entity_);
-  std::list<std::weak_ptr<entity>> patch_entities = _patch->get_entities();
+  std::shared_ptr<Entity> us(entity_);
+  std::list<std::weak_ptr<Entity>> patch_entities = patch_->get_entities();
   for (auto it = patch_entities.begin(); it != patch_entities.end(); ++it) {
-    std::shared_ptr<entity> ent = (*it).lock();
+    std::shared_ptr<Entity> ent = (*it).lock();
     if (!ent) {
       continue;
     }
@@ -173,7 +173,7 @@ std::weak_ptr<entity> position_component::get_nearest_entity(
       continue;
     }
 
-    position_component *their_pos = ent->get_component<position_component>();
+    PositionComponent *their_pos = ent->get_component<PositionComponent>();
     if (their_pos == nullptr) {
       continue;
     }
@@ -185,43 +185,43 @@ std::weak_ptr<entity> position_component::get_nearest_entity(
     }
   }
 
-  return std::weak_ptr<entity>(closest);
+  return std::weak_ptr<Entity>(closest);
 }
 
-// searches for the nearest entity to us
-std::weak_ptr<entity> position_component::get_nearest_entity() const {
-  return get_nearest_entity([](std::shared_ptr<entity> const &) { return true; });
+// searches for the nearest Entity to us
+std::weak_ptr<Entity> PositionComponent::get_nearest_entity() const {
+  return get_nearest_entity([](std::shared_ptr<Entity> const &) { return true; });
 }
 
-std::weak_ptr<entity> position_component::get_nearest_entity_with_component(int component_type) const {
-  return get_nearest_entity([component_type](std::shared_ptr<entity> const &ent) {
+std::weak_ptr<Entity> PositionComponent::get_nearest_entity_with_component(int component_type) const {
+  return get_nearest_entity([component_type](std::shared_ptr<Entity> const &ent) {
     return ent->contains_component(component_type);
   });
 }
 
 //-------------------------------------------------------------------------
 
-patch::patch(fw::Vector const &origin) :
-    _origin(origin) {
+Patch::Patch(fw::Vector const &origin) :
+    origin_(origin) {
 }
 
-patch::~patch() {
+Patch::~Patch() {
 }
 
-void patch::add_entity(std::weak_ptr<entity> entity) {
-  _entities.push_back(entity);
+void Patch::add_entity(std::weak_ptr<Entity> Entity) {
+  entities_.push_back(Entity);
 }
 
-void patch::remove_entity(std::weak_ptr<entity> entity) {
-  std::shared_ptr<ent::entity> ent = entity.lock();
+void Patch::remove_entity(std::weak_ptr<Entity> Entity) {
+  std::shared_ptr<ent::Entity> ent = Entity.lock();
   if (!ent) {
     return;
   }
 
-  for (auto it = _entities.begin(); it != _entities.end();) {
-    std::shared_ptr<ent::entity> other_ent = (*it).lock();
+  for (auto it = entities_.begin(); it != entities_.end();) {
+    std::shared_ptr<ent::Entity> other_ent = (*it).lock();
     if (other_ent && other_ent == ent) {
-      it = _entities.erase(it);
+      it = entities_.erase(it);
     } else {
       ++it;
     }
@@ -230,38 +230,38 @@ void patch::remove_entity(std::weak_ptr<entity> entity) {
 
 //-------------------------------------------------------------------------
 
-patch_manager::patch_manager(float size_x, float size_z) {
-  _patch_width = static_cast<int>(size_x / PATCH_SIZE);
-  _patch_length = static_cast<int>(size_z / PATCH_SIZE);
+PatchManager::PatchManager(float size_x, float size_z) {
+  patch_width_ = static_cast<int>(size_x / PATCH_SIZE);
+  patch_length_ = static_cast<int>(size_z / PATCH_SIZE);
 
-  _patches.resize(_patch_width * _patch_length);
-  for (int z = 0; z < _patch_length; z++) {
-    for (int x = 0; x < _patch_width; x++) {
-      patch *p = new patch(fw::Vector(static_cast<float>(x * PATCH_SIZE), 0.0f, static_cast<float>(z * PATCH_SIZE)));
-      _patches[get_patch_index(x, z)] = p;
+  patches_.resize(patch_width_ * patch_length_);
+  for (int z = 0; z < patch_length_; z++) {
+    for (int x = 0; x < patch_width_; x++) {
+      Patch *p = new Patch(fw::Vector(static_cast<float>(x * PATCH_SIZE), 0.0f, static_cast<float>(z * PATCH_SIZE)));
+      patches_[get_patch_index(x, z)] = p;
     }
   }
 }
 
-patch_manager::~patch_manager() {
-  for(patch_list::value_type patch : _patches) {
+PatchManager::~PatchManager() {
+  for(auto patch : patches_) {
     delete patch;
   }
-  _patches.clear();
+  patches_.clear();
 }
 
-patch *patch_manager::get_patch(float x, float z) {
+Patch *PatchManager::get_patch(float x, float z) {
   int patch_x = static_cast<int>(floor(x / PATCH_SIZE));
   int patch_z = static_cast<int>(floor(z / PATCH_SIZE));
 
   return get_patch(patch_x, patch_z);
 }
 
-patch *patch_manager::get_patch(int patch_x, int patch_z) {
-  return _patches[get_patch_index(patch_x, patch_z)];
+Patch *PatchManager::get_patch(int patch_x, int patch_z) {
+  return patches_[get_patch_index(patch_x, patch_z)];
 }
 
-int patch_manager::get_patch_index(int patch_x, int patch_z, int *new_patch_x /*= 0*/, int *new_patch_z /*= 0*/) {
+int PatchManager::get_patch_index(int patch_x, int patch_z, int *new_patch_x /*= 0*/, int *new_patch_z /*= 0*/) {
   patch_x = fw::constrain(patch_x, get_patch_width());
   patch_z = fw::constrain(patch_z, get_patch_length());
 

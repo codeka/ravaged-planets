@@ -8,33 +8,33 @@ class Model;
 }
 
 namespace ent {
-class ownable_component;
+class OwnableComponent;
 
 // the mesh component is a member of all entities that have mesh data, basically
 // all the visible entities
-class mesh_component: public entity_component {
+class MeshComponent: public EntityComponent {
 private:
-  ownable_component *_ownable_component;
-  std::string _model_name;
+  OwnableComponent *ownable_component_;
+  std::string model_name_;
   std::shared_ptr<fw::Model> model_;
 
 public:
   static const int identifier = 200;
 
-  mesh_component();
-  mesh_component(std::shared_ptr<fw::Model> const &Model);
-  virtual ~mesh_component();
+  MeshComponent();
+  MeshComponent(std::shared_ptr<fw::Model> const &Model);
+  virtual ~MeshComponent();
 
   virtual void apply_template(luabind::object const &tmpl);
 
-  // this is called after the entity has added all of it's components
+  // this is called after the Entity has added all of it's components
   virtual void initialize();
 
   std::shared_ptr<fw::Model> get_model() const {
     return model_;
   }
   std::string get_model_name() const {
-    return _model_name;
+    return model_name_;
   }
 
   virtual void render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform);

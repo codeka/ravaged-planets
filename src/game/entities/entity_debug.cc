@@ -29,20 +29,20 @@ enum ids {
   GOAL_ID,
 };
 
-entity_debug::entity_debug(entity_manager *mgr) :
-    mgr_(mgr), _just_shown(false), wnd_(nullptr) {
+EntityDebug::EntityDebug(EntityManager *mgr) :
+    mgr_(mgr), just_shown_(false), wnd_(nullptr) {
 }
 
-entity_debug::~entity_debug() {
+EntityDebug::~EntityDebug() {
   fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void entity_debug::initialize() {
+void EntityDebug::initialize() {
   wnd_ = Builder<Window>(px(10), px(10), px(200), px(106))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Checkbox>(px(10), px(10), sum(pct(100), px(-20)), px(26))
           << Checkbox::text("Show steering") << Widget::id(SHOW_STEERING_ID)
-          << Widget::click(std::bind(&entity_debug::on_show_steering_changed, this, _1)))
+          << Widget::click(std::bind(&EntityDebug::on_show_steering_changed, this, _1)))
       << (Builder<Label>(px(10), px(46), sum(pct(100), px(-20)), px(20))
           << Label::text("Pos: ") << Widget::id(POSITION_ID))
       << (Builder<Label>(px(10), px(76), sum(pct(100), px(-20)), px(20))
@@ -51,33 +51,33 @@ void entity_debug::initialize() {
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
   fw::Input *inp = fw::Framework::get_instance()->get_input();
-  inp->bind_key("Ctrl+D", std::bind(&entity_debug::on_key_press, this, _1, _2));
+  inp->bind_key("Ctrl+D", std::bind(&EntityDebug::on_key_press, this, _1, _2));
 }
 
-void entity_debug::update() {
+void EntityDebug::update() {
   if (wnd_ == nullptr)
     initialize();
 
   std::string new_pos_value;
   std::string new_goal_value;
 
-  std::list<std::weak_ptr<entity> > selection = mgr_->get_selection();
+  std::list<std::weak_ptr<Entity> > selection = mgr_->get_selection();
   if (selection.size() > 0) {
-    // we display some info about the selected entity (if there's more than one, we just use the first one from the
+    // we display some info about the selected Entity (if there's more than one, we just use the first one from the
     // list - essentially a Random one)
-    std::shared_ptr<entity> entity = selection.front().lock();
-    if (!entity) {
+    std::shared_ptr<Entity> Entity = selection.front().lock();
+    if (!Entity) {
       return;
     }
 
-    position_component *pos = entity->get_component<position_component>();
+    PositionComponent *pos = Entity->get_component<PositionComponent>();
 
     if (pos != 0) {
       new_pos_value = (boost::format("Pos: (%1$.1f, %2$.1f, %3$.1f)")
           % pos->get_position()[0] % pos->get_position()[1] % pos->get_position()[2]).str();
     }
 
-    moveable_component *moveable = entity->get_component<moveable_component>();
+    MoveableComponent *moveable = Entity->get_component<MoveableComponent>();
     if (moveable != nullptr) {
       fw::Vector goal = moveable->get_goal();
       new_goal_value = (boost::format("Goal: (%1$.1f, %2$.1f, %3$.1f)") % goal[0] % goal[1] % goal[2]).str();
@@ -88,29 +88,29 @@ void entity_debug::update() {
   wnd_->find<Label>(GOAL_ID)->set_text(new_goal_value);
 }
 
-void entity_debug::on_key_press(std::string /*key*/, bool is_down) {
-  if (is_down && !_just_shown) {
+void EntityDebug::on_key_press(std::string /*key*/, bool is_down) {
+  if (is_down && !just_shown_) {
     wnd_->set_visible(!wnd_->is_visible());
-    _just_shown = true;
+    just_shown_ = true;
   } else if (!is_down) {
-    _just_shown = false;
+    just_shown_ = false;
   }
 }
 
-bool entity_debug::on_show_steering_changed(Widget *w) {
+bool EntityDebug::on_show_steering_changed(Widget *w) {
   Checkbox *cbx = dynamic_cast<Checkbox *>(w);
 
-  for(std::weak_ptr<entity> const &wp : mgr_->get_selection()) {
-    std::shared_ptr<entity> ent = wp.lock();
+  for(std::weak_ptr<Entity> const &wp : mgr_->get_selection()) {
+    std::shared_ptr<Entity> ent = wp.lock();
     if (!ent) {
       continue;
     }
 
-    entity_debug_flags flags = ent->get_debug_flags();
+    EntityDebugFlags flags = ent->get_debug_flags();
     if (cbx->is_checked()) {
-      flags = static_cast<entity_debug_flags>(flags | debug_show_steering);
+      flags = static_cast<EntityDebugFlags>(flags | kDebugShowSteering);
     } else {
-      flags = static_cast<entity_debug_flags>(flags & ~debug_show_steering);
+      flags = static_cast<EntityDebugFlags>(flags & ~kDebugShowSteering);
     }
     ent->set_debug_flags(flags);
   }
@@ -120,22 +120,22 @@ bool entity_debug::on_show_steering_changed(Widget *w) {
 
 //-------------------------------------------------------------------------
 
-entity_debug_view::entity_debug_view() {
+EntityDebugView::EntityDebugView() {
 }
 
-entity_debug_view::~entity_debug_view() {
+EntityDebugView::~EntityDebugView() {
 }
 
-void entity_debug_view::add_line(fw::Vector const &from, fw::Vector const &to, fw::Color const &col) {
-  line l;
+void EntityDebugView::add_line(fw::Vector const &from, fw::Vector const &to, fw::Color const &col) {
+  Line l;
   l.from = from;
   l.to = to;
   l.col = col;
 
-  _lines.push_back(l);
+  lines_.push_back(l);
 }
 
-void entity_debug_view::add_circle(fw::Vector const &center, float radius, fw::Color const &col) {
+void EntityDebugView::add_circle(fw::Vector const &center, float radius, fw::Color const &col) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * M_PI * radius);
@@ -159,17 +159,17 @@ void entity_debug_view::add_circle(fw::Vector const &center, float radius, fw::C
   add_line(last_point, first_point, col);
 }
 
-void entity_debug_view::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
-  if (_lines.size() == 0)
+void EntityDebugView::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform) {
+  if (lines_.size() == 0)
     return;
 
-  std::vector<line> lines_copy = _lines;
-  _lines.clear();
+  std::vector<Line> lines_copy = lines_;
+  lines_.clear();
 
   fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[lines_copy.size() * 2];
 
   for (int i = 0; i < static_cast<int>(lines_copy.size()); i++) {
-    line const &l = lines_copy[i];
+    Line const &l = lines_copy[i];
 
     vertices[i * 2].x = l.from[0];
     vertices[i * 2].y = l.from[1];
@@ -190,14 +190,14 @@ void entity_debug_view::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const 
   std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
   shader_params->set_program_name("notexture");
 
-  std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
-  Node->set_world_matrix(transform);
-  Node->set_vertex_buffer(vb);
-  Node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
-  Node->set_shader(Shader);
-  Node->set_shader_parameters(shader_params);
-  Node->set_cast_shadows(false);
-  Scenegraph.add_node(Node);
+  std::shared_ptr<fw::sg::Node> node(new fw::sg::Node());
+  node->set_world_matrix(transform);
+  node->set_vertex_buffer(vb);
+  node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
+  node->set_shader(Shader);
+  node->set_shader_parameters(shader_params);
+  node->set_cast_shadows(false);
+  scenegraph.add_node(node);
 }
 
 }

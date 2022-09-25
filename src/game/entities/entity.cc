@@ -15,104 +15,104 @@
 
 namespace ent {
 
-entity::entity(entity_manager *mgr, entity_id id) :
-    mgr_(mgr), debug_view_(0), _debug_flags(static_cast<entity_debug_flags>(0)), id_(id),
-    _create_time(0) {
+Entity::Entity(EntityManager *mgr, entity_id id) :
+    mgr_(mgr), debug_view_(0), debug_flags_(static_cast<EntityDebugFlags>(0)), id_(id),
+    create_time_(0) {
 }
 
-entity::~entity() {
-  for(auto &pair : _components) {
+Entity::~Entity() {
+  for(auto &pair : components_) {
     delete pair.second;
   }
 }
 
-void entity::add_component(entity_component *comp) {
+void Entity::add_component(EntityComponent *comp) {
   // you can only have one component of each type
-  auto it = _components.find(comp->get_identifier());
-  if (it != _components.end())
+  auto it = components_.find(comp->get_identifier());
+  if (it != components_.end())
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("only one component of each type is allowed."));
 
-  _components[comp->get_identifier()] = comp;
+  components_[comp->get_identifier()] = comp;
 }
 
-entity_component *entity::get_component(int identifier) {
-  auto it = _components.find(identifier);
-  if (it == _components.end()) {
+EntityComponent *Entity::get_component(int identifier) {
+  auto it = components_.find(identifier);
+  if (it == components_.end()) {
     return nullptr;
   }
 
   return (*it).second;
 }
 
-bool entity::contains_component(int identifier) const {
-  return (_components.find(identifier) != _components.end());
+bool Entity::contains_component(int identifier) const {
+  return (components_.find(identifier) != components_.end());
 }
 
-void entity::add_attribute(entity_attribute const &attr) {
+void Entity::add_attribute(EntityAttribute const &attr) {
   // you can only have one attribute with a given name
-  auto it = _attributes.find(attr.get_name());
-  if (it != _attributes.end()) {
+  auto it = attributes_.find(attr.get_name());
+  if (it != attributes_.end()) {
     BOOST_THROW_EXCEPTION(
         fw::Exception() << fw::message_error_info("only one attribute with the same name is allowed"));
   }
 
-  _attributes[attr.get_name()] = attr;
+  attributes_[attr.get_name()] = attr;
 }
 
-entity_attribute *entity::get_attribute(std::string const &name) {
-  auto it = _attributes.find(name);
-  if (it == _attributes.end())
+EntityAttribute *Entity::get_attribute(std::string const &name) {
+  auto it = attributes_.find(name);
+  if (it == attributes_.end())
     return nullptr;
 
   return &(*it).second;
 }
 
-void entity::initialize() {
-  _create_time = fw::Framework::get_instance()->get_timer()->get_total_time();
-  for(auto &pair : _components) {
+void Entity::initialize() {
+  create_time_ = fw::Framework::get_instance()->get_timer()->get_total_time();
+  for(auto &pair : components_) {
     pair.second->initialize();
   }
 }
 
-void entity::update(float dt) {
-  for (auto& pair : _components) {
+void Entity::update(float dt) {
+  for (auto& pair : components_) {
     pair.second->update(dt);
   }
 }
 
-void entity::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
-  for (auto& pair : _components) {
-    pair.second->render(Scenegraph, transform);
+void Entity::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform) {
+  for (auto& pair : components_) {
+    pair.second->render(scenegraph, transform);
   }
 
   if (debug_view_ != nullptr) {
-    debug_view_->render(Scenegraph, transform);
+    debug_view_->render(scenegraph, transform);
   }
 }
 
-void entity::set_position(fw::Vector const &pos) {
-  position_component *position = get_component<ent::position_component>();
+void Entity::set_position(fw::Vector const &pos) {
+  PositionComponent *position = get_component<ent::PositionComponent>();
   if (position != nullptr) {
     position->set_position(pos);
 
-    moveable_component *moveable = get_component<ent::moveable_component>();
+    MoveableComponent *moveable = get_component<ent::MoveableComponent>();
     if (moveable != nullptr) {
       moveable->set_goal(position->get_position());
     }
   }
 }
 
-float entity::get_age() const {
+float Entity::get_age() const {
   float curr_time = fw::Framework::get_instance()->get_timer()->get_total_time();
-  return (curr_time - _create_time);
+  return (curr_time - create_time_);
 }
 
-// gets the entity_debug_view object that contains the list of lines and points that
-// we'll draw along with this entity for debugging purposes.
-entity_debug_view *entity::get_debug_view() {
-  if (_debug_flags != 0) {
+// gets the EntityDebugView object that contains the list of lines and points that
+// we'll draw along with this Entity for debugging purposes.
+EntityDebugView *Entity::get_debug_view() {
+  if (debug_flags_ != 0) {
     if (debug_view_ == nullptr) {
-      debug_view_ = new entity_debug_view();
+      debug_view_ = new EntityDebugView();
     }
 
     return debug_view_;
@@ -124,10 +124,10 @@ entity_debug_view *entity::get_debug_view() {
 
 //-------------------------------------------------------------------------
 
-entity_component::entity_component() {
+EntityComponent::EntityComponent() {
 }
 
-entity_component::~entity_component() {
+EntityComponent::~EntityComponent() {
 }
 
 }

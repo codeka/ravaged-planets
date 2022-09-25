@@ -5,36 +5,36 @@
 
 namespace ent {
 
-entity_attribute::entity_attribute() {
+EntityAttribute::EntityAttribute() {
 }
 
-entity_attribute::entity_attribute(std::string name, boost::any ParticleRotation) :
-    _name(name), value_(ParticleRotation) {
+EntityAttribute::EntityAttribute(std::string name, boost::any value) :
+    name_(name), value_(value) {
 }
 
-entity_attribute::entity_attribute(entity_attribute const &copy) :
-    _name(copy._name), value_(copy.value_) {
+EntityAttribute::EntityAttribute(EntityAttribute const &copy) :
+    name_(copy.name_), value_(copy.value_) {
 }
 
-entity_attribute::~entity_attribute() {
+EntityAttribute::~EntityAttribute() {
 }
 
-entity_attribute &entity_attribute::operator =(entity_attribute const &copy) {
-  _name = copy._name;
+EntityAttribute &EntityAttribute::operator =(EntityAttribute const &copy) {
+  name_ = copy.name_;
   value_ = copy.value_;
   // note: we don't copy the signal
   return (*this);
 }
 
-void entity_attribute::set_value(boost::any ParticleRotation) {
-  if (value_.type() != ParticleRotation.type()) {
+void EntityAttribute::set_value(boost::any value) {
+  if (value_.type() != value.type()) {
     fw::debug << boost::format("WARN: cannot set value of type %1% to value of type %2%")
-        % value_.type().name() % ParticleRotation.type().name() << std::endl;
+        % value_.type().name() % value.type().name() << std::endl;
     return;
   }
 
-  value_ = ParticleRotation;
-  sig_value_changed(_name, value_);
+  value_ = value;
+  sig_value_changed(name_, value_);
 }
 
 }

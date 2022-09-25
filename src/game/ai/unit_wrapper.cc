@@ -23,18 +23,18 @@ void unit_wrapper::register_class(lua_State *state) {
 //  ];
 }
 
-void unit_wrapper::set_entity(std::weak_ptr<ent::entity> const &ent) {
+void unit_wrapper::set_entity(std::weak_ptr<ent::Entity> const &ent) {
   entity_ = ent;
 
-  std::shared_ptr<ent::entity> sp = entity_.lock();
+  std::shared_ptr<ent::Entity> sp = entity_.lock();
   if (sp) {
-    _ownable = sp->get_component<ent::ownable_component>();
-    _orderable = sp->get_component<ent::orderable_component>();
+    _ownable = sp->get_component<ent::OwnableComponent>();
+    _orderable = sp->get_component<ent::OrderableComponent>();
   }
 }
 
 std::string unit_wrapper::l_get_kind() {
-  std::shared_ptr<ent::entity> ent = entity_.lock();
+  std::shared_ptr<ent::Entity> ent = entity_.lock();
   if (ent) {
     return ent->get_name();
   } else {
@@ -43,8 +43,8 @@ std::string unit_wrapper::l_get_kind() {
 }
 
 std::string unit_wrapper::l_get_state() {
-  std::shared_ptr<ent::entity> entity = entity_.lock();
-  if (entity && _orderable != nullptr) {
+  std::shared_ptr<ent::Entity> Entity = entity_.lock();
+  if (Entity && _orderable != nullptr) {
     std::shared_ptr<game::order> curr_order = _orderable->get_current_order();
     if (curr_order) {
       return curr_order->get_state_name();
@@ -55,8 +55,8 @@ std::string unit_wrapper::l_get_state() {
 }
 
 int unit_wrapper::l_get_player_no() {
-  std::shared_ptr<ent::entity> entity = entity_.lock();
-  if (entity) {
+  std::shared_ptr<ent::Entity> Entity = entity_.lock();
+  if (Entity) {
     return static_cast<int>(_ownable->get_owner()->get_player_no());
   }
 

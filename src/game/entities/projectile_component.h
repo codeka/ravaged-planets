@@ -5,36 +5,36 @@
 #include <game/entities/entity.h>
 
 namespace ent {
-class position_component;
-class moveable_component;
+class PositionComponent;
+class MoveableComponent;
 
-// This is the base class for "projectile" components which allow an
-// entity to act like a projectile (e.g. ballistic, missile, bullet, etc)
-class projectile_component: public entity_component {
+// This is the base class for "projectile" components which allow an Entity to act like a projectile (e.g. ballistic,
+// missile, bullet, etc)
+class ProjectileComponent: public EntityComponent {
 protected:
-  std::weak_ptr<entity> _target;
-  position_component *_target_position;
-  moveable_component *_our_moveable;
-  position_component *_our_position;
+  std::weak_ptr<Entity> target_;
+  PositionComponent *target_position_;
+  MoveableComponent *our_moveable_;
+  PositionComponent *our_position_;
 
 public:
   static const int identifier = 600;
 
-  projectile_component();
-  virtual ~projectile_component();
+  ProjectileComponent();
+  virtual ~ProjectileComponent();
 
-  virtual void set_target(std::weak_ptr<entity> target);
-  std::weak_ptr<entity> get_target() const {
-    return _target;
+  virtual void set_target(std::weak_ptr<Entity> target);
+  std::weak_ptr<Entity> get_target() const {
+    return target_;
   }
 
   virtual void initialize();
   virtual void update(float dt);
 
   // this is called when we detect we've hit our target (or something else got in the way) not all projectiles
-  // will actually "explode" but that's a good enough analogy. If hit is valid, we'll assume that's the entity we
+  // will actually "explode" but that's a good enough analogy. If hit is valid, we'll assume that's the Entity we
   // actually hit and give them some extra damage
-  virtual void explode(std::shared_ptr<entity> hit);
+  virtual void explode(std::shared_ptr<Entity> hit);
 
   virtual int get_identifier() {
     return identifier;
@@ -42,15 +42,15 @@ public:
 };
 
 // This is a "seeking" projectile component, which "seeks" it target (for example, missiles)
-class seeking_projectile_component: public projectile_component {
+class SeekingProjectileComponent: public ProjectileComponent {
 private:
   // The seeker takes a short amount of time before it "locks" on the target.
   // Basically, we simply don't start "seeking" until this time runs out.
-  float _time_to_lock;
+  float time_to_lock_;
 
 public:
-  seeking_projectile_component();
-  virtual ~seeking_projectile_component();
+  SeekingProjectileComponent();
+  virtual ~SeekingProjectileComponent();
 
   virtual void apply_template(luabind::object const &tmpl);
 
@@ -58,18 +58,18 @@ public:
 };
 
 // This is a "ballistic" projectile component, which travels in a arc to it's target
-class ballistic_projectile_component: public projectile_component {
+class BallisticProjectileComponent: public ProjectileComponent {
 private:
   // this is the maximum height above the firing point that we'll travel.
-  float _max_height;
+  float max_height_;
 
 public:
-  ballistic_projectile_component();
-  virtual ~ballistic_projectile_component();
+  BallisticProjectileComponent();
+  virtual ~BallisticProjectileComponent();
 
   virtual void apply_template(luabind::object const &tmpl);
 
-  virtual void set_target(std::weak_ptr<entity> target);
+  virtual void set_target(std::weak_ptr<Entity> target);
 };
 
 }

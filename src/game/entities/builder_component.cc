@@ -17,24 +17,24 @@ namespace ent {
 using namespace std::placeholders;
 
 // register the builder component with the entity_factory
-ENT_COMPONENT_REGISTER("Builder", builder_component);
+ENT_COMPONENT_REGISTER("Builder", BuilderComponent);
 
-builder_component::builder_component() {
+BuilderComponent::BuilderComponent() {
 }
 
-builder_component::~builder_component() {
+BuilderComponent::~BuilderComponent() {
 }
 
-void builder_component::initialize() {
-  std::shared_ptr<entity> entity(entity_);
-  selectable_component *sel = entity->get_component<selectable_component>();
+void BuilderComponent::initialize() {
+  std::shared_ptr<Entity> Entity(entity_);
+  SelectableComponent *sel = Entity->get_component<SelectableComponent>();
   if (sel != nullptr) {
-    sel->sig_selected.connect(std::bind(&builder_component::on_selected, this, _1));
+    sel->sig_selected.connect(std::bind(&BuilderComponent::on_selected, this, _1));
   }
-  _particle_effect_component = entity->get_component<particle_effect_component>();
+  _particle_effect_component = Entity->get_component<ParticleEffectComponent>();
 }
 
-void builder_component::apply_template(luabind::object const &tmpl) {
+void BuilderComponent::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "BuildGroup") {
 //      build_group_ = luabind::object_cast<std::string>(*it);
@@ -42,8 +42,8 @@ void builder_component::apply_template(luabind::object const &tmpl) {
 //  }
 }
 
-// this is called when our entity is selected/deselected, we need to show/hide the build window as appropriate.
-void builder_component::on_selected(bool selected) {
+// this is called when our Entity is selected/deselected, we need to show/hide the build window as appropriate.
+void BuilderComponent::on_selected(bool selected) {
   if (selected) {
     game::hud_build->show();
     game::hud_build->refresh(entity_, build_group_);
@@ -52,10 +52,10 @@ void builder_component::on_selected(bool selected) {
   }
 }
 
-void builder_component::build(std::string name) {
+void BuilderComponent::build(std::string name) {
   //game::hud_chat->add_line("Building: " + name + "...");
 
-  entity_factory factory;
+  EntityFactory factory;
   queue_entry entry;
   entry.tmpl = factory.get_template(name);
   entry.time_to_build = 2.0f;// luabind::object_cast<float>(entry.tmpl["components"]["Buildable"]["TimeToBuild"]);
@@ -68,11 +68,11 @@ void builder_component::build(std::string name) {
   }
 }
 
-bool builder_component::is_building() const {
+bool BuilderComponent::is_building() const {
   return !_build_queue.empty();
 }
 
-void builder_component::update(float dt) {
+void BuilderComponent::update(float dt) {
   if (_build_queue.empty()) {
     return;
   }
@@ -83,11 +83,11 @@ void builder_component::update(float dt) {
   if (entry.percent_complete >= 100.0f) {
     entry.percent_complete = 100.0f;
 
-    // we've finished so actually create the entity
-    std::shared_ptr<entity> entity(entity_);
-    ownable_component *our_ownable = entity->get_component<ownable_component>();
+    // we've finished so actually create the Entity
+    std::shared_ptr<Entity> Entity(entity_);
+    OwnableComponent *our_ownable = Entity->get_component<OwnableComponent>();
     if (our_ownable != nullptr && our_ownable->is_local_or_ai_player()) {
-      position_component *our_pos = entity->get_component<position_component>();
+      PositionComponent *our_pos = Entity->get_component<PositionComponent>();
       if (our_pos != nullptr) {
         std::shared_ptr<game::create_entity_command> cmd(
             game::create_command<game::create_entity_command>(our_ownable->get_owner()->get_player_no()));

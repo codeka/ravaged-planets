@@ -182,16 +182,16 @@ void MinimapWindow::update_entity_display() {
   // make a copy of the minimap background's pixels
   std::vector<uint32_t> pixels(game::world::get_instance()->get_minimap_background()->get_pixels());
 
-  // go through each minimap_visible entity and draw it on our bitmap
-  ent::entity_manager *ent_mgr = game::world::get_instance()->get_entity_manager();
-  for (std::weak_ptr<ent::entity> wp : ent_mgr->get_entities_by_component<ent::minimap_visible_component>()) {
-    std::shared_ptr<ent::entity> ent = wp.lock();
+  // go through each minimap_visible Entity and draw it on our bitmap
+  ent::EntityManager *ent_mgr = game::world::get_instance()->get_entity_manager();
+  for (std::weak_ptr<ent::Entity> wp : ent_mgr->get_entities_by_component<ent::MinimapVisibleComponent>()) {
+    std::shared_ptr<ent::Entity> ent = wp.lock();
     if (!ent) {
       continue;
     }
 
-    ent::position_component *position_comp = ent->get_component<ent::position_component>();
-    ent::ownable_component *ownable_comp = ent->get_component<ent::ownable_component>();
+    ent::PositionComponent *position_comp = ent->get_component<ent::PositionComponent>();
+    ent::OwnableComponent *ownable_comp = ent->get_component<ent::OwnableComponent>();
 
     // obviously we can't display the position if it doesn't HAVE a position!
     if (position_comp == nullptr)

@@ -3,12 +3,12 @@
 #include <game/entities/minimap_visible_component.h>
 
 namespace ent {
-ENT_COMPONENT_REGISTER("MinimapVisible", minimap_visible_component);
+ENT_COMPONENT_REGISTER("MinimapVisible", MinimapVisibleComponent);
 
-minimap_visible_component::minimap_visible_component() {
+MinimapVisibleComponent::MinimapVisibleComponent() {
 }
 
-minimap_visible_component::~minimap_visible_component() {
+MinimapVisibleComponent::~MinimapVisibleComponent() {
 }
 
 }

@@ -140,7 +140,7 @@ class XMLPrinter;
 /*
   A class that wraps strings. Normally stores the start and end
   pointers into the XML file itself, and will apply normalization
-  and entity translation if actually read. Can also store (and memory
+  and Entity translation if actually read. Can also store (and memory
   manage) a traditional char[]
 */
 class StrPair
@@ -602,7 +602,7 @@ public:
 
     static const char* ReadBOM( const char* p, bool* hasBOM );
     // p is the starting location,
-    // the UTF-8 ParticleRotation of the entity will be placed in ParticleRotation, and length filled in.
+    // the UTF-8 ParticleRotation of the Entity will be placed in ParticleRotation, and length filled in.
     static const char* GetCharacterRef( const char* p, char* ParticleRotation, int* length );
     static void ConvertUTF32ToUTF8( unsigned long Input, char* output, int* length );
 
@@ -1164,7 +1164,7 @@ private:
 
     char* ParseDeep( char* p, bool processEntities );
 
-    mutable StrPair _name;
+    mutable StrPair name_;
     mutable StrPair value_;
     XMLAttribute*   _next;
     MemPool*        _memPool;

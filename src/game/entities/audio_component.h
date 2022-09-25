@@ -15,18 +15,18 @@ namespace ent {
 
 /**
  * This class provide audio cues and so on that other components can reference to play audio from
- * this entity.
+ * this Entity.
  */
-class audio_component: public entity_component {
+class AudioComponent: public EntityComponent {
 public:
-  struct cue {
+  struct Cue {
     std::string name;
     std::shared_ptr<fw::audio_buffer> audio;
   };
 
 private:
-  std::map<std::string, std::shared_ptr<cue>> _cues;
-  std::list<std::shared_ptr<fw::audio_source> > _active_sources;
+  std::map<std::string, std::shared_ptr<Cue>> cues_;
+  std::list<std::shared_ptr<fw::audio_source>> active_sources_;
 
   /** Goes through and removes all of the sources which have finished playing. */
   void remove_inactive_sources();
@@ -34,12 +34,12 @@ private:
 public:
   static const int identifier = 800;
 
-  audio_component();
-  virtual ~audio_component();
+  AudioComponent();
+  virtual ~AudioComponent();
 
   virtual void apply_template(luabind::object const &tmpl);
 
-  /** Plays the cue with the given name (if the cue doesn't exist, nothing happens). */
+  /** Plays the Cue with the given name (if the Cue doesn't exist, nothing happens). */
   void play_cue(std::string const &name);
 
   virtual int get_identifier() {

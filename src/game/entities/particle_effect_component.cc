@@ -11,21 +11,21 @@
 namespace ent {
 
 // Register the our component in this file with the entity_factory.
-ENT_COMPONENT_REGISTER("ParticleEffect", particle_effect_component);
+ENT_COMPONENT_REGISTER("ParticleEffect", ParticleEffectComponent);
 
-particle_effect_component::particle_effect_component() : _our_position(nullptr) {
+ParticleEffectComponent::ParticleEffectComponent() : our_position_(nullptr) {
 }
 
-particle_effect_component::~particle_effect_component() {
+ParticleEffectComponent::~ParticleEffectComponent() {
   for(auto& kvp : effects_) {
-    effect_info const &effect_info = kvp.second;
+    EffectInfo const &effect_info = kvp.second;
     if (effect_info.effect) {
       effect_info.effect->destroy();
     }
   }
 }
 
-void particle_effect_component::apply_template(luabind::object const &tmpl) {
+void ParticleEffectComponent::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    std::string name = luabind::object_cast<std::string>(it.key());
 //    effect_info effect;
@@ -44,25 +44,25 @@ void particle_effect_component::apply_template(luabind::object const &tmpl) {
 //  }
 }
 
-void particle_effect_component::initialize() {
-  _our_position = std::shared_ptr<entity>(entity_)->get_component<position_component>();
+void ParticleEffectComponent::initialize() {
+  our_position_ = std::shared_ptr<Entity>(entity_)->get_component<PositionComponent>();
 }
 
-void particle_effect_component::start_effect(std::string const &name) {
+void ParticleEffectComponent::start_effect(std::string const &name) {
   auto it = effects_.find(name);
   if (it == effects_.end()) {
     return;
   }
-  effect_info &effect_info = it->second;
+  EffectInfo &effect_info = it->second;
   effect_info.started = true;
 }
 
-void particle_effect_component::stop_effect(std::string const &name) {
+void ParticleEffectComponent::stop_effect(std::string const &name) {
   auto it = effects_.find(name);
   if (it == effects_.end()) {
     return;
   }
-  effect_info &effect_info = it->second;
+  EffectInfo &effect_info = it->second;
   effect_info.started = false;
   if (effect_info.effect) {
     effect_info.effect->destroy();
@@ -70,27 +70,27 @@ void particle_effect_component::stop_effect(std::string const &name) {
   effect_info.effect = std::shared_ptr<fw::ParticleEffect>();
 }
 
-void particle_effect_component::update(float) {
+void ParticleEffectComponent::update(float) {
   for (auto& kvp : effects_) {
-    effect_info const &effect_info = kvp.second;
+    EffectInfo const &effect_info = kvp.second;
     if (!effect_info.effect) {
       continue;
     }
 
-    if (_our_position != nullptr) {
-      effect_info.effect->set_position(_our_position->get_position() + effect_info.offset);
+    if (our_position_ != nullptr) {
+      effect_info.effect->set_position(our_position_->get_position() + effect_info.offset);
     }
 
     if (effect_info.destroy_entity_on_complete && effect_info.effect->is_dead()) {
-      std::shared_ptr<entity>(entity_)->get_manager()->destroy(entity_);
+      std::shared_ptr<Entity>(entity_)->get_manager()->destroy(entity_);
     }
   }
 }
 
-void particle_effect_component::render(fw::sg::Scenegraph &, fw::Matrix const &) {
+void ParticleEffectComponent::render(fw::sg::Scenegraph &, fw::Matrix const &) {
   fw::ParticleManager *mgr = fw::Framework::get_instance()->get_particle_mgr();
   for (auto& kvp : effects_) {
-    effect_info &effect_info = kvp.second;
+    EffectInfo &effect_info = kvp.second;
     if (effect_info.started && !effect_info.effect) {
       effect_info.effect = mgr->create_effect(effect_info.name);
     }

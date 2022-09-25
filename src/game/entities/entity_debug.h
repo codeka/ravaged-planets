@@ -14,35 +14,32 @@ class Scenegraph;
 }
 
 namespace ent {
-class entity_manager;
+class EntityManager;
 
-/** These are the different flags that apply to a single entity. */
-enum entity_debug_flags {
-  /**
-   * If this is set, we should render "steering vectors" which show how the entity is currently steering.
-   */
-  debug_show_steering = 1,
+// These are the different flags that apply to a single Entity.
+enum EntityDebugFlags {
+  // If this is set, we should render "steering vectors" which show how the Entity is currently steering.
+  kDebugShowSteering = 1,
 
-  debug_max_value = 2
+  kDebugMaxValue = 2
 };
 
-/**
- * This class contains some debug-related state. It registers the Ctrl+D key to enable/disable
- * "entity debugging" which shows things such as steering behaviours, pathing finding and so on.
- */
-class entity_debug {
+
+// This class contains some debug-related state. It registers the Ctrl+D key to enable/disable
+// "Entity debugging" which shows things such as steering behaviours, pathing finding and so on.
+class EntityDebug {
 private:
-  entity_manager *mgr_;
+  EntityManager *mgr_;
   fw::gui::Window *wnd_;
 
-  bool _just_shown;
+  bool just_shown_;
 
   void on_key_press(std::string keyname, bool is_down);
   bool on_show_steering_changed(fw::gui::Widget *w);
 
 public:
-  entity_debug(entity_manager *mgr);
-  ~entity_debug();
+  EntityDebug(EntityManager *mgr);
+  ~EntityDebug();
 
   void initialize();
 
@@ -51,28 +48,28 @@ public:
 };
 
 /**
- * This is a class that each entity has access to and allows you to draw various lines and points
+ * This is a class that each Entity has access to and allows you to draw various lines and points
  * and so on that represent the various debugging information we can visualize.
  */
-class entity_debug_view {
+class EntityDebugView {
 private:
-  struct line {
+  struct Line {
     fw::Vector from;
     fw::Vector to;
     fw::Color col;
   };
-  std::vector<line> _lines;
+  std::vector<Line> lines_;
 
 public:
-  entity_debug_view();
-  ~entity_debug_view();
+  EntityDebugView();
+  ~EntityDebugView();
 
   void add_line(fw::Vector const &from, fw::Vector const &to,
       fw::Color const &col);
   void add_circle(fw::Vector const &center, float radius,
       fw::Color const &col);
 
-  void render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform);
+  void render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform);
 };
 
 }

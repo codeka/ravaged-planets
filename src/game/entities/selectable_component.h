@@ -10,28 +10,28 @@ class texture;
 }
 
 namespace ent {
-class ownable_component;
+class OwnableComponent;
 
 // The selectable_component is added to entities which can be selected by the user (e.g.
 // buildings, units and so on)
-class selectable_component: public entity_component {
+class SelectableComponent: public EntityComponent {
 private:
-  bool _is_selected;
-  float _selection_radius;
-  ownable_component *_ownable;
+  bool is_selected_;
+  float selection_radius_;
+  OwnableComponent *ownable_;
 
   static void populate_buffers();
 
-  fw::Color _highlight_color;
-  bool _is_highlighted;
+  fw::Color highlight_color_;
+  bool is_highlighted_;
 
 public:
   static const int identifier = 300;
 
-  selectable_component();
-  virtual ~selectable_component();
+  SelectableComponent();
+  virtual ~SelectableComponent();
 
-  // this is called after the entity loads all of it's components
+  // this is called after the Entity loads all of it's components
   virtual void initialize();
 
   virtual void apply_template(luabind::object const &tmpl);
@@ -42,17 +42,17 @@ public:
   // gets or sets a flag which indicates whether we're selected or not
   void set_is_selected(bool selected);
   bool get_is_selected() const {
-    return _is_selected;
+    return is_selected_;
   }
   boost::signals2::signal<void(bool)> sig_selected;
 
-  // highlight the entity with the given color
+  // highlight the Entity with the given color
   void highlight(fw::Color const &col);
   void unhighlight();
 
   void set_selection_radius(float ParticleRotation);
   float get_selection_radius() const {
-    return _selection_radius;
+    return selection_radius_;
   }
 
   virtual int get_identifier() {

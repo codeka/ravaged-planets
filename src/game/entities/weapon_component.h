@@ -5,36 +5,35 @@
 
 namespace ent {
 
-// This component is attached to entities that have weapons and can
-// shoot other entities.
-class weapon_component: public entity_component {
+// This component is attached to entities that have weapons and can shoot other entities.
+class WeaponComponent: public EntityComponent {
 private:
-  std::weak_ptr<entity> _target;
-  std::string _fire_entity_name;
-  fw::Vector _fire_direction;
-  float _time_to_fire;
-  float _range;
+  std::weak_ptr<Entity> target_;
+  std::string fire_entity_name_;
+  fw::Vector fire_direction_;
+  float time_to_fire_;
+  float range_;
 
   void fire();
 
 public:
   static const int identifier = 500;
 
-  weapon_component();
-  virtual ~weapon_component();
+  WeaponComponent();
+  virtual ~WeaponComponent();
 
   virtual void apply_template(luabind::object const &tmpl);
 
   virtual void update(float dt);
 
-  void set_target(std::weak_ptr<entity> target) {
-    _target = target;
+  void set_target(std::weak_ptr<Entity> target) {
+    target_ = target;
   }
   void clear_target() {
-    _target.reset();
+    target_.reset();
   }
-  std::weak_ptr<entity> get_target() const {
-    return _target;
+  std::weak_ptr<Entity> get_target() const {
+    return target_;
   }
 
   virtual int get_identifier() {

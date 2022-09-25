@@ -5,9 +5,9 @@
 namespace ent {
 
 /**
- * This component is attached to entities that can be directly built by a builder_component entity.
+ * This component is attached to entities that can be directly built by a BuilderComponent Entity.
  */
-class buildable_component: public entity_component {
+class BuildableComponent: public EntityComponent {
 private:
   std::string build_group_;
 
@@ -17,8 +17,8 @@ public:
     return identifier;
   }
 
-  buildable_component();
-  ~buildable_component();
+  BuildableComponent();
+  ~BuildableComponent();
 
   virtual void apply_template(luabind::object const &tmpl);
 };

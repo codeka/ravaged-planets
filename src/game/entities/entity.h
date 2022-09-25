@@ -17,14 +17,14 @@ class Scenegraph;
 }
 
 namespace ent {
-class entity_debug_view;
-class entity;
-class entity_manager;
+class EntityDebugView;
+class Entity;
+class EntityManager;
 
 /**
- * This is the identifier for an entity, it's actually made up of two components, the
+ * This is the identifier for an Entity, it's actually made up of two components, the
  * identifier of the player who created it, and a unique number that the player assigns.
- * In this way, we avoid collisions when two players create an entity at the same time.
+ * In this way, we avoid collisions when two players create an Entity at the same time.
  */
 typedef uint32_t entity_id;
 
@@ -33,16 +33,16 @@ typedef uint32_t entity_id;
  * and stuff that let us figure out how the component fits in and so on.
  */
 
-class entity_component {
+class EntityComponent {
 protected:
-  std::weak_ptr<entity> entity_;
+  std::weak_ptr<Entity> entity_;
 
 public:
-  entity_component();
-  virtual ~entity_component();
+  EntityComponent();
+  virtual ~EntityComponent();
 
   /**
-   * This is called once the entity we're attached to has all of it's components defined and so
+   * This is called once the Entity we're attached to has all of it's components defined and so
    * on (we can query for other components, etc)
    */
   virtual void initialize() {
@@ -61,10 +61,10 @@ public:
   }
 
   /**
-   * This is called by the entity_factory when we're added to an entity. Do not override this and
+   * This is called by the entity_factory when we're added to an Entity. Do not override this and
    * instead wait for initialize() to be called.
    */
-  void set_entity(std::weak_ptr<entity> ent) {
+  void set_entity(std::weak_ptr<Entity> ent) {
     entity_ = ent;
   }
 
@@ -74,7 +74,7 @@ public:
   virtual int get_identifier() = 0;
 
   /**
-   * Return true from here if you want people to be able to call entity_manager::get_entities_by_component<YOU>();
+   * Return true from here if you want people to be able to call EntityManager::get_entities_by_component<YOU>();
    */
   virtual bool allow_get_by_component() {
     return false;
@@ -82,48 +82,48 @@ public:
 };
 
 /**
- * The entity class is a "container" class that represents all of the entities in the game (including
+ * The Entity class is a "container" class that represents all of the entities in the game (including
  * buildings, unit, trees, etc) it's basically a collection of components and the combination of
  * components is what makes it unique.
  */
-class entity {
+class Entity {
 private:
-  friend class entity_manager;
-  entity(entity_manager *mgr, entity_id id);
+  friend class EntityManager;
+  Entity(EntityManager *mgr, entity_id id);
 
-  std::map<int, entity_component *> _components;
-  std::map<std::string, entity_attribute> _attributes;
-  std::weak_ptr<entity> _creator;
+  std::map<int, EntityComponent *> components_;
+  std::map<std::string, EntityAttribute> attributes_;
+  std::weak_ptr<Entity> creator_;
   entity_id id_;
-  float _create_time;
-  std::string _name;
+  float create_time_;
+  std::string name_;
 
-  entity_debug_flags _debug_flags;
-  entity_debug_view *debug_view_;
-  entity_manager *mgr_;
+  EntityDebugFlags debug_flags_;
+  EntityDebugView *debug_view_;
+  EntityManager *mgr_;
 public:
-  ~entity();
+  ~Entity();
 
-  // adds a new component to this entity, and gets the component with the given identifier
-  void add_component(entity_component *comp);
-  entity_component *get_component(int identifier);
+  // adds a new component to this Entity, and gets the component with the given identifier
+  void add_component(EntityComponent *comp);
+  EntityComponent *get_component(int identifier);
 
   // determines whether we contain a component of the given type
   bool contains_component(int identifier) const;
 
   // adds an attribute, or gets a pointer to the attribute with the given name
-  void add_attribute(entity_attribute const &attr);
-  entity_attribute *get_attribute(std::string const &name);
+  void add_attribute(EntityAttribute const &attr);
+  EntityAttribute *get_attribute(std::string const &name);
 
-  // gets the entity_manager we were created by
-  entity_manager *get_manager() const {
+  // gets the EntityManager we were created by
+  EntityManager *get_manager() const {
     return mgr_;
   }
 
-  // gets a reference to the entity which created us (e.g. if we're a missile
-  // or something, this is the entity which fired us).
-  std::weak_ptr<entity> get_creator() const {
-    return _creator;
+  // gets a reference to the Entity which created us (e.g. if we're a missile
+  // or something, this is the Entity which fired us).
+  std::weak_ptr<Entity> get_creator() const {
+    return creator_;
   }
 
   // this is called after all the components have been added and so on.
@@ -145,28 +145,28 @@ public:
     return contains_component(T::identifier);
   }
 
-  // these are called each frame to update and then render the entity
+  // these are called each frame to update and then render the Entity
   void update(float dt);
-  void render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform);
+  void render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform);
 
-  // this is a helper that you can use to move an entity directly to somewhere on the map.
+  // this is a helper that you can use to move an Entity directly to somewhere on the map.
   void set_position(fw::Vector const &pos);
 
-  void set_debug_flags(entity_debug_flags flags) {
-    _debug_flags = flags;
+  void set_debug_flags(EntityDebugFlags flags) {
+    debug_flags_ = flags;
   }
-  entity_debug_flags get_debug_flags() const {
-    return _debug_flags;
+  EntityDebugFlags get_debug_flags() const {
+    return debug_flags_;
   }
-  entity_debug_view *get_debug_view();
+  EntityDebugView *get_debug_view();
 
-  // gets a string description of the "name" of this entity
+  // gets a string description of the "name" of this Entity
   std::string const &get_name() const {
-    return _name;
+    return name_;
   }
   float get_age() const;
 
-  // gets the identifier for this entity
+  // gets the identifier for this Entity
   entity_id get_id() const {
     return id_;
   }

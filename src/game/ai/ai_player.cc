@@ -140,7 +140,7 @@ void ai_player::l_register_unit(std::string name, luabind::object creator) {
   _unit_creator_map[name] = creator;
 }
 
-// this is the predicate we pass to the entity manager for our l_findunits() implementation
+// this is the predicate we pass to the Entity manager for our l_findunits() implementation
 struct findunits_predicate {
 private:
   ai_player *_plyr;
@@ -178,9 +178,9 @@ public:
     }
   }
 
-  inline bool operator()(std::shared_ptr<ent::entity> const &ent) {
+  inline bool operator()(std::shared_ptr<ent::Entity> const &ent) {
     // if it's not ownable, we don't care about it...
-    ent::ownable_component *ownable = ent->get_component<ent::ownable_component>();
+    ent::OwnableComponent *ownable = ent->get_component<ent::OwnableComponent>();
     if (ownable == nullptr)
       return false;
 
@@ -196,7 +196,7 @@ public:
       return false;
     }
 
-    // if we're looking for a specific unit_type, check the entity's name
+    // if we're looking for a specific unit_type, check the Entity's name
     if (_unit_type != "") {
       if (_unit_type != ent->get_name()) {
         return false;
@@ -205,7 +205,7 @@ public:
 
     // if we're looking for entities in a particular state, then check that
     if (_state != "") {
-      ent::orderable_component *orderable = ent->get_component<ent::orderable_component>();
+      ent::OrderableComponent *orderable = ent->get_component<ent::OrderableComponent>();
       if (orderable == nullptr) {
         return false;
       }
@@ -237,11 +237,11 @@ luabind::object ai_player::l_find_units(luabind::object params, lua_State *L) {
   findunits_predicate pred(this, params);
 
   // do the actual search
-  ent::entity_manager *entmgr = game::world::get_instance()->get_entity_manager();
-  std::list<std::weak_ptr<ent::entity>> entities = entmgr->get_entities(pred);
+  ent::EntityManager *entmgr = game::world::get_instance()->get_entity_manager();
+  std::list<std::weak_ptr<ent::Entity>> entities = entmgr->get_entities(pred);
 
   int index = 1;
-  for(std::weak_ptr<ent::entity> &wp : entities) {
+  for(std::weak_ptr<ent::Entity> &wp : entities) {
     luabind::object wrapper = get_unit_wrapper(wp);
 //    if (!wrapper) {
 //      continue;
@@ -277,11 +277,11 @@ void ai_player::l_issue_order(luabind::object units, luabind::object orders) {
 }
 
 void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
-  std::shared_ptr<ent::entity> entity = unit->get_entity().lock();
-  if (!entity)
+  std::shared_ptr<ent::Entity> Entity = unit->get_entity().lock();
+  if (!Entity)
     return;
 
-  ent::orderable_component *orderable = entity->get_component<ent::orderable_component>();
+  ent::OrderableComponent *orderable = Entity->get_component<ent::OrderableComponent>();
 
   std::string order_name;// = luabind::object_cast<std::string>(orders["order"]);
   if (order_name == "build") {
@@ -293,8 +293,8 @@ void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
     orderable->issue_order(order);
   } else if (order_name == "attack") {
     fw::debug << "issuing \"attack\" order to units." << std::endl;
-    std::weak_ptr<ent::entity> target_entity_wp;/// = luabind::object_cast<unit_wrapper*>(orders["target"])->get_entity();
-    std::shared_ptr<ent::entity> target_entity = target_entity_wp.lock();
+    std::weak_ptr<ent::Entity> target_entity_wp;/// = luabind::object_cast<unit_wrapper*>(orders["target"])->get_entity();
+    std::shared_ptr<ent::Entity> target_entity = target_entity_wp.lock();
     if (target_entity) {
       std::shared_ptr<attack_order> order = create_order<attack_order>();
       order->target = target_entity->get_id();
@@ -305,17 +305,17 @@ void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
   }
 }
 
-luabind::object ai_player::get_unit_wrapper(std::weak_ptr<ent::entity> wp) {
-  std::shared_ptr<ent::entity> ent = wp.lock();
+luabind::object ai_player::get_unit_wrapper(std::weak_ptr<ent::Entity> wp) {
+  std::shared_ptr<ent::Entity> ent = wp.lock();
   if (!ent) {
     return luabind::object();
   }
 
-  ent::entity_attribute *attr = ent->get_attribute("ai_wrapper");
+  ent::EntityAttribute *attr = ent->get_attribute("ai_wrapper");
   if (attr == nullptr) {
     luabind::object wrapper = create_unit_wrapper(ent->get_name());
 //    luabind::object_cast<unit_wrapper *>(wrapper)->set_entity(wp);
-    ent->add_attribute(ent::entity_attribute("ai_wrapper", wrapper));
+    ent->add_attribute(ent::EntityAttribute("ai_wrapper", wrapper));
     attr = ent->get_attribute("ai_wrapper");
   }
 

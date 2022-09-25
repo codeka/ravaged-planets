@@ -14,33 +14,33 @@ namespace ent {
 using namespace std::placeholders;
 
 // register the damageable component with the entity_factory
-ENT_COMPONENT_REGISTER("Damageable", damageable_component);
+ENT_COMPONENT_REGISTER("Damageable", DamageableComponent);
 
-damageable_component::damageable_component() {
+DamageableComponent::DamageableComponent() {
 }
 
-damageable_component::~damageable_component() {
+DamageableComponent::~DamageableComponent() {
 }
 
-void damageable_component::apply_template(luabind::object const &tmpl) {
+void DamageableComponent::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "Explosion") {
-//      _expl_name = luabind::object_cast<std::string>(*it);
+//      expl_name_ = luabind::object_cast<std::string>(*it);
 //    }
 //  }
 }
 
-void damageable_component::initialize() {
-  std::shared_ptr<entity> entity(entity_);
-  entity_attribute *health = entity->get_attribute("health");
+void DamageableComponent::initialize() {
+  std::shared_ptr<Entity> Entity(entity_);
+  EntityAttribute *health = Entity->get_attribute("health");
   if (health != nullptr) {
-    health->sig_value_changed.connect(std::bind(&damageable_component::check_explode, this, _2));
+    health->sig_value_changed.connect(std::bind(&DamageableComponent::check_explode, this, _2));
   }
 }
 
-void damageable_component::apply_damage(float amt) {
-  std::shared_ptr<entity> entity(entity_);
-  entity_attribute *attr = entity->get_attribute("health");
+void DamageableComponent::apply_damage(float amt) {
+  std::shared_ptr<Entity> Entity(entity_);
+  EntityAttribute *attr = Entity->get_attribute("health");
   if (attr != nullptr) {
     float curr_value = attr->get_value<float>();
     if (curr_value > 0) {
@@ -51,37 +51,37 @@ void damageable_component::apply_damage(float amt) {
 
 // this is called whenever our health attribute changes value. we check whether it's
 // hit 0, and explode if it has
-void damageable_component::check_explode(boost::any health_value) {
+void DamageableComponent::check_explode(boost::any health_value) {
   if (boost::any_cast<float>(health_value) <= 0) {
     explode();
   }
 }
 
-void apply_damage(std::shared_ptr<entity> ent, float amt) {
-  damageable_component *damageable = ent->get_component<damageable_component>();
+void apply_damage(std::shared_ptr<Entity> ent, float amt) {
+  DamageableComponent *damageable = ent->get_component<DamageableComponent>();
   if (damageable != 0) {
     damageable->apply_damage(amt);
   }
 }
 
-void damageable_component::explode() {
-  std::shared_ptr<entity> entity(entity_); // entity is always valid while we're valid...
-  entity->get_manager()->destroy(entity_);
+void DamageableComponent::explode() {
+  std::shared_ptr<Entity> Entity(entity_); // Entity is always valid while we're valid...
+  Entity->get_manager()->destroy(entity_);
 
-  if (_expl_name != "") {
-    // create an explosion entity
-    entity->get_manager()->create_entity(entity, _expl_name, 0);
+  if (expl_name_ != "") {
+    // create an explosion Entity
+    Entity->get_manager()->create_entity(Entity, expl_name_, 0);
   }
 
-  position_component *our_position = entity->get_component<position_component>();
+  PositionComponent *our_position = Entity->get_component<PositionComponent>();
   if (our_position != nullptr) {
-    std::list<std::weak_ptr<ent::entity>> entities;
+    std::list<std::weak_ptr<ent::Entity>> entities;
     our_position->get_entities_within_radius(5.0f, std::back_inserter(entities));
-    for(std::weak_ptr<ent::entity> const &wp : entities) {
-      std::shared_ptr<ent::entity> ent = wp.lock();
+    for(std::weak_ptr<ent::Entity> const &wp : entities) {
+      std::shared_ptr<ent::Entity> ent = wp.lock();
 
       // don't damange ourselves...
-      if (!ent || ent == entity)
+      if (!ent || ent == Entity)
         continue;
 
       ent::apply_damage(ent, (5.0f - our_position->get_direction_to(ent).length()));

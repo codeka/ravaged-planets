@@ -17,48 +17,48 @@
 namespace ent {
 
 // register the various components in this file with the entity_factory
-ENT_COMPONENT_REGISTER("SeekingProjectile", seeking_projectile_component);
-ENT_COMPONENT_REGISTER("BallisticProjectile", ballistic_projectile_component);
+ENT_COMPONENT_REGISTER("SeekingProjectile", SeekingProjectileComponent);
+ENT_COMPONENT_REGISTER("BallisticProjectile", BallisticProjectileComponent);
 
 //-------------------------------------------------------------------------
-projectile_component::projectile_component() :
-    _our_moveable(0), _our_position(nullptr), _target_position(nullptr) {
+ProjectileComponent::ProjectileComponent() :
+    our_moveable_(0), our_position_(nullptr), target_position_(nullptr) {
 }
 
-projectile_component::~projectile_component() {
+ProjectileComponent::~ProjectileComponent() {
 }
 
-void projectile_component::initialize() {
-  std::shared_ptr<ent::entity> entity(entity_);
-  _our_moveable = entity->get_component<moveable_component>();
-  _our_position = entity->get_component<position_component>();
+void ProjectileComponent::initialize() {
+  std::shared_ptr<ent::Entity> Entity(entity_);
+  our_moveable_ = Entity->get_component<MoveableComponent>();
+  our_position_ = Entity->get_component<PositionComponent>();
 
   // obviously, we're a projectile, so we don't want to avoid collisions!
-  _our_moveable->set_avoid_collisions(false);
+  our_moveable_->set_avoid_collisions(false);
 }
 
-void projectile_component::set_target(std::weak_ptr<entity> target) {
-  _target = target;
+void ProjectileComponent::set_target(std::weak_ptr<Entity> target) {
+  target_ = target;
 
-  std::shared_ptr<entity> sp = target.lock();
+  std::shared_ptr<Entity> sp = target.lock();
   if (sp)
-    _target_position = sp->get_component<position_component>();
+    target_position_ = sp->get_component<PositionComponent>();
 }
 
-void projectile_component::update(float) {
+void ProjectileComponent::update(float) {
   bool exploded = false;
-  std::shared_ptr<ent::entity> entity(entity_);
+  std::shared_ptr<ent::Entity> Entity(entity_);
 
-  // find the nearest damagable entity - if it's closer than the "hit" distance, then we've hit them!
-  std::shared_ptr<ent::entity> nearest =
-      _our_position->get_nearest_entity_with_component<damageable_component>().lock();
-  std::shared_ptr<ent::entity> creator = entity->get_creator().lock();
+  // find the nearest damagable Entity - if it's closer than the "hit" distance, then we've hit them!
+  std::shared_ptr<ent::Entity> nearest =
+      our_position_->get_nearest_entity_with_component<DamageableComponent>().lock();
+  std::shared_ptr<ent::Entity> creator = Entity->get_creator().lock();
   if (nearest && nearest != creator) {
-    fw::Vector nearest_dir = _our_position->get_direction_to(nearest);
+    fw::Vector nearest_dir = our_position_->get_direction_to(nearest);
     float nearest_distance = nearest_dir.length();
 
     float hit_distance = 0.5f;
-    selectable_component *selectable = nearest->get_component<selectable_component>();
+    SelectableComponent *selectable = nearest->get_component<SelectableComponent>();
     if (selectable != 0) {
       hit_distance = selectable->get_selection_radius();
     }
@@ -73,39 +73,39 @@ void projectile_component::update(float) {
     // check whether we've hit the ground
     game::terrain *trn = game::world::get_instance()->get_terrain();
 
-    fw::Vector pos = _our_position->get_position();
+    fw::Vector pos = our_position_->get_position();
     float height = trn->get_height(pos[0], pos[2]);
     if (height > pos[1]) {
-      explode (std::shared_ptr<ent::entity>());
+      explode (std::shared_ptr<ent::Entity>());
       exploded = true;
     }
   }
 }
 
-void projectile_component::explode(std::shared_ptr<entity> hit) {
+void ProjectileComponent::explode(std::shared_ptr<Entity> hit) {
   // if we hit someone, apply damage to them
   if (hit) {
-    damageable_component *damageable = hit->get_component<damageable_component>();
+    DamageableComponent *damageable = hit->get_component<DamageableComponent>();
     if (damageable != nullptr) {
       damageable->apply_damage(30.0f);
     }
   }
 
-  // now, just set our health to zero and let our damageable_component handle it
-  std::shared_ptr<ent::entity> entity(entity_);
-  entity_attribute *attr = entity->get_attribute("health");
+  // now, just set our health to zero and let our DamageableComponent handle it
+  std::shared_ptr<ent::Entity> Entity(entity_);
+  EntityAttribute *attr = Entity->get_attribute("health");
   attr->set_value(0.0f);
 }
 
 //-------------------------------------------------------------------------
-seeking_projectile_component::seeking_projectile_component() :
-    _time_to_lock(0) {
+SeekingProjectileComponent::SeekingProjectileComponent() :
+    time_to_lock_(0) {
 }
 
-seeking_projectile_component::~seeking_projectile_component() {
+SeekingProjectileComponent::~SeekingProjectileComponent() {
 }
 
-void seeking_projectile_component::apply_template(luabind::object const &tmpl) {
+void SeekingProjectileComponent::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "TimeToLock") {
 //      _time_to_lock = luabind::object_cast<float>(*it);
@@ -113,40 +113,40 @@ void seeking_projectile_component::apply_template(luabind::object const &tmpl) {
 //  }
 }
 
-void seeking_projectile_component::update(float dt) {
-  if (_time_to_lock > 0.0f) {
-    _time_to_lock -= dt;
+void SeekingProjectileComponent::update(float dt) {
+  if (time_to_lock_ > 0.0f) {
+    time_to_lock_ -= dt;
 
     // our time to lock hasn't expired yet, keep waiting...
-    if (_time_to_lock > 0.0f) {
-      _our_moveable->set_intermediate_goal(_our_position->get_position() + _our_position->get_direction());
+    if (time_to_lock_ > 0.0f) {
+      our_moveable_->set_intermediate_goal(our_position_->get_position() + our_position_->get_direction());
     } else {
       // we've locked, make it exactly 0 (it might be less)
-      _time_to_lock = 0.0f;
+      time_to_lock_ = 0.0f;
     }
   }
 
   // if the target is destroyed before we get there, we'll just keep
   // moving towards the "old" target location and explode there...
-  std::shared_ptr<entity> target = _target.lock();
-  if (target && _time_to_lock == 0) {
+  std::shared_ptr<Entity> target = target_.lock();
+  if (target && time_to_lock_ == 0) {
     // "seek" the target, just move towards it...
-    _our_moveable->set_intermediate_goal(_target_position->get_position());
+    our_moveable_->set_intermediate_goal(target_position_->get_position());
   }
 
   // the base class will check when it's time to explode
-  projectile_component::update(dt);
+  ProjectileComponent::update(dt);
 }
 
 //-------------------------------------------------------------------------
-ballistic_projectile_component::ballistic_projectile_component() :
-    _max_height(10.0f) {
+BallisticProjectileComponent::BallisticProjectileComponent() :
+    max_height_(10.0f) {
 }
 
-ballistic_projectile_component::~ballistic_projectile_component() {
+BallisticProjectileComponent::~BallisticProjectileComponent() {
 }
 
-void ballistic_projectile_component::apply_template(luabind::object const &tmpl) {
+void BallisticProjectileComponent::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "MaxHeight") {
 //      _max_height = luabind::object_cast<float>(*it);
@@ -154,9 +154,9 @@ void ballistic_projectile_component::apply_template(luabind::object const &tmpl)
 //  }
 }
 
-void ballistic_projectile_component::set_target(std::weak_ptr<entity> target) {
-  projectile_component::set_target(target);
-  std::shared_ptr<entity> sptarget = target.lock();
+void BallisticProjectileComponent::set_target(std::weak_ptr<Entity> target) {
+  ProjectileComponent::set_target(target);
+  std::shared_ptr<Entity> sptarget = target.lock();
   if (!sptarget)
     return;
 
@@ -167,14 +167,14 @@ void ballistic_projectile_component::set_target(std::weak_ptr<entity> target) {
   // and turn radius on our moveable component so that we travel in a nice-looking
   // arc towards the goal.
 
-  fw::Vector initial_pos = _our_position->get_position();
-  fw::Vector goal_pos = _target_position->get_position();
-  fw::Vector mid_pos = initial_pos + (goal_pos - initial_pos) + fw::Vector(0, _max_height, 0);
+  fw::Vector initial_pos = our_position_->get_position();
+  fw::Vector goal_pos = target_position_->get_position();
+  fw::Vector mid_pos = initial_pos + (goal_pos - initial_pos) + fw::Vector(0, max_height_, 0);
 
   // todo: this is *not* a nice-looking arc!
-  _our_position->set_direction((mid_pos - initial_pos).normalize());
-  _our_moveable->set_turn_speed(1.0f);
-  _our_moveable->set_intermediate_goal(goal_pos);
+  our_position_->set_direction((mid_pos - initial_pos).normalize());
+  our_moveable_->set_turn_speed(1.0f);
+  our_moveable_->set_intermediate_goal(goal_pos);
 }
 
 }

@@ -16,7 +16,7 @@ namespace game {
  */
 class world_summary {
 private:
-  std::string _name;
+  std::string name_;
   mutable bool _extra_loaded;
   mutable std::string _description;
   mutable std::string _author;
@@ -41,7 +41,7 @@ public:
   void initialize(std::string map_file);
 
   std::string get_name() const {
-    return _name;
+    return name_;
   }
   std::string get_description() const {
     ensure_extra_loaded();

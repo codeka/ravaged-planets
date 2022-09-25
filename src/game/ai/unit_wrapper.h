@@ -5,9 +5,9 @@
 #include <framework/lua.h>
 
 namespace ent {
-class entity;
-class ownable_component;
-class orderable_component;
+class Entity;
+class OwnableComponent;
+class OrderableComponent;
 }
 
 namespace game {
@@ -17,9 +17,9 @@ namespace game {
  */
 class unit_wrapper {
 private:
-  std::weak_ptr<ent::entity> entity_;
-  ent::ownable_component *_ownable;
-  ent::orderable_component *_orderable;
+  std::weak_ptr<ent::Entity> entity_;
+  ent::OwnableComponent *_ownable;
+  ent::OrderableComponent *_orderable;
 
   std::string l_get_kind();
   int l_get_player_no();
@@ -30,8 +30,8 @@ public:
   static void register_class(lua_State *state);
 
   // this must be called before you do anything with this wrapper
-  void set_entity(std::weak_ptr<ent::entity> const &ent);
-  std::weak_ptr<ent::entity> get_entity() const {
+  void set_entity(std::weak_ptr<ent::Entity> const &ent);
+  std::weak_ptr<ent::Entity> get_entity() const {
     return entity_;
   }
 };

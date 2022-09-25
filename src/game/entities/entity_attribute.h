@@ -6,29 +6,27 @@
 
 namespace ent {
 
-/**
- * This class represents a generic "attribute" that can be applied to an entity. This can include
- * things like the "health" attribute, "attack" and "defense" attributes, and so on.
- *
- * Attributes can also have "modifiers" applied to them which change the ParticleRotation of the attribute
- * according to some Particle rules. For example, upgrading a unit's armour might apply a modifier
- * to the "defense" attribute.
- */
-class entity_attribute {
+// This class represents a generic "attribute" that can be applied to an Entity. This can include
+// things like the "health" attribute, "attack" and "defense" attributes, and so on.
+//
+// Attributes can also have "modifiers" applied to them which change the ParticleRotation of the attribute
+// according to some Particle rules. For example, upgrading a unit's armor might apply a modifier
+// to the "defense" attribute.
+class EntityAttribute {
 private:
-  std::string _name;
+  std::string name_;
   boost::any value_;
 
 public:
-  entity_attribute();
-  entity_attribute(entity_attribute const &copy);
-  entity_attribute(std::string name, boost::any ParticleRotation);
-  ~entity_attribute();
+  EntityAttribute();
+  EntityAttribute(EntityAttribute const &copy);
+  EntityAttribute(std::string name, boost::any value);
+  ~EntityAttribute();
 
-  entity_attribute &operator =(entity_attribute const &copy);
+  EntityAttribute &operator =(EntityAttribute const &copy);
 
   std::string const &get_name() const {
-    return _name;
+    return name_;
   }
 
   boost::any const &get_value() const {
@@ -46,8 +44,8 @@ public:
   }
 
   template<typename T>
-  inline void set_value(T const &ParticleRotation) {
-    set_value(boost::any(ParticleRotation));
+  inline void set_value(T const &value) {
+    set_value(boost::any(value));
   }
 };
 

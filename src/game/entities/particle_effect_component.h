@@ -8,33 +8,31 @@ class ParticleEffect;
 }
 
 namespace ent {
-class position_component;
+class PositionComponent;
 
-/**
- * This component holds a bunch of particle_emitters, and allows an entity to act as a Particle emitter as well
- * (basically, the ParticleEmitter follows the entity around).
- */
-class particle_effect_component: public entity_component {
+// This component holds a bunch of ParticleEmitters, and allows an Entity to act as a particle emitter as well
+// (basically, the ParticleEmitter follows the Entity around).
+class ParticleEffectComponent: public EntityComponent {
 private:
-  struct effect_info {
+  struct EffectInfo {
     std::string name;
     std::shared_ptr<fw::ParticleEffect> effect;
     fw::Vector offset;
     bool destroy_entity_on_complete;
     bool started;
 
-    effect_info() : destroy_entity_on_complete(false), started(false) {
+    EffectInfo() : destroy_entity_on_complete(false), started(false) {
     }
   };
 
-  std::map<std::string, effect_info> effects_;
-  position_component *_our_position;
+  std::map<std::string, EffectInfo> effects_;
+  PositionComponent *our_position_;
 
 public:
   static const int identifier = 700;
 
-  particle_effect_component();
-  virtual ~particle_effect_component();
+  ParticleEffectComponent();
+  virtual ~ParticleEffectComponent();
 
   virtual void apply_template(luabind::object const &tmpl);
 

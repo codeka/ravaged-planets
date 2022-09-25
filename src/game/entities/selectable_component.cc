@@ -20,25 +20,25 @@ static std::shared_ptr<fw::VertexBuffer> vb_;
 static std::shared_ptr<fw::IndexBuffer> ib_;
 
 // register the selectable component with the entity_factory
-ENT_COMPONENT_REGISTER("Selectable", selectable_component);
+ENT_COMPONENT_REGISTER("Selectable", SelectableComponent);
 
-selectable_component::selectable_component() :
-    _is_selected(false), _selection_radius(2.0f), _is_highlighted(false), _ownable(nullptr) {
+SelectableComponent::SelectableComponent() :
+    is_selected_(false), selection_radius_(2.0f), is_highlighted_(false), ownable_(nullptr) {
 }
 
-selectable_component::~selectable_component() {
+SelectableComponent::~SelectableComponent() {
 }
 
-void selectable_component::initialize() {
-  // grab a reference to the ownable component of our entity so we can refer to it
+void SelectableComponent::initialize() {
+  // grab a reference to the ownable component of our Entity so we can refer to it
   // later on.
-  std::shared_ptr<entity> entity(entity_);
-  _ownable = entity->get_component<ownable_component>();
+  std::shared_ptr<Entity> Entity(entity_);
+  ownable_ = Entity->get_component<OwnableComponent>();
 }
 
 // this is called when we start up, and also when our device is reset. we need to populate
 // the vertex buffer and index buffer
-void selectable_component::populate_buffers() {
+void SelectableComponent::populate_buffers() {
   std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_uv>();
   fw::vertex::xyz_uv vertices[4] = {
       fw::vertex::xyz_uv(-1.0f, 0.0f, -1.0f, 0.0f, 0.0f),
@@ -59,12 +59,12 @@ void selectable_component::populate_buffers() {
   }
 }
 
-void selectable_component::set_is_selected(bool selected) {
-  _is_selected = selected;
+void SelectableComponent::set_is_selected(bool selected) {
+  is_selected_ = selected;
   sig_selected(selected);
 }
 
-void selectable_component::apply_template(luabind::object const &tmpl) {
+void SelectableComponent::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "SelectionRadius") {
 //      set_selection_radius(luabind::object_cast<float>(*it));
@@ -72,46 +72,46 @@ void selectable_component::apply_template(luabind::object const &tmpl) {
 //  }
 }
 
-void selectable_component::set_selection_radius(float ParticleRotation) {
-  _selection_radius = ParticleRotation;
+void SelectableComponent::set_selection_radius(float ParticleRotation) {
+  selection_radius_ = ParticleRotation;
 }
 
-void selectable_component::highlight(fw::Color const &col) {
-  _is_highlighted = true;
-  _highlight_color = col;
+void SelectableComponent::highlight(fw::Color const &col) {
+  is_highlighted_ = true;
+  highlight_color_ = col;
 }
 
-void selectable_component::unhighlight() {
-  _is_highlighted = false;
+void SelectableComponent::unhighlight() {
+  is_highlighted_ = false;
 }
 
-void selectable_component::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
+void SelectableComponent::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
   if (!vb_) {
     populate_buffers();
   }
 
   bool draw = false;
   fw::Color col(1, 1, 1);
-  if (_is_selected) {
+  if (is_selected_) {
     draw = true;
     col = fw::Color(1, 1, 1);
-  } else if (_is_highlighted) {
+  } else if (is_highlighted_) {
     draw = true;
-    col = _highlight_color;
+    col = highlight_color_;
   }
 
   if (!draw)
     return;
 
-  std::shared_ptr<entity> entity(entity_);
-  position_component *pos = entity->get_component<position_component>();
+  std::shared_ptr<Entity> Entity(entity_);
+  PositionComponent *pos = Entity->get_component<PositionComponent>();
   if (pos != 0) {
     std::shared_ptr<fw::ShaderParameters> shader_params = shader_->create_parameters();
     shader_params->set_color("selection_color", col);
 
     fw::Matrix m = pos->get_transform() * transform;
     m *= fw::translation(fw::Vector(0.0f, 0.2f, 0.0f)); // lift it off the ground a bit
-    m = fw::scale(_selection_radius) * m; // scale it to the size of our selection radius
+    m = fw::scale(selection_radius_) * m; // scale it to the size of our selection radius
 
     std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
     Node->set_vertex_buffer(vb_);

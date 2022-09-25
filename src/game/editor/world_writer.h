@@ -15,7 +15,7 @@ class editor_world;
 class world_writer {
 private:
   editor_world *world_;
-  std::string _name;
+  std::string name_;
   fw::Color _base_minimap_colors[4];
 
   fw::Color get_terrain_color(int x, int z);

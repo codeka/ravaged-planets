@@ -21,11 +21,11 @@ fs::path find_map(std::string name);
 namespace game {
 
 world_summary::world_summary() :
-    _name(""), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0), _num_players(0) {
+    name_(""), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0), _num_players(0) {
 }
 
 world_summary::world_summary(world_summary const &copy) :
-    _name(copy._name), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0), _num_players(0) {
+    name_(copy.name_), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0), _num_players(0) {
 }
 
 world_summary::~world_summary() {
@@ -35,14 +35,14 @@ void world_summary::ensure_extra_loaded() const {
   if (_extra_loaded)
     return;
 
-  fs::path full_path(find_map(_name));
+  fs::path full_path(find_map(name_));
 
   auto screenshot_path = full_path / "screenshot.png";
   if (fs::exists(screenshot_path)) {
     _screenshot = std::make_shared<fw::Bitmap>(full_path / "screenshot.png");
   }
 
-  parse_mapdesc_file(full_path / (_name + ".mapdesc"));
+  parse_mapdesc_file(full_path / (name_ + ".mapdesc"));
 
   _extra_loaded = true;
 }
@@ -74,7 +74,7 @@ void world_summary::parse_mapdesc_file(fs::path const &filename) const {
 }
 
 void world_summary::initialize(std::string map_file) {
-  _name = map_file;
+  name_ = map_file;
 }
 
 //----------------------------------------------------------------------------

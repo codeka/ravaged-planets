@@ -21,19 +21,19 @@ using namespace std::placeholders;
 namespace ent {
 
 // register the mesh component with the entity_factory
-ENT_COMPONENT_REGISTER("Mesh", mesh_component);
+ENT_COMPONENT_REGISTER("Mesh", MeshComponent);
 
-mesh_component::mesh_component() {
+MeshComponent::MeshComponent() {
 }
 
-mesh_component::mesh_component(std::shared_ptr<fw::Model> const &Model) :
+MeshComponent::MeshComponent(std::shared_ptr<fw::Model> const &Model) :
     model_(Model) {
 }
 
-mesh_component::~mesh_component() {
+MeshComponent::~MeshComponent() {
 }
 
-void mesh_component::apply_template(luabind::object const &tmpl) {
+void MeshComponent::apply_template(luabind::object const &tmpl) {
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "FileName") {
 //      _model_name = luabind::object_cast<std::string>(*it);
@@ -41,21 +41,21 @@ void mesh_component::apply_template(luabind::object const &tmpl) {
 //  }
 }
 
-void mesh_component::initialize() {
-  std::shared_ptr<entity> entity(entity_);
-  _ownable_component = entity->get_component<ownable_component>();
+void MeshComponent::initialize() {
+  std::shared_ptr<Entity> Entity(entity_);
+  ownable_component_ = Entity->get_component<OwnableComponent>();
 }
 
-void mesh_component::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
-  std::shared_ptr<entity> entity(entity_);
-  position_component *pos = entity->get_component<position_component>();
+void MeshComponent::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
+  std::shared_ptr<Entity> Entity(entity_);
+  PositionComponent *pos = Entity->get_component<PositionComponent>();
   if (pos != nullptr) {
     if (!model_) {
-      model_ = fw::Framework::get_instance()->get_model_manager()->get_model(_model_name);
+      model_ = fw::Framework::get_instance()->get_model_manager()->get_model(model_name_);
     }
 
-    if (_ownable_component != nullptr) {
-      game::player *player = _ownable_component->get_owner();
+    if (ownable_component_ != nullptr) {
+      game::player *player = ownable_component_->get_owner();
       if (player != nullptr) {
         model_->set_color(player->get_color());
       }

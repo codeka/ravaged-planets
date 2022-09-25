@@ -46,7 +46,7 @@ world::~world() {
 void world::initialize() {
   _terrain = _reader->get_terrain();
   _minimap_background = _reader->get_minimap_background();
-  _name = _reader->get_name();
+  name_ = _reader->get_name();
   _description = _reader->get_description();
   _author = _reader->get_author();
   _screenshot = _reader->get_screenshot();
@@ -94,7 +94,7 @@ void world::initialize_pathing() {
 }
 
 void world::initialize_entities() {
-  _entities = new ent::entity_manager();
+  _entities = new ent::EntityManager();
   _entities->initialize();
 }
 

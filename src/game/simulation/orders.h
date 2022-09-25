@@ -11,8 +11,8 @@ class PacketBuffer;
 }
 
 namespace ent {
-class builder_component;
-class moveable_component;
+class BuilderComponent;
+class MoveableComponent;
 }
 
 namespace game {
@@ -23,7 +23,7 @@ private:
   std::string _state_name;
 
 protected:
-  std::weak_ptr<ent::entity> entity_;
+  std::weak_ptr<ent::Entity> entity_;
 
   order(std::string const &state_name);
 
@@ -34,10 +34,10 @@ public:
   virtual void deserialize(fw::net::PacketBuffer &buffer);
 
   /**
-   * This is called by the orderable_component when this order hits the front of the queue for entity. You can
+   * This is called by the orderable_component when this order hits the front of the queue for Entity. You can
    * start executing the order now.
    */
-  virtual void begin(std::weak_ptr<ent::entity> const &ent);
+  virtual void begin(std::weak_ptr<ent::Entity> const &ent);
 
   /** This is called each frame and lets you update your order status. */
   virtual void update(float) {
@@ -50,7 +50,7 @@ public:
   virtual bool is_complete() = 0;
 
   /**
-   * Gets the name of the state the entity is in while it's executing this order (e.g. "moving", "attacking",
+   * Gets the name of the state the Entity is in while it's executing this order (e.g. "moving", "attacking",
    * "building", etc)
    */
   virtual std::string get_state_name() const {
@@ -63,13 +63,13 @@ public:
 /** This is the "build" order which you issue to unit that can build other units (such as the factory, etc). */
 class build_order: public order {
 private:
-  ent::builder_component *_builder;
+  ent::BuilderComponent *_builder;
 
 public:
   build_order();
   virtual ~build_order();
 
-  virtual void begin(std::weak_ptr<ent::entity> const &ent);
+  virtual void begin(std::weak_ptr<ent::Entity> const &ent);
   virtual bool is_complete();
 
   virtual void serialize(fw::net::PacketBuffer &buffer);
@@ -89,7 +89,7 @@ public:
   move_order();
   ~move_order();
 
-  virtual void begin(std::weak_ptr<ent::entity> const &ent);
+  virtual void begin(std::weak_ptr<ent::Entity> const &ent);
   virtual bool is_complete();
 
   virtual void serialize(fw::net::PacketBuffer &buffer);
@@ -106,18 +106,18 @@ public:
 /** This is the "attack" order, which you issue to a unit when you want it to attack another unit. */
 class attack_order: public order {
 private:
-  void attack(std::shared_ptr<ent::entity> entity, std::shared_ptr<ent::entity> target_entity);
+  void attack(std::shared_ptr<ent::Entity> Entity, std::shared_ptr<ent::Entity> target_entity);
 public:
   attack_order();
   ~attack_order();
 
-  virtual void begin(std::weak_ptr<ent::entity> const &ent);
+  virtual void begin(std::weak_ptr<ent::Entity> const &ent);
   virtual bool is_complete();
 
   virtual void serialize(fw::net::PacketBuffer &buffer);
   virtual void deserialize(fw::net::PacketBuffer &buffer);
 
-  // ID of the entity we want to attack.
+  // ID of the Entity we want to attack.
   ent::entity_id target;
 
   static const int identifier = 3;

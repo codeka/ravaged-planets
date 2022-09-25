@@ -5,14 +5,11 @@
 
 namespace ent {
 
-/**
- * This component is applied to any entity which can take damage. Entities that "dish out" damage
- * will query for this component and apply the damage.
- */
-class damageable_component: public entity_component,
-    public boost::signals2::trackable {
+// This component is applied to any Entity which can take damage. Entities that "dish out" damage
+// will query for this component and apply the damage.
+class DamageableComponent: public EntityComponent, public boost::signals2::trackable {
 private:
-  std::string _expl_name;
+  std::string expl_name_;
   void check_explode(boost::any health_value);
 
 public:
@@ -21,8 +18,8 @@ public:
     return identifier;
   }
 
-  damageable_component();
-  ~damageable_component();
+  DamageableComponent();
+  ~DamageableComponent();
 
   virtual void apply_template(luabind::object const &tmpl);
   virtual void initialize();

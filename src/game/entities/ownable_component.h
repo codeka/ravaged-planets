@@ -8,9 +8,9 @@ class player;
 
 namespace ent {
 
-class ownable_component: public entity_component {
+class OwnableComponent: public EntityComponent {
 private:
-  game::player *_owner;
+  game::player *owner_;
 
 public:
   static const int identifier = 900;
@@ -18,23 +18,23 @@ public:
     return identifier;
   }
 
-  ownable_component();
-  ~ownable_component();
+  OwnableComponent();
+  ~OwnableComponent();
 
   game::player *get_owner() const {
-    return _owner;
+    return owner_;
   }
   void set_owner(game::player *owner);
 
-  // helper for checking whether this entity is owned by the local player
+  // helper for checking whether this Entity is owned by the local player
   bool is_local_player() const;
 
-  // helper for checking whether this entity is owned by the local player or an ai player
+  // helper for checking whether this Entity is owned by the local player or an ai player
   // that's under our control
   bool is_local_or_ai_player() const;
 
   // this signal is fired when the owner changes.
-  boost::signals2::signal<void(ownable_component *)> owner_changed_event;
+  boost::signals2::signal<void(OwnableComponent *)> owner_changed_event;
 };
 
 }

@@ -4,19 +4,19 @@
 #include <framework/vector.h>
 
 namespace ent {
-class moveable_component;
-class position_component;
+class MoveableComponent;
+class PositionComponent;
 
-// The pathing component is attached to each entity that will follow a path
+// The pathing component is attached to each Entity that will follow a path
 // over the terrain (for example, tanks have this; helicopters do not)
-class pathing_component: public entity_component {
+class PathingComponent: public EntityComponent {
 private:
-  fw::Vector _last_request_goal;
-  float _last_request_time;
-  size_t _curr_goal_node;
-  std::vector<fw::Vector> _path;
-  position_component *position_;
-  moveable_component *_moveable;
+  fw::Vector last_request_goal_;
+  float last_request_time_;
+  size_t curr_goal_node_;
+  std::vector<fw::Vector> path_;
+  PositionComponent *position_;
+  MoveableComponent *moveable_;
 
   void on_path_found(std::vector<fw::Vector> const &path);
 
@@ -26,8 +26,8 @@ public:
     return identifier;
   }
 
-  pathing_component();
-  ~pathing_component();
+  PathingComponent();
+  ~PathingComponent();
 
   virtual void initialize();
   virtual void update(float dt);
@@ -35,7 +35,7 @@ public:
   // sets the path that we're to follow until we reach the goal
   void set_path(std::vector<fw::Vector> const &path);
 
-  // sets the goal for this entity. we request the path from the pathing_thread and when it comes back, we'll start
+  // sets the goal for this Entity. we request the path from the pathing_thread and when it comes back, we'll start
   // moving along it.
   void set_goal(fw::Vector const &goal);
 

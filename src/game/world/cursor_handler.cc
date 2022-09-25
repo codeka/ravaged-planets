@@ -47,11 +47,11 @@ void cursor_handler::update() {
   }
 
   _entity_under_cursor = _entities->get_entity_at_cursor();
-  std::shared_ptr<ent::entity> entity_under_cursor = _entity_under_cursor.lock();
+  std::shared_ptr<ent::Entity> entity_under_cursor = _entity_under_cursor.lock();
   if (entity_under_cursor) {
     local_player *lplyr = game::simulation_thread::get_instance()->get_local_player();
 
-    ent::ownable_component *ownable = entity_under_cursor->get_component<ent::ownable_component>();
+    ent::OwnableComponent *ownable = entity_under_cursor->get_component<ent::OwnableComponent>();
     if (ownable != nullptr) {
       if (ownable->get_owner() == lplyr) {
         //highlight = true;
@@ -69,7 +69,7 @@ void cursor_handler::update() {
       cursor_name = "i-beam";
     }
   } else {
-    // if we don't have an entity under our cursor, but we *do* have one selected, then we want
+    // if we don't have an Entity under our cursor, but we *do* have one selected, then we want
     // the "move" cursor!
     if (_entities->get_selection().size() > 0) {
       cursor_name = "move";
@@ -78,14 +78,14 @@ void cursor_handler::update() {
 
   fw::Framework::get_instance()->get_cursor()->set_cursor(1, cursor_name);
 
-  std::shared_ptr<ent::entity> last_highlighted = _last_highlighted.lock();
+  std::shared_ptr<ent::Entity> last_highlighted = _last_highlighted.lock();
   if (last_highlighted) {
-    ent::selectable_component *lh_selectable = last_highlighted->get_component<ent::selectable_component>();
+    ent::SelectableComponent *lh_selectable = last_highlighted->get_component<ent::SelectableComponent>();
     lh_selectable->unhighlight();
   }
 
   if (highlight) {
-    ent::selectable_component *selectable = entity_under_cursor->get_component<ent::selectable_component>();
+    ent::SelectableComponent *selectable = entity_under_cursor->get_component<ent::SelectableComponent>();
     selectable->highlight(highlight_color);
     _last_highlighted = _entity_under_cursor;
   }
@@ -100,7 +100,7 @@ void cursor_handler::destroy() {
 }
 
 void cursor_handler::on_key_select(std::string, bool is_down) {
-  std::shared_ptr<ent::entity> entity_under_cursor = _entity_under_cursor.lock();
+  std::shared_ptr<ent::Entity> entity_under_cursor = _entity_under_cursor.lock();
   if (!is_down) {
     if (entity_under_cursor) {
       // todo: if it's ours, add it to our selection otherwise, attack!
@@ -111,11 +111,11 @@ void cursor_handler::on_key_select(std::string, bool is_down) {
       } else {
         // if we've got entities selected, order them to attack this guy!
         for (auto it = _entities->get_selection().begin(); it != _entities->get_selection().end(); ++it) {
-          std::shared_ptr<ent::entity> ent = (*it).lock();
+          std::shared_ptr<ent::Entity> ent = (*it).lock();
           if (!ent)
             continue;
 
-          ent::orderable_component *orderable = ent->get_component<ent::orderable_component>();
+          ent::OrderableComponent *orderable = ent->get_component<ent::OrderableComponent>();
           if (orderable != nullptr) {
             std::shared_ptr<attack_order> order(create_order<attack_order>());
             order->target = entity_under_cursor->get_id();
@@ -127,11 +127,11 @@ void cursor_handler::on_key_select(std::string, bool is_down) {
       std::shared_ptr<move_order> order(create_order<move_order>());
       order->goal = _terrain->get_cursor_location();
       for (auto it = _entities->get_selection().begin(); it != _entities->get_selection().end(); ++it) {
-        std::shared_ptr<ent::entity> ent = it->lock();
+        std::shared_ptr<ent::Entity> ent = it->lock();
         if (!ent)
           continue;
 
-        ent::orderable_component *orderable = ent->get_component<ent::orderable_component>();
+        ent::OrderableComponent *orderable = ent->get_component<ent::OrderableComponent>();
         if (orderable != nullptr) {
           orderable->issue_order(order);
         }

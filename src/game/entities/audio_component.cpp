@@ -16,14 +16,14 @@
 namespace ent {
 
 	// register the component with the entity_factory
-	ENT_COMPONENT_REGISTER("audio", audio_component);
+	ENT_COMPONENT_REGISTER("audio", AudioComponent);
 
 	class audio_component_template : public entity_component_template
 	{
 	public:
 		virtual bool load(fw::XmlElement const &elem);
 
-		audio_component::cue_list cues;
+		AudioComponent::cue_list cues;
 	};
 
 	bool audio_component_template::load(fw::XmlElement const &elem)
@@ -39,13 +39,13 @@ namespace ent {
 				std::string name = child.get_attribute("cue");
 				std::string filename = child.get_attribute("filename");
 
-				// populate a new cue object
-				shared_ptr<audio_component::cue> c(new audio_component::cue());
+				// populate a new Cue object
+				shared_ptr<AudioComponent::Cue> c(new AudioComponent::Cue());
 				c->name = name;
 				c->audio = audio_mgr->load_file(filename);
 				if (c->audio)
 				{
-					// only add this cue if the file loaded successfully
+					// only add this Cue if the file loaded successfully
 					cues[c->name] = c;
 				}
 			}
@@ -62,45 +62,45 @@ namespace ent {
 
 	//-------------------------------------------------------------------------
 
-	audio_component::audio_component()
+	AudioComponent::AudioComponent()
 	{
 	}
 
-	audio_component::~audio_component()
+	AudioComponent::~AudioComponent()
 	{
 	}
 
-	void audio_component::apply_template(shared_ptr<entity_component_template> comp_template)
+	void AudioComponent::apply_template(shared_ptr<entity_component_template> comp_template)
 	{
 		shared_ptr<audio_component_template> tmpl(boost::dynamic_pointer_cast<audio_component_template>(comp_template));
-		_cues = tmpl->cues;
+		cues_ = tmpl->cues;
 	}
 
 	static bool is_active(shared_ptr<fw::audio_source> const &src)
 	{
 		return src->is_active();
 	}
-	void audio_component::remove_inactive_sources()
+	void AudioComponent::remove_inactive_sources()
 	{
-		std::remove_if(_active_sources.begin(), _active_sources.end(), &is_active);
+		std::remove_if(active_sources_.begin(), active_sources_.end(), &is_active);
 	}
 
-	void audio_component::play_cue(std::string const &name)
+	void AudioComponent::play_cue(std::string const &name)
 	{
 		remove_inactive_sources();
 
-		cue_list::iterator it = _cues.find(name);
-		if (it != _cues.end())
+		cue_list::iterator it = cues_.find(name);
+		if (it != cues_.end())
 		{
-			shared_ptr<cue> &c = (*it).second;
+			shared_ptr<Cue> &c = (*it).second;
 
 			shared_ptr<fw::audio_source> src(fw::Framework::get_instance()->get_audio()->create_source());
 			src->play(c->audio);
-			_active_sources.push_back(src);
+			active_sources_.push_back(src);
 		}
 	}
 
-	entity_component_template *audio_component::create_template()
+	entity_component_template *AudioComponent::create_template()
 	{
 		return new audio_component_template();
 	}

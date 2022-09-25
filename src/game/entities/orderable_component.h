@@ -15,13 +15,13 @@ class order;
 
 namespace ent {
 
-// The orderable component is attached to each entity that can execute orders
+// The orderable component is attached to each Entity that can execute orders
 // from a local (or AI) player.
-class orderable_component: public entity_component {
+class OrderableComponent: public EntityComponent {
 private:
-  std::shared_ptr<game::order> _curr_order;
-  bool _order_pending;
-  std::queue<std::shared_ptr<game::order>> _orders;
+  std::shared_ptr<game::order> curr_order_;
+  bool order_pending_;
+  std::queue<std::shared_ptr<game::order>> orders_;
 
 public:
   static const int identifier = 550;
@@ -29,8 +29,8 @@ public:
     return identifier;
   }
 
-  orderable_component();
-  ~orderable_component();
+  OrderableComponent();
+  ~OrderableComponent();
 
   virtual void update(float dt);
 

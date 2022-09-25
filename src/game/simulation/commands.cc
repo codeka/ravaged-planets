@@ -140,21 +140,21 @@ void create_entity_command::deserialize(fw::net::PacketBuffer &buffer) {
 }
 
 void create_entity_command::execute() {
-  ent::entity_manager *ent_mgr = game::world::get_instance()->get_entity_manager();
-  std::shared_ptr<ent::entity> ent = ent_mgr->create_entity(template_name, static_cast<ent::entity_id>(_entity_id));
+  ent::EntityManager *ent_mgr = game::world::get_instance()->get_entity_manager();
+  std::shared_ptr<ent::Entity> ent = ent_mgr->create_entity(template_name, static_cast<ent::entity_id>(_entity_id));
 
-  ent::position_component *position = ent->get_component<ent::position_component>();
+  ent::PositionComponent *position = ent->get_component<ent::PositionComponent>();
   if (position != nullptr) {
     position->set_position(initial_position);
 
-    ent::moveable_component *moveable = ent->get_component<ent::moveable_component>();
+    ent::MoveableComponent *moveable = ent->get_component<ent::MoveableComponent>();
     if (moveable != nullptr) {
       fw::Vector goal = position->get_position() + (initial_goal - initial_position);
       moveable->set_goal(goal, true /* skip_pathing */);
     }
   }
 
-  ent::ownable_component *ownable = ent->get_component<ent::ownable_component>();
+  ent::OwnableComponent *ownable = ent->get_component<ent::OwnableComponent>();
   if (ownable != nullptr) {
     ownable->set_owner(get_player());
   }
@@ -162,20 +162,20 @@ void create_entity_command::execute() {
 
 //-------------------------------------------------------------------------
 order_command::order_command(uint8_t player_no) :
-    command(player_no), entity(0) {
+    command(player_no), Entity(0) {
 }
 
 order_command::~order_command() {
 }
 
 void order_command::serialize(fw::net::PacketBuffer &buffer) {
-  buffer << entity;
+  buffer << Entity;
   buffer << order->get_identifier();
   order->serialize(buffer);
 }
 
 void order_command::deserialize(fw::net::PacketBuffer &buffer) {
-  buffer >> entity;
+  buffer >> Entity;
 
   uint16_t order_id;
   buffer >> order_id;
@@ -185,10 +185,10 @@ void order_command::deserialize(fw::net::PacketBuffer &buffer) {
 }
 
 void order_command::execute() {
-  ent::entity_manager *ent_mgr = game::world::get_instance()->get_entity_manager();
-  std::shared_ptr<ent::entity> ent = ent_mgr->get_entity(entity).lock();
+  ent::EntityManager *ent_mgr = game::world::get_instance()->get_entity_manager();
+  std::shared_ptr<ent::Entity> ent = ent_mgr->get_entity(Entity).lock();
   if (ent) {
-    ent::orderable_component *orderable = ent->get_component<ent::orderable_component>();
+    ent::OrderableComponent *orderable = ent->get_component<ent::OrderableComponent>();
     if (orderable != 0) {
       orderable->execute_order(order);
     }

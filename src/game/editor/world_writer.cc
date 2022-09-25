@@ -25,7 +25,7 @@ world_writer::~world_writer() {
 }
 
 void world_writer::write(std::string name) {
-  _name = name;
+  name_ = name;
 
   game::world_vfs vfs;
   game::world_file wf = vfs.open_file(name, true);
@@ -66,7 +66,7 @@ void world_writer::write_terrain(game::world_file &wf) {
 }
 
 void world_writer::write_mapdesc(game::world_file &wf) {
-  game::world_file_entry wfe = wf.get_entry(_name + ".mapdesc", true /* for_write */);
+  game::world_file_entry wfe = wf.get_entry(name_ + ".mapdesc", true /* for_write */);
   wfe.write("<mapdesc version=\"1\">");
   wfe.write((boost::format("  <description>%1%</description>") % world_->get_description()).str());
   wfe.write((boost::format("  <author>%1%</author>") % world_->get_author()).str());

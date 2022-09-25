@@ -17,17 +17,17 @@
 namespace ent {
 
 // register the component with the entity_factory
-ENT_COMPONENT_REGISTER("Weapon", weapon_component);
+ENT_COMPONENT_REGISTER("Weapon", WeaponComponent);
 
-weapon_component::weapon_component() :
-    _time_to_fire(0.0f) {
+WeaponComponent::WeaponComponent() :
+    time_to_fire_(0.0f) {
 }
 
-weapon_component::~weapon_component() {
+WeaponComponent::~WeaponComponent() {
 }
 
-void weapon_component::apply_template(luabind::object const &tmpl) {
-  _range = 10.0f;
+void WeaponComponent::apply_template(luabind::object const &tmpl) {
+  range_ = 10.0f;
 
 //  for (luabind::iterator it(tmpl), end; it != end; ++it) {
 //    if (it.key() == "FireEntity") {
@@ -44,17 +44,17 @@ void weapon_component::apply_template(luabind::object const &tmpl) {
 //  }
 }
 
-void weapon_component::update(float dt) {
-  _time_to_fire -= dt;
-  if (_time_to_fire < 0)
-    _time_to_fire = 0.0f;
+void WeaponComponent::update(float dt) {
+  time_to_fire_ -= dt;
+  if (time_to_fire_ < 0)
+    time_to_fire_ = 0.0f;
 
-  std::shared_ptr<ent::entity> entity(entity_);
-  std::shared_ptr<ent::entity> target = _target.lock();
+  std::shared_ptr<ent::Entity> Entity(entity_);
+  std::shared_ptr<ent::Entity> target = target_.lock();
   if (target) {
-    position_component *our_pos = entity->get_component<position_component>();
-    position_component *their_pos = target->get_component<position_component>();
-    moveable_component *our_moveable = entity->get_component<moveable_component>();
+    PositionComponent *our_pos = Entity->get_component<PositionComponent>();
+    PositionComponent *their_pos = target->get_component<PositionComponent>();
+    MoveableComponent *our_moveable = Entity->get_component<MoveableComponent>();
 
     if (our_pos == nullptr || their_pos == nullptr)
       return;
@@ -64,7 +64,7 @@ void weapon_component::update(float dt) {
       float wrap_x = game::world::get_instance()->get_terrain()->get_width();
       float wrap_z = game::world::get_instance()->get_terrain()->get_length();
       fw::Vector goal = fw::get_direction_to(our_pos->get_position(), their_pos->get_position(), wrap_x, wrap_z);
-      if (goal.length() > _range) {
+      if (goal.length() > range_) {
         our_moveable->set_goal(their_pos->get_position());
         need_fire = false;
       } else {
@@ -72,32 +72,32 @@ void weapon_component::update(float dt) {
       }
     }
 
-    if (need_fire && _time_to_fire <= 0.0f) {
+    if (need_fire && time_to_fire_ <= 0.0f) {
       fire();
-      _time_to_fire = 5.0f;
+      time_to_fire_ = 5.0f;
     }
   }
 }
 
-void weapon_component::fire() {
-  std::shared_ptr<ent::entity> entity(entity_);
+void WeaponComponent::fire() {
+  std::shared_ptr<ent::Entity> Entity(entity_);
   // TODO: entity_id
-  std::shared_ptr<ent::entity> ent = entity->get_manager()->create_entity(entity, _fire_entity_name, 0);
+  std::shared_ptr<ent::Entity> ent = Entity->get_manager()->create_entity(Entity, fire_entity_name_, 0);
 
   // it should face our "fire_direction"
-  position_component *position = ent->get_component<position_component>();
+  PositionComponent *position = ent->get_component<PositionComponent>();
   if (position != nullptr) {
-    position->set_direction(_fire_direction);
+    position->set_direction(fire_direction_);
   }
 
   // set the projectile's target to our target
-  projectile_component *projectile = ent->get_component<projectile_component>();
+  ProjectileComponent *projectile = ent->get_component<ProjectileComponent>();
   if (projectile != nullptr) {
-    projectile->set_target(_target);
+    projectile->set_target(target_);
   }
 
-  // fire our "Fire" audio cue
-  //audio_component *our_audio = entity_->get_component<audio_component>();
+  // fire our "Fire" audio Cue
+  //AudioComponent *our_audio = entity_->get_component<AudioComponent>();
   //if (our_audio != nullptr) {
   //  our_audio->play_cue("Fire");
   //}

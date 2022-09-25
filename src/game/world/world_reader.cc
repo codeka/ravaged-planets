@@ -42,7 +42,7 @@ void world_reader::read(std::string name) {
   float *height_data = new float[trn_width * trn_length];
   wfe.read(height_data, trn_width * trn_length * sizeof(float));
 
-  _name = name;
+  name_ = name;
   _terrain = create_terrain(trn_width, trn_length);
   _terrain->_heights = height_data;
 

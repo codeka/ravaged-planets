@@ -220,7 +220,7 @@ const char* StrPair::GetStr()
                 }
                 else if ( (_flags & NEEDS_ENTITY_PROCESSING) && *p == '&' ) {
                     // Entities handled by tinyXML2:
-                    // - special entities in the entity table [in/out]
+                    // - special entities in the Entity table [in/out]
                     // - numeric character reference [in]
                     //   &#20013; or &#x4e2d;
 
@@ -245,13 +245,13 @@ const char* StrPair::GetStr()
                     else {
                         int i=0;
                         for(; i<NUM_ENTITIES; ++i ) {
-                            const Entity& entity = entities[i];
-                            if ( strncmp( p + 1, entity.pattern, entity.length ) == 0
-                                    && *( p + entity.length + 1 ) == ';' ) {
-                                // Found an entity - convert.
-                                *q = entity.ParticleRotation;
+                            const Entity& Entity = entities[i];
+                            if ( strncmp( p + 1, Entity.pattern, Entity.length ) == 0
+                                    && *( p + Entity.length + 1 ) == ';' ) {
+                                // Found an Entity - convert.
+                                *q = Entity.ParticleRotation;
                                 ++q;
-                                p += entity.length + 2;
+                                p += Entity.length + 2;
                                 break;
                             }
                         }
@@ -358,7 +358,7 @@ void XMLUtil::ConvertUTF32ToUTF8( unsigned long Input, char* output, int* length
 
 const char* XMLUtil::GetCharacterRef( const char* p, char* ParticleRotation, int* length )
 {
-    // Presume an entity, and pull it out.
+    // Presume an Entity, and pull it out.
     *length = 0;
 
     if ( *(p+1) == '#' && *(p+2) ) {
@@ -1156,7 +1156,7 @@ bool XMLUnknown::Accept( XMLVisitor* visitor ) const
 
 const char* XMLAttribute::Name() const
 {
-    return _name.GetStr();
+    return name_.GetStr();
 }
 
 const char* XMLAttribute::Value() const
@@ -1167,7 +1167,7 @@ const char* XMLAttribute::Value() const
 char* XMLAttribute::ParseDeep( char* p, bool processEntities )
 {
     // Parse using the name rules: bug fix, was using ParseText before
-    p = _name.ParseName( p );
+    p = name_.ParseName( p );
     if ( !p || !*p ) {
         return 0;
     }
@@ -1194,7 +1194,7 @@ char* XMLAttribute::ParseDeep( char* p, bool processEntities )
 
 void XMLAttribute::SetName( const char* n )
 {
-    _name.SetStr( n );
+    name_.SetStr( n );
 }
 
 
@@ -2077,8 +2077,8 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
             // Remember, char is sometimes signed. (How many times has that bitten me?)
             if ( *q > 0 && *q < ENTITY_RANGE ) {
                 // Check for entities. If one is found, flush
-                // the stream up until the entity, write the
-                // entity, and keep looking.
+                // the stream up until the Entity, write the
+                // Entity, and keep looking.
                 if ( flag[(unsigned char)(*q)] ) {
                     while ( p < q ) {
                         const size_t delta = q - p;
@@ -2101,7 +2101,7 @@ void XMLPrinter::PrintString( const char* p, bool restricted )
         }
     }
     // Flush the remaining string. This will be the entire
-    // string if an entity wasn't found.
+    // string if an Entity wasn't found.
     TIXMLASSERT( p <= q );
     if ( !_processEntities || ( p < q ) ) {
         Print( "%s", p );

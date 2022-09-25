@@ -65,7 +65,7 @@ order::order(std::string const &state_name) :
 order::~order() {
 }
 
-void order::begin(std::weak_ptr<ent::entity> const &ent) {
+void order::begin(std::weak_ptr<ent::Entity> const &ent) {
   entity_ = ent;
 }
 
@@ -84,11 +84,11 @@ build_order::build_order() :
 build_order::~build_order() {
 }
 
-void build_order::begin(std::weak_ptr<ent::entity> const &ent) {
+void build_order::begin(std::weak_ptr<ent::Entity> const &ent) {
   order::begin(ent);
 
-  std::shared_ptr<ent::entity> entity(entity_);
-  _builder = entity->get_component<ent::builder_component>();
+  std::shared_ptr<ent::Entity> Entity(entity_);
+  _builder = Entity->get_component<ent::BuilderComponent>();
   if (_builder != nullptr) {
     _builder->build(template_name);
   }
@@ -118,32 +118,32 @@ move_order::move_order() :
 move_order::~move_order() {
 }
 
-void move_order::begin(std::weak_ptr<ent::entity> const &ent) {
+void move_order::begin(std::weak_ptr<ent::Entity> const &ent) {
   order::begin(ent);
-  std::shared_ptr<ent::entity> entity(entity_);
+  std::shared_ptr<ent::Entity> Entity(entity_);
 
   // move towards the component, if we don't have a moveable component, nothing will happen.
-  auto moveable = entity->get_component<ent::moveable_component>();
+  auto moveable = Entity->get_component<ent::MoveableComponent>();
   if (moveable != nullptr) {
     moveable->set_goal(goal);
   }
 
   // if it's got a weapon, clear the target (since we've now moving instead)
-  ent::weapon_component *weapon = entity->get_component<ent::weapon_component>();
+  ent::WeaponComponent *weapon = Entity->get_component<ent::WeaponComponent>();
   if (weapon != 0) {
     weapon->clear_target();
   }
 }
 
 bool move_order::is_complete() {
-  std::shared_ptr<ent::entity> entity = entity_.lock();
-  if (entity) {
-    ent::pathing_component *pathing = entity->get_component<ent::pathing_component>();
+  std::shared_ptr<ent::Entity> Entity = entity_.lock();
+  if (Entity) {
+    ent::PathingComponent *pathing = Entity->get_component<ent::PathingComponent>();
     if (pathing != nullptr) {
       return !pathing->is_following_path();
     }
 
-    ent::position_component *pos = entity->get_component<ent::position_component>();
+    ent::PositionComponent *pos = Entity->get_component<ent::PositionComponent>();
     return (pos->get_direction_to(goal).length_squared() < 1.1f);
   }
 
@@ -167,20 +167,20 @@ attack_order::attack_order() :
 attack_order::~attack_order() {
 }
 
-void attack_order::begin(std::weak_ptr<ent::entity> const &ent) {
+void attack_order::begin(std::weak_ptr<ent::Entity> const &ent) {
   order::begin(ent);
-  std::shared_ptr<ent::entity> entity = entity_.lock();
-  if (entity) {
-    std::weak_ptr<ent::entity> target_entity_wp = game::world::get_instance()->get_entity_manager()->get_entity(target);
-    std::shared_ptr<ent::entity> target_entity = target_entity_wp.lock();
+  std::shared_ptr<ent::Entity> Entity = entity_.lock();
+  if (Entity) {
+    std::weak_ptr<ent::Entity> target_entity_wp = game::world::get_instance()->get_entity_manager()->get_entity(target);
+    std::shared_ptr<ent::Entity> target_entity = target_entity_wp.lock();
     if (target_entity) {
-      attack(entity, target_entity);
+      attack(Entity, target_entity);
     }
   }
 }
 
-void attack_order::attack(std::shared_ptr<ent::entity> entity, std::shared_ptr<ent::entity> target_entity) {
-  ent::weapon_component *weapon = entity->get_component<ent::weapon_component>();
+void attack_order::attack(std::shared_ptr<ent::Entity> Entity, std::shared_ptr<ent::Entity> target_entity) {
+  ent::WeaponComponent *weapon = Entity->get_component<ent::WeaponComponent>();
   if (weapon != nullptr) {
     weapon->set_target(target_entity);
   }
@@ -188,12 +188,12 @@ void attack_order::attack(std::shared_ptr<ent::entity> entity, std::shared_ptr<e
 
 bool attack_order::is_complete() {
   // attack is complete when either of us is dead
-  std::shared_ptr<ent::entity> entity = entity_.lock();
-  if (!entity) {
+  std::shared_ptr<ent::Entity> Entity = entity_.lock();
+  if (!Entity) {
     return true;
   }
 
-  std::weak_ptr<ent::entity> target_entity = game::world::get_instance()->get_entity_manager()->get_entity(target);
+  std::weak_ptr<ent::Entity> target_entity = game::world::get_instance()->get_entity_manager()->get_entity(target);
   if (!target_entity.lock()) {
     return true;
   }

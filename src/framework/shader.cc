@@ -153,7 +153,7 @@ class ShaderProgram {
 private:
   friend class fw::ShaderParameters;
 
-  std::string _name;
+  std::string name_;
   std::map<std::string, std::string> states_;
   GLuint _program_id;
   std::map<std::string, fw::ShaderVariable> _shader_variables;
