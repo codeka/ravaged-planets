@@ -244,7 +244,7 @@ void BuildWindow::do_refresh() {
     fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
       std::shared_ptr<fw::Model> mdl =
           fw::Framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
-      mdl->set_color(game::simulation_thread::get_instance()->get_local_player()->get_color());
+      mdl->set_color(game::SimulationThread::get_instance()->get_local_player()->get_color());
       icon->set_model(""/*luabind::object_cast<std::string>(tmpl["name"])*/, mdl);
     });
 

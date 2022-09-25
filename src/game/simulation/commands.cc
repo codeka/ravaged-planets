@@ -24,23 +24,23 @@ namespace game {
 
 // this is a helper macro for registering command types with the command_factory
 #define COMMAND_REGISTER(type) \
-  std::shared_ptr<command> create_ ## type (uint8_t player_no) { \
-    return std::shared_ptr<command>(new type(player_no)); \
+  std::shared_ptr<Command> create_ ## type (uint8_t player_no) { \
+    return std::shared_ptr<Command>(new type(player_no)); \
   } \
-  command_registrar reg_ ## type(type::identifier, &create_ ## type)
+  CommandRegistrar reg_ ## type(type::identifier, &create_ ## type)
 
-typedef std::function<std::shared_ptr<command>(uint8_t)> create_command_fn;
+typedef std::function<std::shared_ptr<Command>(uint8_t)> create_command_fn;
 typedef std::map<uint8_t, create_command_fn> command_registry_map;
 static command_registry_map *g_command_registry = nullptr;
 
 // this is a helper class that you use indirectly via the COMMAND_REGISTER macro
 // to register a command.
-class command_registrar {
+class CommandRegistrar {
 public:
-  command_registrar(uint8_t id, create_command_fn fn);
+  CommandRegistrar(uint8_t id, create_command_fn fn);
 };
 
-command_registrar::command_registrar(uint8_t id, create_command_fn fn) {
+CommandRegistrar::CommandRegistrar(uint8_t id, create_command_fn fn) {
   if (g_command_registry == nullptr)
     g_command_registry = new command_registry_map();
 
@@ -48,7 +48,7 @@ command_registrar::command_registrar(uint8_t id, create_command_fn fn) {
 }
 
 // creates the Packet object from the given command identifier
-std::shared_ptr<command> create_command(uint8_t id, uint8_t player_no) {
+std::shared_ptr<Command> create_command(uint8_t id, uint8_t player_no) {
   create_command_fn fn = (*g_command_registry)[id];
   if (fn == nullptr) {
     BOOST_THROW_EXCEPTION(
@@ -59,47 +59,47 @@ std::shared_ptr<command> create_command(uint8_t id, uint8_t player_no) {
 }
 
 // creates the Packet object from the given command identifier
-std::shared_ptr<command> create_command(uint8_t id) {
+std::shared_ptr<Command> create_command(uint8_t id) {
   create_command_fn fn = (*g_command_registry)[id];
   if (fn == nullptr) {
     BOOST_THROW_EXCEPTION(
         fw::Exception() << fw::message_error_info("command does not exist: " + boost::lexical_cast<std::string>(id)));
   }
 
-  return fn(simulation_thread::get_instance()->get_local_player()->get_player_no());
+  return fn(SimulationThread::get_instance()->get_local_player()->get_player_no());
 }
 
 //-------------------------------------------------------------------------
 
-COMMAND_REGISTER(connect_player_command);
-COMMAND_REGISTER(create_entity_command);
-COMMAND_REGISTER(order_command);
+COMMAND_REGISTER(ConnectPlayerCommand);
+COMMAND_REGISTER(CreateEntityCommand);
+COMMAND_REGISTER(OrderCommand);
 
 //-------------------------------------------------------------------------
 
-command::command(uint8_t player_no) {
-  _player = simulation_thread::get_instance()->get_player(player_no);
+Command::Command(uint8_t player_no) {
+  player_ = SimulationThread::get_instance()->get_player(player_no);
 }
 
-command::~command() {
+Command::~Command() {
 }
 
 //-------------------------------------------------------------------------
 
-connect_player_command::connect_player_command(uint8_t player_no) :
-    command(player_no) {
+ConnectPlayerCommand::ConnectPlayerCommand(uint8_t player_no) :
+    Command(player_no) {
 }
 
-connect_player_command::~connect_player_command() {
+ConnectPlayerCommand::~ConnectPlayerCommand() {
 }
 
-void connect_player_command::serialize(fw::net::PacketBuffer &) {
+void ConnectPlayerCommand::serialize(fw::net::PacketBuffer &) {
 }
 
-void connect_player_command::deserialize(fw::net::PacketBuffer &) {
+void ConnectPlayerCommand::deserialize(fw::net::PacketBuffer &) {
 }
 
-void connect_player_command::execute() {
+void ConnectPlayerCommand::execute() {
 }
 
 //-------------------------------------------------------------------------
@@ -107,7 +107,7 @@ static volatile std::atomic<ent::entity_id> g_next_entity_number;
 
 ent::entity_id generate_entity_id() {
   uint32_t entity_id = ++g_next_entity_number;
-  uint8_t player_id = simulation_thread::get_instance()->get_local_player()->get_player_no();
+  uint8_t player_id = SimulationThread::get_instance()->get_local_player()->get_player_no();
 
   if (entity_id > 0x00ffffff) {
     // this is probably pretty bad! I can't imagine a game that needs 16 million entities...
@@ -117,31 +117,31 @@ ent::entity_id generate_entity_id() {
   return static_cast<ent::entity_id>((static_cast<uint32_t>(player_id) << 24) | entity_id);
 }
 
-create_entity_command::create_entity_command(uint8_t player_no) :
-    command(player_no) {
-  _entity_id = generate_entity_id();
+CreateEntityCommand::CreateEntityCommand(uint8_t player_no) :
+    Command(player_no) {
+  entity_id_ = generate_entity_id();
 }
 
-create_entity_command::~create_entity_command() {
+CreateEntityCommand::~CreateEntityCommand() {
 }
 
-void create_entity_command::serialize(fw::net::PacketBuffer &buffer) {
-  buffer << _entity_id;
+void CreateEntityCommand::serialize(fw::net::PacketBuffer &buffer) {
+  buffer << entity_id_;
   buffer << template_name;
   buffer << initial_position;
   buffer << initial_goal;
 }
 
-void create_entity_command::deserialize(fw::net::PacketBuffer &buffer) {
-  buffer >> _entity_id;
+void CreateEntityCommand::deserialize(fw::net::PacketBuffer &buffer) {
+  buffer >> entity_id_;
   buffer >> template_name;
   buffer >> initial_position;
   buffer >> initial_goal;
 }
 
-void create_entity_command::execute() {
-  ent::EntityManager *ent_mgr = game::world::get_instance()->get_entity_manager();
-  std::shared_ptr<ent::Entity> ent = ent_mgr->create_entity(template_name, static_cast<ent::entity_id>(_entity_id));
+void CreateEntityCommand::execute() {
+  ent::EntityManager *ent_mgr = game::World::get_instance()->get_entity_manager();
+  std::shared_ptr<ent::Entity> ent = ent_mgr->create_entity(template_name, static_cast<ent::entity_id>(entity_id_));
 
   ent::PositionComponent *position = ent->get_component<ent::PositionComponent>();
   if (position != nullptr) {
@@ -161,20 +161,20 @@ void create_entity_command::execute() {
 }
 
 //-------------------------------------------------------------------------
-order_command::order_command(uint8_t player_no) :
-    command(player_no), Entity(0) {
+OrderCommand::OrderCommand(uint8_t player_no) :
+    Command(player_no), Entity(0) {
 }
 
-order_command::~order_command() {
+OrderCommand::~OrderCommand() {
 }
 
-void order_command::serialize(fw::net::PacketBuffer &buffer) {
+void OrderCommand::serialize(fw::net::PacketBuffer &buffer) {
   buffer << Entity;
   buffer << order->get_identifier();
   order->serialize(buffer);
 }
 
-void order_command::deserialize(fw::net::PacketBuffer &buffer) {
+void OrderCommand::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> Entity;
 
   uint16_t order_id;
@@ -184,8 +184,8 @@ void order_command::deserialize(fw::net::PacketBuffer &buffer) {
   order->deserialize(buffer);
 }
 
-void order_command::execute() {
-  ent::EntityManager *ent_mgr = game::world::get_instance()->get_entity_manager();
+void OrderCommand::execute() {
+  ent::EntityManager *ent_mgr = game::World::get_instance()->get_entity_manager();
   std::shared_ptr<ent::Entity> ent = ent_mgr->get_entity(Entity).lock();
   if (ent) {
     ent::OrderableComponent *orderable = ent->get_component<ent::OrderableComponent>();

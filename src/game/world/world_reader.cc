@@ -15,22 +15,22 @@
 
 namespace game {
 
-world_reader::world_reader() :
-    _terrain(nullptr) {
+WorldReader::WorldReader() :
+    terrain_(nullptr) {
 }
 
-world_reader::~world_reader() {
+WorldReader::~WorldReader() {
 }
 
-void world_reader::read(std::string name) {
-  world_vfs vfs;
-  world_file wf = vfs.open_file(name, false);
+void WorldReader::read(std::string name) {
+  WorldVfs vfs;
+  WorldFile wf = vfs.open_file(name, false);
 
   int version;
   int trn_width;
   int trn_length;
 
-  world_file_entry wfe = wf.get_entry("heightfield", false /* for_write */);
+  WorldFileEntry wfe = wf.get_entry("heightfield", false /* for_write */);
   wfe.read(&version, sizeof(int));
   if (version != 1) {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown terrain version"));
@@ -43,16 +43,16 @@ void world_reader::read(std::string name) {
   wfe.read(height_data, trn_width * trn_length * sizeof(float));
 
   name_ = name;
-  _terrain = create_terrain(trn_width, trn_length);
-  _terrain->_heights = height_data;
+  terrain_ = create_terrain(trn_width, trn_length);
+  terrain_->heights_ = height_data;
 
-  for (int patch_z = 0; patch_z < _terrain->get_patches_length(); patch_z++) {
-    for (int patch_x = 0; patch_x < _terrain->get_patches_width(); patch_x++) {
+  for (int patch_z = 0; patch_z < terrain_->get_patches_length(); patch_z++) {
+    for (int patch_x = 0; patch_x < terrain_->get_patches_width(); patch_x++) {
       std::string name = (boost::format("splatt-%1%-%2%.png") % patch_x % patch_z).str();
       wfe = wf.get_entry(name, false /* for_write */);
 
       fw::Bitmap splatt(wfe.get_full_path().c_str());
-      _terrain->set_splatt(patch_x, patch_z, splatt);
+      terrain_->set_splatt(patch_x, patch_z, splatt);
     }
   }
 
@@ -60,14 +60,14 @@ void world_reader::read(std::string name) {
   if (wfe.exists()) {
     wfe.close();
 
-    _minimap_background = std::make_shared<fw::Bitmap>(wfe.get_full_path());
+    minimap_background_ = std::make_shared<fw::Bitmap>(wfe.get_full_path());
   }
 
   wfe = wf.get_entry("screenshot.png", false /* for_write */);
   if (wfe.exists()) {
     wfe.close();
 
-    _screenshot = std::make_shared<fw::Bitmap>(wfe.get_full_path());
+    screenshot_ = std::make_shared<fw::Bitmap>(wfe.get_full_path());
   }
 
   wfe = wf.get_entry(name + ".mapdesc", false /* for_write */);
@@ -84,7 +84,7 @@ void world_reader::read(std::string name) {
   }
 }
 
-void world_reader::read_collision_data(world_file_entry &wfe) {
+void WorldReader::read_collision_data(WorldFileEntry &wfe) {
   int version;
   wfe.read(&version, sizeof(int));
   if (version != 1) {
@@ -99,17 +99,17 @@ void world_reader::read_collision_data(world_file_entry &wfe) {
   for (int i = 0; i < (width * length); i++) {
     uint8_t n;
     wfe.read(&n, sizeof(uint8_t));
-    _terrain->_collision_data.push_back(n != 0);
+    terrain_->collision_data_.push_back(n != 0);
   }
 }
 
-void world_reader::read_mapdesc(fw::XmlElement root) {
+void WorldReader::read_mapdesc(fw::XmlElement root) {
   for (fw::XmlElement child = root.get_first_child(); child.is_valid(); child =
       child.get_next_sibling()) {
     if (child.get_value() == "description") {
-      _description = child.get_text();
+      description_ = child.get_text();
     } else if (child.get_value() == "author") {
-      _author = child.get_text();
+      author_ = child.get_text();
     } else if (child.get_value() == "size") {
     } else if (child.get_value() == "players") {
       read_mapdesc_players(child);
@@ -120,7 +120,7 @@ void world_reader::read_mapdesc(fw::XmlElement root) {
   }
 }
 
-void world_reader::read_mapdesc_players(fw::XmlElement players_node) {
+void WorldReader::read_mapdesc_players(fw::XmlElement players_node) {
   for (fw::XmlElement child = players_node.get_first_child(); child.is_valid();
       child = child.get_next_sibling()) {
     if (child.get_value() != "player") {
@@ -135,23 +135,23 @@ void world_reader::read_mapdesc_players(fw::XmlElement players_node) {
           << fw::message_error_info("<player> node has invalid 'start' attribute."));
     }
 
-    _player_starts[player_no] = fw::Vector(start[0], 0.0f, start[1]);
+    player_starts_[player_no] = fw::Vector(start[0], 0.0f, start[1]);
   }
 }
 
-terrain *world_reader::create_terrain(int width, int length) {
-  terrain *t = new terrain();
+Terrain *WorldReader::create_terrain(int width, int length) {
+  Terrain *t = new Terrain();
   t->create(width, length, false);
   return t;
 }
 
-terrain *world_reader::get_terrain() {
-  if (_terrain == nullptr) {
+Terrain *WorldReader::get_terrain() {
+  if (terrain_ == nullptr) {
     BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("Terrain has not been created yet!"));
   }
 
-  return _terrain;
+  return terrain_;
 }
 
 }

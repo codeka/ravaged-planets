@@ -77,7 +77,7 @@ void PathingComponent::set_goal(fw::Vector const &goal) {
   last_request_time_ = now;
   last_request_goal_ = goal;
 
-  auto pathing_thread = game::world::get_instance()->get_pathing();
+  auto pathing_thread = game::World::get_instance()->get_pathing();
   pathing_thread->request_path(position_->get_position(), goal,
       std::bind(&PathingComponent::on_path_found, this, _1));
 }

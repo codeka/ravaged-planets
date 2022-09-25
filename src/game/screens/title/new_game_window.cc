@@ -122,9 +122,9 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
 void NewGameWindow::show() {
   wnd_->set_visible(true);
 
-  world_vfs vfs;
+  WorldVfs vfs;
   map_list_ = vfs.list_maps();
-  for (world_summary &ws : map_list_) {
+  for (WorldSummary &ws : map_list_) {
     std::string title = ws.get_name();
     wnd_->find<Listbox>(MAP_LIST_ID)->add_item(
         Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
@@ -133,9 +133,9 @@ void NewGameWindow::show() {
     wnd_->find<Listbox>(MAP_LIST_ID)->select_item(0);
   }
 
-  sig_players_changed_conn_ = simulation_thread::get_instance()->sig_players_changed.connect(
+  sig_players_changed_conn_ = SimulationThread::get_instance()->sig_players_changed.connect(
       std::bind(&NewGameWindow::on_players_changed, this));
-  sig_chat_conn_ = simulation_thread::get_instance()->sig_chat.connect(
+  sig_chat_conn_ = SimulationThread::get_instance()->sig_chat.connect(
       std::bind(&NewGameWindow::add_chat_msg, this, _1, _2));
   sig_session_state_changed_ = session::get_instance()->sig_state_changed.connect(
       std::bind(&NewGameWindow::on_session_state_changed, this, _1));
@@ -165,7 +165,7 @@ void NewGameWindow::update() {
 
   // check which players are now ready that weren't ready before
   int num_players = 0;
-  for (player* p : simulation_thread::get_instance()->get_players()) {
+  for (Player* p : SimulationThread::get_instance()->get_players()) {
     num_players++;
     if (p->is_ready()) {
       bool was_ready_before = false;
@@ -250,11 +250,11 @@ void NewGameWindow::on_players_changed() {
 
 // refreshes the list of players in the game
 void NewGameWindow::refresh_players() {
-  std::vector<player *> players = simulation_thread::get_instance()->get_players();
+  std::vector<Player *> players = SimulationThread::get_instance()->get_players();
 
   Listbox *players_list = wnd_->find<Listbox>(PLAYER_LIST_ID);
   players_list->clear();
-  for (player *plyr : players) {
+  for (Player *plyr : players) {
     int player_no = static_cast<int>(plyr->get_player_no());
 
     std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";
@@ -281,14 +281,14 @@ void NewGameWindow::on_maps_selection_changed(int index) {
   update_selection();
 }
 
-game::world_summary const &NewGameWindow::get_selected_world_summary() {
+game::WorldSummary const &NewGameWindow::get_selected_world_summary() {
   Widget *selected_widget = wnd_->find<Listbox>(MAP_LIST_ID)->get_selected_item();
   if (selected_widget == nullptr) {
     // should never happen (unless you have no maps installed at all)
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("No selected world!"));
   }
 
-  return boost::any_cast<game::world_summary const &>(selected_widget->get_data());
+  return boost::any_cast<game::WorldSummary const &>(selected_widget->get_data());
 }
 
 bool NewGameWindow::on_new_ai_clicked(Widget *w) {
@@ -311,7 +311,7 @@ bool NewGameWindow::on_chat_filter(std::string ch) {
   boost::trim(msg);
 
   add_chat_msg(session::get_instance()->get_user_name(), msg);
-  simulation_thread::get_instance()->send_chat_msg(msg);
+  SimulationThread::get_instance()->send_chat_msg(msg);
 
   ed->set_text("");
   return false; // ignore the newline character
@@ -327,8 +327,8 @@ void NewGameWindow::append_chat(std::string const &msg) {
 }
 
 void NewGameWindow::update_selection() {
-  game::world_summary const &ws = get_selected_world_summary();
-  simulation_thread::get_instance()->set_map_name(ws.get_name());
+  game::WorldSummary const &ws = get_selected_world_summary();
+  SimulationThread::get_instance()->set_map_name(ws.get_name());
 
   wnd_->find<Label>(MAP_NAME_ID)->set_text((boost::format("%s by %s") % ws.get_name() % ws.get_author()).str());
   wnd_->find<Label>(MAP_SIZE_ID)->set_text((boost::format(fw::text("title.new-game.map-size"))
@@ -339,7 +339,7 @@ void NewGameWindow::update_selection() {
 // when we're ready to start, we need to mark our own player as ready and then
 // wait for others. Once they're ready as well, start_game() is called.
 bool NewGameWindow::on_start_game_clicked(Widget *w) {
-  simulation_thread::get_instance()->get_local_player()->local_player_is_ready();
+  SimulationThread::get_instance()->get_local_player()->local_player_is_ready();
 
   // disable the start_game button, since we don't want you clicking it twice.
   w->set_enabled(false);
@@ -354,7 +354,7 @@ void NewGameWindow::start_game() {
     return;
   }
 
-  game::world_summary const &ws = boost::any_cast<game::world_summary const &>(selected_widget->get_data());
+  game::WorldSummary const &ws = boost::any_cast<game::WorldSummary const &>(selected_widget->get_data());
   game_options_->map_name = ws.get_name();
 
   hide();

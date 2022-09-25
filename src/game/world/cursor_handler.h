@@ -6,19 +6,17 @@ class EntityManager;
 }
 
 namespace game {
-class terrain;
+class Terrain;
 
-/**
- * This class "handles" the cursor. That is, it remembers which Entity (if any) is currently under the cursor as well
- * what happens when you click the mouse button.
- */
-class cursor_handler {
+// This class "handles" the cursor. That is, it remembers which Entity (if any) is currently under the cursor as well
+// what happens when you click the mouse button.
+class CursorHandler {
 private:
-  std::vector<int> _keybind_tokens;
-  ent::EntityManager *_entities;
-  terrain *_terrain;
-  std::weak_ptr<ent::Entity> _last_highlighted;
-  std::weak_ptr<ent::Entity> _entity_under_cursor;
+  std::vector<int> keybind_tokens_;
+  ent::EntityManager *entities_;
+  Terrain *terrain_;
+  std::weak_ptr<ent::Entity> last_highlighted_;
+  std::weak_ptr<ent::Entity> entity_under_cursor_;
 
   // this is called when the "select" button is pressed (left mouse button by default)
   void on_key_select(std::string keyname, bool is_down);
@@ -27,8 +25,8 @@ private:
   void on_key_deselect(std::string keyname, bool is_down);
 
 public:
-  cursor_handler();
-  ~cursor_handler();
+  CursorHandler();
+  ~CursorHandler();
 
   void initialize();
   void update();

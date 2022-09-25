@@ -12,7 +12,7 @@ class Http;
 }
 
 namespace game {
-class session_request;
+class SessionRequest;
 class remote_game;
 
 class session {
@@ -26,9 +26,9 @@ private:
   static session *_instance;
 
   session_state _state;
-  std::shared_ptr<session_request> _curr_req;
-  std::queue<std::shared_ptr<session_request>> _pending;
-  uint64_t _session_id;
+  std::shared_ptr<SessionRequest> _curr_req;
+  std::queue<std::shared_ptr<SessionRequest>> _pending;
+  uint64_t session_id_;
   uint32_t _user_id;
   std::string _user_name;
   std::string _error_msg;
@@ -42,8 +42,8 @@ private:
   std::string get_base_url() const;
 
   // adds a request to the queue
-  void add_request(std::shared_ptr<session_request> req);
-  void begin_request(std::shared_ptr<session_request> req);
+  void add_request(std::shared_ptr<SessionRequest> req);
+  void begin_request(std::shared_ptr<SessionRequest> req);
 
 public:
   static session *get_instance() {
@@ -56,24 +56,24 @@ public:
   void update();
 
   // logs you in to the server with the given username and password
-  std::shared_ptr<session_request> login(std::string const &username, std::string const &password);
+  std::shared_ptr<SessionRequest> login(std::string const &username, std::string const &password);
 
   // logs you out and "disconnects".
-  std::shared_ptr<session_request> logout();
+  std::shared_ptr<SessionRequest> logout();
 
   // this is called when you check the "enable multiplayer" checkbox, we need to create
   // a new game for people to join
-  std::shared_ptr<session_request> create_game();
+  std::shared_ptr<SessionRequest> create_game();
 
   // joins the game with the given lobby identifier
-  std::shared_ptr<session_request> join_game(uint64_t lobby_id);
+  std::shared_ptr<SessionRequest> join_game(uint64_t lobby_id);
 
   // gets the list of remote games that we can connect to. when the list is refreshed (may
   // take some time) we'll call the given callback with the list
-  std::shared_ptr<session_request> get_games_list(std::function<void(std::vector<remote_game> const &)> callback);
+  std::shared_ptr<SessionRequest> get_games_list(std::function<void(std::vector<remote_game> const &)> callback);
 
   // confirm that the given player has joined this game
-  std::shared_ptr<session_request> confirm_player(uint64_t game_id, uint32_t user_id);
+  std::shared_ptr<SessionRequest> confirm_player(uint64_t game_id, uint32_t user_id);
 
   // gets the current state (if a post is in progress, we'll check if it's finished
   // and parse the response at the same time)
@@ -87,7 +87,7 @@ public:
 
   // gets and sets our session_id and user_name
   uint64_t get_session_id() const {
-    return _session_id;
+    return session_id_;
   }
   uint32_t get_user_id() const {
     return _user_id;

@@ -20,36 +20,36 @@ namespace game {
 
 using namespace std::placeholders;
 
-cursor_handler::cursor_handler() :
-    _entities(nullptr), _terrain(nullptr) {
+CursorHandler::CursorHandler() :
+    entities_(nullptr), terrain_(nullptr) {
 }
 
-cursor_handler::~cursor_handler() {
+CursorHandler::~CursorHandler() {
 }
 
-void cursor_handler::initialize() {
+void CursorHandler::initialize() {
   fw::Input *Input = fw::Framework::get_instance()->get_input();
-  _keybind_tokens.push_back(Input->bind_function("select", std::bind(&cursor_handler::on_key_select, this, _1, _2)));
-  _keybind_tokens.push_back(
-      Input->bind_function("deselect", std::bind(&cursor_handler::on_key_deselect, this, _1, _2)));
+  keybind_tokens_.push_back(Input->bind_function("select", std::bind(&CursorHandler::on_key_select, this, _1, _2)));
+  keybind_tokens_.push_back(
+      Input->bind_function("deselect", std::bind(&CursorHandler::on_key_deselect, this, _1, _2)));
 
-  _entities = game::world::get_instance()->get_entity_manager();
-  _terrain = game::world::get_instance()->get_terrain();
+  entities_ = game::World::get_instance()->get_entity_manager();
+  terrain_ = game::World::get_instance()->get_terrain();
 }
 
-void cursor_handler::update() {
+void CursorHandler::update() {
   bool highlight = false;
   fw::Color highlight_color;
   std::string cursor_name = "arrow";
 
-  if (_entities == nullptr) {
+  if (entities_ == nullptr) {
     return;
   }
 
-  _entity_under_cursor = _entities->get_entity_at_cursor();
-  std::shared_ptr<ent::Entity> entity_under_cursor = _entity_under_cursor.lock();
+  entity_under_cursor_ = entities_->get_entity_at_cursor();
+  std::shared_ptr<ent::Entity> entity_under_cursor = entity_under_cursor_.lock();
   if (entity_under_cursor) {
-    local_player *lplyr = game::simulation_thread::get_instance()->get_local_player();
+    LocalPlayer *lplyr = game::SimulationThread::get_instance()->get_local_player();
 
     ent::OwnableComponent *ownable = entity_under_cursor->get_component<ent::OwnableComponent>();
     if (ownable != nullptr) {
@@ -57,7 +57,7 @@ void cursor_handler::update() {
         //highlight = true;
         //highlight_color = fw::color(1, 1, 1);
         cursor_name = "select";
-      } else if (_entities->get_selection().size() > 0) {
+      } else if (entities_->get_selection().size() > 0) {
         // if it's not ours and we have a selection, highlight with
         // red to indicate we can attack
         highlight = true;
@@ -71,14 +71,14 @@ void cursor_handler::update() {
   } else {
     // if we don't have an Entity under our cursor, but we *do* have one selected, then we want
     // the "move" cursor!
-    if (_entities->get_selection().size() > 0) {
+    if (entities_->get_selection().size() > 0) {
       cursor_name = "move";
     }
   }
 
   fw::Framework::get_instance()->get_cursor()->set_cursor(1, cursor_name);
 
-  std::shared_ptr<ent::Entity> last_highlighted = _last_highlighted.lock();
+  std::shared_ptr<ent::Entity> last_highlighted = last_highlighted_.lock();
   if (last_highlighted) {
     ent::SelectableComponent *lh_selectable = last_highlighted->get_component<ent::SelectableComponent>();
     lh_selectable->unhighlight();
@@ -87,46 +87,46 @@ void cursor_handler::update() {
   if (highlight) {
     ent::SelectableComponent *selectable = entity_under_cursor->get_component<ent::SelectableComponent>();
     selectable->highlight(highlight_color);
-    _last_highlighted = _entity_under_cursor;
+    last_highlighted_ = entity_under_cursor_;
   }
 }
 
-void cursor_handler::destroy() {
+void CursorHandler::destroy() {
   fw::Input *input = fw::Framework::get_instance()->get_input();
-  for (int token : _keybind_tokens) {
+  for (int token : keybind_tokens_) {
     input->unbind_key(token);
   }
-  _keybind_tokens.clear();
+  keybind_tokens_.clear();
 }
 
-void cursor_handler::on_key_select(std::string, bool is_down) {
-  std::shared_ptr<ent::Entity> entity_under_cursor = _entity_under_cursor.lock();
+void CursorHandler::on_key_select(std::string, bool is_down) {
+  std::shared_ptr<ent::Entity> entity_under_cursor = entity_under_cursor_.lock();
   if (!is_down) {
     if (entity_under_cursor) {
       // todo: if it's ours, add it to our selection otherwise, attack!
 
-      if (_entities->get_selection().size() == 0) {
+      if (entities_->get_selection().size() == 0) {
         // if we don't have anything selected yet, select this one...
-        _entities->add_selection(entity_under_cursor);
+        entities_->add_selection(entity_under_cursor);
       } else {
         // if we've got entities selected, order them to attack this guy!
-        for (auto it = _entities->get_selection().begin(); it != _entities->get_selection().end(); ++it) {
+        for (auto it = entities_->get_selection().begin(); it != entities_->get_selection().end(); ++it) {
           std::shared_ptr<ent::Entity> ent = (*it).lock();
           if (!ent)
             continue;
 
           ent::OrderableComponent *orderable = ent->get_component<ent::OrderableComponent>();
           if (orderable != nullptr) {
-            std::shared_ptr<attack_order> order(create_order<attack_order>());
+            std::shared_ptr<AttackOrder> order(create_order<AttackOrder>());
             order->target = entity_under_cursor->get_id();
             orderable->issue_order(order);
           }
         }
       }
     } else {
-      std::shared_ptr<move_order> order(create_order<move_order>());
-      order->goal = _terrain->get_cursor_location();
-      for (auto it = _entities->get_selection().begin(); it != _entities->get_selection().end(); ++it) {
+      std::shared_ptr<MoveOrder> order(create_order<MoveOrder>());
+      order->goal = terrain_->get_cursor_location();
+      for (auto it = entities_->get_selection().begin(); it != entities_->get_selection().end(); ++it) {
         std::shared_ptr<ent::Entity> ent = it->lock();
         if (!ent)
           continue;
@@ -140,9 +140,9 @@ void cursor_handler::on_key_select(std::string, bool is_down) {
   }
 }
 
-void cursor_handler::on_key_deselect(std::string, bool is_down) {
+void CursorHandler::on_key_deselect(std::string, bool is_down) {
   if (!is_down) {
-    _entities->clear_selection();
+    entities_->clear_selection();
   }
 }
 

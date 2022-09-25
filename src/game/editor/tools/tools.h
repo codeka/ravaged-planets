@@ -8,7 +8,7 @@ class Scenegraph;
 }
 
 namespace game {
-class terrain;
+class Terrain;
 }
 
 // Use this macro to register a tool with the tool_factory
@@ -73,7 +73,7 @@ public:
 
 // draws a circle, centred at the given point, with the given radius. The circle will be
 // in the x/z plane
-void draw_circle(fw::sg::Scenegraph &Scenegraph, game::terrain *terrain,
+void draw_circle(fw::sg::Scenegraph &Scenegraph, game::Terrain *terrain,
     fw::Vector const &center, float radius);
 
 }

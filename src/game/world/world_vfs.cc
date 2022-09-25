@@ -13,56 +13,56 @@
 namespace fs = boost::filesystem;
 
 // populate the given world summary based on the maps found in the given path
-void populate_maps(std::vector<game::world_summary> &list, fs::path path);
+void populate_maps(std::vector<game::WorldSummary> &list, fs::path path);
 
 // looks for the full path to the map with the given name
 fs::path find_map(std::string name);
 
 namespace game {
 
-world_summary::world_summary() :
-    name_(""), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0), _num_players(0) {
+WorldSummary::WorldSummary() :
+    name_(""), extra_loaded_(false), screenshot_(nullptr), width_(0), height_(0), num_players_(0) {
 }
 
-world_summary::world_summary(world_summary const &copy) :
-    name_(copy.name_), _extra_loaded(false), _screenshot(nullptr), _width(0), _height(0), _num_players(0) {
+WorldSummary::WorldSummary(WorldSummary const &copy) :
+    name_(copy.name_), extra_loaded_(false), screenshot_(nullptr), width_(0), height_(0), num_players_(0) {
 }
 
-world_summary::~world_summary() {
+WorldSummary::~WorldSummary() {
 }
 
-void world_summary::ensure_extra_loaded() const {
-  if (_extra_loaded)
+void WorldSummary::ensure_extra_loaded() const {
+  if (extra_loaded_)
     return;
 
   fs::path full_path(find_map(name_));
 
   auto screenshot_path = full_path / "screenshot.png";
   if (fs::exists(screenshot_path)) {
-    _screenshot = std::make_shared<fw::Bitmap>(full_path / "screenshot.png");
+    screenshot_ = std::make_shared<fw::Bitmap>(full_path / "screenshot.png");
   }
 
   parse_mapdesc_file(full_path / (name_ + ".mapdesc"));
 
-  _extra_loaded = true;
+  extra_loaded_ = true;
 }
 
-void world_summary::parse_mapdesc_file(fs::path const &filename) const {
+void WorldSummary::parse_mapdesc_file(fs::path const &filename) const {
   fw::XmlElement xml = fw::load_xml(filename, "mapdesc", 1);
 
   for (fw::XmlElement child = xml.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
     if (child.get_value() == "description") {
-      _description = child.get_text();
+      description_ = child.get_text();
     } else if (child.get_value() == "author") {
-      _author = child.get_text();
+      author_ = child.get_text();
     } else if (child.get_value() == "size") {
-      _width = boost::lexical_cast<int>(child.get_attribute("width"));
-      _height = boost::lexical_cast<int>(child.get_attribute("height"));
+      width_ = boost::lexical_cast<int>(child.get_attribute("width"));
+      height_ = boost::lexical_cast<int>(child.get_attribute("height"));
     } else if (child.get_value() == "players") {
-      _num_players = 0;
+      num_players_ = 0;
       for (fw::XmlElement player = child.get_first_child(); player.is_valid(); player = player.get_next_sibling()) {
         if (player.get_value() == "player") {
-          _num_players ++;
+          num_players_ ++;
         } else {
           fw::debug << boost::format("WARN: unknown child of <players>: %1%") % child.get_value() << std::endl;
         }
@@ -73,20 +73,20 @@ void world_summary::parse_mapdesc_file(fs::path const &filename) const {
   }
 }
 
-void world_summary::initialize(std::string map_file) {
+void WorldSummary::initialize(std::string map_file) {
   name_ = map_file;
 }
 
 //----------------------------------------------------------------------------
 
-world_vfs::world_vfs() {
+WorldVfs::WorldVfs() {
 }
 
-world_vfs::~world_vfs() {
+WorldVfs::~WorldVfs() {
 }
 
-std::vector<world_summary> world_vfs::list_maps() {
-  std::vector<world_summary> list;
+std::vector<WorldSummary> WorldVfs::list_maps() {
+  std::vector<WorldSummary> list;
   populate_maps(list, fw::install_base_path() / "maps");
   populate_maps(list, fw::user_base_path() / "maps");
 
@@ -95,7 +95,7 @@ std::vector<world_summary> world_vfs::list_maps() {
   return list;
 }
 
-world_file world_vfs::open_file(std::string name, bool for_writing /*= false*/) {
+WorldFile WorldVfs::open_file(std::string name, bool for_writing /*= false*/) {
   // check the user's profile directory first
   fs::path map_path = fw::user_base_path() / "maps";
   fs::path full_path = map_path / name;
@@ -103,106 +103,106 @@ world_file world_vfs::open_file(std::string name, bool for_writing /*= false*/) 
     // if it's for writing, we'll want to create the above directory and write the files
     // there anyway. At least for now, that's the easiest way....
     fs::create_directories(full_path);
-    return world_file(full_path.string());
+    return WorldFile(full_path.string());
   }
 
   if (!for_writing) {
     // if it's not for writing, check the install directory as well
     map_path = fw::install_base_path() / "maps";
     fs::path full_path = map_path / name;
-    return world_file(full_path.string());
+    return WorldFile(full_path.string());
   }
 
   // todo: not for writing, check other locations...
   BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("map doesn't exist"));
-  return world_file(""); // can't get here (the above line throws an exception)
+  return WorldFile(""); // can't get here (the above line throws an exception)
 }
 
 //-------------------------------------------------------------------------
 
-world_file_entry::world_file_entry(std::string full_path, bool for_write) :
-    _full_path(full_path), _for_write(for_write) {
+WorldFileEntry::WorldFileEntry(std::string full_path, bool for_write) :
+    full_path_(full_path), for_write_(for_write) {
 }
 
-world_file_entry::world_file_entry(world_file_entry const &copy) : _for_write(false) {
+WorldFileEntry::WorldFileEntry(WorldFileEntry const &copy) : for_write_(false) {
   this->copy(copy);
 }
 
-world_file_entry::~world_file_entry() {
+WorldFileEntry::~WorldFileEntry() {
   close();
 }
 
-world_file_entry &world_file_entry::operator =(world_file_entry const &copy) {
+WorldFileEntry &WorldFileEntry::operator =(WorldFileEntry const &copy) {
   this->copy(copy);
   return (*this);
 }
 
-void world_file_entry::copy(world_file_entry const &copy) {
+void WorldFileEntry::copy(WorldFileEntry const &copy) {
   close();
 
-  _full_path = copy._full_path;
-  _stream.copyfmt(copy._stream);
-  _for_write = copy._for_write;
+  full_path_ = copy.full_path_;
+  stream_.copyfmt(copy.stream_);
+  for_write_ = copy.for_write_;
 }
 
-void world_file_entry::ensure_open(bool throw_on_error) {
-  if (_stream.is_open()) {
+void WorldFileEntry::ensure_open(bool throw_on_error) {
+  if (stream_.is_open()) {
     return;
   }
 
-  if (_for_write) {
-    _stream.open(_full_path.c_str(), std::ios::out | std::ifstream::binary);
+  if (for_write_) {
+    stream_.open(full_path_.c_str(), std::ios::out | std::ifstream::binary);
   } else {
-    _stream.open(_full_path.c_str(), std::ios::in | std::ifstream::binary);
+    stream_.open(full_path_.c_str(), std::ios::in | std::ifstream::binary);
   }
-  if (_stream.fail()) {
+  if (stream_.fail()) {
     if (throw_on_error) {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(_full_path));
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(full_path_));
     }
   }
 }
 
-void world_file_entry::close() {
-  if (_stream.is_open()) {
-    _stream.close();
+void WorldFileEntry::close() {
+  if (stream_.is_open()) {
+    stream_.close();
   }
 }
 
-void world_file_entry::write(void const *buffer, int num_bytes) {
+void WorldFileEntry::write(void const *buffer, int num_bytes) {
   ensure_open();
-  _stream.write(reinterpret_cast<char const *>(buffer), num_bytes);
+  stream_.write(reinterpret_cast<char const *>(buffer), num_bytes);
 }
 
-void world_file_entry::write(std::string const &line) {
+void WorldFileEntry::write(std::string const &line) {
   std::string full_line = boost::algorithm::trim_right_copy(line);
   full_line += "\r\n";
 
   write(full_line.c_str(), full_line.length());
 }
 
-void world_file_entry::read(void *buffer, int num_bytes) {
+void WorldFileEntry::read(void *buffer, int num_bytes) {
   ensure_open();
-  _stream.read(reinterpret_cast<char *>(buffer), num_bytes);
+  stream_.read(reinterpret_cast<char *>(buffer), num_bytes);
 }
 
-bool world_file_entry::exists() {
+bool WorldFileEntry::exists() {
   ensure_open(false);
-  return (_stream.is_open());
+  return (stream_.is_open());
 }
 
 //-------------------------------------------------------------------------
 
-world_file::world_file(std::string path) :
-    _path(path) {
+WorldFile::WorldFile(std::string path) :
+    path_(path) {
 }
 
-world_file_entry world_file::get_entry(std::string name, bool for_write) {
-  fs::path file_path = fs::path(_path) / name;
-  return world_file_entry(file_path.string(), for_write);
+WorldFileEntry WorldFile::get_entry(std::string name, bool for_write) {
+  fs::path file_path = fs::path(path_) / name;
+  return WorldFileEntry(file_path.string(), for_write);
 }
 }
 
-void populate_maps(std::vector<game::world_summary> &list, fs::path path) {
+void populate_maps(std::vector<game::WorldSummary> &list, fs::path path) {
   fw::debug << boost::format("populating maps from: %1%") % path.string()
       << std::endl;
 
@@ -213,7 +213,7 @@ void populate_maps(std::vector<game::world_summary> &list, fs::path path) {
     fs::path p(*it);
     fw::debug << boost::format("  - %1%") % p.string() << std::endl;
     if (fs::is_directory(p)) {
-      game::world_summary ws;
+      game::WorldSummary ws;
       ws.initialize(p.leaf().string());
 
       // todo: see if it already exists before adding it

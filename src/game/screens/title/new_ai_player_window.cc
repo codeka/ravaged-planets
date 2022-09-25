@@ -74,7 +74,7 @@ void NewAIPlayerWindow::show() {
   wnd_->set_visible(true);
 
   int max_player_no = 0;
-  for (player *plyr : simulation_thread::get_instance()->get_players()) {
+  for (Player *plyr : SimulationThread::get_instance()->get_players()) {
     int player_no = plyr->get_player_no();
     if (player_no > max_player_no)
       max_player_no = player_no;
@@ -95,18 +95,18 @@ bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
   }
   script_desc const &desc = boost::any_cast<script_desc const &>(selected_item->get_data());
 
-  uint16_t game_id = simulation_thread::get_instance()->get_game_id();
+  uint16_t game_id = SimulationThread::get_instance()->get_game_id();
   if (game_id == 0) {
     // if we're not part of a multiplayer game, just add the AI player and be
     // done with it (choose a player_id based on the number of players so far)
-    int num_players = simulation_thread::get_instance()->get_players().size();
+    int num_players = SimulationThread::get_instance()->get_players().size();
 
     ai_player *ply = new ai_player(name, desc, static_cast<uint8_t>(num_players + 1));
     if (!ply->is_valid_state()) {
       new_game_window_->append_chat("Error loading player script, check error log.");
     } else {
       //ply->set_color(_color_chooser->get_color());
-      simulation_thread::get_instance()->add_ai_player(ply);
+      SimulationThread::get_instance()->add_ai_player(ply);
     }
   } else {
     // if we're part of a multiplayer game, we have to join this player like any other player...

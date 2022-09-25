@@ -18,7 +18,7 @@ namespace game {
  * This implementation of player provides an AI player so that you can play against the computer, if you don't
  * have any friends.
  */
-class ai_player : public player {
+class ai_player : public Player {
 private:
   typedef std::map<std::string, std::vector<luabind::object>> lua_event_map;
   typedef std::map<std::string, luabind::object> unit_creator_map;
@@ -64,7 +64,7 @@ public:
 
   // This is called each simulation frame when we get all the commands from
   // other players
-  virtual void post_commands(std::vector<std::shared_ptr<command> > &commands);
+  virtual void post_commands(std::vector<std::shared_ptr<Command> > &commands);
 
   // gets value that indicates whether we're in a valid state or not
   bool is_valid_state() { return _is_valid; }

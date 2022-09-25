@@ -10,7 +10,7 @@
 #include <game/entities/entity.h>
 
 namespace game {
-class order;
+class Order;
 }
 
 namespace ent {
@@ -19,9 +19,9 @@ namespace ent {
 // from a local (or AI) player.
 class OrderableComponent: public EntityComponent {
 private:
-  std::shared_ptr<game::order> curr_order_;
+  std::shared_ptr<game::Order> curr_order_;
   bool order_pending_;
-  std::queue<std::shared_ptr<game::order>> orders_;
+  std::queue<std::shared_ptr<game::Order>> orders_;
 
 public:
   static const int identifier = 550;
@@ -36,16 +36,16 @@ public:
 
   // begins actually executing an order. This should only be called by the order_command
   // when the simulation thread has deemed it's time to begin execution.
-  void execute_order(std::shared_ptr<game::order> const &order);
+  void execute_order(std::shared_ptr<game::Order> const &order);
 
   // adds an order to the queue. When it gets to the head of the queue, it will be sent to
   // the simulation thread for actual processing. When the simulation thread comes back, it'll
   // call execute_order to actually begin the execution.
-  void issue_order(std::shared_ptr<game::order> const &order);
+  void issue_order(std::shared_ptr<game::Order> const &order);
 
   // gets the total number of currently executing + waiting orders.
   int get_order_count() const;
-  std::shared_ptr<game::order> get_current_order() const;
+  std::shared_ptr<game::Order> get_current_order() const;
 };
 
 }

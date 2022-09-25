@@ -25,9 +25,9 @@ public:
 
 // this is the base "session request" class and represents a request we'll make
 // to the server to update our session state.
-class session_request {
+class SessionRequest {
 public:
-  typedef std::function<void(session_request &req)> complete_handler_fn;
+  typedef std::function<void(SessionRequest &req)> complete_handler_fn;
 
   // what we can return from the update() method
   enum update_result {
@@ -42,7 +42,7 @@ private:
 protected:
   std::shared_ptr<fw::Http> _post;
   std::string _error_msg;
-  uint64_t _session_id;
+  uint64_t session_id_;
   uint32_t _user_id;
 
   // converts this request into the XML that we'll post to the URL
@@ -64,8 +64,8 @@ protected:
   virtual bool parse_response(fw::XmlElement &xml);
 
 public:
-  session_request();
-  virtual ~session_request();
+  SessionRequest();
+  virtual ~SessionRequest();
 
   // posts the request, using the specific base URL
   virtual void begin(std::string base_url);
@@ -85,10 +85,10 @@ public:
   // gets or sets the session_id, this can change (for example when you log in) and
   // the session will update itself when the request is finished.
   void set_session_id(uint64_t sid) {
-    _session_id = sid;
+    session_id_ = sid;
   }
   uint64_t get_session_id() const {
-    return _session_id;
+    return session_id_;
   }
 
   void set_user_id(uint32_t uid) {
@@ -101,7 +101,7 @@ public:
 
 // this is a request to log in to the server. You can't do anything until the login
 // request succeeds.
-class login_session_request: public session_request {
+class login_session_request: public SessionRequest {
 private:
   std::string _username;
   std::string _password;
@@ -120,7 +120,7 @@ public:
 
 // this is a request to log in to the server. You can't do anything until the login
 // request succeeds.
-class logout_session_request: public session_request {
+class logout_session_request: public SessionRequest {
 protected:
   virtual std::string get_description();
   virtual bool parse_response(fw::XmlElement &xml);
@@ -134,7 +134,7 @@ public:
 
 // this is a request to create a new game for us that people will be able to join
 // and so on.
-class create_game_session_request: public session_request {
+class create_game_session_request: public SessionRequest {
 protected:
   virtual std::string get_request_xml();
   virtual std::string get_url();
@@ -147,7 +147,7 @@ public:
 };
 
 // this is a request to refresh the list of lobbies that are available to connect to.
-class list_games_session_request: public session_request {
+class list_games_session_request: public SessionRequest {
 public:
   typedef std::function<void(std::vector<remote_game> const &games)> callback_fn;
 
@@ -167,7 +167,7 @@ public:
 
 // this is a request to join a game, we'll get back the information required to actually
 // connect to the server.
-class join_game_session_request: public session_request {
+class join_game_session_request: public SessionRequest {
 private:
   uint64_t _game_id;
 
@@ -187,7 +187,7 @@ public:
 // this is used to confirm that a player is valid for a given game and that
 // the server actually has them registered as a player. it returns the player#
 // and few other details of that player as well...
-class confirm_player_session_request: public session_request {
+class confirm_player_session_request: public SessionRequest {
 private:
   uint64_t _game_id;
   uint32_t _other_user_id;

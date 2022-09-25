@@ -27,8 +27,8 @@ namespace game {
 
 ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t player_no) {
   _script_desc = desc;
-  _user_name = name;
-  _player_no = player_no;
+  user_name_ = name;
+  player_no_ = player_no;
 
   // we do one update of the update queue, to ensure it's ready to go
   _upd_queue.update();
@@ -74,19 +74,19 @@ ai_player::~ai_player() {
 }
 
 void ai_player::l_set_ready() {
-  _is_ready_to_start = true;
+  is_ready_to_start_ = true;
 }
 
 void ai_player::l_say(std::string const &msg) {
   // just "say" whatever they told us to say...
   // todo: this should be a proper network call
-  simulation_thread::get_instance()->sig_chat(_user_name, msg);
+  SimulationThread::get_instance()->sig_chat(user_name_, msg);
 }
 
 void ai_player::l_local_say(std::string const &msg) {
   fw::debug << "SAY : " << msg << std::endl;
   // just "say" whatever they told us to say... (but just locally, it's for debugging your scripts, basically)
-  simulation_thread::get_instance()->sig_chat(_user_name, msg);
+  SimulationThread::get_instance()->sig_chat(user_name_, msg);
 }
 
 void ai_player::l_timer(float dt, luabind::object obj) {
@@ -209,7 +209,7 @@ public:
       if (orderable == nullptr) {
         return false;
       }
-      std::shared_ptr<game::order> curr_order = orderable->get_current_order();
+      std::shared_ptr<game::Order> curr_order = orderable->get_current_order();
       if (curr_order && curr_order->get_state_name() != _state) {
         return false;
       } else if (!curr_order && _state != "idle") {
@@ -237,7 +237,7 @@ luabind::object ai_player::l_find_units(luabind::object params, lua_State *L) {
   findunits_predicate pred(this, params);
 
   // do the actual search
-  ent::EntityManager *entmgr = game::world::get_instance()->get_entity_manager();
+  ent::EntityManager *entmgr = game::World::get_instance()->get_entity_manager();
   std::list<std::weak_ptr<ent::Entity>> entities = entmgr->get_entities(pred);
 
   int index = 1;
@@ -288,7 +288,7 @@ void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
     fw::debug << "issuing \"build\" order to unit." << std::endl;
 
     // todo: we should make this "generic"
-    std::shared_ptr<build_order> order = create_order<build_order>();
+    std::shared_ptr<BuildOrder> order = create_order<BuildOrder>();
     order->template_name;// = luabind::object_cast<std::string>(orders["build_unit"]);
     orderable->issue_order(order);
   } else if (order_name == "attack") {
@@ -296,7 +296,7 @@ void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
     std::weak_ptr<ent::Entity> target_entity_wp;/// = luabind::object_cast<unit_wrapper*>(orders["target"])->get_entity();
     std::shared_ptr<ent::Entity> target_entity = target_entity_wp.lock();
     if (target_entity) {
-      std::shared_ptr<attack_order> order = create_order<attack_order>();
+      std::shared_ptr<AttackOrder> order = create_order<AttackOrder>();
       order->target = target_entity->get_id();
       orderable->issue_order(order);
     }
@@ -345,26 +345,26 @@ void ai_player::local_player_is_ready() {
 void ai_player::world_loaded() {
   fw::Vector start_loc;
 
-  auto start_it = game::world::get_instance()->get_player_starts().find(_player_no);
-  if (start_it == game::world::get_instance()->get_player_starts().end()) {
+  auto start_it = game::World::get_instance()->get_player_starts().find(player_no_);
+  if (start_it == game::World::get_instance()->get_player_starts().end()) {
     fw::debug << boost::format("WARN: no player_start defined for player %1%, choosing random")
-        % static_cast<int>(_player_no) << std::endl;
+        % static_cast<int>(player_no_) << std::endl;
     start_loc = fw::Vector(13.0f, 0, 13.0f); // <todo, Random
   } else {
     start_loc = start_it->second;
   }
 
   // todo: we should create a "capital" or "HQ" or something building instead of "factory"
-  std::shared_ptr<create_entity_command> cmd(create_command<create_entity_command>());
+  std::shared_ptr<CreateEntityCommand> cmd(create_command<CreateEntityCommand>());
   cmd->template_name = "factory";
   cmd->initial_position = start_loc;
-  simulation_thread::get_instance()->post_command(cmd);
+  SimulationThread::get_instance()->post_command(cmd);
 
   fire_event("game_started");
 }
 
 // This is called each simulation frame when we get all the commands from other players
-void ai_player::post_commands(std::vector<std::shared_ptr<command>> &) {
+void ai_player::post_commands(std::vector<std::shared_ptr<Command>> &) {
 }
 
 }

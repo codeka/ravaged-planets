@@ -42,9 +42,9 @@ void open_map_window::initialize() {
           << Widget::click(std::bind(&open_map_window::cancel_clicked, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
-  game::world_vfs vfs;
-  std::vector<game::world_summary> map_list = vfs.list_maps();
-  for(game::world_summary &ws : map_list) {
+  game::WorldVfs vfs;
+  std::vector<game::WorldSummary> map_list = vfs.list_maps();
+  for(game::WorldSummary &ws : map_list) {
     std::string title = ws.get_name();
     wnd_->find<Listbox>(MAP_LIST)->add_item(
         Builder<Label>(px(0), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
@@ -57,7 +57,7 @@ bool open_map_window::open_clicked(Widget *w) {
     return true;
   }
 
-  game::world_summary const &ws = boost::any_cast<game::world_summary const &>(selected_widget->get_data());
+  game::WorldSummary const &ws = boost::any_cast<game::WorldSummary const &>(selected_widget->get_data());
   editor_screen::get_instance()->open_map(ws.get_name());
 
   hide();

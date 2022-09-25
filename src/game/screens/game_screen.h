@@ -10,7 +10,7 @@ class Scenegraph;
 }
 
 namespace game {
-class world;
+class World;
 
 // This is the options screen for specifying the options for the game we're about to play.
 class GameScreenOptions: public ScreenOptions {
@@ -21,7 +21,7 @@ public:
 // The game screen is the main screen that is used when a game is actually in progress.
 class GameScreen: public Screen {
 private:
-  world *world_;
+  World *world_;
   std::shared_ptr<GameScreenOptions> options_;
 
 public:

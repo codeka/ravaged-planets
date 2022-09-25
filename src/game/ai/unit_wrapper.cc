@@ -45,7 +45,7 @@ std::string unit_wrapper::l_get_kind() {
 std::string unit_wrapper::l_get_state() {
   std::shared_ptr<ent::Entity> Entity = entity_.lock();
   if (Entity && _orderable != nullptr) {
-    std::shared_ptr<game::order> curr_order = _orderable->get_current_order();
+    std::shared_ptr<game::Order> curr_order = _orderable->get_current_order();
     if (curr_order) {
       return curr_order->get_state_name();
     }

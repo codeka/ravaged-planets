@@ -5,8 +5,8 @@ namespace game {
 
 std::vector<fw::Color> player_colors;
 
-player::player() :
-    _user_id(0), _player_no(0), _is_ready_to_start(0), color_(0, 0, 0) {
+Player::Player() :
+    user_id_(0), player_no_(0), is_ready_to_start_(0), color_(0, 0, 0) {
   if (player_colors.size() == 0) {
     player_colors.push_back(fw::Color(0.0f, 1.0f, 1.0f)); // aqua
     player_colors.push_back(fw::Color(1.0f, 1.0f, 1.0f)); // fuchsia
@@ -19,28 +19,28 @@ player::player() :
   }
 }
 
-player::~player() {
+Player::~Player() {
 }
 
-void player::update() {
+void Player::update() {
 }
 
-void player::send_chat_msg(std::string const &) {
+void Player::send_chat_msg(std::string const &) {
 }
 
-void player::post_commands(std::vector<std::shared_ptr<command>> &) {
+void Player::post_commands(std::vector<std::shared_ptr<Command>> &) {
 }
 
-void player::world_loaded() {
+void Player::world_loaded() {
 }
 
-std::string player::get_user_name() const {
-  if (_user_name == "") {
+std::string Player::get_user_name() const {
+  if (user_name_ == "") {
     std::stringstream ss;
-    ss << "Player " << static_cast<int>(_player_no);
+    ss << "Player " << static_cast<int>(player_no_);
     return ss.str();
   } else {
-    return _user_name;
+    return user_name_;
   }
 }
 

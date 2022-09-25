@@ -59,7 +59,7 @@ void save_map_window::initialize() {
 void save_map_window::show() {
   wnd_->set_visible(true);
 
-  auto world = dynamic_cast<editor_world *>(game::world::get_instance());
+  auto world = dynamic_cast<editor_world *>(game::World::get_instance());
 
   wnd_->find<TextEdit>(NAME_ID)->set_text(world->get_name());
   wnd_->find<TextEdit>(DESCRIPTION_ID)->set_text(world->get_description());
@@ -73,7 +73,7 @@ void save_map_window::show() {
 
 // updates the screenshot that we're displaying whenever it changes.
 void save_map_window::update_screenshot() {
-  auto world = dynamic_cast<editor_world *>(game::world::get_instance());
+  auto world = dynamic_cast<editor_world *>(game::World::get_instance());
   if (world->get_screenshot() == nullptr || world->get_screenshot()->get_width() == 0)
     return;
 
@@ -82,7 +82,7 @@ void save_map_window::update_screenshot() {
 }
 
 bool save_map_window::screenshot_clicked(Widget *w) {
-  auto world = dynamic_cast<editor_world *>(game::world::get_instance());
+  auto world = dynamic_cast<editor_world *>(game::World::get_instance());
   fw::Framework::get_instance()->take_screenshot(
       1024, 768, std::bind(&save_map_window::screenshot_complete, this, _1), false);
   return true;
@@ -91,7 +91,7 @@ bool save_map_window::screenshot_clicked(Widget *w) {
 void save_map_window::screenshot_complete(std::shared_ptr<fw::Bitmap> bitmap) {
   bitmap->resize(640, 480);
 
-  auto world = dynamic_cast<editor_world *>(game::world::get_instance());
+  auto world = dynamic_cast<editor_world *>(game::World::get_instance());
   world->set_screenshot(bitmap);
   fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this]() {
     update_screenshot();
@@ -99,7 +99,7 @@ void save_map_window::screenshot_complete(std::shared_ptr<fw::Bitmap> bitmap) {
 }
 
 bool save_map_window::save_clicked(Widget *w) {
-  auto world = dynamic_cast<editor_world *>(game::world::get_instance());
+  auto world = dynamic_cast<editor_world *>(game::World::get_instance());
   world->set_name(wnd_->find<TextEdit>(NAME_ID)->get_text());
   world->set_author(wnd_->find<TextEdit>(AUTHOR_ID)->get_text());
   world->set_description(wnd_->find<TextEdit>(DESCRIPTION_ID)->get_text());

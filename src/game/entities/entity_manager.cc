@@ -33,8 +33,8 @@ EntityManager::~EntityManager() {
 }
 
 void EntityManager::initialize() {
-  game::world *wrld = game::world::get_instance();
-  game::terrain *trn = wrld->get_terrain();
+  game::World *wrld = game::World::get_instance();
+  game::Terrain *trn = wrld->get_terrain();
 
   debug_ = new EntityDebug(this);
   patch_mgr_ = new PatchManager(static_cast<float>(trn->get_width()), static_cast<float>(trn->get_length()));
@@ -272,7 +272,7 @@ void EntityManager::update() {
 
   // work out the current "view center" which is used for things like drawing
   // the entities centred around the camera and so on.
-  game::world *wrld = game::world::get_instance();
+  game::World *wrld = game::World::get_instance();
   fw::Camera *camera = fw::Framework::get_instance()->get_camera();
   fw::Vector cam_loc = camera->get_position();
   fw::Vector cam_dir = camera->get_direction();

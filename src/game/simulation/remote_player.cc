@@ -18,58 +18,58 @@ using namespace std::placeholders;
 
 namespace game {
 
-remote_player::remote_player(fw::net::Host *Host, fw::net::Peer *Peer, bool connected) :
+RemotePlayer::RemotePlayer(fw::net::Host *Host, fw::net::Peer *Peer, bool connected) :
     host_(Host), peer_(Peer), connected_(connected) {
-  Peer->set_handler(std::bind(&remote_player::packet_handler, this, _1));
+  Peer->set_handler(std::bind(&RemotePlayer::packet_handler, this, _1));
 
   // give them a temporary username until the connection process has completed.
-  _user_name = "Joining...";
+  user_name_ = "Joining...";
 }
 
-remote_player::~remote_player() {
+RemotePlayer::~RemotePlayer() {
 }
 
 // connect to the specified remote player
-remote_player *remote_player::connect(fw::net::Host *Host, std::string address) {
+RemotePlayer *RemotePlayer::connect(fw::net::Host *Host, std::string address) {
   fw::net::Peer *Peer = Host->connect(address);
-  return new remote_player(Host, Peer, false);
+  return new RemotePlayer(Host, Peer, false);
 }
 
-void remote_player::send_chat_msg(std::string const &msg) {
-  chat_packet pkt;
+void RemotePlayer::send_chat_msg(std::string const &msg) {
+  ChatPacket pkt;
   pkt.set_msg(msg);
   peer_->send(pkt);
 }
 
 // we need to send a Packet to our Peer and let them know we're ready to go
-void remote_player::local_player_is_ready() {
-  start_game_packet pkt;
+void RemotePlayer::local_player_is_ready() {
+  StartGamePacket pkt;
   peer_->send(pkt);
 }
 
-void remote_player::post_commands(std::vector<std::shared_ptr<command>> &commands) {
-  command_packet pkt;
+void RemotePlayer::post_commands(std::vector<std::shared_ptr<Command>> &commands) {
+  CommandPacket pkt;
   pkt.set_commands(commands);
   peer_->send(pkt);
 }
 
 // this is called whenever we receive a Packet from our Peer, we need to work out
 // what kind of Packet it is and hand it off to the correct handler function.
-void remote_player::packet_handler(std::shared_ptr<fw::net::Packet> const &pkt) {
+void RemotePlayer::packet_handler(std::shared_ptr<fw::net::Packet> const &pkt) {
   switch (pkt->get_identifier()) {
-  case join_request_packet::identifier:
+  case JoinRequestPacket::identifier:
     pkt_join_req(pkt);
     break;
-  case join_response_packet::identifier:
+  case JoinResponsePacket::identifier:
     pkt_join_resp(pkt);
     break;
-  case chat_packet::identifier:
+  case ChatPacket::identifier:
     pkt_chat(pkt);
     break;
-  case start_game_packet::identifier:
+  case StartGamePacket::identifier:
     pkt_start_game(pkt);
     break;
-  case command_packet::identifier:
+  case CommandPacket::identifier:
     pkt_command(pkt);
     break;
 
@@ -81,21 +81,21 @@ void remote_player::packet_handler(std::shared_ptr<fw::net::Packet> const &pkt) 
 }
 
 // this is called when the remote player first connects to us, it's the "join" request.
-void remote_player::pkt_join_req(std::shared_ptr<fw::net::Packet> pkt) {
-  std::shared_ptr<join_request_packet> req(std::dynamic_pointer_cast<join_request_packet>(pkt));
-  _user_id = req->get_user_id();
+void RemotePlayer::pkt_join_req(std::shared_ptr<fw::net::Packet> pkt) {
+  std::shared_ptr<JoinRequestPacket> req(std::dynamic_pointer_cast<JoinRequestPacket>(pkt));
+  user_id_ = req->get_user_id();
   color_ = req->get_color();
 
   // call the session and confirm the fact that this player is valid and that.
-  std::shared_ptr<game::session_request> sess_req = session::get_instance()->confirm_player(
-      simulation_thread::get_instance()->get_game_id(), _user_id);
-  sess_req->set_complete_handler(std::bind(&remote_player::join_complete, this, _1));
+  std::shared_ptr<game::SessionRequest> sess_req = session::get_instance()->confirm_player(
+      SimulationThread::get_instance()->get_game_id(), user_id_);
+  sess_req->set_complete_handler(std::bind(&RemotePlayer::join_complete, this, _1));
 
-  simulation_thread::get_instance()->sig_players_changed();
+  SimulationThread::get_instance()->sig_players_changed();
 }
 
-void remote_player::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
-  std::shared_ptr<join_response_packet> resp(std::dynamic_pointer_cast<join_response_packet>(pkt));
+void RemotePlayer::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
+  std::shared_ptr<JoinResponsePacket> resp(std::dynamic_pointer_cast<JoinResponsePacket>(pkt));
 
   fw::debug << boost::format("connected to host, map is: %1%") % resp->get_map_name() << std::endl;
   for (uint32_t other_user_id : resp->get_other_users()) {
@@ -103,23 +103,23 @@ void remote_player::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
     color_ = resp->get_my_color();
 
     // we assume the first player is the Host we're connect to, is that valid?
-    if (_user_id == 0) {
-      _user_id = other_user_id;
+    if (user_id_ == 0) {
+      user_id_ = other_user_id;
 
       // "your" color is the color we allow this "local" player to have
       fw::Color your_color = resp->get_your_color();
-      simulation_thread::get_instance()->get_local_player()->set_color(your_color);
+      SimulationThread::get_instance()->get_local_player()->set_color(your_color);
 
       // call the session and confirm the fact that this player is valid and that.
-      std::shared_ptr<game::session_request> sess_req = session::get_instance()->confirm_player(
-          simulation_thread::get_instance()->get_game_id(), _user_id);
-      sess_req->set_complete_handler(std::bind(&remote_player::connect_complete, this, _1));
+      std::shared_ptr<game::SessionRequest> sess_req = session::get_instance()->confirm_player(
+          SimulationThread::get_instance()->get_game_id(), user_id_);
+      sess_req->set_complete_handler(std::bind(&RemotePlayer::connect_complete, this, _1));
     } else {
       // it's not the Host we just connected to, so we'll have toconnect to them as well!
       // but first, check whether we've already connected to them
       bool need_connect = true;
       if (other_user_id != 0) { // (it'll be zero if this is an AI player)
-        for (player *plyr : simulation_thread::get_instance()->get_players()) {
+        for (Player *plyr : SimulationThread::get_instance()->get_players()) {
           if (plyr->get_user_id() == other_user_id) {
             fw::debug
                 << boost::format("Already connected to player with user_id #%1%, not connecting again")
@@ -132,41 +132,41 @@ void remote_player::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
 
       if (need_connect) {
         // call the session and confirm the fact that this player is valid and that, then connect to them
-        std::shared_ptr<game::session_request> sess_req = session::get_instance()->confirm_player(
-            simulation_thread::get_instance()->get_game_id(), other_user_id);
-        sess_req->set_complete_handler(std::bind(&remote_player::new_player_confirmed, this, _1));
+        std::shared_ptr<game::SessionRequest> sess_req = session::get_instance()->confirm_player(
+            SimulationThread::get_instance()->get_game_id(), other_user_id);
+        sess_req->set_complete_handler(std::bind(&RemotePlayer::new_player_confirmed, this, _1));
       }
     }
   }
 
-  simulation_thread::get_instance()->sig_players_changed();
+  SimulationThread::get_instance()->sig_players_changed();
 }
 
 // when we get a chat Packet, just fire the simulation_thread's chat_msg event
-void remote_player::pkt_chat(std::shared_ptr<fw::net::Packet> pkt) {
-  std::shared_ptr<chat_packet> chat_pkt(std::dynamic_pointer_cast<chat_packet>(pkt));
-  simulation_thread::get_instance()->sig_chat(_user_name, chat_pkt->get_msg());
+void RemotePlayer::pkt_chat(std::shared_ptr<fw::net::Packet> pkt) {
+  std::shared_ptr<ChatPacket> chat_pkt(std::dynamic_pointer_cast<ChatPacket>(pkt));
+  SimulationThread::get_instance()->sig_chat(user_name_, chat_pkt->get_msg());
 }
 
 // this is sent to us when our Peer is ready to start the game
-void remote_player::pkt_start_game(std::shared_ptr<fw::net::Packet> pkt) {
+void RemotePlayer::pkt_start_game(std::shared_ptr<fw::net::Packet> pkt) {
   // mark this player as ready to start
-  _is_ready_to_start = true;
+  is_ready_to_start_ = true;
 }
 
 // this is sent to us at the beginning of the turn, we need to enqueue the commands
 // for the next turn.
-void remote_player::pkt_command(std::shared_ptr<fw::net::Packet> pkt) {
-  std::shared_ptr<command_packet> command_pkt(std::dynamic_pointer_cast<command_packet>(pkt));
-  for (std::shared_ptr<command> &cmd : command_pkt->get_commands()) {
+void RemotePlayer::pkt_command(std::shared_ptr<fw::net::Packet> pkt) {
+  std::shared_ptr<CommandPacket> command_pkt(std::dynamic_pointer_cast<CommandPacket>(pkt));
+  for (std::shared_ptr<Command> &cmd : command_pkt->get_commands()) {
     fw::debug << "got command, id: " << static_cast<int>(cmd->get_identifier()) << std::endl;
-    simulation_thread::get_instance()->enqueue_command(cmd);
+    SimulationThread::get_instance()->enqueue_command(cmd);
   }
 }
 
 // checks whether the given color is already taken (ignoring the given player)
-bool color_already_taken(player *except_for, fw::Color &col) {
-  for (player *plyr : simulation_thread::get_instance()->get_players()) {
+bool color_already_taken(Player *except_for, fw::Color &col) {
+  for (Player *plyr : SimulationThread::get_instance()->get_players()) {
     if (plyr != except_for && plyr->get_color() == col) {
       return true;
     }
@@ -178,14 +178,14 @@ bool color_already_taken(player *except_for, fw::Color &col) {
 // when we get a pkt_join, we ask the server to confirm the user. when the server
 // gets back to us, it'll call this method and we can respond to the original
 // player who just joined.
-void remote_player::join_complete(session_request &req) {
+void RemotePlayer::join_complete(SessionRequest &req) {
   confirm_player_session_request &cpsr = dynamic_cast<confirm_player_session_request &>(req);
   fw::debug << boost::format("remote_player::join_complete() addr=%1% username=%2%")
       % cpsr.get_address() % cpsr.get_user_name() << std::endl;
 
   // get the confirmed information about this new player
-  _user_name = cpsr.get_user_name();
-  _player_no = cpsr.get_player_no();
+  user_name_ = cpsr.get_user_name();
+  player_no_ = cpsr.get_player_no();
 
   // work out a Random color they can have (which hasn't already been taken by another player)
   if (color_ == fw::Color(0, 0, 0) || color_already_taken(this, color_)) {
@@ -205,12 +205,12 @@ void remote_player::join_complete(session_request &req) {
   }
 
   // once we get confirmation from the server, we can let the player know it's OK to join
-  join_response_packet resp;
-  resp.set_map_name(simulation_thread::get_instance()->get_map_name());
+  JoinResponsePacket resp;
+  resp.set_map_name(SimulationThread::get_instance()->get_map_name());
   resp.set_your_color(color_);
-  resp.set_my_color(simulation_thread::get_instance()->get_local_player()->get_color());
-  std::vector<player *> players = simulation_thread::get_instance()->get_players();
-  for (player *plyr : players) {
+  resp.set_my_color(SimulationThread::get_instance()->get_local_player()->get_color());
+  std::vector<Player *> players = SimulationThread::get_instance()->get_players();
+  for (Player *plyr : players) {
     if (plyr == this) {
       continue;
     }
@@ -219,32 +219,32 @@ void remote_player::join_complete(session_request &req) {
   }
   peer_->send(resp);
 
-  simulation_thread::get_instance()->sig_players_changed();
+  SimulationThread::get_instance()->sig_players_changed();
 }
 
-void remote_player::connect_complete(session_request &req) {
+void RemotePlayer::connect_complete(SessionRequest &req) {
   confirm_player_session_request &cpsr = dynamic_cast<confirm_player_session_request &>(req);
   fw::debug << boost::format("remote_player::connect_complete() host username=%1%") % cpsr.get_user_name() << std::endl;
-  _user_name = cpsr.get_user_name();
-  _player_no = cpsr.get_player_no();
+  user_name_ = cpsr.get_user_name();
+  player_no_ = cpsr.get_player_no();
 
-  simulation_thread::get_instance()->sig_players_changed();
+  SimulationThread::get_instance()->sig_players_changed();
 }
 
-void remote_player::new_player_confirmed(session_request &req) {
+void RemotePlayer::new_player_confirmed(SessionRequest &req) {
   confirm_player_session_request &cpsr = dynamic_cast<confirm_player_session_request &>(req);
   fw::debug << boost::format("additional player (username: %1%) confirmed, connecting to them as well...")
       % cpsr.get_user_name() << std::endl;
 
-  simulation_thread::get_instance()->connect_player(cpsr.get_address());
+  SimulationThread::get_instance()->connect_player(cpsr.get_address());
 }
 
-void remote_player::update() {
+void RemotePlayer::update() {
   if (!connected_ && peer_->is_connected()) {
-    fw::Color our_color = simulation_thread::get_instance()->get_local_player()->get_color();
+    fw::Color our_color = SimulationThread::get_instance()->get_local_player()->get_color();
     fw::debug << "connected to peer, sending \"hello\" packet! (our color is: " << our_color << ")" << std::endl;
 
-    join_request_packet pkt;
+    JoinRequestPacket pkt;
     pkt.set_user_id(session::get_instance()->get_user_id());
     pkt.set_color(our_color);
     peer_->send(pkt);

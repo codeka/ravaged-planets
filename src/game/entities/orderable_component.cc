@@ -16,7 +16,7 @@ OrderableComponent::OrderableComponent() :
 OrderableComponent::~OrderableComponent() {
 }
 
-void OrderableComponent::execute_order(std::shared_ptr<game::order> const &order) {
+void OrderableComponent::execute_order(std::shared_ptr<game::Order> const &order) {
   curr_order_ = order;
   order_pending_ = false;
   curr_order_->begin(entity_);
@@ -35,13 +35,13 @@ void OrderableComponent::update(float dt) {
     // if we don't have an order, check whether any has been queued since the last
     // update and execute a command to start it off
     if (orders_.size() > 0) {
-      std::shared_ptr<game::order> next_order = orders_.front();
+      std::shared_ptr<game::Order> next_order = orders_.front();
       orders_.pop();
 
-      std::shared_ptr<game::order_command> cmd(game::create_command<game::order_command>());
+      std::shared_ptr<game::OrderCommand> cmd(game::create_command<game::OrderCommand>());
       cmd->order = next_order;
       cmd->Entity = std::shared_ptr<ent::Entity>(entity_)->get_id();
-      game::simulation_thread::get_instance()->post_command(cmd);
+      game::SimulationThread::get_instance()->post_command(cmd);
 
       // mark that we've got an order pending, it'll take a few frames
       // for it to actually come back to us
@@ -50,7 +50,7 @@ void OrderableComponent::update(float dt) {
   }
 }
 
-void OrderableComponent::issue_order(std::shared_ptr<game::order> const &order) {
+void OrderableComponent::issue_order(std::shared_ptr<game::Order> const &order) {
   orders_.push(order);
 }
 
@@ -58,7 +58,7 @@ int OrderableComponent::get_order_count() const {
   return orders_.size() + (curr_order_ ? 1 : 0);
 }
 
-std::shared_ptr<game::order> OrderableComponent::get_current_order() const {
+std::shared_ptr<game::Order> OrderableComponent::get_current_order() const {
   return curr_order_;
 }
 

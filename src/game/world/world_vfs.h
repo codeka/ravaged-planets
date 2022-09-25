@@ -4,26 +4,22 @@
 #include <memory>
 #include <boost/filesystem.hpp>
 
-namespace fw {
-class bitmap;
-}
+#include <framework/bitmap.h>
 
 namespace game {
 
-/**
- * A "summary" of a single map file. Things like the name, size and so on, useful for displaying
- * in a list.
- */
-class world_summary {
+// A "summary" of a single map file. Things like the name, size and so on, useful for displaying
+// in a list.
+class WorldSummary {
 private:
   std::string name_;
-  mutable bool _extra_loaded;
-  mutable std::string _description;
-  mutable std::string _author;
-  mutable int _width;
-  mutable int _height;
-  mutable std::shared_ptr<fw::Bitmap> _screenshot;
-  mutable int _num_players;
+  mutable bool extra_loaded_;
+  mutable std::string description_;
+  mutable std::string author_;
+  mutable int width_;
+  mutable int height_;
+  mutable std::shared_ptr<fw::Bitmap> screenshot_;
+  mutable int num_players_;
 
   // this is called when you request any of the "extra" info (which is anything other than the name), we load
   // up the data on-demand.
@@ -33,9 +29,9 @@ private:
   void parse_mapdesc_file(boost::filesystem::path const &filename) const;
 
 public:
-  world_summary();
-  world_summary(world_summary const &copy);
-  ~world_summary();
+  WorldSummary();
+  WorldSummary(WorldSummary const &copy);
+  ~WorldSummary();
 
   // initialize our properties from the given map file (or directory)
   void initialize(std::string map_file);
@@ -45,52 +41,50 @@ public:
   }
   std::string get_description() const {
     ensure_extra_loaded();
-    return _description;
+    return description_;
   }
   std::string get_author() const {
     ensure_extra_loaded();
-    return _author;
+    return author_;
   }
   int get_width() const {
     ensure_extra_loaded();
-    return _width;
+    return width_;
   }
   int get_height() const {
     ensure_extra_loaded();
-    return _height;
+    return height_;
   }
   std::shared_ptr<fw::Bitmap> get_screenshot() const {
     ensure_extra_loaded();
-    return _screenshot;
+    return screenshot_;
   }
   int get_num_players() const {
     ensure_extra_loaded();
-    return _num_players;
+    return num_players_;
   }
 };
 
-/**
- * Represents a named entry in the "world file".
- */
-class world_file_entry {
+// Represents a named entry in the "world file".
+class WorldFileEntry {
 private:
-  std::string _full_path;
-  std::fstream _stream;
-  bool _for_write;
+  std::string full_path_;
+  std::fstream stream_;
+  bool for_write_;
 
-  void copy(world_file_entry const &copy);
+  void copy(WorldFileEntry const &copy);
   void ensure_open(bool throw_on_error = true);
 
 public:
-  world_file_entry(std::string full_path, bool for_write);
-  world_file_entry(world_file_entry const &copy);
-  ~world_file_entry();
+  WorldFileEntry(std::string full_path, bool for_write);
+  WorldFileEntry(WorldFileEntry const &copy);
+  ~WorldFileEntry();
 
-  world_file_entry &operator =(world_file_entry const &copy);
+  WorldFileEntry &operator =(WorldFileEntry const &copy);
 
   // gets the full path to this file
   std::string get_full_path() const {
-    return _full_path;
+    return full_path_;
   }
 
   // writes num_bytes into the file
@@ -109,33 +103,29 @@ public:
   void close();
 };
 
-/**
- * Represents a "world file", which is a collection of \ref world_file_entry objects.
- */
-class world_file {
+// Represents a "world file", which is a collection of \ref world_file_entry objects.
+class WorldFile {
 private:
-  std::string _path;
+  std::string path_;
 
 public:
-  world_file(std::string path);
+  WorldFile(std::string path);
 
-  world_file_entry get_entry(std::string name, bool for_write);
+  WorldFileEntry get_entry(std::string name, bool for_write);
 };
 
-/**
- * This class represents a "virtual file system" containing the world file(s). Basically this just
- * combines the world files in the install directory and the user's personal directory.
- */
-class world_vfs {
+// This class represents a "virtual file system" containing the world file(s). Basically this just
+// combines the world files in the install directory and the user's personal directory.
+class WorldVfs {
 public:
-  world_vfs();
-  ~world_vfs();
+  WorldVfs();
+  ~WorldVfs();
 
   // gets a list of all the maps
-  std::vector<world_summary> list_maps();
+  std::vector<WorldSummary> list_maps();
 
   // opens a new world_file with the complete details of the given map
-  world_file open_file(std::string name, bool for_writing = false);
+  WorldFile open_file(std::string name, bool for_writing = false);
 };
 
 }

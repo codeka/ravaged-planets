@@ -25,38 +25,38 @@ class world_writer;
 
 namespace game {
 
-struct terrain_patch {
+struct TerrainPatch {
   std::shared_ptr<fw::VertexBuffer> vb;
   std::shared_ptr<fw::Texture> texture;
   std::shared_ptr<fw::ShaderParameters> shader_params;
 };
 
-class terrain {
+class Terrain {
 public:
   static const int PATCH_SIZE = 64;
 
 private:
-  std::vector<std::shared_ptr<terrain_patch> > _patches;
+  std::vector<std::shared_ptr<TerrainPatch> > patches_;
   std::shared_ptr<fw::IndexBuffer> ib_;
   std::shared_ptr<fw::Shader> shader_;
 
 protected:
   friend class ed::world_writer;
-  friend class world_reader;
+  friend class WorldReader;
 
-  std::vector<std::shared_ptr<fw::Texture>> _layers;
-  std::vector<bool> _collision_data;
+  std::vector<std::shared_ptr<fw::Texture>> layers_;
+  std::vector<bool> collision_data_;
 
-  int _width;
-  int _length;
-  float *_heights;
+  int width_;
+  int length_;
+  float *heights_;
 
   // get the width/height of the terrain in patches
   int get_patches_width() {
-    return (_width / PATCH_SIZE);
+    return (width_ / PATCH_SIZE);
   }
   int get_patches_length() {
-    return (_length / PATCH_SIZE);
+    return (length_ / PATCH_SIZE);
   }
 
   // Gets the index of the given x/z coordinates for a single patch
@@ -75,8 +75,8 @@ protected:
   // Makes sure we've created all of the patches we'll need
   void ensure_patches();
 public:
-  terrain();
-  virtual ~terrain();
+  Terrain();
+  virtual ~Terrain();
 
   void initialize();
   void create(int width, int length, bool create_height_data = true);
@@ -93,17 +93,17 @@ public:
   float get_height(float x, float z);
 
   inline int get_width() {
-    return _width;
+    return width_;
   }
   inline int get_length() {
-    return _length;
+    return length_;
   }
 
   virtual void set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp);
 
   // gets the collision data for the map
   std::vector<bool> const &get_collision_data() const {
-    return _collision_data;
+    return collision_data_;
   }
 
   // Gets the (x,y,z) location of the point on the terrain where the cursor is pointing

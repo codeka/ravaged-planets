@@ -61,8 +61,8 @@ void WeaponComponent::update(float dt) {
 
     bool need_fire = true;
     if (our_moveable != nullptr) {
-      float wrap_x = game::world::get_instance()->get_terrain()->get_width();
-      float wrap_z = game::world::get_instance()->get_terrain()->get_length();
+      float wrap_x = game::World::get_instance()->get_terrain()->get_width();
+      float wrap_z = game::World::get_instance()->get_terrain()->get_length();
       fw::Vector goal = fw::get_direction_to(our_pos->get_position(), their_pos->get_position(), wrap_x, wrap_z);
       if (goal.length() > range_) {
         our_moveable->set_goal(their_pos->get_position());

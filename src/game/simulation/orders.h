@@ -18,17 +18,19 @@ class MoveableComponent;
 namespace game {
 
 /** Base class for our order classes. */
-class order: boost::noncopyable {
+class Order {
 private:
-  std::string _state_name;
+  std::string state_name_;
 
 protected:
   std::weak_ptr<ent::Entity> entity_;
 
-  order(std::string const &state_name);
+  Order(std::string const &state_name);
 
 public:
-  virtual ~order();
+  Order();
+  Order(const Order&) = delete;
+  virtual ~Order();
 
   virtual void serialize(fw::net::PacketBuffer &buffer);
   virtual void deserialize(fw::net::PacketBuffer &buffer);
@@ -54,80 +56,80 @@ public:
    * "building", etc)
    */
   virtual std::string get_state_name() const {
-    return _state_name;
+    return state_name_;
   }
 
   virtual uint16_t get_identifier() const = 0;
 };
 
 /** This is the "build" order which you issue to unit that can build other units (such as the factory, etc). */
-class build_order: public order {
+class BuildOrder: public Order {
 private:
-  ent::BuilderComponent *_builder;
+  ent::BuilderComponent *builder_;
 
 public:
-  build_order();
-  virtual ~build_order();
+  BuildOrder();
+  virtual ~BuildOrder();
 
-  virtual void begin(std::weak_ptr<ent::Entity> const &ent);
-  virtual bool is_complete();
+  void begin(std::weak_ptr<ent::Entity> const &ent) override;
+  bool is_complete() override;
 
-  virtual void serialize(fw::net::PacketBuffer &buffer);
-  virtual void deserialize(fw::net::PacketBuffer &buffer);
+  void serialize(fw::net::PacketBuffer &buffer) override;
+  void deserialize(fw::net::PacketBuffer &buffer) override;
 
   std::string template_name;
 
   static const int identifier = 1;
-  virtual uint16_t get_identifier() const {
+  uint16_t get_identifier() const override {
     return identifier;
   }
 };
 
 /** This is the "move" order which you issue to a unit when you want it to move from point "A" to point "B". */
-class move_order: public order {
+class MoveOrder: public Order {
 public:
-  move_order();
-  ~move_order();
+  MoveOrder();
+  ~MoveOrder();
 
-  virtual void begin(std::weak_ptr<ent::Entity> const &ent);
-  virtual bool is_complete();
+  void begin(std::weak_ptr<ent::Entity> const &ent) override;
+  bool is_complete() override;
 
-  virtual void serialize(fw::net::PacketBuffer &buffer);
-  virtual void deserialize(fw::net::PacketBuffer &buffer);
+  void serialize(fw::net::PacketBuffer &buffer) override;
+  void deserialize(fw::net::PacketBuffer &buffer) override;
 
   fw::Vector goal;
 
   static const int identifier = 2;
-  virtual uint16_t get_identifier() const {
+  uint16_t get_identifier() const override {
     return identifier;
   }
 };
 
 /** This is the "attack" order, which you issue to a unit when you want it to attack another unit. */
-class attack_order: public order {
+class AttackOrder: public Order {
 private:
   void attack(std::shared_ptr<ent::Entity> Entity, std::shared_ptr<ent::Entity> target_entity);
 public:
-  attack_order();
-  ~attack_order();
+  AttackOrder();
+  ~AttackOrder();
 
-  virtual void begin(std::weak_ptr<ent::Entity> const &ent);
-  virtual bool is_complete();
+  void begin(std::weak_ptr<ent::Entity> const &ent) override;
+  bool is_complete() override;
 
-  virtual void serialize(fw::net::PacketBuffer &buffer);
-  virtual void deserialize(fw::net::PacketBuffer &buffer);
+  void serialize(fw::net::PacketBuffer &buffer) override;
+  void deserialize(fw::net::PacketBuffer &buffer) override;
 
   // ID of the Entity we want to attack.
   ent::entity_id target;
 
   static const int identifier = 3;
-  virtual uint16_t get_identifier() const {
+  uint16_t get_identifier() const override {
     return identifier;
   }
 };
 
 // creates the order object from the given identifier
-std::shared_ptr<order> create_order(uint16_t id);
+std::shared_ptr<Order> create_order(uint16_t id);
 
 template<typename T>
 inline std::shared_ptr<T> create_order() {

@@ -13,7 +13,7 @@ class PathFfind;
 }
 
 namespace game {
-class terrain;
+class Terrain;
 
 /**
  * Encapsulates a thread that all players will queue requests for path-finding to. We then execute one request
@@ -32,7 +32,7 @@ private:
   };
 
   std::shared_ptr<fw::PathFfind> _pather;
-  terrain *_terrain;
+  Terrain *_terrain;
   std::thread thread_;
   fw::WorkQueue<path_request_data> _work_queue;
 

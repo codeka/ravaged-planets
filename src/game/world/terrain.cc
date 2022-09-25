@@ -15,15 +15,15 @@
 
 namespace game {
 
-terrain::terrain() :
-    _width(0), _length(0), _heights(nullptr) {
+Terrain::Terrain() :
+    width_(0), length_(0), heights_(nullptr) {
 }
 
-terrain::~terrain() {
-  delete[] _heights;
+Terrain::~Terrain() {
+  delete[] heights_;
 }
 
-void terrain::initialize() {
+void Terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices(index_data, PATCH_SIZE);
@@ -47,105 +47,105 @@ void terrain::initialize() {
   }
 }
 
-void terrain::create(int width, int length, bool create_height_data /*= true */) {
-  _width = width;
-  _length = length;
+void Terrain::create(int width, int length, bool create_height_data /*= true */) {
+  width_ = width;
+  length_ = length;
 
   if (create_height_data) {
-    _heights = new float[_width * _length];
-    for (int i = 0; i < _width * _length; i++)
-      _heights[i] = 0.0f;
+    heights_ = new float[width_ * length_];
+    for (int i = 0; i < width_ * length_; i++)
+      heights_[i] = 0.0f;
   } else {
-    _heights = nullptr;
+    heights_ = nullptr;
   }
 }
 
-std::shared_ptr<fw::Texture> terrain::get_patch_splatt(int patch_x, int patch_z) {
+std::shared_ptr<fw::Texture> Terrain::get_patch_splatt(int patch_x, int patch_z) {
   ensure_patches();
 
   unsigned int index = get_patch_index(patch_x, patch_z);
-  return _patches[index]->texture;
+  return patches_[index]->texture;
 }
 
-void terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
+void Terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   if (number < 0)
     return;
 
   std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(bitmap);
 
-  if (number == static_cast<int>(_layers.size())) {
+  if (number == static_cast<int>(layers_.size())) {
     // we need to add a new layer
-    _layers.push_back(texture);
+    layers_.push_back(texture);
     return;
-  } else if (number > static_cast<int>(_layers.size())) {
+  } else if (number > static_cast<int>(layers_.size())) {
     // TODO: not supported yet
     return;
   }
 
-  _layers[number] = texture;
+  layers_[number] = texture;
 }
 
-void terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::Texture> texture) {
+void Terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::Texture> texture) {
   ensure_patches();
 
   unsigned int index = get_patch_index(patch_x, patch_z);
-  _patches[index]->texture = texture;
+  patches_[index]->texture = texture;
 }
 
-void terrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) {
+void Terrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) {
   std::shared_ptr<fw::Texture> splatt(new fw::Texture());
   splatt->create(bmp);
 
   set_patch_splatt(patch_x, patch_z, splatt);
 }
 
-void terrain::bake_patch(int patch_x, int patch_z) {
+void Terrain::bake_patch(int patch_x, int patch_z) {
   unsigned int index = get_patch_index(patch_x, patch_z, &patch_x, &patch_z);
   ensure_patches();
 
   // if we haven't created the vertex buffer for this patch yet, do it now
-  if (_patches[index]->vb == std::shared_ptr<fw::VertexBuffer>()) {
-    _patches[index]->vb = fw::VertexBuffer::create<fw::vertex::xyz_n>();
+  if (patches_[index]->vb == std::shared_ptr<fw::VertexBuffer>()) {
+    patches_[index]->vb = fw::VertexBuffer::create<fw::vertex::xyz_n>();
   }
 
   fw::vertex::xyz_n *vert_data;
-  int num_verts = generate_terrain_vertices(&vert_data, _heights, _width, _length, PATCH_SIZE, patch_x, patch_z);
+  int num_verts = generate_terrain_vertices(&vert_data, heights_, width_, length_, PATCH_SIZE, patch_x, patch_z);
 
-  std::shared_ptr<terrain_patch> patch(_patches[index]);
+  std::shared_ptr<TerrainPatch> patch(patches_[index]);
   patch->vb->set_data(num_verts, vert_data, 0);
   delete[] vert_data;
 
   patch->shader_params = shader_->create_parameters();
-  if (_layers.size() >= 1)
-    patch->shader_params->set_texture("layer1", _layers[0]);
-  if (_layers.size() >= 2)
-    patch->shader_params->set_texture("layer2", _layers[1]);
-  if (_layers.size() >= 3)
-    patch->shader_params->set_texture("layer3", _layers[2]);
-  if (_layers.size() >= 4)
-    patch->shader_params->set_texture("layer4", _layers[3]);
+  if (layers_.size() >= 1)
+    patch->shader_params->set_texture("layer1", layers_[0]);
+  if (layers_.size() >= 2)
+    patch->shader_params->set_texture("layer2", layers_[1]);
+  if (layers_.size() >= 3)
+    patch->shader_params->set_texture("layer3", layers_[2]);
+  if (layers_.size() >= 4)
+    patch->shader_params->set_texture("layer4", layers_[3]);
   patch->shader_params->set_texture("splatt", patch->texture);
 }
 
-void terrain::ensure_patches() {
+void Terrain::ensure_patches() {
   unsigned int index = get_patch_index(get_patches_width() - 1,
       get_patches_length() - 1);
-  while (_patches.size() <= index) {
-    std::shared_ptr<terrain_patch> patch(new terrain_patch());
-    _patches.push_back(patch);
+  while (patches_.size() <= index) {
+    std::shared_ptr<TerrainPatch> patch(new TerrainPatch());
+    patches_.push_back(patch);
   }
 }
 
-void terrain::update() {
+void Terrain::update() {
   fw::Camera *camera = fw::Framework::get_instance()->get_camera();
 
   // if the camera has moved off the edge of the map, wrap it back around
   fw::Vector old_loc = camera->get_location();
   fw::Vector new_loc(
-      fw::constrain(old_loc[0], (float) _width),
+      fw::constrain(old_loc[0], (float) width_),
       old_loc[1],
-      fw::constrain(old_loc[2], (float) _length));
+      fw::constrain(old_loc[2], (float) length_));
   if ((old_loc - new_loc).length_squared() > 0.001f) {
     camera->set_location(new_loc);
   }
@@ -158,8 +158,8 @@ void terrain::update() {
   }
 }
 
-void terrain::render(fw::sg::Scenegraph &Scenegraph) {
-  if (_layers.size() == 0)
+void Terrain::render(fw::sg::Scenegraph &scenegraph) {
+  if (layers_.size() == 0)
     return;
 
   // we want to render the terrain centered on where the camera is looking
@@ -173,7 +173,7 @@ void terrain::render(fw::sg::Scenegraph &Scenegraph) {
     for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
       int patch_index = get_patch_index(patch_x, patch_z);
 
-      std::shared_ptr<terrain_patch> patch(_patches[patch_index]);
+      std::shared_ptr<TerrainPatch> patch(patches_[patch_index]);
 
       // set up the world matrix for this patch so that it's being rendered at the right offset
       std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
@@ -189,12 +189,12 @@ void terrain::render(fw::sg::Scenegraph &Scenegraph) {
       Node->set_shader_parameters(patch->shader_params);
       Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleStrip);
 
-      Scenegraph.add_node(Node);
+      scenegraph.add_node(Node);
     }
   }
 }
 
-int terrain::get_patch_index(int patch_x, int patch_z, int *new_patch_x, int *new_patch_z) {
+int Terrain::get_patch_index(int patch_x, int patch_z, int *new_patch_x, int *new_patch_z) {
   patch_x = fw::constrain(patch_x, get_patches_width());
   patch_z = fw::constrain(patch_z, get_patches_length());
 
@@ -206,15 +206,15 @@ int terrain::get_patch_index(int patch_x, int patch_z, int *new_patch_x, int *ne
   return patch_z * get_patches_width() + patch_x;
 }
 
-float terrain::get_vertex_height(int x, int z) {
-  return _heights[fw::constrain(z, _length) * _width + fw::constrain(x, _width)];
+float Terrain::get_vertex_height(int x, int z) {
+  return heights_[fw::constrain(z, length_) * width_ + fw::constrain(x, width_)];
 }
 
 //
 // this method is pretty simple. we basically get the height at (x, z) then interpolate that
 // ParticleRotation between (x+1, z+1).
 //
-float terrain::get_height(float x, float z) {
+float Terrain::get_height(float x, float z) {
   int x0 = (int) floor(x);
   int x1 = x0 + 1;
 
@@ -235,7 +235,7 @@ float terrain::get_height(float x, float z) {
 }
 
 // gets the point on the terrain that the camera is currently looking at
-fw::Vector terrain::get_camera_lookat() {
+fw::Vector Terrain::get_camera_lookat() {
   fw::Framework *frmwrk = fw::Framework::get_instance();
   fw::Camera *camera = frmwrk->get_camera();
 
@@ -251,7 +251,7 @@ fw::Vector terrain::get_camera_lookat() {
 // in the (x,y) plane (so it's a nice, easy 2D line). Then, for each
 // 2D point on that line, we check how close the ray is to that point
 // in 3D-space. If it's close enough, we return that one...
-fw::Vector terrain::get_cursor_location() {
+fw::Vector Terrain::get_cursor_location() {
   fw::Framework *frmwrk = fw::Framework::get_instance();
   fw::Input *Input = frmwrk->get_input();
   fw::Camera *camera = frmwrk->get_camera();
@@ -270,7 +270,7 @@ fw::Vector terrain::get_cursor_location() {
   return get_cursor_location(start, direction);
 }
 
-fw::Vector terrain::get_cursor_location(fw::Vector const &start, fw::Vector const &direction) {
+fw::Vector Terrain::get_cursor_location(fw::Vector const &start, fw::Vector const &direction) {
   fw::Vector evec = start + (direction * 150.0f);
   fw::Vector svec = start + (direction * 5.0f);
 

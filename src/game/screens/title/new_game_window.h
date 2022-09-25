@@ -14,7 +14,7 @@ class Widget;
 }
 
 namespace game {
-class world_summary;
+class WorldSummary;
 class GameScreenOptions;
 class MainMenuWindow;
 class NewAIPlayerWindow;
@@ -38,7 +38,7 @@ private:
   void on_players_changed();
   void refresh_players();
 
-  std::vector<world_summary> map_list_;
+  std::vector<WorldSummary> map_list_;
 
   bool on_start_game_clicked(fw::gui::Widget *w);
   bool on_cancel_clicked(fw::gui::Widget *w);
@@ -56,7 +56,7 @@ private:
 
   void start_game();
 
-  game::world_summary const &get_selected_world_summary();
+  game::WorldSummary const &get_selected_world_summary();
 public:
   NewGameWindow();
   ~NewGameWindow();

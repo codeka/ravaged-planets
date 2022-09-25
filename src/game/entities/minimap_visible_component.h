@@ -3,7 +3,7 @@
 #include <game/entities/entity.h>
 
 namespace game {
-class player;
+class Player;
 }
 
 namespace ent {

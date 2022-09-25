@@ -34,7 +34,7 @@ bool Application::initialize(fw::Framework *frmwrk) {
 
   // start the simulation thread now, it'll always run even if there's
   // no actual game running....
-  simulation_thread::get_instance()->initialize();
+  SimulationThread::get_instance()->initialize();
   /*
    // attach our GUI sounds to the various events
    fw::audio_manager *audio_mgr = framework_->get_audio();
@@ -52,7 +52,7 @@ bool Application::initialize(fw::Framework *frmwrk) {
 
 void Application::destroy() {
   fw::debug << "application shutting down." << std::endl;
-  simulation_thread::get_instance()->destroy();
+  SimulationThread::get_instance()->destroy();
 }
 
 void Application::update(float dt) {

@@ -8,34 +8,30 @@ class Color;
 
 namespace game {
 
-/**
- * There's only one local_player, and it represents, US, that is, the person who's playing this instance of the game.
- */
-class local_player: public player {
+// There's only one local_player, and it represents, US, that is, the person who's playing this instance of the game.
+class LocalPlayer: public Player {
 private:
-  session::session_state _last_session_state;
+  session::session_state last_session_state_;
 
-  /**
-   * The session-id of this player, as they are logged in to the server (this is a secret, so we can't tell the
-   * other players!)
-   */
-  uint64_t _session_id;
+  // The session-id of this player, as they are logged in to the server (this is a secret, so we can't tell the
+  // other players!)
+  uint64_t session_id_;
 
 public:
-  local_player();
-  virtual ~local_player();
+  LocalPlayer();
+  virtual ~LocalPlayer();
 
-  virtual void update();
+  void update() override;
 
   /** This is a notification that the local player is ready. */
-  virtual void local_player_is_ready();
+  void local_player_is_ready() override;
 
   /** This is called when the world has loaded. We create our initial entities. */
-  virtual void world_loaded();
+  void world_loaded() override;
 
   /** Our player# gets updated when we connect to a remote game. */
-  void set_player_no(uint8_t ParticleRotation) {
-    _player_no = ParticleRotation;
+  void set_player_no(uint8_t value) {
+    player_no_ = value;
   }
 };
 

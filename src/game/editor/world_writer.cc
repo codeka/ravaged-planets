@@ -27,8 +27,8 @@ world_writer::~world_writer() {
 void world_writer::write(std::string name) {
   name_ = name;
 
-  game::world_vfs vfs;
-  game::world_file wf = vfs.open_file(name, true);
+  game::WorldVfs vfs;
+  game::WorldFile wf = vfs.open_file(name, true);
 
   write_terrain(wf);
   write_mapdesc(wf);
@@ -37,22 +37,22 @@ void world_writer::write(std::string name) {
 
   // write the screenshot as well, which is pretty simple...
   if (world_->get_screenshot()) {
-    game::world_file_entry wfe = wf.get_entry("screenshot.png", true /* for_write */);
+    game::WorldFileEntry wfe = wf.get_entry("screenshot.png", true /* for_write */);
     world_->get_screenshot()->save_bitmap(wfe.get_full_path());
   }
 }
 
-void world_writer::write_terrain(game::world_file &wf) {
+void world_writer::write_terrain(game::WorldFile &wf) {
   editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
   int version = 1;
   int trn_width = trn->get_width();
   int trn_length = trn->get_length();
 
-  game::world_file_entry wfe = wf.get_entry("heightfield", true /* for_write */);
+  game::WorldFileEntry wfe = wf.get_entry("heightfield", true /* for_write */);
   wfe.write(&version, sizeof(int));
   wfe.write(&trn_width, sizeof(int));
   wfe.write(&trn_length, sizeof(int));
-  wfe.write(trn->_heights, trn_width * trn_length * sizeof(float));
+  wfe.write(trn->heights_, trn_width * trn_length * sizeof(float));
 
   for (int patch_z = 0; patch_z < trn->get_patches_length(); patch_z++) {
     for (int patch_x = 0; patch_x < trn->get_patches_width(); patch_x++) {
@@ -65,8 +65,8 @@ void world_writer::write_terrain(game::world_file &wf) {
   }
 }
 
-void world_writer::write_mapdesc(game::world_file &wf) {
-  game::world_file_entry wfe = wf.get_entry(name_ + ".mapdesc", true /* for_write */);
+void world_writer::write_mapdesc(game::WorldFile &wf) {
+  game::WorldFileEntry wfe = wf.get_entry(name_ + ".mapdesc", true /* for_write */);
   wfe.write("<mapdesc version=\"1\">");
   wfe.write((boost::format("  <description>%1%</description>") % world_->get_description()).str());
   wfe.write((boost::format("  <author>%1%</author>") % world_->get_author()).str());
@@ -84,8 +84,8 @@ void world_writer::write_mapdesc(game::world_file &wf) {
 // The minimap background consist of basically one pixel per vertex. We calculate the color
 // of the pixel as a combination of the height of the terrain at that point and the texture that
 // is displayed on the terrain at that point (so "high" and "grass" would be a Light green, etc)
-void world_writer::write_minimap_background(game::world_file &wf) {
-  game::terrain *trn = world_->get_terrain();
+void world_writer::write_minimap_background(game::WorldFile &wf) {
+  game::Terrain *trn = world_->get_terrain();
   int width = trn->get_width();
   int height = trn->get_length();
 
@@ -136,22 +136,22 @@ void world_writer::write_minimap_background(game::world_file &wf) {
   fw::Bitmap img(width, height);
   img.set_pixels(pixels);
 
-  game::world_file_entry wfe = wf.get_entry("minimap.png", true /* for_write */);
+  game::WorldFileEntry wfe = wf.get_entry("minimap.png", true /* for_write */);
   img.save_bitmap(wfe.get_full_path());
 }
 
 // gets the basic color of the terrain at the given (x,z) location
 fw::Color world_writer::get_terrain_color(int x, int z) {
-  int patch_x = static_cast<int>(static_cast<float>(x) / game::terrain::PATCH_SIZE);
-  int patch_z = static_cast<int>(static_cast<float>(z) / game::terrain::PATCH_SIZE);
+  int patch_x = static_cast<int>(static_cast<float>(x) / game::Terrain::PATCH_SIZE);
+  int patch_z = static_cast<int>(static_cast<float>(z) / game::Terrain::PATCH_SIZE);
 
   editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
   fw::Bitmap &bmp = trn->get_splatt(patch_x, patch_z);
 
   // centre_u and centre_v are the texture coordinates (in the range [0..1])
   // of what the cursor is currently pointing at
-  float centre_u = (x - (patch_x * game::terrain::PATCH_SIZE)) / static_cast<float>(game::terrain::PATCH_SIZE);
-  float centre_v = (z - (patch_z * game::terrain::PATCH_SIZE)) / static_cast<float>(game::terrain::PATCH_SIZE);
+  float centre_u = (x - (patch_x * game::Terrain::PATCH_SIZE)) / static_cast<float>(game::Terrain::PATCH_SIZE);
+  float centre_v = (z - (patch_z * game::Terrain::PATCH_SIZE)) / static_cast<float>(game::Terrain::PATCH_SIZE);
 
   // centre_x and centre_y are the (x,y) coordinates (in texture space) of the splatt texture where the cursor
   // is currently pointing.
@@ -180,7 +180,7 @@ void world_writer::calculate_base_minimap_colors() {
   }
 }
 
-void world_writer::write_collision_data(game::world_file &wf) {
+void world_writer::write_collision_data(game::WorldFile &wf) {
   editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
   int width = trn->get_width();
   int length = trn->get_length();
@@ -190,7 +190,7 @@ void world_writer::write_collision_data(game::world_file &wf) {
 
   int version = 1;
 
-  game::world_file_entry wfe = wf.get_entry("collision_data", true /* for_write */);
+  game::WorldFileEntry wfe = wf.get_entry("collision_data", true /* for_write */);
   wfe.write(&version, sizeof(int));
   wfe.write(&width, sizeof(int));
   wfe.write(&length, sizeof(int));

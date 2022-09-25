@@ -13,7 +13,7 @@ class texture;
 namespace ed {
 
 // this subclass of game::terrain allows us to edit the actual heightfield data, textures, and so on.
-class editor_terrain: public game::terrain {
+class editor_terrain: public game::Terrain {
 private:
   std::mutex _patches_to_bake_mutex;
   std::vector<std::tuple<int, int>> _patches_to_bake;
@@ -44,7 +44,7 @@ public:
   fw::Bitmap &get_splatt(int patch_x, int patch_z);
 
   float *get_height_data() const {
-    return _heights;
+    return heights_;
   }
 
   // builds the collision data for the whole map. we assume the vertices buffer

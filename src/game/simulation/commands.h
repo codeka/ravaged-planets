@@ -12,29 +12,27 @@ class PacketBuffer;
 }
 
 namespace game {
-class player;
-class order;
+class Player;
+class Order;
 
-/**
- * The command is the base class for what the simulation_thread processes. Each turn, we process the commands that
- * have been queued up for that turn. Each "action" in the game is represented by a command.
- */
-class command {
+// The command is the base class for what the simulation_thread processes. Each turn, we process the commands that
+// have been queued up for that turn. Each "action" in the game is represented by a command.
+class Command {
 private:
-  player *_player;
+  Player *player_;
 
 protected:
-  command(uint8_t player_no);
+  Command(uint8_t player_no);
 
 public:
-  virtual ~command();
+  virtual ~Command();
 
   virtual void serialize(fw::net::PacketBuffer &buffer) = 0;
   virtual void deserialize(fw::net::PacketBuffer &buffer) = 0;
 
   /** Gets an instance of the player who executed this command. */
-  player *get_player() const {
-    return _player;
+  Player *get_player() const {
+    return player_;
   }
 
   /** When it's our turn, this'll get called to actually execute the command. */
@@ -47,16 +45,14 @@ public:
   virtual uint8_t get_identifier() const = 0;
 };
 
-/**
- * This command is sent to another player when we want to notify them about a new player (i.e. when we first connect
- * to them [as a non-Host], or when we add a new AI player)
- */
-class connect_player_command: public command {
+// This command is sent to another player when we want to notify them about a new player (i.e. when we first connect
+//to them [as a non-Host], or when we add a new AI player)
+class ConnectPlayerCommand: public Command {
 private:
 
 public:
-  connect_player_command(uint8_t player_no);
-  virtual ~connect_player_command();
+  ConnectPlayerCommand(uint8_t player_no);
+  virtual ~ConnectPlayerCommand();
 
   virtual void serialize(fw::net::PacketBuffer &buffer);
   virtual void deserialize(fw::net::PacketBuffer &buffer);
@@ -69,21 +65,19 @@ public:
   }
 };
 
-/**
- * This class is issues when a new Entity is to be created (e.g. when a factory has finished building, when a unit is
- * about it fire it's weapon, etc).
- */
-class create_entity_command: public command {
+// This class is issues when a new Entity is to be created (e.g. when a factory has finished building, when a unit is
+// about it fire it's weapon, etc).
+class CreateEntityCommand: public Command {
 private:
-  ent::entity_id _entity_id;
+  ent::entity_id entity_id_;
 
 public:
   std::string template_name;
   fw::Vector initial_position;
   fw::Vector initial_goal;
 
-  create_entity_command(uint8_t player_no);
-  virtual ~create_entity_command();
+  CreateEntityCommand(uint8_t player_no);
+  virtual ~CreateEntityCommand();
 
   virtual void serialize(fw::net::PacketBuffer &buffer);
   virtual void deserialize(fw::net::PacketBuffer &buffer);
@@ -96,17 +90,15 @@ public:
   }
 };
 
-/**
- * This is the command that is executed when an Entity is about to begin executing an order. The actual queuing and
- * so on happens on the client-side and this command is executed only when the command reaches the front of the queue.
- */
-class order_command: public command {
+// This is the command that is executed when an Entity is about to begin executing an order. The actual queuing and
+// so on happens on the client-side and this command is executed only when the command reaches the front of the queue.
+class OrderCommand: public Command {
 public:
   ent::entity_id Entity;
-  std::shared_ptr<game::order> order;
+  std::shared_ptr<game::Order> order;
 
-  order_command(uint8_t player_no);
-  virtual ~order_command();
+  OrderCommand(uint8_t player_no);
+  virtual ~OrderCommand();
 
   virtual void serialize(fw::net::PacketBuffer &buffer);
   virtual void deserialize(fw::net::PacketBuffer &buffer);
@@ -120,8 +112,8 @@ public:
 };
 
 // creates the Packet object from the given command identifier
-std::shared_ptr<command> create_command(uint8_t id);
-std::shared_ptr<command> create_command(uint8_t id, uint8_t player_no);
+std::shared_ptr<Command> create_command(uint8_t id);
+std::shared_ptr<Command> create_command(uint8_t id, uint8_t player_no);
 
 template<typename T>
 std::shared_ptr<T> create_command() {

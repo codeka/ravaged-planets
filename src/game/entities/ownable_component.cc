@@ -16,7 +16,7 @@ OwnableComponent::OwnableComponent() :
 OwnableComponent::~OwnableComponent() {
 }
 
-void OwnableComponent::set_owner(game::player *owner) {
+void OwnableComponent::set_owner(game::Player *owner) {
   owner_ = owner;
   owner_changed_event(this);
 }
@@ -25,7 +25,7 @@ bool OwnableComponent::is_local_player() const {
   if (owner_ == nullptr)
     return false;
 
-  game::player *local_player = game::simulation_thread::get_instance()->get_local_player();
+  game::Player *local_player = game::SimulationThread::get_instance()->get_local_player();
   return (local_player == owner_);
 }
 

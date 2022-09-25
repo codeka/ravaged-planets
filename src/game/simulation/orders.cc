@@ -19,21 +19,21 @@ namespace game {
 //-------------------------------------------------------------------------
 // this is a helper macro for registering order types with the order_factory
 #define ORDER_REGISTER(type) \
-  std::shared_ptr<order> create_ ## type () { return std::shared_ptr<order>(new type()); } \
-  order_registrar reg_ ## type(type::identifier, &create_ ## type)
+  std::shared_ptr<Order> create_ ## type () { return std::shared_ptr<Order>(new type()); } \
+  OrderRegistrar reg_ ## type(type::identifier, &create_ ## type)
 
-typedef std::function<std::shared_ptr<order>()> create_order_fn;
+typedef std::function<std::shared_ptr<Order>()> create_order_fn;
 typedef std::map<uint16_t, create_order_fn> order_registry_map;
 static order_registry_map *g_order_registry = nullptr;
 
 // this is a helper class that you use indirectly via the ORDER_REGISTER macro
 // to register an order.
-class order_registrar {
+class OrderRegistrar {
 public:
-  order_registrar(uint16_t id, create_order_fn fn);
+  OrderRegistrar(uint16_t id, create_order_fn fn);
 };
 
-order_registrar::order_registrar(uint16_t id, create_order_fn fn) {
+OrderRegistrar::OrderRegistrar(uint16_t id, create_order_fn fn) {
   if (g_order_registry == 0)
     g_order_registry = new order_registry_map();
 
@@ -41,7 +41,7 @@ order_registrar::order_registrar(uint16_t id, create_order_fn fn) {
 }
 
 // creates the order object from the given order identifier
-std::shared_ptr<order> create_order(uint16_t id) {
+std::shared_ptr<Order> create_order(uint16_t id) {
   create_order_fn fn = (*g_order_registry)[id];
   if (fn == nullptr) {
     BOOST_THROW_EXCEPTION(
@@ -52,74 +52,74 @@ std::shared_ptr<order> create_order(uint16_t id) {
 }
 
 //-------------------------------------------------------------------------
-ORDER_REGISTER(build_order);
-ORDER_REGISTER(move_order);
-ORDER_REGISTER(attack_order);
+ORDER_REGISTER(BuildOrder);
+ORDER_REGISTER(MoveOrder);
+ORDER_REGISTER(AttackOrder);
 
 //-------------------------------------------------------------------------
 
-order::order(std::string const &state_name) :
-    _state_name(state_name) {
+Order::Order(std::string const &state_name) :
+    state_name_(state_name) {
 }
 
-order::~order() {
+Order::~Order() {
 }
 
-void order::begin(std::weak_ptr<ent::Entity> const &ent) {
+void Order::begin(std::weak_ptr<ent::Entity> const &ent) {
   entity_ = ent;
 }
 
-void order::serialize(fw::net::PacketBuffer &) {
+void Order::serialize(fw::net::PacketBuffer &) {
 }
 
-void order::deserialize(fw::net::PacketBuffer &) {
+void Order::deserialize(fw::net::PacketBuffer &) {
 }
 
 //-------------------------------------------------------------------------
 
-build_order::build_order() :
-    order("building"), _builder(0) {
+BuildOrder::BuildOrder() :
+    Order("building"), builder_(0) {
 }
 
-build_order::~build_order() {
+BuildOrder::~BuildOrder() {
 }
 
-void build_order::begin(std::weak_ptr<ent::Entity> const &ent) {
-  order::begin(ent);
+void BuildOrder::begin(std::weak_ptr<ent::Entity> const &ent) {
+  Order::begin(ent);
 
   std::shared_ptr<ent::Entity> Entity(entity_);
-  _builder = Entity->get_component<ent::BuilderComponent>();
-  if (_builder != nullptr) {
-    _builder->build(template_name);
+  builder_ = Entity->get_component<ent::BuilderComponent>();
+  if (builder_ != nullptr) {
+    builder_->build(template_name);
   }
 }
 
-bool build_order::is_complete() {
-  if (_builder == 0)
+bool BuildOrder::is_complete() {
+  if (builder_ == 0)
     return true;
 
-  return !_builder->is_building();
+  return !builder_->is_building();
 }
 
-void build_order::serialize(fw::net::PacketBuffer &buffer) {
+void BuildOrder::serialize(fw::net::PacketBuffer &buffer) {
   buffer << template_name;
 }
 
-void build_order::deserialize(fw::net::PacketBuffer &buffer) {
+void BuildOrder::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> template_name;
 }
 
 //-------------------------------------------------------------------------
 
-move_order::move_order() :
-    order("moving") {
+MoveOrder::MoveOrder() :
+    Order("moving") {
 }
 
-move_order::~move_order() {
+MoveOrder::~MoveOrder() {
 }
 
-void move_order::begin(std::weak_ptr<ent::Entity> const &ent) {
-  order::begin(ent);
+void MoveOrder::begin(std::weak_ptr<ent::Entity> const &ent) {
+  Order::begin(ent);
   std::shared_ptr<ent::Entity> Entity(entity_);
 
   // move towards the component, if we don't have a moveable component, nothing will happen.
@@ -135,7 +135,7 @@ void move_order::begin(std::weak_ptr<ent::Entity> const &ent) {
   }
 }
 
-bool move_order::is_complete() {
+bool MoveOrder::is_complete() {
   std::shared_ptr<ent::Entity> Entity = entity_.lock();
   if (Entity) {
     ent::PathingComponent *pathing = Entity->get_component<ent::PathingComponent>();
@@ -150,28 +150,28 @@ bool move_order::is_complete() {
   return true;
 }
 
-void move_order::serialize(fw::net::PacketBuffer &buffer) {
+void MoveOrder::serialize(fw::net::PacketBuffer &buffer) {
   buffer << goal;
 }
 
-void move_order::deserialize(fw::net::PacketBuffer &buffer) {
+void MoveOrder::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> goal;
 }
 
 //-----------------------------------------------------------------------------
 
-attack_order::attack_order() :
-    order("attacking") {
+AttackOrder::AttackOrder() :
+    Order("attacking") {
 }
 
-attack_order::~attack_order() {
+AttackOrder::~AttackOrder() {
 }
 
-void attack_order::begin(std::weak_ptr<ent::Entity> const &ent) {
-  order::begin(ent);
+void AttackOrder::begin(std::weak_ptr<ent::Entity> const &ent) {
+  Order::begin(ent);
   std::shared_ptr<ent::Entity> Entity = entity_.lock();
   if (Entity) {
-    std::weak_ptr<ent::Entity> target_entity_wp = game::world::get_instance()->get_entity_manager()->get_entity(target);
+    std::weak_ptr<ent::Entity> target_entity_wp = game::World::get_instance()->get_entity_manager()->get_entity(target);
     std::shared_ptr<ent::Entity> target_entity = target_entity_wp.lock();
     if (target_entity) {
       attack(Entity, target_entity);
@@ -179,21 +179,21 @@ void attack_order::begin(std::weak_ptr<ent::Entity> const &ent) {
   }
 }
 
-void attack_order::attack(std::shared_ptr<ent::Entity> Entity, std::shared_ptr<ent::Entity> target_entity) {
+void AttackOrder::attack(std::shared_ptr<ent::Entity> Entity, std::shared_ptr<ent::Entity> target_entity) {
   ent::WeaponComponent *weapon = Entity->get_component<ent::WeaponComponent>();
   if (weapon != nullptr) {
     weapon->set_target(target_entity);
   }
 }
 
-bool attack_order::is_complete() {
+bool AttackOrder::is_complete() {
   // attack is complete when either of us is dead
   std::shared_ptr<ent::Entity> Entity = entity_.lock();
   if (!Entity) {
     return true;
   }
 
-  std::weak_ptr<ent::Entity> target_entity = game::world::get_instance()->get_entity_manager()->get_entity(target);
+  std::weak_ptr<ent::Entity> target_entity = game::World::get_instance()->get_entity_manager()->get_entity(target);
   if (!target_entity.lock()) {
     return true;
   }
@@ -201,11 +201,11 @@ bool attack_order::is_complete() {
   return false;
 }
 
-void attack_order::serialize(fw::net::PacketBuffer &buffer) {
+void AttackOrder::serialize(fw::net::PacketBuffer &buffer) {
   buffer << target;
 }
 
-void attack_order::deserialize(fw::net::PacketBuffer &buffer) {
+void AttackOrder::deserialize(fw::net::PacketBuffer &buffer) {
   buffer >> target;
 }
 

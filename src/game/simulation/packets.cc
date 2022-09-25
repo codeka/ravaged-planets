@@ -8,107 +8,107 @@
 
 namespace game {
 
-PACKET_REGISTER(join_request_packet);
-PACKET_REGISTER(join_response_packet);
-PACKET_REGISTER(chat_packet);
-PACKET_REGISTER(start_game_packet);
-PACKET_REGISTER(command_packet);
+PACKET_REGISTER(JoinRequestPacket);
+PACKET_REGISTER(JoinResponsePacket);
+PACKET_REGISTER(ChatPacket);
+PACKET_REGISTER(StartGamePacket);
+PACKET_REGISTER(CommandPacket);
 
 //-------------------------------------------------------------------------
 
-join_request_packet::join_request_packet() : _user_id(-1) {
+JoinRequestPacket::JoinRequestPacket() : user_id_(-1) {
 }
 
-join_request_packet::~join_request_packet() {
+JoinRequestPacket::~JoinRequestPacket() {
 }
 
-void join_request_packet::serialize(fw::net::PacketBuffer &buffer) {
-  buffer << _user_id;
+void JoinRequestPacket::serialize(fw::net::PacketBuffer &buffer) {
+  buffer << user_id_;
   buffer << color_;
 }
 
-void join_request_packet::deserialize(fw::net::PacketBuffer &buffer) {
-  buffer >> _user_id;
+void JoinRequestPacket::deserialize(fw::net::PacketBuffer &buffer) {
+  buffer >> user_id_;
   buffer >> color_;
 }
 
 //-------------------------------------------------------------------------
 
-join_response_packet::join_response_packet() {
+JoinResponsePacket::JoinResponsePacket() {
 }
 
-join_response_packet::~join_response_packet() {
+JoinResponsePacket::~JoinResponsePacket() {
 }
 
-void join_response_packet::serialize(fw::net::PacketBuffer &buffer) {
-  buffer << _map_name;
-  buffer << _other_users.size();
-  for (uint32_t sess_id : _other_users) {
+void JoinResponsePacket::serialize(fw::net::PacketBuffer &buffer) {
+  buffer << map_name_;
+  buffer << other_users_.size();
+  for (uint32_t sess_id : other_users_) {
     buffer << sess_id;
   }
-  buffer << _my_color;
-  buffer << _your_color;
+  buffer << my_color_;
+  buffer << your_color_;
 }
 
-void join_response_packet::deserialize(fw::net::PacketBuffer &buffer) {
+void JoinResponsePacket::deserialize(fw::net::PacketBuffer &buffer) {
   typedef std::vector<std::string>::size_type size_type;
 
-  buffer >> _map_name;
+  buffer >> map_name_;
   size_type num_other_users;
   buffer >> num_other_users;
   for (size_type i = 0; i < num_other_users; i++) {
     uint32_t other_user;
     buffer >> other_user;
 
-    _other_users.push_back(other_user);
+    other_users_.push_back(other_user);
   }
-  buffer >> _my_color;
-  buffer >> _your_color;
+  buffer >> my_color_;
+  buffer >> your_color_;
 }
 
 //-------------------------------------------------------------------------
-chat_packet::chat_packet() :
-    _msg("") {
+ChatPacket::ChatPacket() :
+    msg_("") {
 }
 
-chat_packet::~chat_packet() {
+ChatPacket::~ChatPacket() {
 }
 
-void chat_packet::serialize(fw::net::PacketBuffer &buffer) {
-  buffer << _msg;
+void ChatPacket::serialize(fw::net::PacketBuffer &buffer) {
+  buffer << msg_;
 }
 
-void chat_packet::deserialize(fw::net::PacketBuffer &buffer) {
-  buffer >> _msg;
+void ChatPacket::deserialize(fw::net::PacketBuffer &buffer) {
+  buffer >> msg_;
 }
 
 //-------------------------------------------------------------------------
 
-start_game_packet::start_game_packet() {
+StartGamePacket::StartGamePacket() {
 }
 
-start_game_packet::~start_game_packet() {
+StartGamePacket::~StartGamePacket() {
 }
 
-void start_game_packet::serialize(fw::net::PacketBuffer &) {
+void StartGamePacket::serialize(fw::net::PacketBuffer &) {
 }
 
-void start_game_packet::deserialize(fw::net::PacketBuffer &) {
+void StartGamePacket::deserialize(fw::net::PacketBuffer &) {
 }
 
 //----------------------------------------------------------------------------
 
-command_packet::command_packet() {
+CommandPacket::CommandPacket() {
 }
 
-command_packet::~command_packet() {
+CommandPacket::~CommandPacket() {
 }
 
-void command_packet::serialize(fw::net::PacketBuffer &buffer) {
-  uint8_t num_commands = static_cast<uint8_t>(_commands.size());
+void CommandPacket::serialize(fw::net::PacketBuffer &buffer) {
+  uint8_t num_commands = static_cast<uint8_t>(commands_.size());
   buffer << num_commands;
 
-  for (std::shared_ptr<command> &cmd : _commands) {
+  for (std::shared_ptr<Command> &cmd : commands_) {
     buffer << cmd->get_identifier();
 
     if (cmd->get_player() != nullptr) {
@@ -121,21 +121,21 @@ void command_packet::serialize(fw::net::PacketBuffer &buffer) {
   }
 }
 
-void command_packet::deserialize(fw::net::PacketBuffer &buffer) {
+void CommandPacket::deserialize(fw::net::PacketBuffer &buffer) {
   uint8_t num_commands;
   buffer >> num_commands;
 
-  _commands.clear();
+  commands_.clear();
   for (uint8_t i = 0; i < num_commands; i++) {
     uint8_t id;
     uint8_t player_no;
     buffer >> id;
     buffer >> player_no;
 
-    std::shared_ptr<command> cmd = create_command(id, player_no);
+    std::shared_ptr<Command> cmd = create_command(id, player_no);
     cmd->deserialize(buffer);
 
-    _commands.push_back(cmd);
+    commands_.push_back(cmd);
   }
 }
 

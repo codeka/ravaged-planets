@@ -3,14 +3,14 @@
 #include <game/entities/entity.h>
 
 namespace game {
-class player;
+class Player;
 }
 
 namespace ent {
 
 class OwnableComponent: public EntityComponent {
 private:
-  game::player *owner_;
+  game::Player *owner_;
 
 public:
   static const int identifier = 900;
@@ -21,10 +21,10 @@ public:
   OwnableComponent();
   ~OwnableComponent();
 
-  game::player *get_owner() const {
+  game::Player *get_owner() const {
     return owner_;
   }
-  void set_owner(game::player *owner);
+  void set_owner(game::Player *owner);
 
   // helper for checking whether this Entity is owned by the local player
   bool is_local_player() const;

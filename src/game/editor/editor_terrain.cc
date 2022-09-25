@@ -30,25 +30,25 @@ void editor_terrain::render(fw::sg::Scenegraph &Scenegraph) {
     _patches_to_bake.clear();
   }
 
-  terrain::render(Scenegraph);
+  Terrain::render(Scenegraph);
 }
 
 // set the height of the given vertex to the given value.
 void editor_terrain::set_vertex_height(int x, int z, float height) {
   while (x < 0) {
-    x += _width;
+    x += width_;
   }
-  while (x >= _width) {
-    x -= _width;
+  while (x >= width_) {
+    x -= width_;
   }
   while (z < 0) {
-    z += _length;
+    z += length_;
   }
-  while (z >= _length) {
-    z -= _length;
+  while (z >= length_) {
+    z -= length_;
   }
 
-  _heights[z * _width + x] = height;
+  heights_[z * width_ + x] = height;
 
   auto this_patch = std::make_tuple(x / PATCH_SIZE, z / PATCH_SIZE);
   bool found = false;
@@ -109,7 +109,7 @@ fw::Bitmap &editor_terrain::get_splatt(int patch_x, int patch_z) {
 }
 
 int editor_terrain::get_num_layers() const {
-  return _layers.size();
+  return layers_.size();
 }
 
 std::shared_ptr<fw::Bitmap> editor_terrain::get_layer(int number) {
@@ -126,10 +126,10 @@ void editor_terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(bitmap);
 
-  if (number == static_cast<int>(_layers.size())) {
+  if (number == static_cast<int>(layers_.size())) {
     // we need to add a new layer
     _layer_bitmaps.push_back(bitmap);
-    _layers.push_back(texture);
+    layers_.push_back(texture);
     return;
   } else if (number > static_cast<int>(_layer_bitmaps.size())) {
     // TODO: not supported yet
@@ -137,15 +137,15 @@ void editor_terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   }
 
   _layer_bitmaps[number] = bitmap;
-  _layers[number] = texture;
+  layers_[number] = texture;
 }
 
 void editor_terrain::build_collision_data(std::vector<bool> &vertices) {
-  if (static_cast<int>(vertices.size()) < (_width * _length)) {
+  if (static_cast<int>(vertices.size()) < (width_ * length_)) {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("vertices vector is too small!"));
   }
 
-  game::build_collision_data(vertices, _heights, _width, _length);
+  game::build_collision_data(vertices, heights_, width_, length_);
 }
 
 }

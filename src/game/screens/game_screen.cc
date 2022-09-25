@@ -43,15 +43,15 @@ void GameScreen::show() {
         fw::Exception() << fw::message_error_info("no GameScreenOptions has been set, cannot start new game!"));
   }
 
-  std::shared_ptr<world_reader> reader(new world_reader());
+  std::shared_ptr<WorldReader> reader(new WorldReader());
   reader->read(options_->map_name);
-  world_ = new world(reader);
+  world_ = new World(reader);
 
   // initialize the world
   world_->initialize();
 
   // notify all of the players that the world is loaded
-  for(player * plyr : simulation_thread::get_instance()->get_players()) {
+  for(Player * plyr : SimulationThread::get_instance()->get_players()) {
     plyr->world_loaded();
   }
 

@@ -3,7 +3,7 @@
 #include <framework/framework.h>
 
 namespace game {
-class world;
+class World;
 class ScreenStack;
 
 class Application: public fw::BaseApp {

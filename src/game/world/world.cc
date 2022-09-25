@@ -29,77 +29,77 @@ using namespace std::placeholders;
 namespace game {
 
 //-------------------------------------------------------------------------
-world *world::_instance = nullptr;
+World *World::instance_ = nullptr;
 
-world::world(std::shared_ptr<world_reader> reader) :
-    _reader(reader), _entities(nullptr), _terrain(nullptr), _pathing(nullptr), _initialized(false) {
-  cursor_ = new cursor_handler();
+World::World(std::shared_ptr<WorldReader> reader) :
+    reader_(reader), entities_(nullptr), terrain_(nullptr), pathing_(nullptr), initialized_(false) {
+  cursor_ = new CursorHandler();
 }
 
-world::~world() {
-  world::set_instance(nullptr);
+World::~World() {
+  World::set_instance(nullptr);
   delete cursor_;
-  if (_pathing != nullptr)
-    delete _pathing;
+  if (pathing_ != nullptr)
+    delete pathing_;
 }
 
-void world::initialize() {
-  _terrain = _reader->get_terrain();
-  _minimap_background = _reader->get_minimap_background();
-  name_ = _reader->get_name();
-  _description = _reader->get_description();
-  _author = _reader->get_author();
-  _screenshot = _reader->get_screenshot();
+void World::initialize() {
+  terrain_ = reader_->get_terrain();
+  minimap_background_ = reader_->get_minimap_background();
+  name_ = reader_->get_name();
+  description_ = reader_->get_description();
+  author_ = reader_->get_author();
+  screenshot_ = reader_->get_screenshot();
 
-  _terrain->initialize();
+  terrain_->initialize();
 
-  for (auto it : _reader->get_player_starts()) {
-    _player_starts[it.first] = it.second;
+  for (auto it : reader_->get_player_starts()) {
+    player_starts_[it.first] = it.second;
   }
 
   // tell the Particle manager to wrap particles at the world boundary
-  fw::Framework::get_instance()->get_particle_mgr()->set_world_wrap(_terrain->get_width(), _terrain->get_length());
+  fw::Framework::get_instance()->get_particle_mgr()->set_world_wrap(terrain_->get_width(), terrain_->get_length());
 
   fw::Input *input = fw::Framework::get_instance()->get_input();
 
-  world::set_instance(this);
+  World::set_instance(this);
 
   initialize_entities();
-  if (_entities != nullptr) {
+  if (entities_ != nullptr) {
     cursor_->initialize();
-    _keybind_tokens.push_back(input->bind_function("pause", std::bind(&world::on_key_pause, this, _1, _2)));
+    keybind_tokens_.push_back(input->bind_function("pause", std::bind(&World::on_key_pause, this, _1, _2)));
   }
-  _keybind_tokens.push_back(input->bind_function("screenshot", std::bind(&world::on_key_screenshot, this, _1, _2)));
+  keybind_tokens_.push_back(input->bind_function("screenshot", std::bind(&World::on_key_screenshot, this, _1, _2)));
 
   initialize_pathing();
 
-  _initialized = true;
+  initialized_ = true;
 }
 
-void world::destroy() {
-  _pathing->stop();
+void World::destroy() {
+  pathing_->stop();
 
   // unbind all the keys we had bound
   fw::Input *Input = fw::Framework::get_instance()->get_input();
-  for (int token : _keybind_tokens) {
+  for (int token : keybind_tokens_) {
     Input->unbind_key(token);
   }
-  _keybind_tokens.clear();
+  keybind_tokens_.clear();
   cursor_->destroy();
 }
 
-void world::initialize_pathing() {
-  _pathing = new pathing_thread();
-  _pathing->start();
+void World::initialize_pathing() {
+  pathing_ = new pathing_thread();
+  pathing_->start();
 }
 
-void world::initialize_entities() {
-  _entities = new ent::EntityManager();
-  _entities->initialize();
+void World::initialize_entities() {
+  entities_ = new ent::EntityManager();
+  entities_->initialize();
 }
 
 // this is called when the "pause" button is pressed (usually "ESC")
-void world::on_key_pause(std::string, bool is_down) {
+void World::on_key_pause(std::string, bool is_down) {
   if (!is_down) {
     if (fw::Framework::get_instance()->is_paused()) {
       fw::Framework::get_instance()->unpause();
@@ -110,13 +110,13 @@ void world::on_key_pause(std::string, bool is_down) {
   }
 }
 
-void world::on_key_screenshot(std::string, bool is_down) {
+void World::on_key_screenshot(std::string, bool is_down) {
   if (!is_down) {
-    fw::Framework::get_instance()->take_screenshot(0, 0, std::bind(&world::screenshot_callback, this, _1));
+    fw::Framework::get_instance()->take_screenshot(0, 0, std::bind(&World::screenshot_callback, this, _1));
   }
 }
 
-void world::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
+void World::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
   // screenshots go under the data directory\screens folder
   fs::path base_path = fw::resolve("screens", true);
   if (!fs::exists(base_path)) {
@@ -148,8 +148,8 @@ void world::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
   screenshot->save_bitmap(full_path.string());
 }
 
-void world::update() {
-  if (!_initialized) {
+void World::update() {
+  if (!initialized_) {
     return;
   }
   // if update is called, we can't be paused so hide the "pause" menu...
@@ -158,21 +158,21 @@ void world::update() {
   }
 
   cursor_->update();
-  _terrain->update();
+  terrain_->update();
 
-  if (_entities != nullptr)
-    _entities->update();
+  if (entities_ != nullptr)
+    entities_->update();
 }
 
-void world::render(fw::sg::Scenegraph &Scenegraph) {
-  if (!_initialized) {
+void World::render(fw::sg::Scenegraph &Scenegraph) {
+  if (!initialized_) {
     return;
   }
 
-  _terrain->render(Scenegraph);
+  terrain_->render(Scenegraph);
 
-  if (_entities != nullptr) {
-    _entities->render(Scenegraph);
+  if (entities_ != nullptr) {
+    entities_->render(Scenegraph);
   }
 }
 

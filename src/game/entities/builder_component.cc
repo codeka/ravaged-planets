@@ -89,12 +89,12 @@ void BuilderComponent::update(float dt) {
     if (our_ownable != nullptr && our_ownable->is_local_or_ai_player()) {
       PositionComponent *our_pos = Entity->get_component<PositionComponent>();
       if (our_pos != nullptr) {
-        std::shared_ptr<game::create_entity_command> cmd(
-            game::create_command<game::create_entity_command>(our_ownable->get_owner()->get_player_no()));
+        std::shared_ptr<game::CreateEntityCommand> cmd(
+            game::create_command<game::CreateEntityCommand>(our_ownable->get_owner()->get_player_no()));
         cmd->template_name = "test";// luabind::object_cast<std::string>(entry.tmpl["name"]);
         cmd->initial_position = our_pos->get_position();
         cmd->initial_goal = our_pos->get_position() + (our_pos->get_direction() * 3.0f);
-        game::simulation_thread::get_instance()->post_command(cmd);
+        game::SimulationThread::get_instance()->post_command(cmd);
       }
     }
 

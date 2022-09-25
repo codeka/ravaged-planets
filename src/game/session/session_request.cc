@@ -11,26 +11,26 @@
 
 namespace game {
 
-session_request::session_request() : _user_id(0), _session_id(0) {
+SessionRequest::SessionRequest() : _user_id(0), session_id_(0) {
 }
 
-session_request::~session_request() {
+SessionRequest::~SessionRequest() {
 }
 
-void session_request::set_complete_handler(complete_handler_fn handler) {
+void SessionRequest::set_complete_handler(complete_handler_fn handler) {
   _on_complete_handler = handler;
 }
 
-void session_request::begin(std::string base_url) {
+void SessionRequest::begin(std::string base_url) {
   fw::XmlElement xml(get_request_xml());
   _post = fw::Http::perform(fw::Http::POST, base_url + get_url(), xml);
   fw::debug << get_description() << std::endl;
 }
 
-session_request::update_result session_request::update() {
+SessionRequest::update_result SessionRequest::update() {
   if (_post->is_finished()) {
     if (!parse_response()) {
-      return session_request::in_error;
+      return SessionRequest::in_error;
     }
 
     // now that we're finished, call the on_complete_handler if we have one
@@ -38,13 +38,13 @@ session_request::update_result session_request::update() {
       _on_complete_handler(*this);
     }
 
-    return session_request::finished;
+    return SessionRequest::finished;
   }
 
-  return session_request::still_going;
+  return SessionRequest::still_going;
 }
 
-bool session_request::parse_response() {
+bool SessionRequest::parse_response() {
   if (_post->is_error()) {
     fw::debug << boost::format("error communicating with server: %1%") % _post->get_error_msg() << std::endl;
     _error_msg = _post->get_error_msg();
@@ -63,7 +63,7 @@ bool session_request::parse_response() {
   return parse_response(xml);
 }
 
-bool session_request::parse_response(fw::XmlElement &) {
+bool SessionRequest::parse_response(fw::XmlElement &) {
   return true;
 }
 
@@ -71,7 +71,7 @@ bool session_request::parse_response(fw::XmlElement &) {
 
 login_session_request::login_session_request(std::string const &username, std::string const &password) :
     _username(username), _password(password) {
-  _listen_port = simulation_thread::get_instance()->get_listen_port();
+  _listen_port = SimulationThread::get_instance()->get_listen_port();
 }
 
 login_session_request::~login_session_request() {
@@ -98,11 +98,11 @@ bool login_session_request::parse_response(fw::XmlElement &xml) {
     return false;
   }
 
-  _session_id = boost::lexical_cast<uint64_t>(xml.get_attribute("sessionId"));
+  session_id_ = boost::lexical_cast<uint64_t>(xml.get_attribute("sessionId"));
   _user_id = boost::lexical_cast<uint32_t>(xml.get_attribute("userId"));
   session::get_instance()->set_state(session::logged_in);
 
-  fw::debug << boost::format("login successful, session-id: %1%") % _session_id << std::endl;
+  fw::debug << boost::format("login successful, session-id: %1%") % session_id_ << std::endl;
   return true;
 }
 
@@ -115,7 +115,7 @@ logout_session_request::~logout_session_request() {
 }
 
 void logout_session_request::begin(std::string base_url) {
-  std::string url = (boost::format("Api/Session/%1%") % _session_id).str();
+  std::string url = (boost::format("Api/Session/%1%") % session_id_).str();
 
   fw::XmlElement xml(get_request_xml());
   _post = fw::Http::perform(fw::Http::DELETE, base_url + url);
@@ -150,7 +150,7 @@ create_game_session_request::~create_game_session_request() {
 }
 
 std::string create_game_session_request::get_request_xml() {
-  return (boost::format("<game sessionId=\"%1%\" />") % _session_id).str();
+  return (boost::format("<game sessionId=\"%1%\" />") % session_id_).str();
 }
 
 std::string create_game_session_request::get_url() {
@@ -177,7 +177,7 @@ bool create_game_session_request::parse_response(fw::XmlElement &xml) {
   fw::debug << boost::format("new game registered, identifier: %1%") % game_id << std::endl;
 
   // now let the simulation thread know we're starting a new game
-  simulation_thread::get_instance()->new_game(game_id);
+  SimulationThread::get_instance()->new_game(game_id);
   return true;
 }
 
@@ -191,7 +191,7 @@ list_games_session_request::~list_games_session_request() {
 }
 
 std::string list_games_session_request::get_request_xml() {
-  return (boost::format("<list-games sessionId=\"%1%\" />") % _session_id).str();
+  return (boost::format("<list-games sessionId=\"%1%\" />") % session_id_).str();
 }
 
 std::string list_games_session_request::get_url() {
@@ -230,7 +230,7 @@ join_game_session_request::~join_game_session_request() {
 }
 
 std::string join_game_session_request::get_request_xml() {
-  return (boost::format("<join sessionId=\"%1%\" gameId=\"%2%\" />") % _session_id % _game_id).str();
+  return (boost::format("<join sessionId=\"%1%\" gameId=\"%2%\" />") % session_id_ % _game_id).str();
 }
 
 std::string join_game_session_request::get_url() {
@@ -242,7 +242,7 @@ std::string join_game_session_request::get_description() {
 }
 
 void join_game_session_request::begin(std::string base_url) {
-  session_request::begin(base_url);
+  SessionRequest::begin(base_url);
   session::get_instance()->set_state(session::joining_lobby);
 }
 
@@ -269,7 +269,7 @@ bool join_game_session_request::parse_response(fw::XmlElement &xml) {
       << std::endl;
 
   // now connect to that server
-  simulation_thread::get_instance()->connect(_game_id, server_address, player_no);
+  SimulationThread::get_instance()->connect(_game_id, server_address, player_no);
 
   // set the state to logged_in as well....
   session::get_instance()->set_state(session::logged_in);
@@ -286,7 +286,7 @@ confirm_player_session_request::~confirm_player_session_request() {
 }
 
 std::string confirm_player_session_request::get_request_xml() {
-  return (boost::format("<confirm sessionId=\"%1%\" gameId=\"%2%\" otherUserId=\"%3%\" />") % _session_id % _game_id
+  return (boost::format("<confirm sessionId=\"%1%\" gameId=\"%2%\" otherUserId=\"%3%\" />") % session_id_ % _game_id
       % _other_user_id).str();
 }
 

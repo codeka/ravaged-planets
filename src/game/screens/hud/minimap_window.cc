@@ -107,7 +107,7 @@ void MinimapWindow::initialize() {
 }
 
 void MinimapWindow::show() {
-  game::terrain *trn = game::world::get_instance()->get_terrain();
+  game::Terrain *trn = game::World::get_instance()->get_terrain();
   texture_->create(trn->get_width(), trn->get_length());
   drawable_ = std::shared_ptr<MinimapDrawable>(new MinimapDrawable(texture_));
   wnd_->find<Label>(MINIMAP_IMAGE_ID)->set_background(drawable_);
@@ -141,7 +141,7 @@ void MinimapWindow::on_camera_updated() {
 
 void MinimapWindow::update_drawable() {
   fw::Camera *camera = fw::Framework::get_instance()->get_camera();
-  game::terrain *terrain = game::world::get_instance()->get_terrain();
+  game::Terrain *terrain = game::World::get_instance()->get_terrain();
 
   // Offset so that it shows up in the correct position relative to where the camera is
   fw::Vector cam_pos(
@@ -165,8 +165,8 @@ void MinimapWindow::update_drawable() {
 }
 
 void MinimapWindow::update_entity_display() {
-  int width = game::world::get_instance()->get_terrain()->get_width();
-  int height = game::world::get_instance()->get_terrain()->get_length();
+  int width = game::World::get_instance()->get_terrain()->get_width();
+  int height = game::World::get_instance()->get_terrain()->get_length();
 
   fw::Graphics *graphics = fw::Framework::get_instance()->get_graphics();
   float screen_width = graphics->get_width();
@@ -180,10 +180,10 @@ void MinimapWindow::update_entity_display() {
   int pixel_height = 1 + static_cast<int>(0.5f + height / wnd_height);
 
   // make a copy of the minimap background's pixels
-  std::vector<uint32_t> pixels(game::world::get_instance()->get_minimap_background()->get_pixels());
+  std::vector<uint32_t> pixels(game::World::get_instance()->get_minimap_background()->get_pixels());
 
   // go through each minimap_visible Entity and draw it on our bitmap
-  ent::EntityManager *ent_mgr = game::world::get_instance()->get_entity_manager();
+  ent::EntityManager *ent_mgr = game::World::get_instance()->get_entity_manager();
   for (std::weak_ptr<ent::Entity> wp : ent_mgr->get_entities_by_component<ent::MinimapVisibleComponent>()) {
     std::shared_ptr<ent::Entity> ent = wp.lock();
     if (!ent) {

@@ -20,31 +20,31 @@ class EntityManager;
 }
 
 namespace game {
-class terrain;
-class world_reader;
-class cursor_handler;
+class Terrain;
+class WorldReader;
+class CursorHandler;
 class pathing_thread;
 
 /**
  * The world class represents the entire game "world", that is, the terrain the trees/obstacles and all the units.
  */
-class world {
+class World {
 private:
-  std::shared_ptr<world_reader> _reader;
-  terrain *_terrain;
-  ent::EntityManager *_entities;
-  pathing_thread *_pathing;
-  std::vector<int> _keybind_tokens;
-  cursor_handler *cursor_;
-  std::shared_ptr<fw::Bitmap> _minimap_background;
-  std::map<int, fw::Vector> _player_starts;
+  std::shared_ptr<WorldReader> reader_;
+  Terrain *terrain_;
+  ent::EntityManager *entities_;
+  pathing_thread *pathing_;
+  std::vector<int> keybind_tokens_;
+  CursorHandler *cursor_;
+  std::shared_ptr<fw::Bitmap> minimap_background_;
+  std::map<int, fw::Vector> player_starts_;
 
-  std::string _description;
+  std::string description_;
   std::string name_;
-  std::string _author;
-  bool _initialized;
+  std::string author_;
+  bool initialized_;
 
-  static world *_instance;
+  static World *instance_;
 
   void on_key_pause(std::string key, bool is_down);
   void on_key_screenshot(std::string key, bool is_down);
@@ -53,15 +53,15 @@ private:
   void screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot);
 
 protected:
-  std::shared_ptr<fw::Bitmap> _screenshot;
+  std::shared_ptr<fw::Bitmap> screenshot_;
 
   virtual void initialize_pathing();
   virtual void initialize_entities();
 
 public:
   // constructs a new world using the information from the given world_reader.
-  world(std::shared_ptr<world_reader> reader);
-  virtual ~world();
+  World(std::shared_ptr<WorldReader> reader);
+  virtual ~World();
 
   virtual void initialize();
   virtual void destroy();
@@ -71,40 +71,40 @@ public:
   void pause();
   void unpause();
 
-  static world *get_instance() {
-    return _instance;
+  static World *get_instance() {
+    return instance_;
   }
-  static void set_instance(world *wrld) {
-    _instance = wrld;
+  static void set_instance(World *wrld) {
+    instance_ = wrld;
   }
 
   std::shared_ptr<fw::Bitmap> const &get_minimap_background() const {
-    return _minimap_background;
+    return minimap_background_;
   }
 
   std::shared_ptr<fw::Bitmap> get_screenshot() const {
-    return _screenshot;
+    return screenshot_;
   }
 
   std::map<int, fw::Vector> &get_player_starts() {
-    return _player_starts;
+    return player_starts_;
   }
 
-  terrain *get_terrain() const {
-    return _terrain;
+  Terrain *get_terrain() const {
+    return terrain_;
   }
   ent::EntityManager *get_entity_manager() const {
-    return _entities;
+    return entities_;
   }
   pathing_thread *get_pathing() const {
-    return _pathing;
+    return pathing_;
   }
 
   std::string get_description() const {
-    return _description;
+    return description_;
   }
   void set_description(std::string description) {
-    _description = description;
+    description_ = description;
   }
 
   std::string get_name() const {
@@ -115,10 +115,10 @@ public:
   }
 
   std::string get_author() const {
-    return _author;
+    return author_;
   }
   void set_author(std::string author) {
-    _author = author;
+    author_ = author;
   }
 };
 
