@@ -89,7 +89,7 @@ void World::destroy() {
 }
 
 void World::initialize_pathing() {
-  pathing_ = new pathing_thread();
+  pathing_ = new PathingThread();
   pathing_->start();
 }
 

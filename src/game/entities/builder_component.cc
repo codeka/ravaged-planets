@@ -56,7 +56,7 @@ void BuilderComponent::build(std::string name) {
   //game::hud_chat->add_line("Building: " + name + "...");
 
   EntityFactory factory;
-  queue_entry entry;
+  QueueEntry entry;
   entry.tmpl = factory.get_template(name);
   entry.time_to_build = 2.0f;// luabind::object_cast<float>(entry.tmpl["components"]["Buildable"]["TimeToBuild"]);
   entry.time_remaining = entry.time_to_build;
@@ -77,7 +77,7 @@ void BuilderComponent::update(float dt) {
     return;
   }
 
-  queue_entry &entry = _build_queue.front();
+  QueueEntry &entry = _build_queue.front();
   entry.time_remaining -= dt;
   entry.percent_complete += (dt / entry.time_to_build) * 100.0f;
   if (entry.percent_complete >= 100.0f) {

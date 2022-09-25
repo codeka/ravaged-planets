@@ -14,7 +14,7 @@
 #include <framework/logging.h>
 
 #include <game/ai/ai_player.h>
-#include <game/ai/ai_scriptmgr.h>
+#include <game/ai/script_manager.h>
 #include <game/screens/title/new_ai_player_window.h>
 #include <game/screens/title/new_game_window.h>
 #include <game/simulation/simulation_thread.h>
@@ -56,9 +56,9 @@ void NewAIPlayerWindow::initialize(NewGameWindow *NewGameWindow) {
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
   // add each of the scripts to the "scripts" combobox so the user can choose which one he wants
-  ai_scriptmgr scriptmgr;
-  std::vector<script_desc> &scripts = scriptmgr.get_scripts();
-  for (script_desc &desc : scripts) {
+  ScriptManager scriptmgr;
+  std::vector<ScriptDesc> &scripts = scriptmgr.get_scripts();
+  for (ScriptDesc &desc : scripts) {
     wnd_->find<Listbox>(AI_LIST_ID)->add_item(
         Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(desc.name) << Widget::data(desc));
   }
@@ -93,7 +93,7 @@ bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
   if (selected_item == nullptr) {
     return false;
   }
-  script_desc const &desc = boost::any_cast<script_desc const &>(selected_item->get_data());
+  ScriptDesc const &desc = boost::any_cast<ScriptDesc const &>(selected_item->get_data());
 
   uint16_t game_id = SimulationThread::get_instance()->get_game_id();
   if (game_id == 0) {
@@ -101,7 +101,7 @@ bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
     // done with it (choose a player_id based on the number of players so far)
     int num_players = SimulationThread::get_instance()->get_players().size();
 
-    ai_player *ply = new ai_player(name, desc, static_cast<uint8_t>(num_players + 1));
+    AIPlayer *ply = new AIPlayer(name, desc, static_cast<uint8_t>(num_players + 1));
     if (!ply->is_valid_state()) {
       new_game_window_->append_chat("Error loading player script, check error log.");
     } else {

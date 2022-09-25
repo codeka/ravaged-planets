@@ -123,7 +123,7 @@ void SimulationThread::enqueue_command(std::shared_ptr<Command> &cmd) {
   command_list.push_back(cmd);
 }
 
-void SimulationThread::add_ai_player(ai_player *plyr) {
+void SimulationThread::add_ai_player(AIPlayer *plyr) {
   players_.push_back(plyr);
   sig_players_changed();
 }

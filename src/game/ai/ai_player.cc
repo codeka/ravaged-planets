@@ -25,7 +25,7 @@ namespace fs = boost::filesystem;
 
 namespace game {
 
-ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t player_no) {
+AIPlayer::AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t player_no) {
   _script_desc = desc;
   user_name_ = name;
   player_no_ = player_no;
@@ -70,26 +70,26 @@ ai_player::ai_player(std::string const &name, script_desc const &desc, uint8_t p
   }
 }
 
-ai_player::~ai_player() {
+AIPlayer::~AIPlayer() {
 }
 
-void ai_player::l_set_ready() {
+void AIPlayer::l_set_ready() {
   is_ready_to_start_ = true;
 }
 
-void ai_player::l_say(std::string const &msg) {
+void AIPlayer::l_say(std::string const &msg) {
   // just "say" whatever they told us to say...
   // todo: this should be a proper network call
   SimulationThread::get_instance()->sig_chat(user_name_, msg);
 }
 
-void ai_player::l_local_say(std::string const &msg) {
+void AIPlayer::l_local_say(std::string const &msg) {
   fw::debug << "SAY : " << msg << std::endl;
   // just "say" whatever they told us to say... (but just locally, it's for debugging your scripts, basically)
   SimulationThread::get_instance()->sig_chat(user_name_, msg);
 }
 
-void ai_player::l_timer(float dt, luabind::object obj) {
+void AIPlayer::l_timer(float dt, luabind::object obj) {
   // this is called to queue a LUA function to our update_queue so we can call a Lua function at the given time
 //  if (!obj.is_valid())
 //    return;
@@ -99,7 +99,7 @@ void ai_player::l_timer(float dt, luabind::object obj) {
   });
 }
 
-void ai_player::fire_event(std::string const &event_name, std::map<std::string, std::string> const &parameters) {
+void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, std::string> const &parameters) {
   // fires the given named event (which'll fire off all our lua callbacks)
   lua_event_map::iterator it = _event_map.find(event_name);
   if (it == _event_map.end())
@@ -121,7 +121,7 @@ void ai_player::fire_event(std::string const &event_name, std::map<std::string, 
   }
 }
 
-void ai_player::l_event(std::string const &event_name, luabind::object obj) {
+void AIPlayer::l_event(std::string const &event_name, luabind::object obj) {
   // this is called to queue a LUA function when the given named event occurs.
 //  if (!obj.is_valid())
 //    return;
@@ -136,20 +136,20 @@ void ai_player::l_event(std::string const &event_name, luabind::object obj) {
 }
 
 // registers the given "creator" function that we'll use to create subclasses of unit_wrapper with
-void ai_player::l_register_unit(std::string name, luabind::object creator) {
+void AIPlayer::l_register_unit(std::string name, luabind::object creator) {
   _unit_creator_map[name] = creator;
 }
 
 // this is the predicate we pass to the Entity manager for our l_findunits() implementation
 struct findunits_predicate {
 private:
-  ai_player *_plyr;
+  AIPlayer *_plyr;
   std::vector<uint8_t> _player_nos;
   std::string _unit_type;
   std::string state_;
 
 public:
-  inline findunits_predicate(ai_player *plyr, luabind::object &params) : _plyr(plyr) {
+  inline findunits_predicate(AIPlayer *plyr, luabind::object &params) : _plyr(plyr) {
 //    luabind::iterator end;
 /*    for (luabind::iterator it(params); it != end; ++it) {
       std::string key = luabind::object_cast<std::string>(it.key());
@@ -224,7 +224,7 @@ public:
 // this is the "workhorse" of the AI function. it searches for all
 // of the units which match the parameters given (note: because of the
 // luabind::adopt policy, LUA takes ownership of the object we return)
-luabind::object ai_player::l_find_units(luabind::object params, lua_State *L) {
+luabind::object AIPlayer::l_find_units(luabind::object params, lua_State *L) {
     luabind::object units;// = luabind::newtable(L);
 
   // if you pass something that's not a table as the first parameter,
@@ -255,13 +255,13 @@ luabind::object ai_player::l_find_units(luabind::object params, lua_State *L) {
 
 // issues the given orders to the given units. We assime that units is an array
 // of unit_wrappers and orders is an object containing the parameters for the order.
-void ai_player::l_issue_order(luabind::object units, luabind::object orders) {
+void AIPlayer::l_issue_order(luabind::object units, luabind::object orders) {
   // if you pass something that's not a table as the parameters, we can't do anything.
 //  if (luabind::type(units) != LUA_TTABLE || luabind::type(orders) != LUA_TTABLE) {
 //    return;
 //  }
 
-    boost::optional<unit_wrapper*> unit;// = luabind::object_cast_nothrow<unit_wrapper*>(units);
+    boost::optional<UnitWrapper*> unit;// = luabind::object_cast_nothrow<unit_wrapper*>(units);
 //  if (unit) {
     // if they just passed one unit in, we'll just issue the order to that unit
     issue_order(*unit, orders);
@@ -276,7 +276,7 @@ void ai_player::l_issue_order(luabind::object units, luabind::object orders) {
 //  }
 }
 
-void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
+void AIPlayer::issue_order(UnitWrapper *unit, luabind::object orders) {
   std::shared_ptr<ent::Entity> Entity = unit->get_entity().lock();
   if (!Entity)
     return;
@@ -305,7 +305,7 @@ void ai_player::issue_order(unit_wrapper *unit, luabind::object orders) {
   }
 }
 
-luabind::object ai_player::get_unit_wrapper(std::weak_ptr<ent::Entity> wp) {
+luabind::object AIPlayer::get_unit_wrapper(std::weak_ptr<ent::Entity> wp) {
   std::shared_ptr<ent::Entity> ent = wp.lock();
   if (!ent) {
     return luabind::object();
@@ -322,7 +322,7 @@ luabind::object ai_player::get_unit_wrapper(std::weak_ptr<ent::Entity> wp) {
   return attr->get_value<luabind::object>();
 }
 
-luabind::object ai_player::create_unit_wrapper(std::string const &entity_name) {
+luabind::object AIPlayer::create_unit_wrapper(std::string const &entity_name) {
   unit_creator_map::iterator it = _unit_creator_map.find(entity_name);
 //  if (it != _unit_creator_map.end() && it->second.is_valid()) {
 //    return it->second() [luabind::adopt(luabind::result)];
@@ -334,15 +334,15 @@ luabind::object ai_player::create_unit_wrapper(std::string const &entity_name) {
   return luabind::object();
 }
 
-void ai_player::update() {
+void AIPlayer::update() {
   _upd_queue.update();
 }
 
 // this is called when our local player is ready to start the game
-void ai_player::local_player_is_ready() {
+void AIPlayer::local_player_is_ready() {
 }
 
-void ai_player::world_loaded() {
+void AIPlayer::world_loaded() {
   fw::Vector start_loc;
 
   auto start_it = game::World::get_instance()->get_player_starts().find(player_no_);
@@ -364,7 +364,7 @@ void ai_player::world_loaded() {
 }
 
 // This is called each simulation frame when we get all the commands from other players
-void ai_player::post_commands(std::vector<std::shared_ptr<Command>> &) {
+void AIPlayer::post_commands(std::vector<std::shared_ptr<Command>> &) {
 }
 
 }

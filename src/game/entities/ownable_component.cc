@@ -36,7 +36,7 @@ bool OwnableComponent::is_local_or_ai_player() const {
   if (is_local_player())
     return true;
 
-  game::ai_player *ai_owner = dynamic_cast<game::ai_player *>(owner_);
+  game::AIPlayer *ai_owner = dynamic_cast<game::AIPlayer *>(owner_);
   if (ai_owner != nullptr)
     return true;
 

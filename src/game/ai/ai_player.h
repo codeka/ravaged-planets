@@ -5,7 +5,7 @@
 
 #include <game/simulation/player.h>
 #include <game/ai/update_queue.h>
-#include <game/ai/ai_scriptmgr.h>
+#include <game/ai/script_manager.h>
 #include <game/ai/unit_wrapper.h>
 
 namespace fw {
@@ -18,14 +18,14 @@ namespace game {
  * This implementation of player provides an AI player so that you can play against the computer, if you don't
  * have any friends.
  */
-class ai_player : public Player {
+class AIPlayer : public Player {
 private:
   typedef std::map<std::string, std::vector<luabind::object>> lua_event_map;
   typedef std::map<std::string, luabind::object> unit_creator_map;
 
-  script_desc _script_desc;
+  ScriptDesc _script_desc;
   std::shared_ptr<fw::lua::LuaContext> _script;
-  update_queue _upd_queue;
+  UpdateQueue _upd_queue;
   lua_event_map _event_map;
   unit_creator_map _unit_creator_map;
   bool _is_valid;
@@ -39,7 +39,7 @@ private:
   /** Creates a unit_wrapper for entities of the given type. */
   luabind::object create_unit_wrapper(std::string const &entity_name);
 
-  void issue_order(unit_wrapper *unit, luabind::object orders);
+  void issue_order(UnitWrapper *unit, luabind::object orders);
 
   void l_set_ready();
   void l_say(std::string const &msg);
@@ -51,8 +51,8 @@ private:
   void l_issue_order(luabind::object units, luabind::object orders);
 
 public:
-  ai_player(std::string const &name, script_desc const &desc, uint8_t player_no);
-  virtual ~ai_player();
+  AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t player_no);
+  virtual ~AIPlayer();
 
   virtual void update();
 

@@ -14,7 +14,7 @@ class ParticleEffectComponent;
  */
 class BuilderComponent : public EntityComponent, public boost::signals2::trackable {
 private:
-  struct queue_entry {
+  struct QueueEntry {
     luabind::object tmpl;
     float time_to_build;
     float time_remaining;
@@ -22,7 +22,7 @@ private:
   };
   ParticleEffectComponent *_particle_effect_component;
   std::string build_group_;
-  std::queue<queue_entry> _build_queue;
+  std::queue<QueueEntry> _build_queue;
 
   void on_selected(bool selected);
 

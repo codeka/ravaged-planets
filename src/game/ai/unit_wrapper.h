@@ -12,14 +12,12 @@ class OrderableComponent;
 
 namespace game {
 
-/**
- * Wraps entities so that Lua classes can inherit from and call methods on and so on.
- */
-class unit_wrapper {
+// Wraps entities so that Lua classes can inherit from and call methods on and so on.
+class UnitWrapper {
 private:
   std::weak_ptr<ent::Entity> entity_;
-  ent::OwnableComponent *_ownable;
-  ent::OrderableComponent *_orderable;
+  ent::OwnableComponent *ownable_;
+  ent::OrderableComponent *orderable_;
 
   std::string l_get_kind();
   int l_get_player_no();

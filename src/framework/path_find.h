@@ -6,7 +6,7 @@ namespace fw {
 struct PathNode;
 
 // Class for finding a path between point "A" and point "B" in a grid.
-class PathFfind {
+class PathFind {
 private:
   int _width;
   int _length;
@@ -17,8 +17,8 @@ private:
   bool is_passable(fw::Vector const &start, fw::Vector const &end) const;
 
 public:
-  PathFfind(int width, int length, std::vector<bool> const &passability);
-  virtual ~PathFfind();
+  PathFind(int width, int length, std::vector<bool> const &passability);
+  virtual ~PathFind();
 
   // Finds a path between the given 'start' and 'end' vectors. We ignore the y component of the vectors and just look
   // at the (x,y) components. The 'path' is populated with the path we found and we'll assume the agent will travel
@@ -38,7 +38,7 @@ public:
 
 // This specialization of PathFfind adds some timing methods and it also keeps the final Node structure around
 // for visualization
-class TimedPathFind: public PathFfind {
+class TimedPathFind: public PathFind {
 public:
   TimedPathFind(int width, int length, std::vector<bool> &passability);
   virtual ~TimedPathFind();

@@ -9,37 +9,35 @@
 #include <framework/work_queue.h>
 
 namespace fw {
-class PathFfind;
+class PathFind;
 }
 
 namespace game {
 class Terrain;
 
-/**
- * Encapsulates a thread that all players will queue requests for path-finding to. We then execute one request
- * at a time and call the player back when the path is found.
- */
-class pathing_thread: private boost::noncopyable {
+// Encapsulates a thread that all players will queue requests for path-finding to. We then execute one request
+// at a time and call the player back when the path is found.
+class PathingThread: private boost::noncopyable {
 public:
   typedef std::function<void(std::vector<fw::Vector> const &)> callback_fn;
 
 private:
-  struct path_request_data {
+  struct PathRequestData {
     int flags;
     fw::Vector start;
     fw::Vector goal;
     callback_fn callback;
   };
 
-  std::shared_ptr<fw::PathFfind> _pather;
+  std::shared_ptr<fw::PathFind> pather_;
   Terrain *terrain_;
   std::thread thread_;
-  fw::WorkQueue<path_request_data> _work_queue;
+  fw::WorkQueue<PathRequestData> work_queue_;
 
   void thread_proc();
 
 public:
-  pathing_thread();
+  PathingThread();
 
   void start();
   void stop();

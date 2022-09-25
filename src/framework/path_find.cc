@@ -29,7 +29,7 @@ struct PathNode {
   int closed_run_no;  // the run_no we were last inserted into the closed set
 };
 
-PathFfind::PathFfind(int width, int length, std::vector<bool> const &passability) :
+PathFind::PathFind(int width, int length, std::vector<bool> const &passability) :
     _width(width), _length(length), _run_no(0) {
   _nodes = new PathNode[_width * _length];
   for (int z = 0; z < _length; z++) {
@@ -43,7 +43,7 @@ PathFfind::PathFfind(int width, int length, std::vector<bool> const &passability
   }
 }
 
-PathFfind::~PathFfind() {
+PathFind::~PathFind() {
   delete[] _nodes;
 }
 
@@ -60,13 +60,13 @@ void construct_path(std::vector<fw::Vector> &path, PathNode const *goal_node) {
   }
 }
 
-PathNode *PathFfind::get_node(fw::Vector const &loc) const {
+PathNode *PathFind::get_node(fw::Vector const &loc) const {
   int x = fw::constrain(static_cast<int>(loc[0]), _width);
   int z = fw::constrain(static_cast<int>(loc[2]), _length);
   return &_nodes[(z * _width) + x];
 }
 
-bool PathFfind::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
+bool PathFind::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) {
   std::multiset<PathNode *, PathNode::cost_comparer> open_set;
 
   // increment the run_no (basically invalidating all the current path_nodes)
@@ -148,7 +148,7 @@ bool PathFfind::find(std::vector<fw::Vector> &path, fw::Vector const &start, fw:
   return false;
 }
 
-bool PathFfind::is_passable(fw::Vector const &start, fw::Vector const &end) const {
+bool PathFind::is_passable(fw::Vector const &start, fw::Vector const &end) const {
   // we need to determine whether a straight line from start to end is passable
   // or not. We'll trace a line from start to end then look up all the nodes
   // in between
@@ -183,7 +183,7 @@ bool PathFfind::is_passable(fw::Vector const &start, fw::Vector const &end) cons
   return true;
 }
 
-void PathFfind::simplify_path(std::vector<fw::Vector> const &full_path, std::vector<fw::Vector> &new_path) {
+void PathFind::simplify_path(std::vector<fw::Vector> const &full_path, std::vector<fw::Vector> &new_path) {
   std::vector<fw::Vector>::const_iterator fp_it = full_path.begin();
   if (fp_it == full_path.end())
     return;
@@ -214,7 +214,7 @@ void PathFfind::simplify_path(std::vector<fw::Vector> const &full_path, std::vec
 //-------------------------------------------------------------------------
 
 TimedPathFind::TimedPathFind(int width, int length, std::vector<bool> &passability) :
-    PathFfind(width, length, passability), total_time(0) {
+    PathFind(width, length, passability), total_time(0) {
 }
 
 TimedPathFind::~TimedPathFind() {
@@ -224,7 +224,7 @@ bool TimedPathFind::find(std::vector<fw::Vector> &path, fw::Vector const &start,
   fw::Timer tmr;
   tmr.start();
 
-  bool found = PathFfind::find(path, start, end);
+  bool found = PathFind::find(path, start, end);
 
   tmr.stop();
   total_time = tmr.get_total_time();

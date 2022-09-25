@@ -13,7 +13,7 @@
 
 namespace game {
 // registers our class and methods and stuff in the given lua_State
-void unit_wrapper::register_class(lua_State *state) {
+void UnitWrapper::register_class(lua_State *state) {
 //  luabind::module(state) [
 //      luabind::class_<unit_wrapper>("Unit")
 //          .def(luabind::constructor<>())
@@ -23,17 +23,17 @@ void unit_wrapper::register_class(lua_State *state) {
 //  ];
 }
 
-void unit_wrapper::set_entity(std::weak_ptr<ent::Entity> const &ent) {
+void UnitWrapper::set_entity(std::weak_ptr<ent::Entity> const &ent) {
   entity_ = ent;
 
   std::shared_ptr<ent::Entity> sp = entity_.lock();
   if (sp) {
-    _ownable = sp->get_component<ent::OwnableComponent>();
-    _orderable = sp->get_component<ent::OrderableComponent>();
+    ownable_ = sp->get_component<ent::OwnableComponent>();
+    orderable_ = sp->get_component<ent::OrderableComponent>();
   }
 }
 
-std::string unit_wrapper::l_get_kind() {
+std::string UnitWrapper::l_get_kind() {
   std::shared_ptr<ent::Entity> ent = entity_.lock();
   if (ent) {
     return ent->get_name();
@@ -42,10 +42,10 @@ std::string unit_wrapper::l_get_kind() {
   }
 }
 
-std::string unit_wrapper::l_get_state() {
+std::string UnitWrapper::l_get_state() {
   std::shared_ptr<ent::Entity> Entity = entity_.lock();
-  if (Entity && _orderable != nullptr) {
-    std::shared_ptr<game::Order> curr_order = _orderable->get_current_order();
+  if (Entity && orderable_ != nullptr) {
+    std::shared_ptr<game::Order> curr_order = orderable_->get_current_order();
     if (curr_order) {
       return curr_order->get_state_name();
     }
@@ -54,10 +54,10 @@ std::string unit_wrapper::l_get_state() {
   return "idle";
 }
 
-int unit_wrapper::l_get_player_no() {
+int UnitWrapper::l_get_player_no() {
   std::shared_ptr<ent::Entity> Entity = entity_.lock();
   if (Entity) {
-    return static_cast<int>(_ownable->get_owner()->get_player_no());
+    return static_cast<int>(ownable_->get_owner()->get_player_no());
   }
 
   return 0;

@@ -16,7 +16,7 @@ class Host;
 
 namespace game {
 class Player;
-class ai_player;
+class AIPlayer;
 class LocalPlayer;
 class Command;
 
@@ -105,7 +105,7 @@ public:
   void enqueue_command(std::shared_ptr<Command> &cmd);
 
   // Adds a new AI player to the list of players.
-  void add_ai_player(ai_player *plyr);
+  void add_ai_player(AIPlayer *plyr);
 
   // Gets an std::vector<> of the current players in the game. This is a copy of our vector, so don't call this
   // too often.

@@ -3,7 +3,7 @@
 namespace game {
 
 // This structure defines various bits of info about a script that we gather from the *.ai file.
-struct script_desc {
+struct ScriptDesc {
   std::string name;
   std::string desc;
   std::string author;
@@ -13,14 +13,14 @@ struct script_desc {
 };
 
 /** This class manages the AI scripts. It enumerates them, lets you instantiate them, and so on. */
-class ai_scriptmgr {
+class ScriptManager {
 private:
   void populate_scripts();
 
 public:
-  ai_scriptmgr();
+  ScriptManager();
 
-  std::vector<script_desc> &get_scripts();
+  std::vector<ScriptDesc> &get_scripts();
 };
 
 }

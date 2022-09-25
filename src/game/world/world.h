@@ -23,7 +23,7 @@ namespace game {
 class Terrain;
 class WorldReader;
 class CursorHandler;
-class pathing_thread;
+class PathingThread;
 
 /**
  * The world class represents the entire game "world", that is, the terrain the trees/obstacles and all the units.
@@ -33,7 +33,7 @@ private:
   std::shared_ptr<WorldReader> reader_;
   Terrain *terrain_;
   ent::EntityManager *entities_;
-  pathing_thread *pathing_;
+  PathingThread *pathing_;
   std::vector<int> keybind_tokens_;
   CursorHandler *cursor_;
   std::shared_ptr<fw::Bitmap> minimap_background_;
@@ -96,7 +96,7 @@ public:
   ent::EntityManager *get_entity_manager() const {
     return entities_;
   }
-  pathing_thread *get_pathing() const {
+  PathingThread *get_pathing() const {
     return pathing_;
   }
 

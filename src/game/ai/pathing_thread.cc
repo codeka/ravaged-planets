@@ -16,50 +16,50 @@ int FLAG_NONE = 0;
 // if set, this means out stop() method has been called and the worker thread is to stop
 int FLAG_STOP = 1;
 
-pathing_thread::pathing_thread() : terrain_(nullptr) {
+PathingThread::PathingThread() : terrain_(nullptr) {
 }
 
-void pathing_thread::start() {
+void PathingThread::start() {
   // initialize the pather with the current world's map
   terrain_ = game::World::get_instance()->get_terrain();
-  std::shared_ptr<fw::PathFfind> pf(
-      new fw::PathFfind(terrain_->get_width(), terrain_->get_length(), terrain_->get_collision_data()));
-  _pather = pf;
+  std::shared_ptr<fw::PathFind> pf(
+      new fw::PathFind(terrain_->get_width(), terrain_->get_length(), terrain_->get_collision_data()));
+  pather_ = pf;
 
   // start the thread that will simply wait for jobs to arrive and
   // then process them in order.
-  thread_ = std::thread(std::bind(&pathing_thread::thread_proc, this));
+  thread_ = std::thread(std::bind(&PathingThread::thread_proc, this));
 }
 
-void pathing_thread::stop() {
+void PathingThread::stop() {
   // add an item to the queue to shutdown...
-  path_request_data request;
+  PathRequestData request;
   request.flags = FLAG_STOP;
-  _work_queue.enqueue(request);
+  work_queue_.enqueue(request);
 }
 
-void pathing_thread::request_path(fw::Vector const &start, fw::Vector const &goal, callback_fn on_path_found) {
-  path_request_data request;
+void PathingThread::request_path(fw::Vector const &start, fw::Vector const &goal, callback_fn on_path_found) {
+  PathRequestData request;
   request.flags = 0;
   request.start = start;
   request.goal = goal;
   request.callback = on_path_found;
-  _work_queue.enqueue(request);
+  work_queue_.enqueue(request);
 }
 
-void pathing_thread::thread_proc() {
+void PathingThread::thread_proc() {
   for (;;) {
-    path_request_data request = _work_queue.dequeue();
+    PathRequestData request = work_queue_.dequeue();
     if (request.flags == FLAG_STOP) {
       fw::debug << "pathing_thread::stop() has been called, thread_proc stopping." << std::endl;
       return;
     }
 
     std::vector<fw::Vector> path;
-    _pather->find(path, request.start, request.goal);
+    pather_->find(path, request.start, request.goal);
 
     std::vector<fw::Vector> simplified;
-    _pather->simplify_path(path, simplified);
+    pather_->simplify_path(path, simplified);
 
     if (request.callback) {
       request.callback(simplified);
