@@ -21,7 +21,7 @@
 namespace ww {
 
 	join_game_window::join_game_window()
-		: fw::gui::window("JoinGame"), sess_state_(ww::session::disconnected)
+		: fw::gui::window("JoinGame"), sess_state_(ww::Session::disconnected)
 	{
 	}
 
@@ -53,17 +53,17 @@ namespace ww {
 
 	void join_game_window::update()
 	{
-		if (session::get_instance() == 0)
+		if (Session::get_instance() == 0)
 		{
 			return;
 		}
 
-		session::session_state curr_state = session::get_instance()->get_state();
+		Session::SessionState curr_state = Session::get_instance()->get_state();
 		if (curr_state != sess_state_)
 		{
 			sess_state_ = curr_state;
 
-			if (sess_state_ == session::logged_in)
+			if (sess_state_ == Session::logged_in)
 			{
 				refresh_games_list();
 			}
@@ -95,7 +95,7 @@ namespace ww {
 		new_game->show();
 		new_game->set_enable_multiplayer_visible(false);
 
-		session::get_instance()->join_game(lobby_id);
+		Session::get_instance()->join_game(lobby_id);
 		return true;
 	}
 
@@ -109,21 +109,21 @@ namespace ww {
 	void join_game_window::refresh_games_list()
 	{
 		fw::debug << "refreshing games list..." << std::endl;
-		ww::session::get_instance()->get_games_list(
+		ww::Session::get_instance()->get_games_list(
 			boost::bind(&join_game_window::refresh_games_list_callback, this, _1));
 	}
 
-	void join_game_window::refresh_games_list_callback(std::vector<remote_game> const &games)
+	void join_game_window::refresh_games_list_callback(std::vector<RemoteGame> const &games)
 	{
 		_games = games;
 
 		_games_list->resetList();
-		for (remote_game &game : _games) {
+		for (RemoteGame &game : _games) {
 			add_game(game);
 		}
 	}
 
-	void join_game_window::add_game(remote_game &g)
+	void join_game_window::add_game(RemoteGame &g)
 	{
 		std::vector<std::string> values;
 		values.push_back(boost::lexical_cast<std::string>(g.id));

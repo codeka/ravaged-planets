@@ -49,7 +49,8 @@ enum ids {
 };
 
 NewGameWindow::NewGameWindow() :
-    wnd_(nullptr), main_menu_window_(nullptr), sess_state_(game::session::disconnected), need_refresh_players_(false) {
+    wnd_(nullptr), main_menu_window_(nullptr), sess_state_(Session::SessionState::kDisconnected),
+    need_refresh_players_(false) {
 }
 
 NewGameWindow::~NewGameWindow() {
@@ -137,11 +138,11 @@ void NewGameWindow::show() {
       std::bind(&NewGameWindow::on_players_changed, this));
   sig_chat_conn_ = SimulationThread::get_instance()->sig_chat.connect(
       std::bind(&NewGameWindow::add_chat_msg, this, _1, _2));
-  sig_session_state_changed_ = session::get_instance()->sig_state_changed.connect(
+  sig_session_state_changed_ = Session::get_instance()->sig_state_changed.connect(
       std::bind(&NewGameWindow::on_session_state_changed, this, _1));
 
   // call this as if the session state just changed, to make sure we're up-to-date
-  on_session_state_changed(session::get_instance()->get_state());
+  on_session_state_changed(Session::get_instance()->get_state());
   refresh_players();
 }
 
@@ -158,7 +159,7 @@ void NewGameWindow::set_enable_multiplayer_visible(bool visible) {
 }
 
 void NewGameWindow::update() {
-  if (session::get_instance() == 0) {
+  if (Session::get_instance() == 0) {
     //fw::gui::set_text(state_msg, fw::text("title.new-game.not-logged-in"));
     return;
   }
@@ -199,7 +200,7 @@ void NewGameWindow::update() {
   }
 }
 
-void NewGameWindow::on_session_state_changed(session::session_state new_state) {
+void NewGameWindow::on_session_state_changed(Session::SessionState new_state) {
 /*
   CEGUI::Window *state_msg = get_child("NewGame/Multiplayer/Status");
   CEGUI::Window *multiplayer_enable_checkbox = get_child("NewGame/Multiplayer/Enable");
@@ -310,7 +311,7 @@ bool NewGameWindow::on_chat_filter(std::string ch) {
   std::string msg = ed->get_text();
   boost::trim(msg);
 
-  add_chat_msg(session::get_instance()->get_user_name(), msg);
+  add_chat_msg(Session::get_instance()->get_user_name(), msg);
   SimulationThread::get_instance()->send_chat_msg(msg);
 
   ed->set_text("");

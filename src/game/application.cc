@@ -60,7 +60,7 @@ void Application::update(float dt) {
   if (active != nullptr) {
     active->update();
   }
-  session::get_instance()->update();
+  Session::get_instance()->update();
 }
 
 void Application::render(fw::sg::Scenegraph &Scenegraph) {

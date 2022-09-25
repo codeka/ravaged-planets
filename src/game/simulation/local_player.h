@@ -11,7 +11,7 @@ namespace game {
 // There's only one local_player, and it represents, US, that is, the person who's playing this instance of the game.
 class LocalPlayer: public Player {
 private:
-  session::session_state last_session_state_;
+  Session::SessionState last_session_state_;
 
   // The session-id of this player, as they are logged in to the server (this is a secret, so we can't tell the
   // other players!)

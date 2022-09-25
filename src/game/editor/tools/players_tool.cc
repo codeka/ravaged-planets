@@ -105,7 +105,7 @@ void players_tool_window::selection_changed(int index) {
 namespace ed {
 REGISTER_TOOL("players", players_tool);
 
-players_tool::players_tool(editor_world *wrld) : wnd_(nullptr), _player_no(1), tool(wrld) {
+players_tool::players_tool(editor_world *wrld) : wnd_(nullptr), player_no_(1), tool(wrld) {
   wnd_ = new players_tool_window(this);
   _marker = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
 }
@@ -129,11 +129,11 @@ void players_tool::deactivate() {
 }
 
 void players_tool::render(fw::sg::Scenegraph &Scenegraph) {
-  if (_player_no <= 0)
+  if (player_no_ <= 0)
     return;
 
   std::map<int, fw::Vector> &starts = world_->get_player_starts();
-  std::map<int, fw::Vector>::iterator it = starts.find(_player_no);
+  std::map<int, fw::Vector>::iterator it = starts.find(player_no_);
 
   // if there's no player_no in the collection, this player isn't enabled
   if (it == starts.end())
@@ -147,17 +147,17 @@ void players_tool::render(fw::sg::Scenegraph &Scenegraph) {
 }
 
 void players_tool::set_curr_player(int player_no) {
-  _player_no = player_no;
+  player_no_ = player_no;
 }
 
 void players_tool::on_key(std::string keyname, bool is_down) {
   if (keyname == "Left-Mouse" && !is_down) {
-    if (_player_no <= 0) {
+    if (player_no_ <= 0) {
       return;
     }
 
     std::map<int, fw::Vector> &starts = world_->get_player_starts();
-    std::map<int, fw::Vector>::iterator it = starts.find(_player_no);
+    std::map<int, fw::Vector>::iterator it = starts.find(player_no_);
     if (it == starts.end()) {
       return;
     }

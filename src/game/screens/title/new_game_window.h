@@ -26,7 +26,7 @@ private:
   NewAIPlayerWindow *new_ai_player_window_;
   fw::gui::Window *wnd_;
   std::shared_ptr<GameScreenOptions> game_options_;
-  game::session::session_state sess_state_;
+  game::Session::SessionState sess_state_;
   boost::signals2::connection sig_players_changed_conn_;
   boost::signals2::connection sig_chat_conn_;
   boost::signals2::connection sig_session_state_changed_;
@@ -50,7 +50,7 @@ private:
 
   void add_chat_msg(std::string const &user_name, std::string const &msg);
 
-  void on_session_state_changed(session::session_state new_state);
+  void on_session_state_changed(Session::SessionState new_state);
 
   void update_selection();
 

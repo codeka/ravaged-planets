@@ -63,7 +63,7 @@ namespace ww {
 	{
 		fw::gui::window::show();
 
-		sig_session_state_changed_ = session::get_instance()->sig_state_changed.connect(
+		sig_session_state_changed_ = Session::get_instance()->sig_state_changed.connect(
 			boost::bind(&login_box_window::on_session_state_changed, this, _1));
 	}
 
@@ -74,7 +74,7 @@ namespace ww {
 		sig_session_state_changed_.disconnect();
 	}
 
-	void login_box_window::on_session_state_changed(session::session_state new_state)
+	void login_box_window::on_session_state_changed(Session::SessionState new_state)
 	{
 		CEGUI::Window *msg_ctrls = get_child("LoginBox/MessageControls");
 		CEGUI::Window *login_ctrls = get_child("LoginBox/LoginControls");
@@ -84,7 +84,7 @@ namespace ww {
 
 		switch(new_state)
 		{
-		case session::logging_in:
+		case Session::logging_in:
 			msg_ctrls->setVisible(true);
 			login_ctrls->setVisible(false);
 			fw::gui::set_text(msg_text, fw::text("please-wait.logging-in"));
@@ -93,16 +93,16 @@ namespace ww {
 			_desired_height = small_height;
 			break;
 
-		case session::logged_in:
+		case Session::logged_in:
 			{
-				std::string s = (boost::format(fw::text("title.login.logged-in")) % session::get_instance()->get_user_name()).str();
+				std::string s = (boost::format(fw::text("title.login.logged-in")) % Session::get_instance()->get_user_name()).str();
 				fw::gui::set_text(msg_text, s);
 			}
 			msg_icon->setVisible(false);
 			_desired_height = small_height;
 			break;
 
-		case session::in_error:
+		case Session::in_error:
 			_reset_time = 3.0f;
 			fw::gui::set_text(msg_text, fw::text("title.login.failed"));
 			_wait_anim.set_enabled(false);
@@ -121,7 +121,7 @@ namespace ww {
 		if (username == "" || password == "")
 			return true;
 
-		ww::session::get_instance()->login(username, password);
+		ww::Session::get_instance()->login(username, password);
 
 		// we just reset the username/password text - the update method will query
 		// the session to actually hide things and display progress messages, etc

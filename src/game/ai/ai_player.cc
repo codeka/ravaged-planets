@@ -146,7 +146,7 @@ private:
   ai_player *_plyr;
   std::vector<uint8_t> _player_nos;
   std::string _unit_type;
-  std::string _state;
+  std::string state_;
 
 public:
   inline findunits_predicate(ai_player *plyr, luabind::object &params) : _plyr(plyr) {
@@ -204,15 +204,15 @@ public:
     }
 
     // if we're looking for entities in a particular state, then check that
-    if (_state != "") {
+    if (state_ != "") {
       ent::OrderableComponent *orderable = ent->get_component<ent::OrderableComponent>();
       if (orderable == nullptr) {
         return false;
       }
       std::shared_ptr<game::Order> curr_order = orderable->get_current_order();
-      if (curr_order && curr_order->get_state_name() != _state) {
+      if (curr_order && curr_order->get_state_name() != state_) {
         return false;
-      } else if (!curr_order && _state != "idle") {
+      } else if (!curr_order && state_ != "idle") {
         return false;
       }
     }

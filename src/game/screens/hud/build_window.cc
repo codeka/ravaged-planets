@@ -43,19 +43,19 @@ enum ids {
 /**
  * Holds information nessecary to render an icon for a given Entity.
  */
-class entity_icon {
+class EntityIcon {
 private:
-  float _rotation;
-  std::string _template_name;
+  float rotation_;
+  std::string template_name_;
   std::shared_ptr<fw::Model> model_;
-  std::shared_ptr<fw::Framebuffer> _framebuffer;
+  std::shared_ptr<fw::Framebuffer> framebuffer_;
   std::shared_ptr<fw::Texture> color_texture_;
-  std::shared_ptr<fw::Texture> _depth_texture;
+  std::shared_ptr<fw::Texture> depth_texture_;
   std::shared_ptr<Drawable> drawable_;
 
   void render();
 public:
-  entity_icon();
+  EntityIcon();
 
   void initialize();
   void set_model(std::string const &template_name, std::shared_ptr<fw::Model> mdl);
@@ -66,19 +66,19 @@ public:
   std::shared_ptr<Drawable> get_drawable();
 };
 
-entity_icon::entity_icon() : _rotation(0.0f) {
+EntityIcon::EntityIcon() : rotation_(0.0f) {
 }
 
-void entity_icon::initialize() {
+void EntityIcon::initialize() {
   color_texture_ = std::shared_ptr<fw::Texture>(new fw::Texture());
   color_texture_->create(64, 64, false);
 
-  _depth_texture = std::shared_ptr<fw::Texture>(new fw::Texture());
-  _depth_texture->create(64, 64, true);
+  depth_texture_ = std::shared_ptr<fw::Texture>(new fw::Texture());
+  depth_texture_->create(64, 64, true);
 
-  _framebuffer = std::shared_ptr<fw::Framebuffer>(new fw::Framebuffer());
-  _framebuffer->set_color_buffer(color_texture_);
-  _framebuffer->set_depth_buffer(_depth_texture);
+  framebuffer_ = std::shared_ptr<fw::Framebuffer>(new fw::Framebuffer());
+  framebuffer_->set_color_buffer(color_texture_);
+  framebuffer_->set_depth_buffer(depth_texture_);
 
   drawable_ = fw::Framework::get_instance()->get_gui()->get_drawable_manager()
       ->build_drawable(color_texture_, 7, 7, 50, 50);
@@ -86,14 +86,14 @@ void entity_icon::initialize() {
   render();
 }
 
-void entity_icon::set_model(std::string const &template_name, std::shared_ptr<fw::Model> mdl) {
-  _template_name = template_name;
+void EntityIcon::set_model(std::string const &template_name, std::shared_ptr<fw::Model> mdl) {
+  template_name_ = template_name;
   model_ = mdl;
-  _rotation = 0.0f;
+  rotation_ = 0.0f;
   render();
 }
 
-void entity_icon::render() {
+void EntityIcon::render() {
   if (!model_) {
     return;
   }
@@ -110,29 +110,29 @@ void entity_icon::render() {
   std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
   sg.add_light(Light);
 
-  model_->render(sg, fw::rotate_axis_angle(fw::Vector(0, 1, 0), _rotation));
-  fw::render(sg, _framebuffer, false);
+  model_->render(sg, fw::rotate_axis_angle(fw::Vector(0, 1, 0), rotation_));
+  fw::render(sg, framebuffer_, false);
 }
 
-void entity_icon::update() {
-  _rotation += 3.14159f * fw::Framework::get_instance()->get_timer()->get_frame_time();
+void EntityIcon::update() {
+  rotation_ += 3.14159f * fw::Framework::get_instance()->get_timer()->get_frame_time();
   fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     render();
   });
 }
 
-void entity_icon::reset() {
-  _rotation = 0.0f;
+void EntityIcon::reset() {
+  rotation_ = 0.0f;
   fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     render();
   });
 }
 
-std::string entity_icon::get_template_name() {
-  return _template_name;
+std::string EntityIcon::get_template_name() {
+  return template_name_;
 }
 
-std::shared_ptr<Drawable> entity_icon::get_drawable() {
+std::shared_ptr<Drawable> EntityIcon::get_drawable() {
   return drawable_;
 }
 
@@ -184,7 +184,7 @@ void BuildWindow::refresh(std::weak_ptr<ent::Entity> Entity, std::string build_g
 
 bool BuildWindow::on_build_clicked(Widget *w, int id) {
   Button *btn = dynamic_cast<Button *>(w);
-  auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
+  auto iconp = boost::any_cast<std::shared_ptr<EntityIcon>>(&btn->get_data());
   if (iconp != nullptr) {
     std::string tmpl_name = (*iconp)->get_template_name();
     std::shared_ptr<ent::Entity> Entity(entity_);
@@ -204,7 +204,7 @@ void BuildWindow::on_mouse_out_button(int id) {
   if (mouse_over_button_id_ == id) {
     Button *btn = wnd_->find<Button>(mouse_over_button_id_);
     if (btn != nullptr) {
-      auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
+      auto iconp = boost::any_cast<std::shared_ptr<EntityIcon>>(&btn->get_data());
       if (iconp != nullptr) {
         (*iconp)->reset();
       }
@@ -227,12 +227,12 @@ void BuildWindow::do_refresh() {
       continue; // TODO
     }
 
-    auto iconp = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
-    std::shared_ptr<entity_icon> icon;
+    auto iconp = boost::any_cast<std::shared_ptr<EntityIcon>>(&btn->get_data());
+    std::shared_ptr<EntityIcon> icon;
     if (iconp != nullptr) {
       icon = *iconp;
     } else {
-      icon = std::shared_ptr<entity_icon>(new entity_icon());
+      icon = std::shared_ptr<EntityIcon>(new EntityIcon());
       btn->set_data(icon);
       fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
         icon->initialize();
@@ -262,7 +262,7 @@ void BuildWindow::update() {
   if (mouse_over_button_id_ > 0) {
     Button *btn = wnd_->find<Button>(mouse_over_button_id_);
     if (btn != nullptr) {
-      auto icon = boost::any_cast<std::shared_ptr<entity_icon>>(&btn->get_data());
+      auto icon = boost::any_cast<std::shared_ptr<EntityIcon>>(&btn->get_data());
       if (icon != nullptr) {
         (*icon)->update();
       }

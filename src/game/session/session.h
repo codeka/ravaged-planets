@@ -13,31 +13,31 @@ class Http;
 
 namespace game {
 class SessionRequest;
-class remote_game;
+class RemoteGame;
 
-class session {
+class Session {
 public:
   // these are the different states the session can be in
-  enum session_state {
-    disconnected, in_error, logging_in, logged_in, logging_out, joining_lobby,
+  enum SessionState {
+    kDisconnected, kInError, kLoggingIn, kLoggedIn, kLoggingOut, kJoiningLobby,
   };
 
 private:
-  static session *_instance;
+  static Session *instance_;
 
-  session_state _state;
-  std::shared_ptr<SessionRequest> _curr_req;
-  std::queue<std::shared_ptr<SessionRequest>> _pending;
+  SessionState state_;
+  std::shared_ptr<SessionRequest> curr_req_;
+  std::queue<std::shared_ptr<SessionRequest>> pending_;
   uint64_t session_id_;
-  uint32_t _user_id;
-  std::string _user_name;
-  std::string _error_msg;
+  uint32_t user_id_;
+  std::string user_name_;
+  std::string error_msg_;
 
   std::mutex mutex_;
 
   // this is called by the login static function. you use that to actually log in
   // and create the session object
-  session();
+  Session();
 
   std::string get_base_url() const;
 
@@ -46,10 +46,10 @@ private:
   void begin_request(std::shared_ptr<SessionRequest> req);
 
 public:
-  static session *get_instance() {
-    return _instance;
+  static Session *get_instance() {
+    return instance_;
   }
-  ~session();
+  ~Session();
 
   // this must be called every now and then (e.g. every frame) to update
   // the state, post and queued requests and so on
@@ -70,35 +70,35 @@ public:
 
   // gets the list of remote games that we can connect to. when the list is refreshed (may
   // take some time) we'll call the given callback with the list
-  std::shared_ptr<SessionRequest> get_games_list(std::function<void(std::vector<remote_game> const &)> callback);
+  std::shared_ptr<SessionRequest> get_games_list(std::function<void(std::vector<RemoteGame> const &)> callback);
 
   // confirm that the given player has joined this game
   std::shared_ptr<SessionRequest> confirm_player(uint64_t game_id, uint32_t user_id);
 
   // gets the current state (if a post is in progress, we'll check if it's finished
   // and parse the response at the same time)
-  session_state get_state() {
-    return _state;
+  SessionState get_state() {
+    return state_;
   }
-  void set_state(session_state state);
+  void set_state(SessionState state);
 
   // this signal is fired when the session state changes.
-  boost::signals2::signal<void(session_state)> sig_state_changed;
+  boost::signals2::signal<void(SessionState)> sig_state_changed;
 
   // gets and sets our session_id and user_name
   uint64_t get_session_id() const {
     return session_id_;
   }
   uint32_t get_user_id() const {
-    return _user_id;
+    return user_id_;
   }
   std::string get_user_name() const {
-    return _state == logged_in ? _user_name : "";
+    return state_ == kLoggedIn ? user_name_ : "";
   }
 
   // if the state is session::in_error, this'll get the corresponding error message
   std::string const &get_error_msg() const {
-    return _error_msg;
+    return error_msg_;
   }
 };
 

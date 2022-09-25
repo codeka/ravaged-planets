@@ -67,8 +67,8 @@ void MainMenuWindow::hide() {
 void MainMenuWindow::update() {
   // if they've clicked "quit" and we're now logged out, then exit
   if (exiting_
-      && (session::get_instance()->get_state() == session::disconnected
-          || session::get_instance()->get_state() == session::in_error)) {
+      && (Session::get_instance()->get_state() == Session::SessionState::kDisconnected
+          || Session::get_instance()->get_state() == Session::SessionState::kInError)) {
     fw::Framework::get_instance()->exit();
   }
 }
@@ -97,9 +97,9 @@ bool MainMenuWindow::editor_clicked(Widget *w) {
 bool MainMenuWindow::quit_clicked(Widget *w) {
   exiting_ = true;
 
-  if (session::get_instance()->get_state() != game::session::disconnected) {
+  if (Session::get_instance()->get_state() != Session::SessionState::kDisconnected) {
     // if we're logged in, we want to log out before we quit
-    session::get_instance()->logout();
+    Session::get_instance()->logout();
     exiting_ = true;
 
     // make sure they don't try to click "quit" more than once...

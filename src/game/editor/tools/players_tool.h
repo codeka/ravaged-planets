@@ -15,7 +15,7 @@ class players_tool: public tool {
 private:
   players_tool_window *wnd_;
   std::shared_ptr<fw::Model> _marker;
-  int _player_no;
+  int player_no_;
 
   void on_key(std::string keyname, bool is_down);
 
@@ -31,7 +31,7 @@ public:
   // sets the current player_number we're editing the starting location for
   void set_curr_player(int player_no);
   int get_curr_player() const {
-    return _player_no;
+    return player_no_;
   }
 };
 

@@ -14,7 +14,7 @@
 namespace game {
 
 LocalPlayer::LocalPlayer() :
-    last_session_state_(session::disconnected), session_id_(0) {
+    last_session_state_(Session::SessionState::kDisconnected), session_id_(0) {
   // by default, our player# is 1, which is what we get if we're playing
   // a non-networked game, or if we're the Host of a networked game
   player_no_ = 1;
@@ -64,13 +64,13 @@ void LocalPlayer::world_loaded() {
 }
 
 void LocalPlayer::update() {
-  session::session_state curr_state = session::get_instance()->get_state();
+  Session::SessionState curr_state = Session::get_instance()->get_state();
   if (curr_state != last_session_state_) {
     switch (curr_state) {
-    case session::logged_in:
-      session_id_ = session::get_instance()->get_session_id();
-      user_id_ = session::get_instance()->get_user_id();
-      user_name_ = session::get_instance()->get_user_name();
+    case Session::SessionState::kLoggedIn:
+      session_id_ = Session::get_instance()->get_session_id();
+      user_id_ = Session::get_instance()->get_user_id();
+      user_name_ = Session::get_instance()->get_user_name();
       break;
     }
 
