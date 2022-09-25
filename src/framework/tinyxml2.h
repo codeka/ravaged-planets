@@ -159,12 +159,12 @@ public:
         COMMENT               = NEEDS_NEWLINE_NORMALIZATION
     };
 
-    StrPair() : _flags( 0 ), _start( 0 ), _end( 0 ) {}
+    StrPair() : _flags( 0 ), start_( 0 ), _end( 0 ) {}
     ~StrPair();
 
     void Set( char* start, char* end, int flags ) {
         Reset();
-        _start  = start;
+        start_  = start;
         _end    = end;
         _flags  = flags | NEEDS_FLUSH;
     }
@@ -172,12 +172,12 @@ public:
     const char* GetStr();
 
     bool Empty() const {
-        return _start == _end;
+        return start_ == _end;
     }
 
     void SetInternedStr( const char* str ) {
         Reset();
-        _start = const_cast<char*>(str);
+        start_ = const_cast<char*>(str);
     }
 
     void SetStr( const char* str, int flags=0 );
@@ -198,7 +198,7 @@ private:
 
     // After parsing, if *_end != 0, it can be set to zero.
     int     _flags;
-    char*   _start;
+    char*   start_;
     char*   _end;
 
     StrPair( const StrPair& other );  // not supported

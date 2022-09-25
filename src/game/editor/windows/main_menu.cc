@@ -65,7 +65,7 @@ void menu_item::on_attached_to_parent(Widget *parent) {
 
 MainMenuWindow *main_menu = nullptr;
 
-MainMenuWindow::MainMenuWindow() : wnd_(nullptr), _file_menu(nullptr), _tool_menu(nullptr) {
+MainMenuWindow::MainMenuWindow() : wnd_(nullptr), file_menu_(nullptr), tool_menu_(nullptr) {
 }
 
 MainMenuWindow::~MainMenuWindow() {
@@ -78,7 +78,7 @@ void MainMenuWindow::initialize() {
       << (Builder<menu_item>(px(50), px(0), px(50), px(20)) << Button::text("Tool")
           << Widget::click(std::bind(&MainMenuWindow::tool_menu_clicked, this, _1)));
 
-  _file_menu = Builder<Window>(px(0), px(20), px(100), px(80))
+  file_menu_ = Builder<Window>(px(0), px(20), px(100), px(80))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<menu_item>(px(0), px(0), px(100), px(20)) << Button::text("New")
           << Widget::click(std::bind(&MainMenuWindow::file_new_clicked, this, _1)))
@@ -89,7 +89,7 @@ void MainMenuWindow::initialize() {
       << (Builder<menu_item>(px(0), px(60), px(100), px(20)) << Button::text("Quit")
           << Widget::click(std::bind(&MainMenuWindow::file_quit_clicked, this, _1)));
 
-  _tool_menu = Builder<Window>(px(50), px(20), px(100), px(80))
+  tool_menu_ = Builder<Window>(px(50), px(20), px(100), px(80))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<menu_item>(px(0), px(0), px(100), px(20)) << Button::text("Heightfield")
           << Widget::click(std::bind(&MainMenuWindow::tool_clicked, this, _1, "heightfield")))
@@ -102,8 +102,8 @@ void MainMenuWindow::initialize() {
 
   fw::Framework *frmwrk = fw::Framework::get_instance();
   frmwrk->get_gui()->attach_widget(wnd_);
-  frmwrk->get_gui()->attach_widget(_file_menu);
-  frmwrk->get_gui()->attach_widget(_tool_menu);
+  frmwrk->get_gui()->attach_widget(file_menu_);
+  frmwrk->get_gui()->attach_widget(tool_menu_);
 
   frmwrk->get_gui()->sig_click.connect(std::bind(&MainMenuWindow::global_click_handler, this, _1, _2, _3));
 }
@@ -121,7 +121,7 @@ void MainMenuWindow::hide() {
  * of our menus (or you clicked on blank space) then we need to hide the menus.
  */
 void MainMenuWindow::global_click_handler(int button, bool is_down, fw::gui::Widget *w) {
-  std::vector<Window *> menus = {_file_menu, _tool_menu};
+  std::vector<Window *> menus = {file_menu_, tool_menu_};
   for(Window *menu : menus) {
     if (is_down && menu->is_visible() && !menu->is_child(w)) {
       menu->set_visible(false);
@@ -134,12 +134,12 @@ void MainMenuWindow::global_click_handler(int button, bool is_down, fw::gui::Wid
 }
 
 bool MainMenuWindow::file_menu_clicked(fw::gui::Widget *w) {
-  _file_menu->set_visible(true);
+  file_menu_->set_visible(true);
   return true;
 }
 
 bool MainMenuWindow::tool_menu_clicked(fw::gui::Widget *w) {
-  _tool_menu->set_visible(true);
+  tool_menu_->set_visible(true);
   return true;
 }
 
@@ -196,20 +196,20 @@ bool MainMenuWindow::map_screenshot_clicked(fw::gui::Widget *w) {
 // This is called when you click one of the "Tool" menu items. We figure out which
 // one you clicked on and switch to that tool as appropriate.
 bool MainMenuWindow::tool_clicked(fw::gui::Widget *w, std::string tool_name) {
-  editor_screen::get_instance()->set_active_tool(tool_name);
+  EditorScreen::get_instance()->set_active_tool(tool_name);
   return true;
 }
 
 //-------------------------------------------------------------------------
-statusbar_window *statusbar = nullptr;
+StatusbarWindow *statusbar = nullptr;
 
-statusbar_window::statusbar_window() : wnd_(nullptr) {
+StatusbarWindow::StatusbarWindow() : wnd_(nullptr) {
 }
 
-statusbar_window::~statusbar_window() {
+StatusbarWindow::~StatusbarWindow() {
 }
 
-void statusbar_window::initialize() {
+void StatusbarWindow::initialize() {
   wnd_ = Builder<Window>(px(0), sum(pct(100), px(-20)), pct(100), px(20)) << Window::background("frame")
       << Widget::visible(false)
       << (Builder<Label>(px(0), px(0), pct(100), pct(100)) << Widget::id(STATUS_MESSAGE_ID));
@@ -217,15 +217,15 @@ void statusbar_window::initialize() {
   frmwrk->get_gui()->attach_widget(wnd_);
 }
 
-void statusbar_window::show() {
+void StatusbarWindow::show() {
   wnd_->set_visible(true);
 }
 
-void statusbar_window::hide() {
+void StatusbarWindow::hide() {
   wnd_->set_visible(false);
 }
 
-void statusbar_window::set_message(std::string const &msg) {
+void StatusbarWindow::set_message(std::string const &msg) {
   wnd_->find<Label>(STATUS_MESSAGE_ID)->set_text(msg);
 }
 

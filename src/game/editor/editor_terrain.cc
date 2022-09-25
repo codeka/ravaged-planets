@@ -13,28 +13,28 @@ namespace ed {
 static const int splatt_width = 128;
 static const int splatt_height = 128;
 
-editor_terrain::editor_terrain() {
+EditorTerrain::EditorTerrain() {
 }
 
-editor_terrain::~editor_terrain() {
+EditorTerrain::~EditorTerrain() {
 }
 
-void editor_terrain::render(fw::sg::Scenegraph &Scenegraph) {
+void EditorTerrain::render(fw::sg::Scenegraph &scenegraph) {
   int num_baked = 0;
   {
-    std::unique_lock<std::mutex> lock(_patches_to_bake_mutex);
-    for(auto patch : _patches_to_bake) {
+    std::unique_lock<std::mutex> lock(patches_to_bake_mutex_);
+    for(auto patch : patches_to_bake_) {
       bake_patch(std::get<0>(patch), std::get<1>(patch));
       num_baked++;
     }
-    _patches_to_bake.clear();
+    patches_to_bake_.clear();
   }
 
-  Terrain::render(Scenegraph);
+  Terrain::render(scenegraph);
 }
 
 // set the height of the given vertex to the given value.
-void editor_terrain::set_vertex_height(int x, int z, float height) {
+void EditorTerrain::set_vertex_height(int x, int z, float height) {
   while (x < 0) {
     x += width_;
   }
@@ -53,8 +53,8 @@ void editor_terrain::set_vertex_height(int x, int z, float height) {
   auto this_patch = std::make_tuple(x / PATCH_SIZE, z / PATCH_SIZE);
   bool found = false;
 
-  std::unique_lock<std::mutex> lock(_patches_to_bake_mutex);
-  for(auto patch : _patches_to_bake) {
+  std::unique_lock<std::mutex> lock(patches_to_bake_mutex_);
+  for(auto patch : patches_to_bake_) {
     if (patch == this_patch) {
       found = true;
       break;
@@ -62,11 +62,11 @@ void editor_terrain::set_vertex_height(int x, int z, float height) {
   }
 
   if (!found) {
-    _patches_to_bake.push_back(this_patch);
+    patches_to_bake_.push_back(this_patch);
   }
 }
 
-void editor_terrain::initialize_splatt() {
+void EditorTerrain::initialize_splatt() {
   std::vector<uint32_t> buffer(splatt_width * splatt_height);
   for (int y = 0; y < splatt_height; y++) {
     for (int x = 0; x < splatt_width; x++) {
@@ -85,7 +85,7 @@ void editor_terrain::initialize_splatt() {
   }
 }
 
-void editor_terrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) {
+void EditorTerrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) {
   std::shared_ptr<fw::Texture> splatt = get_patch_splatt(patch_x, patch_z);
   if (splatt == std::shared_ptr<fw::Texture>()) {
     splatt = std::shared_ptr<fw::Texture>(new fw::Texture());
@@ -93,33 +93,33 @@ void editor_terrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp)
   }
 
   int index = get_patch_index(patch_x, patch_z);
-  while (static_cast<int>(_splatt_bitmaps.size()) <= index) {
+  while (static_cast<int>(splatt_bitmaps_.size()) <= index) {
     // we'll add the new bitmap to all of them, but they'll eventually
     // be replaced with the correct one (well, hopefully)
-    _splatt_bitmaps.push_back(bmp);
+    splatt_bitmaps_.push_back(bmp);
   }
 
-  _splatt_bitmaps[index] = bmp;
+  splatt_bitmaps_[index] = bmp;
   splatt->create(bmp);
 }
 
-fw::Bitmap &editor_terrain::get_splatt(int patch_x, int patch_z) {
+fw::Bitmap &EditorTerrain::get_splatt(int patch_x, int patch_z) {
   int index = get_patch_index(patch_x, patch_z);
-  return _splatt_bitmaps[index];
+  return splatt_bitmaps_[index];
 }
 
-int editor_terrain::get_num_layers() const {
+int EditorTerrain::get_num_layers() const {
   return layers_.size();
 }
 
-std::shared_ptr<fw::Bitmap> editor_terrain::get_layer(int number) {
-  if (number < 0 || number >= static_cast<int>(_layer_bitmaps.size()))
+std::shared_ptr<fw::Bitmap> EditorTerrain::get_layer(int number) {
+  if (number < 0 || number >= static_cast<int>(layer_bitmaps_.size()))
     return std::shared_ptr<fw::Bitmap>();
 
-  return _layer_bitmaps[number];
+  return layer_bitmaps_[number];
 }
 
-void editor_terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
+void EditorTerrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   if (number < 0)
     return;
 
@@ -128,19 +128,19 @@ void editor_terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
 
   if (number == static_cast<int>(layers_.size())) {
     // we need to add a new layer
-    _layer_bitmaps.push_back(bitmap);
+    layer_bitmaps_.push_back(bitmap);
     layers_.push_back(texture);
     return;
-  } else if (number > static_cast<int>(_layer_bitmaps.size())) {
+  } else if (number > static_cast<int>(layer_bitmaps_.size())) {
     // TODO: not supported yet
     return;
   }
 
-  _layer_bitmaps[number] = bitmap;
+  layer_bitmaps_[number] = bitmap;
   layers_[number] = texture;
 }
 
-void editor_terrain::build_collision_data(std::vector<bool> &vertices) {
+void EditorTerrain::build_collision_data(std::vector<bool> &vertices) {
   if (static_cast<int>(vertices.size()) < (width_ * length_)) {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("vertices vector is too small!"));
   }

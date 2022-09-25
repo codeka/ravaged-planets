@@ -7,16 +7,15 @@ class WorldFile;
 }
 
 namespace ed {
-class editor_world;
+class EditorWorld;
 
-/** This class writes all the information for a given world (map) into the given directory or .map file (which is
- * just a zipped version of the directory)
- */
-class world_writer {
+// This class writes all the information for a given world (map) into the given directory or .map file (which is
+// just a zipped version of the directory)
+class WorldWriter {
 private:
-  editor_world *world_;
+  EditorWorld *world_;
   std::string name_;
-  fw::Color _base_minimap_colors[4];
+  fw::Color base_minimap_colors_[4];
 
   fw::Color get_terrain_color(int x, int z);
   void calculate_base_minimap_colors();
@@ -27,8 +26,8 @@ private:
   void write_collision_data(game::WorldFile &wf);
 
 public:
-  world_writer(editor_world *wrld);
-  ~world_writer();
+  WorldWriter(EditorWorld *wrld);
+  ~WorldWriter();
 
   void write(std::string name);
 };

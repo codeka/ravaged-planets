@@ -15,29 +15,29 @@ using namespace std::placeholders;
 
 namespace ed {
 
-tool::tool(editor_world *wrld) :
-    world_(wrld), _terrain(nullptr), _editor(nullptr) {
+Tool::Tool(EditorWorld *wrld) :
+    world_(wrld), terrain_(nullptr), editor_(nullptr) {
 }
 
-tool::~tool() {
+Tool::~Tool() {
 }
 
-void tool::activate() {
+void Tool::activate() {
   game::Application *app = dynamic_cast<game::Application *>(fw::Framework::get_instance()->get_app());
-  _editor = dynamic_cast<editor_screen *>(app->get_screen_stack()->get_active_screen());
-  _terrain = dynamic_cast<editor_terrain *>(world_->get_terrain());
+  editor_ = dynamic_cast<EditorScreen *>(app->get_screen_stack()->get_active_screen());
+  terrain_ = dynamic_cast<EditorTerrain *>(world_->get_terrain());
 }
 
-void tool::deactivate() {
+void Tool::deactivate() {
   // Loop through the keybind tokens and unbind them all
   fw::Input *Input = fw::Framework::get_instance()->get_input();
-  std::for_each(_keybind_tokens.begin(), _keybind_tokens.end(), std::bind(&fw::Input::unbind_key, Input, _1));
+  std::for_each(keybind_tokens_.begin(), keybind_tokens_.end(), std::bind(&fw::Input::unbind_key, Input, _1));
 }
 
-void tool::update() {
+void Tool::update() {
 }
 
-void tool::render(fw::sg::Scenegraph &) {
+void Tool::render(fw::sg::Scenegraph &) {
 }
 
 // This is used by a number of of the tools for giving a basic indication of it's area of effect.
@@ -90,7 +90,7 @@ void draw_circle(fw::sg::Scenegraph &Scenegraph, game::Terrain *terrain, fw::Vec
 typedef std::map<std::string, create_tool_fn> tool_map;
 static tool_map *g_tools = nullptr;
 
-tool_factory_registrar::tool_factory_registrar(std::string const &name, create_tool_fn fn) {
+ToolFactoryRegistrar::ToolFactoryRegistrar(std::string const &name, create_tool_fn fn) {
   if (g_tools == 0) {
     g_tools = new tool_map();
   }
@@ -98,7 +98,7 @@ tool_factory_registrar::tool_factory_registrar(std::string const &name, create_t
   (*g_tools)[name] = fn;
 }
 
-tool *tool_factory::create_tool(std::string const &name, editor_world *world) {
+Tool *ToolFactory::create_tool(std::string const &name, EditorWorld *world) {
   if (g_tools == nullptr)
     return nullptr;
 

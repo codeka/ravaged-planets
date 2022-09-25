@@ -32,7 +32,7 @@ void Screen::render(fw::sg::Scenegraph &) {
 ScreenStack::ScreenStack() {
   screens_["title"] = new TitleScreen();
   screens_["game"] = new GameScreen();
-  screens_["editor"] = new ed::editor_screen();
+  screens_["editor"] = new ed::EditorScreen();
 }
 
 ScreenStack::~ScreenStack() {

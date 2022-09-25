@@ -2,7 +2,7 @@
 
 #include <game/editor/tools/tools.h>
 
-class texture_tool_window;
+class TextureToolWindow;
 
 namespace fw {
 namespace sg {
@@ -11,34 +11,34 @@ class Scenegraph;
 }
 
 namespace ed {
-class editor_world;
+class EditorWorld;
 
 /** This tool lets you draw the texture on the terrain. */
-class texture_tool: public tool {
+class TextureTool: public Tool {
 public:
   static float max_radius;
 
 private:
-  int _radius;
+  int radius_;
   int _layer;
-  texture_tool_window *wnd_;
+  TextureToolWindow *wnd_;
   bool _is_painting;
 
   void on_key(std::string keyname, bool is_down);
   uint32_t get_selected_splatt_mask();
 
 public:
-  texture_tool(editor_world *wrld);
-  virtual ~texture_tool();
+  TextureTool(EditorWorld *wrld);
+  virtual ~TextureTool();
 
   virtual void activate();
   virtual void deactivate();
 
-  void set_radius(int ParticleRotation) {
-    _radius = ParticleRotation;
+  void set_radius(int value) {
+    radius_ = value;
   }
   int get_radius() const {
-    return _radius;
+    return radius_;
   }
   void set_layer(int layer) {
     _layer = layer;
@@ -48,7 +48,7 @@ public:
   }
 
   virtual void update();
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
+  virtual void render(fw::sg::Scenegraph &scenegraph);
 };
 
 }

@@ -9,14 +9,14 @@ class bitmap;
 }
 
 namespace ed {
-class editor_screen;
+class EditorScreen;
 
 // Represents the main menu ("File", "Edit", and all that jazz)
 class MainMenuWindow {
 private:
   fw::gui::Window *wnd_;
-  fw::gui::Window *_file_menu;
-  fw::gui::Window *_tool_menu;
+  fw::gui::Window *file_menu_;
+  fw::gui::Window *tool_menu_;
 
   void global_click_handler(int button, bool is_down, fw::gui::Widget *w);
   bool file_menu_clicked(fw::gui::Widget *w);
@@ -40,12 +40,12 @@ public:
 };
 
 // represents the statusbar
-class statusbar_window {
+class StatusbarWindow {
 private:
   fw::gui::Window *wnd_;
 public:
-  statusbar_window();
-  ~statusbar_window();
+  StatusbarWindow();
+  ~StatusbarWindow();
 
   void initialize();
   void show();
@@ -55,6 +55,6 @@ public:
 };
 
 extern MainMenuWindow *main_menu;
-extern statusbar_window *statusbar;
+extern StatusbarWindow *statusbar;
 
 }

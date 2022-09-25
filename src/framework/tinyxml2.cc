@@ -79,27 +79,27 @@ void StrPair::TransferTo( StrPair* other )
     // ownership (as in auto_ptr).
 
     TIXMLASSERT( other->_flags == 0 );
-    TIXMLASSERT( other->_start == 0 );
+    TIXMLASSERT( other->start_ == 0 );
     TIXMLASSERT( other->_end == 0 );
 
     other->Reset();
 
     other->_flags = _flags;
-    other->_start = _start;
+    other->start_ = start_;
     other->_end = _end;
 
     _flags = 0;
-    _start = 0;
+    start_ = 0;
     _end = 0;
 }
 
 void StrPair::Reset()
 {
     if ( _flags & NEEDS_DELETE ) {
-        delete [] _start;
+        delete [] start_;
     }
     _flags = 0;
-    _start = 0;
+    start_ = 0;
     _end = 0;
 }
 
@@ -108,9 +108,9 @@ void StrPair::SetStr( const char* str, int flags )
 {
     Reset();
     size_t len = strlen( str );
-    _start = new char[ len+1 ];
-    memcpy( _start, str, len+1 );
-    _end = _start + len;
+    start_ = new char[ len+1 ];
+    memcpy( start_, str, len+1 );
+    _end = start_ + len;
     _flags = flags | NEEDS_DELETE;
 }
 
@@ -160,11 +160,11 @@ void StrPair::CollapseWhitespace()
     // Adjusting _start would cause undefined behavior on delete[]
     TIXMLASSERT( ( _flags & NEEDS_DELETE ) == 0 );
     // Trim leading space.
-    _start = XMLUtil::SkipWhiteSpace( _start );
+    start_ = XMLUtil::SkipWhiteSpace( start_ );
 
-    if ( *_start ) {
-        char* p = _start; // the read pointer
-        char* q = _start; // the write pointer
+    if ( *start_ ) {
+        char* p = start_; // the read pointer
+        char* q = start_; // the write pointer
 
         while( *p ) {
             if ( XMLUtil::IsWhiteSpace( *p )) {
@@ -186,15 +186,15 @@ void StrPair::CollapseWhitespace()
 
 const char* StrPair::GetStr()
 {
-    TIXMLASSERT( _start );
+    TIXMLASSERT( start_ );
     TIXMLASSERT( _end );
     if ( _flags & NEEDS_FLUSH ) {
         *_end = 0;
         _flags ^= NEEDS_FLUSH;
 
         if ( _flags ) {
-            char* p = _start; // the read pointer
-            char* q = _start; // the write pointer
+            char* p = start_; // the read pointer
+            char* q = start_; // the write pointer
 
             while( p < _end ) {
                 if ( (_flags & NEEDS_NEWLINE_NORMALIZATION) && *p == CR ) {
@@ -277,8 +277,8 @@ const char* StrPair::GetStr()
         }
         _flags = (_flags & NEEDS_DELETE);
     }
-    TIXMLASSERT( _start );
-    return _start;
+    TIXMLASSERT( start_ );
+    return start_;
 }
 
 

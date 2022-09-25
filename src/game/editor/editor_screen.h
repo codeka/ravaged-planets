@@ -3,18 +3,18 @@
 #include <game/screens/screen.h>
 
 namespace ed {
-class tool;
-class editor_terrain;
-class editor_world;
+class Tool;
+class EditorTerrain;
+class EditorWorld;
 
-class editor_screen: public game::Screen {
+class EditorScreen: public game::Screen {
 private:
-  tool *_tool;
-  editor_world *world_;
+  Tool *tool_;
+  EditorWorld *world_;
 
 public:
-  editor_screen();
-  virtual ~editor_screen();
+  EditorScreen();
+  virtual ~EditorScreen();
 
   virtual void show();
   virtual void hide();
@@ -23,7 +23,7 @@ public:
   virtual void update();
 
   // renders this Screen, this is only called if we're the active Screen
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
+  virtual void render(fw::sg::Scenegraph &scenegraph);
 
   // create a new map to edit
   void new_map(int width, int height);
@@ -31,13 +31,13 @@ public:
   // load an existing map to edit
   void open_map(std::string const &name);
 
-  tool *get_active_tool() {
-    return _tool;
+  Tool *get_active_tool() {
+    return tool_;
   }
   void set_active_tool(std::string const &name);
 
   // This is just a helper that returns the current editor_screen instance
-  static editor_screen *get_instance();
+  static EditorScreen *get_instance();
 };
 
 }

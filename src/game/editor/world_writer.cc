@@ -17,14 +17,14 @@
 
 namespace ed {
 
-world_writer::world_writer(editor_world *wrld) :
+WorldWriter::WorldWriter(EditorWorld *wrld) :
     world_(wrld) {
 }
 
-world_writer::~world_writer() {
+WorldWriter::~WorldWriter() {
 }
 
-void world_writer::write(std::string name) {
+void WorldWriter::write(std::string name) {
   name_ = name;
 
   game::WorldVfs vfs;
@@ -42,8 +42,8 @@ void world_writer::write(std::string name) {
   }
 }
 
-void world_writer::write_terrain(game::WorldFile &wf) {
-  editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
+void WorldWriter::write_terrain(game::WorldFile &wf) {
+  EditorTerrain *trn = dynamic_cast<EditorTerrain *>(world_->get_terrain());
   int version = 1;
   int trn_width = trn->get_width();
   int trn_length = trn->get_length();
@@ -65,7 +65,7 @@ void world_writer::write_terrain(game::WorldFile &wf) {
   }
 }
 
-void world_writer::write_mapdesc(game::WorldFile &wf) {
+void WorldWriter::write_mapdesc(game::WorldFile &wf) {
   game::WorldFileEntry wfe = wf.get_entry(name_ + ".mapdesc", true /* for_write */);
   wfe.write("<mapdesc version=\"1\">");
   wfe.write((boost::format("  <description>%1%</description>") % world_->get_description()).str());
@@ -84,7 +84,7 @@ void world_writer::write_mapdesc(game::WorldFile &wf) {
 // The minimap background consist of basically one pixel per vertex. We calculate the color
 // of the pixel as a combination of the height of the terrain at that point and the texture that
 // is displayed on the terrain at that point (so "high" and "grass" would be a Light green, etc)
-void world_writer::write_minimap_background(game::WorldFile &wf) {
+void WorldWriter::write_minimap_background(game::WorldFile &wf) {
   game::Terrain *trn = world_->get_terrain();
   int width = trn->get_width();
   int height = trn->get_length();
@@ -141,11 +141,11 @@ void world_writer::write_minimap_background(game::WorldFile &wf) {
 }
 
 // gets the basic color of the terrain at the given (x,z) location
-fw::Color world_writer::get_terrain_color(int x, int z) {
+fw::Color WorldWriter::get_terrain_color(int x, int z) {
   int patch_x = static_cast<int>(static_cast<float>(x) / game::Terrain::PATCH_SIZE);
   int patch_z = static_cast<int>(static_cast<float>(z) / game::Terrain::PATCH_SIZE);
 
-  editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
+  EditorTerrain *trn = dynamic_cast<EditorTerrain *>(world_->get_terrain());
   fw::Bitmap &bmp = trn->get_splatt(patch_x, patch_z);
 
   // centre_u and centre_v are the texture coordinates (in the range [0..1])
@@ -161,27 +161,27 @@ fw::Color world_writer::get_terrain_color(int x, int z) {
   fw::Color splatt_color = bmp.get_pixel(centre_x, centre_y);
 
   fw::Color final_color(0, 0, 0);
-  final_color += _base_minimap_colors[0] * splatt_color.a;
-  final_color += _base_minimap_colors[1] * splatt_color.r;
-  final_color += _base_minimap_colors[2] * splatt_color.g;
-  final_color += _base_minimap_colors[3] * splatt_color.b;
+  final_color += base_minimap_colors_[0] * splatt_color.a;
+  final_color += base_minimap_colors_[1] * splatt_color.r;
+  final_color += base_minimap_colors_[2] * splatt_color.g;
+  final_color += base_minimap_colors_[3] * splatt_color.b;
   final_color.a = 1.0f;
 
   return final_color;
 }
 
-void world_writer::calculate_base_minimap_colors() {
-  editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
+void WorldWriter::calculate_base_minimap_colors() {
+  EditorTerrain *trn = dynamic_cast<EditorTerrain *>(world_->get_terrain());
   for (int i = 0; i < 4; i++) {
      // Use the average color of this layer
     std::shared_ptr<fw::Bitmap> layer_bmp = trn->get_layer(i);
-    _base_minimap_colors[i] = layer_bmp->get_dominant_color();
-    fw::debug << "base minimap color [" << i << "] = " << _base_minimap_colors[i] << std::endl;
+    base_minimap_colors_[i] = layer_bmp->get_dominant_color();
+    fw::debug << "base minimap color [" << i << "] = " << base_minimap_colors_[i] << std::endl;
   }
 }
 
-void world_writer::write_collision_data(game::WorldFile &wf) {
-  editor_terrain *trn = dynamic_cast<editor_terrain *>(world_->get_terrain());
+void WorldWriter::write_collision_data(game::WorldFile &wf) {
+  EditorTerrain *trn = dynamic_cast<EditorTerrain *>(world_->get_terrain());
   int width = trn->get_width();
   int length = trn->get_length();
 

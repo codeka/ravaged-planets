@@ -30,9 +30,9 @@ enum widget_ids {
   PLAYER_LIST_ID
 };
 
-class players_tool_window {
+class PlayersToolWindow {
 private:
-  ed::players_tool *_tool;
+  ed::PlayersTool *tool_;
   Window *wnd_;
 
   void selection_changed(int index);
@@ -40,52 +40,52 @@ private:
 
   void refresh_player_list();
 public:
-  players_tool_window(ed::players_tool *tool);
-  ~players_tool_window();
+  PlayersToolWindow(ed::PlayersTool *Tool);
+  ~PlayersToolWindow();
 
   void show();
   void hide();
 };
 
-players_tool_window::players_tool_window(ed::players_tool *tool) : _tool(tool) {
+PlayersToolWindow::PlayersToolWindow(ed::PlayersTool *Tool) : tool_(Tool) {
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(200)) << Window::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Num players:"))
       << (Builder<TextEdit>(px(4), px(26), sum(pct(100), px(-8)), px(20))
           << TextEdit::text("4") << Widget::id(NUM_PLAYERS_ID))
       << (Builder<Button>(px(4), px(54), sum(pct(100), px(-8)), px(20)) << Button::text("Update")
-          << Widget::click(std::bind(&players_tool_window::num_players_updated_click, this, _1)))
+          << Widget::click(std::bind(&PlayersToolWindow::num_players_updated_click, this, _1)))
       << (Builder<Label>(px(4), px(80), sum(pct(100), px(-8)), px(1)) << Label::background("filler"))
       << (Builder<Listbox>(px(4), px(88), sum(pct(100), px(-8)), px(108)) << Widget::id(PLAYER_LIST_ID)
-          << Listbox::item_selected(std::bind(&players_tool_window::selection_changed, this, _1)));
+          << Listbox::item_selected(std::bind(&PlayersToolWindow::selection_changed, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
-players_tool_window::~players_tool_window() {
+PlayersToolWindow::~PlayersToolWindow() {
   fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void players_tool_window::refresh_player_list() {
+void PlayersToolWindow::refresh_player_list() {
   Listbox *lb = wnd_->find<Listbox>(PLAYER_LIST_ID);
   lb->clear();
-  for (int i = 0; i < _tool->get_world()->get_player_starts().size(); i++) {
+  for (int i = 0; i < tool_->get_world()->get_player_starts().size(); i++) {
     lb->add_item(Builder<Label>(px(4), px(0), pct(100), px(20))
         << Label::text("Player " + boost::lexical_cast<std::string>(i + 1)));
   }
 }
 
-void players_tool_window::show() {
+void PlayersToolWindow::show() {
   wnd_->set_visible(true);
   refresh_player_list();
 }
 
-void players_tool_window::hide() {
+void PlayersToolWindow::hide() {
   wnd_->set_visible(false);
 }
 
-bool players_tool_window::num_players_updated_click(fw::gui::Widget *w) {
+bool PlayersToolWindow::num_players_updated_click(fw::gui::Widget *w) {
   TextEdit *te = wnd_->find<TextEdit>(NUM_PLAYERS_ID);
   int num_players = boost::lexical_cast<int>(te->get_text());
-  std::map<int, fw::Vector> &player_starts = _tool->get_world()->get_player_starts();
+  std::map<int, fw::Vector> &player_starts = tool_->get_world()->get_player_starts();
   if (player_starts.size() < num_players) {
     for (int i = player_starts.size(); i < num_players; i++) {
       player_starts[i + 1] = fw::Vector(0, 0, 0);
@@ -98,37 +98,37 @@ bool players_tool_window::num_players_updated_click(fw::gui::Widget *w) {
 }
 
 
-void players_tool_window::selection_changed(int index) {
-  _tool->set_curr_player(index + 1);
+void PlayersToolWindow::selection_changed(int index) {
+  tool_->set_curr_player(index + 1);
 }
 
 namespace ed {
-REGISTER_TOOL("players", players_tool);
+REGISTER_TOOL("players", PlayersTool);
 
-players_tool::players_tool(editor_world *wrld) : wnd_(nullptr), player_no_(1), tool(wrld) {
-  wnd_ = new players_tool_window(this);
-  _marker = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
+PlayersTool::PlayersTool(EditorWorld *wrld) : wnd_(nullptr), player_no_(1), Tool(wrld) {
+  wnd_ = new PlayersToolWindow(this);
+  marker_ = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
 }
 
-players_tool::~players_tool() {
+PlayersTool::~PlayersTool() {
   delete wnd_;
 }
 
-void players_tool::activate() {
-  tool::activate();
+void PlayersTool::activate() {
+  Tool::activate();
   wnd_->show();
 
   fw::Input *inp = fw::Framework::get_instance()->get_input();
-  _keybind_tokens.push_back(
-      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&players_tool::on_key, this, _1, _2))));
+  keybind_tokens_.push_back(
+      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&PlayersTool::on_key, this, _1, _2))));
 }
 
-void players_tool::deactivate() {
-  tool::deactivate();
+void PlayersTool::deactivate() {
+  Tool::deactivate();
   wnd_->hide();
 }
 
-void players_tool::render(fw::sg::Scenegraph &Scenegraph) {
+void PlayersTool::render(fw::sg::Scenegraph &Scenegraph) {
   if (player_no_ <= 0)
     return;
 
@@ -142,15 +142,15 @@ void players_tool::render(fw::sg::Scenegraph &Scenegraph) {
   // otherwise, render the marker at the given location
   fw::Matrix loc(fw::translation(it->second));
 
-  _marker->set_color(fw::Color(0.75f, 0.0f, 1.0f, 0.0f));
-  _marker->render(Scenegraph, loc);
+  marker_->set_color(fw::Color(0.75f, 0.0f, 1.0f, 0.0f));
+  marker_->render(Scenegraph, loc);
 }
 
-void players_tool::set_curr_player(int player_no) {
+void PlayersTool::set_curr_player(int player_no) {
   player_no_ = player_no;
 }
 
-void players_tool::on_key(std::string keyname, bool is_down) {
+void PlayersTool::on_key(std::string keyname, bool is_down) {
   if (keyname == "Left-Mouse" && !is_down) {
     if (player_no_ <= 0) {
       return;
@@ -162,7 +162,7 @@ void players_tool::on_key(std::string keyname, bool is_down) {
       return;
     }
 
-    it->second = _terrain->get_cursor_location();
+    it->second = terrain_->get_cursor_location();
   }
 }
 

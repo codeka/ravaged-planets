@@ -31,9 +31,9 @@ enum IDS {
 };
 
 //-----------------------------------------------------------------------------
-class texture_tool_window {
+class TextureToolWindow {
 private:
-  ed::texture_tool *_tool;
+  ed::TextureTool *tool_;
   Window *wnd_;
 
   void on_radius_updated(int new_radius);
@@ -41,109 +41,109 @@ private:
   void refresh_texture_icon(fw::gui::Window *wnd, int layer_num);
 
 public:
-  texture_tool_window(ed::texture_tool *tool);
-  virtual ~texture_tool_window();
+  TextureToolWindow(ed::TextureTool *tool);
+  virtual ~TextureToolWindow();
 
   void show();
   void hide();
 };
 
-texture_tool_window::texture_tool_window(ed::texture_tool *tool) : _tool(tool) {
+TextureToolWindow::TextureToolWindow(ed::TextureTool *tool) : tool_(tool) {
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(262)) << Window::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
       << (Builder<Slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
-          << Slider::limits(10, 100) << Slider::on_update(std::bind(&texture_tool_window::on_radius_updated, this, _1))
+          << Slider::limits(10, 100) << Slider::on_update(std::bind(&TextureToolWindow::on_radius_updated, this, _1))
           << Slider::ParticleRotation(40))
       << (Builder<Listbox>(px(4), px(48), sum(pct(100), px(-8)), px(80)) << Widget::id(TEXTURES_ID)
-          << Listbox::item_selected(std::bind(&texture_tool_window::on_texture_selected, this, _1)))
+          << Listbox::item_selected(std::bind(&TextureToolWindow::on_texture_selected, this, _1)))
       << (Builder<Label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << Widget::id(TEXTURE_PREVIEW_ID))
       << (Builder<Button>(px(4), px(228), sum(pct(100), px(-8)), px(30)) << Button::text("Change"));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
-texture_tool_window::~texture_tool_window() {
+TextureToolWindow::~TextureToolWindow() {
   fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void texture_tool_window::show() {
+void TextureToolWindow::show() {
   wnd_->set_visible(true);
 
   Listbox *lbx = wnd_->find<Listbox>(TEXTURES_ID);
   lbx->clear();
-  for (int i = 0; i < _tool->get_terrain()->get_num_layers(); i++) {
-    fs::path filename = _tool->get_terrain()->get_layer(i)->get_filename();
+  for (int i = 0; i < tool_->get_terrain()->get_num_layers(); i++) {
+    fs::path filename = tool_->get_terrain()->get_layer(i)->get_filename();
     lbx->add_item(Builder<Label>(px(0), px(0), pct(100), px(18)) << Label::text(filename.stem().string()));
   }
   lbx->select_item(0);
 }
 
-void texture_tool_window::hide() {
+void TextureToolWindow::hide() {
   wnd_->set_visible(false);
 }
 
-void texture_tool_window::on_texture_selected(int index) {
+void TextureToolWindow::on_texture_selected(int index) {
   std::shared_ptr<fw::Texture> layer(new fw::Texture());
-  layer->create(_tool->get_terrain()->get_layer(index));
+  layer->create(tool_->get_terrain()->get_layer(index));
 
   std::shared_ptr<Drawable> drawable =
       fw::Framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
         layer, 0, 0, layer->get_width(), layer->get_height());
   wnd_->find<Label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
-  _tool->set_layer(index);
+  tool_->set_layer(index);
 }
 
-void texture_tool_window::on_radius_updated(int ParticleRotation) {
-  int radius = ParticleRotation / 10;
-  _tool->set_radius(radius);
+void TextureToolWindow::on_radius_updated(int value) {
+  int radius = value / 10;
+  tool_->set_radius(radius);
 }
 
 // refreshes the icon of the given window which represents the given
 // terrain texture layer
-void texture_tool_window::refresh_texture_icon(fw::gui::Window *wnd, int layer_num) {
+void TextureToolWindow::refresh_texture_icon(fw::gui::Window *wnd, int layer_num) {
 }
 
 namespace ed {
-REGISTER_TOOL("texture", texture_tool);
+REGISTER_TOOL("texture", TextureTool);
 
-float texture_tool::max_radius = 10;
+float TextureTool::max_radius = 10;
 
-texture_tool::texture_tool(editor_world *wrld) :
-    tool(wrld), _radius(4), _is_painting(false), _layer(0) {
-  wnd_ = new texture_tool_window(this);
+TextureTool::TextureTool(EditorWorld *wrld) :
+    Tool(wrld), radius_(4), _is_painting(false), _layer(0) {
+  wnd_ = new TextureToolWindow(this);
 }
 
-texture_tool::~texture_tool() {
+TextureTool::~TextureTool() {
   delete wnd_;
 }
 
-void texture_tool::activate() {
-  tool::activate();
+void TextureTool::activate() {
+  Tool::activate();
 
   fw::Input *inp = fw::Framework::get_instance()->get_input();
-  _keybind_tokens.push_back(
-      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&texture_tool::on_key, this, _1, _2))));
+  keybind_tokens_.push_back(
+      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&TextureTool::on_key, this, _1, _2))));
 
   wnd_->show();
 }
 
-void texture_tool::deactivate() {
-  tool::deactivate();
+void TextureTool::deactivate() {
+  Tool::deactivate();
 
   wnd_->hide();
 }
 
-void texture_tool::update() {
-  tool::update();
+void TextureTool::update() {
+  Tool::update();
 
   if (_is_painting) {
-    fw::Vector cursor_loc = _terrain->get_cursor_location();
+    fw::Vector cursor_loc = terrain_->get_cursor_location();
 
     // patch_x and patch_z are the patch number(s) we're inside of
     int patch_x = static_cast<int>(cursor_loc[0] / game::Terrain::PATCH_SIZE);
     int patch_z = static_cast<int>(cursor_loc[2] / game::Terrain::PATCH_SIZE);
 
     // get the splatt texture at the current cursor location
-    fw::Bitmap &splatt = _terrain->get_splatt(patch_x, patch_z);
+    fw::Bitmap &splatt = terrain_->get_splatt(patch_x, patch_z);
 
     // scale_x and scale_y represent the number of pixels in the splatt texture
     // per game unit of the terrain
@@ -168,15 +168,15 @@ void texture_tool::update() {
     std::vector<uint32_t> data = splatt.get_pixels();
 
     uint32_t new_value = get_selected_splatt_mask();
-    for (int y = centre_y - static_cast<int>(_radius * scale_y); y <= centre_y + static_cast<int>(_radius * scale_y);
+    for (int y = centre_y - static_cast<int>(radius_ * scale_y); y <= centre_y + static_cast<int>(radius_ * scale_y);
         y++) {
-      for (int x = centre_x - static_cast<int>(_radius * scale_x); x <= centre_x + static_cast<int>(_radius * scale_x);
+      for (int x = centre_x - static_cast<int>(radius_ * scale_x); x <= centre_x + static_cast<int>(radius_ * scale_x);
           x++) {
         if (y < 0 || x < 0 || y >= splatt.get_height() || x >= splatt.get_width())
           continue;
 
         fw::Vector v(static_cast<float>(x), static_cast<float>(y), 0.0f);
-        if ((v - center).length() > (_radius * scale_x))
+        if ((v - center).length() > (radius_ * scale_x))
           continue;
 
         data[(y * splatt.get_width()) + x] = new_value;
@@ -185,22 +185,22 @@ void texture_tool::update() {
 
     splatt.set_pixels(data);
     fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
-      _terrain->set_splatt(patch_x, patch_z, splatt);
+      terrain_->set_splatt(patch_x, patch_z, splatt);
     });
   }
 }
 
-void texture_tool::render(fw::sg::Scenegraph &Scenegraph) {
-  draw_circle(Scenegraph, _terrain, _terrain->get_cursor_location(), (float) _radius);
+void TextureTool::render(fw::sg::Scenegraph &scenegraph) {
+  draw_circle(scenegraph, terrain_, terrain_->get_cursor_location(), (float) radius_);
 }
 
-void texture_tool::on_key(std::string keyname, bool is_down) {
+void TextureTool::on_key(std::string keyname, bool is_down) {
   if (keyname == "Left-Mouse") {
     _is_painting = is_down;
   }
 }
 
-uint32_t texture_tool::get_selected_splatt_mask() {
+uint32_t TextureTool::get_selected_splatt_mask() {
   switch (_layer) {
   case 0:
     return 0x000000FF;

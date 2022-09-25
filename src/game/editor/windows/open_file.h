@@ -14,13 +14,12 @@ class Window;
 }
 
 namespace ed {
-/**
- * A generic "open file" dialog, which lets us open whatever file we want to open, though with a
- * particular focus on opening images.
- */
-class open_file_window {
+
+// A generic "open file" dialog, which lets us open whatever file we want to open, though with a
+// particular focus on opening images.
+class OpenFileWindow {
 public:
-  typedef std::function<void(open_file_window *)> file_selected_handler;
+  typedef std::function<void(OpenFileWindow *)> file_selected_handler;
 
 private:
   fw::gui::Window *wnd_;
@@ -40,8 +39,8 @@ private:
   void add_row(fw::gui::Listbox *lbx, std::string const &name);
 
 public:
-  open_file_window();
-  ~open_file_window();
+  OpenFileWindow();
+  ~OpenFileWindow();
 
   void initialize();
   void show(file_selected_handler fn);
@@ -50,5 +49,5 @@ public:
   boost::filesystem::path get_selected_file() const;
 };
 
-extern open_file_window *open_file;
+extern OpenFileWindow *open_file;
 }

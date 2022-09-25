@@ -13,37 +13,37 @@ class Terrain;
 
 // Use this macro to register a tool with the tool_factory
 #define REGISTER_TOOL(name, type) \
-  tool *create_ ## type (editor_world *wrld) { return new type(wrld); } \
-  tool_factory_registrar reg_create_ ## type(name, create_ ## type)
+  Tool *create_ ## type (EditorWorld *wrld) { return new type(wrld); } \
+  ToolFactoryRegistrar reg_create_ ## type(name, create_ ## type)
 
 namespace ed {
-class editor_screen;
-class editor_terrain;
+class EditorScreen;
+class EditorTerrain;
 class editor_application;
-class editor_world;
+class EditorWorld;
 
 // this is the base class for the editor tools. one tool is active at
 // a time, and interacts in some way with the environment. it can also
 // put up various bits of UI for controlling it, etc.
-class tool {
+class Tool {
 protected:
-  editor_world *world_;
-  editor_terrain *_terrain;
-  editor_screen *_editor;
+  EditorWorld *world_;
+  EditorTerrain *terrain_;
+  EditorScreen *editor_;
 
   // for each key you bind in your tool's activate() method, you should add
   // the bind token to this list. We'll unbind it automatically when deactive()
   // is called.
-  std::vector<int> _keybind_tokens;
+  std::vector<int> keybind_tokens_;
 
 public:
-  tool(editor_world *wrld);
-  virtual ~tool();
+  Tool(EditorWorld *wrld);
+  virtual ~Tool();
 
-  editor_terrain *get_terrain() const {
-    return _terrain;
+  EditorTerrain *get_terrain() const {
+    return terrain_;
   }
-  editor_world *get_world() const {
+  EditorWorld *get_world() const {
     return world_;
   }
 
@@ -55,20 +55,20 @@ public:
   virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
-typedef tool *(*create_tool_fn)(editor_world *wrld);
+typedef Tool *(*create_tool_fn)(EditorWorld *wrld);
 
 // This class is used by the REGISTER_TOOL macro to register a tool
 // at Application startup.
-class tool_factory_registrar {
+class ToolFactoryRegistrar {
 public:
-  tool_factory_registrar(std::string const &name, create_tool_fn fn);
+  ToolFactoryRegistrar(std::string const &name, create_tool_fn fn);
 };
 
 // This class contains all of the tool definitions that were registered via the
 // REGISTER_TOOL macro and allows you to create instances of the tool at runtime
-class tool_factory {
+class ToolFactory {
 public:
-  static tool *create_tool(std::string const &name, editor_world *world);
+  static Tool *create_tool(std::string const &name, EditorWorld *world);
 };
 
 // draws a circle, centred at the given point, with the given radius. The circle will be

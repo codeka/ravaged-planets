@@ -12,7 +12,7 @@ class bitmap;
 
 namespace ed {
 
-class save_map_window {
+class SaveMapWindow {
 private:
   fw::gui::Window *wnd_;
 
@@ -24,14 +24,14 @@ private:
   void update_screenshot();
 
 public:
-  save_map_window();
-  virtual ~save_map_window();
+  SaveMapWindow();
+  virtual ~SaveMapWindow();
 
   void initialize();
   void show();
   void hide();
 };
 
-extern save_map_window *save_map;
+extern SaveMapWindow *save_map;
 
 }

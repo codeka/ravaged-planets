@@ -6,22 +6,21 @@ namespace fw {
 class Model;
 }
 
-class players_tool_window;
+class PlayersToolWindow;
 
 namespace ed {
-class world;
 
-class players_tool: public tool {
+class PlayersTool: public Tool {
 private:
-  players_tool_window *wnd_;
-  std::shared_ptr<fw::Model> _marker;
+  PlayersToolWindow *wnd_;
+  std::shared_ptr<fw::Model> marker_;
   int player_no_;
 
   void on_key(std::string keyname, bool is_down);
 
 public:
-  players_tool(editor_world *wrld);
-  virtual ~players_tool();
+  PlayersTool(EditorWorld *wrld);
+  virtual ~PlayersTool();
 
   virtual void activate();
   virtual void deactivate();

@@ -12,21 +12,21 @@ class texture;
 
 namespace ed {
 
-// this subclass of game::terrain allows us to edit the actual heightfield data, textures, and so on.
-class editor_terrain: public game::Terrain {
+// this subclass of game::Terrain allows us to edit the actual heightfield data, textures, and so on.
+class EditorTerrain: public game::Terrain {
 private:
-  std::mutex _patches_to_bake_mutex;
-  std::vector<std::tuple<int, int>> _patches_to_bake;
+  std::mutex patches_to_bake_mutex_;
+  std::vector<std::tuple<int, int>> patches_to_bake_;
 
   // we keep a separate vector of the splatt bitmaps for easy editing
-  std::vector<fw::Bitmap> _splatt_bitmaps;
+  std::vector<fw::Bitmap> splatt_bitmaps_;
 
   // We also keep a separate vector of the layer bitmaps
-  std::vector<std::shared_ptr<fw::Bitmap>> _layer_bitmaps;
+  std::vector<std::shared_ptr<fw::Bitmap>> layer_bitmaps_;
 
 public:
-  editor_terrain();
-  virtual ~editor_terrain();
+  EditorTerrain();
+  virtual ~EditorTerrain();
 
   // set a new height for the given vertex
   void set_vertex_height(int x, int y, float height);
@@ -52,7 +52,7 @@ public:
   // holds a single boolean flag - true means "passable", false means "impassable"
   void build_collision_data(std::vector<bool> &vertices);
 
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
+  virtual void render(fw::sg::Scenegraph &scenegraph);
 };
 
 }

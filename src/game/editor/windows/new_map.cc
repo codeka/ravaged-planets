@@ -22,18 +22,18 @@ namespace ed {
 using namespace fw::gui;
 using namespace std::placeholders;
 
-new_map_window *new_map = nullptr;
+NewMapWindow *new_map = nullptr;
 
 static const int WIDTH_ID = 1;
 static const int HEIGHT_ID = 2;
 
-new_map_window::new_map_window() : wnd_(nullptr) {
+NewMapWindow::NewMapWindow() : wnd_(nullptr) {
 }
 
-new_map_window::~new_map_window() {
+NewMapWindow::~NewMapWindow() {
 }
 
-void new_map_window::initialize() {
+void NewMapWindow::initialize() {
   wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-100)), px(200), px(100))
           << Window::background("frame") << Widget::visible(false)
       << (Builder<Label>(px(10), px(10), sum(pct(100), px(-20)), px(18)) << Label::text("Size:"))
@@ -43,21 +43,21 @@ void new_map_window::initialize() {
       << (Builder<TextEdit>(sum(pct(50), px(10)), px(30), sum(pct(50), px(-20)), px(20))
           << TextEdit::text("4") << Widget::id(HEIGHT_ID))
       << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Create")
-          << Widget::click(std::bind(&new_map_window::ok_clicked, this, _1)))
+          << Widget::click(std::bind(&NewMapWindow::ok_clicked, this, _1)))
       << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Cancel")
-          << Widget::click(std::bind(&new_map_window::cancel_clicked, this, _1)));
+          << Widget::click(std::bind(&NewMapWindow::cancel_clicked, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
-void new_map_window::show() {
+void NewMapWindow::show() {
   wnd_->set_visible(true);
 }
 
-void new_map_window::hide() {
+void NewMapWindow::hide() {
   wnd_->set_visible(false);
 }
 
-bool new_map_window::ok_clicked(Widget *w) {
+bool NewMapWindow::ok_clicked(Widget *w) {
   wnd_->set_visible(false);
 
   int width;
@@ -70,11 +70,11 @@ bool new_map_window::ok_clicked(Widget *w) {
     return true;
   }
 
-  editor_screen::get_instance()->new_map(width * game::Terrain::PATCH_SIZE, width * game::Terrain::PATCH_SIZE);
+  EditorScreen::get_instance()->new_map(width * game::Terrain::PATCH_SIZE, width * game::Terrain::PATCH_SIZE);
   return true;
 }
 
-bool new_map_window::cancel_clicked(Widget *w) {
+bool NewMapWindow::cancel_clicked(Widget *w) {
   wnd_->set_visible(false);
   return true;
 }

@@ -9,15 +9,15 @@
 
 namespace ed {
     
-world_create::world_create() {
+WorldCreate::WorldCreate() {
 }
 
-world_create::world_create(int width, int height) {
+WorldCreate::WorldCreate(int width, int height) {
   terrain_ = create_terrain(width, height);
 }
 
-game::Terrain *world_create::create_terrain(int width, int length) {
-  editor_terrain *et = new editor_terrain();
+game::Terrain *WorldCreate::create_terrain(int width, int length) {
+  EditorTerrain *et = new EditorTerrain();
   et->create(width, length);
   et->initialize_splatt();
   return et;
@@ -25,18 +25,18 @@ game::Terrain *world_create::create_terrain(int width, int length) {
 
 //-------------------------------------------------------------------------
 
-editor_world::editor_world(std::shared_ptr<game::WorldReader> reader) :
+EditorWorld::EditorWorld(std::shared_ptr<game::WorldReader> reader) :
     World(reader) {
 }
 
-editor_world::~editor_world() {
+EditorWorld::~EditorWorld() {
 }
 
-void editor_world::initialize_entities() {
+void EditorWorld::initialize_entities() {
   // no entities!
 }
 
-void editor_world::initialize_pathing() {
+void EditorWorld::initialize_pathing() {
   // no pathing
 }
 

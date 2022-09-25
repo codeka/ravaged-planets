@@ -16,14 +16,14 @@ int FLAG_NONE = 0;
 // if set, this means out stop() method has been called and the worker thread is to stop
 int FLAG_STOP = 1;
 
-pathing_thread::pathing_thread() : _terrain(nullptr) {
+pathing_thread::pathing_thread() : terrain_(nullptr) {
 }
 
 void pathing_thread::start() {
   // initialize the pather with the current world's map
-  _terrain = game::World::get_instance()->get_terrain();
+  terrain_ = game::World::get_instance()->get_terrain();
   std::shared_ptr<fw::PathFfind> pf(
-      new fw::PathFfind(_terrain->get_width(), _terrain->get_length(), _terrain->get_collision_data()));
+      new fw::PathFfind(terrain_->get_width(), terrain_->get_length(), terrain_->get_collision_data()));
   _pather = pf;
 
   // start the thread that will simply wait for jobs to arrive and

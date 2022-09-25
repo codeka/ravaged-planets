@@ -36,71 +36,71 @@ enum IDS {
   END_ID,
 };
 
-class pathing_tool_window {
+class PathingToolWindow {
 private:
   Window *wnd_;
-  ed::pathing_tool *_tool;
+  ed::PathingTool *tool_;
 
   bool on_start_click(Widget *w);
   bool on_end_click(Widget *w);
   bool on_simplify_click(Widget *w);
 
 public:
-  pathing_tool_window(ed::pathing_tool *tool);
-  virtual ~pathing_tool_window();
+  PathingToolWindow(ed::PathingTool *Tool);
+  virtual ~PathingToolWindow();
 
   void show();
   void hide();
 };
 
-pathing_tool_window::pathing_tool_window(ed::pathing_tool *tool) :
-    _tool(tool), wnd_(nullptr) {
+PathingToolWindow::PathingToolWindow(ed::PathingTool *tool) :
+    tool_(tool), wnd_(nullptr) {
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(94)) << Window::background("frame")
       << (Builder<Button>(px(4), px(4), sum(pct(100), px(-8)), px(30)) << Button::text("Start") << Widget::id(START_ID)
-          << Widget::click(std::bind(&pathing_tool_window::on_start_click, this, _1)))
+          << Widget::click(std::bind(&PathingToolWindow::on_start_click, this, _1)))
       << (Builder<Button>(px(4), px(38), sum(pct(100), px(-8)), px(30)) << Button::text("End") << Widget::id(END_ID)
-          << Widget::click(std::bind(&pathing_tool_window::on_end_click, this, _1)))
+          << Widget::click(std::bind(&PathingToolWindow::on_end_click, this, _1)))
       << (Builder<Checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18)) << Checkbox::text("Simplify")
-          << Widget::click(std::bind(&pathing_tool_window::on_simplify_click, this, _1)));
+          << Widget::click(std::bind(&PathingToolWindow::on_simplify_click, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
-pathing_tool_window::~pathing_tool_window() {
+PathingToolWindow::~PathingToolWindow() {
   fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void pathing_tool_window::show() {
+void PathingToolWindow::show() {
   wnd_->set_visible(true);
 }
 
-void pathing_tool_window::hide() {
+void PathingToolWindow::hide() {
   wnd_->set_visible(false);
 }
 
-bool pathing_tool_window::on_start_click(Widget *w) {
+bool PathingToolWindow::on_start_click(Widget *w) {
   ed::statusbar->set_message("Set test start...");
-  _tool->set_test_start();
+  tool_->set_test_start();
   wnd_->find<Button>(START_ID)->set_pressed(true);
   wnd_->find<Button>(END_ID)->set_pressed(false);
   return true;
 }
 
-bool pathing_tool_window::on_end_click(Widget *w) {
+bool PathingToolWindow::on_end_click(Widget *w) {
   ed::statusbar->set_message("Set test end...");
-  _tool->set_test_end();
+  tool_->set_test_end();
   wnd_->find<Button>(START_ID)->set_pressed(false);
   wnd_->find<Button>(END_ID)->set_pressed(true);
   return true;
 }
 
-bool pathing_tool_window::on_simplify_click(Widget *w) {
-  _tool->set_simplify(dynamic_cast<Checkbox *>(w)->is_checked());
+bool PathingToolWindow::on_simplify_click(Widget *w) {
+  tool_->set_simplify(dynamic_cast<Checkbox *>(w)->is_checked());
   return true;
 }
 
 //-----------------------------------------------------------------------------
 
-class collision_patch {
+class CollisionPatch {
 private:
   int _patch_x, _patch_z;
   static std::shared_ptr<fw::IndexBuffer> ib_;
@@ -112,11 +112,11 @@ public:
   void render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &world);
 };
 
-std::shared_ptr<fw::IndexBuffer> collision_patch::ib_;
+std::shared_ptr<fw::IndexBuffer> CollisionPatch::ib_;
 std::shared_ptr<fw::VertexBuffer> current_path_vb;
 std::shared_ptr<fw::IndexBuffer> current_path_ib;
 
-void collision_patch::bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
+void CollisionPatch::bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
   if (!ib_) {
     std::vector<uint16_t> indices;
     game::generate_terrain_indices_wireframe(indices, PATCH_SIZE);
@@ -143,7 +143,7 @@ void collision_patch::bake(std::vector<bool> &data, float *heights, int width, i
   vb_->set_data(vertices.size(), vertices.data());
 }
 
-void collision_patch::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &world) {
+void CollisionPatch::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &world) {
   std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
   Node->set_world_matrix(world);
 
@@ -163,40 +163,40 @@ void collision_patch::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &w
 //-----------------------------------------------------------------------------
 
 namespace ed {
-REGISTER_TOOL("pathing", pathing_tool);
+REGISTER_TOOL("pathing", PathingTool);
 
-pathing_tool::pathing_tool(editor_world *wrld) :
-    tool(wrld), _start_set(false), _end_set(false), _test_mode(test_none), _simplify(true) {
-  wnd_ = new pathing_tool_window(this);
-  _marker = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
+PathingTool::PathingTool(EditorWorld *wrld) :
+    Tool(wrld), start_set_(false), end_set_(false), test_mode_(kTestNone), simplify_(true) {
+  wnd_ = new PathingToolWindow(this);
+  marker_ = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
 }
 
-pathing_tool::~pathing_tool() {
+PathingTool::~PathingTool() {
   delete wnd_;
 }
 
-void pathing_tool::activate() {
-  tool::activate();
+void PathingTool::activate() {
+  Tool::activate();
   wnd_->show();
 
   int width = get_terrain()->get_width();
   int length = get_terrain()->get_length();
-  _collision_data.resize(width * length);
-  get_terrain()->build_collision_data(_collision_data);
+  collision_data_.resize(width * length);
+  get_terrain()->build_collision_data(collision_data_);
 
-  _patches.resize((width / PATCH_SIZE) * (length / PATCH_SIZE));
+  patches_.resize((width / PATCH_SIZE) * (length / PATCH_SIZE));
 
   std::shared_ptr<fw::TimedPathFind> pf(
-      new fw::TimedPathFind(get_terrain()->get_width(), get_terrain()->get_length(), _collision_data));
-  _path_find = pf;
+      new fw::TimedPathFind(get_terrain()->get_width(), get_terrain()->get_length(), collision_data_));
+  path_find_ = pf;
 
   fw::Input *inp = fw::Framework::get_instance()->get_input();
-  _keybind_tokens.push_back(
-      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&pathing_tool::on_key, this, _1, _2))));
+  keybind_tokens_.push_back(
+      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&PathingTool::on_key, this, _1, _2))));
 }
 
-void pathing_tool::deactivate() {
-  tool::deactivate();
+void PathingTool::deactivate() {
+  Tool::deactivate();
   wnd_->hide();
 }
 
@@ -213,7 +213,7 @@ int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_len
   return patch_z * patches_width + patch_x;
 }
 
-void pathing_tool::render(fw::sg::Scenegraph &Scenegraph) {
+void PathingTool::render(fw::sg::Scenegraph &Scenegraph) {
   // we want to render the patches centred on where the camera is looking
   fw::Camera *camera = fw::Framework::get_instance()->get_camera();
   fw::Vector cam_loc = camera->get_position();
@@ -230,26 +230,26 @@ void pathing_tool::render(fw::sg::Scenegraph &Scenegraph) {
       int new_patch_x, new_patch_z;
       int patch_index = get_patch_index(patch_x, patch_z, patch_width, patch_length, &new_patch_x, &new_patch_z);
 
-      if (!_patches[patch_index])
-        _patches[patch_index] = bake_patch(new_patch_x, new_patch_z);
+      if (!patches_[patch_index])
+        patches_[patch_index] = bake_patch(new_patch_x, new_patch_z);
 
       fw::Matrix world = fw::translation(static_cast<float>(patch_x * PATCH_SIZE), 0,
           static_cast<float>(patch_z * PATCH_SIZE));
 
-      _patches[patch_index]->render(Scenegraph, world);
+      patches_[patch_index]->render(Scenegraph, world);
     }
   }
 
-  if (_start_set) {
-    fw::Matrix loc(fw::translation(_start_pos));
-    _marker->set_color(fw::Color(1, 0.1f, 1, 0.1f));
-    _marker->render(Scenegraph, loc);
+  if (start_set_) {
+    fw::Matrix loc(fw::translation(start_pos_));
+    marker_->set_color(fw::Color(1, 0.1f, 1, 0.1f));
+    marker_->render(Scenegraph, loc);
   }
 
-  if (_end_set) {
-    fw::Matrix loc(fw::translation(_end_pos));
-    _marker->set_color(fw::Color(1, 1, 0.1f, 0.1f));
-    _marker->render(Scenegraph, loc);
+  if (end_set_) {
+    fw::Matrix loc(fw::translation(end_pos_));
+    marker_->set_color(fw::Color(1, 1, 0.1f, 0.1f));
+    marker_->render(Scenegraph, loc);
   }
 
   if (current_path_vb) {
@@ -268,66 +268,66 @@ void pathing_tool::render(fw::sg::Scenegraph &Scenegraph) {
   }
 }
 
-std::shared_ptr<collision_patch> pathing_tool::bake_patch(int patch_x, int patch_z) {
-  std::shared_ptr<collision_patch> patch(new collision_patch());
-  patch->bake(_collision_data, get_terrain()->get_height_data(), get_terrain()->get_width(),
+std::shared_ptr<CollisionPatch> PathingTool::bake_patch(int patch_x, int patch_z) {
+  std::shared_ptr<CollisionPatch> patch(new CollisionPatch());
+  patch->bake(collision_data_, get_terrain()->get_height_data(), get_terrain()->get_width(),
       get_terrain()->get_length(), patch_x, patch_z);
   return patch;
 }
 
-void pathing_tool::set_simplify(bool ParticleRotation) {
-  _simplify = ParticleRotation;
+void PathingTool::set_simplify(bool ParticleRotation) {
+  simplify_ = ParticleRotation;
   find_path();
 }
 
-void pathing_tool::set_test_start() {
-  _test_mode = test_start;
+void PathingTool::set_test_start() {
+  test_mode_ = kTestStart;
 }
 
-void pathing_tool::set_test_end() {
-  _test_mode = test_end;
+void PathingTool::set_test_end() {
+  test_mode_ = kTestEnd;
 }
 
-void pathing_tool::stop_testing() {
-  _test_mode = test_none;
+void PathingTool::stop_testing() {
+  test_mode_ = kTestNone;
 }
 
-void pathing_tool::on_key(std::string keyname, bool is_down) {
-  if (_test_mode == test_none) {
+void PathingTool::on_key(std::string keyname, bool is_down) {
+  if (test_mode_ == kTestNone) {
     return;
   }
 
   if (!is_down) {
-    if (_test_mode == test_start) {
-      _start_pos = _terrain->get_cursor_location();
-      _start_set = true;
-    } else if (_test_mode == test_end) {
-      _end_pos = _terrain->get_cursor_location();
-      _end_set = true;
+    if (test_mode_ == kTestStart) {
+      start_pos_ = terrain_->get_cursor_location();
+      start_set_ = true;
+    } else if (test_mode_ == kTestEnd) {
+      end_pos_ = terrain_->get_cursor_location();
+      end_set_ = true;
     }
 
     find_path();
   }
 }
 
-void pathing_tool::find_path() {
-  if (!_start_set || !_end_set)
+void PathingTool::find_path() {
+  if (!start_set_ || !end_set_)
     return;
 
   std::vector<fw::Vector> full_path;
-  if (!_path_find->find(full_path, _start_pos, _end_pos)) {
-    statusbar->set_message((boost::format("No path found after %1%ms") % (_path_find->total_time * 1000.0f)).str());
+  if (!path_find_->find(full_path, start_pos_, end_pos_)) {
+    statusbar->set_message((boost::format("No path found after %1%ms") % (path_find_->total_time * 1000.0f)).str());
   } else {
     std::vector<fw::Vector> path;
-    _path_find->simplify_path(full_path, path);
+    path_find_->simplify_path(full_path, path);
     statusbar->set_message((boost::format("Path found in %1%ms, %2% nodes, %3% nodes (simplified)")
-        % (_path_find->total_time * 1000.0f)
+        % (path_find_->total_time * 1000.0f)
         % full_path.size()
         % path.size()).str());
 
     std::vector<fw::vertex::xyz_c> buffer;
 
-    if (_simplify) {
+    if (simplify_) {
       for(fw::Vector loc : path) {
         float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
         buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));

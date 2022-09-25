@@ -32,7 +32,7 @@ private:
   };
 
   std::shared_ptr<fw::PathFfind> _pather;
-  Terrain *_terrain;
+  Terrain *terrain_;
   std::thread thread_;
   fw::WorkQueue<path_request_data> _work_queue;
 

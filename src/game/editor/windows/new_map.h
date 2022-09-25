@@ -9,7 +9,7 @@ class Widget;
 
 namespace ed {
 
-class new_map_window {
+class NewMapWindow {
 private:
   fw::gui::Window *wnd_;
 
@@ -17,14 +17,14 @@ private:
   bool cancel_clicked(fw::gui::Widget *w);
 
 public:
-  new_map_window();
-  ~new_map_window();
+  NewMapWindow();
+  ~NewMapWindow();
 
   void initialize();
   void show();
   void hide();
 };
 
-extern new_map_window *new_map;
+extern NewMapWindow *new_map;
 
 }

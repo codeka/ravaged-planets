@@ -20,7 +20,7 @@ class Scenegraph;
 }
 
 namespace ed {
-class world_writer;
+class WorldWriter;
 }
 
 namespace game {
@@ -41,7 +41,7 @@ private:
   std::shared_ptr<fw::Shader> shader_;
 
 protected:
-  friend class ed::world_writer;
+  friend class ed::WorldWriter;
   friend class WorldReader;
 
   std::vector<std::shared_ptr<fw::Texture>> layers_;

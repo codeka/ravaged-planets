@@ -36,45 +36,45 @@ enum IDS {
   IMAGE_PREVIEW_ID
 };
 
-open_file_window *open_file = nullptr;
+OpenFileWindow *open_file = nullptr;
 
-open_file_window::open_file_window() : wnd_(nullptr), _show_hidden(false) {
+OpenFileWindow::OpenFileWindow() : wnd_(nullptr), _show_hidden(false) {
 }
 
-open_file_window::~open_file_window() {
+OpenFileWindow::~OpenFileWindow() {
   fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void open_file_window::initialize() {
+void OpenFileWindow::initialize() {
   wnd_ = Builder<Window>(sum(pct(50), px(-200)), sum(pct(40), px(-150)), px(400), px(300))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<TextEdit>(px(8), px(8), sum(pct(100), px(-16)), px(18)) << Widget::id(FILENAME_ID))
       << (Builder<Listbox>(px(8), px(30), sum(pct(66), px(-12)), sum(pct(100), px(-76))) << Widget::id(FILE_LIST_ID)
-          << Listbox::item_selected(std::bind(&open_file_window::on_item_selected, this, _1))
-          << Listbox::item_activated(std::bind(&open_file_window::on_item_activated, this, _1)))
+          << Listbox::item_selected(std::bind(&OpenFileWindow::on_item_selected, this, _1))
+          << Listbox::item_activated(std::bind(&OpenFileWindow::on_item_activated, this, _1)))
       << (Builder<Label>(sum(pct(66), px(4)), px(30), sum(pct(33), px(-12)), px(100)) << Widget::id(IMAGE_PREVIEW_ID))
       << (Builder<Button>(sum(pct(100), px(-176)), sum(pct(100), px(-38)), px(80), px(30))
           << Button::text("OK") << Widget::id(OK_ID)
-          << Button::click(std::bind(&open_file_window::on_ok_clicked, this, _1)))
+          << Button::click(std::bind(&OpenFileWindow::on_ok_clicked, this, _1)))
       << (Builder<Button>(sum(pct(100), px(-88)), sum(pct(100), px(-38)), px(80), px(30))
-          << Button::text("Cancel") << Button::click(std::bind(&open_file_window::on_cancel_clicked, this, _1)))
+          << Button::text("Cancel") << Button::click(std::bind(&OpenFileWindow::on_cancel_clicked, this, _1)))
       << (Builder<Checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18)) << Checkbox::text("Show hidden files")
-          << Widget::click(std::bind(&open_file_window::on_show_hidden_clicked, this, _1)));
+          << Widget::click(std::bind(&OpenFileWindow::on_show_hidden_clicked, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
   _curr_directory = fw::user_base_path();
 }
 
-void open_file_window::show(file_selected_handler fn) {
+void OpenFileWindow::show(file_selected_handler fn) {
   _file_selected_handler = fn;
   wnd_->set_visible(true);
   refresh();
 }
 
-void open_file_window::hide() {
+void OpenFileWindow::hide() {
   wnd_->set_visible(false);
 }
 
-void open_file_window::add_row(Listbox *lbx, std::string const &name) {
+void OpenFileWindow::add_row(Listbox *lbx, std::string const &name) {
   fs::path full_path = _curr_directory / name;
 
   std::string file_size = "";
@@ -93,7 +93,7 @@ void open_file_window::add_row(Listbox *lbx, std::string const &name) {
   _items.push_back(name);
 }
 
-void open_file_window::refresh() {
+void OpenFileWindow::refresh() {
   Listbox*lbx = wnd_->find<Listbox>(FILE_LIST_ID);
   lbx->clear();
   _items.clear();
@@ -137,16 +137,16 @@ void open_file_window::refresh() {
   wnd_->find<TextEdit>(FILENAME_ID)->set_text(_curr_directory.string());
 }
 
-fs::path open_file_window::get_selected_file() const {
+fs::path OpenFileWindow::get_selected_file() const {
   return fs::path(wnd_->find<TextEdit>(FILENAME_ID)->get_text());
 }
 
-void open_file_window::navigate_to_directory(fs::path const &new_directory) {
+void OpenFileWindow::navigate_to_directory(fs::path const &new_directory) {
   _curr_directory = new_directory;
   refresh();
 }
 
-void open_file_window::on_item_selected(int index) {
+void OpenFileWindow::on_item_selected(int index) {
   fs::path item_path = _curr_directory / _items[index];
   wnd_->find<TextEdit>(FILENAME_ID)->set_text(item_path.string());
 
@@ -196,17 +196,17 @@ void open_file_window::on_item_selected(int index) {
   }
 }
 
-void open_file_window::on_item_activated(int index) {
+void OpenFileWindow::on_item_activated(int index) {
   on_ok_clicked(wnd_->find<Button>(OK_ID));
 }
 
-bool open_file_window::on_show_hidden_clicked(Widget *w) {
+bool OpenFileWindow::on_show_hidden_clicked(Widget *w) {
   _show_hidden = dynamic_cast<Checkbox *>(w)->is_checked();
   refresh();
   return true;
 }
 
-bool open_file_window::on_ok_clicked(Widget *w) {
+bool OpenFileWindow::on_ok_clicked(Widget *w) {
   fs::path item_path = fs::path(wnd_->find<TextEdit>(FILENAME_ID)->get_text());
   if (fs::is_directory(item_path)) {
     _curr_directory = item_path;
@@ -223,7 +223,7 @@ bool open_file_window::on_ok_clicked(Widget *w) {
   return true;
 }
 
-bool open_file_window::on_cancel_clicked(Widget *w) {
+bool OpenFileWindow::on_cancel_clicked(Widget *w) {
   hide();
   return true;
 }

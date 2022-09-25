@@ -3,8 +3,8 @@
 #include <memory>
 #include <game/editor/tools/tools.h>
 
-class pathing_tool_window;
-class collision_patch;
+class PathingToolWindow;
+class CollisionPatch;
 
 namespace fw {
 class Model;
@@ -12,37 +12,37 @@ class TimedPathFind;
 }
 
 namespace ed {
-class editor_world;
+class EditorWorld;
 
-class pathing_tool: public tool {
+class PathingTool: public Tool {
 private:
-  enum test_mode {
-    test_none, test_start, test_end
+  enum TestMode {
+    kTestNone, kTestStart, kTestEnd
   };
 
-  test_mode _test_mode;
-  pathing_tool_window *wnd_;
-  std::vector<bool> _collision_data;
-  std::shared_ptr<fw::Model> _marker;
-  fw::Vector _start_pos;
-  bool _start_set;
-  fw::Vector _end_pos;
-  bool _end_set;
-  bool _simplify;
-  std::vector<std::shared_ptr<collision_patch>> _patches;
-  std::shared_ptr<fw::TimedPathFind> _path_find;
+  TestMode test_mode_;
+  PathingToolWindow *wnd_;
+  std::vector<bool> collision_data_;
+  std::shared_ptr<fw::Model> marker_;
+  fw::Vector start_pos_;
+  bool start_set_;
+  fw::Vector end_pos_;
+  bool end_set_;
+  bool simplify_;
+  std::vector<std::shared_ptr<CollisionPatch>> patches_;
+  std::shared_ptr<fw::TimedPathFind> path_find_;
 
   void on_key(std::string keyname, bool is_down);
-  std::shared_ptr<collision_patch> bake_patch(int patch_x, int patch_z);
+  std::shared_ptr<CollisionPatch> bake_patch(int patch_x, int patch_z);
   void find_path();
 public:
-  pathing_tool(editor_world *wrld);
-  virtual ~pathing_tool();
+  PathingTool(EditorWorld *wrld);
+  virtual ~PathingTool();
 
   virtual void activate();
   virtual void deactivate();
 
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
+  virtual void render(fw::sg::Scenegraph &scenegraph);
 
   void set_simplify(bool enabled);
   void set_test_start();

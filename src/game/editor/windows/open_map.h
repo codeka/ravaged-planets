@@ -9,7 +9,7 @@ class Window;
 
 namespace ed {
 
-class open_map_window {
+class OpenMapWindow {
 private:
   fw::gui::Window *wnd_;
 
@@ -17,14 +17,14 @@ private:
   bool cancel_clicked(fw::gui::Widget *w);
 
 public:
-  open_map_window();
-  ~open_map_window();
+  OpenMapWindow();
+  ~OpenMapWindow();
 
   void initialize();
   void show();
   void hide();
 };
 
-extern open_map_window *open_map;
+extern OpenMapWindow *open_map;
 
 }
