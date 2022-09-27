@@ -21,7 +21,7 @@ public:
   DamageableComponent();
   ~DamageableComponent();
 
-  virtual void apply_template(luabind::object const &tmpl);
+  void apply_template(fw::lua::Value tmpl) override;
   virtual void initialize();
 
   void apply_damage(float amt);

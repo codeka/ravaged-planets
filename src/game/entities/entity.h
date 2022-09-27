@@ -3,7 +3,6 @@
 #include <memory>
 
 #include <framework/lua.h>
-//#include <luabind/object.hpp>
 
 #include <game/entities/entity_attribute.h>
 #include <game/entities/entity_debug.h>
@@ -57,7 +56,7 @@ public:
   }
 
   /** Loads this component with data from the given component template (Lua object). */
-  virtual void apply_template(luabind::object const &tmpl) {
+  virtual void apply_template(fw::lua::Value tmpl) {
   }
 
   /**

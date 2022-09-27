@@ -96,7 +96,7 @@ public:
   PositionComponent();
   virtual ~PositionComponent();
 
-  virtual void apply_template(luabind::object const &tmpl);
+  virtual void apply_template(fw::lua::Value tmpl);
 
   virtual void update(float dt);
 

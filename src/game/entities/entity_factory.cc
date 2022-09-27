@@ -27,74 +27,70 @@ EntityFactory::~EntityFactory() {
 
 void EntityFactory::populate(std::shared_ptr<Entity> ent, std::string name) {
   // first, find the template we'll use for creating the Entity
-  luabind::object entity_template = get_template(name);
-//  if (!entity_template) {
-//    fw::debug << boost::format("  warning: unknown Entity: %1%") % name << std::endl;
-//    return;
-//  }
+  std::optional<fw::lua::Value> entity_template = get_template(name);
+  if (!entity_template) {
+    fw::debug << boost::format("  warning: unknown Entity: %1%") % name << std::endl;
+    return;
+  }
+  fw::debug << boost::format("  populating entity: %1%") % name << std::endl;
 
-  // add all of the attributes before we add any of the components
-//  for (luabind::iterator it(entity_template), end; it != end; ++it) {
-//    if (it.key() == "components") {
-//      continue;
-//    }
-//    boost::any value;
-//    int type = luabind::type(*it);
-//    if (type == LUA_TNUMBER) {
-//      value = luabind::object_cast<float>(*it);
-//    } else if (type == LUA_TSTRING) {
-//      value = luabind::object_cast<std::string>(*it);
-//    } else {
-//      // table? maybe a vector?
-//    }
-//    EntityAttribute attr(luabind::object_cast<std::string>(it.key()), value);
-//    ent->add_attribute(attr);
-//  }
+  // add all of the attributes before we add any of the components, as the components might want to refer to the
+  // attributes.
+  for (auto& kvp : *entity_template) {
+    std::string key_name = kvp.key<std::string>();
+    if (key_name == "components") {
+      continue;
+    }
 
-//  // then add all of the components as well
-//  for (luabind::iterator it(entity_template["components"]), end; it != end; ++it) {
-//    luabind::object comp_tmpl(*it);
-//    EntityComponent *comp = create_component(luabind::object_cast<std::string>(it.key()));
-//    if (comp != nullptr) {
-//      comp->apply_template(comp_tmpl);
-//      ent->add_component(comp);
-//      comp->set_entity(ent);
-//    }
-//  }
+    ent->add_attribute(EntityAttribute(key_name, kvp.value<boost::any>()));
+    fw::debug << "    attribute \"" << key_name << "\" = " << kvp.value<std::string>() << std::endl;
+  }
+
+  // then add all of the components as well
+  // TODO: support begin/end directly on IndexValue.
+  fw::lua::Value components = (*entity_template)["components"];
+  for (auto& kvp : components) {
+    EntityComponent* component = create_component(kvp.key<std::string>());
+    if (component != nullptr) {
+      component->apply_template(kvp.value<fw::lua::Value>());
+      fw::debug << "    component \"" << kvp.key<std::string> () << "\" = " << kvp.value<std::string>() << std::endl;
+      ent->add_component(component);
+      component->set_entity(ent);
+    }
+  }
 }
 
-luabind::object EntityFactory::get_template(std::string name) {
+std::optional<fw::lua::Value> EntityFactory::get_template(std::string name) {
   entity_template_map::iterator it = entity_templates->find(name);
   if (it == entity_templates->end()) {
-    return luabind::object();
+    return std::nullopt;
   }
 
   fw::lua::LuaContext *ctx = it->second;
-  return luabind::object();
-  //return luabind::globals(*ctx)["Entity"];
+  return ctx->globals()["Entity"];
 }
 
 // gets the complete list of entity_templates
-void EntityFactory::get_templates(std::vector<luabind::object> &templates) {
+void EntityFactory::get_templates(std::vector<fw::lua::Value> &templates) {
   for(auto &kvp : *entity_templates) {
     fw::lua::LuaContext *ctx = kvp.second;
-//    templates.push_back(luabind::globals(*ctx)["Entity"]);
+    templates.push_back(ctx->globals()["Entity"]);
   }
 }
 
 // helper method that populates a vector with entities that are buildable (and in the given build_group)
 void EntityFactory::get_buildable_templates(std::string const &build_group,
-      std::vector<luabind::object> &templates) {
+      std::vector<fw::lua::Value> &templates) {
   for(entity_template_map::value_type &kvp : *entity_templates) {
     fw::lua::LuaContext *ctx = kvp.second;
-//    luabind::object const &tmpl = luabind::globals(*ctx)["Entity"];
+    fw::lua::Value tmpl = ctx->globals()["Entity"];
 
-    luabind::object buildable_tmpl;// = tmpl["components"]["Buildable"];
- //   if (buildable_tmpl) {
- //     if (luabind::object_cast<std::string>(buildable_tmpl["BuildGroup"]) == build_group) {
- //       templates.push_back(tmpl);
- //     }
- //   }
+    fw::lua::Value buildable_tmpl = tmpl["components"]["Buildable"];
+    if (!buildable_tmpl.is_nil()) {
+      if (buildable_tmpl["BuildGroup"].value<std::string>() == build_group) {
+        templates.push_back(tmpl);
+      }
+    }
   }
 }
 
@@ -109,11 +105,11 @@ void EntityFactory::load_entities() {
     if (fs::is_regular_file(it->status()) && it->path().extension() == ".entity") {
       std::string tmpl_name = it->path().stem().string();
 
-      fw::lua::LuaContext *ctx = new fw::lua::LuaContext();
+      fw::lua::LuaContext* ctx = new fw::lua::LuaContext();
       ctx->load_script(it->path());
 
-//      luabind::object tmpl = luabind::globals(*ctx)["Entity"];
-//      tmpl["name"] = tmpl_name;
+      fw::lua::Value tmpl = ctx->globals()["Entity"];
+      tmpl["name"] = tmpl_name;
 
       // TODO: loop through components and register their identifier(?)
       (*entity_templates)[tmpl_name] = ctx;

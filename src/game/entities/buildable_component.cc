@@ -11,12 +11,8 @@ BuildableComponent::BuildableComponent() {
 BuildableComponent::~BuildableComponent() {
 }
 
-void BuildableComponent::apply_template(luabind::object const &tmpl) {
-//  for(luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "BuildGroup") {
-//      build_group_ = luabind::object_cast<std::string>(*it);
-//    }
-//  }
+void BuildableComponent::apply_template(fw::lua::Value tmpl) {
+  build_group_ = tmpl["BuildGroup"];
 }
 
 }

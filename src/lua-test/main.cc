@@ -148,6 +148,15 @@ int main(int argc, char** argv) {
     ctx.add_path("D:\\src\\ravaged-planets\\lua");
     ctx.load_script("D:\\src\\ravaged-planets\\lua\\main.lua");
 
+    fw::lua::Value blah = ctx.globals()["Blah"];
+    for (auto& kvp : blah) {
+      fw::debug << "key/value " << kvp.key<std::string>() << " - " << kvp.value<fw::lua::Value>() << std::endl;
+    }
+    fw::debug << " Blah.name = " << blah["name"].debug_string() << std::endl;
+    blah["desc"] = "hrm";
+    for (auto& kvp : blah) {
+      fw::debug << "key/value " << kvp.key<std::string>() << " - " << kvp.value<fw::lua::Value>() << std::endl;
+    }
 
 /*
 

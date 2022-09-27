@@ -34,7 +34,7 @@ public:
   // this is called after the Entity loads all of it's components
   virtual void initialize();
 
-  virtual void apply_template(luabind::object const &tmpl);
+  void apply_template(fw::lua::Value tmpl) override;
 
   virtual void render(fw::sg::Scenegraph &Scenegraph,
       fw::Matrix const &transform);

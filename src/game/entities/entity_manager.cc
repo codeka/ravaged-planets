@@ -88,8 +88,8 @@ std::shared_ptr<Entity> EntityManager::create_entity(std::shared_ptr<Entity> cre
   return ent;
 }
 
-void EntityManager::destroy(std::weak_ptr<Entity> Entity) {
-  std::shared_ptr<ent::Entity> sp = Entity.lock();
+void EntityManager::destroy(std::weak_ptr<Entity> entity) {
+  std::shared_ptr<ent::Entity> sp = entity.lock();
   if (sp) {
     float age = sp->get_age();
     fw::debug << boost::format("destroying entity: %1% (age: %2%)") % sp->get_name() % age << std::endl;
@@ -293,7 +293,7 @@ void EntityManager::update() {
   debug_->update();
 }
 
-void EntityManager::render(fw::sg::Scenegraph &Scenegraph) {
+void EntityManager::render(fw::sg::Scenegraph &scenegraph) {
   fw::Vector location = get_view_center();
 
   int centre_patch_x = (int) (location[0] / PatchManager::PATCH_SIZE);
@@ -310,11 +310,11 @@ void EntityManager::render(fw::sg::Scenegraph &Scenegraph) {
 
       std::list<std::weak_ptr<Entity> > patch_entities = p->get_entities();
       for (auto it = patch_entities.begin(); it != patch_entities.end(); ++it) {
-        std::shared_ptr<Entity> Entity = (*it).lock();
-        if (!Entity)
+        auto entity = (*it).lock();
+        if (!entity)
           continue;
 
-        Entity->render(Scenegraph, trans);
+        entity->render(scenegraph, trans);
       }
     }
   }

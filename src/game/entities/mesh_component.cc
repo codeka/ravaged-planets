@@ -33,12 +33,8 @@ MeshComponent::MeshComponent(std::shared_ptr<fw::Model> const &Model) :
 MeshComponent::~MeshComponent() {
 }
 
-void MeshComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "FileName") {
-//      _model_name = luabind::object_cast<std::string>(*it);
-//    }
-//  }
+void MeshComponent::apply_template(fw::lua::Value tmpl) {
+  model_name_ = tmpl["FileName"];
 }
 
 void MeshComponent::initialize() {
@@ -46,7 +42,7 @@ void MeshComponent::initialize() {
   ownable_component_ = Entity->get_component<OwnableComponent>();
 }
 
-void MeshComponent::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &transform) {
+void MeshComponent::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform) {
   std::shared_ptr<Entity> Entity(entity_);
   PositionComponent *pos = Entity->get_component<PositionComponent>();
   if (pos != nullptr) {
@@ -61,7 +57,7 @@ void MeshComponent::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &tra
       }
     }
 
-    model_->render(Scenegraph, pos->get_transform() * transform);
+    model_->render(scenegraph, pos->get_transform() * transform);
   }
 }
 }

@@ -215,13 +215,13 @@ void BuildWindow::on_mouse_out_button(int id) {
 }
 
 void BuildWindow::do_refresh() {
-  std::vector<luabind::object> templates;
+  std::vector<fw::lua::Value> templates;
   ent::EntityFactory ent_factory;
   ent_factory.get_buildable_templates(build_group_, templates);
 
   int index = 0;
-  for(luabind::object const &tmpl : templates) {
-    fw::debug << " checking " << ""/*tmpl["name"]*/ << std::endl;
+  for(auto &tmpl : templates) {
+    fw::debug << " checking " << std::string(tmpl["name"]) << std::endl;
     Button *btn = wnd_->find<Button>(FIRST_BUILD_BUTTON_ID + index);
     if (btn == nullptr) {
       continue; // TODO

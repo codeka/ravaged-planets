@@ -37,7 +37,7 @@ public:
   AudioComponent();
   virtual ~AudioComponent();
 
-  virtual void apply_template(luabind::object const &tmpl);
+  void apply_template(fw::lua::Value tmpl) override;
 
   /** Plays the Cue with the given name (if the Cue doesn't exist, nothing happens). */
   void play_cue(std::string const &name);

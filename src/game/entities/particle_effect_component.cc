@@ -25,23 +25,24 @@ ParticleEffectComponent::~ParticleEffectComponent() {
   }
 }
 
-void ParticleEffectComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    std::string name = luabind::object_cast<std::string>(it.key());
-//    effect_info effect;
-//    effect.name = luabind::object_cast<std::string>((*it)["EffectName"]);
-//    if ((*it)["DestroyEntityOnComplete"]) {
-//      effect.destroy_entity_on_complete = true;
-//    }
-//    if ((*it)["Started"]) {
-//      effect.started = true;
-//    }
-//    if ((*it)["Offset"]) {
-//      std::string offset = luabind::object_cast<std::string>((*it)["Offset"]);
-//      effect.offset = fw::Vector(0, 2, 0); // TODO
-//    }
-//    effects_[name] = effect;
-//  }
+void ParticleEffectComponent::apply_template(fw::lua::Value tmpl) {
+  // TODO: there's currently a limitation in that we cannot have an iterator inside an iterator of Lua values.
+  /*
+  for (auto& kvp : tmpl) {
+    auto name = kvp.key<std::string>();
+    auto value = kvp.value<fw::lua::Value>();
+    EffectInfo effect;
+    effect.name = value["EffectName"];
+    effect.destroy_entity_on_complete = value["DestroyEntityOnComplete"];
+    effect.started = value["Started"];
+    if (value.has_key("Offset")) {
+      std::string offset = value["Offset"];
+      // TODO: parse offset
+      effect.offset = fw::Vector(0, 2, 0);
+    }
+
+    effects_[name] = effect;
+  }*/
 }
 
 void ParticleEffectComponent::initialize() {

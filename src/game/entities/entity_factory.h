@@ -1,11 +1,11 @@
 #pragma once
 
+#include <optional>
 #include <map>
 #include <memory>
 #include <vector>
 
 #include <framework/lua.h>
-//#include <luabind/object.hpp>
 
 #include <game/entities/entity_attribute.h>
 
@@ -35,14 +35,14 @@ public:
   void populate(std::shared_ptr<Entity> ent, std::string name);
 
   // gets the template with the given name
-  luabind::object get_template(std::string name);
+  std::optional<fw::lua::Value> get_template(std::string name);
 
   // populates a vector with all of the Entity templates
-  void get_templates(std::vector<luabind::object> &templates);
+  void get_templates(std::vector<fw::lua::Value> &templates);
 
   // helper method that populates a vector with entities that are buildable (and
   // in the given build_group)
-  void get_buildable_templates(std::string const &build_group, std::vector<luabind::object> &templates);
+  void get_buildable_templates(std::string const &build_group, std::vector<fw::lua::Value> &templates);
 };
 
 // this is a helper class that you use indirectly via the ENT_COMPONENT_REGISTER macro

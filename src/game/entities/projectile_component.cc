@@ -105,12 +105,8 @@ SeekingProjectileComponent::SeekingProjectileComponent() :
 SeekingProjectileComponent::~SeekingProjectileComponent() {
 }
 
-void SeekingProjectileComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "TimeToLock") {
-//      _time_to_lock = luabind::object_cast<float>(*it);
-//    }
-//  }
+void SeekingProjectileComponent::apply_template(fw::lua::Value tmpl) {
+  time_to_lock_ = tmpl["TimeToLock"];
 }
 
 void SeekingProjectileComponent::update(float dt) {
@@ -146,12 +142,8 @@ BallisticProjectileComponent::BallisticProjectileComponent() :
 BallisticProjectileComponent::~BallisticProjectileComponent() {
 }
 
-void BallisticProjectileComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "MaxHeight") {
-//      _max_height = luabind::object_cast<float>(*it);
-//    }
-//  }
+void BallisticProjectileComponent::apply_template(fw::lua::Value tmpl) {
+  max_height_ = tmpl["MaxHeight"];
 }
 
 void BallisticProjectileComponent::set_target(std::weak_ptr<Entity> target) {

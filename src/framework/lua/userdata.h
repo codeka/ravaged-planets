@@ -16,7 +16,7 @@ template<typename T>
 class Userdata : public BaseValue<Userdata<T>> {
 public:
   // When this constructor is called, we assume the userdata is already on the stack.
-  Userdata(lua_State* l, T* object) : l_(l), index_(lua_gettop(l)), object_(object) {
+  Userdata(lua_State* l, T* object) : BaseValue<Userdata<T>>(l), index_(lua_gettop(l)), object_(object) {
   }
 
   ~Userdata() {

@@ -25,16 +25,10 @@ MoveableComponent::MoveableComponent() :
 MoveableComponent::~MoveableComponent() {
 }
 
-void MoveableComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "Speed") {
-//      _speed = luabind::object_cast<float>(*it);
-//    } else if (it.key() == "TurnRadius") {
-//      _turn_speed = 1.0f / luabind::object_cast<float>(*it);
-//    } else if (it.key() == "AvoidCollisions") {
-//      _avoid_collisions = luabind::object_cast<bool>(*it);
-//    }
-//  }
+void MoveableComponent::apply_template(fw::lua::Value tmpl) {
+  speed_ = tmpl["Speed"];
+  turn_speed_ = tmpl["TurnRadius"];
+  avoid_collisions_ = tmpl["AvoidCollisions"];
 }
 
 void MoveableComponent::initialize() {

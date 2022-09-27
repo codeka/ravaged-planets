@@ -34,12 +34,8 @@ void BuilderComponent::initialize() {
   _particle_effect_component = Entity->get_component<ParticleEffectComponent>();
 }
 
-void BuilderComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "BuildGroup") {
-//      build_group_ = luabind::object_cast<std::string>(*it);
-//    }
-//  }
+void BuilderComponent::apply_template(fw::lua::Value tmpl) {
+  build_group_ = tmpl["BuildGroup"];
 }
 
 // this is called when our Entity is selected/deselected, we need to show/hide the build window as appropriate.
@@ -56,9 +52,13 @@ void BuilderComponent::build(std::string name) {
   //game::hud_chat->add_line("Building: " + name + "...");
 
   EntityFactory factory;
-  QueueEntry entry;
-  entry.tmpl = factory.get_template(name);
-  entry.time_to_build = 2.0f;// luabind::object_cast<float>(entry.tmpl["components"]["Buildable"]["TimeToBuild"]);
+
+  auto tmpl = factory.get_template(name);
+  if (!tmpl) {
+    return; // TODO error?
+  }
+  QueueEntry entry(*tmpl);
+  entry.time_to_build = 2.0f;// TODO luabind::object_cast<float>(entry.tmpl["components"]["Buildable"]["TimeToBuild"]);
   entry.time_remaining = entry.time_to_build;
   entry.percent_complete = 0.0f;
   _build_queue.push(entry);

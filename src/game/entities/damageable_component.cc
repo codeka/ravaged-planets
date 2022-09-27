@@ -22,12 +22,8 @@ DamageableComponent::DamageableComponent() {
 DamageableComponent::~DamageableComponent() {
 }
 
-void DamageableComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "Explosion") {
-//      expl_name_ = luabind::object_cast<std::string>(*it);
-//    }
-//  }
+void DamageableComponent::apply_template(fw::lua::Value tmpl) {
+  expl_name_ = tmpl["Explosion"];
 }
 
 void DamageableComponent::initialize() {

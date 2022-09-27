@@ -64,12 +64,10 @@ void SelectableComponent::set_is_selected(bool selected) {
   sig_selected(selected);
 }
 
-void SelectableComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "SelectionRadius") {
-//      set_selection_radius(luabind::object_cast<float>(*it));
-//    }
-//  }
+void SelectableComponent::apply_template(fw::lua::Value tmpl) {
+  if (tmpl.has_key("SelectionRadius")) {
+    set_selection_radius(tmpl["SelectionRadius"]);
+  }
 }
 
 void SelectableComponent::set_selection_radius(float ParticleRotation) {

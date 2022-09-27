@@ -25,7 +25,7 @@ public:
   MeshComponent(std::shared_ptr<fw::Model> const &Model);
   virtual ~MeshComponent();
 
-  virtual void apply_template(luabind::object const &tmpl);
+  void apply_template(fw::lua::Value tmpl) override;
 
   // this is called after the Entity has added all of it's components
   virtual void initialize();

@@ -25,14 +25,13 @@ PositionComponent::PositionComponent() :
 PositionComponent::~PositionComponent() {
 }
 
-void PositionComponent::apply_template(luabind::object const &tmpl) {
-//  for (luabind::iterator it(tmpl), end; it != end; ++it) {
-//    if (it.key() == "SitOnTerrain") {
-//      set_sit_on_terrain(luabind::object_cast<bool>(*it));
-//    } else if (it.key() == "OrientToTerrain") {
-//      this->set_orient_to_terrain(luabind::object_cast<bool>(*it));
-//    }
-//  }
+void PositionComponent::apply_template(fw::lua::Value tmpl) {
+  set_sit_on_terrain(tmpl["SitOnTerrain"]);
+  // We don't want to set this false unless it's explicitly set to false. If it's unset, then it will depend on the
+  // value of SitOnTerrain.
+  if (tmpl.has_key("OrientToTerrain")) {
+    set_orient_to_terrain(tmpl["OrientToTerrain"]);
+  }
 }
 
 void PositionComponent::set_sit_on_terrain(bool sit_on_terrain) {
