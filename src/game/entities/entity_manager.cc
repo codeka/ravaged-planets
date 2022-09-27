@@ -44,8 +44,8 @@ std::shared_ptr<Entity> EntityManager::create_entity(std::string const &template
   return create_entity(std::shared_ptr<Entity>(), template_name, id);
 }
 
-std::shared_ptr<Entity> EntityManager::create_entity(std::shared_ptr<Entity> created_by,
-    std::string const &template_name, entity_id id) {
+std::shared_ptr<Entity> EntityManager::create_entity(
+    std::shared_ptr<Entity> created_by, std::string const &template_name, entity_id id) {
   std::shared_ptr<Entity> ent(new Entity(this, id));
   ent->name_ = template_name;
   ent->creator_ = created_by;

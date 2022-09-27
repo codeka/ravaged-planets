@@ -47,34 +47,39 @@ private:
   lua_State* l_;
 };
 
-// Iterate the keys and values of the table at the top of the stack.
-// TODO: figure out how to clean up the value we expect to exist on the stack. We could keep the value in the registry
-// and push it to the stack on each iteration?
+// Iterate the keys and values of the given table.
 class ValueIterator : public std::iterator<std::input_iterator_tag, ValueIteratorEntry> {
 public:
-  inline ValueIterator(lua_State* l): l_(l), table_index_(0), entry_(l) {
-    if (l != nullptr) {
-      table_index_ = lua_gettop(l_);
+  // Constructs an "end" ValueIterator that doesn't refer to anything.
+  inline ValueIterator() : copies_(nullptr), l_(nullptr), entry_(nullptr), is_end_(true), num_to_pop_(0) {
+  }
 
-      lua_pushnil(l_);
-      if (lua_next(l_, table_index_) == 0) {
-        // If there's no keys at all, just become an end() iterator.
-        l_ = nullptr;
-      }
+  inline ValueIterator(lua_State* l, Value& value);
+
+  inline ValueIterator(const ValueIterator& copy)
+      : copies_(copy.copies_), l_(copy.l_), entry_(copy.l_) {
+    if (copies_ != nullptr) {
+      (*copies_)++;
     }
   }
 
-  inline ValueIterator(const ValueIterator& copy)
-      : l_(copy.l_), table_index_(copy.table_index_), entry_(copy.l_) {
-  }
-
   inline ~ValueIterator() {
+    if (copies_ != nullptr && num_to_pop_ > 0) {
+      (*copies_)--;
+      if ((*copies_) == 0) {
+        // Pop the key & the table itself.
+        lua_pop(l_, num_to_pop_);
+      }
+    }
   }
 
   friend void swap(ValueIterator& lhs, ValueIterator& rhs) {
     using std::swap;
     swap(lhs.l_, rhs.l_);
-    swap(lhs.table_index_, rhs.table_index_);
+    swap(lhs.copies_, rhs.copies_);
+    swap(lhs.entry_, rhs.entry_);
+    swap(lhs.is_end_, rhs.is_end_);
+    swap(lhs.num_to_pop_, rhs.num_to_pop_);
   }
 
   inline ValueIterator& operator=(ValueIterator& other) {
@@ -84,10 +89,10 @@ public:
   }
 
   inline bool operator ==(const ValueIterator& other) {
-    if (l_ == nullptr && other.l_ == nullptr) {
+    if (is_end_ && other.is_end_) {
       return true;
     }
-    if (l_ == nullptr || other.l_ == nullptr) {
+    if (is_end_ || other.is_end_) {
       return false;
     }
 
@@ -102,8 +107,11 @@ public:
   inline ValueIterator& operator++() {
     // Remove the value, the key should still be there.
     lua_pop(l_, 1);
-    if (lua_next(l_, table_index_) == 0) {
-      l_ = nullptr;
+    if (lua_next(l_, -2) == 0) {
+      is_end_ = true;
+
+      // lua_next won't push anything if it returns 0, so only need to pop the table.
+      num_to_pop_ = 1;
     }
     return *this;
   }
@@ -117,9 +125,13 @@ public:
   }
 
 private:
+  // Pointer to a shared reference count. When all instances of the iterator are destucted, we need to pop the table
+  // from the stack.
+  int *copies_;
   lua_State* l_;
-  int table_index_;
   ValueIteratorEntry entry_;
+  bool is_end_;
+  int num_to_pop_;
 };
 
 // Base class for any value-like object (values, index values, call return values, etc). 
@@ -283,12 +295,11 @@ public:
   }
 
   ValueIterator begin() {
-    push();
-    return ValueIterator(l_);
+    return ValueIterator(l_, *this);
   }
 
   ValueIterator end() {
-    return ValueIterator(nullptr);
+    return ValueIterator();
   }
 
   std::string debug_string() const {
@@ -373,6 +384,24 @@ boost::any ValueIteratorEntry::value() const {
   default:
     // TODO: support for LUA_TFUNCTION, LUA_TUSERDATA, LUA_TTHREAD and LUA_TLIGHTUSERDATA?
     return boost::any();
+  }
+}
+
+ValueIterator::ValueIterator(lua_State* l, Value& value) : copies_(new int), l_(l), entry_(l), is_end_(false) {
+  value.push();
+  lua_pushnil(l_);
+
+  if (lua_next(l_, -2) == 0) {
+    lua_pop(l_, 2);
+
+    // If there's no keys at all, just become an end() iterator.
+    is_end_ = true;
+    l_ = nullptr;
+    delete copies_;
+    copies_ = nullptr;
+  } else {
+    (*copies_) = 1;
+    num_to_pop_ = 2;
   }
 }
 

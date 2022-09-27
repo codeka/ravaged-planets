@@ -26,8 +26,6 @@ ParticleEffectComponent::~ParticleEffectComponent() {
 }
 
 void ParticleEffectComponent::apply_template(fw::lua::Value tmpl) {
-  // TODO: there's currently a limitation in that we cannot have an iterator inside an iterator of Lua values.
-  /*
   for (auto& kvp : tmpl) {
     auto name = kvp.key<std::string>();
     auto value = kvp.value<fw::lua::Value>();
@@ -42,7 +40,7 @@ void ParticleEffectComponent::apply_template(fw::lua::Value tmpl) {
     }
 
     effects_[name] = effect;
-  }*/
+  }
 }
 
 void ParticleEffectComponent::initialize() {
