@@ -21,7 +21,7 @@ private:
     float time_remaining;
     float percent_complete;
 
-    QueueEntry(const fw::lua::Value& tmpl) : tmpl(tmpl) {}
+    QueueEntry(const fw::lua::Value& tmpl) : tmpl(tmpl), time_to_build(0), time_remaining(0), percent_complete(0) {}
   };
   ParticleEffectComponent *_particle_effect_component;
   std::string build_group_;
@@ -40,6 +40,8 @@ public:
 
   void build(std::string name);
   bool is_building() const;
+
+  void set_target(const fw::Vector& target);
 
   void apply_template(fw::lua::Value tmpl) override;
   virtual void initialize();

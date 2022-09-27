@@ -23,7 +23,7 @@ public:
 
   // Evaluates to true if we are not nil.
   operator bool() const {
-    return l_ != nullptr;
+    return l_ != nullptr && ref_ != LUA_REFNIL;
   }
 
   void swap(Reference& other);

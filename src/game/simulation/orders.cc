@@ -120,16 +120,22 @@ MoveOrder::~MoveOrder() {
 
 void MoveOrder::begin(std::weak_ptr<ent::Entity> const &ent) {
   Order::begin(ent);
-  std::shared_ptr<ent::Entity> Entity(entity_);
+  std::shared_ptr<ent::Entity> entity(entity_);
 
   // move towards the component, if we don't have a moveable component, nothing will happen.
-  auto moveable = Entity->get_component<ent::MoveableComponent>();
+  auto moveable = entity->get_component<ent::MoveableComponent>();
   if (moveable != nullptr) {
     moveable->set_goal(goal);
   }
 
+  // if it has a builder component, then "move" commands actually just update the builder's target.
+  auto builder = entity->get_component<ent::BuilderComponent>();
+  if (builder != nullptr) {
+    builder->set_target(goal);
+  }
+
   // if it's got a weapon, clear the target (since we've now moving instead)
-  ent::WeaponComponent *weapon = Entity->get_component<ent::WeaponComponent>();
+  ent::WeaponComponent *weapon = entity->get_component<ent::WeaponComponent>();
   if (weapon != 0) {
     weapon->clear_target();
   }

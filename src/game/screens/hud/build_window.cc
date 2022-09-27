@@ -40,9 +40,7 @@ enum ids {
 
 //-----------------------------------------------------------------------------
 
-/**
- * Holds information nessecary to render an icon for a given Entity.
- */
+// Holds information nessecary to render an icon for a given Entity.
 class EntityIcon {
 private:
   float rotation_;
@@ -176,8 +174,8 @@ void BuildWindow::hide() {
   wnd_->set_visible(false);
 }
 
-void BuildWindow::refresh(std::weak_ptr<ent::Entity> Entity, std::string build_group) {
-  entity_ = Entity;
+void BuildWindow::refresh(std::weak_ptr<ent::Entity> entity, std::string build_group) {
+  entity_ = entity;
   build_group_ = build_group;
   require_refresh_ = true;
 }
@@ -240,12 +238,13 @@ void BuildWindow::do_refresh() {
       });
     }
 
-    std::string mesh_file_name = "";// luabind::object_cast<std::string>(tmpl["components"]["Mesh"]["FileName"]);
+    std::string mesh_file_name = tmpl["components"]["Mesh"]["FileName"];
+    std::string tmpl_name = tmpl["name"];
     fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
       std::shared_ptr<fw::Model> mdl =
           fw::Framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
       mdl->set_color(game::SimulationThread::get_instance()->get_local_player()->get_color());
-      icon->set_model(""/*luabind::object_cast<std::string>(tmpl["name"])*/, mdl);
+      icon->set_model(tmpl_name, mdl);
     });
 
     index ++;

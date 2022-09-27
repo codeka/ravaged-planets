@@ -58,7 +58,7 @@ void BuilderComponent::build(std::string name) {
     return; // TODO error?
   }
   QueueEntry entry(*tmpl);
-  entry.time_to_build = 2.0f;// TODO luabind::object_cast<float>(entry.tmpl["components"]["Buildable"]["TimeToBuild"]);
+  entry.time_to_build = entry.tmpl["components"]["Buildable"]["TimeToBuild"];
   entry.time_remaining = entry.time_to_build;
   entry.percent_complete = 0.0f;
   _build_queue.push(entry);
@@ -70,6 +70,10 @@ void BuilderComponent::build(std::string name) {
 
 bool BuilderComponent::is_building() const {
   return !_build_queue.empty();
+}
+
+void BuilderComponent::set_target(const fw::Vector& target) {
+  // TODO
 }
 
 void BuilderComponent::update(float dt) {
@@ -84,14 +88,14 @@ void BuilderComponent::update(float dt) {
     entry.percent_complete = 100.0f;
 
     // we've finished so actually create the Entity
-    std::shared_ptr<Entity> Entity(entity_);
-    OwnableComponent *our_ownable = Entity->get_component<OwnableComponent>();
+    std::shared_ptr<Entity> entity(entity_);
+    OwnableComponent *our_ownable = entity->get_component<OwnableComponent>();
     if (our_ownable != nullptr && our_ownable->is_local_or_ai_player()) {
-      PositionComponent *our_pos = Entity->get_component<PositionComponent>();
+      PositionComponent *our_pos = entity->get_component<PositionComponent>();
       if (our_pos != nullptr) {
         std::shared_ptr<game::CreateEntityCommand> cmd(
             game::create_command<game::CreateEntityCommand>(our_ownable->get_owner()->get_player_no()));
-        cmd->template_name = "test";// luabind::object_cast<std::string>(entry.tmpl["name"]);
+        cmd->template_name = entry.tmpl["name"];
         cmd->initial_position = our_pos->get_position();
         cmd->initial_goal = our_pos->get_position() + (our_pos->get_direction() * 3.0f);
         game::SimulationThread::get_instance()->post_command(cmd);

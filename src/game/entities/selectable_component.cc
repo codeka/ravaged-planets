@@ -70,8 +70,8 @@ void SelectableComponent::apply_template(fw::lua::Value tmpl) {
   }
 }
 
-void SelectableComponent::set_selection_radius(float ParticleRotation) {
-  selection_radius_ = ParticleRotation;
+void SelectableComponent::set_selection_radius(float value) {
+  selection_radius_ = value;
 }
 
 void SelectableComponent::highlight(fw::Color const &col) {

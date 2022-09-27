@@ -26,24 +26,30 @@ MoveableComponent::~MoveableComponent() {
 }
 
 void MoveableComponent::apply_template(fw::lua::Value tmpl) {
-  speed_ = tmpl["Speed"];
-  turn_speed_ = tmpl["TurnRadius"];
-  avoid_collisions_ = tmpl["AvoidCollisions"];
+  if (tmpl.has_key("Speed")) {
+    speed_ = tmpl["Speed"];
+  }
+  if (tmpl.has_key("TurnRadius")) {
+    turn_speed_ = tmpl["TurnRadius"];
+  }
+  if (tmpl.has_key("AvoidCollisions")) {
+    avoid_collisions_ = tmpl["AvoidCollisions"];
+  }
 }
 
 void MoveableComponent::initialize() {
-  std::shared_ptr<Entity> Entity(entity_);
-  pathing_component_ = Entity->get_component<PathingComponent>();
-  position_component_ = Entity->get_component<PositionComponent>();
+  std::shared_ptr<Entity> entity(entity_);
+  pathing_component_ = entity->get_component<PathingComponent>();
+  position_component_ = entity->get_component<PositionComponent>();
   goal_ = position_component_->get_position();
   is_moving_ = false;
 }
 
 // TODO: skip_pathing is such a hack
 void MoveableComponent::set_goal(fw::Vector goal, bool skip_pathing /*= false*/) {
-  std::shared_ptr<Entity> Entity(entity_);
-  float world_width = Entity->get_manager()->get_patch_manager()->get_world_width();
-  float world_length = Entity->get_manager()->get_patch_manager()->get_world_length();
+  std::shared_ptr<Entity> entity(entity_);
+  float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
+  float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
   // make sure we constraining the goal to the bounds of the map
   goal_ = fw::Vector(
@@ -53,14 +59,18 @@ void MoveableComponent::set_goal(fw::Vector goal, bool skip_pathing /*= false*/)
   if (skip_pathing || pathing_component_ == nullptr) {
     set_intermediate_goal(goal_);
   } else {
+    // Start off with intermedia_goal set to the current position, and stop moving until we get a path.
+    intermediate_goal_ = position_component_->get_position();
+    is_moving_ = false;
+
     pathing_component_->set_goal(goal_);
   }
 }
 
 void MoveableComponent::set_intermediate_goal(fw::Vector goal) {
-  std::shared_ptr<Entity> Entity(entity_);
-  float world_width = Entity->get_manager()->get_patch_manager()->get_world_width();
-  float world_length = Entity->get_manager()->get_patch_manager()->get_world_length();
+  std::shared_ptr<Entity> entity(entity_);
+  float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
+  float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
   // make sure we constraining the goal to the bounds of the map
   intermediate_goal_ = fw::Vector(
@@ -92,8 +102,8 @@ void MoveableComponent::update(float dt) {
     return;
   }
 
-  std::shared_ptr<Entity> Entity(entity_);
-  bool show_steering = (Entity->get_debug_view() != 0 && (Entity->get_debug_flags() & kDebugShowSteering) != 0);
+  std::shared_ptr<Entity> entity(entity_);
+  bool show_steering = (entity->get_debug_view() != 0 && (entity->get_debug_flags() & kDebugShowSteering) != 0);
 
   // if we're avoiding obstacles, we'll need to figure out what is the closest Entity to us
   if (avoid_collisions_) {
@@ -120,7 +130,7 @@ void MoveableComponent::update(float dt) {
           fw::Vector obstacle_pos = pos + obstacle_dir;
           if (show_steering) {
             // draw a circle around whatever we're trying to avoid
-            Entity->get_debug_view()->add_circle(obstacle_pos, obstacle_radius * 2.0f, fw::Color(1, 0, 0));
+            entity->get_debug_view()->add_circle(obstacle_pos, obstacle_radius * 2.0f, fw::Color(1, 0, 0));
           }
 
           // temporarily adjust the "goal" so as to avoid the obstacle
@@ -133,7 +143,7 @@ void MoveableComponent::update(float dt) {
 
           if (show_steering) {
             // draw a blue line from the obstacle in the direction we're going to travel to avoid it.
-            Entity->get_debug_view()->add_line(
+            entity->get_debug_view()->add_line(
                 obstacle_pos, obstacle_pos + (avoid_dir * (obstacle_radius * 2.0f)), fw::Color(0, 0, 1));
           }
 
@@ -156,7 +166,7 @@ void MoveableComponent::update(float dt) {
 
   if (show_steering) {
     // a line from us to the goal
-    Entity->get_debug_view()->add_line(pos, goal, fw::Color(0, 1, 0));
+    entity->get_debug_view()->add_line(pos, goal, fw::Color(0, 1, 0));
   }
 
   if (scale_factor < 1.0f) {

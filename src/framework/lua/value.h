@@ -200,7 +200,7 @@ public:
   template<typename T>
   T value() {
     push();
-    impl::PopStack(l_, 1);
+    impl::PopStack pop(l_, 1);
 
     return peek<T>(l_, -1);
   }
@@ -278,7 +278,7 @@ public:
   }
 
   bool is_nil() const {
-    return ref_;
+    return !ref_;
   }
 
   template<class T>

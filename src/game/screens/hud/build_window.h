@@ -32,7 +32,7 @@ public:
   BuildWindow();
   virtual ~BuildWindow();
 
-  void refresh(std::weak_ptr<ent::Entity> Entity, std::string build_group);
+  void refresh(std::weak_ptr<ent::Entity> entity, std::string build_group);
 
   void initialize();
   void update();

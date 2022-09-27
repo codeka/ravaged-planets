@@ -188,7 +188,7 @@ void display_exception(std::string const &msg) {
 void settings_initialize(int argc, char** argv) {
   po::options_description options("Additional options");
   options.add_options()("mesh-file",
-      po::value<std::string>()->default_value("factory"),
+      po::value<std::string>()->default_value("tank-tracks"),
       "Name of the mesh file to load, we assume it can be fw::resolve'd.");
 
   fw::Settings::initialize(options, argc, argv, "font-test.conf");
