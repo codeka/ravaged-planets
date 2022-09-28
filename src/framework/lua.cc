@@ -12,12 +12,32 @@ namespace fs = boost::filesystem;
 
 namespace fw::lua {
 
-void l_log_debug(std::string const &msg);
+namespace {
+
+class LogWrapper {
+private:
+  static void l_debug(fw::lua::MethodContext<LogWrapper>& ctx) {
+    ctx.owner()->debug(ctx.arg<std::string>(0));
+  }
+
+public:
+  void debug(std::string msg) {
+    fw::debug << msg << std::endl;
+  }
+
+  LUA_DECLARE_METATABLE(LogWrapper);
+};
+
+LUA_DEFINE_METATABLE(LogWrapper)
+    .method("debug", LogWrapper::l_debug);
+
+LogWrapper log_wrapper;
+
+}
 
 LuaContext::LuaContext() {
   l_ = luaL_newstate();
   luaL_openlibs(l_);
-//  luabind::open(_state);
 
   // sets up our custom functions and so on
   setup_state();
@@ -28,26 +48,23 @@ LuaContext::~LuaContext() {
 }
 
 void LuaContext::setup_state() {
-  // first, clear out the default package.path. we want to restrict where we look
-  // for scripts to just those areas that we control
-//  luabind::object package = luabind::globals(_state)["package"];
-//  if (package.is_valid()) {
-//    package["path"] = "";
-//  }
+  // first, clear out the default package.path. we want to restrict where we look for scripts to just those areas that
+  // we control.
+  fw::lua::Value package = globals()["package"];
+  if (!package.is_nil()) {
+    package["path"] = "";
+  }
 
   // add the log.debug() method
-//  luabind::module(_state, "log")
-//    [
-//      luabind::def("debug", &l_log_debug)
-//    ];
+  globals()["log"] = wrap(&log_wrapper);
 }
 
 void LuaContext::add_path(fs::path const &path) {
-//  luabind::object package = luabind::globals(_state)["package"];
-//  if (package.is_valid()) {
-//    // simply append the new path onto package.path
-//    package["path"] = boost::lexical_cast<std::string>(package["path"]) + ";" + path.string();
-//  }
+  fw::lua::Value package = globals()["package"];
+  if (!package.is_nil()) {
+    // simply append the new path onto package.path
+    package["path"] = std::string(package["path"]) + ";" + path.string();
+  }
 }
 
 bool LuaContext::load_script(fs::path const &filename) {

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <map>
-//#include <luabind/object.hpp>
+
+#include <framework/lua.h>
 
 #include <game/simulation/player.h>
 #include <game/ai/update_queue.h>
@@ -41,14 +42,14 @@ private:
 
   void issue_order(UnitWrapper *unit, luabind::object orders);
 
-  void l_set_ready();
-  void l_say(std::string const &msg);
-  void l_local_say(std::string const &msg);
-  void l_timer(float dt, luabind::object obj);
-  void l_register_unit(std::string name, luabind::object creator);
-  void l_event(std::string const &event_name, luabind::object obj);
-  luabind::object l_find_units(luabind::object params, lua_State* L);
-  void l_issue_order(luabind::object units, luabind::object orders);
+  static void l_set_ready(fw::lua::MethodContext<AIPlayer>& ctx);
+  static void l_say(fw::lua::MethodContext<AIPlayer>& ctx);
+  static void l_local_say(fw::lua::MethodContext<AIPlayer>& ctx);
+  static void l_timer(fw::lua::MethodContext<AIPlayer>& ctx);
+  static void l_register_unit(fw::lua::MethodContext<AIPlayer>& ctx);
+  static void l_event(fw::lua::MethodContext<AIPlayer>& ctx);
+  static void l_find_units(fw::lua::MethodContext<AIPlayer>& ctx);
+  static void l_issue_order(fw::lua::MethodContext<AIPlayer>& ctx);
 
 public:
   AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t player_no);
@@ -68,6 +69,8 @@ public:
 
   // gets value that indicates whether we're in a valid state or not
   bool is_valid_state() { return _is_valid; }
+
+  LUA_DECLARE_METATABLE(AIPlayer);
 };
 
 }

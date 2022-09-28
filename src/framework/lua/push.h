@@ -46,11 +46,6 @@ inline std::string peek(lua_State* l, int index) {
   return std::string(str, length);
 }
 
-template<typename T>
-T* peek_userdata(lua_State* l, int index) {
-  return reinterpret_cast<T*>(lua_touserdata(l, index));
-}
-
 // TODO: add more specializations as needed.
 
 }

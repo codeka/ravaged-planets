@@ -4,8 +4,6 @@
 #include <boost/program_options.hpp>
 
 #include <framework/lua.h>
-#include <framework/lua/method.h>
-#include <framework/lua/table.h>
 #include <framework/settings.h>
 #include <framework/framework.h>
 #include <framework/logging.h>
@@ -103,25 +101,27 @@ std::vector<unit_wrapper *> ai_player::find() {
 }
 */
 
-class LogWrapper {
+class TestClass {
 private:
-  static void l_debug(fw::lua::MethodContext<LogWrapper>& ctx) {
+  static void l_debug(fw::lua::MethodContext<TestClass>& ctx) {
     ctx.owner()->debug(ctx.arg<std::string>(0));
   }
 
 public:
   void debug(std::string msg) {
+    fw::debug << "debug " << n << std::endl;
     fw::debug << msg << std::endl;
   }
 
-  static fw::lua::Metatable<LogWrapper> metatable;
+  int n = 0;
+
+  LUA_DECLARE_METATABLE(TestClass);
 };
 
-fw::lua::Metatable<LogWrapper> LogWrapper::metatable =
-    fw::lua::Metatable<LogWrapper>("log", fw::lua::TableBuilder<LogWrapper>()
-        .method("debug", LogWrapper::l_debug));
+LUA_DEFINE_METATABLE(TestClass)
+    .method("debug", TestClass::l_debug);
 
-LogWrapper log_wrapper;
+TestClass test_class;
 
 //-----------------------------------------------------------------------------
 
@@ -143,7 +143,8 @@ int main(int argc, char** argv) {
     obj["test2"] = "and I will go into the West and remain Galadriel";
     ctx.globals()["test"] = obj;
 
-    ctx.globals()["log"] = ctx.wrap(&log_wrapper);
+    ctx.globals()["test_class"] = ctx.wrap(&test_class);
+    test_class.n = 200;
 
     ctx.add_path("D:\\src\\ravaged-planets\\lua");
     ctx.load_script("D:\\src\\ravaged-planets\\lua\\main.lua");

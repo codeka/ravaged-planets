@@ -32,22 +32,22 @@ end
 _log_contexts = {}
 
 -- Enables the given context that we'll log to the chat window
-function log.enable_context(context)
-  _log_contexts[context] = true
-end
+--function log.enable_context(context)
+--  _log_contexts[context] = true
+--end
 
 -- Disables the given context from being logged to the chat window
-function log.disable_context(context)
-  _log_contexts[context] = false
-end
+--function log.disable_context(context)
+--  _log_contexts[context] = false
+--end
 
 -- This is useful for debugging. You can selectively enable/disable a context in your setup, and then sprinkle
 -- log.say() throughout your code. The message is printed in the game's chat log.
-function log.say(context, msg)
-  if (_log_contexts[context] == true) then
-    player:local_say(msg)
-  end
-end
+--function log.say(context, msg)
+--  if (_log_contexts[context] == true) then
+--    player:local_say(msg)
+--  end
+--end
 
 
 -- This event is fired when the game starts. We just set the is_game_started flag

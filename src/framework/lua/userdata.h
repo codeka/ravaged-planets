@@ -23,6 +23,10 @@ public:
     lua_pop(l_, 1);
   }
 
+  T* owner() {
+    return object_;
+  }
+
   void push() const {
     lua_pushvalue(l_, index_);
   }

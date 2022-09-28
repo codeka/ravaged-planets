@@ -25,6 +25,17 @@ namespace fs = boost::filesystem;
 
 namespace game {
 
+LUA_DEFINE_METATABLE(AIPlayer)
+    .method("set_ready", AIPlayer::l_set_ready)
+    .method("say", AIPlayer::l_say)
+    .method("local_say", AIPlayer::l_local_say)
+    .method("timer", AIPlayer::l_timer)
+    .method("event", AIPlayer::l_event)
+    .method("register_unit", AIPlayer::l_register_unit)
+    .method("find_units", AIPlayer::l_find_units)
+    .method("issue_order", AIPlayer::l_issue_order);
+
+
 AIPlayer::AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t player_no) {
   _script_desc = desc;
   user_name_ = name;
@@ -40,19 +51,7 @@ AIPlayer::AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t play
   // functions and so on to it
   std::shared_ptr<fw::lua::LuaContext> script(new fw::lua::LuaContext());
 
-//  luabind::module(*script) [
-//      luabind::class_<ai_player>("ai_player")
-//          .def("set_ready", &ai_player::l_set_ready)
-//          .def("say", &ai_player::l_say)
-//          .def("local_say", &ai_player::l_local_say)
-//          .def("Timer", &ai_player::l_timer)
-//          .def("event", &ai_player::l_event)
-//          .def("register_unit", &ai_player::l_register_unit)
-//          .def("find_units", &ai_player::l_find_units, luabind::raw(_3))
-//          .def("issue_order", &ai_player::l_issue_order)
-//  ];
-//unit_wrapper::register_class(script);
-//  luabind::globals(*script)["player"] = this;
+  script->globals()["player"] = script->wrap(this);
   //player->self = luabind::get_globals(state)["player"];
 
   // add the ..\data\ai\common path to the package.path variable (so you can
@@ -73,30 +72,37 @@ AIPlayer::AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t play
 AIPlayer::~AIPlayer() {
 }
 
-void AIPlayer::l_set_ready() {
-  is_ready_to_start_ = true;
+/* static */
+void AIPlayer::l_set_ready(fw::lua::MethodContext<AIPlayer>& ctx) {
+  fw::debug << "setting AI player ready" << std::endl;
+  ctx.owner()->is_ready_to_start_ = true;
 }
 
-void AIPlayer::l_say(std::string const &msg) {
+/* static */
+void AIPlayer::l_say(fw::lua::MethodContext<AIPlayer>& ctx) {
   // just "say" whatever they told us to say...
   // todo: this should be a proper network call
-  SimulationThread::get_instance()->sig_chat(user_name_, msg);
+  SimulationThread::get_instance()->sig_chat(ctx.owner()->user_name_, ctx.arg<std::string>(0));
 }
 
-void AIPlayer::l_local_say(std::string const &msg) {
+/* static */
+void AIPlayer::l_local_say(fw::lua::MethodContext<AIPlayer>& ctx) {
+  std::string msg = ctx.arg<std::string>(0);
+
   fw::debug << "SAY : " << msg << std::endl;
   // just "say" whatever they told us to say... (but just locally, it's for debugging your scripts, basically)
-  SimulationThread::get_instance()->sig_chat(user_name_, msg);
+  SimulationThread::get_instance()->sig_chat(ctx.owner()->user_name_, msg);
 }
 
-void AIPlayer::l_timer(float dt, luabind::object obj) {
+/* static */
+void AIPlayer::l_timer(fw::lua::MethodContext<AIPlayer>& ctx) {
   // this is called to queue a LUA function to our update_queue so we can call a Lua function at the given time
 //  if (!obj.is_valid())
 //    return;
 
-  _upd_queue.push(dt, [obj]() mutable {
+//  _upd_queue.push(dt, [obj]() mutable {
 //    obj();
-  });
+//  });
 }
 
 void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, std::string> const &parameters) {
@@ -121,23 +127,25 @@ void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, s
   }
 }
 
-void AIPlayer::l_event(std::string const &event_name, luabind::object obj) {
+/* static */
+void AIPlayer::l_event(fw::lua::MethodContext<AIPlayer>& ctx) {
   // this is called to queue a LUA function when the given named event occurs.
 //  if (!obj.is_valid())
 //    return;
 
-  lua_event_map::iterator it = _event_map.find(event_name);
-  if (it == _event_map.end()) {
-    _event_map[event_name] = lua_event_map::mapped_type();
-    it = _event_map.find(event_name);
-  }
+//  lua_event_map::iterator it = _event_map.find(event_name);
+//  if (it == _event_map.end()) {
+//    _event_map[event_name] = lua_event_map::mapped_type();
+//    it = _event_map.find(event_name);
+//  }
 
-  it->second.push_back(obj);
+//  it->second.push_back(obj);
 }
 
 // registers the given "creator" function that we'll use to create subclasses of unit_wrapper with
-void AIPlayer::l_register_unit(std::string name, luabind::object creator) {
-  _unit_creator_map[name] = creator;
+/* static */
+void AIPlayer::l_register_unit(fw::lua::MethodContext<AIPlayer>& ctx) {
+//  _unit_creator_map[name] = creator;
 }
 
 // this is the predicate we pass to the Entity manager for our l_findunits() implementation
@@ -224,8 +232,9 @@ public:
 // this is the "workhorse" of the AI function. it searches for all
 // of the units which match the parameters given (note: because of the
 // luabind::adopt policy, LUA takes ownership of the object we return)
-luabind::object AIPlayer::l_find_units(luabind::object params, lua_State *L) {
-    luabind::object units;// = luabind::newtable(L);
+/* static */
+void AIPlayer::l_find_units(fw::lua::MethodContext<AIPlayer>& ctx) {
+//    luabind::object units;// = luabind::newtable(L);
 
   // if you pass something that's not a table as the first parameter,
   // we can't do anything so we just return an empty set.
@@ -234,37 +243,38 @@ luabind::object AIPlayer::l_find_units(luabind::object params, lua_State *L) {
 //  }
 
   // create the predicate object that does the actual searching
-  findunits_predicate pred(this, params);
+//  findunits_predicate pred(this, params);
 
   // do the actual search
-  ent::EntityManager *entmgr = game::World::get_instance()->get_entity_manager();
-  std::list<std::weak_ptr<ent::Entity>> entities = entmgr->get_entities(pred);
+//  ent::EntityManager *entmgr = game::World::get_instance()->get_entity_manager();
+//  std::list<std::weak_ptr<ent::Entity>> entities = entmgr->get_entities(pred);
 
-  int index = 1;
-  for(std::weak_ptr<ent::Entity> &wp : entities) {
-    luabind::object wrapper = get_unit_wrapper(wp);
+//  int index = 1;
+//  for(std::weak_ptr<ent::Entity> &wp : entities) {
+//    luabind::object wrapper = get_unit_wrapper(wp);
 //    if (!wrapper) {
 //      continue;
 //    }
 //    units[index++] = wrapper;
-  }
+//  }
 
   // and return the object
-  return units;
+//  return units;
 }
 
 // issues the given orders to the given units. We assime that units is an array
 // of unit_wrappers and orders is an object containing the parameters for the order.
-void AIPlayer::l_issue_order(luabind::object units, luabind::object orders) {
+/* static */
+void AIPlayer::l_issue_order(fw::lua::MethodContext<AIPlayer>& ctx) {
   // if you pass something that's not a table as the parameters, we can't do anything.
 //  if (luabind::type(units) != LUA_TTABLE || luabind::type(orders) != LUA_TTABLE) {
 //    return;
 //  }
 
-    boost::optional<UnitWrapper*> unit;// = luabind::object_cast_nothrow<unit_wrapper*>(units);
+//    boost::optional<UnitWrapper*> unit;// = luabind::object_cast_nothrow<unit_wrapper*>(units);
 //  if (unit) {
     // if they just passed one unit in, we'll just issue the order to that unit
-    issue_order(*unit, orders);
+//    issue_order(*unit, orders);
 //  } else {
 //    luabind::iterator end;
 //    for(luabind::iterator it(units); it != end; ++it) {
