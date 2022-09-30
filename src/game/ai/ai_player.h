@@ -26,7 +26,7 @@ private:
 
   ScriptDesc _script_desc;
   std::shared_ptr<fw::lua::LuaContext> _script;
-  UpdateQueue _upd_queue;
+  UpdateQueue _update_queue;
   lua_event_map _event_map;
   unit_creator_map _unit_creator_map;
   bool _is_valid;

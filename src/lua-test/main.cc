@@ -107,6 +107,10 @@ private:
     ctx.owner()->debug(ctx.arg<std::string>(0));
   }
 
+  static void l_register(fw::lua::MethodContext<TestClass>& ctx) {
+    ctx.owner()->callback = ctx.arg<fw::lua::Callback>(0);
+  }
+
 public:
   void debug(std::string msg) {
     fw::debug << "debug " << n << std::endl;
@@ -115,13 +119,14 @@ public:
 
   int n = 0;
 
+  fw::lua::Callback callback;
+
   LUA_DECLARE_METATABLE(TestClass);
 };
 
 LUA_DEFINE_METATABLE(TestClass)
-    .method("debug", TestClass::l_debug);
-
-TestClass test_class;
+    .method("debug", TestClass::l_debug)
+    .method("register", TestClass::l_register);
 
 //-----------------------------------------------------------------------------
 
@@ -133,7 +138,11 @@ int main(int argc, char** argv) {
     new fw::Framework(&app);
     fw::Framework::get_instance()->initialize("Lua Test");
 
+
     fw::lua::LuaContext ctx;
+
+    TestClass test_class;
+
 
     ctx.globals()["foo"] = "bar";
     ctx.globals()["baz"] = 123;
@@ -158,6 +167,8 @@ int main(int argc, char** argv) {
     for (auto& kvp : blah) {
       fw::debug << "key/value " << kvp.key<std::string>() << " - " << kvp.value<fw::lua::Value>() << std::endl;
     }
+
+    test_class.callback();
 
 /*
 

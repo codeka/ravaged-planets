@@ -42,7 +42,7 @@ AIPlayer::AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t play
   player_no_ = player_no;
 
   // we do one update of the update queue, to ensure it's ready to go
-  _upd_queue.update();
+  _update_queue.update();
 
   int color_index = static_cast<int>(fw::random() * player_colors.size());
   color_ = player_colors[color_index];
@@ -96,13 +96,12 @@ void AIPlayer::l_local_say(fw::lua::MethodContext<AIPlayer>& ctx) {
 
 /* static */
 void AIPlayer::l_timer(fw::lua::MethodContext<AIPlayer>& ctx) {
-  // this is called to queue a LUA function to our update_queue so we can call a Lua function at the given time
-//  if (!obj.is_valid())
-//    return;
-
-//  _upd_queue.push(dt, [obj]() mutable {
-//    obj();
-//  });
+  // this is called to queue a Lua function to our update_queue so we can call a Lua function at the given time
+  float time = ctx.arg<float>(0);
+  fw::lua::Callback fn = ctx.arg<fw::lua::Callback>(1);
+  ctx.owner()->_update_queue.push(time, [fn]() mutable {
+    fn();
+  });
 }
 
 void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, std::string> const &parameters) {
@@ -345,7 +344,7 @@ luabind::object AIPlayer::create_unit_wrapper(std::string const &entity_name) {
 }
 
 void AIPlayer::update() {
-  _upd_queue.update();
+  _update_queue.update();
 }
 
 // this is called when our local player is ready to start the game

@@ -42,7 +42,7 @@ add_library(framework
     ${ARCH_FILES}
     ${ARCH_HEADERS}
     ${PROTO_SRCS}
-)
+ "lua/callback.h")
 
 target_link_libraries(framework ${Boost_FILESYSTEM_LIBRARY})
 target_link_libraries(framework ${Boost_IOSTREAMS_LIBRARY})

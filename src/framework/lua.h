@@ -5,6 +5,7 @@
 #include <boost/filesystem.hpp>
 
 #include <framework/lua/base.h>
+#include <framework/lua/callback.h>
 #include <framework/lua/metatable.h>
 #include <framework/lua/method.h>
 #include <framework/lua/userdata.h>

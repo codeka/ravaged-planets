@@ -11,26 +11,61 @@ namespace fw::lua {
 class Reference {
 public:
   // Creates a reference to the nil value.
-  Reference();
+  inline Reference() : l_(nullptr), ref_(LUA_REFNIL) {
+  }
 
   // Create a reference to a value on the current Lua stack.
-  Reference(lua_State* l, int stack_index);
+  inline Reference(lua_State* l, int stack_index) : l_(l) {
+    lua_pushvalue(l_, stack_index);
+    ref_ = luaL_ref(l_, LUA_REGISTRYINDEX);
+  }
 
-  Reference(const Reference& copy);
-  Reference(const Reference&& move);
+  inline Reference(const Reference& copy)
+      : l_(copy.l_), ref_(LUA_REFNIL) {
+    if (l_ != nullptr) {
+      lua_rawgeti(l_, LUA_REGISTRYINDEX, copy.ref_);
+      ref_ = luaL_ref(l_, LUA_REGISTRYINDEX);
+    }
+  }
 
-  ~Reference();
+  inline ~Reference() {
+    if (l_ != nullptr && ref_ != LUA_REFNIL && ref_ != LUA_NOREF) {
+      luaL_unref(l_, LUA_REGISTRYINDEX, ref_);
+    }
+  }
 
   // Evaluates to true if we are not nil.
   operator bool() const {
     return l_ != nullptr && ref_ != LUA_REFNIL;
   }
 
-  void swap(Reference& other);
-  Reference& operator=(Reference other);
+  inline void swap(Reference& other) {
+    std::swap(l_, other.l_);
+    std::swap(ref_, other.ref_);
+  }
+
+  inline Reference& operator=(const Reference& other) {
+    if (ref_ != LUA_REFNIL) {
+      luaL_unref(l_, LUA_REGISTRYINDEX, ref_);
+    }
+
+    l_ = other.l_;
+    if (l_ != nullptr) {
+      lua_rawgeti(l_, LUA_REGISTRYINDEX, other.ref_);
+      ref_ = luaL_ref(l_, LUA_REGISTRYINDEX);
+    }
+
+    return *this;
+  }
 
   // Push this reference onto the stack so we can use it.
-  void push() const;
+  void push() const {
+    if (l_ == nullptr || ref_ == LUA_REFNIL) {
+      // TODO: push nil
+    } else {
+      lua_rawgeti(l_, LUA_REGISTRYINDEX, ref_);
+    }
+  }
 
   lua_State* l() {
     return l_;
