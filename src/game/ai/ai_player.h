@@ -19,7 +19,7 @@ namespace game {
 // have any friends.
 class AIPlayer : public Player {
 private:
-  typedef std::map<std::string, std::vector<luabind::object>> LuaEventMap;
+  typedef std::map<std::string, std::vector<fw::lua::Callback>> LuaEventMap;
   typedef std::map<std::string, fw::lua::Value> UnitCreatorMap;
 
   ScriptDesc script_desc_;

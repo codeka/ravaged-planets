@@ -281,7 +281,7 @@ public:
   }
 
   bool is_nil() const {
-    return !ref_;
+    return ref_.is_nil();
   }
 
   template<class T>
@@ -306,6 +306,10 @@ public:
   }
 
   std::string debug_string() const {
+    if (l_ == nullptr) {
+      return "nil";
+    }
+
     push();
     impl::PopStack pop(l_, 1);
 

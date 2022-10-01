@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include <framework/lua/base.h>
 
 namespace fw::lua {
@@ -34,9 +36,8 @@ public:
     }
   }
 
-  // Evaluates to true if we are not nil.
-  operator bool() const {
-    return l_ != nullptr && ref_ != LUA_REFNIL;
+  bool is_nil() const {
+    return l_ == nullptr || ref_ == LUA_REFNIL;
   }
 
   inline void swap(Reference& other) {
@@ -72,11 +73,17 @@ public:
   }
 
 private:
-  lua_State* l_;
+  friend std::ostream& operator<<(std::ostream& os, const Reference& r);
+  mutable lua_State* l_;
   int ref_;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const Reference& r) {
+  r.push();
+  impl::PopStack pop(r.l_, 1);
 
-
+  os << "[ref " << r.ref_ << " " << lua_typename(r.l_, lua_type(r.l_, -1)) << "]";
+  return os;
+}
 
 }

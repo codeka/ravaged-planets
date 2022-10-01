@@ -110,35 +110,31 @@ void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, s
   if (it == event_map_.end())
     return;
 
-  luabind::object lua_params;
+  fw::lua::Value lua_params = script_->create_table();
   for(auto it = parameters.begin(); it != parameters.end(); ++it) {
-    //lua_params[it->first] = it->second;
+    lua_params[it->first] = it->second;
   }
 
   for(auto& obj : it->second) {
-//    try {
-//      obj(event_name);
- //   } catch (luabind::error &e) {
- //     luabind::object error_msg(luabind::from_stack(e.state(), -1));
-  //    fw::debug << boost::format("An exception occured executing a Lua event handler\n%1%\n%2%")
- //         % e.what() % error_msg << std::endl;
- //   }
+    // TODO: handle errors gracefully?
+    obj(event_name, lua_params);
   }
 }
 
 /* static */
 void AIPlayer::l_event(fw::lua::MethodContext<AIPlayer>& ctx) {
   // this is called to queue a LUA function when the given named event occurs.
-//  if (!obj.is_valid())
-//    return;
+  std::string event_name = ctx.arg<std::string>(0);
+  fw::lua::Callback event_callback = ctx.arg<fw::lua::Callback>(1);
 
-//  lua_event_map::iterator it = _event_map.find(event_name);
-//  if (it == _event_map.end()) {
-//    _event_map[event_name] = lua_event_map::mapped_type();
-//    it = _event_map.find(event_name);
-//  }
+  auto& event_map = ctx.owner()->event_map_;
+  auto it = event_map.find(event_name);
+  if (it == event_map.end()) {
+    event_map[event_name] = LuaEventMap::mapped_type();
+    it = event_map.find(event_name);
+  }
 
-//  it->second.push_back(obj);
+  it->second.push_back(event_callback);
 }
 
 // registers the given "creator" function that we'll use to create subclasses of unit_wrapper with

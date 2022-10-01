@@ -9,6 +9,7 @@ require ("factory")
 
 -- first thing we do is set ourselves ready
 player:set_ready()
+log:debug("joined game, ready to go")
 
 -- Enable some logging contexts so that we can see these messages in the chat log (for debugging).
 --log.enable_context("attack")
