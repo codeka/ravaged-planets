@@ -15,30 +15,28 @@ class LuaContext;
 
 namespace game {
 
-/**
- * This implementation of player provides an AI player so that you can play against the computer, if you don't
- * have any friends.
- */
+// This implementation of player provides an AI player so that you can play against the computer, if you don't
+// have any friends.
 class AIPlayer : public Player {
 private:
-  typedef std::map<std::string, std::vector<luabind::object>> lua_event_map;
-  typedef std::map<std::string, luabind::object> unit_creator_map;
+  typedef std::map<std::string, std::vector<luabind::object>> LuaEventMap;
+  typedef std::map<std::string, fw::lua::Value> UnitCreatorMap;
 
-  ScriptDesc _script_desc;
-  std::shared_ptr<fw::lua::LuaContext> _script;
-  UpdateQueue _update_queue;
-  lua_event_map _event_map;
-  unit_creator_map _unit_creator_map;
-  bool _is_valid;
+  ScriptDesc script_desc_;
+  std::shared_ptr<fw::lua::LuaContext> script_;
+  UpdateQueue update_queue_;
+  LuaEventMap event_map_;
+  UnitCreatorMap unit_creator_map_;
+  bool is_valid_;
 
   void fire_event(std::string const &event_name,
      std::map<std::string, std::string> const &parameters = std::map<std::string, std::string>());
 
-  /** Helper function that returns the unit_wrapper (as a luabind::object) for the given Entity. */
-  luabind::object get_unit_wrapper(std::weak_ptr<ent::Entity> wp);
+  // Helper function that returns the unit_wrapper (as a luabind::object) for the given Entity.
+  fw::lua::Value get_unit_wrapper(std::weak_ptr<ent::Entity> wp);
 
-  /** Creates a unit_wrapper for entities of the given type. */
-  luabind::object create_unit_wrapper(std::string const &entity_name);
+  // Creates a unit_wrapper for entities of the given type.
+  fw::lua::Value create_unit_wrapper(std::string const &entity_name);
 
   void issue_order(UnitWrapper *unit, luabind::object orders);
 
@@ -68,7 +66,7 @@ public:
   virtual void post_commands(std::vector<std::shared_ptr<Command> > &commands);
 
   // gets value that indicates whether we're in a valid state or not
-  bool is_valid_state() { return _is_valid; }
+  bool is_valid_state() { return is_valid_; }
 
   LUA_DECLARE_METATABLE(AIPlayer);
 };

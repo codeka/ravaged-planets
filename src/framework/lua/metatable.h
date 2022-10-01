@@ -94,7 +94,6 @@ inline void Metatable<Owner>::build(lua_State* l) {
     const fw::lua::MethodClosure<Owner>* closure = \
         reinterpret_cast<const fw::lua::MethodClosure<Owner>*>(lua_topointer(l, lua_upvalueindex(1))); \
     closure->call(l, userdata); \
-    fw::debug << "this is called here" << std::endl; \
     return 0; \
   } \
   fw::lua::Metatable<Owner> Owner ::metatable = fw::lua::Metatable<Owner>(#Owner, &fw_lua_callback_ ## Owner)

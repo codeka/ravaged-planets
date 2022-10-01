@@ -1,8 +1,6 @@
 
-//#include <luabind/luabind.hpp>
-//#include <luabind/adopt_policy.hpp>
-
 #include <framework/lua.h>
+#include <framework/logging.h>
 
 #include <game/ai/unit_wrapper.h>
 #include <game/simulation/player.h>
@@ -12,6 +10,11 @@
 #include <game/entities/orderable_component.h>
 
 namespace game {
+
+LUA_DEFINE_METATABLE(UnitWrapper)
+;
+
+
 // registers our class and methods and stuff in the given lua_State
 void UnitWrapper::register_class(lua_State *state) {
 //  luabind::module(state) [

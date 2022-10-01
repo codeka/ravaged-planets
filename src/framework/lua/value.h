@@ -259,6 +259,9 @@ private:
 // Represents a value residing in the Lua registry.
 class Value : public BaseValue<Value> {
 public:
+  // Constructs a value that refers to nil.
+  Value(): BaseValue<Value>(nullptr) {}
+
   // Constructs a value from a reference residing on the Lua stack.
   Value(lua_State* l, int stack_index)
     : BaseValue<Value>(l), ref_(l, stack_index) {

@@ -32,7 +32,6 @@ void EntityFactory::populate(std::shared_ptr<Entity> ent, std::string name) {
     fw::debug << boost::format("  warning: unknown Entity: %1%") % name << std::endl;
     return;
   }
-  fw::debug << boost::format("  populating entity: %1%") % name << std::endl;
 
   // add all of the attributes before we add any of the components, as the components might want to refer to the
   // attributes.
@@ -43,7 +42,6 @@ void EntityFactory::populate(std::shared_ptr<Entity> ent, std::string name) {
     }
 
     ent->add_attribute(EntityAttribute(key_name, kvp.value<boost::any>()));
-    fw::debug << "    attribute \"" << key_name << "\" = " << kvp.value<std::string>() << std::endl;
   }
 
   // then add all of the components as well
@@ -53,7 +51,6 @@ void EntityFactory::populate(std::shared_ptr<Entity> ent, std::string name) {
     EntityComponent* component = create_component(kvp.key<std::string>());
     if (component != nullptr) {
       component->apply_template(kvp.value<fw::lua::Value>());
-      fw::debug << "    component \"" << kvp.key<std::string> () << "\" = " << kvp.value<std::string>() << std::endl;
       ent->add_component(component);
       component->set_entity(ent);
     }

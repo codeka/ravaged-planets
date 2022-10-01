@@ -32,6 +32,8 @@ public:
   std::weak_ptr<ent::Entity> get_entity() const {
     return entity_;
   }
+
+  LUA_DECLARE_METATABLE(UnitWrapper);
 };
 
 }

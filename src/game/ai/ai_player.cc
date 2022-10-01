@@ -37,12 +37,12 @@ LUA_DEFINE_METATABLE(AIPlayer)
 
 
 AIPlayer::AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t player_no) {
-  _script_desc = desc;
+  script_desc_ = desc;
   user_name_ = name;
   player_no_ = player_no;
 
   // we do one update of the update queue, to ensure it's ready to go
-  _update_queue.update();
+  update_queue_.update();
 
   int color_index = static_cast<int>(fw::random() * player_colors.size());
   color_ = player_colors[color_index];
@@ -59,13 +59,13 @@ AIPlayer::AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t play
   script->add_path(fw::install_base_path() / "ai/common/?.lua");
 
   // also add the AI script's directory so we can pick up any extra scripts you might have defined
-  script->add_path(_script_desc.filename.parent_path() / "?.lua");
+  script->add_path(script_desc_.filename.parent_path() / "?.lua");
 
-  if (!script->load_script(_script_desc.filename.string())) {
-    _is_valid = false;
+  if (!script->load_script(script_desc_.filename.string())) {
+    is_valid_ = false;
   } else {
-    _is_valid = true;
-    _script = script;
+    is_valid_ = true;
+    script_ = script;
   }
 }
 
@@ -99,15 +99,15 @@ void AIPlayer::l_timer(fw::lua::MethodContext<AIPlayer>& ctx) {
   // this is called to queue a Lua function to our update_queue so we can call a Lua function at the given time
   float time = ctx.arg<float>(0);
   fw::lua::Callback fn = ctx.arg<fw::lua::Callback>(1);
-  ctx.owner()->_update_queue.push(time, [fn]() mutable {
+  ctx.owner()->update_queue_.push(time, [fn]() mutable {
     fn();
   });
 }
 
 void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, std::string> const &parameters) {
   // fires the given named event (which'll fire off all our lua callbacks)
-  lua_event_map::iterator it = _event_map.find(event_name);
-  if (it == _event_map.end())
+  auto it = event_map_.find(event_name);
+  if (it == event_map_.end())
     return;
 
   luabind::object lua_params;
@@ -144,7 +144,9 @@ void AIPlayer::l_event(fw::lua::MethodContext<AIPlayer>& ctx) {
 // registers the given "creator" function that we'll use to create subclasses of unit_wrapper with
 /* static */
 void AIPlayer::l_register_unit(fw::lua::MethodContext<AIPlayer>& ctx) {
-//  _unit_creator_map[name] = creator;
+  std::string name = ctx.arg<std::string>(0);
+  fw::lua::Value creator_class = ctx.arg<fw::lua::Value>(1);
+  ctx.owner()->unit_creator_map_[name] = creator_class;
 }
 
 // this is the predicate we pass to the Entity manager for our l_findunits() implementation
@@ -314,25 +316,25 @@ void AIPlayer::issue_order(UnitWrapper *unit, luabind::object orders) {
   }
 }
 
-luabind::object AIPlayer::get_unit_wrapper(std::weak_ptr<ent::Entity> wp) {
+fw::lua::Value AIPlayer::get_unit_wrapper(std::weak_ptr<ent::Entity> wp) {
   std::shared_ptr<ent::Entity> ent = wp.lock();
   if (!ent) {
-    return luabind::object();
+    return fw::lua::Value();
   }
 
   ent::EntityAttribute *attr = ent->get_attribute("ai_wrapper");
   if (attr == nullptr) {
-    luabind::object wrapper = create_unit_wrapper(ent->get_name());
+    fw::lua::Value wrapper = create_unit_wrapper(ent->get_name());
 //    luabind::object_cast<unit_wrapper *>(wrapper)->set_entity(wp);
     ent->add_attribute(ent::EntityAttribute("ai_wrapper", wrapper));
     attr = ent->get_attribute("ai_wrapper");
   }
 
-  return attr->get_value<luabind::object>();
+  return attr->get_value<fw::lua::Value>();
 }
 
-luabind::object AIPlayer::create_unit_wrapper(std::string const &entity_name) {
-  unit_creator_map::iterator it = _unit_creator_map.find(entity_name);
+fw::lua::Value AIPlayer::create_unit_wrapper(std::string const &entity_name) {
+  auto it = unit_creator_map_.find(entity_name);
 //  if (it != _unit_creator_map.end() && it->second.is_valid()) {
 //    return it->second() [luabind::adopt(luabind::result)];
 //  }
@@ -340,11 +342,11 @@ luabind::object AIPlayer::create_unit_wrapper(std::string const &entity_name) {
   // if we don't have a specific wrapper for this unit type, just create a generic
   // one and return that instead
 //  return luabind::call_function<luabind::object>(*_script, "Unit");
-  return luabind::object();
+  return fw::lua::Value();
 }
 
 void AIPlayer::update() {
-  _update_queue.update();
+  update_queue_.update();
 }
 
 // this is called when our local player is ready to start the game
