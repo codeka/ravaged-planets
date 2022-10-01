@@ -2,6 +2,7 @@
 
 #include <framework/logging.h>
 #include <framework/lua/base.h>
+#include <framework/lua/error.h>
 #include <framework/lua/reference.h>
 
 namespace fw::lua {
@@ -24,6 +25,8 @@ public:
   template<typename... Arg>
   inline void operator ()(Arg... args) {
     fw::debug << "call " << ref_ << "(";
+    impl::push_error_handler(l_);
+    impl::PopStack pop(l_, 1);
 
     ref_.push();
     call(0, args...);
@@ -37,7 +40,7 @@ private:
   inline void call(int num_args) {
     fw::debug << ")" << std::endl;
 
-    int err = lua_pcall(l_, num_args, 0, 0);
+    int err = lua_pcall(l_, num_args, 0, lua_gettop(l_) - num_args - 1);
     if (err != 0) {
       // TODO: throw exception?
       fw::debug << "Error calling callback with " << num_args << " arguments, err=" << err << std::endl;
