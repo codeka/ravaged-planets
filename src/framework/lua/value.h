@@ -142,7 +142,7 @@ public:
   }
 
 protected:
-  lua_State* l_;
+  mutable lua_State* l_;
 
 private:
   inline Derived& derived() {
@@ -260,11 +260,11 @@ private:
 class Value : public BaseValue<Value> {
 public:
   // Constructs a value that refers to nil.
-  Value(): BaseValue<Value>(nullptr) {}
+  Value(): BaseValue<Value>(nullptr), type_(LUA_TNIL) {}
 
   // Constructs a value from a reference residing on the Lua stack.
   Value(lua_State* l, int stack_index)
-    : BaseValue<Value>(l), ref_(l, stack_index) {
+    : BaseValue<Value>(l), ref_(l, stack_index), type_(lua_type(l, stack_index)) {
   }
 
   // Construts a new value with the given value and puts it in the registry.
@@ -273,6 +273,7 @@ public:
     : BaseValue<Value>(l) {
     push(value);
     ref_(l, -1);
+    type_ = lua_type(l, -1);
   }
 
   // Push this value onto the Lua stack.
@@ -282,6 +283,18 @@ public:
 
   bool is_nil() const {
     return ref_.is_nil();
+  }
+
+  int type() const {
+    return type_;
+  }
+
+  template<typename T>
+  T as() const {
+    push();
+    impl::PopStack pop(l_, 1);
+
+    return peek<T>(l_, -1);
   }
 
   template<class T>
@@ -331,6 +344,7 @@ public:
 private:
   // A reference to the value we hold.
   Reference ref_;
+  int type_;
 };
 
 // Allows us to log a Lua value.

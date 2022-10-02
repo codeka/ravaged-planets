@@ -145,41 +145,40 @@ void AIPlayer::l_register_unit(fw::lua::MethodContext<AIPlayer>& ctx) {
   ctx.owner()->unit_creator_map_[name] = creator_class;
 }
 
-// this is the predicate we pass to the Entity manager for our l_findunits() implementation
-struct findunits_predicate {
+// this is the predicate we pass to the Entity manager for our l_find_units() implementation
+struct FindUnitsPredicate {
 private:
-  AIPlayer *_plyr;
-  std::vector<uint8_t> _player_nos;
-  std::string _unit_type;
+  AIPlayer *player_;
+  std::vector<uint8_t> player_nos_;
+  std::string unit_type_;
   std::string state_;
 
 public:
-  inline findunits_predicate(AIPlayer *plyr, luabind::object &params) : _plyr(plyr) {
-//    luabind::iterator end;
-/*    for (luabind::iterator it(params); it != end; ++it) {
-      std::string key = luabind::object_cast<std::string>(it.key());
+  inline FindUnitsPredicate(AIPlayer *plyr, fw::lua::Value &params) : player_(plyr) {
+    for (auto& kvp : params) {
+      const std::string key = kvp.key<std::string>();
 
       if (key == "players" || key == "player") {
-        luabind::object value = *it;
-        if (luabind::type(value) == LUA_TTABLE) {
+        const fw::lua::Value value = kvp.value<fw::lua::Value>();
+        if (value.type() == LUA_TTABLE) {
           // if it's a table, we treat it as an array
           fw::debug << "TODO: specifying multiple player_nos is not implemented" << std::endl;
         } else {
           // if it's not a table, it should be an integer
-          _player_nos.push_back(luabind::object_cast<uint8_t>(value));
+          player_nos_.push_back(static_cast<uint8_t>(value.as<int>()));
         }
       } else if (key == "unit_type") {
-        _unit_type = luabind::object_cast<std::string>(*it);
+        unit_type_ = kvp.value<std::string>();
       } else if (key == "state") {
-        _state = luabind::object_cast<std::string>(*it);
+        state_ = kvp.value<std::string>();
       } else {
         fw::debug << boost::format("WARN: unknown option for findunits: %1%") % key << std::endl;
       }
-    }*/
+    }
 
     // set up some defaults if they didn't get set already...
-    if (_player_nos.size() == 0) {
-      _player_nos.push_back(plyr->get_player_no());
+    if (player_nos_.size() == 0) {
+      player_nos_.push_back(plyr->get_player_no());
     }
   }
 
@@ -191,7 +190,7 @@ public:
 
     // check that it's one of the players we've asked for
     bool wrong_player = true;
-    for(uint8_t player_no : _player_nos) {
+    for(uint8_t player_no : player_nos_) {
       if (player_no == ownable->get_owner()->get_player_no()) {
         wrong_player = false;
         break;
@@ -202,8 +201,8 @@ public:
     }
 
     // if we're looking for a specific unit_type, check the Entity's name
-    if (_unit_type != "") {
-      if (_unit_type != ent->get_name()) {
+    if (unit_type_ != "") {
+      if (unit_type_ != ent->get_name()) {
         return false;
       }
     }
@@ -226,37 +225,34 @@ public:
   }
 };
 
-// this is the "workhorse" of the AI function. it searches for all
-// of the units which match the parameters given (note: because of the
-// luabind::adopt policy, LUA takes ownership of the object we return)
+// this is the "workhorse" of the AI function. it searches for all of the units which match the parameters given
 /* static */
 void AIPlayer::l_find_units(fw::lua::MethodContext<AIPlayer>& ctx) {
-//    luabind::object units;// = luabind::newtable(L);
+  fw::lua::Value filter = ctx.arg<fw::lua::Value>(0);
+  fw::lua::Value units = ctx.owner()->find_units(filter);
+  ctx.return_value(units);
+}
 
-  // if you pass something that's not a table as the first parameter,
-  // we can't do anything so we just return an empty set.
-//  if (luabind::type(params) != LUA_TTABLE) {
-//    return units;
-//  }
-
+fw::lua::Value AIPlayer::find_units(fw::lua::Value filter) {
   // create the predicate object that does the actual searching
-//  findunits_predicate pred(this, params);
+  FindUnitsPredicate pred(this, filter);
 
   // do the actual search
-//  ent::EntityManager *entmgr = game::World::get_instance()->get_entity_manager();
-//  std::list<std::weak_ptr<ent::Entity>> entities = entmgr->get_entities(pred);
+  ent::EntityManager *entity_manager = game::World::get_instance()->get_entity_manager();
+  auto entities = entity_manager->get_entities(pred);
 
-//  int index = 1;
-//  for(std::weak_ptr<ent::Entity> &wp : entities) {
-//    luabind::object wrapper = get_unit_wrapper(wp);
-//    if (!wrapper) {
-//      continue;
-//    }
-//    units[index++] = wrapper;
-//  }
+  fw::lua::Value units = script_->create_table();
+  int index = 1;
+  for(auto &wp : entities) {
+    auto wrapper = get_unit_wrapper(wp);
+    if (wrapper.is_nil()) {
+      continue;
+    }
+    units[index++] = wrapper;
+  }
 
   // and return the object
-//  return units;
+  return units;
 }
 
 // issues the given orders to the given units. We assime that units is an array
@@ -312,33 +308,33 @@ void AIPlayer::issue_order(UnitWrapper *unit, luabind::object orders) {
   }
 }
 
-fw::lua::Value AIPlayer::get_unit_wrapper(std::weak_ptr<ent::Entity> wp) {
+fw::lua::Userdata<UnitWrapper> AIPlayer::get_unit_wrapper(std::weak_ptr<ent::Entity> wp) {
   std::shared_ptr<ent::Entity> ent = wp.lock();
   if (!ent) {
-    return fw::lua::Value();
+    return fw::lua::Userdata<UnitWrapper>();
   }
 
   ent::EntityAttribute *attr = ent->get_attribute("ai_wrapper");
   if (attr == nullptr) {
-    fw::lua::Value wrapper = create_unit_wrapper(ent->get_name());
+    fw::lua::Userdata<UnitWrapper> wrapper = create_unit_wrapper(ent);
 //    luabind::object_cast<unit_wrapper *>(wrapper)->set_entity(wp);
     ent->add_attribute(ent::EntityAttribute("ai_wrapper", wrapper));
     attr = ent->get_attribute("ai_wrapper");
   }
 
-  return attr->get_value<fw::lua::Value>();
+  return attr->get_value<fw::lua::Userdata<UnitWrapper>>();
 }
 
-fw::lua::Value AIPlayer::create_unit_wrapper(std::string const &entity_name) {
-  auto it = unit_creator_map_.find(entity_name);
+fw::lua::Userdata<UnitWrapper> AIPlayer::create_unit_wrapper(std::shared_ptr<ent::Entity> ent) {
+  // TODO: if the script has a wrapper, use that instead.
+//  auto it = unit_creator_map_.find(entity_name);
 //  if (it != _unit_creator_map.end() && it->second.is_valid()) {
 //    return it->second() [luabind::adopt(luabind::result)];
 //  }
 
-  // if we don't have a specific wrapper for this unit type, just create a generic
-  // one and return that instead
-//  return luabind::call_function<luabind::object>(*_script, "Unit");
-  return fw::lua::Value();
+  // if we don't have a specific wrapper for this unit type, just create a generic one and return that instead.
+  UnitWrapper* wrapper = new UnitWrapper(ent);
+  return script_->wrap(wrapper);
 }
 
 void AIPlayer::update() {

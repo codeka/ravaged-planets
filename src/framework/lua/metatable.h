@@ -22,12 +22,16 @@ public:
     return *this;
   }
 
-  lua_CFunction callback() const {
+  inline std::string name() const {
+    return name_;
+  }
+
+  inline lua_CFunction callback() const {
     return callback_;
   }
 
   // Pushes this metatable (possibly creating it if it doesn't already exist) onto the stack.
-  void push(lua_State* l) {
+  inline void push(lua_State* l) {
     if (luaL_newmetatable(l, name_.c_str()) == 0) {
       // Already exists, we're done.
       return;
@@ -93,8 +97,7 @@ inline void Metatable<Owner>::build(lua_State* l) {
     } \
     const fw::lua::MethodClosure<Owner>* closure = \
         reinterpret_cast<const fw::lua::MethodClosure<Owner>*>(lua_topointer(l, lua_upvalueindex(1))); \
-    closure->call(l, userdata); \
-    return 0; \
+    return closure->call(l, userdata); \
   } \
   fw::lua::Metatable<Owner> Owner ::metatable = fw::lua::Metatable<Owner>(#Owner, &fw_lua_callback_ ## Owner)
 

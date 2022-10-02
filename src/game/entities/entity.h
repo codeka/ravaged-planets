@@ -93,6 +93,7 @@ private:
   std::map<int, EntityComponent *> components_;
   std::map<std::string, EntityAttribute> attributes_;
   std::weak_ptr<Entity> creator_;
+  std::vector<std::function<void()>> cleanup_functions_;
   entity_id id_;
   float create_time_;
   std::string name_;
@@ -123,6 +124,11 @@ public:
   // or something, this is the Entity which fired us).
   std::weak_ptr<Entity> get_creator() const {
     return creator_;
+  }
+
+  // Adds a function that'll be called to clean up any extra memory or resources associated with this entity.
+  void add_cleanup_function(std::function<void()> fn) {
+    cleanup_functions_.push_back(fn);
   }
 
   // this is called after all the components have been added and so on.

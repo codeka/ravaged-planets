@@ -21,8 +21,11 @@ Entity::Entity(EntityManager *mgr, entity_id id) :
 }
 
 Entity::~Entity() {
-  for(auto &pair : components_) {
+  for(auto& pair : components_) {
     delete pair.second;
+  }
+  for (auto& cleanup_fn : cleanup_functions_) {
+    cleanup_fn();
   }
 }
 

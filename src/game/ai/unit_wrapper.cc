@@ -12,31 +12,27 @@
 namespace game {
 
 LUA_DEFINE_METATABLE(UnitWrapper)
-;
+    .method("get_kind", UnitWrapper::l_get_kind)
+    .method("get_state", UnitWrapper::l_get_state)
+    .method("get_player_no", UnitWrapper::l_get_player_no);
 
-
-// registers our class and methods and stuff in the given lua_State
-void UnitWrapper::register_class(lua_State *state) {
-//  luabind::module(state) [
-//      luabind::class_<unit_wrapper>("Unit")
-//          .def(luabind::constructor<>())
-//          .property("kind", &unit_wrapper::l_get_kind)
-//          .property("player_no", &unit_wrapper::l_get_player_no)
-//          .property("state", &unit_wrapper::l_get_state)
-//  ];
-}
-
-void UnitWrapper::set_entity(std::weak_ptr<ent::Entity> const &ent) {
-  entity_ = ent;
-
+UnitWrapper::UnitWrapper(std::weak_ptr<ent::Entity> ent) : entity_(ent) {
   std::shared_ptr<ent::Entity> sp = entity_.lock();
   if (sp) {
     ownable_ = sp->get_component<ent::OwnableComponent>();
     orderable_ = sp->get_component<ent::OrderableComponent>();
+  } else {
+    ownable_ = nullptr;
+    orderable_ = nullptr;
   }
 }
 
-std::string UnitWrapper::l_get_kind() {
+/* static */
+void UnitWrapper::l_get_kind(fw::lua::MethodContext<UnitWrapper>& ctx) {
+  ctx.return_value(ctx.owner()->get_kind());
+}
+
+std::string UnitWrapper::get_kind() {
   std::shared_ptr<ent::Entity> ent = entity_.lock();
   if (ent) {
     return ent->get_name();
@@ -45,9 +41,14 @@ std::string UnitWrapper::l_get_kind() {
   }
 }
 
-std::string UnitWrapper::l_get_state() {
-  std::shared_ptr<ent::Entity> Entity = entity_.lock();
-  if (Entity && orderable_ != nullptr) {
+/* static */
+void UnitWrapper::l_get_state(fw::lua::MethodContext<UnitWrapper>& ctx) {
+  ctx.return_value(ctx.owner()->get_state());
+}
+
+std::string UnitWrapper::get_state() {
+  std::shared_ptr<ent::Entity> entity = entity_.lock();
+  if (entity && orderable_ != nullptr) {
     std::shared_ptr<game::Order> curr_order = orderable_->get_current_order();
     if (curr_order) {
       return curr_order->get_state_name();
@@ -57,9 +58,14 @@ std::string UnitWrapper::l_get_state() {
   return "idle";
 }
 
-int UnitWrapper::l_get_player_no() {
-  std::shared_ptr<ent::Entity> Entity = entity_.lock();
-  if (Entity) {
+/* static */
+void UnitWrapper::l_get_player_no(fw::lua::MethodContext<UnitWrapper>& ctx) {
+  ctx.return_value(ctx.owner()->get_player_no());
+}
+
+int UnitWrapper::get_player_no() {
+  std::shared_ptr<ent::Entity> entity = entity_.lock();
+  if (entity) {
     return static_cast<int>(ownable_->get_owner()->get_player_no());
   }
 

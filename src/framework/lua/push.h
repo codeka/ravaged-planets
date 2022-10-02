@@ -55,6 +55,12 @@ inline float peek(lua_State* l, int index) {
 }
 
 template<>
+inline int peek(lua_State* l, int index) {
+  lua_Number n = lua_tonumber(l, index);
+  return static_cast<int>(n);
+}
+
+template<>
 inline fw::lua::Callback peek(lua_State* l, int index) {
   return fw::lua::Callback(l, index);
 }

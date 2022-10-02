@@ -8,12 +8,16 @@ namespace fw::lua {
 template<typename Owner>
 class MethodContext {
 public:
-  MethodContext(lua_State* l, Userdata<Owner>* userdata) : l_(l), userdata_(userdata) {
+  MethodContext(lua_State* l, Userdata<Owner>* userdata) : l_(l), userdata_(userdata), num_return_values_(0) {
   }
 
-  /** Gets the "owner" of this method call. */
+  // Gets the "owner" of this method call.
   Owner* owner() {
     return userdata_->owner();
+  }
+
+  int num_return_values() const {
+    return num_return_values_;
   }
 
   template<typename T>
@@ -23,24 +27,33 @@ public:
     return peek<T>(l_, index + 2);
   }
 
+  template<typename T>
+  void return_value(const T& value) {
+    push(l_, value);
+    num_return_values_++;
+  }
+
 private:
   lua_State* l_;
   Userdata<Owner>* userdata_;
+  int num_return_values_;
 };
 
 template<typename Owner>
 using MethodCall = std::function<void(MethodContext<Owner>&)>;
 
-// Contains the information we care about for a method call. Basically that means the
-// std::function we *actually* call in response to a call from Lua.
+// Contains the information we care about for a method call. Basically that means the std::function we *actually* call
+// in response to a call from Lua.
 template<typename Owner>
 class MethodClosure {
 public:
   MethodClosure(MethodCall<Owner> method) : method_(method) {
   }
 
-  void call(lua_State* l, Userdata<Owner>* userdata) const {
-    method_(MethodContext<Owner>(l, userdata));
+  int call(lua_State* l, Userdata<Owner>* userdata) const {
+    MethodContext<Owner> ctx(l, userdata);
+    method_(ctx);
+    return ctx.num_return_values();
   }
 
 private:

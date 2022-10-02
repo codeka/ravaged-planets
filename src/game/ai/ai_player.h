@@ -32,11 +32,12 @@ private:
   void fire_event(std::string const &event_name,
      std::map<std::string, std::string> const &parameters = std::map<std::string, std::string>());
 
-  // Helper function that returns the unit_wrapper (as a luabind::object) for the given Entity.
-  fw::lua::Value get_unit_wrapper(std::weak_ptr<ent::Entity> wp);
+  // Helper function that returns the unit_wrapper for the given Entity, or creates a new one if it doesn't already
+  // exist.
+  fw::lua::Userdata<UnitWrapper> get_unit_wrapper(std::weak_ptr<ent::Entity> wp);
 
-  // Creates a unit_wrapper for entities of the given type.
-  fw::lua::Value create_unit_wrapper(std::string const &entity_name);
+  // Creates a unit_wrapper for the given entity.
+  fw::lua::Userdata<UnitWrapper> create_unit_wrapper(std::shared_ptr<ent::Entity> ent);
 
   void issue_order(UnitWrapper *unit, luabind::object orders);
 
@@ -47,6 +48,8 @@ private:
   static void l_register_unit(fw::lua::MethodContext<AIPlayer>& ctx);
   static void l_event(fw::lua::MethodContext<AIPlayer>& ctx);
   static void l_find_units(fw::lua::MethodContext<AIPlayer>& ctx);
+  fw::lua::Value find_units(fw::lua::Value filter);
+
   static void l_issue_order(fw::lua::MethodContext<AIPlayer>& ctx);
 
 public:
