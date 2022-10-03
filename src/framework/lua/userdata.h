@@ -25,13 +25,17 @@ public:
   Userdata(lua_State* l, T* owner) : BaseValue<Userdata<T>>(l), ref_(l_, -1), owner_(owner) {
   }
 
-  // Constructs a new Userdata with the value on the stack.
-  Userdata(lua_State* l, int stack_index) : BaseValue<Userdata<T>>(l), ref_(l_, stack_index) {
-    owner_ = reinterpret_cast<T*>(luaL_checkudata(l, stack_index, T::metatable.name_()));
-    if (owner_ == nullptr) {
-      // TODO: throw exception?
-      fw::debug << "Userdata on stack does not have correct metatable?" << std::endl;
+  // Attempt to cast the given value as a Userdata. Returns nullopt if it's not valid.
+  static inline std::optional<Userdata<T>> from(const Value &value) {
+    value.push();
+    impl::PopStack pop(value.l(), 1);
+
+    void* p = luaL_testudata(value.l(), -1, T::metatable.name().c_str());
+    if (p == nullptr) {
+      return std::nullopt;
     }
+
+    return *(reinterpret_cast<Userdata<T>*>(p));
   }
 
   inline const T* owner() const {

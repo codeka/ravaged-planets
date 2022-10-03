@@ -260,40 +260,39 @@ fw::lua::Value AIPlayer::find_units(fw::lua::Value filter) {
 /* static */
 void AIPlayer::l_issue_order(fw::lua::MethodContext<AIPlayer>& ctx) {
   // if you pass something that's not a table as the parameters, we can't do anything.
-//  if (luabind::type(units) != LUA_TTABLE || luabind::type(orders) != LUA_TTABLE) {
-//    return;
-//  }
+  // TODO: check parameters
 
-//    boost::optional<UnitWrapper*> unit;// = luabind::object_cast_nothrow<unit_wrapper*>(units);
-//  if (unit) {
-    // if they just passed one unit in, we'll just issue the order to that unit
-//    issue_order(*unit, orders);
-//  } else {
-//    luabind::iterator end;
-//    for(luabind::iterator it(units); it != end; ++it) {
-//      unit = luabind::object_cast_nothrow<unit_wrapper *>(*it);
-//      if (unit) {
-//        issue_order(*unit, orders);
-//      }
-//    }
-//  }
+  auto units = ctx.arg<fw::lua::Value>(0);
+  auto order = ctx.arg<fw::lua::Value>(1);
+
+  auto unit = fw::lua::Userdata<UnitWrapper>::from(units);
+  if (unit) {
+    ctx.owner()->issue_order((*unit).owner(), order);
+  } else {
+    for (auto it : units) {
+      unit = fw::lua::Userdata<UnitWrapper>::from(it.value<fw::lua::Value>());
+      if (unit) {
+        ctx.owner()->issue_order((*unit).owner(), order);
+      }
+    }
+  }
 }
 
-void AIPlayer::issue_order(UnitWrapper *unit, luabind::object orders) {
-  std::shared_ptr<ent::Entity> Entity = unit->get_entity().lock();
-  if (!Entity)
+void AIPlayer::issue_order(UnitWrapper *unit, fw::lua::Value order) {
+  std::shared_ptr<ent::Entity> entity = unit->get_entity().lock();
+  if (!entity)
     return;
 
-  ent::OrderableComponent *orderable = Entity->get_component<ent::OrderableComponent>();
+  ent::OrderableComponent *orderable = entity->get_component<ent::OrderableComponent>();
 
-  std::string order_name;// = luabind::object_cast<std::string>(orders["order"]);
+  std::string order_name = order["order"];
   if (order_name == "build") {
     fw::debug << "issuing \"build\" order to unit." << std::endl;
 
     // todo: we should make this "generic"
-    std::shared_ptr<BuildOrder> order = create_order<BuildOrder>();
-    order->template_name;// = luabind::object_cast<std::string>(orders["build_unit"]);
-    orderable->issue_order(order);
+    std::shared_ptr<BuildOrder> build_order = create_order<BuildOrder>();
+    build_order->template_name = order["build_unit"];
+    orderable->issue_order(build_order);
   } else if (order_name == "attack") {
     fw::debug << "issuing \"attack\" order to units." << std::endl;
     std::weak_ptr<ent::Entity> target_entity_wp;/// = luabind::object_cast<unit_wrapper*>(orders["target"])->get_entity();

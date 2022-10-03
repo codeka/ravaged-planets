@@ -39,8 +39,6 @@ private:
   // Creates a unit_wrapper for the given entity.
   fw::lua::Userdata<UnitWrapper> create_unit_wrapper(std::shared_ptr<ent::Entity> ent);
 
-  void issue_order(UnitWrapper *unit, luabind::object orders);
-
   static void l_set_ready(fw::lua::MethodContext<AIPlayer>& ctx);
   static void l_say(fw::lua::MethodContext<AIPlayer>& ctx);
   static void l_local_say(fw::lua::MethodContext<AIPlayer>& ctx);
@@ -51,6 +49,7 @@ private:
   fw::lua::Value find_units(fw::lua::Value filter);
 
   static void l_issue_order(fw::lua::MethodContext<AIPlayer>& ctx);
+  void issue_order(UnitWrapper* unit, fw::lua::Value order);
 
 public:
   AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t player_no);

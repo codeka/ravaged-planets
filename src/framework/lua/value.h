@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iterator>
+#include <optional>
 #include <ostream>
 #include <boost/any.hpp>
 
@@ -139,6 +140,10 @@ template<typename Derived>
 class BaseValue {
 public:
   BaseValue(lua_State* l) : l_(l) {
+  }
+
+  lua_State* l() const {
+    return l_;
   }
 
 protected:

@@ -47,6 +47,7 @@ private:
         size_t length = 0;
         const char* str = lua_tolstring(l_, -1, &length);
         std::string msg(str, length);
+        fw::debug << "  " << msg << std::endl;
       }
     }
   }
