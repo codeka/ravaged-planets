@@ -29,7 +29,7 @@ function check_attack()
 
   local units = player:find_units({ unit_type="factory", state="idle" })
   for _,u in ipairs(units) do
-    log:debug("  unit: " .. u:get_kind() .. " owner: " .. u:get_player_no() .. " state: " .. u:get_state())
+    log:debug("  unit: " .. u.kind .. " owner: " .. u.player_no .. " state: " .. u.state)
   end
   player:issue_order(units, { order="build", build_unit="simple-tank" })
 

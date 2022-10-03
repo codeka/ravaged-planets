@@ -19,11 +19,11 @@ private:
   ent::OwnableComponent *ownable_;
   ent::OrderableComponent *orderable_;
 
-  static void l_get_kind(fw::lua::MethodContext<UnitWrapper>& ctx);
+  static void l_get_kind(fw::lua::PropertyContext<UnitWrapper>& ctx);
   std::string get_kind();
-  static void l_get_player_no(fw::lua::MethodContext<UnitWrapper>& ctx);
+  static void l_get_player_no(fw::lua::PropertyContext<UnitWrapper>& ctx);
   int get_player_no();
-  static void l_get_state(fw::lua::MethodContext<UnitWrapper>& ctx);
+  static void l_get_state(fw::lua::PropertyContext<UnitWrapper>& ctx);
   std::string get_state();
 
 public:

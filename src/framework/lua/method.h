@@ -33,6 +33,11 @@ public:
     num_return_values_++;
   }
 
+  // Call this if you push a value onto the stack that you want to return.
+  void record_return_value() {
+    num_return_values_++;
+  }
+
 private:
   lua_State* l_;
   Userdata<Owner>* userdata_;
@@ -40,7 +45,42 @@ private:
 };
 
 template<typename Owner>
+class PropertyContext {
+public:
+  PropertyContext(lua_State* l, Owner* owner) : l_(l), owner_(owner), has_return_value_(false) {
+  }
+
+  // Gets the "owner" of this method call.
+  Owner* owner() {
+    return owner_;
+  }
+
+  template<typename T>
+  inline void return_value(const T& value) {
+    if (has_return_value_) {
+      // TODO: this is not valid.
+      return;
+    }
+
+    push(l_, value);
+    has_return_value_ = true;
+  }
+
+  inline bool has_return_value() const {
+    return has_return_value_;
+  }
+
+private:
+  bool has_return_value_;
+  lua_State* l_;
+  Owner* owner_;
+};
+
+template<typename Owner>
 using MethodCall = std::function<void(MethodContext<Owner>&)>;
+
+template<typename Owner>
+using PropertyCall = std::function<void(PropertyContext<Owner>&)>;
 
 // Contains the information we care about for a method call. Basically that means the std::function we *actually* call
 // in response to a call from Lua.
@@ -59,5 +99,14 @@ public:
 private:
   MethodCall<Owner> method_;
 };
+
+// Pushes a method that is associated with Owner::metatable.
+template<typename Owner>
+inline void push(lua_State* l, MethodCall<Owner> method) {
+  MethodClosure<Owner>* closure =
+    new(lua_newuserdata(l, sizeof(MethodClosure<Owner>))) MethodClosure<Owner>(method);
+
+  lua_pushcclosure(l, Owner::metatable.callback(), 1);
+}
 
 }  // namespace fw::lua

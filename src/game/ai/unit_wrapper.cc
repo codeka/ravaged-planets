@@ -12,9 +12,9 @@
 namespace game {
 
 LUA_DEFINE_METATABLE(UnitWrapper)
-    .method("get_kind", UnitWrapper::l_get_kind)
-    .method("get_state", UnitWrapper::l_get_state)
-    .method("get_player_no", UnitWrapper::l_get_player_no);
+    .property("kind", UnitWrapper::l_get_kind)
+    .property("state", UnitWrapper::l_get_state)
+    .property("player_no", UnitWrapper::l_get_player_no);
 
 UnitWrapper::UnitWrapper(std::weak_ptr<ent::Entity> ent) : entity_(ent) {
   std::shared_ptr<ent::Entity> sp = entity_.lock();
@@ -28,7 +28,7 @@ UnitWrapper::UnitWrapper(std::weak_ptr<ent::Entity> ent) : entity_(ent) {
 }
 
 /* static */
-void UnitWrapper::l_get_kind(fw::lua::MethodContext<UnitWrapper>& ctx) {
+void UnitWrapper::l_get_kind(fw::lua::PropertyContext<UnitWrapper>& ctx) {
   ctx.return_value(ctx.owner()->get_kind());
 }
 
@@ -42,7 +42,7 @@ std::string UnitWrapper::get_kind() {
 }
 
 /* static */
-void UnitWrapper::l_get_state(fw::lua::MethodContext<UnitWrapper>& ctx) {
+void UnitWrapper::l_get_state(fw::lua::PropertyContext<UnitWrapper>& ctx) {
   ctx.return_value(ctx.owner()->get_state());
 }
 
@@ -59,7 +59,7 @@ std::string UnitWrapper::get_state() {
 }
 
 /* static */
-void UnitWrapper::l_get_player_no(fw::lua::MethodContext<UnitWrapper>& ctx) {
+void UnitWrapper::l_get_player_no(fw::lua::PropertyContext<UnitWrapper>& ctx) {
   ctx.return_value(ctx.owner()->get_player_no());
 }
 

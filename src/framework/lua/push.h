@@ -57,7 +57,7 @@ inline float peek(lua_State* l, int index) {
 template<>
 inline int peek(lua_State* l, int index) {
   lua_Number n = lua_tonumber(l, index);
-  return static_cast<int>(n);
+  return static_cast<float>(n);
 }
 
 template<>
