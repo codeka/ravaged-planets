@@ -18,6 +18,8 @@ private:
   std::weak_ptr<ent::Entity> entity_;
   ent::OwnableComponent *ownable_;
   ent::OrderableComponent *orderable_;
+  std::weak_ptr<fw::lua::LuaContext> ctx_;
+  fw::lua::Value script_;
 
   static void l_get_kind(fw::lua::PropertyContext<UnitWrapper>& ctx);
   std::string get_kind();
@@ -27,10 +29,7 @@ private:
   std::string get_state();
 
 public:
-  UnitWrapper(std::weak_ptr<ent::Entity> entity);
-
-  // registers the unit_wrapper as the "Unit" class in Lua.
-  static void register_class(lua_State *state);
+  UnitWrapper(std::weak_ptr<ent::Entity> entity, std::weak_ptr<fw::lua::LuaContext> ctx, fw::lua::Value script);
 
   std::weak_ptr<ent::Entity> get_entity() const {
     return entity_;

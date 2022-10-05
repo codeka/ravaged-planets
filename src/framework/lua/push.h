@@ -61,11 +61,6 @@ inline int peek(lua_State* l, int index) {
 }
 
 template<>
-inline fw::lua::Callback peek(lua_State* l, int index) {
-  return fw::lua::Callback(l, index);
-}
-
-template<>
 inline fw::lua::Value peek(lua_State* l, int index) {
   return fw::lua::Value(l, index);
 }

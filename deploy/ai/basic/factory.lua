@@ -1,9 +1,8 @@
 
 Factory = {}
 
-function Factory:__init()
-  Unit.__init(self)
-  log.debug("Factory:__init")
+Factory.__init = function(self)
+  log:debug("Factory:__init "..self.state)
 end
 
 -- register the Factory class as the class to handle 'factory' units

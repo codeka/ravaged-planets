@@ -52,7 +52,6 @@ AIPlayer::AIPlayer(std::string const &name, ScriptDesc const &desc, uint8_t play
   std::shared_ptr<fw::lua::LuaContext> script(new fw::lua::LuaContext());
 
   script->globals()["player"] = script->wrap(this);
-  //player->self = luabind::get_globals(state)["player"];
 
   // add the ..\data\ai\common path to the package.path variable (so you can
   // just go require("whatever") to load stuff from there)
@@ -98,9 +97,9 @@ void AIPlayer::l_local_say(fw::lua::MethodContext<AIPlayer>& ctx) {
 void AIPlayer::l_timer(fw::lua::MethodContext<AIPlayer>& ctx) {
   // this is called to queue a Lua function to our update_queue so we can call a Lua function at the given time
   float time = ctx.arg<float>(0);
-  fw::lua::Callback fn = ctx.arg<fw::lua::Callback>(1);
+  fw::lua::Value fn = ctx.arg<fw::lua::Value>(1);
   ctx.owner()->update_queue_.push(time, [fn]() mutable {
-    fn();
+    fn.as<fw::lua::Callback>()();
   });
 }
 
@@ -117,7 +116,7 @@ void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, s
 
   for(auto& obj : it->second) {
     // TODO: handle errors gracefully?
-    obj(event_name, lua_params);
+    obj.as<fw::lua::Callback>()(event_name, lua_params);
   }
 }
 
@@ -125,7 +124,7 @@ void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, s
 void AIPlayer::l_event(fw::lua::MethodContext<AIPlayer>& ctx) {
   // this is called to queue a LUA function when the given named event occurs.
   std::string event_name = ctx.arg<std::string>(0);
-  fw::lua::Callback event_callback = ctx.arg<fw::lua::Callback>(1);
+  fw::lua::Value event_callback = ctx.arg<fw::lua::Value>(1);
 
   auto& event_map = ctx.owner()->event_map_;
   auto it = event_map.find(event_name);
@@ -316,7 +315,6 @@ fw::lua::Userdata<UnitWrapper> AIPlayer::get_unit_wrapper(std::weak_ptr<ent::Ent
   ent::EntityAttribute *attr = ent->get_attribute("ai_wrapper");
   if (attr == nullptr) {
     fw::lua::Userdata<UnitWrapper> wrapper = create_unit_wrapper(ent);
-//    luabind::object_cast<unit_wrapper *>(wrapper)->set_entity(wp);
     ent->add_attribute(ent::EntityAttribute("ai_wrapper", wrapper));
     attr = ent->get_attribute("ai_wrapper");
   }
@@ -325,15 +323,16 @@ fw::lua::Userdata<UnitWrapper> AIPlayer::get_unit_wrapper(std::weak_ptr<ent::Ent
 }
 
 fw::lua::Userdata<UnitWrapper> AIPlayer::create_unit_wrapper(std::shared_ptr<ent::Entity> ent) {
-  // TODO: if the script has a wrapper, use that instead.
-//  auto it = unit_creator_map_.find(entity_name);
-//  if (it != _unit_creator_map.end() && it->second.is_valid()) {
-//    return it->second() [luabind::adopt(luabind::result)];
-//  }
+  fw::lua::Value script;
+  auto it = unit_creator_map_.find(ent->get_name());
+  if (it != unit_creator_map_.end()) {
+    script = it->second;
+  }
 
-  // if we don't have a specific wrapper for this unit type, just create a generic one and return that instead.
-  UnitWrapper* wrapper = new UnitWrapper(ent);
-  return script_->wrap(wrapper);
+  // TODO: does this new() below leak? I think probably it does...
+  fw::lua::Userdata<UnitWrapper> wrapper = script_->wrap(new UnitWrapper(ent, script_, script));
+
+  return wrapper;
 }
 
 void AIPlayer::update() {

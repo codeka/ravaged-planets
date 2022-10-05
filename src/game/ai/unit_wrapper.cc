@@ -16,7 +16,8 @@ LUA_DEFINE_METATABLE(UnitWrapper)
     .property("state", UnitWrapper::l_get_state)
     .property("player_no", UnitWrapper::l_get_player_no);
 
-UnitWrapper::UnitWrapper(std::weak_ptr<ent::Entity> ent) : entity_(ent) {
+UnitWrapper::UnitWrapper(std::weak_ptr<ent::Entity> ent, std::weak_ptr<fw::lua::LuaContext> ctx, fw::lua::Value script)
+    : entity_(ent), ctx_(ctx), script_(script) {
   std::shared_ptr<ent::Entity> sp = entity_.lock();
   if (sp) {
     ownable_ = sp->get_component<ent::OwnableComponent>();
@@ -24,6 +25,13 @@ UnitWrapper::UnitWrapper(std::weak_ptr<ent::Entity> ent) : entity_(ent) {
   } else {
     ownable_ = nullptr;
     orderable_ = nullptr;
+  }
+
+  if (!script_.is_nil()) {
+    auto ctx = ctx_.lock();
+    if (ctx) {
+      script_["__init"](ctx->wrap(this));
+    }
   }
 }
 

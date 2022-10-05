@@ -60,10 +60,6 @@ void UpdateQueue::update() {
     } else {
       try {
         qntry.fn();
-//      } catch (luabind::error &e) {
-//        luabind::object error_msg(luabind::from_stack(e.state(), -1));
- //       fw::debug << boost::format("An exception occured executing a Lua update function\n%1%\n%2%")
-//            % e.what() % error_msg << std::endl;
       } catch (std::exception &e) {
         std::string msg = boost::diagnostic_information(e);
         fw::debug << "ERR: an exception occurred executing an update function" << std::endl;

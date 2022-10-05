@@ -5,7 +5,10 @@
 #include <ostream>
 #include <boost/any.hpp>
 
+#include <framework/logging.h>
 #include <framework/lua/base.h>
+#include <framework/lua/callback.h>
+#include <framework/lua/error.h>
 #include <framework/lua/push.h>
 #include <framework/lua/reference.h>
 
@@ -176,6 +179,7 @@ public:
   }
 
   operator Value();
+
   operator std::string() const {
     push();
     impl::PopStack pop(l_, 1);
@@ -208,6 +212,13 @@ public:
     impl::PopStack pop(l_, 1);
 
     return peek<T>(l_, -1);
+  }
+
+  template<typename... Arg>
+  inline void operator()(Arg... args) const {
+    push();
+    Callback callback(l_);
+    callback(args...);
   }
 
   template<typename T>
@@ -300,6 +311,12 @@ public:
     impl::PopStack pop(l_, 1);
 
     return peek<T>(l_, -1);
+  }
+
+  template<>
+  Callback as() const {
+    push();
+    return Callback(l_);
   }
 
   template<class T>

@@ -11,30 +11,44 @@ namespace fw::lua {
 class Callback {
 public:
   // Constructs a new callback that references nil.
-  Callback() {
+  Callback() : l_(nullptr) {
   }
 
   // Construct a new callback from the value at the given stack index.
-  Callback(lua_State* l, int stack_index) : l_(l), ref_(l, stack_index) {
-    if (lua_type(l, stack_index) != LUA_TFUNCTION) {
+  Callback(lua_State* l, int stack_index) : l_(l) {
+  }
+
+  Callback(lua_State* l) : l_(l) {
+    if (lua_type(l, -1) != LUA_TFUNCTION) {
       fw::debug << "Attempt to create a Callback with something that is not a function." << std::endl;
-      // TODO: this is an error!
+      lua_pop(l_, 1);
+      l_ = nullptr;
     }
   }
 
+  ~Callback() {
+    if (l_ != nullptr) {
+      lua_pop(l_, 1);
+    }
+  }
+
+  // As we just refer to a value on the stack, you cannot copy/assign us.
+  Callback(const Callback&) = delete;
+  Callback& operator=(const Callback&) = delete;
+
   template<typename... Arg>
   inline void operator ()(Arg... args) {
+    if (l_ == nullptr) return;
+
     impl::push_error_handler(l_);
     impl::PopStack pop(l_, 1);
 
-    ref_.push();
+    lua_pushvalue(l_, -2); // Push the function on top of the error handler
     call(0, args...);
   }
 
 private:
   lua_State* l_;
-  // A reference to the function object itself.
-  Reference ref_;
 
   inline void call(int num_args) {
     int err = lua_pcall(l_, num_args, 0, lua_gettop(l_) - num_args - 1);
