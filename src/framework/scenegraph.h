@@ -74,7 +74,7 @@ private:
   void render_noshader(fw::Camera *camera, fw::Matrix const &transform);
 
 protected:
-  Node *_parent;
+  Node *parent_;
   std::vector<std::shared_ptr<Node> > _children;
   fw::Matrix world_;
 

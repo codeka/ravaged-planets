@@ -67,7 +67,7 @@ void GameScreen::update() {
   hud_minimap->update();
 }
 
-void GameScreen::render(fw::sg::Scenegraph &Scenegraph) {
+void GameScreen::render(fw::sg::Scenegraph &scenegraph) {
   if (world_ == nullptr) {
     return;
   }
@@ -79,10 +79,10 @@ void GameScreen::render(fw::sg::Scenegraph &Scenegraph) {
   fw::Vector cam_dir = old_cam->get_forward();
   fw::Vector lookat = world_->get_terrain()->get_cursor_location(cam_pos, cam_dir);
 
-  std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
-  Scenegraph.add_light(Light);
+  std::shared_ptr <fw::sg::Light> light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
+  scenegraph.add_light(light);
 
-  world_->render(Scenegraph);
+  world_->render(scenegraph);
 }
 
 void GameScreen::hide() {

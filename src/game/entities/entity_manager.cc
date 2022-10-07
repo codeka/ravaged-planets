@@ -55,8 +55,8 @@ std::shared_ptr<Entity> EntityManager::create_entity(
 
   ent->initialize();
   if (created_by) {
-    // if we're being created by another Entity, some of our properties
-    // get copied to the new Entity (particularly debug flags)
+    // if we're being created by another Entity, some of our properties get copied to the new Entity (particularly
+    // debug flags)
     ent->set_debug_flags(created_by->get_debug_flags());
 
     // it'll also start at the same position as the creator

@@ -22,10 +22,8 @@ class Command;
 
 typedef uint32_t turn_id;
 
-/**
- * The main simulation for the game runs in a separate thread, and at a separate rate to the rendering, etc. This
- * class encapsulates the functions of the simulation thread.
- */
+// The main simulation for the game runs in a separate thread, and at a separate rate to the rendering, etc. This
+// class encapsulates the functions of the simulation thread.
 class SimulationThread {
 public:
   // these are the functions we use when various events occur in the simulation.

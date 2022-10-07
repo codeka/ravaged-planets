@@ -218,8 +218,7 @@ void Framework::run() {
       }
     }
 
-    // wait for the update thread to exit (once we set running_ to false, it'll
-    // stop as well)
+    // wait for the update thread to exit (once we set running_ to false, it'll stop as well)
     update_thread.join();
   } catch(...) {
     update_thread.detach();
@@ -305,15 +304,15 @@ void Framework::render() {
   timer_->render();
 
   // populate the scene graph by calling into the Application itself
-  sg::Scenegraph Scenegraph;
-  app_->render(Scenegraph);
-  particle_mgr_->render(Scenegraph);
+  sg::Scenegraph scenegraph;
+  app_->render(scenegraph);
+  particle_mgr_->render(scenegraph);
 
-  fw::render(Scenegraph);
+  fw::render(scenegraph);
 
   // if we've been asked for some screenshots, take them after we've done the normal render.
   if (screenshots_.size() > 0)
-    take_screenshots(Scenegraph);
+    take_screenshots(scenegraph);
 
   graphics_->after_render();
 }

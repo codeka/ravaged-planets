@@ -630,7 +630,7 @@ bool XMLDocument::Accept( XMLVisitor* visitor ) const
 
 XMLNode::XMLNode( XMLDocument* doc ) :
     _document( doc ),
-    _parent( 0 ),
+    parent_( 0 ),
     _firstChild( 0 ), _lastChild( 0 ),
     _prev( 0 ), _next( 0 ),
     _memPool( 0 )
@@ -641,8 +641,8 @@ XMLNode::XMLNode( XMLDocument* doc ) :
 XMLNode::~XMLNode()
 {
     DeleteChildren();
-    if ( _parent ) {
-        _parent->Unlink( this );
+    if ( parent_ ) {
+        parent_->Unlink( this );
     }
 }
 
@@ -680,7 +680,7 @@ void XMLNode::Unlink( XMLNode* child )
 {
     TIXMLASSERT( child );
     TIXMLASSERT( child->_document == _document );
-    TIXMLASSERT( child->_parent == this );
+    TIXMLASSERT( child->parent_ == this );
     if ( child == _firstChild ) {
         _firstChild = _firstChild->_next;
     }
@@ -694,7 +694,7 @@ void XMLNode::Unlink( XMLNode* child )
     if ( child->_next ) {
         child->_next->_prev = child->_prev;
     }
-  child->_parent = 0;
+  child->parent_ = 0;
 }
 
 
@@ -702,7 +702,7 @@ void XMLNode::DeleteChild( XMLNode* Node )
 {
     TIXMLASSERT( Node );
     TIXMLASSERT( Node->_document == _document );
-    TIXMLASSERT( Node->_parent == this );
+    TIXMLASSERT( Node->parent_ == this );
     DeleteNode( Node );
 }
 
@@ -732,7 +732,7 @@ XMLNode* XMLNode::InsertEndChild( XMLNode* addThis )
         addThis->_prev = 0;
         addThis->_next = 0;
     }
-    addThis->_parent = this;
+    addThis->parent_ = this;
     return addThis;
 }
 
@@ -763,7 +763,7 @@ XMLNode* XMLNode::InsertFirstChild( XMLNode* addThis )
         addThis->_prev = 0;
         addThis->_next = 0;
     }
-    addThis->_parent = this;
+    addThis->parent_ = this;
     return addThis;
 }
 
@@ -778,7 +778,7 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
 
     TIXMLASSERT( afterThis );
 
-    if ( afterThis->_parent != this ) {
+    if ( afterThis->parent_ != this ) {
         TIXMLASSERT( false );
         return 0;
     }
@@ -792,7 +792,7 @@ XMLNode* XMLNode::InsertAfterChild( XMLNode* afterThis, XMLNode* addThis )
     addThis->_next = afterThis->_next;
     afterThis->_next->_prev = addThis;
     afterThis->_next = addThis;
-    addThis->_parent = this;
+    addThis->parent_ = this;
     return addThis;
 }
 
@@ -944,8 +944,8 @@ void XMLNode::InsertChildPreamble( XMLNode* insertThis ) const
     TIXMLASSERT( insertThis );
     TIXMLASSERT( insertThis->_document == _document );
 
-    if ( insertThis->_parent )
-        insertThis->_parent->Unlink( insertThis );
+    if ( insertThis->parent_ )
+        insertThis->parent_->Unlink( insertThis );
     else
         insertThis->_memPool->SetTracked();
 }
@@ -1802,8 +1802,8 @@ static FILE* callfopen( const char* filepath, const char* mode )
 void XMLDocument::DeleteNode( XMLNode* Node ) {
     TIXMLASSERT( Node );
     TIXMLASSERT(Node->_document == this );
-    if (Node->_parent) {
-        Node->_parent->DeleteChild( Node );
+    if (Node->parent_) {
+        Node->parent_->DeleteChild( Node );
     }
     else {
         // Isn't in the tree.

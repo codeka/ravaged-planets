@@ -724,11 +724,11 @@ public:
 
     /// Get the parent of this Node on the DOM.
     const XMLNode*  Parent() const      {
-        return _parent;
+        return parent_;
     }
 
     XMLNode* Parent()           {
-        return _parent;
+        return parent_;
     }
 
     /// Returns true if this Node has no children.
@@ -894,7 +894,7 @@ protected:
     virtual char* ParseDeep( char*, StrPair* );
 
     XMLDocument*  _document;
-    XMLNode*    _parent;
+    XMLNode*    parent_;
     mutable StrPair value_;
 
     XMLNode*    _firstChild;

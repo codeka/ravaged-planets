@@ -64,20 +64,20 @@ void EntityDebug::update() {
   std::list<std::weak_ptr<Entity> > selection = mgr_->get_selection();
   if (selection.size() > 0) {
     // we display some info about the selected Entity (if there's more than one, we just use the first one from the
-    // list - essentially a Random one)
-    std::shared_ptr<Entity> Entity = selection.front().lock();
-    if (!Entity) {
+    // list - essentially a random one)
+    std::shared_ptr<Entity> entity = selection.front().lock();
+    if (!entity) {
       return;
     }
 
-    PositionComponent *pos = Entity->get_component<PositionComponent>();
+    PositionComponent *pos = entity->get_component<PositionComponent>();
 
     if (pos != 0) {
       new_pos_value = (boost::format("Pos: (%1$.1f, %2$.1f, %3$.1f)")
           % pos->get_position()[0] % pos->get_position()[1] % pos->get_position()[2]).str();
     }
 
-    MoveableComponent *moveable = Entity->get_component<MoveableComponent>();
+    MoveableComponent *moveable = entity->get_component<MoveableComponent>();
     if (moveable != nullptr) {
       fw::Vector goal = moveable->get_goal();
       new_goal_value = (boost::format("Goal: (%1$.1f, %2$.1f, %3$.1f)") % goal[0] % goal[1] % goal[2]).str();
@@ -166,35 +166,36 @@ void EntityDebugView::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &t
   std::vector<Line> lines_copy = lines_;
   lines_.clear();
 
-  fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[lines_copy.size() * 2];
+  const int vertices_size = static_cast<int>(lines_copy.size() * 2);
+  fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[vertices_size];
 
-  for (int i = 0; i < static_cast<int>(lines_copy.size()); i++) {
-    Line const &l = lines_copy[i];
+  for (int i = 0; i < vertices_size; i += 2) {
+    Line const &l = lines_copy[i / 2];
 
-    vertices[i * 2].x = l.from[0];
-    vertices[i * 2].y = l.from[1];
-    vertices[i * 2].z = l.from[2];
-    vertices[i * 2].color = l.col.to_rgba();
+    vertices[i].x = l.from[0];
+    vertices[i].y = l.from[1];
+    vertices[i].z = l.from[2];
+    vertices[i].color = l.col.to_rgba();
 
-    vertices[(i * 2) + 1].x = l.to[0];
-    vertices[(i * 2) + 1].y = l.to[1];
-    vertices[(i * 2) + 1].z = l.to[2];
-    vertices[(i * 2) + 1].color = l.col.to_rgba();
+    vertices[i + 1].x = l.to[0];
+    vertices[i + 1].y = l.to[1];
+    vertices[i + 1].z = l.to[2];
+    vertices[i + 1].color = l.col.to_rgba();
   }
 
   std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
-  vb->set_data(lines_copy.size() * 2, vertices);
+  vb->set_data(vertices_size, vertices);
   delete[] vertices;
 
-  std::shared_ptr<fw::Shader> Shader(fw::Shader::create("basic.shader"));
-  std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
+  std::shared_ptr<fw::Shader> shader(fw::Shader::create("basic.shader"));
+  std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
   shader_params->set_program_name("notexture");
 
   std::shared_ptr<fw::sg::Node> node(new fw::sg::Node());
   node->set_world_matrix(transform);
   node->set_vertex_buffer(vb);
   node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
-  node->set_shader(Shader);
+  node->set_shader(shader);
   node->set_shader_parameters(shader_params);
   node->set_cast_shadows(false);
   scenegraph.add_node(node);

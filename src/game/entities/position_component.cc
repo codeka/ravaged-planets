@@ -93,9 +93,9 @@ void PositionComponent::set_final_position() {
 }
 
 void PositionComponent::set_position(fw::Vector const &pos) {
-  std::shared_ptr<ent::Entity> Entity(entity_);
-  float world_width = Entity->get_manager()->get_patch_manager()->get_world_width();
-  float world_length = Entity->get_manager()->get_patch_manager()->get_world_length();
+  std::shared_ptr<ent::Entity> entity(entity_);
+  float world_width = entity->get_manager()->get_patch_manager()->get_world_width();
+  float world_length = entity->get_manager()->get_patch_manager()->get_world_length();
 
   pos_ = fw::Vector(fw::constrain(pos[0], world_width, 0.0f), pos[1], fw::constrain(pos[2], world_length, 0.0f));
 

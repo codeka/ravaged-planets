@@ -176,20 +176,20 @@ void Terrain::render(fw::sg::Scenegraph &scenegraph) {
       std::shared_ptr<TerrainPatch> patch(patches_[patch_index]);
 
       // set up the world matrix for this patch so that it's being rendered at the right offset
-      std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
+      std::shared_ptr<fw::sg::Node> node(new fw::sg::Node());
       fw::Matrix world = fw::translation(
           static_cast<float>(patch_x * PATCH_SIZE), 0,
           static_cast<float>(patch_z * PATCH_SIZE));
-      Node->set_world_matrix(world);
+      node->set_world_matrix(world);
 
       // we have to set up the Scenegraph Node with these manually
-      Node->set_vertex_buffer(patch->vb);
-      Node->set_index_buffer(ib_);
-      Node->set_shader(shader_);
-      Node->set_shader_parameters(patch->shader_params);
-      Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleStrip);
+      node->set_vertex_buffer(patch->vb);
+      node->set_index_buffer(ib_);
+      node->set_shader(shader_);
+      node->set_shader_parameters(patch->shader_params);
+      node->set_primitive_type(fw::sg::PrimitiveType::kTriangleStrip);
 
-      scenegraph.add_node(Node);
+      scenegraph.add_node(node);
     }
   }
 }
@@ -246,11 +246,9 @@ fw::Vector Terrain::get_camera_lookat() {
   return get_cursor_location(start, direction);
 }
 
-// this method is fairly simple, we just trace a line from the
-// camera through the cursor point to the end of the terrain, projected
-// in the (x,y) plane (so it's a nice, easy 2D line). Then, for each
-// 2D point on that line, we check how close the ray is to that point
-// in 3D-space. If it's close enough, we return that one...
+// This method is fairly simple, we just trace a line from the camera through the cursor point to the end of the
+// terrain, projected in the (x,y) plane (so it's a nice, easy 2D line). Then, for each 2D point on that line, we check
+// how close the ray is to that point in 3D-space. If it's close enough, we return that one.
 fw::Vector Terrain::get_cursor_location() {
   fw::Framework *frmwrk = fw::Framework::get_instance();
   fw::Input *Input = frmwrk->get_input();
@@ -274,7 +272,7 @@ fw::Vector Terrain::get_cursor_location(fw::Vector const &start, fw::Vector cons
   fw::Vector evec = start + (direction * 150.0f);
   fw::Vector svec = start + (direction * 5.0f);
 
-  // todo: we use the same algorithm here and in PathFfind::is_passable(fw::Vector const &start, fw::Vector const &end)
+  // TODO: we use the same algorithm here and in PathFfind::is_passable(fw::Vector const &start, fw::Vector const &end)
   // can we factor it out?
   int sx = static_cast<int>(floor(svec[0] + 0.5f));
   int sz = static_cast<int>(floor(svec[2] + 0.5f));
@@ -294,9 +292,8 @@ fw::Vector Terrain::get_cursor_location(fw::Vector const &start, fw::Vector cons
   float x = static_cast<float>(sx);
   float z = static_cast<float>(sz);
   for (int i = 0; i <= steps; i++) {
-    // we actually check in a 9x9 matrix around this point, to make sure
-    // we check all possible candidates. Because we return as soon as
-    // match is found, this shouldn't be too bad...
+    // We actually check in a 9x9 matrix around this point, to make sure we check all possible candidates. Because we
+    // return as soon as match is found, this shouldn't be too bad...
     int ix = static_cast<int>(floor(x + 0.5f));
     int iz = static_cast<int>(floor(z + 0.5f));
     for (int oz = iz - 1; oz <= iz + 1; oz++) {
@@ -314,14 +311,14 @@ fw::Vector Terrain::get_cursor_location(fw::Vector const &start, fw::Vector cons
         fw::Vector n1 = cml::cross(p12 - p11, p21 - p11);
         fw::Vector n2 = cml::cross(p21 - p22, p12 - p22);
 
-        // the line intersects the plane defined by the first triangle at i1. If that's
-        // within this triangle's "x,z" coordinates, this is the intersection point!
+        // The line intersects the plane defined by the first triangle at i1. If that's within this triangle's "x,z"
+        // coordinates, this is the intersection point!
         fw::Vector i1 = fw::point_plane_intersect(p11, n1, start, direction);
         if (i1[0] > x1 && i1[0] <= x2 && i1[2] > z1 && i1[2] <= z2) {
           return i1;
         }
 
-        // same calculation for the second triangle
+        // Same calculation for the second triangle
         fw::Vector i2 = fw::point_plane_intersect(p22, n2, start, direction);
         if (i2[0] > x1 && i2[0] <= x2 && i2[2] > z1 && i2[2] <= z2) {
           return i2;

@@ -38,13 +38,13 @@ void MeshComponent::apply_template(fw::lua::Value tmpl) {
 }
 
 void MeshComponent::initialize() {
-  std::shared_ptr<Entity> Entity(entity_);
-  ownable_component_ = Entity->get_component<OwnableComponent>();
+  std::shared_ptr<Entity> entity(entity_);
+  ownable_component_ = entity->get_component<OwnableComponent>();
 }
 
 void MeshComponent::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform) {
-  std::shared_ptr<Entity> Entity(entity_);
-  PositionComponent *pos = Entity->get_component<PositionComponent>();
+  std::shared_ptr<Entity> entity(entity_);
+  PositionComponent *pos = entity->get_component<PositionComponent>();
   if (pos != nullptr) {
     if (!model_) {
       model_ = fw::Framework::get_instance()->get_model_manager()->get_model(model_name_);
@@ -60,4 +60,5 @@ void MeshComponent::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &tra
     model_->render(scenegraph, pos->get_transform() * transform);
   }
 }
+
 }

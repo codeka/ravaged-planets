@@ -155,7 +155,7 @@ public:
   tSymGetSearchPath pSymGetSearchPath;
 
   StackWalkerInternal(fw::StackWalker *parent, HANDLE process) {
-    _parent = parent;
+    parent_ = parent;
     _dbghelp = 0;
     _process = process;
 
@@ -180,11 +180,11 @@ public:
     if (_dbghelp != NULL)
       ::FreeLibrary(_dbghelp);
     _dbghelp = 0;
-    _parent = 0;
+    parent_ = 0;
   }
 
   bool initialize(char const *symbol_path) {
-    if (_parent == 0)
+    if (parent_ == 0)
       return false;
 
     Settings stg;
@@ -235,7 +235,7 @@ public:
     if (symbol_path != 0)
       _symbol_path = fs::path(symbol_path);
     if (pSymInitialize(_process, symbol_path, FALSE) == FALSE)
-      _parent->on_dbghelp_error("SymInitialize", ::GetLastError(), 0);
+      parent_->on_dbghelp_error("SymInitialize", ::GetLastError(), 0);
 
     DWORD options = pSymGetOptions();
     options |= SYMOPT_LOAD_LINES;
@@ -248,14 +248,14 @@ public:
     char buf[StackWalker::STACKWALK_MAX_NAMELEN] = {0};
     if (this->pSymGetSearchPath != 0) {
       if (pSymGetSearchPath(_process, buf, StackWalker::STACKWALK_MAX_NAMELEN) == FALSE) {
-        _parent->on_dbghelp_error("SymGetSearchPath", ::GetLastError(), 0);
+        parent_->on_dbghelp_error("SymGetSearchPath", ::GetLastError(), 0);
       }
     }
 
     char user_name[1024] = {0};
     DWORD size = 1024;
     ::GetUserNameA(user_name, &size);
-    _parent->on_sym_init(buf, options, user_name);
+    parent_->on_sym_init(buf, options, user_name);
 
     return true;
   }
@@ -263,7 +263,7 @@ public:
   HMODULE _dbghelp;
 
 private:
-  StackWalker *_parent;
+  StackWalker *parent_;
   HANDLE _process;
   fs::path _symbol_path;
 
@@ -296,7 +296,7 @@ private:
 
       DWORD err = load_module(process, &file_name[0], &module_name[0], (uint64_t) mi.lpBaseOfDll, mi.SizeOfImage);
       if (err != ERROR_SUCCESS) {
-        _parent->on_dbghelp_error("LoadModule", err, 0);
+        parent_->on_dbghelp_error("LoadModule", err, 0);
       }
     }
 
@@ -312,7 +312,7 @@ private:
     }
 
     uint64_t file_version = 0;
-    if ((_parent->options_ & StackWalker::retrieve_file_version) != 0) {
+    if ((parent_->options_ & StackWalker::retrieve_file_version) != 0) {
       VS_FIXEDFILEINFO *ff_info = 0;
       DWORD handle;
       DWORD size = ::GetFileVersionInfoSize(file_name, &handle);
@@ -365,7 +365,7 @@ private:
       }
     }
 
-    _parent->on_load_module(
+    parent_->on_load_module(
       file_name, module_name, base_addr, size, result, symbol_type, module_info.LoadedImageName, file_version);
     return result;
   }

@@ -51,6 +51,8 @@ void OrderableComponent::update(float dt) {
 }
 
 void OrderableComponent::issue_order(std::shared_ptr<game::Order> const &order) {
+  // TODO: we need a way to queue up orders.
+  curr_order_.reset();
   orders_.push(order);
 }
 

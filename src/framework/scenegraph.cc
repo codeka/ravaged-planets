@@ -53,14 +53,14 @@ Light::~Light() {
 
 //-------------------------------------------------------------------------------------
 Node::Node() :
-    world_(fw::identity()), _parent(0), cast_shadows_(true), _primitive_type(PrimitiveType::kUnknownPrimitiveType) {
+    world_(fw::identity()), parent_(0), cast_shadows_(true), _primitive_type(PrimitiveType::kUnknownPrimitiveType) {
 }
 
 Node::~Node() {
 }
 
 void Node::add_child(std::shared_ptr<Node> child) {
-  child->_parent = this;
+  child->parent_ = this;
   _children.push_back(child);
 }
 
@@ -73,16 +73,16 @@ void Node::remove_child(std::shared_ptr<Node> child) {
 // Get the Shader file to use. if we don't have one defined, look at our parent and keep looking up at our parents
 // until we find one.
 std::shared_ptr<fw::Shader> Node::get_shader() const {
-  std::shared_ptr<fw::Shader> Shader = shader_;
-  if (!Shader) {
-    Node *parent = _parent;
-    while (!Shader && parent != 0) {
-      Shader = parent->shader_;
-      parent = parent->_parent;
+  std::shared_ptr<fw::Shader> shader = shader_;
+  if (!shader) {
+    Node *parent = parent_;
+    while (!shader && parent != 0) {
+      shader = parent->shader_;
+      parent = parent->parent_;
     }
   }
 
-  return Shader;
+  return shader;
 }
 
 void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identity()*/) {
@@ -117,12 +117,12 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
 }
 
 // this is called when we're rendering a given Shader
-void Node::render_shader(std::shared_ptr<fw::Shader> Shader, fw::Camera *camera, fw::Matrix const &transform) {
+void Node::render_shader(std::shared_ptr<fw::Shader> shader, fw::Camera *camera, fw::Matrix const &transform) {
   std::shared_ptr<fw::ShaderParameters> parameters;
   if (shader_params_) {
     parameters = shader_params_;
   } else {
-    parameters = Shader->create_parameters();
+    parameters = shader->create_parameters();
   }
 
   // add the world_view and world_view_proj parameters as well as shadow parameters
@@ -151,7 +151,7 @@ void Node::render_shader(std::shared_ptr<fw::Shader> Shader, fw::Camera *camera,
   }
 
   vb_->begin();
-  Shader->begin(parameters);
+  shader->begin(parameters);
   if (ib_) {
     ib_->begin();
     FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
@@ -159,7 +159,7 @@ void Node::render_shader(std::shared_ptr<fw::Shader> Shader, fw::Camera *camera,
   } else {
     FW_CHECKED(glDrawArrays(g_primitive_type_map[_primitive_type], 0, vb_->get_num_vertices()));
   }
-  Shader->end();
+  shader->end();
   vb_->end();
 }
 
@@ -179,7 +179,7 @@ void Node::populate_clone(std::shared_ptr<Node> clone) {
   clone->shader_ = shader_;
   if (shader_params_)
     clone->shader_params_ = shader_params_->clone();
-  clone->_parent = _parent;
+  clone->parent_ = parent_;
   clone->world_ = world_;
 
   // clone the children as well!
@@ -206,7 +206,7 @@ Scenegraph::~Scenegraph() {
 }
 
 //-----------------------------------------------------------------------------------------
-static const bool g_shadow_debug = false;
+static const bool g_shadow_debug = true;
 
 // renders the scene!
 void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_target /*= nullptr*/,
