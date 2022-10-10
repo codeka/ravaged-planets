@@ -15,23 +15,21 @@
 
 namespace game {
 
-Terrain::Terrain() :
-    width_(0), length_(0), heights_(nullptr) {
-}
+Terrain::Terrain(int width, int height, float* height_data /*= nullptr*/) :
+    width_(width), length_(width), heights_(nullptr), ib_(std::make_shared<fw::IndexBuffer>()),
+    shader_(fw::Shader::create("terrain.shader")), root_node_(std::make_shared<fw::sg::Node>()) {
+  if (height_data != nullptr) {
+    heights_ = height_data;
+  } else {
+    heights_ = new float[width_ * length_];
+    for (int i = 0; i < width_ * length_; i++)
+      heights_[i] = 0.0f;
+  }
 
-Terrain::~Terrain() {
-  delete[] heights_;
-}
-
-void Terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices(index_data, PATCH_SIZE);
-  ib_ = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
   ib_->set_data(index_data.size(), &index_data[0], 0);
-
-  // load the Shader file that we'll use for rendering
-  shader_ = fw::Shader::create("terrain.shader");
 
   // TODO: this should come from the world_reader
   set_layer(0, std::make_shared<fw::Bitmap>(fw::resolve("terrain/grass-01.jpg")));
@@ -45,19 +43,16 @@ void Terrain::initialize() {
       bake_patch(patch_x, patch_z);
     }
   }
+
+  std::shared_ptr<fw::sg::Node> root_node = root_node_;
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [root_node](fw::sg::Scenegraph& scenegraph) {
+      scenegraph.add_node(root_node);
+    });
 }
 
-void Terrain::create(int width, int length, bool create_height_data /*= true */) {
-  width_ = width;
-  length_ = length;
-
-  if (create_height_data) {
-    heights_ = new float[width_ * length_];
-    for (int i = 0; i < width_ * length_; i++)
-      heights_[i] = 0.0f;
-  } else {
-    heights_ = nullptr;
-  }
+Terrain::~Terrain() {
+  delete[] heights_;
 }
 
 std::shared_ptr<fw::Texture> Terrain::get_patch_splatt(int patch_x, int patch_z) {
@@ -125,7 +120,6 @@ void Terrain::bake_patch(int patch_x, int patch_z) {
     patch->shader_params->set_texture("layer3", layers_[2]);
   if (layers_.size() >= 4)
     patch->shader_params->set_texture("layer4", layers_[3]);
-  patch->shader_params->set_texture("splatt", patch->texture);
 }
 
 void Terrain::ensure_patches() {
@@ -156,45 +150,51 @@ void Terrain::update() {
   if (height_diff > 0.001f || height_diff < -0.001f) {
     camera->set_ground_height(new_height);
   }
-}
 
-void Terrain::render(fw::sg::Scenegraph &scenegraph) {
-  if (layers_.size() == 0)
-    return;
-
-  // we want to render the terrain centered on where the camera is looking
-  fw::Camera *camera = fw::Framework::get_instance()->get_camera();
   fw::Vector location = get_cursor_location(camera->get_position(), camera->get_direction());
+  std::shared_ptr<fw::sg::Node> root_node = root_node_;
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [location, root_node, &terrain = std::as_const(*this)](fw::sg::Scenegraph& scenegraph) {
+      int centre_patch_x = (int)(location[0] / PATCH_SIZE);
+      int centre_patch_z = (int)(location[2] / PATCH_SIZE);
 
-  int centre_patch_x = (int) (location[0] / PATCH_SIZE);
-  int centre_patch_z = (int) (location[2] / PATCH_SIZE);
+      root_node->clear_children();
 
-  for (int patch_z = centre_patch_z - 1; patch_z <= centre_patch_z + 1; patch_z++) {
-    for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
-      int patch_index = get_patch_index(patch_x, patch_z);
+      for (int patch_z = centre_patch_z - 1; patch_z <= centre_patch_z + 1; patch_z++) {
+        for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
+          int patch_index = terrain.get_patch_index(patch_x, patch_z);
 
-      std::shared_ptr<TerrainPatch> patch(patches_[patch_index]);
+          std::shared_ptr<TerrainPatch> patch(terrain.patches_[patch_index]);
+          //if (patch->dirty) {
+         //   bake_patch(patch_x, patch_z);
+         // }
 
-      // set up the world matrix for this patch so that it's being rendered at the right offset
-      std::shared_ptr<fw::sg::Node> node(new fw::sg::Node());
-      fw::Matrix world = fw::translation(
-          static_cast<float>(patch_x * PATCH_SIZE), 0,
-          static_cast<float>(patch_z * PATCH_SIZE));
-      node->set_world_matrix(world);
+          patch->shader_params->set_texture("splatt", patch->texture);
 
-      // we have to set up the Scenegraph Node with these manually
-      node->set_vertex_buffer(patch->vb);
-      node->set_index_buffer(ib_);
-      node->set_shader(shader_);
-      node->set_shader_parameters(patch->shader_params);
-      node->set_primitive_type(fw::sg::PrimitiveType::kTriangleStrip);
+          std::shared_ptr<fw::sg::Node> node = patch->node_;
+          if (!node) {
+            node = patch->node_ = std::make_shared<fw::sg::Node>();
 
-      scenegraph.add_node(node);
-    }
-  }
+            // we have to set up the Scenegraph Node with these manually
+            node->set_vertex_buffer(patch->vb);
+            node->set_index_buffer(terrain.ib_);
+            node->set_shader(terrain.shader_);
+            node->set_shader_parameters(patch->shader_params);
+            node->set_primitive_type(fw::sg::PrimitiveType::kTriangleStrip);
+          }
+          fw::Matrix world = fw::translation(
+            static_cast<float>(patch_x * PATCH_SIZE), 0,
+            static_cast<float>(patch_z * PATCH_SIZE));
+          node->set_world_matrix(world);
+
+          // set up the world matrix for this patch so that it's being rendered at the right offset
+          root_node->add_child(patch->node_);
+        }
+      }
+    });
 }
 
-int Terrain::get_patch_index(int patch_x, int patch_z, int *new_patch_x, int *new_patch_z) {
+int Terrain::get_patch_index(int patch_x, int patch_z, int *new_patch_x, int *new_patch_z) const {
   patch_x = fw::constrain(patch_x, get_patches_width());
   patch_z = fw::constrain(patch_z, get_patches_length());
 

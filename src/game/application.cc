@@ -23,8 +23,8 @@ Application::Application()
 Application::~Application() {
 }
 
-bool Application::initialize(fw::Framework *frmwrk) {
-  framework_ = frmwrk;
+bool Application::initialize(fw::Framework * framework) {
+  framework_ = framework;
   framework_->get_cursor()->set_visible(true);
 
   // set up the camera
@@ -61,13 +61,6 @@ void Application::update(float dt) {
     active->update();
   }
   Session::get_instance()->update();
-}
-
-void Application::render(fw::sg::Scenegraph &scenegraph) {
-  Screen *active = screen_stack_->get_active_screen();
-  if (active != nullptr) {
-    active->render(scenegraph);
-  }
 }
 
 }

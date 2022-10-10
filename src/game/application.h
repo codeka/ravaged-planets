@@ -11,11 +11,10 @@ public:
   Application();
   ~Application();
 
-  virtual bool initialize(fw::Framework *frmwrf);
-  virtual void destroy();
-  virtual void update(float dt);
-  virtual void render(fw::sg::Scenegraph &sg);
-
+  bool initialize(fw::Framework *framework) override;
+  void destroy() override;
+  void update(float dt) override;
+  
   ScreenStack *get_screen_stack() {
     return screen_stack_;
   }

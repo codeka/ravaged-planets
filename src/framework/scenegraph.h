@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <memory>
 #include <stack>
 
@@ -59,12 +60,13 @@ public:
   }
 };
 
-// this is the base "scene graph Node"
+// This is the base scene graph Node contains all the information needed to render a single object in the scene. In
+// general, this will translate to a single OpenGL draw call.
 class Node {
 private:
   bool cast_shadows_;
 
-  PrimitiveType _primitive_type;
+  PrimitiveType primitive_type_;
   std::shared_ptr<fw::VertexBuffer> vb_;
   std::shared_ptr<fw::IndexBuffer> ib_;
   std::shared_ptr<fw::Shader> shader_;
@@ -75,11 +77,11 @@ private:
 
 protected:
   Node *parent_;
-  std::vector<std::shared_ptr<Node> > _children;
+  std::vector<std::shared_ptr<Node> > children_;
   fw::Matrix world_;
 
   // this is called when we're rendering a given Shader
-  virtual void render_shader(std::shared_ptr<fw::Shader> Shader, fw::Camera *camera, fw::Matrix const &transform);
+  virtual void render_shader(std::shared_ptr<fw::Shader> shader, fw::Camera *camera, fw::Matrix const &transform);
 
   // called by clone() to populate the clone
   virtual void populate_clone(std::shared_ptr<Node> clone);
@@ -89,11 +91,12 @@ public:
 
   void add_child(std::shared_ptr<Node> child);
   void remove_child(std::shared_ptr<Node> child);
+  void clear_children();
   int get_num_children() const {
-    return _children.size();
+    return children_.size();
   }
   std::shared_ptr<Node> get_child(int index) const {
-    return _children[index];
+    return children_[index];
   }
 
   void set_world_matrix(fw::Matrix const &m) {
@@ -137,10 +140,10 @@ public:
   }
 
   void set_primitive_type(PrimitiveType pt) {
-    _primitive_type = pt;
+    primitive_type_ = pt;
   }
   PrimitiveType get_primitive_type() const {
-    return _primitive_type;
+    return primitive_type_;
   }
 
   // this is called by the Scenegraph itself when it's time to render
@@ -151,15 +154,14 @@ public:
   virtual std::shared_ptr<Node> clone();
 };
 
-// this class manages the scene graph.
+// The scenegraph is the main interface between the "update" thread and the "render" thread. There should be no data
+// shared between these two threads that is not part of the scenegraph. The scenegraph is a coherent data structure
+// (that is, it persists from frame-to-frame). You can add nodes to it, and then post closures to the scenegraph to
+// update the nodes on the render thread.
 class Scenegraph {
-public:
-  typedef std::vector<std::shared_ptr<Light> > light_coll;
-  typedef std::vector<std::shared_ptr<Node> > node_coll;
-
 private:
-  light_coll lights_;
-  node_coll root_nodes_;
+  std::vector<std::shared_ptr<Light>> lights_;
+  std::vector<std::shared_ptr<Node>> root_nodes_;
   fw::Color clear_color_;
   std::stack<fw::Camera *> camera_stack_;
 
@@ -171,14 +173,14 @@ public:
   void add_light(std::shared_ptr<Light> &l) {
     lights_.push_back(l);
   }
-  light_coll const &get_lights() const {
+  std::vector<std::shared_ptr<Light>> const &get_lights() const {
     return lights_;
   }
 
   void add_node(std::shared_ptr<Node> Node) {
     root_nodes_.push_back(Node);
   }
-  node_coll const &get_nodes() const {
+  std::vector<std::shared_ptr<Node>> const &get_nodes() const {
     return root_nodes_;
   }
 
@@ -202,7 +204,33 @@ public:
     return camera_stack_.top();
   }
 };
-}
+
+// The ScenegraphManager manages access to the scenegraph. Because manipulation of the scenegraph can only occur on the
+// render thread, this class is mostly just an interface for queuing closures to run on the render thread.
+class ScenegraphManager {
+private:
+  std::mutex mutex_;
+  Scenegraph scenegraph_;
+
+  // We have two lists of closures. To keep things efficient, one list is being used by the render thread, the other
+  // is being used by the update thread. We lock the mutex only long enough to switch which is which. update_index_ is
+  // the index of the list we are accessing from the update thread.
+  std::list<std::function<void(Scenegraph&)>> closures_[2];
+  int update_index_ = 0;
+public:
+
+  // Called on the update thread. Enqueues the given closure to run on the render thread. We'll pass it the scenegraph
+  // that you can update, or whatever is needed.
+  void enqueue(std::function<void(Scenegraph&)> closure);
+
+  // Called on the render thread, before rendering a frame. We'll run all of the enqueued closures.
+  void before_render();
+
+  // Called on the render thread, returns the scenegraph.
+  Scenegraph& get_scenegraph();
+};
+
+}  // namespace fw::sg
 
 namespace fw {
 void render(fw::sg::Scenegraph &sg, std::shared_ptr<fw::Framebuffer> render_target = nullptr, bool render_gui = true);

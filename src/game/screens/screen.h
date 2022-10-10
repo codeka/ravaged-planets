@@ -43,9 +43,6 @@ public:
 
   // Updates the "world", this is only called if we're the active screen.
   virtual void update();
-
-  // Renders this screen, this is only called if we're the active screen.
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 // This class represents the "stack" of screens. the top-most Screen is the one that's currently being displayed.

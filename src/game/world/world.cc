@@ -51,8 +51,6 @@ void World::initialize() {
   author_ = reader_->get_author();
   screenshot_ = reader_->get_screenshot();
 
-  terrain_->initialize();
-
   for (auto it : reader_->get_player_starts()) {
     player_starts_[it.first] = it.second;
   }
@@ -160,20 +158,13 @@ void World::update() {
   cursor_->update();
   terrain_->update();
 
-  if (entities_ != nullptr)
+  if (entities_ != nullptr) {
     entities_->update();
+  }
 }
 
 void World::render(fw::sg::Scenegraph &scenegraph) {
-  if (!initialized_) {
-    return;
-  }
-
-  terrain_->render(scenegraph);
-
-  if (entities_ != nullptr) {
-    entities_->render(scenegraph);
-  }
+  // TODO: remove
 }
 
 }

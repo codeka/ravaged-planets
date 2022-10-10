@@ -19,10 +19,10 @@ public:
   TitleScreen();
   virtual ~TitleScreen();
 
-  virtual void show();
-  virtual void hide();
+  void show() override;
+  void hide() override;
 
-  virtual void update();
+  void update() override;
 };
 
 }

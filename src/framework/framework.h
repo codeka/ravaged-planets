@@ -26,6 +26,7 @@ class Gui;
 
 namespace sg {
 class Scenegraph;
+class ScenegraphManager;
 }
 
 // This is the "interface" that the main game class must implement.
@@ -48,13 +49,9 @@ public:
   virtual void destroy() {
   }
 
-  // This is called each frame to perform the "update" phase
+  // This is called at a fixed rate on the "update" thread to update the game. Use the scenegraph manager to
+  // add things to the scenegraph for rendering at each frame.
   virtual void update(float dt) {
-  }
-
-  // This is called each frame to perform the "render" phase - we need to basically add
-  // nodes to the given Scenegraph object
-  virtual void render(sg::Scenegraph &Scenegraph) {
   }
 };
 
@@ -98,6 +95,7 @@ private:
   Lang *lang_;
   FontManager *font_manager_;
   DebugView *debug_view_;
+  sg::ScenegraphManager* scenegraph_manager_;
   volatile bool running_;
 
   // game updates happen (synchronized) on this thread in constant timestep
@@ -177,6 +175,9 @@ public:
   }
   ModelManager *get_model_manager() const {
     return model_manager_;
+  }
+  sg::ScenegraphManager* get_scenegraph_manager() const {
+    return scenegraph_manager_;
   }
   ParticleManager *get_particle_mgr() const {
     return particle_mgr_;

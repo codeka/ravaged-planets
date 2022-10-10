@@ -17,8 +17,7 @@ WorldCreate::WorldCreate(int width, int height) {
 }
 
 game::Terrain *WorldCreate::create_terrain(int width, int length) {
-  EditorTerrain *et = new EditorTerrain();
-  et->create(width, length);
+  EditorTerrain *et = new EditorTerrain(width, length);
   et->initialize_splatt();
   return et;
 }

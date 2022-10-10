@@ -66,7 +66,9 @@ public:
   virtual void initialize();
   virtual void destroy();
   virtual void update();
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
+
+  // TODO: remove this
+  virtual void render(fw::sg::Scenegraph &scenegraph);
 
   void pause();
   void unpause();

@@ -33,7 +33,7 @@ void ModelNode::initialize(Model *mdl) {
     set_shader_parameters(params);
   }
 
-  for(std::shared_ptr<Node> Node : _children) {
+  for(std::shared_ptr<Node> Node : children_) {
     std::dynamic_pointer_cast<ModelNode>(Node)->initialize(mdl);
   }
 }
@@ -68,7 +68,7 @@ void ModelNode::populate_clone(std::shared_ptr<sg::Node> clone) {
 
 void ModelNode::set_color(fw::Color color) {
   color_ = color;
-  for(std::shared_ptr<Node> &child_node: _children) {
+  for(std::shared_ptr<Node> &child_node: children_) {
     std::dynamic_pointer_cast<ModelNode>(child_node)->set_color(color);
   }
 }

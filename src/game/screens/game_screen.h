@@ -28,13 +28,12 @@ public:
   GameScreen();
   virtual ~GameScreen();
 
-  virtual void set_options(std::shared_ptr<ScreenOptions> opt);
+  void set_options(std::shared_ptr<ScreenOptions> opt) override;
 
-  virtual void show();
-  virtual void hide();
+  void show() override;
+  void hide() override;
 
-  virtual void update();
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
+  void update() override;
 };
 
 }

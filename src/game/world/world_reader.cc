@@ -43,8 +43,7 @@ void WorldReader::read(std::string name) {
   wfe.read(height_data, trn_width * trn_length * sizeof(float));
 
   name_ = name;
-  terrain_ = create_terrain(trn_width, trn_length);
-  terrain_->heights_ = height_data;
+  terrain_ = create_terrain(trn_width, trn_length, height_data);
 
   for (int patch_z = 0; patch_z < terrain_->get_patches_length(); patch_z++) {
     for (int patch_x = 0; patch_x < terrain_->get_patches_width(); patch_x++) {
@@ -139,10 +138,8 @@ void WorldReader::read_mapdesc_players(fw::XmlElement players_node) {
   }
 }
 
-Terrain *WorldReader::create_terrain(int width, int length) {
-  Terrain *t = new Terrain();
-  t->create(width, length, false);
-  return t;
+Terrain *WorldReader::create_terrain(int width, int length, float* height_data) {
+  return new Terrain(width, length, height_data);
 }
 
 Terrain *WorldReader::get_terrain() {

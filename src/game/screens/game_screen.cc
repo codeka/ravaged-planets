@@ -58,6 +58,14 @@ void GameScreen::show() {
   // show the initial set of windows
 //  hud_chat->show();
   hud_minimap->show();
+
+
+  // Add a light to the scene. TODO: remove it on close? also update it somehow?
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue([=](fw::sg::Scenegraph& scenegraph) {
+      fw::Vector sun(0.485f, 0.485f, 0.727f);
+      std::shared_ptr <fw::sg::Light> light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
+      scenegraph.add_light(light);
+    });
 }
 
 void GameScreen::update() {
@@ -65,24 +73,6 @@ void GameScreen::update() {
 
   hud_build->update();
   hud_minimap->update();
-}
-
-void GameScreen::render(fw::sg::Scenegraph &scenegraph) {
-  if (world_ == nullptr) {
-    return;
-  }
-
-  // set up the properties of the sun that we'll use to Light and also cast shadows
-  fw::Vector sun(0.485f, 0.485f, 0.727f);
-  fw::Camera *old_cam = fw::Framework::get_instance()->get_camera();
-  fw::Vector cam_pos = old_cam->get_position();
-  fw::Vector cam_dir = old_cam->get_forward();
-  fw::Vector lookat = world_->get_terrain()->get_cursor_location(cam_pos, cam_dir);
-
-  std::shared_ptr <fw::sg::Light> light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
-  scenegraph.add_light(light);
-
-  world_->render(scenegraph);
 }
 
 void GameScreen::hide() {

@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include <framework/bitmap.h>
+#include <framework/scenegraph.h>
 #include <framework/texture.h>
 #include <framework/vector.h>
 
@@ -13,10 +14,6 @@ class VertexBuffer;
 class IndexBuffer;
 class Shader;
 class ShaderParameters;
-
-namespace sg {
-class Scenegraph;
-}
 }
 
 namespace ed {
@@ -29,6 +26,11 @@ struct TerrainPatch {
   std::shared_ptr<fw::VertexBuffer> vb;
   std::shared_ptr<fw::Texture> texture;
   std::shared_ptr<fw::ShaderParameters> shader_params;
+
+  std::shared_ptr<fw::sg::Node> node_;
+
+  // If true, we know we need to re-bake this patch.
+  bool dirty = false;
 };
 
 class Terrain {
@@ -36,9 +38,12 @@ public:
   static const int PATCH_SIZE = 64;
 
 private:
-  std::vector<std::shared_ptr<TerrainPatch> > patches_;
-  std::shared_ptr<fw::IndexBuffer> ib_;
-  std::shared_ptr<fw::Shader> shader_;
+  std::vector<std::shared_ptr<TerrainPatch>> patches_;
+  const std::shared_ptr<fw::IndexBuffer> ib_;
+  const std::shared_ptr<fw::Shader> shader_;
+
+  // The root scenegraph node that we add all our nodes to.
+  std::shared_ptr<fw::sg::Node> root_node_;
 
 protected:
   friend class ed::WorldWriter;
@@ -47,21 +52,20 @@ protected:
   std::vector<std::shared_ptr<fw::Texture>> layers_;
   std::vector<bool> collision_data_;
 
-  int width_;
-  int length_;
+  const int width_;
+  const int length_;
   float *heights_;
 
   // get the width/height of the terrain in patches
-  int get_patches_width() {
+  int get_patches_width() const {
     return (width_ / PATCH_SIZE);
   }
-  int get_patches_length() {
+  int get_patches_length() const {
     return (length_ / PATCH_SIZE);
   }
 
   // Gets the index of the given x/z coordinates for a single patch
-  int get_patch_index(int patch_x, int patch_z, int *new_patch_x = 0,
-      int *new_patch_z = 0);
+  int get_patch_index(int patch_x, int patch_z, int *new_patch_x = 0, int *new_patch_z = 0) const;
 
   // bake a patch's height values into a texture, ready to be
   // passed to our vertex Shader. cool!
@@ -69,20 +73,15 @@ protected:
 
   // gets or sets the splatt texture for the given patch
   std::shared_ptr<fw::Texture> get_patch_splatt(int patch_x, int patch_z);
-  virtual void set_patch_splatt(int patch_x, int patch_z,
-      std::shared_ptr<fw::Texture> texture);
+  virtual void set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::Texture> texture);
 
   // Makes sure we've created all of the patches we'll need
   void ensure_patches();
 public:
-  Terrain();
+  Terrain(int width, int height, float *height_data = nullptr);
   virtual ~Terrain();
 
-  void initialize();
-  void create(int width, int length, bool create_height_data = true);
-
   virtual void update();
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
 
   virtual void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap);
 
@@ -92,10 +91,10 @@ public:
   // gets the height above the terrain at the given (x,z) coordinates.
   float get_height(float x, float z);
 
-  inline int get_width() {
+  inline int get_width() const {
     return width_;
   }
-  inline int get_length() {
+  inline int get_length() const {
     return length_;
   }
 

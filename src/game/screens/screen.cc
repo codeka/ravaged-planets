@@ -24,9 +24,6 @@ void Screen::hide() {
 void Screen::update() {
 }
 
-void Screen::render(fw::sg::Scenegraph &) {
-}
-
 //-------------------------------------------------------------------------
 
 ScreenStack::ScreenStack() {

@@ -13,7 +13,8 @@ namespace ed {
 static const int splatt_width = 128;
 static const int splatt_height = 128;
 
-EditorTerrain::EditorTerrain() {
+EditorTerrain::EditorTerrain(int width, int height)
+  : Terrain(width, height) {
 }
 
 EditorTerrain::~EditorTerrain() {
@@ -30,7 +31,7 @@ void EditorTerrain::render(fw::sg::Scenegraph &scenegraph) {
     patches_to_bake_.clear();
   }
 
-  Terrain::render(scenegraph);
+ // Terrain::render(scenegraph);
 }
 
 // set the height of the given vertex to the given value.

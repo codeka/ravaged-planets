@@ -47,7 +47,7 @@ Framework::Framework(BaseApp* app) :
     app_(app), active_(true), camera_(nullptr), paused_(false), particle_mgr_(nullptr),
     graphics_(nullptr), timer_(nullptr), audio_manager_(nullptr), input_(nullptr), lang_(nullptr),
     gui_(nullptr), font_manager_(nullptr), model_manager_(nullptr), cursor_(nullptr),
-    debug_view_(nullptr), running_(true) {
+    debug_view_(nullptr), scenegraph_manager_(nullptr), running_(true) {
   only_instance = this;
 }
 
@@ -70,6 +70,8 @@ Framework::~Framework() {
     delete cursor_;
   if (model_manager_ != nullptr)
     delete model_manager_;
+  if (scenegraph_manager_ != nullptr)
+    delete scenegraph_manager_;
   if (debug_view_ != nullptr)
     delete debug_view_;
   if (audio_manager_ != nullptr)
@@ -106,6 +108,7 @@ bool Framework::initialize(char const *title) {
     particle_mgr_->initialize(graphics_);
 
     model_manager_ = new ModelManager();
+    scenegraph_manager_ = new sg::ScenegraphManager();
 
     cursor_ = new Cursor();
     cursor_->initialize();
@@ -303,11 +306,12 @@ void Framework::render() {
 
   timer_->render();
 
-  // populate the scene graph by calling into the Application itself
-  sg::Scenegraph scenegraph;
-  app_->render(scenegraph);
-  particle_mgr_->render(scenegraph);
+  scenegraph_manager_->before_render();
+  
+  // TODO: rework particles
+  //particle_mgr_->render(scenegraph);
 
+  auto& scenegraph = scenegraph_manager_->get_scenegraph();
   fw::render(scenegraph);
 
   // if we've been asked for some screenshots, take them after we've done the normal render.

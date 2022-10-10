@@ -53,21 +53,31 @@ Light::~Light() {
 
 //-------------------------------------------------------------------------------------
 Node::Node() :
-    world_(fw::identity()), parent_(0), cast_shadows_(true), _primitive_type(PrimitiveType::kUnknownPrimitiveType) {
+    world_(fw::identity()), parent_(0), cast_shadows_(true), primitive_type_(PrimitiveType::kUnknownPrimitiveType) {
 }
 
 Node::~Node() {
 }
 
 void Node::add_child(std::shared_ptr<Node> child) {
+  FW_ENSURE_RENDER_THREAD();
+
   child->parent_ = this;
-  _children.push_back(child);
+  children_.push_back(child);
 }
 
 void Node::remove_child(std::shared_ptr<Node> child) {
-  auto it = std::find(_children.begin(), _children.end(), child);
-  if (it != _children.end())
-    _children.erase(it);
+  FW_ENSURE_RENDER_THREAD();
+
+  auto it = std::find(children_.begin(), children_.end(), child);
+  if (it != children_.end())
+    children_.erase(it);
+}
+
+void Node::clear_children() {
+  FW_ENSURE_RENDER_THREAD();
+
+  children_.clear();
 }
 
 // Get the Shader file to use. if we don't have one defined, look at our parent and keep looking up at our parents
@@ -111,7 +121,7 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
   }
 
   // render the children as well (todo: pass transformations)
-  for(auto &child_node : _children) {
+  for(auto &child_node : children_) {
     child_node->render(sg, transform);
   }
 }
@@ -154,10 +164,10 @@ void Node::render_shader(std::shared_ptr<fw::Shader> shader, fw::Camera *camera,
   shader->begin(parameters);
   if (ib_) {
     ib_->begin();
-    FW_CHECKED(glDrawElements(g_primitive_type_map[_primitive_type], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
+    FW_CHECKED(glDrawElements(g_primitive_type_map[primitive_type_], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
     ib_->end();
   } else {
-    FW_CHECKED(glDrawArrays(g_primitive_type_map[_primitive_type], 0, vb_->get_num_vertices()));
+    FW_CHECKED(glDrawArrays(g_primitive_type_map[primitive_type_], 0, vb_->get_num_vertices()));
   }
   shader->end();
   vb_->end();
@@ -173,7 +183,7 @@ void Node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
 
 void Node::populate_clone(std::shared_ptr<Node> clone) {
   clone->cast_shadows_ = cast_shadows_;
-  clone->_primitive_type = _primitive_type;
+  clone->primitive_type_ = primitive_type_;
   clone->vb_ = vb_;
   clone->ib_ = ib_;
   clone->shader_ = shader_;
@@ -183,8 +193,8 @@ void Node::populate_clone(std::shared_ptr<Node> clone) {
   clone->world_ = world_;
 
   // clone the children as well!
-  for(auto& child : _children) {
-    clone->_children.push_back(child->clone());
+  for(auto& child : children_) {
+    clone->children_.push_back(child->clone());
   }
 }
 
@@ -203,8 +213,45 @@ Scenegraph::Scenegraph()
 Scenegraph::~Scenegraph() {
 }
 
+
+//-----------------------------------------------------------------------------------------
+
+// Called on the update thread. Enqueues the given closure to run on the render thread. We'll pass it the scenegraph
+// that you can update, or whatever is needed.
+void ScenegraphManager::enqueue(std::function<void(Scenegraph&)> closure) {
+  std::unique_lock<std::mutex> lock(mutex_);
+  closures_[update_index_].push_back(closure);
 }
 
+// Called on the render thread, before rendering a frame. We'll run all of the enqueued closures.
+void ScenegraphManager::before_render() {
+  FW_ENSURE_RENDER_THREAD();
+
+  int render_index;
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (update_index_ == 0) {
+      update_index_ = 1;
+      render_index = 0;
+    } else {
+      update_index_ = 0;
+      render_index = 1;
+    }
+  }
+
+  auto& closures = closures_[render_index];
+  for (auto& closure : closures) {
+    closure(scenegraph_);
+  }
+  closures.clear();
+}
+
+Scenegraph& ScenegraphManager::get_scenegraph() {
+  FW_ENSURE_RENDER_THREAD();
+  return scenegraph_;
+}
+
+}
 //-----------------------------------------------------------------------------------------
 static const bool g_shadow_debug = true;
 

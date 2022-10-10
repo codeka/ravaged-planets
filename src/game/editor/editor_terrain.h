@@ -25,7 +25,7 @@ private:
   std::vector<std::shared_ptr<fw::Bitmap>> layer_bitmaps_;
 
 public:
-  EditorTerrain();
+  EditorTerrain(int width, int height);
   virtual ~EditorTerrain();
 
   // set a new height for the given vertex

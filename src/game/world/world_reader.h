@@ -26,7 +26,7 @@ protected:
   std::string description_;
   std::string author_;
 
-  virtual Terrain* create_terrain(int width, int length);
+  virtual Terrain* create_terrain(int width, int length, float* height_data);
 
   void read_mapdesc(fw::XmlElement root);
   void read_mapdesc_players(fw::XmlElement players_node);
