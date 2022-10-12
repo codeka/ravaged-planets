@@ -112,7 +112,9 @@ void Texture::create(fw::Bitmap const &bmp) {
   data_->height = bitmap.get_height();
 
   data_creator_ = [g, bitmap](TextureData& data) {
-    glGenTextures(1, &data.texture_id);
+    if (data.texture_id <= 0) {
+      glGenTextures(1, &data.texture_id);
+    }
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
     FW_CHECKED(
       glTexImage2D(
