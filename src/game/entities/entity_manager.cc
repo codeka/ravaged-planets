@@ -74,6 +74,8 @@ std::shared_ptr<Entity> EntityManager::create_entity(
     }
   }
 
+  ent->add_attribute(ent::EntityAttribute("patch_offset_", fw::Vector(0, 0, 0)));
+
   fw::debug << boost::format("created entity: %1% (identifier: %2%)") % template_name % id << std::endl;
 
   for (auto& pair : ent->components_) {
@@ -289,24 +291,16 @@ void EntityManager::update() {
     ent->update(dt);
   }
 
-  // update the EntityDebug interface
-  debug_->update();
-}
+  int center_patch_x = (int)(location[0] / PatchManager::PATCH_SIZE);
+  int center_patch_z = (int)(location[2] / PatchManager::PATCH_SIZE);
+  for (int patch_z = center_patch_z - 1; patch_z <= center_patch_z + 1; patch_z++) {
+    for (int patch_x = center_patch_x - 1; patch_x <= center_patch_x + 1; patch_x++) {
+      Patch* p = patch_mgr_->get_patch(patch_x, patch_z);
 
-void EntityManager::render(fw::sg::Scenegraph &scenegraph) {
-  fw::Vector location = get_view_center();
-
-  int centre_patch_x = (int) (location[0] / PatchManager::PATCH_SIZE);
-  int centre_patch_z = (int) (location[2] / PatchManager::PATCH_SIZE);
-
-  for (int patch_z = centre_patch_z - 1; patch_z <= centre_patch_z + 1; patch_z++) {
-    for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
-      Patch *p = patch_mgr_->get_patch(patch_x, patch_z);
-
-      fw::Matrix trans = fw::translation(fw::Vector(
-          (float) (patch_x * PatchManager::PATCH_SIZE) - p->get_origin()[0],
-          0,
-          (float) (patch_z * PatchManager::PATCH_SIZE) - p->get_origin()[2]));
+      fw::Vector patch_offset(
+        (float)(patch_x * PatchManager::PATCH_SIZE) - p->get_origin()[0],
+        0,
+        (float)(patch_z * PatchManager::PATCH_SIZE) - p->get_origin()[2]);
 
       std::list<std::weak_ptr<Entity> > patch_entities = p->get_entities();
       for (auto it = patch_entities.begin(); it != patch_entities.end(); ++it) {
@@ -314,10 +308,17 @@ void EntityManager::render(fw::sg::Scenegraph &scenegraph) {
         if (!entity)
           continue;
 
-        entity->render(scenegraph, trans);
+        auto attr = entity->get_attribute("patch_offset_");
+        if (attr != nullptr) {
+          attr->set_value(patch_offset);
+        }
       }
     }
   }
+
+
+  // update the EntityDebug interface
+  debug_->update();
 }
 
 }

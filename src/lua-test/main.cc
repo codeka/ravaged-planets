@@ -108,7 +108,7 @@ private:
   }
 
   static void l_register(fw::lua::MethodContext<TestClass>& ctx) {
-    ctx.owner()->callback = ctx.arg<fw::lua::Callback>(0);
+    //ctx.owner()->callback = ctx.arg<fw::lua::Callback>(0);
   }
 
 public:

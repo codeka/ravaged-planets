@@ -242,14 +242,14 @@ void PathingTool::render(fw::sg::Scenegraph &Scenegraph) {
 
   if (start_set_) {
     fw::Matrix loc(fw::translation(start_pos_));
-    marker_->set_color(fw::Color(1, 0.1f, 1, 0.1f));
-    marker_->render(Scenegraph, loc);
+//    marker_->set_color(fw::Color(1, 0.1f, 1, 0.1f));
+//    marker_->render(Scenegraph, loc);
   }
 
   if (end_set_) {
     fw::Matrix loc(fw::translation(end_pos_));
-    marker_->set_color(fw::Color(1, 1, 0.1f, 0.1f));
-    marker_->render(Scenegraph, loc);
+//    marker_->set_color(fw::Color(1, 1, 0.1f, 0.1f));
+//    marker_->render(Scenegraph, loc);
   }
 
   if (current_path_vb) {

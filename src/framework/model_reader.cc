@@ -17,7 +17,6 @@ namespace fw {
 void add_node(std::shared_ptr<ModelNode> node, Node const &pb_node);
 
 std::shared_ptr<Model> ModelReader::read(fs::path const &filename) {
-  std::shared_ptr<Model> Model(new fw::Model());
   ::Model pb_model;
 
   std::fstream ins;
@@ -28,6 +27,7 @@ std::shared_ptr<Model> ModelReader::read(fs::path const &filename) {
   pb_model.ParseFromIstream(&ins);
   ins.close();
 
+  std::vector<std::shared_ptr<fw::ModelMesh>> meshes;
   for (int i = 0; i < pb_model.meshes_size(); i++) {
     Mesh const &pb_mesh = pb_model.meshes(i);
     std::shared_ptr<ModelMeshNoanim> mesh_noanim = std::shared_ptr<ModelMeshNoanim>(new ModelMeshNoanim(
@@ -42,14 +42,13 @@ std::shared_ptr<Model> ModelReader::read(fs::path const &filename) {
     uint16_t const *indices_end =
         reinterpret_cast<uint16_t const *>(pb_mesh.indices().data() + pb_mesh.indices().size());
     mesh_noanim->indices.assign(indices_begin, indices_end);
-    Model->meshes.push_back(mesh_noanim);
+    meshes.push_back(mesh_noanim);
   }
 
   std::shared_ptr<ModelNode> root_node = std::shared_ptr<ModelNode>(new ModelNode());
   add_node(root_node, pb_model.root_node());
-  Model->root_node = root_node;
-
-  return Model;
+  
+  return std::make_shared<fw::Model>(meshes, root_node);
 }
 
 void add_node(std::shared_ptr<ModelNode> node, Node const &pb_node) {

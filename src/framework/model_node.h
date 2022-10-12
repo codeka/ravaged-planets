@@ -17,6 +17,8 @@ private:
   Model *model_;
   fw::Color color_;
 
+  bool need_initialize_ = false;
+
 protected:
   /* Renders the Model Node. */
   virtual void render(sg::Scenegraph *sg, fw::Matrix const &model_matrix = fw::identity());

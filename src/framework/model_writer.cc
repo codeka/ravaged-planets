@@ -19,13 +19,13 @@ void ModelWriter::write(std::string const &filename, std::shared_ptr<Model> mdl)
 void ModelWriter::write(std::string const &filename, Model &mdl) {
   ::Model pb_model;
   pb_model.set_name("TODO");
-  for(auto& mesh : mdl.meshes) {
+  for(auto& mesh : mdl.meshes_) {
     std::shared_ptr<ModelMeshNoanim> mesh_noanim = std::dynamic_pointer_cast<ModelMeshNoanim>(mesh);
     Mesh *pb_mesh = pb_model.add_meshes();
     pb_mesh->set_vertices(mesh_noanim->vertices.data(), mesh_noanim->vertices.size() * sizeof(vertex::xyz_n_uv));
     pb_mesh->set_indices(mesh_noanim->indices.data(), mesh_noanim->indices.size() * sizeof(uint16_t));
   }
-  add_node(pb_model.mutable_root_node(), mdl.root_node);
+  add_node(pb_model.mutable_root_node(), mdl.root_node_);
 
   std::fstream outs;
   outs.open(filename.c_str(), std::ios::out);

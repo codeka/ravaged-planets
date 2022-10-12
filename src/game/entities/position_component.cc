@@ -1,12 +1,14 @@
 #include <functional>
 
 #include <framework/misc.h>
+#include <framework/scenegraph.h>
 #include <framework/logging.h>
 
 #include <game/entities/entity.h>
 #include <game/entities/entity_manager.h>
 #include <game/entities/entity_factory.h>
 #include <game/entities/position_component.h>
+#include <game/entities/mesh_component.h>
 #include <game/world/world.h>
 #include <game/world/terrain.h>
 
@@ -75,20 +77,29 @@ void PositionComponent::set_final_position() {
     pos_ = fw::Vector(x, pos_[1], z);
 
     // make sure we "exist" in the correct patch as well...
-    std::shared_ptr<ent::Entity> Entity(entity_);
-    EntityManager *emgr = Entity->get_manager();
+    std::shared_ptr<ent::Entity> entity(entity_);
+    EntityManager *emgr = entity->get_manager();
     PatchManager *pmgr = emgr->get_patch_manager();
     Patch *new_patch = pmgr->get_patch(x, z);
     if (new_patch != patch_) {
       if (patch_ != nullptr) {
-        patch_->remove_entity(Entity);
+        patch_->remove_entity(entity);
       }
 
-      new_patch->add_entity(Entity);
+      new_patch->add_entity(entity);
       patch_ = new_patch;
     }
 
     pos_updated_ = false;
+
+    fw::Matrix transform = get_transform();
+    MeshComponent *mesh_component = entity->get_component<MeshComponent>();
+    if (mesh_component != nullptr) {
+      fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+        [transform, mesh_component](fw::sg::Scenegraph& sg) {
+          mesh_component->get_sg_node()->transform = transform;
+        });
+    }
   }
 }
 

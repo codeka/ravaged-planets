@@ -17,20 +17,13 @@ namespace fw {
 
 //-------------------------------------------------------------------------
 struct TextureData {
-  GLuint texture_id;
-  int width, height;
+  GLuint texture_id = -1;
+  int width = -1, height = -1;
   fs::path filename; // might be empty if we weren't created from a file
 
+  TextureData() = default;
   TextureData(const TextureData&) = delete;
   TextureData& operator=(const TextureData&) = delete;
-
-  TextureData() : texture_id(0), width(-1), height(-1) {
-    FW_CHECKED(glGenTextures(1, &texture_id));
-  }
-
-  ~TextureData() {
-    FW_CHECKED(glDeleteTextures(1, &texture_id));
-  }
 };
 
 //-------------------------------------------------------------------------
@@ -60,6 +53,11 @@ void TextureCache::add_texture(fs::path const &filename, std::shared_ptr<Texture
 }
 
 void TextureCache::clear_cache() {
+  FW_ENSURE_RENDER_THREAD();
+
+  for (auto texture : textures_) {
+    glDeleteTextures(1, &texture.second->texture_id);
+  }
   textures_.clear();
 }
 
@@ -71,30 +69,34 @@ Texture::Texture() {
 }
 
 Texture::~Texture() {
+  // TODO: do I need to glDeleteTextures?
 }
 
-void Texture::create(fs::path const &filename) {
+void Texture::create(fs::path const &fn) {
   Graphics *g = fw::Framework::get_instance()->get_graphics();
 
-  data_ = g_cache.get_texture(filename);
-  if (!data_) {
-    data_ = std::make_shared<TextureData>();
+  // Local the image on this thread to avoid loading it on the render thread.
+  fs::path filename = fn;
+  debug << boost::format("loading texture: %1%") % filename << std::endl;
+  int width, height, channels;
+  unsigned char* pixels = stbi_load(filename.string().c_str(), &width, &height, &channels, 4);
 
-    debug << boost::format("loading texture: %1%") % filename << std::endl;
-    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
+  data_ = std::make_shared<TextureData>();
+  data_->filename = filename;
+  data_->width = width;
+  data_->height = height;
 
-    data_->filename = filename;
-    int channels;
-    unsigned char *pixels = stbi_load(filename.string().c_str(), &data_->width, &data_->height, &channels, 4);
+  data_creator_ = [g, filename, pixels, width, height, channels](TextureData& data) {
+    glGenTextures(1, &data.texture_id);
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
     // TODO: pre-multiply alpha
     // TODO: DXT compress
     // TODO: mipmaps
-    FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data_->width, data_->height, 0, GL_RGBA,
-        GL_UNSIGNED_BYTE, pixels));
+    FW_CHECKED(
+      glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels));
     stbi_image_free(pixels);
-
-    g_cache.add_texture(filename, data_);
-  }
+  };
 }
 
 void Texture::create(std::shared_ptr<fw::Bitmap> bmp) {
@@ -103,34 +105,47 @@ void Texture::create(std::shared_ptr<fw::Bitmap> bmp) {
 
 void Texture::create(fw::Bitmap const &bmp) {
   Graphics *g = fw::Framework::get_instance()->get_graphics();
+  fw::Bitmap bitmap(bmp);
 
-  if (!data_) {
-    data_ = std::make_shared<TextureData>();
-  }
-  data_->width = bmp.get_width();
-  data_->height = bmp.get_height();
+  data_ = std::make_shared<TextureData>();
+  data_->width = bitmap.get_width();
+  data_->height = bitmap.get_height();
 
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
-  FW_CHECKED(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, data_->width, data_->height, 0, GL_RGBA,
-      GL_UNSIGNED_BYTE, bmp.get_pixels().data()));
+  data_creator_ = [g, bitmap](TextureData& data) {
+    glGenTextures(1, &data.texture_id);
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
+    FW_CHECKED(
+      glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, bitmap.get_pixels().data()));
+  };
 }
 
 void Texture::create(int width, int height, bool is_shadowmap) {
   Graphics *g = fw::Framework::get_instance()->get_graphics();
 
-  if (!data_) {
-    data_ = std::make_shared<TextureData>();
-  }
+  data_ = std::make_shared<TextureData>();
   data_->width = width;
   data_->height = height;
 
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
-  if (is_shadowmap) {
-    FW_CHECKED(glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, data_->width, data_->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr));
-  } else {
-    FW_CHECKED(glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, data_->width, data_->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+  data_creator_ = [g, width, height, is_shadowmap](TextureData& data) {
+    glGenTextures(1, &data.texture_id);
+    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
+    if (is_shadowmap) {
+      FW_CHECKED(glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, data.width, data.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr));
+    } else {
+      FW_CHECKED(glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+    }
+  };
+}
+
+void Texture::ensure_created() {
+  FW_ENSURE_RENDER_THREAD();
+  if (data_creator_) {
+    data_creator_(*data_);
+    data_creator_ = nullptr;
   }
 }
 

@@ -27,11 +27,8 @@ class EntityManager;
  */
 typedef uint32_t entity_id;
 
-/**
- * This is the base class for components of entities. It's just got a couple of methods
- * and stuff that let us figure out how the component fits in and so on.
- */
-
+// This is the base class for components of entities. It's just got a couple of methods
+// and stuff that let us figure out how the component fits in and so on.
 class EntityComponent {
 protected:
   std::weak_ptr<Entity> entity_;
@@ -40,41 +37,29 @@ public:
   EntityComponent();
   virtual ~EntityComponent();
 
-  /**
-   * This is called once the Entity we're attached to has all of it's components defined and so
-   * on (we can query for other components, etc)
-   */
+  // This is called once the Entity we're attached to has all of it's components defined and so
+  // on (we can query for other components, etc)
   virtual void initialize() {
   }
 
-  /** This is called each frame in the "update" round. */
+  // This is called each frame in the "update" round.
   virtual void update(float) {
   }
 
-  /** This is called when it's time to render. generate a Scenegraph Node and add it to the Scenegraph. */
-  virtual void render(fw::sg::Scenegraph &, fw::Matrix const &) {
-  }
-
-  /** Loads this component with data from the given component template (Lua object). */
+  // Loads this component with data from the given component template (Lua object).
   virtual void apply_template(fw::lua::Value tmpl) {
   }
 
-  /**
-   * This is called by the entity_factory when we're added to an Entity. Do not override this and
-   * instead wait for initialize() to be called.
-   */
+  // This is called by the entity_factory when we're added to an Entity. Do not override this and
+  // instead wait for initialize() to be called.
   void set_entity(std::weak_ptr<Entity> ent) {
     entity_ = ent;
   }
 
-  /**
-   * Gets the unique identifier for this component (e.g. render_component::identifier for the render component)
-   */
+  // Gets the unique identifier for this component (e.g. MesgComponent::identifier for the MeshComponent)
   virtual int get_identifier() = 0;
 
-  /**
-   * Return true from here if you want people to be able to call EntityManager::get_entities_by_component<YOU>();
-   */
+  // Return true from here if you want people to be able to call EntityManager::get_entities_by_component<YOU>();
   virtual bool allow_get_by_component() {
     return false;
   }
@@ -150,9 +135,8 @@ public:
     return contains_component(T::identifier);
   }
 
-  // these are called each frame to update and then render the Entity
+  // these are called each frame to update the Entity
   void update(float dt);
-  void render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform);
 
   // this is a helper that you can use to move an Entity directly to somewhere on the map.
   void set_position(fw::Vector const &pos);

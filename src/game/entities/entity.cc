@@ -82,17 +82,17 @@ void Entity::update(float dt) {
     pair.second->update(dt);
   }
 }
-
-void Entity::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform) {
+/*
+void Entity::render(fw::sg::Scenegraph& scenegraph, fw::Matrix const& transform) {
   for (auto& pair : components_) {
     pair.second->render(scenegraph, transform);
   }
 
-  if (debug_view_ != nullptr) {
-    debug_view_->render(scenegraph, transform);
-  }
+  //  if (debug_view_ != nullptr) {
+  //    debug_view_->render(scenegraph, transform);
+  //  }
 }
-
+*/
 void Entity::set_position(fw::Vector const &pos) {
   PositionComponent *position = get_component<ent::PositionComponent>();
   if (position != nullptr) {

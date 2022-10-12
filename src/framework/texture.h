@@ -12,6 +12,10 @@ class Texture {
 private:
   std::shared_ptr<TextureData> data_;
 
+  // If this is set, we'll call it (once) on the render thread to finish creating the actual TextureData. We do expect
+  // to have data_->width, height etc set before the render thread runs though.
+  std::function<void(TextureData& data)> data_creator_;
+
   void calculate_size() const;
 
 public:
@@ -22,6 +26,9 @@ public:
   void create(std::shared_ptr<fw::Bitmap> bmp);
   void create(fw::Bitmap const &bmp);
   void create(int width, int height, bool is_shadowmap = false);
+
+  // Ensures we are created before you call bind. Must be called on the render thread.
+  void ensure_created();
 
   // save the contents of this texture to a .png file with the given name
   void save_png(boost::filesystem::path const &filename);
@@ -40,7 +47,8 @@ public:
   boost::filesystem::path get_filename() const;
 
   /** Gets the texture_data for this texture (used by framebuffer) */
-  std::shared_ptr<TextureData> get_data() const {
+  std::shared_ptr<TextureData> get_data() {
+    ensure_created();
     return data_;
   }
 };

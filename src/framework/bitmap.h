@@ -26,7 +26,7 @@ private:
   void load_bitmap(uint8_t const *data, size_t data_size);
 
   // Populates our bitmap data from the given texture.
-  void load_bitmap(Texture const &tex);
+  void load_bitmap(Texture &tex);
 
 public:
   // Constructs a blank bitmap.
@@ -42,7 +42,7 @@ public:
   Bitmap(uint8_t const *data, size_t data_size);
 
   // Constructs a new bitmap from the given texture (if the texture is mip-mapped, we'll use the largest mip-map level)
-  Bitmap(Texture const &tex);
+  Bitmap(Texture &tex);
 
   // Constructs a new bitmap that is a copy of the given bitmap. We won't actually copy the data until you write to it.
   Bitmap(Bitmap const &copy);

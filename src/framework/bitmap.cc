@@ -61,7 +61,7 @@ Bitmap::Bitmap(uint8_t const *data, size_t data_size) :
   load_bitmap(data, data_size);
 }
 
-Bitmap::Bitmap(Texture const &tex) :
+Bitmap::Bitmap(Texture &tex) :
     data_(nullptr) {
   load_bitmap(tex);
 }
@@ -150,9 +150,10 @@ void Bitmap::load_bitmap(uint8_t const *data, size_t data_size) {
   stbi_image_free(pixels);
 }
 
-void Bitmap::load_bitmap(Texture const &tex) {
+void Bitmap::load_bitmap(Texture &tex) {
   FW_ENSURE_RENDER_THREAD();
 
+  tex.ensure_created();
   prepare_write(tex.get_width(), tex.get_height());
   tex.bind();
   FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data_->rgba.data()));

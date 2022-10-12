@@ -12,19 +12,18 @@ namespace fs = boost::filesystem;
 namespace fw {
 
 std::shared_ptr<Model> ModelManager::get_model(std::string const &name) {
-  FW_ENSURE_RENDER_THREAD();
   fs::path path = fw::resolve("meshes/" + name + ".mesh");
   debug << boost::format("loading mesh: %1%") % path << std::endl;
 
   auto it = models_.find(name);
   if (it == models_.end()) {
     ModelReader reader;
-    std::shared_ptr<Model> Model = reader.read(path);
-    Model->texture = std::shared_ptr<Texture>(new Texture());
-    Model->texture->create(fw::resolve("meshes/" + name + ".png"));
-    Model->root_node->initialize(Model.get());
-    models_[name] = Model;
-    return Model;
+    std::shared_ptr<Model> model = reader.read(path);
+    model->texture_ = std::shared_ptr<Texture>(new Texture());
+    model->texture_->create(fw::resolve("meshes/" + name + ".png"));
+    model->root_node_->initialize(model.get());
+    models_[name] = model;
+    return model;
   } else {
     return it->second;
   }

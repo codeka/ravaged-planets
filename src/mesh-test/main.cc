@@ -114,8 +114,8 @@ void Application::render(fw::sg::Scenegraph &Scenegraph) {
     Scenegraph.add_node(g_ground);
   }
 
-  g_model->set_color(fw::Color(1.0f, 1.0f, 0.0f, 0.0f));
-  g_model->render(Scenegraph, fw::rotate_axis_angle(fw::Vector(0, 1, 0), g_rotate_angle));
+//  g_model->set_color(fw::Color(1.0f, 1.0f, 0.0f, 0.0f));
+//  g_model->render(Scenegraph, fw::rotate_axis_angle(fw::Vector(0, 1, 0), g_rotate_angle));
 }
 
 //-----------------------------------------------------------------------------

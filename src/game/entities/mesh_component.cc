@@ -4,6 +4,7 @@
 #include <framework/graphics.h>
 #include <framework/model.h>
 #include <framework/model_manager.h>
+#include <framework/model_node.h>
 #include <framework/paths.h>
 #include <framework/logging.h>
 #include <framework/scenegraph.h>
@@ -26,8 +27,8 @@ ENT_COMPONENT_REGISTER("Mesh", MeshComponent);
 MeshComponent::MeshComponent() {
 }
 
-MeshComponent::MeshComponent(std::shared_ptr<fw::Model> const &Model) :
-    model_(Model) {
+MeshComponent::MeshComponent(std::shared_ptr<fw::Model> const &model) :
+    model_(model) {
 }
 
 MeshComponent::~MeshComponent() {
@@ -39,26 +40,22 @@ void MeshComponent::apply_template(fw::lua::Value tmpl) {
 
 void MeshComponent::initialize() {
   std::shared_ptr<Entity> entity(entity_);
-  ownable_component_ = entity->get_component<OwnableComponent>();
-}
-
-void MeshComponent::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform) {
-  std::shared_ptr<Entity> entity(entity_);
-  PositionComponent *pos = entity->get_component<PositionComponent>();
-  if (pos != nullptr) {
-    if (!model_) {
-      model_ = fw::Framework::get_instance()->get_model_manager()->get_model(model_name_);
+  fw::Color color = fw::Color::WHITE();
+  auto ownable_component = entity->get_component<OwnableComponent>();
+  if (ownable_component != nullptr) {
+    game::Player* player = ownable_component->get_owner();
+    if (player != nullptr) {
+      color = player->get_color();
     }
-
-    if (ownable_component_ != nullptr) {
-      game::Player *player = ownable_component_->get_owner();
-      if (player != nullptr) {
-        model_->set_color(player->get_color());
-      }
-    }
-
-    model_->render(scenegraph, pos->get_transform() * transform);
   }
+
+  auto& model = fw::Framework::get_instance()->get_model_manager()->get_model(model_name_);
+  auto sg_node = model->create_node(color);
+  sg_node_ = sg_node;
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [sg_node](fw::sg::Scenegraph& scenegraph) {
+      scenegraph.add_node(std::dynamic_pointer_cast<fw::sg::Node>(sg_node));
+    });
 }
 
 }

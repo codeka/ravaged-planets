@@ -163,8 +163,4 @@ void World::update() {
   }
 }
 
-void World::render(fw::sg::Scenegraph &scenegraph) {
-  // TODO: remove
-}
-
 }

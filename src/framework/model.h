@@ -8,6 +8,7 @@
 #include <framework/vector.h>
 
 namespace fw {
+class ModelManager;
 class ModelNode;
 
 // A ModelMesh represents all the data needed for a single call to glDraw* - vertices, indices, etc.
@@ -58,35 +59,20 @@ private:
   bool wireframe_;
   fw::Color color_;
 
+  friend class ModelManager;
+  friend class ModelNode;
+  friend class ModelWriter;
+
+  std::shared_ptr<fw::Texture> texture_;
+  const std::vector<std::shared_ptr<fw::ModelMesh>> meshes_;
+  const std::shared_ptr<fw::ModelNode> root_node_;
+
 public:
-  Model();
+  Model(const std::vector<std::shared_ptr<fw::ModelMesh>>& meshes, std::shared_ptr<fw::ModelNode> root_node);
   ~Model();
 
-  std::vector<std::shared_ptr<fw::ModelMesh>> meshes;
-  std::shared_ptr<fw::ModelNode> root_node;
-  std::shared_ptr<fw::Texture> texture;
-
-  /** Sets a ParticleRotation which indicates whether we want to render in wireframe mode or not. */
-  inline void set_wireframe(bool ParticleRotation) {
-    wireframe_ = ParticleRotation;
-  }
-  inline bool get_wireframe() const {
-    return wireframe_;
-  }
-
-  /**
-   * Sets the color we apply to transparent parts of the Model's texture - this is usually used to differentiate
-   * different players.
-   */
-  inline void set_color(fw::Color col) {
-    color_ = col;
-  }
-  inline fw::Color get_color() const {
-    return color_;
-  }
-
-  /** Renders the mesh to the given Scenegraph. */
-  void render(sg::Scenegraph &sg, fw::Matrix const &transform = fw::identity());
+  // Creates a new scenegraph node you can use that will render this model.
+  std::shared_ptr<fw::ModelNode> create_node(fw::Color color);
 };
 
 }

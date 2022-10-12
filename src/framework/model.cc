@@ -16,7 +16,7 @@ ModelMesh::~ModelMesh() {
 //-------------------------------------------------------------------------
 
 ModelMeshNoanim::ModelMeshNoanim(int num_vertices, int num_indices) :
-    ModelMesh(num_vertices, num_indices), vertices(num_vertices), indices(num_indices) {
+  ModelMesh(num_vertices, num_indices), vertices(num_vertices), indices(num_indices) {
 }
 
 ModelMeshNoanim::~ModelMeshNoanim() {
@@ -37,16 +37,17 @@ void ModelMeshNoanim::setup_buffers() {
 
 //-------------------------------------------------------------------------
 
-Model::Model() : wireframe_(false), color_(fw::Color(1, 1, 1)) {
+Model::Model(const std::vector<std::shared_ptr<fw::ModelMesh>>& meshes, std::shared_ptr<fw::ModelNode> root_node)
+  : meshes_(meshes), root_node_(root_node) {
 }
 
 Model::~Model() {
 }
 
-void Model::render(sg::Scenegraph &sg, fw::Matrix const &transform /*= fw::matrix::identity() */) {
-  root_node->set_world_matrix(transform);
-  root_node->set_color(color_);
-  sg.add_node(root_node->clone());
+std::shared_ptr<fw::ModelNode> Model::create_node(fw::Color color) {
+  auto clone = std::dynamic_pointer_cast<fw::ModelNode>(root_node_->clone());
+  clone->set_color(color);
+  return clone;
 }
 
 }

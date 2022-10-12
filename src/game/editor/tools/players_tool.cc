@@ -142,8 +142,8 @@ void PlayersTool::render(fw::sg::Scenegraph &Scenegraph) {
   // otherwise, render the marker at the given location
   fw::Matrix loc(fw::translation(it->second));
 
-  marker_->set_color(fw::Color(0.75f, 0.0f, 1.0f, 0.0f));
-  marker_->render(Scenegraph, loc);
+//  marker_->set_color(fw::Color(0.75f, 0.0f, 1.0f, 0.0f));
+//  marker_->render(Scenegraph, loc);
 }
 
 void PlayersTool::set_curr_player(int player_no) {

@@ -309,6 +309,7 @@ void ShaderParameters::apply(ShaderProgram *prog) const {
       FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
       std::shared_ptr<fw::Texture> texture = it->second;
       if(texture) {
+        texture->ensure_created();
         texture->bind();
       }
       FW_CHECKED(glUniform1i(var.location, texture_unit));

@@ -89,6 +89,7 @@ BitmapDrawable::~BitmapDrawable() {
 }
 
 fw::Matrix BitmapDrawable::get_uv_transform() {
+  texture_->ensure_created();
   const float x = static_cast<float>(left_) / static_cast<float>(texture_->get_width());
   const float y = static_cast<float>(top_) / static_cast<float>(texture_->get_height());
   const float width = static_cast<float>(width_) / static_cast<float>(texture_->get_width());
@@ -141,6 +142,8 @@ NinePatchDrawable::NinePatchDrawable(std::shared_ptr<fw::Texture> texture, fw::x
 }
 
 void NinePatchDrawable::render(float x, float y, float width, float height) {
+  texture_->ensure_created();
+
   const float pixel_width = 1.0f / static_cast<float>(texture_->get_width());
   const float pixel_height = 1.0f / static_cast<float>(texture_->get_height());
   const float width_scale = width / static_cast<float>(width_);
