@@ -17,7 +17,7 @@ namespace fw {
 
 //-------------------------------------------------------------------------
 struct TextureData {
-  GLuint texture_id = -1;
+  GLuint texture_id = 0;
   int width = -1, height = -1;
   fs::path filename; // might be empty if we weren't created from a file
 
@@ -87,7 +87,9 @@ void Texture::create(fs::path const &fn) {
   data_->height = height;
 
   data_creator_ = [g, filename, pixels, width, height, channels](TextureData& data) {
-    glGenTextures(1, &data.texture_id);
+    if (data.texture_id == 0) {
+      glGenTextures(1, &data.texture_id);
+    }
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
     // TODO: pre-multiply alpha
     // TODO: DXT compress
@@ -112,7 +114,7 @@ void Texture::create(fw::Bitmap const &bmp) {
   data_->height = bitmap.get_height();
 
   data_creator_ = [g, bitmap](TextureData& data) {
-    if (data.texture_id <= 0) {
+    if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
@@ -131,7 +133,9 @@ void Texture::create(int width, int height, bool is_shadowmap) {
   data_->height = height;
 
   data_creator_ = [g, width, height, is_shadowmap](TextureData& data) {
-    glGenTextures(1, &data.texture_id);
+    if (data.texture_id == 0) {
+      glGenTextures(1, &data.texture_id);
+    }
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
     if (is_shadowmap) {
       FW_CHECKED(glTexImage2D(
