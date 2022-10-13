@@ -53,7 +53,8 @@ Light::~Light() {
 
 //-------------------------------------------------------------------------------------
 Node::Node() :
-    world_(fw::identity()), parent_(0), cast_shadows_(true), primitive_type_(PrimitiveType::kUnknownPrimitiveType) {
+    world_(fw::identity()), parent_(0), cast_shadows_(true), primitive_type_(PrimitiveType::kUnknownPrimitiveType),
+    enabled_(true) {
 }
 
 Node::~Node() {
@@ -61,6 +62,10 @@ Node::~Node() {
 
 void Node::add_child(std::shared_ptr<Node> child) {
   FW_ENSURE_RENDER_THREAD();
+
+  if (child->parent_) {
+    child->parent_->remove_child(child);
+  }
 
   child->parent_ = this;
   children_.push_back(child);
@@ -101,7 +106,12 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
     return;
   }
 
-  fw::Matrix transform(model_matrix * world_);
+  // if we're not enabled, don't do anything.
+  if (!enabled_) {
+    return;
+  }
+
+  fw::Matrix transform(world_ * model_matrix);
   if (vb_) {
     std::shared_ptr<fw::Shader> Shader = get_shader();
     if (is_rendering_shadow) {

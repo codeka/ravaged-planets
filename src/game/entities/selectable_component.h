@@ -1,16 +1,14 @@
 #pragma once
 
 #include <framework/color.h>
+#include <framework/graphics.h>
+#include <framework/scenegraph.h>
 #include <game/entities/entity.h>
 
-namespace fw {
-class VertexBuffer;
-class IndexBuffer;
-class texture;
-}
-
 namespace ent {
+class MeshComponent;
 class OwnableComponent;
+class PositionComponent;
 
 // The selectable_component is added to entities which can be selected by the user (e.g.
 // buildings, units and so on)
@@ -19,11 +17,13 @@ private:
   bool is_selected_;
   float selection_radius_;
   OwnableComponent *ownable_;
-
-  static void populate_buffers();
+  MeshComponent* mesh_;
+  PositionComponent* pos_;
 
   fw::Color highlight_color_;
   bool is_highlighted_;
+
+  std::shared_ptr<fw::sg::Node> sg_node_;
 
 public:
   static const int identifier = 300;
@@ -32,12 +32,11 @@ public:
   virtual ~SelectableComponent();
 
   // this is called after the Entity loads all of it's components
-  virtual void initialize();
+  void initialize() override;
+
+  void update(float dt) override;
 
   void apply_template(fw::lua::Value tmpl) override;
-
-  virtual void render(fw::sg::Scenegraph &Scenegraph,
-      fw::Matrix const &transform);
 
   // gets or sets a flag which indicates whether we're selected or not
   void set_is_selected(bool selected);

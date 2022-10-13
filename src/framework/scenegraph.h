@@ -65,6 +65,7 @@ public:
 class Node {
 private:
   bool cast_shadows_;
+  bool enabled_;
 
   PrimitiveType primitive_type_;
   std::shared_ptr<fw::VertexBuffer> vb_;
@@ -92,11 +93,22 @@ public:
   void add_child(std::shared_ptr<Node> child);
   void remove_child(std::shared_ptr<Node> child);
   void clear_children();
+  Node* get_parent() const {
+    return parent_;
+  }
   int get_num_children() const {
     return children_.size();
   }
   std::shared_ptr<Node> get_child(int index) const {
     return children_[index];
+  }
+
+  void set_enabled(bool enabled) {
+    enabled_ = enabled;
+    return;
+  }
+  bool is_enabled() const {
+    return enabled_;
   }
 
   void set_world_matrix(fw::Matrix const &m) {
