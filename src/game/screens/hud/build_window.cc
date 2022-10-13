@@ -13,6 +13,7 @@
 #include <framework/logging.h>
 #include <framework/model.h>
 #include <framework/model_manager.h>
+#include <framework/model_node.h>
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
 #include <framework/texture.h>
@@ -46,6 +47,7 @@ private:
   float rotation_;
   std::string template_name_;
   std::shared_ptr<fw::Model> model_;
+  std::shared_ptr<fw::ModelNode> model_node_;
   std::shared_ptr<fw::Framebuffer> framebuffer_;
   std::shared_ptr<fw::Texture> color_texture_;
   std::shared_ptr<fw::Texture> depth_texture_;
@@ -96,6 +98,12 @@ void EntityIcon::render() {
     return;
   }
 
+  if (!model_node_) {
+    // TODO: get correct color
+    model_node_ = model_->create_node(fw::Color(1, 0, 0));
+  }
+
+  // TODO: keep the same scenegraph and just update the ndoe
   fw::sg::Scenegraph sg;
   sg.set_clear_color(fw::Color(0, 0, 0, 0));
 
@@ -108,7 +116,9 @@ void EntityIcon::render() {
   std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
   sg.add_light(Light);
 
-//TODO  model_->render(sg, fw::rotate_axis_angle(fw::Vector(0, 1, 0), rotation_));
+  model_node_->set_world_matrix(fw::rotate_axis_angle(fw::Vector(0, 1, 0), rotation_));
+  sg.add_node(model_node_);
+
   fw::render(sg, framebuffer_, false);
 }
 
