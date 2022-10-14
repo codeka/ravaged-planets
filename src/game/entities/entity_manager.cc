@@ -286,7 +286,7 @@ void EntityManager::update() {
       fw::constrain(location[2], this->get_patch_manager()->get_world_length(), 0.0f));
 
   // update all of the entities
-  float dt = fw::Framework::get_instance()->get_timer()->get_frame_time();
+  float dt = fw::Framework::get_instance()->get_timer()->get_update_time();
   for(auto &ent : all_entities_) {
     ent->update(dt);
   }

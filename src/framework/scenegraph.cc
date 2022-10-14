@@ -11,6 +11,7 @@
 #include <framework/shader.h>
 #include <framework/shadows.h>
 #include <framework/texture.h>
+#include <framework/timer.h>
 #include <framework/gui/gui.h>
 
 static std::shared_ptr<fw::Shader> shadow_shader;
@@ -271,6 +272,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   ensure_primitive_type_map();
 
   Graphics *g = fw::Framework::get_instance()->get_graphics();
+  Timer* timer = fw::Framework::get_instance()->get_timer();
 
   if (!shadow_shader) {
     shadow_shader = fw::Shader::create("shadow.shader");
@@ -316,7 +318,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
     node->render(&scenegraph);
   }
 
-  scenegraph.call_after_render();
+  scenegraph.call_after_render(timer->get_frame_time());
 
   // make sure the shadowsrc is empty
   std::shared_ptr<ShadowSource> debug_shadowsrc;

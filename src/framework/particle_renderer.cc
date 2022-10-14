@@ -247,8 +247,8 @@ void ParticleRenderer::render_particles(RenderState &rs, float offset_x, float o
   }
 }
 
-void ParticleRenderer::after_render(fw::sg::Scenegraph& scenegraph) {
-  auto& particles = mgr_->on_render();
+void ParticleRenderer::after_render(fw::sg::Scenegraph& scenegraph, float dt) {
+  auto& particles = mgr_->on_render(dt);
   if (particles.size() == 0) {
     return;
   }

@@ -30,10 +30,6 @@ private:
   std::map<std::string, EffectInfo> effects_;
   PositionComponent *our_position_;
 
-  // If an effect marked destroy_entity_on_complete finishes, this will get set to true to signify that we need to
-  // destroy the entity now.
-  std::atomic<bool> queue_destroy_entity_;
-
 public:
   static const int identifier = 700;
 
@@ -42,8 +38,8 @@ public:
 
   void apply_template(fw::lua::Value tmpl) override;
 
-  virtual void initialize();
-  virtual void update(float dt);
+  void initialize() override;
+  void update(float dt) override;
 
   void start_effect(std::string const &name);
   void stop_effect(std::string const &name);

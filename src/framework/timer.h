@@ -12,12 +12,14 @@ private:
   Clock::time_point start_time_point_;
   Clock::time_point curr_time_point_;
   float total_time_seconds_;
-  float frame_time_seconds_;
-  Clock::duration frame_time_;
+  float update_time_seconds_;
+  Clock::duration update_time_;
   bool stopped_;
 
   Clock::time_point last_fps_update_;
   unsigned int num_frames_;
+  float frame_time_seconds_;
+  Clock::time_point last_frame_time_point_;
   float fps_;
 
 public:
@@ -36,12 +38,19 @@ public:
   inline float get_total_time() const {
     return total_time_seconds_;
   }
+
+  // Gets the time the last update iteration took.
+  inline float get_update_time() const {
+    return stopped_ ? 0.000001f : update_time_seconds_;
+  }
+
+  // Gets the time the last frame took to render.
   inline float get_frame_time() const {
-    return stopped_ ? 0.000001f : frame_time_seconds_;
+    return frame_time_seconds_;
   }
 
   Clock::duration get_frame_duration() const {
-    return frame_time_;
+    return update_time_;
   }
 };
 

@@ -35,6 +35,11 @@ public:
   bool is_dead() const {
     return dead_;
   }
+
+  // Returns true if we're both dead and all our emitters are also dead.
+  bool is_finished() const {
+    return dead_ && emitters_.size() == 0;
+  }
 };
 
 }

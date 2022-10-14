@@ -6,7 +6,7 @@ namespace fw {
 const float _fps_update_interval_microseconds = 2.0f * 1000000.0f;
 
 Timer::Timer() :
-    num_frames_(0), total_time_seconds_(0), frame_time_seconds_(0), fps_(0), stopped_(true) {
+    num_frames_(0), total_time_seconds_(0), update_time_seconds_(0), fps_(0), stopped_(true) {
 }
 
 void Timer::start() {
@@ -31,9 +31,9 @@ void Timer::update() {
 
   // note: the counter for _total_time will wrap around eventually, but for all intents
   // and purposes, it doesn't matter.
-  frame_time_ = now - curr_time_point_;
-  auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(frame_time_).count();
-  frame_time_seconds_ = ((float) microseconds / 1000000.f)/* / 10.0f*/;
+  update_time_ = now - curr_time_point_;
+  auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(update_time_).count();
+  update_time_seconds_ = ((float) microseconds / 1000000.f)/* / 10.0f*/;
 
   microseconds = std::chrono::duration_cast<std::chrono::microseconds>(now - start_time_point_).count();
   total_time_seconds_ = (float) microseconds / 1000000.0f;
@@ -54,6 +54,11 @@ void Timer::render() {
     last_fps_update_ = curr_time_point_;
     num_frames_ = 0;
   }
+
+  auto now = Clock::now();
+  auto frame_time_micros = std::chrono::duration_cast<std::chrono::microseconds>(now - last_frame_time_point_).count();
+  frame_time_seconds_ = ((float)frame_time_micros / 1000000.f);
+  last_frame_time_point_ = now;
 }
 
 }

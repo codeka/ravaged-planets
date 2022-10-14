@@ -1,3 +1,5 @@
+#include <stack>
+
 #include <framework/misc.h>
 #include <framework/particle.h>
 #include <framework/particle_config.h>
@@ -124,9 +126,9 @@ void TimedEmitPolicy::check_emit(float dt) {
 
 //-------------------------------------------------------------------------
 
-DistanceEmitPolicy::DistanceEmitPolicy(float ParticleRotation) :
+DistanceEmitPolicy::DistanceEmitPolicy(float max_distance) :
     max_distance_(0.0f), last_particle_(0) {
-  max_distance_ = ParticleRotation;
+  max_distance_ = max_distance;
 }
 
 DistanceEmitPolicy::~DistanceEmitPolicy() {

@@ -96,9 +96,9 @@ void RaiseLowerBrush::on_key(std::string keyname, bool is_down) {
 void RaiseLowerBrush::update(fw::Vector const &cursor_loc) {
   float dy = 0.0f;
   if (raise_direction_ == up) {
-    dy += 5.0f * fw::Framework::get_instance()->get_timer()->get_frame_time();
+    dy += 5.0f * fw::Framework::get_instance()->get_timer()->get_update_time();
   } else if (raise_direction_ == down) {
-    dy -= 5.0f * fw::Framework::get_instance()->get_timer()->get_frame_time();
+    dy -= 5.0f * fw::Framework::get_instance()->get_timer()->get_update_time();
   }
 
   if (dy != 0.0f) {
@@ -173,7 +173,7 @@ void LevelBrush::update(fw::Vector const &cursor_loc) {
     for (int z = sz; z < ez; z++) {
       for (int x = sx; x < ex; x++) {
         float height = terrain_->get_vertex_height(x, z);
-        float diff = (level_height_ - height) * fw::Framework::get_instance()->get_timer()->get_frame_time();
+        float diff = (level_height_ - height) * fw::Framework::get_instance()->get_timer()->get_update_time();
         float distance = sqrt((float) ((x - cx) * (x - cx) + (z - cz) * (z - cz))) / tool_->get_radius();
         if (distance < 1.0f) {
           terrain_->set_vertex_height(x, z, height + (diff * (1.0f - distance)));

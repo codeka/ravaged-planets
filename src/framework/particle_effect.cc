@@ -54,10 +54,6 @@ void ParticleEffect::update(float dt) {
       }
     }
   }
-
-  if (dead_ && emitters_.size() == 0) {
-    mgr_->remove_effect(this);
-  }
 }
 
 }

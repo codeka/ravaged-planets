@@ -42,7 +42,7 @@ public:
   void initialize(Graphics *g);
 
   // ScenegraphCallback methods.
-  void after_render(fw::sg::Scenegraph& scenegraph) override;
+  void after_render(fw::sg::Scenegraph& scenegraph, float dt) override;
 };
 
 }

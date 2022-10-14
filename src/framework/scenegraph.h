@@ -168,7 +168,7 @@ public:
 
 class ScenegraphCallback {
 public:
-  virtual void after_render(Scenegraph& scenegraph) = 0;
+  virtual void after_render(Scenegraph& scenegraph, float dt) = 0;
 };
 
 // The scenegraph is the main interface between the "update" thread and the "render" thread. There should be no data
@@ -194,9 +194,9 @@ public:
   void add_callback(ScenegraphCallback* callback) {
     callbacks_.push_back(callback);
   }
-  void call_after_render() {
+  void call_after_render(float dt) {
     for (auto& cb : callbacks_) {
-      cb->after_render(*this);
+      cb->after_render(*this, dt);
     }
   }
 

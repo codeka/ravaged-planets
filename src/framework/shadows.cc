@@ -49,7 +49,7 @@ void ShadowSource::initialize(bool debug /*= false */) {
 
 void ShadowSource::begin_scene() {
   Framework *frmwrk = fw::Framework::get_instance();
-  camera_.update(frmwrk->get_timer()->get_frame_time());
+  camera_.update(frmwrk->get_timer()->get_update_time());
   frmwrk->get_graphics()->set_render_target(shadowbuffer_);
 }
 

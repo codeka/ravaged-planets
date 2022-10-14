@@ -123,7 +123,7 @@ void EntityIcon::render() {
 }
 
 void EntityIcon::update() {
-  rotation_ += 3.14159f * fw::Framework::get_instance()->get_timer()->get_frame_time();
+  rotation_ += 3.14159f * fw::Framework::get_instance()->get_timer()->get_update_time();
   fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
     render();
   });

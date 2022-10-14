@@ -21,18 +21,15 @@ public:
   typedef std::list<Particle *> ParticleList;
 
 private:
+  // Controls access to the effect list, which can be access from both the render thread and update thread.
+  std::mutex mutex_;
+
   Graphics *graphics_;
   ParticleRenderer *renderer_;
   EffectList effects_;
   ParticleList particles_;
-  ParticleList to_add_;
-  std::mutex mutex_;
   float wrap_x_;
   float wrap_z_;
-
-  // when you call remove_effect, we add it to this list and remove it
-  // on the next loop through ParticleManager::update()
-  std::vector<ParticleEffect *> dead_effects_;
 
 public:
   ParticleManager();
@@ -43,13 +40,13 @@ public:
 
   // This is called by the ParticleRenderer when we're about to render the particles. We return the particle list so
   // that it can actually render the particles.
-  ParticleList& on_render();
+  ParticleList& on_render(float dt);
 
   // created the named effect (we load the properties from the given .wwpart file)
   std::shared_ptr<ParticleEffect> create_effect(std::string const &name);
 
   // this is called by the ParticleEffect when it's finished.
-  void remove_effect(ParticleEffect *effect);
+  void remove_effect(const std::shared_ptr<ParticleEffect>& effect);
 
   // sets the wrapping of the world, once we get > (x, *, z) we wrap back to (0, *, 0).
   void set_world_wrap(float x, float z);
