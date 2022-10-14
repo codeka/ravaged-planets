@@ -6,7 +6,6 @@
 #include <vector>
 
 #include <framework/graphics.h>
-#include <framework/scenegraph.h>
 #include <framework/texture.h>
 
 namespace fw {
@@ -41,7 +40,10 @@ public:
 
   void initialize(Graphics *g);
   void update(float dt);
-  void render(sg::Scenegraph &Scenegraph);
+
+  // This is called by the ParticleRenderer when we're about to render the particles. We return the particle list so
+  // that it can actually render the particles.
+  ParticleList& on_render();
 
   // created the named effect (we load the properties from the given .wwpart file)
   std::shared_ptr<ParticleEffect> create_effect(std::string const &name);

@@ -68,9 +68,8 @@ void ParticleEmitter::destroy() {
   dead_ = true;
 }
 
-// This is called when it's time to emit a new Particle.
-// The offset is used when emitting "extra" particles, we need to offset
-// their age and position a bit
+// This is called when it's time to emit a new Particle. The offset is used when emitting "extra" particles, we need
+// to offset their age and position a bit.
 Particle *ParticleEmitter::emit(fw::Vector pos, float time_offset /*= 0.0f*/) {
   Particle *p = new Particle(config_);
   p->initialize();

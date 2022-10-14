@@ -53,7 +53,12 @@ void ParticleEffectComponent::start_effect(std::string const &name) {
     return;
   }
   EffectInfo &effect_info = it->second;
-  effect_info.started = true;
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [&effect_info](fw::sg::Scenegraph&) {
+      effect_info.started = true;
+      fw::ParticleManager* mgr = fw::Framework::get_instance()->get_particle_mgr();
+      effect_info.effect = mgr->create_effect(effect_info.name);
+    });
 }
 
 void ParticleEffectComponent::stop_effect(std::string const &name) {
@@ -62,37 +67,40 @@ void ParticleEffectComponent::stop_effect(std::string const &name) {
     return;
   }
   EffectInfo &effect_info = it->second;
-  effect_info.started = false;
-  if (effect_info.effect) {
-    effect_info.effect->destroy();
-  }
-  effect_info.effect = std::shared_ptr<fw::ParticleEffect>();
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [&effect_info](fw::sg::Scenegraph&) {
+      effect_info.started = false;
+      if (effect_info.effect) {
+        effect_info.effect->destroy();
+        effect_info.effect.reset();
+      }
+    });
 }
 
 void ParticleEffectComponent::update(float) {
-  for (auto& kvp : effects_) {
-    EffectInfo const &effect_info = kvp.second;
-    if (!effect_info.effect) {
-      continue;
-    }
-
-    if (our_position_ != nullptr) {
-      effect_info.effect->set_position(our_position_->get_position() + effect_info.offset);
-    }
-
-    if (effect_info.destroy_entity_on_complete && effect_info.effect->is_dead()) {
-      std::shared_ptr<Entity>(entity_)->get_manager()->destroy(entity_);
-    }
+  if (queue_destroy_entity_.load()) {
+    entity_.lock()->get_manager()->destroy(entity_);
   }
-}
 
-void ParticleEffectComponent::render(fw::sg::Scenegraph &, fw::Matrix const &) {
-  fw::ParticleManager *mgr = fw::Framework::get_instance()->get_particle_mgr();
+  fw::Vector our_position;
+  if (our_position_) {
+    our_position = our_position_->get_position();
+  }
+
   for (auto& kvp : effects_) {
-    EffectInfo &effect_info = kvp.second;
-    if (effect_info.started && !effect_info.effect) {
-      effect_info.effect = mgr->create_effect(effect_info.name);
-    }
+    EffectInfo& effect_info = kvp.second;
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [&effect_info, our_position, &queue_destroy_entity = queue_destroy_entity_](fw::sg::Scenegraph&) {
+        if (!effect_info.effect) {
+          return;
+        }
+
+        effect_info.effect->set_position(our_position + effect_info.offset);
+
+        if (effect_info.destroy_entity_on_complete && effect_info.effect->is_dead()) {
+          queue_destroy_entity.store(true);
+        }
+      });
   }
 }
 

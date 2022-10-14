@@ -14,15 +14,11 @@ namespace fw {
 class Particle;
 class ParticleManager;
 
-/**
- * The ParticleRenderer is responsible for rendering particles. We create our own special Scenegraph Node that does
- * the main work.
- */
-class ParticleRenderer {
+// The ParticleRenderer is responsible for rendering particles. We create our own special Scenegraph Node that does
+// the main work.
+class ParticleRenderer : public fw::sg::ScenegraphCallback {
 public:
-  /**
-   * This is the type of a list of particles. It must match the ParticleList type defined in ParticleManager.
-   */
+  // This is the type of a list of particles. It must match the ParticleList type defined in ParticleManager.
   typedef std::list<Particle *> ParticleList;
 
 private:
@@ -31,7 +27,7 @@ private:
   std::shared_ptr<ShaderParameters> shader_params_;
   std::shared_ptr<Texture> color_texture_;
   ParticleManager *mgr_;
-  int _draw_frame;
+  int draw_frame_;
 
   void render_particles(RenderState &rs, float offset_x, float offset_z);
   bool add_particle(RenderState &rs, int base_index, Particle *p, float offset_x, float offset_z);
@@ -44,7 +40,9 @@ public:
   ~ParticleRenderer();
 
   void initialize(Graphics *g);
-  void render(sg::Scenegraph &Scenegraph, ParticleList &particles);
+
+  // ScenegraphCallback methods.
+  void after_render(fw::sg::Scenegraph& scenegraph) override;
 };
 
 }

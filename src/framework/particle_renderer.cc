@@ -48,21 +48,21 @@ const int max_vertices = batch_size * 4;
 const int max_indices = batch_size * 6;
 
 struct RenderState {
-  fw::sg::Scenegraph &Scenegraph;
+  fw::sg::Scenegraph* scenegraph;
   int particle_num;
   std::vector<fw::vertex::xyz_c_uv> vertices;
   std::vector<uint16_t> indices;
   std::shared_ptr<fw::Texture> texture;
   fw::ParticleEmitterConfig::BillboardMode mode;
   fw::ParticleRenderer::ParticleList &particles;
-  std::shared_ptr<fw::Shader> Shader;
-  std::shared_ptr<fw::ShaderParameters> ShaderParameters;
+  std::shared_ptr<fw::Shader> shader;
+  std::shared_ptr<fw::ShaderParameters> shader_parameters;
 
   std::vector<std::shared_ptr<fw::VertexBuffer>> vertex_buffers;
   std::vector<std::shared_ptr<fw::IndexBuffer>> index_buffers;
 
-  inline RenderState(fw::sg::Scenegraph &sg, fw::ParticleRenderer::ParticleList &particles) :
-      Scenegraph(sg), particles(particles), mode(fw::ParticleEmitterConfig::kAdditive), particle_num(0) {
+  inline RenderState(fw::sg::Scenegraph* scenegraph, fw::ParticleRenderer::ParticleList &particles) :
+    scenegraph(scenegraph), particles(particles), mode(fw::ParticleEmitterConfig::kAdditive), particle_num(0) {
   }
 };
 
@@ -117,7 +117,7 @@ static BufferCache g_buffer_cache;
 namespace fw {
 
 ParticleRenderer::ParticleRenderer(ParticleManager *mgr) :
-    graphics_(nullptr), shader_(nullptr), mgr_(mgr), _draw_frame(1), color_texture_(new fw::Texture()) {
+    graphics_(nullptr), shader_(nullptr), mgr_(mgr), draw_frame_(1), color_texture_(new fw::Texture()) {
 }
 
 ParticleRenderer::~ParticleRenderer() {
@@ -146,7 +146,7 @@ std::string get_program_name(ParticleEmitterConfig::BillboardMode mode) {
   }
 }
 
-void generate_scenegraph_node(RenderState &rs) {
+void render_particle_batch(RenderState &rs) {
   std::shared_ptr<fw::VertexBuffer> vb = g_buffer_cache.get_vertex_buffer();
   vb->set_data(rs.vertices.size(), &rs.vertices[0]);
   rs.vertices.clear();
@@ -157,18 +157,18 @@ void generate_scenegraph_node(RenderState &rs) {
   rs.indices.clear();
   rs.index_buffers.push_back(ib);
 
-  std::shared_ptr<fw::ShaderParameters> shader_params = rs.ShaderParameters->clone();
+  std::shared_ptr<fw::ShaderParameters> shader_params = rs.shader_parameters->clone();
   shader_params->set_program_name(get_program_name(rs.mode));
   shader_params->set_texture("particle_texture", rs.texture);
 
-  std::shared_ptr<sg::Node> Node(new sg::Node());
-  Node->set_vertex_buffer(vb);
-  Node->set_index_buffer(ib);
-  Node->set_shader(rs.Shader);
-  Node->set_shader_parameters(shader_params);
-  Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
-  Node->set_cast_shadows(false);
-  rs.Scenegraph.add_node(Node);
+  std::shared_ptr<sg::Node> node(new sg::Node());
+  node->set_vertex_buffer(vb);
+  node->set_index_buffer(ib);
+  node->set_shader(rs.shader);
+  node->set_shader_parameters(shader_params);
+  node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
+  node->set_cast_shadows(false);
+  node->render(rs.scenegraph);
 }
 
 bool ParticleRenderer::add_particle(RenderState &rs, int base_index, Particle *p, float offset_x, float offset_z) {
@@ -181,9 +181,9 @@ bool ParticleRenderer::add_particle(RenderState &rs, int base_index, Particle *p
     return false;
 
   // if we've already drawn the Particle this frame, don't do it again.
-  if (p->draw_frame == _draw_frame)
+  if (p->draw_frame == draw_frame_)
     return false;
-  p->draw_frame = _draw_frame;
+  p->draw_frame = draw_frame_;
 
   // the color_row is divided by this value to get the value between 0 and 1.
   float color_texture_factor = 1.0f / this->color_texture_->get_height();
@@ -233,7 +233,7 @@ void ParticleRenderer::render_particles(RenderState &rs, float offset_x, float o
     if (rs.texture != p->config->billboard.texture || rs.particle_num >= batch_size
         || rs.mode != p->config->billboard.mode) {
       if (rs.texture && rs.particle_num > 0) {
-        generate_scenegraph_node(rs);
+        render_particle_batch(rs);
       }
 
       rs.particle_num = 0;
@@ -247,11 +247,13 @@ void ParticleRenderer::render_particles(RenderState &rs, float offset_x, float o
   }
 }
 
-void ParticleRenderer::render(sg::Scenegraph &Scenegraph, ParticleRenderer::ParticleList &particles) {
-  if (particles.size() == 0)
+void ParticleRenderer::after_render(fw::sg::Scenegraph& scenegraph) {
+  auto& particles = mgr_->on_render();
+  if (particles.size() == 0) {
     return;
+  }
 
-  // make sure the Particle's pos is update
+  // make sure the Particle's pos is updated.
   for(Particle *p : particles) {
     p->pos = p->new_pos;
   }
@@ -260,9 +262,9 @@ void ParticleRenderer::render(sg::Scenegraph &Scenegraph, ParticleRenderer::Part
   sort_particles(particles);
 
   // create the render state that'll hold all our state variables
-  RenderState rs(Scenegraph, particles);
-  rs.Shader = shader_;
-  rs.ShaderParameters = shader_params_;
+  RenderState rs(&scenegraph, particles);
+  rs.shader = shader_;
+  rs.shader_parameters = shader_params_;
   rs.particle_num = 0;
   rs.mode = ParticleEmitterConfig::kNormal;
 
@@ -279,7 +281,7 @@ void ParticleRenderer::render(sg::Scenegraph &Scenegraph, ParticleRenderer::Part
   }
 
   if (rs.particle_num > 0) {
-    generate_scenegraph_node(rs);
+    render_particle_batch(rs);
   }
 
   // release the vertex and index buffers back into the cache (even though
@@ -293,7 +295,7 @@ void ParticleRenderer::render(sg::Scenegraph &Scenegraph, ParticleRenderer::Part
   }
 
   // now this frame is over record it so we'll continue to draw particles next frame
-  _draw_frame++;
+  draw_frame_++;
 }
 
 void ParticleRenderer::sort_particles(ParticleRenderer::ParticleList &particles) {

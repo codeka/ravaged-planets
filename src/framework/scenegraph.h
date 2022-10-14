@@ -166,6 +166,11 @@ public:
   virtual std::shared_ptr<Node> clone();
 };
 
+class ScenegraphCallback {
+public:
+  virtual void after_render(Scenegraph& scenegraph) = 0;
+};
+
 // The scenegraph is the main interface between the "update" thread and the "render" thread. There should be no data
 // shared between these two threads that is not part of the scenegraph. The scenegraph is a coherent data structure
 // (that is, it persists from frame-to-frame). You can add nodes to it, and then post closures to the scenegraph to
@@ -177,9 +182,23 @@ private:
   fw::Color clear_color_;
   std::stack<fw::Camera *> camera_stack_;
 
+  // A list of callbacks that are called after we finish rendering nodes, but before the GUI renders.
+  std::vector<ScenegraphCallback*> callbacks_;
+
 public:
   Scenegraph();
   ~Scenegraph();
+
+  // Add a callback to the collection of callbacks we'll notify. Does not own the pointer, it must remain valid
+  // until you call remove_callback.
+  void add_callback(ScenegraphCallback* callback) {
+    callbacks_.push_back(callback);
+  }
+  void call_after_render() {
+    for (auto& cb : callbacks_) {
+      cb->after_render(*this);
+    }
+  }
 
   // add a Light to the scene. the pointer must be valid for the
   void add_light(std::shared_ptr<Light> &l) {

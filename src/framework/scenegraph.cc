@@ -113,9 +113,9 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
 
   fw::Matrix transform(world_ * model_matrix);
   if (vb_) {
-    std::shared_ptr<fw::Shader> Shader = get_shader();
+    std::shared_ptr<fw::Shader> shader = get_shader();
     if (is_rendering_shadow) {
-      Shader = shadow_shader;
+      shader = shadow_shader;
     }
 
     fw::Camera *camera = sg->get_camera();
@@ -123,10 +123,10 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
       camera = fw::Framework::get_instance()->get_camera();
     }
 
-    if (!Shader) {
+    if (!shader) {
       render_noshader(camera, transform);
     } else {
-      render_shader(Shader, camera, transform);
+      render_shader(shader, camera, transform);
     }
   }
 
@@ -315,6 +315,8 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   for(auto& node : scenegraph.get_nodes()) {
     node->render(&scenegraph);
   }
+
+  scenegraph.call_after_render();
 
   // make sure the shadowsrc is empty
   std::shared_ptr<ShadowSource> debug_shadowsrc;

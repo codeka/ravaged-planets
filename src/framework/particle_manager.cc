@@ -14,6 +14,11 @@ namespace fw {
 ParticleManager::ParticleManager() :
     renderer_(nullptr), graphics_(nullptr), wrap_x_(0.0f), wrap_z_(0.0f) {
   renderer_ = new ParticleRenderer(this);
+  auto* renderer = renderer_;
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [renderer](fw::sg::Scenegraph& scenegraph) {
+      scenegraph.add_callback(renderer);
+    });
 }
 
 ParticleManager::~ParticleManager() {
@@ -47,7 +52,7 @@ void ParticleManager::update(float dt) {
   }
 }
 
-void ParticleManager::render(sg::Scenegraph &Scenegraph) {
+ParticleManager::ParticleList& ParticleManager::on_render() {
   {
     std::unique_lock<std::mutex> lock(mutex_);
     for(Particle *p : to_add_) {
@@ -56,12 +61,12 @@ void ParticleManager::render(sg::Scenegraph &Scenegraph) {
     to_add_.clear();
   }
 
-  renderer_->render(Scenegraph, particles_);
-
   // remove any dead particles
-  particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [](Particle const *p) {
+  particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [](const Particle* p) {
     return p->age >= 1.0f;
   }), particles_.end());
+
+  return particles_;
 }
 
 long ParticleManager::get_num_active_particles() const {
@@ -83,9 +88,7 @@ void ParticleManager::remove_effect(ParticleEffect *effect) {
   dead_effects_.push_back(effect);
 }
 
-/**
- * Because this is called on the update thread, we don't add directly to the particles_ list until the render thread.
- */
+// Because this is called on the update thread, we don't add directly to the particles_ list until the render thread.
 void ParticleManager::add_particle(Particle *p) {
   std::unique_lock<std::mutex> lock(mutex_);
   to_add_.push_back(p);

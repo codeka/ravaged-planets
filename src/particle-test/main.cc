@@ -33,21 +33,39 @@ class Application: public fw::BaseApp {
 public:
   bool initialize(fw::Framework *frmwrk);
   void update(float dt);
-  void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 void update_effect_position() {
-  fw::Matrix m = fw::rotate_axis_angle(fw::Vector(0, 1, 0), angle);
-  cml::vector4f pos = m * cml::vector4f(10.0f, 0, 0, 1);
-  g_effect->set_position(fw::Vector(pos[0], pos[1], pos[2]));
+  fw::Vector pos;
+  if (is_moving) {
+    fw::Matrix m = fw::rotate_axis_angle(fw::Vector(0, 1, 0), angle);
+    auto res = m * cml::vector4f(10.0f, 0, 0, 1);
+    pos = fw::Vector(res[0], res[1], res[2]);
+  } else {
+    pos = fw::Vector(0.0f, 0.0f, 0.0f);
+  }
+
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [pos](fw::sg::Scenegraph& scenegraph) {
+      g_effect->set_position(pos);
+    });
+}
+
+void restart_effect() {
+  fw::Settings stg;
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [&stg](fw::sg::Scenegraph& scenegraph) {
+      if (g_effect) {
+        g_effect->destroy();
+      }
+      g_effect = fw::Framework::get_instance()->get_particle_mgr()->create_effect(
+        stg.get_value<std::string>("particle-file"));
+    });
+  update_effect_position();
 }
 
 bool restart_handler(fw::gui::Widget *wdgt) {
-  fw::Settings stg;
-  g_effect->destroy();
-  g_effect = fw::Framework::get_instance()->get_particle_mgr()->create_effect(
-      stg.get_value<std::string>("particle-file"));
-  update_effect_position();
+  restart_effect();
   return true;
 }
 
@@ -70,7 +88,7 @@ bool movement_handler(fw::gui::Widget *wdgt) {
   if (is_moving) {
     is_moving = false;
     btn->set_text("Stationary");
-    g_effect->set_position(fw::Vector(0, 0, 0));
+    update_effect_position();
   } else {
     is_moving = true;
     btn->set_text("Moving");
@@ -107,7 +125,7 @@ bool Application::initialize(fw::Framework *frmwrk) {
   frmwrk->get_gui()->attach_widget(wnd);
 
   fw::Settings stg;
-  g_effect = frmwrk->get_particle_mgr()->create_effect(stg.get_value<std::string>("particle-file"));
+  restart_effect();
   return true;
 }
 
@@ -116,10 +134,6 @@ void Application::update(float dt) {
     angle += 3.1415f * dt;
     update_effect_position();
   }
-}
-
-void Application::render(fw::sg::Scenegraph &Scenegraph) {
-  Scenegraph.set_clear_color(fw::Color(1, 0, 0.0, 0));
 }
 
 //-----------------------------------------------------------------------------

@@ -104,11 +104,11 @@ bool Framework::initialize(char const *title) {
     graphics_ = new Graphics();
     graphics_->initialize(title);
 
-    particle_mgr_ = new ParticleManager();
-    particle_mgr_->initialize(graphics_);
-
     model_manager_ = new ModelManager();
     scenegraph_manager_ = new sg::ScenegraphManager();
+
+    particle_mgr_ = new ParticleManager();
+    particle_mgr_->initialize(graphics_);
 
     cursor_ = new Cursor();
     cursor_->initialize();
@@ -308,9 +308,6 @@ void Framework::render() {
 
   scenegraph_manager_->before_render();
   
-  // TODO: rework particles
-  //particle_mgr_->render(scenegraph);
-
   auto& scenegraph = scenegraph_manager_->get_scenegraph();
   fw::render(scenegraph);
 
