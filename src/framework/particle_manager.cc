@@ -62,10 +62,10 @@ long ParticleManager::get_num_active_particles() const {
   return particles_.size();
 }
 
-std::shared_ptr<ParticleEffect> ParticleManager::create_effect(std::string const &name) {
+std::shared_ptr<ParticleEffect> ParticleManager::create_effect(
+    std::string const &name, const fw::Vector& initial_position) {
   auto config = ParticleEffectConfig::load(name);
-  std::shared_ptr <ParticleEffect> effect(new ParticleEffect(this, config));
-  effect->initialize();
+  auto effect = std::make_shared<ParticleEffect>(this, config, initial_position);
 
   {
     std::unique_lock<std::mutex> lock(mutex_);

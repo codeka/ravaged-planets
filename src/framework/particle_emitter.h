@@ -31,10 +31,10 @@ private:
   bool dead_;
 
 public:
-  ParticleEmitter(ParticleManager *mgr, std::shared_ptr<ParticleEmitterConfig> config);
+  ParticleEmitter(
+    ParticleManager *mgr, std::shared_ptr<ParticleEmitterConfig> config, const fw::Vector& initial_position);
   ~ParticleEmitter();
 
-  void initialize();
   bool update(float dt);
 
   /**
@@ -62,16 +62,14 @@ public:
 // second" policy or a "when the new Particle will be x units from the last emitted Particle".
 class EmitPolicy {
 protected:
-  ParticleEmitter *emitter_;
+  ParticleEmitter* const emitter_;
 
 public:
-  EmitPolicy() :
-      emitter_(0) {
+  EmitPolicy(ParticleEmitter* emitter) :
+      emitter_(emitter) {
   }
   virtual ~EmitPolicy() {
   }
-
-  virtual void initialize(ParticleEmitter *emitter);
 
   virtual void check_emit(float) {
   }
@@ -85,7 +83,7 @@ private:
   fw::Vector last_position_;
 
 public:
-  TimedEmitPolicy(float ParticleRotation);
+  TimedEmitPolicy(ParticleEmitter* emitter, float ParticleRotation);
   virtual ~TimedEmitPolicy();
 
   virtual void check_emit(float dt);
@@ -99,7 +97,7 @@ private:
   float max_distance_;
 
 public:
-  DistanceEmitPolicy(float ParticleRotation);
+  DistanceEmitPolicy(ParticleEmitter* emitter, float ParticleRotation);
   virtual ~DistanceEmitPolicy();
 
   virtual void check_emit(float dt);
@@ -109,7 +107,7 @@ public:
 // count of particles to be emitted as soon as the emitter is started.
 class NoEmitPolicy: public EmitPolicy {
 public:
-  NoEmitPolicy(float ParticleRotation);
+  NoEmitPolicy(ParticleEmitter* emitter, float ParticleRotation);
   virtual ~NoEmitPolicy();
 
   virtual void check_emit(float dt);

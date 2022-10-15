@@ -52,10 +52,16 @@ void ParticleEffectComponent::start_effect(std::string const &name) {
   if (it == effects_.end()) {
     return;
   }
+
+  fw::Vector our_position;
+  if (our_position_) {
+    our_position = our_position_->get_position();
+  }
+
   EffectInfo &effect_info = it->second;
   effect_info.started = true;
   fw::ParticleManager* mgr = fw::Framework::get_instance()->get_particle_mgr();
-  effect_info.effect = mgr->create_effect(effect_info.name);
+  effect_info.effect = mgr->create_effect(effect_info.name, our_position + effect_info.offset);
 }
 
 void ParticleEffectComponent::stop_effect(std::string const &name) {

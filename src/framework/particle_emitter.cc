@@ -8,24 +8,21 @@
 
 namespace fw {
 
-ParticleEmitter::ParticleEmitter(ParticleManager *mgr, std::shared_ptr<ParticleEmitterConfig> config) :
-    mgr_(mgr), emit_policy_(0), config_(config), dead_(false), age_(0.0f), position_(0, 0, 0) {
+ParticleEmitter::ParticleEmitter(
+    ParticleManager *mgr, std::shared_ptr<ParticleEmitterConfig> config, const fw::Vector& initial_position)
+    : mgr_(mgr), emit_policy_(0), config_(config), dead_(false), age_(0.0f), position_(initial_position) {
   if (config_->emit_policy_name == "distance") {
-    emit_policy_ = new DistanceEmitPolicy(config_->emit_policy_value);
+    emit_policy_ = new DistanceEmitPolicy(this, config_->emit_policy_value);
   } else if (config_->emit_policy_name == "timed") {
-    emit_policy_ = new TimedEmitPolicy(config_->emit_policy_value);
+    emit_policy_ = new TimedEmitPolicy(this, config_->emit_policy_value);
   } else { // if (config_->emit_policy_name == "none")
-    emit_policy_ = new NoEmitPolicy(config_->emit_policy_value);
+    emit_policy_ = new NoEmitPolicy(this, config_->emit_policy_value);
   }
 
   initial_count_ = config_->initial_count;
 }
 
 ParticleEmitter::~ParticleEmitter() {
-}
-
-void ParticleEmitter::initialize() {
-  emit_policy_->initialize(this);
 }
 
 bool ParticleEmitter::update(float dt) {
@@ -87,14 +84,8 @@ Particle *ParticleEmitter::emit(fw::Vector pos, float time_offset /*= 0.0f*/) {
 
 //-------------------------------------------------------------------------
 
-void EmitPolicy::initialize(ParticleEmitter *emitter) {
-  emitter_ = emitter;
-}
-
-//-------------------------------------------------------------------------
-
-TimedEmitPolicy::TimedEmitPolicy(float ParticleRotation) :
-    particles_per_second_(0.0f), time_since_last_particle_(0.0f), last_position_(0, 0, 0) {
+TimedEmitPolicy::TimedEmitPolicy(ParticleEmitter* emitter, float ParticleRotation) :
+    EmitPolicy(emitter), particles_per_second_(0.0f), time_since_last_particle_(0.0f), last_position_(0, 0, 0) {
   particles_per_second_ = ParticleRotation;
 }
 
@@ -126,8 +117,8 @@ void TimedEmitPolicy::check_emit(float dt) {
 
 //-------------------------------------------------------------------------
 
-DistanceEmitPolicy::DistanceEmitPolicy(float max_distance) :
-    max_distance_(0.0f), last_particle_(0) {
+DistanceEmitPolicy::DistanceEmitPolicy(ParticleEmitter* emitter, float max_distance) :
+    EmitPolicy(emitter), max_distance_(0.0f), last_particle_(0) {
   max_distance_ = max_distance;
 }
 
@@ -164,7 +155,7 @@ void DistanceEmitPolicy::check_emit(float) {
 
 //-------------------------------------------------------------------------
 
-NoEmitPolicy::NoEmitPolicy(float) {
+NoEmitPolicy::NoEmitPolicy(ParticleEmitter* emitter, float): EmitPolicy(emitter) {
 }
 
 NoEmitPolicy::~NoEmitPolicy() {

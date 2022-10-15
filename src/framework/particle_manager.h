@@ -43,7 +43,7 @@ public:
   ParticleList& on_render(float dt);
 
   // created the named effect (we load the properties from the given .wwpart file)
-  std::shared_ptr<ParticleEffect> create_effect(std::string const &name);
+  std::shared_ptr<ParticleEffect> create_effect(std::string const &name, const fw::Vector& initial_position);
 
   // this is called by the ParticleEffect when it's finished.
   void remove_effect(const std::shared_ptr<ParticleEffect>& effect);

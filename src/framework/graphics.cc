@@ -91,7 +91,8 @@ void Graphics::initialize(char const *title) {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::gl_error_info(err));
   }
 
-  if(SDL_GL_SetSwapInterval(1) < 0) {
+//  if(SDL_GL_SetSwapInterval(1) < 0) {
+  if(SDL_GL_SetSwapInterval(0) < 0) {
     fw::debug << "Unable to set vsync, vsync is disabled. error: " << SDL_GetError() << std::endl;
   }
 

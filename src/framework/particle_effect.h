@@ -17,16 +17,15 @@ public:
   typedef std::vector<std::shared_ptr<ParticleEmitter>> EmitterList;
 
 private:
-  std::shared_ptr<ParticleEffectConfig> config_;
   ParticleManager *mgr_;
   EmitterList emitters_;
   bool dead_;
 
 public:
-  ParticleEffect(ParticleManager *mgr, std::shared_ptr<ParticleEffectConfig> const &config);
+  ParticleEffect(
+    ParticleManager *mgr, std::shared_ptr<ParticleEffectConfig> const &config, const fw::Vector& initial_position);
   ~ParticleEffect();
 
-  void initialize();
   void destroy();
 
   void set_position(fw::Vector const &pos);
