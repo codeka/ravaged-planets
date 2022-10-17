@@ -19,7 +19,7 @@ class ParticleManager;
 class ParticleRenderer : public fw::sg::ScenegraphCallback {
 public:
   // This is the type of a list of particles. It must match the ParticleList type defined in ParticleManager.
-  typedef std::list<Particle *> ParticleList;
+  typedef std::list<std::weak_ptr<Particle>> ParticleList;
 
 private:
   Graphics *graphics_;
@@ -30,7 +30,7 @@ private:
   int draw_frame_;
 
   void render_particles(RenderState &rs, float offset_x, float offset_z);
-  bool add_particle(RenderState &rs, int base_index, Particle *p, float offset_x, float offset_z);
+  bool add_particle(RenderState &rs, int base_index, std::shared_ptr<Particle>& p, float offset_x, float offset_z);
 
   // sort the particles so they're optimal for rendering
   void sort_particles(ParticleRenderer::ParticleList &particles);

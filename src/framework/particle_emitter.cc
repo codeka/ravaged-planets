@@ -9,8 +9,10 @@
 namespace fw {
 
 ParticleEmitter::ParticleEmitter(
-    ParticleManager *mgr, std::shared_ptr<ParticleEmitterConfig> config, const fw::Vector& initial_position)
-    : mgr_(mgr), emit_policy_(0), config_(config), dead_(false), age_(0.0f), position_(initial_position) {
+    ParticleManager *mgr, ObjectPool<Particle>& particle_pool, std::shared_ptr<ParticleEmitterConfig> config,
+    const fw::Vector& initial_position)
+    : mgr_(mgr), particle_pool_(particle_pool), emit_policy_(0), config_(config), dead_(false), age_(0.0f),
+      position_(initial_position) {
   if (config_->emit_policy_name == "distance") {
     emit_policy_ = new DistanceEmitPolicy(this, config_->emit_policy_value);
   } else if (config_->emit_policy_name == "timed") {
@@ -46,18 +48,15 @@ bool ParticleEmitter::update(float dt) {
     emit_policy_->check_emit(dt);
   }
 
-  std::vector<ParticleList::iterator> to_remove;
-
   // go through each Particle and update it's various properties
-  for (ParticleList::iterator it = particles_.begin(); it != particles_.end(); ++it) {
-    Particle *p = *it;
-    if (!p->update(dt))
-      to_remove.push_back(it);
-  }
-
-  // remove any particles that are too old
-  for (std::vector<ParticleList::iterator>::iterator it = to_remove.begin(); it != to_remove.end(); ++it) {
-    particles_.erase(*it);
+  for (ParticleList::iterator it = particles_.begin(); it != particles_.end();) {
+    auto p = *it;
+    if (!p->update(dt)) {
+      // It's dead, so remove it.
+      it = particles_.erase(it);
+    } else {
+      ++it;
+    }
   }
 
   return (!dead_ || particles_.size() != 0);
@@ -69,11 +68,10 @@ void ParticleEmitter::destroy() {
 
 // This is called when it's time to emit a new Particle. The offset is used when emitting "extra" particles, we need
 // to offset their age and position a bit.
-Particle *ParticleEmitter::emit(fw::Vector pos, float time_offset /*= 0.0f*/) {
-  Particle *p = new Particle(config_);
-  p->initialize();
+std::shared_ptr<Particle> ParticleEmitter::emit(fw::Vector pos, float time_offset /*= 0.0f*/) {
+  std::shared_ptr<Particle> p(particle_pool_.get());
+  p->initialize(config_);
   p->pos += pos;
-  p->new_pos = p->pos;
   p->age = time_offset;
 
   particles_.push_back(p);
@@ -117,8 +115,8 @@ void TimedEmitPolicy::check_emit(float dt) {
 
 //-------------------------------------------------------------------------
 
-DistanceEmitPolicy::DistanceEmitPolicy(ParticleEmitter* emitter, float max_distance) :
-    EmitPolicy(emitter), max_distance_(0.0f), last_particle_(0) {
+DistanceEmitPolicy::DistanceEmitPolicy(ParticleEmitter* emitter, float max_distance)
+  : EmitPolicy(emitter), max_distance_(0.0f) {
   max_distance_ = max_distance;
 }
 
@@ -126,7 +124,8 @@ DistanceEmitPolicy::~DistanceEmitPolicy() {
 }
 
 void DistanceEmitPolicy::check_emit(float) {
-  if (last_particle_ == nullptr) {
+  std::shared_ptr<Particle> last_particle = last_particle_.lock();
+  if (!last_particle) {
     last_particle_ = emitter_->emit(emitter_->get_position());
     return;
   }
@@ -135,7 +134,7 @@ void DistanceEmitPolicy::check_emit(float) {
   float wrap_z = emitter_->get_manager()->get_wrap_z();
 
   fw::Vector next_pos = emitter_->get_position();
-  fw::Vector last_pos = last_particle_->pos;
+  fw::Vector last_pos = last_particle->pos;
   fw::Vector dir = get_direction_to(last_pos, next_pos, wrap_x, wrap_z).normalize();
   fw::Vector curr_pos = last_pos + (dir * max_distance_);
 

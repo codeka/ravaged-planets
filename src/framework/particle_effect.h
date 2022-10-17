@@ -3,10 +3,12 @@
 #include <memory>
 #include <vector>
 
+#include <framework/object_pool.h>
 #include <framework/particle_emitter.h>
 #include <framework/vector.h>
 
 namespace fw {
+class Particle;
 class ParticleManager;
 class ParticleEffectConfig;
 
@@ -23,7 +25,8 @@ private:
 
 public:
   ParticleEffect(
-    ParticleManager *mgr, std::shared_ptr<ParticleEffectConfig> const &config, const fw::Vector& initial_position);
+    ParticleManager *mgr, ObjectPool<Particle>& particle_pool, std::shared_ptr<ParticleEffectConfig> const &config,
+    const fw::Vector& initial_position);
   ~ParticleEffect();
 
   void destroy();

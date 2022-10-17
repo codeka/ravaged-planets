@@ -224,6 +224,7 @@ void FontFace::draw_string(int x, int y, std::basic_string<uint32_t> const &str,
 
   if (texture_dirty_) {
     texture_->create(bitmap_);
+    texture_dirty_ = false;
   }
 
   if ((flags & kAlignCenter) != 0) {

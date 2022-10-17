@@ -58,8 +58,7 @@ void restart_effect() {
       if (g_effect) {
         g_effect->destroy();
       }
-      g_effect = fw::Framework::get_instance()->get_particle_mgr()->create_effect(
-        stg.get_value<std::string>("particle-file"));
+      g_effect = fw::Framework::get_instance()->get_particle_mgr()->create_effect(stg.get_value<std::string>("particle-file"), fw::Vector(0, 0, 0));
     });
   update_effect_position();
 }

@@ -3,6 +3,7 @@
 #include <list>
 #include <memory>
 
+#include <framework/object_pool.h>
 #include <framework/vector.h>
 #include <framework/xml.h>
 
@@ -19,11 +20,12 @@ class EmitPolicy;
 class ParticleEmitter {
 private:
   std::shared_ptr<ParticleEmitterConfig> config_;
+  ObjectPool<Particle>& particle_pool_;
   ParticleManager *mgr_;
   float age_;
   int initial_count_;
 
-  typedef std::list<Particle *> ParticleList;
+  typedef std::list<std::shared_ptr<Particle>> ParticleList;
   ParticleList particles_;
 
   fw::Vector position_;
@@ -32,7 +34,8 @@ private:
 
 public:
   ParticleEmitter(
-    ParticleManager *mgr, std::shared_ptr<ParticleEmitterConfig> config, const fw::Vector& initial_position);
+    ParticleManager *mgr, ObjectPool<Particle>& particle_pool, std::shared_ptr<ParticleEmitterConfig> config,
+    const fw::Vector& initial_position);
   ~ParticleEmitter();
 
   bool update(float dt);
@@ -54,8 +57,8 @@ public:
     return mgr_;
   }
 
-  /** This is called by the EmitPolicy when it decides to emit a new Particle. */
-  Particle *emit(fw::Vector pos, float time_offset = 0.0f);
+  // This is called by the EmitPolicy when it decides to emit a new Particle.
+  std::shared_ptr<Particle> emit(fw::Vector pos, float time_offset = 0.0f);
 };
 
 // This is the base class for the "policy" which decide how and when we emit new particles. It might be an "x per
@@ -93,7 +96,7 @@ public:
 // becomes greater than some threshold.
 class DistanceEmitPolicy: public EmitPolicy {
 private:
-  Particle *last_particle_;
+  std::weak_ptr<Particle> last_particle_;
   float max_distance_;
 
 public:

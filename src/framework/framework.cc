@@ -129,7 +129,7 @@ bool Framework::initialize(char const *title) {
     gui_->initialize(graphics_);
   }
 
-  if (stg.is_set("debug-view") && app_->wants_graphics()) {
+  if (stg.get_value<bool>("debug-view") && app_->wants_graphics()) {
     debug_view_ = new DebugView();
     debug_view_->initialize();
   }

@@ -12,7 +12,7 @@
 namespace fw {
 
 ParticleManager::ParticleManager() :
-    renderer_(nullptr), graphics_(nullptr), wrap_x_(0.0f), wrap_z_(0.0f) {
+    renderer_(nullptr), graphics_(nullptr), wrap_x_(0.0f), wrap_z_(0.0f), particle_pool_(/*initial_size=*/1000) {
   renderer_ = new ParticleRenderer(this);
   auto* renderer = renderer_;
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
@@ -48,9 +48,9 @@ ParticleManager::ParticleList& ParticleManager::on_render(float dt) {
   }
 
   // remove any dead particles
-  particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [](const Particle* p) {
-    // TODO: if we're going to remove this guy, cache him so we can reuse him.
-    return p->age >= 1.0f;
+  particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [](const std::weak_ptr<Particle> &p) {
+    // If the underlying shared_ptr is gone, we remove it.
+    return p.expired();
   }), particles_.end());
 
   // Return the particles so that the renderer can render them.
@@ -65,7 +65,7 @@ long ParticleManager::get_num_active_particles() const {
 std::shared_ptr<ParticleEffect> ParticleManager::create_effect(
     std::string const &name, const fw::Vector& initial_position) {
   auto config = ParticleEffectConfig::load(name);
-  auto effect = std::make_shared<ParticleEffect>(this, config, initial_position);
+  auto effect = std::make_shared<ParticleEffect>(this, particle_pool_, config, initial_position);
 
   {
     std::unique_lock<std::mutex> lock(mutex_);
@@ -85,7 +85,7 @@ void ParticleManager::remove_effect(const std::shared_ptr<ParticleEffect>& effec
   }
 }
 
-void ParticleManager::add_particle(Particle *p) {
+void ParticleManager::add_particle(std::weak_ptr<Particle> p) {
   FW_ENSURE_RENDER_THREAD();
 
   particles_.push_back(p);

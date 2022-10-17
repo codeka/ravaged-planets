@@ -24,7 +24,19 @@ struct ParticleSorter {
       cam_pos_(camera_pos) {
   }
 
-  bool operator()(fw::Particle const *lhs, fw::Particle const *rhs) {
+  bool operator()(const std::weak_ptr<fw::Particle>& wlhs, const std::weak_ptr<fw::Particle>& wrhs) {
+    const auto lhs = wlhs.lock();
+    const auto rhs = wrhs.lock();
+    if (!lhs && !rhs) {
+      return false;
+    }
+    if (lhs && !rhs) {
+      return true;
+    }
+    if (!lhs && rhs) {
+      return false;
+    }
+
     if (lhs->config->billboard.texture != rhs->config->billboard.texture) {
       // it doesn't matter which order we choose for the textures,
       // as long TextureA always appears on the "same side" of TextureB.
@@ -171,7 +183,7 @@ void render_particle_batch(RenderState &rs) {
   node->render(rs.scenegraph);
 }
 
-bool ParticleRenderer::add_particle(RenderState &rs, int base_index, Particle *p, float offset_x, float offset_z) {
+bool ParticleRenderer::add_particle(RenderState &rs, int base_index, std::shared_ptr<Particle>& p, float offset_x, float offset_z) {
   fw::Camera *cam = fw::Framework::get_instance()->get_camera();
   fw::Vector pos(p->pos[0] + offset_x, p->pos[1], p->pos[2] + offset_z);
 
@@ -228,7 +240,10 @@ bool ParticleRenderer::add_particle(RenderState &rs, int base_index, Particle *p
 
 void ParticleRenderer::render_particles(RenderState &rs, float offset_x, float offset_z) {
   for (ParticleRenderer::ParticleList::iterator it = rs.particles.begin(); it != rs.particles.end(); ++it) {
-    Particle *p = *it;
+    auto& p = it->lock();
+    if (!p) {
+      continue;
+    }
 
     if (rs.texture != p->config->billboard.texture || rs.particle_num >= batch_size
         || rs.mode != p->config->billboard.mode) {
@@ -251,11 +266,6 @@ void ParticleRenderer::after_render(fw::sg::Scenegraph& scenegraph, float dt) {
   auto& particles = mgr_->on_render(dt);
   if (particles.size() == 0) {
     return;
-  }
-
-  // make sure the Particle's pos is updated.
-  for(Particle *p : particles) {
-    p->pos = p->new_pos;
   }
 
   // sort the particles by texture, then by z-order
@@ -284,9 +294,7 @@ void ParticleRenderer::after_render(fw::sg::Scenegraph& scenegraph, float dt) {
     render_particle_batch(rs);
   }
 
-  // release the vertex and index buffers back into the cache (even though
-  // they're still technically in use by the scene graph, we won't need them
-  // again until the next frame so we can do this here)
+  // release the vertex and index buffers back into the cache.
   for(const auto& vb : rs.vertex_buffers) {
     g_buffer_cache.release_vertex_buffer(vb);
   }

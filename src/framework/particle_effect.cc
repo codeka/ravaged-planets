@@ -7,11 +7,11 @@
 namespace fw {
 
 ParticleEffect::ParticleEffect(
-  ParticleManager *mgr, std::shared_ptr<ParticleEffectConfig> const &config, const fw::Vector& initial_position) :
+  ParticleManager *mgr, ObjectPool<Particle>& particle_pool, std::shared_ptr<ParticleEffectConfig> const &config, const fw::Vector& initial_position) :
     mgr_(mgr), dead_(false) {
 
   for (auto it = config->emitter_config_begin(); it != config->emitter_config_end(); ++it) {
-    std::shared_ptr<ParticleEmitter> emitter(new ParticleEmitter(mgr_, *it, initial_position));
+    std::shared_ptr<ParticleEmitter> emitter(new ParticleEmitter(mgr_, particle_pool, *it, initial_position));
     emitters_.push_back(emitter);
   }
 }

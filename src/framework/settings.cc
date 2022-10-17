@@ -58,8 +58,8 @@ void Settings::initialize(po::options_description const &additional_options, int
 
   po::options_description graphics_options("Graphics options");
   graphics_options.add_options()
-      ("windowed-width", po::value<int>()->default_value(800), "The width of the window when running in windowed mode")
-      ("windowed-height", po::value<int>()->default_value(600), "The height of the window when running in windowed mode")
+      ("windowed-width", po::value<int>()->default_value(1280), "The width of the window when running in windowed mode")
+      ("windowed-height", po::value<int>()->default_value(720), "The height of the window when running in windowed mode")
       ("fullscreen-width,W", po::value<int>()->default_value(0), "The width of the screen when running in fullscreen mode")
       ("fullscreen-height,H", po::value<int>()->default_value(0), "The height of the screen when running in fullscreen mode")
       ("windowed", po::value<bool>()->default_value(true), "Run in windowed mode")

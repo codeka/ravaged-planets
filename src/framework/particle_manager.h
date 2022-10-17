@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <framework/graphics.h>
+#include <framework/object_pool.h>
 #include <framework/texture.h>
 
 namespace fw {
@@ -18,12 +19,13 @@ class ParticleRenderer;
 class ParticleManager {
 public:
   typedef std::list<std::shared_ptr<ParticleEffect>> EffectList;
-  typedef std::list<Particle *> ParticleList;
+  typedef std::list<std::weak_ptr<Particle>> ParticleList;
 
 private:
   // Controls access to the effect list, which can be access from both the render thread and update thread.
   std::mutex mutex_;
 
+  ObjectPool<Particle> particle_pool_;
   Graphics *graphics_;
   ParticleRenderer *renderer_;
   EffectList effects_;
@@ -63,7 +65,7 @@ public:
   long get_num_active_particles() const;
 
   // this is called by the ParticleEmitter to add a new Particle
-  void add_particle(Particle *p);
+  void add_particle(std::weak_ptr<Particle> p);
 };
 
 }

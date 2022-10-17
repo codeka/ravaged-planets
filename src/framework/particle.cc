@@ -26,27 +26,16 @@ Particle::LifeState::LifeState(Particle::LifeState const &copy) {
 
 //-------------------------------------------------------------------------
 
-Particle::Particle(std::shared_ptr<ParticleEmitterConfig> const &config) :
-    config(config), rotation(ParticleRotation::kRandom), alpha(0), color1(0), color2(0), age(0), max_age_(0),
+Particle::Particle() :
+    rotation(ParticleRotation::kRandom), alpha(0), color1(0), color2(0), age(0), max_age_(0),
     color_factor(0) {
-  random = fw::random();
-  angle = 0.0f;
-  size = 0.0f;
-  draw_frame = 0;
-
-  if (config->billboard.areas.size() < 1) {
-    rect.left = rect.top = 0.0f;
-    rect.width = rect.height = 1.0f;
-  } else {
-    int index = static_cast<int>(random * (config->billboard.areas.size() - 1));
-    rect = config->billboard.areas[index];
-  }
 }
 
 Particle::~Particle() {
 }
 
-void Particle::initialize() {
+void Particle::initialize(std::shared_ptr<ParticleEmitterConfig> const& config) {
+  this->config = config;
   max_age_ = config->max_age.get_value();
   states_.clear();
   for (auto it = config->life.begin(); it != config->life.end(); it++) {
@@ -66,9 +55,25 @@ void Particle::initialize() {
     states_.push_back(state);
   }
 
+  if (config->billboard.areas.size() < 1) {
+    rect.left = rect.top = 0.0f;
+    rect.width = rect.height = 1.0f;
+  } else {
+    int index = static_cast<int>(random * (config->billboard.areas.size() - 1));
+    rect = config->billboard.areas[index];
+  }
+
   direction = fw::Vector(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f).normalize();
-  new_pos = pos = config->position.get_point();
+  pos = config->position.get_point();
+  alpha = 0;
+  color1 = 0;
+  color2 = 0;
+  color_factor = 0.f;
   age = 0.0f;
+  random = fw::random();
+  angle = 0.0f;
+  size = 0.0f;
+  draw_frame = 0;
 }
 
 bool Particle::update(float dt) {
@@ -133,7 +138,7 @@ bool Particle::update(float dt) {
   size = fw::lerp(prev->size, next->size, t);
 
   // Don't update pos in the update thread, set new_pos and let the render thread update pos.
-  new_pos = pos + (direction * speed) * dt;
+  pos += (direction * speed) * dt;
   return true;
 }
 

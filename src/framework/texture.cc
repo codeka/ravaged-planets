@@ -24,6 +24,16 @@ struct TextureData {
   TextureData() = default;
   TextureData(const TextureData&) = delete;
   TextureData& operator=(const TextureData&) = delete;
+
+  ~TextureData() {
+    GLuint id = texture_id;
+    if (id != 0) {
+      fw::Framework::get_instance()->get_graphics()->run_on_render_thread(
+        [id]() {
+          glDeleteTextures(1, &id);
+        });
+    }
+  }
 };
 
 //-------------------------------------------------------------------------
@@ -69,7 +79,6 @@ Texture::Texture() {
 }
 
 Texture::~Texture() {
-  // TODO: do I need to glDeleteTextures?
 }
 
 void Texture::create(fs::path const &fn) {
@@ -81,7 +90,9 @@ void Texture::create(fs::path const &fn) {
   int width, height, channels;
   unsigned char* pixels = stbi_load(filename.string().c_str(), &width, &height, &channels, 4);
 
-  data_ = std::make_shared<TextureData>();
+  if (!data_) {
+    data_ = std::make_shared<TextureData>();
+  }
   data_->filename = filename;
   data_->width = width;
   data_->height = height;
@@ -109,7 +120,9 @@ void Texture::create(fw::Bitmap const &bmp) {
   Graphics *g = fw::Framework::get_instance()->get_graphics();
   fw::Bitmap bitmap(bmp);
 
-  data_ = std::make_shared<TextureData>();
+  if (!data_) {
+    data_ = std::make_shared<TextureData>();
+  }
   data_->width = bitmap.get_width();
   data_->height = bitmap.get_height();
 
@@ -128,7 +141,9 @@ void Texture::create(fw::Bitmap const &bmp) {
 void Texture::create(int width, int height, bool is_shadowmap) {
   Graphics *g = fw::Framework::get_instance()->get_graphics();
 
-  data_ = std::make_shared<TextureData>();
+  if (!data_) {
+    data_ = std::make_shared<TextureData>();
+  }
   data_->width = width;
   data_->height = height;
 
