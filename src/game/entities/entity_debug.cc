@@ -18,6 +18,8 @@
 #include <game/entities/position_component.h>
 #include <game/entities/mesh_component.h>
 #include <game/entities/moveable_component.h>
+#include <game/world/terrain.h>
+#include <game/world/world.h>
 
 using namespace std::placeholders;
 using namespace fw::gui;
@@ -28,6 +30,7 @@ enum ids {
   SHOW_STEERING_ID = 3642,
   POSITION_ID,
   GOAL_ID,
+  CURSOR_ID,
 };
 
 EntityDebug::EntityDebug(EntityManager *mgr) :
@@ -39,7 +42,7 @@ EntityDebug::~EntityDebug() {
 }
 
 void EntityDebug::initialize() {
-  wnd_ = Builder<Window>(px(10), px(10), px(200), px(106))
+  wnd_ = Builder<Window>(px(10), px(10), px(200), px(136))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Checkbox>(px(10), px(10), sum(pct(100), px(-20)), px(26))
           << Checkbox::text("Show steering") << Widget::id(SHOW_STEERING_ID)
@@ -48,6 +51,8 @@ void EntityDebug::initialize() {
           << Label::text("Pos: ") << Widget::id(POSITION_ID))
       << (Builder<Label>(px(10), px(76), sum(pct(100), px(-20)), px(20))
           << Label::text("Goal: ") << Widget::id(GOAL_ID))
+      << (Builder<Label>(px(10), px(106), sum(pct(100), px(-20)), px(20))
+          << Label::text("Cursor: ") << Window::id(CURSOR_ID))
       ;
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
@@ -61,6 +66,7 @@ void EntityDebug::update() {
 
   std::string new_pos_value;
   std::string new_goal_value;
+  std::string new_cursor_value;
 
   std::list<std::weak_ptr<Entity> > selection = mgr_->get_selection();
   if (selection.size() > 0) {
@@ -85,8 +91,12 @@ void EntityDebug::update() {
     }
   }
 
+  auto cursor = game::World::get_instance()->get_terrain()->get_cursor_location();
+  new_cursor_value = (boost::format("Cursor: (%1$.1f, %2$.1f, %3$.1f)") % cursor[0] % cursor[1] % cursor[2]).str();
+
   wnd_->find<Label>(POSITION_ID)->set_text(new_pos_value);
   wnd_->find<Label>(GOAL_ID)->set_text(new_goal_value);
+  wnd_->find<Label>(CURSOR_ID)->set_text(new_cursor_value);
 }
 
 void EntityDebug::on_key_press(std::string /*key*/, bool is_down) {
