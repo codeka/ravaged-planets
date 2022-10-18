@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mutex>
 #include <vector>
 #define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
 #include <boost/signals2.hpp>
@@ -11,6 +12,13 @@
 
 namespace fw {
 
+struct CameraRenderState {
+  Matrix view;
+  Matrix projection;
+};
+
+// Note: All methods are expected to be called on the update thread, EXCEPT for get_render_state() which returns the
+// state of the camera for the render thread and is thread-safe.
 class Camera {
 private:
   void set_look_at(Matrix &m, Vector const &eye, Vector const &look_at,
@@ -37,6 +45,9 @@ protected:
 
   // these are automatically unbound when disable() is called
   std::vector<int> keybindings_;
+
+  std::mutex render_state_mutex_;
+  CameraRenderState render_state_;
 
 public:
   Camera();
@@ -107,6 +118,8 @@ public:
   Vector const & get_up() const {
     return up_;
   }
+
+  CameraRenderState get_render_state();
 };
 
 // This implementation of camera is a "first-person" camera. The mouse cursor is hidden and you move the mouse to

@@ -74,7 +74,7 @@ private:
   std::shared_ptr<fw::ShaderParameters> shader_params_;
 
   // Renders the Node if the Shader file is null (basically just uses the basic Shader).
-  void render_noshader(fw::Camera *camera, fw::Matrix const &transform);
+  void render_noshader(const fw::CameraRenderState& camera, fw::Matrix const &transform);
 
 protected:
   Node *parent_;
@@ -82,7 +82,8 @@ protected:
   fw::Matrix world_;
 
   // this is called when we're rendering a given Shader
-  virtual void render_shader(std::shared_ptr<fw::Shader> shader, fw::Camera *camera, fw::Matrix const &transform);
+  virtual void render_shader(
+    std::shared_ptr<fw::Shader> shader, const fw::CameraRenderState& camera, fw::Matrix const &transform);
 
   // called by clone() to populate the clone
   virtual void populate_clone(std::shared_ptr<Node> clone);
@@ -180,7 +181,7 @@ private:
   std::vector<std::shared_ptr<Light>> lights_;
   std::vector<std::shared_ptr<Node>> root_nodes_;
   fw::Color clear_color_;
-  std::stack<fw::Camera *> camera_stack_;
+  std::stack<CameraRenderState> camera_stack_;
 
   // A list of callbacks that are called after we finish rendering nodes, but before the GUI renders.
   std::vector<ScenegraphCallback*> callbacks_;
@@ -230,15 +231,15 @@ public:
     return clear_color_;
   }
 
-  void push_camera(fw::Camera *cam) {
-    camera_stack_.push(cam);
+  void push_camera(const fw::CameraRenderState& camera) {
+    camera_stack_.push(camera);
   }
   void pop_camera() {
     camera_stack_.pop();
   }
-  fw::Camera *get_camera() const {
+  fw::CameraRenderState get_camera() const {
     if (camera_stack_.empty()) {
-      return nullptr;
+      return fw::CameraRenderState();
     }
     return camera_stack_.top();
   }

@@ -119,11 +119,7 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
       shader = shadow_shader;
     }
 
-    fw::Camera *camera = sg->get_camera();
-    if (camera == nullptr) {
-      camera = fw::Framework::get_instance()->get_camera();
-    }
-
+    fw::CameraRenderState camera = sg->get_camera();
     if (!shader) {
       render_noshader(camera, transform);
     } else {
@@ -138,7 +134,9 @@ void Node::render(Scenegraph *sg, fw::Matrix const &model_matrix /*= fw::identit
 }
 
 // this is called when we're rendering a given Shader
-void Node::render_shader(std::shared_ptr<fw::Shader> shader, fw::Camera *camera, fw::Matrix const &transform) {
+void Node::render_shader(
+    std::shared_ptr<fw::Shader> shader, const fw::CameraRenderState& camera, fw::Matrix const &transform) {
+
   std::shared_ptr<fw::ShaderParameters> parameters;
   if (shader_params_) {
     parameters = shader_params_;
@@ -147,35 +145,34 @@ void Node::render_shader(std::shared_ptr<fw::Shader> shader, fw::Camera *camera,
   }
 
   // add the world_view and world_view_proj parameters as well as shadow parameters
-  if (camera != nullptr) {
-    fw::Matrix worldview = camera->get_view_matrix();
-    worldview = transform * worldview;
-    fw::Matrix worldviewproj = worldview * camera->get_projection_matrix();
+  fw::Matrix worldview = camera.view;
+  worldview = transform * worldview;
+  fw::Matrix worldviewproj = worldview * camera.projection;
 
-    parameters->set_matrix("worldviewproj", worldviewproj);
-    parameters->set_matrix("worldview", worldview);
+  parameters->set_matrix("worldviewproj", worldviewproj);
+  parameters->set_matrix("worldview", worldview);
 
-    if (!is_rendering_shadow && shadowsrc) {
-      fw::Matrix lightviewproj = transform * shadowsrc->get_camera().get_view_matrix();
-      lightviewproj *= shadowsrc->get_camera().get_projection_matrix();
+  if (!is_rendering_shadow && shadowsrc) {
+    fw::Matrix lightviewproj = transform * shadowsrc->get_camera().get_view_matrix();
+    lightviewproj *= shadowsrc->get_camera().get_projection_matrix();
 
-      fw::Matrix bias = fw::Matrix(
-          0.5, 0.0, 0.0, 0.0,
-          0.0, 0.5, 0.0, 0.0,
-          0.0, 0.0, 0.5, 0.0,
-          0.5, 0.5, 0.5, 1.0
-      );
+    fw::Matrix bias = fw::Matrix(
+        0.5, 0.0, 0.0, 0.0,
+        0.0, 0.5, 0.0, 0.0,
+        0.0, 0.0, 0.5, 0.0,
+        0.5, 0.5, 0.5, 1.0
+    );
 
-      parameters->set_matrix("lightviewproj", bias * lightviewproj);
-      parameters->set_texture("shadow_map", shadowsrc->get_shadowmap()->get_depth_buffer());
-    }
+    parameters->set_matrix("lightviewproj", bias * lightviewproj);
+    parameters->set_texture("shadow_map", shadowsrc->get_shadowmap()->get_depth_buffer());
   }
 
   vb_->begin();
   shader->begin(parameters);
   if (ib_) {
     ib_->begin();
-    FW_CHECKED(glDrawElements(g_primitive_type_map[primitive_type_], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
+    FW_CHECKED(
+      glDrawElements(g_primitive_type_map[primitive_type_], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
     ib_->end();
   } else {
     FW_CHECKED(glDrawArrays(g_primitive_type_map[primitive_type_], 0, vb_->get_num_vertices()));
@@ -184,7 +181,7 @@ void Node::render_shader(std::shared_ptr<fw::Shader> shader, fw::Camera *camera,
   vb_->end();
 }
 
-void Node::render_noshader(fw::Camera *camera, fw::Matrix const &transform) {
+void Node::render_noshader(const fw::CameraRenderState& camera, fw::Matrix const &transform) {
   if (!basic_shader) {
     basic_shader = fw::Shader::create("basic.shader");
   }
@@ -297,7 +294,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   is_rendering_shadow = true;
   for(auto shadowsrc : shadows) {
     shadowsrc->begin_scene();
-    scenegraph.push_camera(&shadowsrc->get_camera());
+    scenegraph.push_camera(shadowsrc->get_camera().get_render_state());
     g->begin_scene();
     for(auto& node : scenegraph.get_nodes()) {
       node->render(&scenegraph);
@@ -313,10 +310,12 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   }
 
   // now, render the main scene
+  scenegraph.push_camera(fw::Framework::get_instance()->get_camera()->get_render_state());
   g->begin_scene(scenegraph.get_clear_color());
   for(auto& node : scenegraph.get_nodes()) {
     node->render(&scenegraph);
   }
+  scenegraph.pop_camera();
 
   scenegraph.call_after_render(timer->get_frame_time());
 

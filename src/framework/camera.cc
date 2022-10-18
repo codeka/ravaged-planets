@@ -67,6 +67,12 @@ void Camera::update(float dt) {
     // we've been updated now, so no need to do it again
     updated_ = false;
 
+    {
+      std::unique_lock lock(render_state_mutex_);
+      render_state_.view = view_;
+      render_state_.projection = projection_;
+    }
+
     // fire the sig_updated signal, since we were updated
     sig_updated();
   }
@@ -85,6 +91,12 @@ Vector Camera::unproject(float x, float y) {
 
   float invw = 1.0f / vec[3];
   return Vector(vec[0] * invw, vec[1] * invw, vec[2] * invw);
+}
+
+CameraRenderState Camera::get_render_state() {
+  FW_ENSURE_RENDER_THREAD();
+  std::unique_lock lock(render_state_mutex_);
+  return render_state_;
 }
 
 void Camera::enable() {

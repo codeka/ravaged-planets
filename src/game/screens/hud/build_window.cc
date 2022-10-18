@@ -110,7 +110,7 @@ void EntityIcon::render() {
   fw::LookAtCamera cam;
   cam.set_distance(2.0f);
   cam.update(1.0f / 30.0f);
-  sg.push_camera(&cam);
+  sg.push_camera(cam.get_render_state());
 
   fw::Vector sun(0.485f, 0.485f, 0.727f);
   std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
