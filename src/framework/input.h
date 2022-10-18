@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 #include <mutex>
+#include <vector>
 #include <boost/algorithm/string.hpp>
 
 union SDL_Event;
@@ -35,6 +36,9 @@ struct InputBinding {
 class Input {
 private:
   void update_cursor();
+
+  std::mutex queued_events_mutex_;
+  std::vector<SDL_Event> queued_events_;
 
 public:
   Input();

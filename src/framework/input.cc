@@ -155,47 +155,60 @@ void Input::initialize() {
 }
 
 void Input::update(float dt) {
-  // this is called each frame - we need to reset the _mdx and _mdy to zero (because if we
-  // don't get an on_mouse_move, it means the mouse didn't move!)
-  g_mdx = g_mdy = 0.0f;
-  g_mwdx = g_mwdy = 0.0f;
+  std::vector<SDL_Event> pending_events;
+  {
+    std::unique_lock lock(queued_events_mutex_);
+    std::swap(pending_events, queued_events_);
+  }
+
+  bool mouse_moved = false;
+  fw::gui::Gui* gui = fw::Framework::get_instance()->get_gui();
+  for (auto& event : pending_events) {
+    if (event.type == SDL_KEYDOWN) {
+      if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), true)) {
+        callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, true);
+      }
+    } else if (event.type == SDL_KEYUP) {
+      if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), false)) {
+        callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, false);
+      }
+    } else if (event.type == SDL_TEXTINPUT) {
+      // TODO
+    } else if (event.type == SDL_MOUSEMOTION) {
+      g_mouse_inside = true;
+
+      // save the current difference and the current position
+      g_mdx = event.motion.x - g_mx;
+      g_mdy = event.motion.y - g_my;
+      g_mx = event.motion.x;
+      g_my = event.motion.y;
+      mouse_moved = true;
+    } else if (event.type == SDL_MOUSEBUTTONDOWN) {
+      int keycode = 0xffffff00 + (event.button.button - 1);
+      if (!gui->inject_mouse(event.button.button, true, g_mx, g_my)) {
+        callback(keycode, 0, true);
+      }
+    } else if (event.type == SDL_MOUSEBUTTONUP) {
+      int keycode = 0xffffff00 + (event.button.button - 1);
+      if (!gui->inject_mouse(event.button.button, false, g_mx, g_my)) {
+        callback(keycode, 0, false);
+      }
+    } else if (event.type == SDL_MOUSEWHEEL) {
+      g_mwdx = event.wheel.x;
+      g_mwdy = event.wheel.y;
+    }
+  }
+
+  if (!mouse_moved) {
+    g_mdx = g_mdy = 0.0f;
+    g_mwdx = g_mwdy = 0.0f;
+  }
 }
 
-/** Called on the render thread when an event is received. We queue it up to actually run on the update thread. */
+// Called on the render thread when an event is received. We queue it up to actually run on the update thread.
 void Input::process_event(SDL_Event &event) {
-  fw::gui::Gui *gui = fw::Framework::get_instance()->get_gui();
-  if (event.type == SDL_KEYDOWN) {
-    if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), true)) {
-      callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, true);
-    }
-  } else if (event.type == SDL_KEYUP) {
-    if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), false)) {
-      callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, false);
-    }
-  } else if (event.type == SDL_TEXTINPUT) {
-    // TODO
-  } else if (event.type == SDL_MOUSEMOTION) {
-    g_mouse_inside = true;
-
-    // save the current difference and the current position
-    g_mdx =  event.motion.x - g_mx;
-    g_mdy = event.motion.y - g_my;
-    g_mx = event.motion.x;
-    g_my = event.motion.y;
-  } else if (event.type == SDL_MOUSEBUTTONDOWN) {
-    int keycode = 0xffffff00 + (event.button.button - 1);
-    if (!gui->inject_mouse(event.button.button, true, g_mx, g_my)) {
-      callback(keycode, 0, true);
-    }
-  } else if (event.type == SDL_MOUSEBUTTONUP) {
-    int keycode = 0xffffff00 + (event.button.button - 1);
-    if (!gui->inject_mouse(event.button.button, false, g_mx, g_my)) {
-      callback(keycode, 0, false);
-    }
-  } else if (event.type == SDL_MOUSEWHEEL) {
-    g_mwdx = event.wheel.x;
-    g_mwdy = event.wheel.y;
-  }
+  std::unique_lock lock(queued_events_mutex_);
+  queued_events_.push_back(event);
 }
 
 float Input::mouse_x() const {
