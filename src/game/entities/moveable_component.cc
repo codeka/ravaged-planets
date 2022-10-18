@@ -103,7 +103,7 @@ void MoveableComponent::update(float dt) {
   }
 
   std::shared_ptr<Entity> entity(entity_);
-  bool show_steering = (entity->get_debug_view() != 0 && (entity->get_debug_flags() & kDebugShowSteering) != 0);
+  bool show_steering = (entity->has_debug_view() && (entity->get_debug_flags() & kDebugShowSteering) != 0);
 
   // if we're avoiding obstacles, we'll need to figure out what is the closest Entity to us
   if (avoid_collisions_) {
@@ -130,7 +130,7 @@ void MoveableComponent::update(float dt) {
           fw::Vector obstacle_pos = pos + obstacle_dir;
           if (show_steering) {
             // draw a circle around whatever we're trying to avoid
-            entity->get_debug_view()->add_circle(obstacle_pos, obstacle_radius * 2.0f, fw::Color(1, 0, 0));
+            entity->get_debug_view().add_circle(obstacle_pos, obstacle_radius * 2.0f, fw::Color(1, 0, 0));
           }
 
           // temporarily adjust the "goal" so as to avoid the obstacle
@@ -143,7 +143,7 @@ void MoveableComponent::update(float dt) {
 
           if (show_steering) {
             // draw a blue line from the obstacle in the direction we're going to travel to avoid it.
-            entity->get_debug_view()->add_line(
+            entity->get_debug_view().add_line(
                 obstacle_pos, obstacle_pos + (avoid_dir * (obstacle_radius * 2.0f)), fw::Color(0, 0, 1));
           }
 
@@ -166,7 +166,7 @@ void MoveableComponent::update(float dt) {
 
   if (show_steering) {
     // a line from us to the goal
-    entity->get_debug_view()->add_line(pos, goal, fw::Color(0, 1, 0));
+    entity->get_debug_view().add_line(pos, goal, fw::Color(0, 1, 0));
   }
 
   if (scale_factor < 1.0f) {
@@ -209,15 +209,15 @@ fw::Vector MoveableComponent::steer(fw::Vector pos, fw::Vector curr_direction, f
   steer = cml::dot(steer, goal_direction) < 0.0f ? steer * -1.0f : steer;
 
   if (show_steering) {
-    std::shared_ptr<Entity> Entity(entity_);
-    EntityDebugView *edv = Entity->get_debug_view();
+    auto entity = entity_.lock();
+    if (entity) {
+      // draw the current "up" and "forward" vectors
+      entity->get_debug_view().add_line(pos, pos + up, fw::Color(1, 1, 1));
+      entity->get_debug_view().add_line(pos, pos + curr_direction, fw::Color(1, 1, 1));
 
-    // draw the current "up" and "forward" vectors
-    edv->add_line(pos, pos + up, fw::Color(1, 1, 1));
-    edv->add_line(pos, pos + curr_direction, fw::Color(1, 1, 1));
-
-    // draw the "steering" vector which is the direction we're going to steer in
-    Entity->get_debug_view()->add_line(pos, pos + steer, fw::Color(0, 1, 1));
+      // draw the "steering" vector which is the direction we're going to steer in
+      entity->get_debug_view().add_line(pos, pos + steer, fw::Color(0, 1, 1));
+    }
   }
 
   // adjust the amount of steering by the turn_amount. The higher the turn amount, the more we try to steer (we assume

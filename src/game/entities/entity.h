@@ -84,7 +84,7 @@ private:
   std::string name_;
 
   EntityDebugFlags debug_flags_;
-  EntityDebugView *debug_view_;
+  std::unique_ptr<EntityDebugView> debug_view_;
   EntityManager *mgr_;
 public:
   ~Entity();
@@ -147,7 +147,14 @@ public:
   EntityDebugFlags get_debug_flags() const {
     return debug_flags_;
   }
-  EntityDebugView *get_debug_view();
+  bool has_debug_view() const {
+    return !!debug_view_;
+  }
+  // Gets the debug view, you must check that we have the debug view enabled first by checking has_debug_view.
+  EntityDebugView& get_debug_view() {
+    assert(debug_view_);
+    return *debug_view_;
+  }
 
   // gets a string description of the "name" of this Entity
   std::string const &get_name() const {

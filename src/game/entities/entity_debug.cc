@@ -16,6 +16,7 @@
 #include <game/entities/entity_debug.h>
 #include <game/entities/entity_manager.h>
 #include <game/entities/position_component.h>
+#include <game/entities/mesh_component.h>
 #include <game/entities/moveable_component.h>
 
 using namespace std::placeholders;
@@ -120,10 +121,17 @@ bool EntityDebug::on_show_steering_changed(Widget *w) {
 
 //-------------------------------------------------------------------------
 
-EntityDebugView::EntityDebugView() {
+EntityDebugView::EntityDebugView(Entity* entity) {
+  mesh_component_ = entity->get_component<MeshComponent>();
 }
 
 EntityDebugView::~EntityDebugView() {
+  if (sg_node_) {
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [sg_node = sg_node_](fw::sg::Scenegraph& scenegraph) {
+        scenegraph.remove_node(sg_node);
+      });
+  }
 }
 
 void EntityDebugView::add_line(fw::Vector const &from, fw::Vector const &to, fw::Color const &col) {
@@ -137,12 +145,8 @@ void EntityDebugView::add_line(fw::Vector const &from, fw::Vector const &to, fw:
 
 void EntityDebugView::add_circle(fw::Vector const &center, float radius, fw::Color const &col) {
   // the number of segments is basically the diameter of our circle. That means
-  // we'll have one segment per unit, approximately.
-  int num_segments = (int) (2.0f * M_PI * radius);
-
-  // at least 8 segments, though...
-  if (num_segments < 8)
-    num_segments = 8;
+  // we'll have one segment per unit, approximately. At least 8, though.
+  const int num_segments = std::max(8, (int) (2.0f * M_PI * radius));
 
   fw::Vector last_point;
   for (int i = 0; i < num_segments; i++) {
@@ -159,18 +163,18 @@ void EntityDebugView::add_circle(fw::Vector const &center, float radius, fw::Col
   add_line(last_point, first_point, col);
 }
 
-void EntityDebugView::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform) {
-  if (lines_.size() == 0)
+void EntityDebugView::update(float dt) {
+  if (lines_.size() == 0) {
+    if (sg_node_) {
+      sg_node_->set_enabled(false);
+    }
     return;
+  }
 
-  std::vector<Line> lines_copy = lines_;
-  lines_.clear();
-
-  const int vertices_size = static_cast<int>(lines_copy.size() * 2);
-  fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[vertices_size];
-
+  const int vertices_size = static_cast<int>(lines_.size() * 2);
+  fw::vertex::xyz_c* vertices = new fw::vertex::xyz_c[vertices_size];
   for (int i = 0; i < vertices_size; i += 2) {
-    Line const &l = lines_copy[i / 2];
+    Line const& l = lines_[i / 2];
 
     vertices[i].x = l.from[0];
     vertices[i].y = l.from[1];
@@ -182,23 +186,32 @@ void EntityDebugView::render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &t
     vertices[i + 1].z = l.to[2];
     vertices[i + 1].color = l.col.to_rgba();
   }
+  lines_.clear();
 
-  std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
-  vb->set_data(vertices_size, vertices);
-  delete[] vertices;
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [&sg_node = sg_node_, mesh_component = mesh_component_, vertices, vertices_size](fw::sg::Scenegraph& scenegraph) {
+      if (!sg_node) {
+        sg_node = std::make_shared<fw::sg::Node>();
 
-  std::shared_ptr<fw::Shader> shader(fw::Shader::create("basic.shader"));
-  std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
-  shader_params->set_program_name("notexture");
+        std::shared_ptr<fw::Shader> shader(fw::Shader::create("basic.shader"));
+        std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
+        shader_params->set_program_name("notexture");
 
-  std::shared_ptr<fw::sg::Node> node(new fw::sg::Node());
-  node->set_world_matrix(transform);
-  node->set_vertex_buffer(vb);
-  node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
-  node->set_shader(shader);
-  node->set_shader_parameters(shader_params);
-  node->set_cast_shadows(false);
-  scenegraph.add_node(node);
+        sg_node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
+        sg_node->set_shader(shader);
+        sg_node->set_shader_parameters(shader_params);
+        sg_node->set_cast_shadows(false);
+        sg_node->set_world_matrix(fw::translation(0.0f, 0.2f, 0.0f));
+
+        scenegraph.add_node(sg_node);
+      }
+      
+      std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
+      vb->set_data(vertices_size, vertices);
+      delete[] vertices;
+
+      sg_node->set_vertex_buffer(vb);
+    });
 }
 
 }

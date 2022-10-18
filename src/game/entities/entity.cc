@@ -15,9 +15,8 @@
 
 namespace ent {
 
-Entity::Entity(EntityManager *mgr, entity_id id) :
-    mgr_(mgr), debug_view_(0), debug_flags_(static_cast<EntityDebugFlags>(0)), id_(id),
-    create_time_(0) {
+Entity::Entity(EntityManager *mgr, entity_id id)
+  : mgr_(mgr), debug_flags_(static_cast<EntityDebugFlags>(0)), id_(id), create_time_(0) {
 }
 
 Entity::~Entity() {
@@ -81,18 +80,17 @@ void Entity::update(float dt) {
   for (auto& pair : components_) {
     pair.second->update(dt);
   }
-}
-/*
-void Entity::render(fw::sg::Scenegraph& scenegraph, fw::Matrix const& transform) {
-  for (auto& pair : components_) {
-    pair.second->render(scenegraph, transform);
-  }
 
-  //  if (debug_view_ != nullptr) {
-  //    debug_view_->render(scenegraph, transform);
-  //  }
+  if (debug_view_ && debug_flags_ == 0) {
+    debug_view_.reset();
+  } else if (!debug_view_ && debug_flags_ != 0) {
+    debug_view_ = std::make_unique<EntityDebugView>(this);
+  }
+  if (debug_view_) {
+    debug_view_->update(dt);
+  }
 }
-*/
+
 void Entity::set_position(fw::Vector const &pos) {
   PositionComponent *position = get_component<ent::PositionComponent>();
   if (position != nullptr) {
@@ -108,21 +106,6 @@ void Entity::set_position(fw::Vector const &pos) {
 float Entity::get_age() const {
   float curr_time = fw::Framework::get_instance()->get_timer()->get_total_time();
   return (curr_time - create_time_);
-}
-
-// gets the EntityDebugView object that contains the list of lines and points that
-// we'll draw along with this Entity for debugging purposes.
-EntityDebugView *Entity::get_debug_view() {
-  if (debug_flags_ != 0) {
-    if (debug_view_ == nullptr) {
-      debug_view_ = new EntityDebugView();
-    }
-
-    return debug_view_;
-  } else {
-    delete debug_view_;
-    return 0;
-  }
 }
 
 //-------------------------------------------------------------------------

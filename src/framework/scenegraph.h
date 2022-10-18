@@ -208,11 +208,19 @@ public:
     return lights_;
   }
 
-  void add_node(std::shared_ptr<Node> Node) {
-    root_nodes_.push_back(Node);
+  void add_node(std::shared_ptr<Node> node) {
+    root_nodes_.push_back(node);
   }
   std::vector<std::shared_ptr<Node>> const &get_nodes() const {
     return root_nodes_;
+  }
+  void remove_node(std::shared_ptr<Node> node) {
+    root_nodes_.erase(
+      std::remove_if(
+        root_nodes_.begin(),
+        root_nodes_.end(),
+        [node](const std::shared_ptr<Node>& n) { return n.get() == node.get(); }),
+      root_nodes_.end());
   }
 
   void set_clear_color(fw::Color color) {

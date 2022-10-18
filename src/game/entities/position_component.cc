@@ -141,9 +141,9 @@ fw::Matrix PositionComponent::get_transform() const {
 fw::Vector PositionComponent::get_direction_to(fw::Vector const &point) const {
   fw::Vector dir = point - pos_;
 
-  std::shared_ptr<ent::Entity> Entity(entity_);
-  float width = Entity->get_manager()->get_patch_manager()->get_world_width();
-  float length = Entity->get_manager()->get_patch_manager()->get_world_length();
+  std::shared_ptr<ent::Entity> entity(entity_);
+  float width = entity->get_manager()->get_patch_manager()->get_world_width();
+  float length = entity->get_manager()->get_patch_manager()->get_world_length();
   for (int z = -1; z <= 1; z++) {
     for (int x = -1; x <= 1; x++) {
       fw::Vector another_point(point[0] + (x * width), point[1], point[2] + (z * length));
@@ -157,8 +157,8 @@ fw::Vector PositionComponent::get_direction_to(fw::Vector const &point) const {
   return dir;
 }
 
-fw::Vector PositionComponent::get_direction_to(std::shared_ptr<Entity> Entity) const {
-  PositionComponent *their_position = Entity->get_component<PositionComponent>();
+fw::Vector PositionComponent::get_direction_to(std::shared_ptr<Entity> entity) const {
+  PositionComponent *their_position = entity->get_component<PositionComponent>();
   if (their_position != nullptr)
     return get_direction_to(their_position->get_position());
 

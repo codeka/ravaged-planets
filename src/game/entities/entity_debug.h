@@ -1,20 +1,21 @@
 #pragma once
 
-#include <framework/vector.h>
 #include <framework/color.h>
+#include <framework/vector.h>
+#include <framework/scenegraph.h>
 
 namespace fw {
 namespace gui {
 class Window;
 class Widget;
 }
-namespace sg {
-class Scenegraph;
-}
 }
 
 namespace ent {
+class Entity;
 class EntityManager;
+class MeshComponent;
+class PositionComponent;
 
 // These are the different flags that apply to a single Entity.
 enum EntityDebugFlags {
@@ -43,14 +44,12 @@ public:
 
   void initialize();
 
-  /** Called each frame to update our state. */
+  // Called each frame to update our state.
   void update();
 };
 
-/**
- * This is a class that each Entity has access to and allows you to draw various lines and points
- * and so on that represent the various debugging information we can visualize.
- */
+// This is a class that each Entity has access to and allows you to draw various lines and points
+// and so on that represent the various debugging information we can visualize.
 class EntityDebugView {
 private:
   struct Line {
@@ -59,9 +58,13 @@ private:
     fw::Color col;
   };
   std::vector<Line> lines_;
+  MeshComponent* mesh_component_;
+
+  // The scenegraph node we are displaying. Only access this on the render thread.
+  std::shared_ptr<fw::sg::Node> sg_node_;
 
 public:
-  EntityDebugView();
+  EntityDebugView(Entity* entity);
   ~EntityDebugView();
 
   void add_line(fw::Vector const &from, fw::Vector const &to,
@@ -69,6 +72,7 @@ public:
   void add_circle(fw::Vector const &center, float radius,
       fw::Color const &col);
 
+  void update(float dt);
   void render(fw::sg::Scenegraph &scenegraph, fw::Matrix const &transform);
 };
 
