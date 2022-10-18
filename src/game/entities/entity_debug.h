@@ -22,6 +22,9 @@ enum EntityDebugFlags {
   // If this is set, we should render "steering vectors" which show how the Entity is currently steering.
   kDebugShowSteering = 1,
 
+  // If this is set, we shoudl render some lines to show the path the entity is following.
+  kDebugShowPathing = 2,
+
   kDebugMaxValue = 2
 };
 
@@ -37,6 +40,7 @@ private:
 
   void on_key_press(std::string keyname, bool is_down);
   bool on_show_steering_changed(fw::gui::Widget *w);
+  bool on_show_path_changed(fw::gui::Widget* w);
 
 public:
   EntityDebug(EntityManager *mgr);

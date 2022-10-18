@@ -49,7 +49,7 @@ public:
   }
 
   void set_checked(bool is_checked);
-  bool is_checked() {
+  bool is_checked() const {
     return is_checked_;
   }
 };

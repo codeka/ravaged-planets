@@ -35,6 +35,9 @@ void PathingComponent::initialize() {
 }
 
 void PathingComponent::update(float dt) {
+  auto entity = entity_.lock();
+  if (!entity) return;
+
   // follow the path... todo: this can be done SOOOOOO much better!
   while (is_following_path()) {
     fw::Vector goal = path_[curr_goal_node_];
@@ -49,6 +52,14 @@ void PathingComponent::update(float dt) {
     // otherwise, move towards the goal...
     moveable_->set_intermediate_goal(goal);
     break;
+  }
+
+  if (entity->has_debug_view() && (entity->get_debug_flags() & EntityDebugFlags::kDebugShowPathing) != 0) {
+    for (int i = 0; i < static_cast<int>(path_.size()) - 1; i++) {
+      const fw::Vector& from = path_[i];
+      const fw::Vector& to = path_[i + 1];
+      entity->get_debug_view().add_line(from, to, fw::Color(0, 1, 1));
+    }
   }
 }
 

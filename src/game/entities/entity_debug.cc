@@ -26,12 +26,34 @@ using namespace fw::gui;
 
 namespace ent {
 
+namespace {
+
 enum ids {
   SHOW_STEERING_ID = 3642,
+  SHOW_PATH_ID,
   POSITION_ID,
   GOAL_ID,
   CURSOR_ID,
 };
+
+void update_debug_flag(EntityManager* manager, EntityDebugFlags flag, bool set_flag) {
+  for (std::weak_ptr<Entity> const& wp : manager->get_selection()) {
+    std::shared_ptr<Entity> ent = wp.lock();
+    if (!ent) {
+      continue;
+    }
+
+    EntityDebugFlags flags = ent->get_debug_flags();
+    if (set_flag) {
+      flags = static_cast<EntityDebugFlags>(flags | flag);
+    } else {
+      flags = static_cast<EntityDebugFlags>(flags & ~flag);
+    }
+    ent->set_debug_flags(flags);
+  }
+}
+
+}  // namespace
 
 EntityDebug::EntityDebug(EntityManager *mgr) :
     mgr_(mgr), just_shown_(false), wnd_(nullptr) {
@@ -42,17 +64,20 @@ EntityDebug::~EntityDebug() {
 }
 
 void EntityDebug::initialize() {
-  wnd_ = Builder<Window>(px(10), px(10), px(200), px(136))
+  wnd_ = Builder<Window>(px(10), px(10), px(200), px(172))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Checkbox>(px(10), px(10), sum(pct(100), px(-20)), px(26))
           << Checkbox::text("Show steering") << Widget::id(SHOW_STEERING_ID)
           << Widget::click(std::bind(&EntityDebug::on_show_steering_changed, this, _1)))
-      << (Builder<Label>(px(10), px(46), sum(pct(100), px(-20)), px(20))
+      << (Builder<Checkbox>(px(10), px(46), sum(pct(100), px(-20)), px(26))
+          << Checkbox::text("Show path") << Widget::id(SHOW_PATH_ID)
+          << Widget::click(std::bind(&EntityDebug::on_show_path_changed, this, _1)))
+      << (Builder<Label>(px(10), px(82), sum(pct(100), px(-20)), px(20))
+        << Label::text("Cursor: ") << Window::id(CURSOR_ID))
+      << (Builder<Label>(px(10), px(112), sum(pct(100), px(-20)), px(20))
           << Label::text("Pos: ") << Widget::id(POSITION_ID))
-      << (Builder<Label>(px(10), px(76), sum(pct(100), px(-20)), px(20))
+      << (Builder<Label>(px(10), px(142), sum(pct(100), px(-20)), px(20))
           << Label::text("Goal: ") << Widget::id(GOAL_ID))
-      << (Builder<Label>(px(10), px(106), sum(pct(100), px(-20)), px(20))
-          << Label::text("Cursor: ") << Window::id(CURSOR_ID))
       ;
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
@@ -109,23 +134,14 @@ void EntityDebug::on_key_press(std::string /*key*/, bool is_down) {
 }
 
 bool EntityDebug::on_show_steering_changed(Widget *w) {
-  Checkbox *cbx = dynamic_cast<Checkbox *>(w);
+  const Checkbox* cbx = dynamic_cast<Checkbox*>(w);
+  update_debug_flag(mgr_, kDebugShowSteering, cbx->is_checked());
+  return true;
+}
 
-  for(std::weak_ptr<Entity> const &wp : mgr_->get_selection()) {
-    std::shared_ptr<Entity> ent = wp.lock();
-    if (!ent) {
-      continue;
-    }
-
-    EntityDebugFlags flags = ent->get_debug_flags();
-    if (cbx->is_checked()) {
-      flags = static_cast<EntityDebugFlags>(flags | kDebugShowSteering);
-    } else {
-      flags = static_cast<EntityDebugFlags>(flags & ~kDebugShowSteering);
-    }
-    ent->set_debug_flags(flags);
-  }
-
+bool EntityDebug::on_show_path_changed(Widget* w) {
+  Checkbox* cbx = dynamic_cast<Checkbox*>(w);
+  update_debug_flag(mgr_, kDebugShowPathing, cbx->is_checked());
   return true;
 }
 
