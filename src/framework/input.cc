@@ -162,6 +162,7 @@ void Input::update(float dt) {
   }
 
   bool mouse_moved = false;
+  bool mouse_wheel_moved = false;
   fw::gui::Gui* gui = fw::Framework::get_instance()->get_gui();
   for (auto& event : pending_events) {
     if (event.type == SDL_KEYDOWN) {
@@ -196,11 +197,14 @@ void Input::update(float dt) {
     } else if (event.type == SDL_MOUSEWHEEL) {
       g_mwdx = event.wheel.x;
       g_mwdy = event.wheel.y;
+      mouse_wheel_moved = true;
     }
   }
 
   if (!mouse_moved) {
     g_mdx = g_mdy = 0.0f;
+  }
+  if (!mouse_wheel_moved) {
     g_mwdx = g_mwdy = 0.0f;
   }
 }
