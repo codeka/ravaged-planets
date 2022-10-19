@@ -315,9 +315,9 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   for(auto& node : scenegraph.get_nodes()) {
     node->render(&scenegraph);
   }
-  scenegraph.pop_camera();
 
   scenegraph.call_after_render(timer->get_frame_time());
+  scenegraph.pop_camera();
 
   // make sure the shadowsrc is empty
   std::shared_ptr<ShadowSource> debug_shadowsrc;
