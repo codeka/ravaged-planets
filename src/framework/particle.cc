@@ -28,7 +28,7 @@ Particle::LifeState::LifeState(Particle::LifeState const &copy) {
 
 Particle::Particle() :
     rotation(ParticleRotation::kRandom), alpha(0), color1(0), color2(0), age(0), max_age_(0),
-    color_factor(0) {
+    color_factor(0), pos(0, 0, 0), direction(0, 0, 0) {
 }
 
 Particle::~Particle() {
@@ -37,6 +37,16 @@ Particle::~Particle() {
 void Particle::initialize(std::shared_ptr<ParticleEmitterConfig> const& config) {
   this->config = config;
   max_age_ = config->max_age.get_value();
+  random = fw::random();
+  alpha = 0;
+  color1 = 0;
+  color2 = 0;
+  color_factor = 0.f;
+  age = 0.0f;
+  angle = 0.0f;
+  size = 0.0f;
+  draw_frame = 0;
+
   states_.clear();
   for (auto it = config->life.begin(); it != config->life.end(); it++) {
     LifeState state;
@@ -65,15 +75,6 @@ void Particle::initialize(std::shared_ptr<ParticleEmitterConfig> const& config) 
 
   direction = fw::Vector(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f).normalize();
   pos = config->position.get_point();
-  alpha = 0;
-  color1 = 0;
-  color2 = 0;
-  color_factor = 0.f;
-  age = 0.0f;
-  random = fw::random();
-  angle = 0.0f;
-  size = 0.0f;
-  draw_frame = 0;
 }
 
 bool Particle::update(float dt) {

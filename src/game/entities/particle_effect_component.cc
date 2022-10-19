@@ -37,6 +37,8 @@ void ParticleEffectComponent::apply_template(fw::lua::Value tmpl) {
       std::string offset = value["Offset"];
       // TODO: parse offset
       effect.offset = fw::Vector(0, 2, 0);
+    } else {
+      effect.offset = fw::Vector(0, 0, 0);
     }
 
     effects_[name] = effect;
@@ -60,8 +62,6 @@ void ParticleEffectComponent::start_effect(std::string const &name) {
 
   EffectInfo &effect_info = it->second;
   effect_info.started = true;
-  fw::ParticleManager* mgr = fw::Framework::get_instance()->get_particle_mgr();
-  effect_info.effect = mgr->create_effect(effect_info.name, our_position + effect_info.offset);
 }
 
 void ParticleEffectComponent::stop_effect(std::string const &name) {
@@ -85,6 +85,11 @@ void ParticleEffectComponent::update(float) {
 
   for (auto& kvp : effects_) {
     EffectInfo& effect_info = kvp.second;
+    if (effect_info.started && !effect_info.effect) {
+      // It should be started, but it's not started yet, then start it.
+      fw::ParticleManager* mgr = fw::Framework::get_instance()->get_particle_mgr();
+      effect_info.effect = mgr->create_effect(effect_info.name, our_position + effect_info.offset);
+    }
     if (!effect_info.effect) {
       return;
     }

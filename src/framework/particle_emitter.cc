@@ -69,9 +69,9 @@ void ParticleEmitter::destroy() {
 // This is called when it's time to emit a new Particle. The offset is used when emitting "extra" particles, we need
 // to offset their age and position a bit.
 std::shared_ptr<Particle> ParticleEmitter::emit(fw::Vector pos, float time_offset /*= 0.0f*/) {
-  std::shared_ptr<Particle> p(particle_pool_.get());
+  std::shared_ptr<Particle> p(particle_pool_.get_or_new());
   p->initialize(config_);
-  p->pos += pos;
+  p->pos = pos;
   p->age = time_offset;
 
   particles_.push_back(p);
@@ -144,7 +144,6 @@ void DistanceEmitPolicy::check_emit(float) {
   float last_distance = this_distance + 1.0f;
   while (last_distance >= this_distance) {
     last_particle_ = emitter_->emit(curr_pos, time_offset);
-
     curr_pos += dir * max_distance_;
 
     last_distance = this_distance;

@@ -30,7 +30,7 @@ void MoveableComponent::apply_template(fw::lua::Value tmpl) {
     speed_ = tmpl["Speed"];
   }
   if (tmpl.has_key("TurnRadius")) {
-    turn_speed_ = tmpl["TurnRadius"];
+    turn_speed_ = 1.0f / static_cast<float>(tmpl["TurnRadius"]);
   }
   if (tmpl.has_key("AvoidCollisions")) {
     avoid_collisions_ = tmpl["AvoidCollisions"];
