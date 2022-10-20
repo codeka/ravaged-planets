@@ -32,6 +32,13 @@ MeshComponent::MeshComponent(std::shared_ptr<fw::Model> const &model) :
 }
 
 MeshComponent::~MeshComponent() {
+  if (sg_node_) {
+    auto sg_node = sg_node_;
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [sg_node](fw::sg::Scenegraph& scenegraph) {
+        scenegraph.remove_node(std::dynamic_pointer_cast<fw::sg::Node>(sg_node));
+      });
+  }
 }
 
 void MeshComponent::apply_template(fw::lua::Value tmpl) {

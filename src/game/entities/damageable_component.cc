@@ -61,15 +61,15 @@ void apply_damage(std::shared_ptr<Entity> ent, float amt) {
 }
 
 void DamageableComponent::explode() {
-  std::shared_ptr<Entity> Entity(entity_); // Entity is always valid while we're valid...
-  Entity->get_manager()->destroy(entity_);
+  std::shared_ptr<Entity> entity(entity_); // Entity is always valid while we're valid...
+  entity->get_manager()->destroy(entity_);
 
   if (expl_name_ != "") {
-    // create an explosion Entity
-    Entity->get_manager()->create_entity(Entity, expl_name_, 0);
+    // create an explosion entity
+    entity->get_manager()->create_entity(entity, expl_name_, 0);
   }
 
-  PositionComponent *our_position = Entity->get_component<PositionComponent>();
+  PositionComponent *our_position = entity->get_component<PositionComponent>();
   if (our_position != nullptr) {
     std::list<std::weak_ptr<ent::Entity>> entities;
     our_position->get_entities_within_radius(5.0f, std::back_inserter(entities));
@@ -77,7 +77,7 @@ void DamageableComponent::explode() {
       std::shared_ptr<ent::Entity> ent = wp.lock();
 
       // don't damange ourselves...
-      if (!ent || ent == Entity)
+      if (!ent || ent == entity)
         continue;
 
       ent::apply_damage(ent, (5.0f - our_position->get_direction_to(ent).length()));
