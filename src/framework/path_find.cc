@@ -34,11 +34,11 @@ PathFind::PathFind(int width, int length, std::vector<bool> const &passability) 
   _nodes = new PathNode[_width * _length];
   for (int z = 0; z < _length; z++) {
     for (int x = 0; x < _width; x++) {
-      PathNode &Node = _nodes[(z * _width) + x];
-      Node.loc = fw::Vector(x, 0, z);
-      Node.open_run_no = 0;
-      Node.closed_run_no = 0;
-      Node.passable = passability[(z * _width) + x];
+      PathNode &node = _nodes[(z * _width) + x];
+      node.loc = fw::Vector(x, 0, z);
+      node.open_run_no = 0;
+      node.closed_run_no = 0;
+      node.passable = passability[(z * _width) + x];
     }
   }
 }

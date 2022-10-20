@@ -35,6 +35,17 @@ void PathingComponent::initialize() {
 }
 
 void PathingComponent::update(float dt) {
+  {
+    std::unique_lock lock(mutex_);
+    if (!new_path_.empty()) {
+      path_ = new_path_;
+      curr_goal_node_ = 0;
+      new_path_.clear();
+
+      fw::debug << "found path to [" << last_request_goal_ << "]: " << path_.size() << " node(s)" << std::endl;
+    }
+  }
+
   auto entity = entity_.lock();
   if (!entity) return;
 
@@ -67,13 +78,6 @@ bool PathingComponent::is_following_path() const {
   return (path_.size() > curr_goal_node_);
 }
 
-void PathingComponent::set_path(std::vector<fw::Vector> const &path) {
-  path_ = path;
-  curr_goal_node_ = 0;
-
-  fw::debug << "found path to [" << last_request_goal_ << "]: " << path_.size() << " node(s)" << std::endl;
-}
-
 void PathingComponent::set_goal(fw::Vector const &goal) {
   // request a path from the Entity's current position to the given goal and get the pathing_thread to call our
   // set_path method when it's done
@@ -99,7 +103,8 @@ void PathingComponent::stop() {
 }
 
 void PathingComponent::on_path_found(std::vector<fw::Vector> const &path) {
-  set_path(path);
+  std::unique_lock lock(mutex_);
+  new_path_ = path;
 }
 
 }

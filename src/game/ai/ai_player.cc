@@ -2,10 +2,6 @@
 #include <boost/bind/arg.hpp>
 #include <boost/filesystem.hpp>
 
-//#include <luabind/luabind.hpp>
-//#include <luabind/raw_policy.hpp>
-//#include <luabind/adopt_policy.hpp>
-
 #include <framework/lua.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
