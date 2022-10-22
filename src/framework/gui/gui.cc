@@ -23,11 +23,13 @@ Gui::~Gui() {
   }
 }
 
-void Gui::initialize(fw::Graphics *graphics) {
+void Gui::initialize(fw::Graphics *graphics, fw::AudioManager* audio_manager) {
   graphics_ = graphics;
 
   drawable_manager_ = new DrawableManager();
   drawable_manager_->parse(fw::resolve("gui/drawables/drawables.xml"));
+
+  audio_source_ = audio_manager->create_audio_source();
 }
 
 void Gui::update(float dt) {

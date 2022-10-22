@@ -143,6 +143,8 @@ void Button::on_mouse_out() {
 void Button::on_mouse_over() {
   is_mouse_over_ = true;
   update_drawable_state();
+
+  gui_->get_audio_source()->play(g_hover_sound);
 }
 
 void Button::set_pressed(bool is_pressed) {

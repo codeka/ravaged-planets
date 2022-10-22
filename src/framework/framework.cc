@@ -126,7 +126,7 @@ bool Framework::initialize(char const *title) {
 
   if (app_->wants_graphics()) {
     gui_ = new gui::Gui();
-    gui_->initialize(graphics_);
+    gui_->initialize(graphics_, audio_manager_);
   }
 
   if (stg.get_value<bool>("debug-view") && app_->wants_graphics()) {
@@ -284,7 +284,7 @@ void Framework::update(float dt) {
     gui_->update(dt);
   }
   font_manager_->update(dt);
-  audio_manager_->update();
+  audio_manager_->update(dt);
   if (!paused_) {
     app_->update(dt);
     particle_mgr_->update(dt);

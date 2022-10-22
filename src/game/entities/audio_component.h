@@ -28,7 +28,7 @@ private:
   std::map<std::string, std::shared_ptr<Cue>> cues_;
   std::list<std::shared_ptr<fw::audio_source>> active_sources_;
 
-  /** Goes through and removes all of the sources which have finished playing. */
+  // Goes through and removes all of the sources which have finished playing.
   void remove_inactive_sources();
 
 public:

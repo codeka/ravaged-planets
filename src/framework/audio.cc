@@ -26,8 +26,7 @@ void AudioManager::initialize() {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error initializing SDL_mixer"));
   }
 
-  // TODO: these are all just guesses (paraticularly frequency and chunksize)
-  CHECK_ERROR(Mix_OpenAudio(22050 /* frequency */, AUDIO_S16SYS /* format */, 2 /* channels */, 1024 /* chunksize */));
+  CHECK_ERROR(Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, /*chunksize=*/ 1024));
 
   int frequency;
   uint16_t format;
@@ -53,7 +52,7 @@ void AudioManager::initialize() {
       << static_cast<int>(link_version->minor) << "."
       << static_cast<int>(link_version->patch) << ") initialized "
       << "[" << frequency << "Hz, " << format_name << ", " << channels << " channels]" << std::endl;
-  fw::debug << "  decoders loaded: ";
+  fw::debug << "  chunk decoders loaded: ";
   for (int i = 0; i < Mix_GetNumChunkDecoders(); i++) {
     if (i != 0) {
       fw::debug << ", ";
@@ -68,7 +67,23 @@ void AudioManager::destroy() {
   Mix_Quit();
 }
 
-void AudioManager::update() {
+void AudioManager::update(float dt) {
+  // first, remove any dead audio sources
+  audio_sources_.erase(
+    std::remove_if(
+      audio_sources_.begin(),
+      audio_sources_.end(),
+      [](const std::weak_ptr<AudioSource>& s) {
+        // If the underlying shared_ptr is gone, we remove it.
+        return s.expired();
+      }), audio_sources_.end());
+
+  // Now update them all.
+  for (auto s : audio_sources_) {
+    if (auto source = s.lock()) {
+      source->update(dt);
+    }
+  }
 }
 
 void AudioManager::check_error(int error_code, char const *fn_name) {
@@ -90,17 +105,59 @@ std::shared_ptr<AudioBuffer> AudioManager::get_audio_buffer(std::string const &n
   return buffer;
 }
 
+std::shared_ptr<AudioSource> AudioManager::create_audio_source() {
+  std::shared_ptr<AudioSource> audio_source = std::make_shared<AudioSource>(*this);
+  audio_sources_.push_back(audio_source);
+  return audio_source;
+}
+
 //-----------------------------------------------------------------------------
 
 AudioBuffer::AudioBuffer(AudioManager *mgr, std::string const &name) {
   fs::path path = fw::resolve(name);
-  fw::debug << boost::format("loading sound: %1%") % path << std::endl;
+  fw::debug << "loading sound: %1%" << path << std::endl;
   chunk_ = Mix_LoadWAV(path.string().c_str());
+  if (chunk_ == nullptr) {
+    fw::debug << "  error loading sound \"" << name << "\": " << SDL_GetError() << std::endl;
+  }
 }
 
 AudioBuffer::~AudioBuffer() {
   Mix_FreeChunk(chunk_);
   chunk_ = nullptr;
+}
+
+//-----------------------------------------------------------------------------
+AudioSource::AudioSource(const AudioManager& manager)
+  : manager_(manager) {
+}
+
+AudioSource::~AudioSource() {
+}
+
+// Called regularly by the AudioManager to update playback.
+void AudioSource::update(float dt) {
+  // TODO: only remove playing_sounds_ if they've finished?
+  playing_sounds_.clear();
+}
+
+bool AudioSource::play(std::shared_ptr<AudioBuffer> audio) {
+  Mix_Chunk* chunk = audio->get_chunk();
+  if (chunk == nullptr) {
+    return false;
+  }
+
+  // TODO: support looping?
+  int channel = Mix_PlayChannel(-1, chunk, 0);
+  if (channel < 0) {
+    fw::debug << "failed to play sound \"" << "TODO" << "\": " << SDL_GetError() << std::endl;
+    return false;
+  }
+
+  PlayState state;
+  state.channel = channel;
+  state.buffer = audio;
+  playing_sounds_.push_back(state);
 }
 
 //-----------------------------------------------------------------------------
