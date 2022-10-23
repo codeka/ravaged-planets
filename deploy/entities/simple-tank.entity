@@ -28,6 +28,11 @@ Entity = {
       FireEntity = "missile",
       FireDirection = "0 1 0",
       Range = 20
+    },
+    Audio = {
+      Cues = {
+        { Name = "Fire", Filename = "audio/rocket-fire.ogg" }
+      }
     }
   },
   health = 100

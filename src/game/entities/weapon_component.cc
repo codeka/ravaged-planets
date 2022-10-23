@@ -50,12 +50,12 @@ void WeaponComponent::update(float dt) {
   if (time_to_fire_ < 0)
     time_to_fire_ = 0.0f;
 
-  std::shared_ptr<ent::Entity> Entity(entity_);
+  std::shared_ptr<ent::Entity> entity(entity_);
   std::shared_ptr<ent::Entity> target = target_.lock();
   if (target) {
-    PositionComponent *our_pos = Entity->get_component<PositionComponent>();
+    PositionComponent *our_pos = entity->get_component<PositionComponent>();
     PositionComponent *their_pos = target->get_component<PositionComponent>();
-    MoveableComponent *our_moveable = Entity->get_component<MoveableComponent>();
+    MoveableComponent *our_moveable = entity->get_component<MoveableComponent>();
 
     if (our_pos == nullptr || their_pos == nullptr)
       return;
@@ -81,9 +81,9 @@ void WeaponComponent::update(float dt) {
 }
 
 void WeaponComponent::fire() {
-  std::shared_ptr<ent::Entity> Entity(entity_);
+  std::shared_ptr<ent::Entity> entity(entity_);
   // TODO: entity_id
-  std::shared_ptr<ent::Entity> ent = Entity->get_manager()->create_entity(Entity, fire_entity_name_, 0);
+  std::shared_ptr<ent::Entity> ent = entity->get_manager()->create_entity(entity, fire_entity_name_, 0);
 
   // it should face our "fire_direction"
   PositionComponent *position = ent->get_component<PositionComponent>();
@@ -98,10 +98,10 @@ void WeaponComponent::fire() {
   }
 
   // fire our "Fire" audio Cue
-  //AudioComponent *our_audio = entity_->get_component<AudioComponent>();
-  //if (our_audio != nullptr) {
-  //  our_audio->play_cue("Fire");
-  //}
+  AudioComponent *our_audio = entity->get_component<AudioComponent>();
+  if (our_audio != nullptr) {
+    our_audio->play_cue("Fire");
+  }
 }
 
 }
