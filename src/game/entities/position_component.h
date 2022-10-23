@@ -8,10 +8,9 @@
 
 namespace ent {
 
-// this is a "patch" for entities (with positions) exist on. The patches wrap at
-// the edges of the world, just like the terrain does. By having Entity patches
-// that are separate to terrain patches, though, means we can make them on a different
-// scale (e.g. 4 Entity patches for every 1 terrain patch).
+// this is a "patch" for entities (with positions) exist on. The patches wrap at the edges of the world, just like the
+// terrain does. By having Entity patches that are separate to terrain patches, though, means we can make them on a
+// different scale (e.g. 4 Entity patches for every 1 terrain patch).
 class Patch {
 private:
   fw::Vector origin_;

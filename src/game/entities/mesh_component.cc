@@ -65,4 +65,24 @@ void MeshComponent::initialize() {
     });
 }
 
+void MeshComponent::update(float dt) {
+  std::shared_ptr<Entity> entity(entity_);
+  if (!entity) return;
+
+  auto pos = entity->get_component<PositionComponent>();
+  if (pos != nullptr) {
+    fw::Matrix transform = pos->get_transform();
+
+    auto offset = entity->get_attribute("patch_offset_");
+    if (offset != nullptr) {
+      transform *= fw::translation(offset->get_value<fw::Vector>());
+    }
+
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [transform, sg_node=sg_node_](fw::sg::Scenegraph& sg) {
+        sg_node->transform = transform;
+      });
+  }
+}
+
 }

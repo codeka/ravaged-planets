@@ -91,15 +91,6 @@ void PositionComponent::set_final_position() {
     }
 
     pos_updated_ = false;
-
-    fw::Matrix transform = get_transform();
-    MeshComponent *mesh_component = entity->get_component<MeshComponent>();
-    if (mesh_component != nullptr) {
-      fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
-        [transform, mesh_component](fw::sg::Scenegraph& sg) {
-          mesh_component->get_sg_node()->transform = transform;
-        });
-    }
   }
 }
 

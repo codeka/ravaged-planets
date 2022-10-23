@@ -29,8 +29,8 @@ public:
 
   void apply_template(fw::lua::Value tmpl) override;
 
-  // this is called after the Entity has added all of it's components
-  virtual void initialize();
+  void initialize() override;
+  void update(float dt) override;
 
   // Gets the scenegraph node this mesh component holds. Must be called on the render thread.
   inline std::shared_ptr<fw::ModelNode> get_sg_node() const {

@@ -316,7 +316,6 @@ void EntityManager::update() {
     }
   }
 
-
   // update the EntityDebug interface
   debug_->update();
 }
