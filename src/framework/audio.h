@@ -1,11 +1,12 @@
 #pragma once
 
+#include <AL/al.h>
+#include <AL/alc.h>
+
 #include <map>
 #include <memory>
 #include <string>
 #include <framework/exception.h>
-
-struct Mix_Chunk;
 
 namespace fw {
 class AudioBuffer;
@@ -20,6 +21,9 @@ std::string to_string(audio_error_info const &err_info);
 // The audio manager creates audio sources, buffers and manages them all.
 class AudioManager {
 private:
+  ALCdevice* device_ = nullptr;
+  ALCcontext* context_ = nullptr;
+
   std::map<std::string, std::shared_ptr<AudioBuffer>> loaded_buffers_;
   std::list<std::weak_ptr<AudioSource>> audio_sources_;
 
@@ -27,8 +31,6 @@ public:
   void initialize();
   void destroy();
   void update(float dt);
-
-  static void check_error(int error_code, char const *fn_name);
 
   // Loads an audio_buffer with the given name (a filename that will be fw::resolved).
   std::shared_ptr<AudioBuffer> get_audio_buffer(std::string const &name);
@@ -41,12 +43,10 @@ public:
 // audio sources.
 class AudioBuffer {
 private:
-  Mix_Chunk* chunk_;
+  ALuint id_ = 0;
 
 protected:
   friend class AudioSource;
-
-  inline Mix_Chunk* get_chunk() { return chunk_; }
 
 public:
   AudioBuffer(AudioManager* mgr, std::string const& name);
@@ -60,10 +60,12 @@ private:
   const AudioManager &manager_;
 
   struct PlayState {
-    int channel;
+    ALuint id;
     std::shared_ptr<AudioBuffer> buffer;
   };
   std::list<PlayState> playing_sounds_;
+
+  PlayState& find_free_playstate();
 
 protected:
   friend class AudioManager;

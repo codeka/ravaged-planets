@@ -60,7 +60,7 @@ target_link_libraries(framework ${PNG_LIBRARY})
 
 target_link_libraries(framework SDL2::SDL2main)
 target_link_libraries(framework SDL2::SDL2)
-target_link_libraries(framework SDL2_mixer::SDL2_mixer)
+target_link_libraries(framework ${OPENAL_LIBRARY})
 target_link_libraries(framework ${GLEW_LIBRARY})
 
 if(MSVC)

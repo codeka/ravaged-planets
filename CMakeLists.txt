@@ -49,7 +49,7 @@ find_package(Protobuf REQUIRED)
 find_package(Lua REQUIRED)
 find_package(CURL REQUIRED)
 find_package(SDL2 REQUIRED)
-find_package(SDL2_mixer REQUIRED)
+find_package(OpenAL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ENet REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
