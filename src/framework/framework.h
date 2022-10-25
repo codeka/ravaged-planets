@@ -20,6 +20,13 @@ class Lang;
 class Cursor;
 class Input;
 
+#if defined(DEBUG)
+#define FW_ENSURE_UPDATE_THREAD() \
+  fw::Framework::ensure_update_thread()
+#else
+#define FW_ENSURE_UPDATE_THREAD()
+#endif
+
 namespace gui {
 class Gui;
 }
@@ -191,6 +198,8 @@ public:
   Lang *get_lang() const {
     return lang_;
   }
+
+  static void ensure_update_thread();
 };
 
 }

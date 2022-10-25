@@ -71,6 +71,9 @@ void EditorScreen::hide() {
 void EditorScreen::update() {
   if (world_ != nullptr)
     world_->update();
+
+
+
   if (tool_ != nullptr)
     tool_->update();
 }

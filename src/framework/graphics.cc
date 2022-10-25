@@ -25,6 +25,12 @@ std::string to_string(gl_error_info const &err_info) {
   return (boost::format("0x%1$08x : %2%") % err % err_msg).str();
 }
 
+int query(GLenum pname) {
+  int value;
+  glGetIntegerv(pname, &value);
+  return value;
+}
+
 //--------------------------------------------------------------
 
 Graphics::Graphics() :
@@ -48,8 +54,8 @@ void Graphics::initialize(char const *title) {
   fw::debug << "Graphics initializing; window size=" << width_ << "x" << height_ << ", windowed=" << windowed_
       << std::endl;
 
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
@@ -101,6 +107,9 @@ void Graphics::initialize(char const *title) {
   fw::debug << "GL renderer: " << glGetString(GL_RENDERER) << std::endl;
   fw::debug << "GL version: " << glGetString(GL_VERSION) << std::endl;
   fw::debug << "shading language version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
+  fw::debug << "  GL_MAX_TEXTURE_SIZE=" << query(GL_MAX_TEXTURE_SIZE) << std::endl;
+  fw::debug << "  GL_MAX_TEXTURE_IMAGE_UNITS=" << query(GL_MAX_TEXTURE_IMAGE_UNITS) << std::endl;
+  fw::debug << "  GL_MAX_ARRAY_TEXTURE_LAYERS=" << query(GL_MAX_ARRAY_TEXTURE_LAYERS) << std::endl;
 
   { // Bind a vertex array, but we never actually use it...
     GLuint id;

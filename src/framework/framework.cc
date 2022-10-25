@@ -33,6 +33,13 @@
 using namespace std::placeholders;
 
 namespace fw {
+
+namespace {
+
+static std::thread::id g_update_thread_id;
+
+}
+
 struct ScreenshotRequest {
   int width;
   int height;
@@ -137,15 +144,8 @@ bool Framework::initialize(char const *title) {
   net::initialize();
   Http::initialize();
 
-  debug << "framework initialization complete, application initialization starting..." << std::endl;
-  if (!app_->initialize(this))
-    return false;
-
-  debug << "application initialization complete, running..." << std::endl;
-
   // start the game Timer that'll record fps, elapsed time, etc.
   timer_->start();
-
 
   input_->bind_function("toggle-fullscreen", std::bind(&Framework::on_fullscreen_toggle, this, _1, _2));
 
@@ -245,7 +245,17 @@ void Framework::set_camera(Camera *cam) {
 }
 
 void Framework::update_proc() {
+  g_update_thread_id = std::this_thread::get_id();
+
   try {
+    debug << "framework initialization complete, application initialization starting..." << std::endl;
+    if (!app_->initialize(this)) {
+      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("application did not initialize"));
+    }
+
+    debug << "application initialization complete, running..." << std::endl;
+
+
     int64_t accum_micros = 0;
     int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
     while (running_) {
@@ -273,9 +283,11 @@ void Framework::update_proc() {
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;
     fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
     fw::debug << msg << std::endl;
+    throw;
   } catch (...) {
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;
     fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
+    throw;
   }
 }
 
@@ -297,6 +309,14 @@ void Framework::update(float dt) {
     camera_->update(dt);
 
   input_->update(dt);
+}
+
+/* static */
+void Framework::ensure_update_thread() {
+  std::thread::id this_thread_id = std::this_thread::get_id();
+  if (this_thread_id != g_update_thread_id) {
+    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Expected to be running on the update thread."));
+  }
 }
 
 void Framework::render() {

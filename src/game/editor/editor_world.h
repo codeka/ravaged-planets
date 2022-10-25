@@ -15,10 +15,10 @@ class Terrain;
 
 namespace ed {
 
-/** This is a specialization of world_reader that creates a brand new world from scratch. */
+// This is a specialization of world_reader that can create a brand new world from scratch, or load one as well.
 class WorldCreate: public game::WorldReader {
 protected:
-  virtual game::Terrain *create_terrain(int width, int length);
+  game::Terrain *create_terrain(int width, int length, float* height_data) override;
 
 public:
   WorldCreate();
@@ -28,8 +28,8 @@ public:
 // The world in the editor is a bit different - no entities and so on...
 class EditorWorld: public game::World {
 protected:
-  virtual void initialize_entities();
-  virtual void initialize_pathing();
+  void initialize_entities() override;
+  void initialize_pathing() override;
 
 public:
   EditorWorld(std::shared_ptr<game::WorldReader> reader);

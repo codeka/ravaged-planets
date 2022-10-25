@@ -13,8 +13,8 @@ namespace ed {
 static const int splatt_width = 128;
 static const int splatt_height = 128;
 
-EditorTerrain::EditorTerrain(int width, int height)
-  : Terrain(width, height) {
+EditorTerrain::EditorTerrain(int width, int height, float* height_data/*= nullptr*/)
+  : Terrain(width, height, height_data) {
 }
 
 EditorTerrain::~EditorTerrain() {

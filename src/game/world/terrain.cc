@@ -16,8 +16,7 @@
 namespace game {
 
 Terrain::Terrain(int width, int height, float* height_data /*= nullptr*/) :
-    width_(width), length_(width), heights_(nullptr), ib_(std::make_shared<fw::IndexBuffer>()),
-    shader_(fw::Shader::create("terrain.shader")), root_node_(std::make_shared<fw::sg::Node>()) {
+    width_(width), length_(width), heights_(nullptr), root_node_(std::make_shared<fw::sg::Node>()) {
   if (height_data != nullptr) {
     heights_ = height_data;
   } else {
@@ -29,7 +28,6 @@ Terrain::Terrain(int width, int height, float* height_data /*= nullptr*/) :
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices(index_data, PATCH_SIZE);
-  ib_->set_data(index_data.size(), &index_data[0], 0);
 
   // TODO: this should come from the world_reader
   set_layer(0, std::make_shared<fw::Bitmap>(fw::resolve("terrain/grass-01.jpg")));
@@ -37,16 +35,21 @@ Terrain::Terrain(int width, int height, float* height_data /*= nullptr*/) :
   set_layer(2, std::make_shared<fw::Bitmap>(fw::resolve("terrain/snow-01.jpg")));
   set_layer(3, std::make_shared<fw::Bitmap>(fw::resolve("terrain/rock-snow-01.jpg")));
 
-  // bake the patches into the vertex buffers that'll be used for rendering
-  for (int patch_z = 0; patch_z < get_patches_length(); patch_z++) {
-    for (int patch_x = 0; patch_x < get_patches_width(); patch_x++) {
-      bake_patch(patch_x, patch_z);
-    }
-  }
-
   std::shared_ptr<fw::sg::Node> root_node = root_node_;
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
-    [root_node](fw::sg::Scenegraph& scenegraph) {
+    [root_node, this, index_data](fw::sg::Scenegraph& scenegraph) {
+      // bake the patches into the vertex buffers that'll be used for rendering
+      for (int patch_z = 0; patch_z < get_patches_length(); patch_z++) {
+        for (int patch_x = 0; patch_x < get_patches_width(); patch_x++) {
+          bake_patch(patch_x, patch_z);
+        }
+      }
+
+      ib_ = std::make_shared<fw::IndexBuffer>();
+      ib_->set_data(index_data.size(), &index_data[0], 0);
+
+      shader_ = fw::Shader::create("terrain.shader");
+
       scenegraph.add_node(root_node);
     });
 }

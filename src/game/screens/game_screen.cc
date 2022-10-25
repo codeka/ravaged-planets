@@ -59,7 +59,6 @@ void GameScreen::show() {
 //  hud_chat->show();
   hud_minimap->show();
 
-
   // Add a light to the scene. TODO: remove it on close? also update it somehow?
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue([=](fw::sg::Scenegraph& scenegraph) {
       fw::Vector sun(0.485f, 0.485f, 0.727f);

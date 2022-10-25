@@ -39,8 +39,8 @@ public:
 
 private:
   std::vector<std::shared_ptr<TerrainPatch>> patches_;
-  const std::shared_ptr<fw::IndexBuffer> ib_;
-  const std::shared_ptr<fw::Shader> shader_;
+  std::shared_ptr<fw::IndexBuffer> ib_;
+  std::shared_ptr<fw::Shader> shader_;
 
   // The root scenegraph node that we add all our nodes to.
   std::shared_ptr<fw::sg::Node> root_node_;
