@@ -20,20 +20,6 @@ EditorTerrain::EditorTerrain(int width, int height, float* height_data/*= nullpt
 EditorTerrain::~EditorTerrain() {
 }
 
-void EditorTerrain::render(fw::sg::Scenegraph &scenegraph) {
-  int num_baked = 0;
-  {
-    std::unique_lock<std::mutex> lock(patches_to_bake_mutex_);
-    for(auto patch : patches_to_bake_) {
-      bake_patch(std::get<0>(patch), std::get<1>(patch));
-      num_baked++;
-    }
-    patches_to_bake_.clear();
-  }
-
- // Terrain::render(scenegraph);
-}
-
 // set the height of the given vertex to the given value.
 void EditorTerrain::set_vertex_height(int x, int z, float height) {
   while (x < 0) {
@@ -64,6 +50,18 @@ void EditorTerrain::set_vertex_height(int x, int z, float height) {
 
   if (!found) {
     patches_to_bake_.push_back(this_patch);
+  }
+  
+  if (!bake_queued_.exchange(true)) {
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [this](fw::sg::Scenegraph&) {
+        std::unique_lock<std::mutex> lock(patches_to_bake_mutex_);
+        for (auto patch : patches_to_bake_) {
+          bake_patch(std::get<0>(patch), std::get<1>(patch));
+        }
+        patches_to_bake_.clear();
+        bake_queued_.store(false);
+      });
   }
 }
 

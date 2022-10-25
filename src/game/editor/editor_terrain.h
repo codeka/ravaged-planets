@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <mutex>
 #include <tuple>
 
@@ -17,6 +18,7 @@ class EditorTerrain: public game::Terrain {
 private:
   std::mutex patches_to_bake_mutex_;
   std::vector<std::tuple<int, int>> patches_to_bake_;
+  std::atomic<bool> bake_queued_;
 
   // we keep a separate vector of the splatt bitmaps for easy editing
   std::vector<fw::Bitmap> splatt_bitmaps_;
@@ -51,8 +53,6 @@ public:
   // is big enough to hold one data point per vertex in the map. each data point
   // holds a single boolean flag - true means "passable", false means "impassable"
   void build_collision_data(std::vector<bool> &vertices);
-
-  virtual void render(fw::sg::Scenegraph &scenegraph);
 };
 
 }

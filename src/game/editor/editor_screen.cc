@@ -50,6 +50,13 @@ EditorScreen::~EditorScreen() {
 void EditorScreen::show() {
   ed::main_menu->show();
   ed::statusbar->show();
+
+  // Add a light to the scene. TODO: remove it on close? also update it somehow?
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue([=](fw::sg::Scenegraph& scenegraph) {
+    fw::Vector sun(0.485f, 0.485f, 0.727f);
+    std::shared_ptr <fw::sg::Light> light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
+    scenegraph.add_light(light);
+    });
 }
 
 void EditorScreen::hide() {
@@ -72,25 +79,12 @@ void EditorScreen::update() {
   if (world_ != nullptr)
     world_->update();
 
-
-
   if (tool_ != nullptr)
     tool_->update();
 }
 
 void EditorScreen::render(fw::sg::Scenegraph &scenegraph) {
-  if (world_ != nullptr) {
-    // set up the properties of the sun that we'll use to Light and also cast shadows
-    fw::Vector sun(0.485f, 0.485f, 0.727f);
-    fw::Camera *old_cam = fw::Framework::get_instance()->get_camera();
-    fw::Vector cam_pos = old_cam->get_position();
-    fw::Vector cam_dir = old_cam->get_forward();
-    fw::Vector lookat = world_->get_terrain()->get_cursor_location(cam_pos, cam_dir);
-
-    std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(lookat + sun * 200.0f, sun * -1, true));
-    scenegraph.add_light(Light);
-  }
-
+//TODO:
   if (tool_ != nullptr) {
     // Only render the tool if the mouse isn't currently over a widget.
     if (!fw::Framework::get_instance()->get_gui()->is_mouse_over_widget()) {
