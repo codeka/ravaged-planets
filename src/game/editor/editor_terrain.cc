@@ -108,7 +108,7 @@ fw::Bitmap &EditorTerrain::get_splatt(int patch_x, int patch_z) {
 }
 
 int EditorTerrain::get_num_layers() const {
-  return layers_.size();
+  return 8; // TODO textures_.size();
 }
 
 std::shared_ptr<fw::Bitmap> EditorTerrain::get_layer(int number) {
@@ -122,21 +122,14 @@ void EditorTerrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   if (number < 0)
     return;
 
-  std::shared_ptr<fw::Texture> texture(new fw::Texture());
-  texture->create(bitmap);
-
-  if (number == static_cast<int>(layers_.size())) {
+  if (number == static_cast<int>(layer_bitmaps_.size())) {
     // we need to add a new layer
     layer_bitmaps_.push_back(bitmap);
-    layers_.push_back(texture);
-    return;
   } else if (number > static_cast<int>(layer_bitmaps_.size())) {
     // TODO: not supported yet
-    return;
   }
 
-  layer_bitmaps_[number] = bitmap;
-  layers_[number] = texture;
+  textures_->add(bitmap);
 }
 
 void EditorTerrain::build_collision_data(std::vector<bool> &vertices) {

@@ -27,10 +27,7 @@
     in vec4 light_pos;
     in float NdotL;
 
-    uniform sampler2D layer1;
-    uniform sampler2D layer2;
-    uniform sampler2D layer3;
-    uniform sampler2D layer4;
+    uniform sampler2DArray textures;
     uniform sampler2D splatt;
     uniform sampler2DShadow shadow_map;
 
@@ -56,10 +53,10 @@
       // we can do about this (encoding the splatt texture differently, perhaps?)
       vec4 base_color;
       uv = tex / 8.0;
-      base_color  = weights.r * texture(layer1, uv);
-      base_color += weights.g * texture(layer2, uv);
-      base_color += weights.b * texture(layer3, uv);
-      base_color += weights.a * texture(layer4, uv);
+      base_color  = weights.r * texture(textures, vec3(uv, 0));
+      base_color += weights.g * texture(textures, vec3(uv, 1));
+      base_color += weights.b * texture(textures, vec3(uv, 2));
+      base_color += weights.a * texture(textures, vec3(uv, 3));
 
       color = base_color * diffuse;
       color.a = 1.0;

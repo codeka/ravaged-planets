@@ -36,7 +36,7 @@ public:
   // gets and sets the texture of the given layer.
   int get_num_layers() const;
   std::shared_ptr<fw::Bitmap> get_layer(int number);
-  void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap);
+  void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) override;
 
   // creates all of the splatt textures and sets them up initially
   void initialize_splatt();

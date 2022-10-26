@@ -49,7 +49,7 @@ protected:
   friend class ed::WorldWriter;
   friend class WorldReader;
 
-  std::vector<std::shared_ptr<fw::Texture>> layers_;
+  std::shared_ptr<fw::TextureArray> textures_;
   std::vector<bool> collision_data_;
 
   const int width_;
@@ -81,6 +81,7 @@ public:
   Terrain(int width, int height, float *height_data = nullptr);
   virtual ~Terrain();
 
+  virtual void initialize();
   virtual void update();
 
   virtual void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap);

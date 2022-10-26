@@ -24,16 +24,27 @@ Terrain::Terrain(int width, int height, float* height_data /*= nullptr*/) :
     for (int i = 0; i < width_ * length_; i++)
       heights_[i] = 0.0f;
   }
+}
 
+Terrain::~Terrain() {
+  delete[] heights_;
+}
+
+void Terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices(index_data, PATCH_SIZE);
 
   // TODO: this should come from the world_reader
+  textures_ = std::make_shared<fw::TextureArray>(512, 512);
   set_layer(0, std::make_shared<fw::Bitmap>(fw::resolve("terrain/grass-01.jpg")));
   set_layer(1, std::make_shared<fw::Bitmap>(fw::resolve("terrain/rock-01.jpg")));
   set_layer(2, std::make_shared<fw::Bitmap>(fw::resolve("terrain/snow-01.jpg")));
   set_layer(3, std::make_shared<fw::Bitmap>(fw::resolve("terrain/rock-snow-01.jpg")));
+  set_layer(4, std::make_shared<fw::Bitmap>(fw::resolve("terrain/sand-01.png")));
+  set_layer(5, std::make_shared<fw::Bitmap>(fw::resolve("terrain/cracked-dirt-01.jpg")));
+  set_layer(6, std::make_shared<fw::Bitmap>(fw::resolve("terrain/grass-02.jpg")));
+  set_layer(7, std::make_shared<fw::Bitmap>(fw::resolve("terrain/road-01.png")));
 
   std::shared_ptr<fw::sg::Node> root_node = root_node_;
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
@@ -54,10 +65,6 @@ Terrain::Terrain(int width, int height, float* height_data /*= nullptr*/) :
     });
 }
 
-Terrain::~Terrain() {
-  delete[] heights_;
-}
-
 std::shared_ptr<fw::Texture> Terrain::get_patch_splatt(int patch_x, int patch_z) {
   ensure_patches();
 
@@ -69,19 +76,8 @@ void Terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
   if (number < 0)
     return;
 
-  std::shared_ptr<fw::Texture> texture(new fw::Texture());
-  texture->create(bitmap);
-
-  if (number == static_cast<int>(layers_.size())) {
-    // we need to add a new layer
-    layers_.push_back(texture);
-    return;
-  } else if (number > static_cast<int>(layers_.size())) {
-    // TODO: not supported yet
-    return;
-  }
-
-  layers_[number] = texture;
+  // TODO: support setting layers and changing them and stuff.
+  textures_->add(bitmap);
 }
 
 void Terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::Texture> texture) {
@@ -115,14 +111,7 @@ void Terrain::bake_patch(int patch_x, int patch_z) {
   delete[] vert_data;
 
   patch->shader_params = shader_->create_parameters();
-  if (layers_.size() >= 1)
-    patch->shader_params->set_texture("layer1", layers_[0]);
-  if (layers_.size() >= 2)
-    patch->shader_params->set_texture("layer2", layers_[1]);
-  if (layers_.size() >= 3)
-    patch->shader_params->set_texture("layer3", layers_[2]);
-  if (layers_.size() >= 4)
-    patch->shader_params->set_texture("layer4", layers_[3]);
+  patch->shader_params->set_texture("textures", textures_);
 }
 
 void Terrain::ensure_patches() {

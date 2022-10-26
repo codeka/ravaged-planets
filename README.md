@@ -41,3 +41,11 @@ For Windows, you probably want to use the "install" target when running, which e
 files are available. For that you'll need to configure CMAKE_INSTALL_PREFIX to be somewhere you have
 non-Admin access to. To configure this, just look what I've done in CMakePresets.json and make your
 own CMakeUserPresets.json (don't check that file into git).
+
+## Credits
+
+### Terrain Textures
+
+ * https://opengameart.org/content/hitw-terrain-textures
+ * https://opengameart.org/content/terrain-textures-pack-from-stunt-rally-23
+ * https://opengameart.org/content/0-ad-textures

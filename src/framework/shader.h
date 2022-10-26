@@ -21,7 +21,7 @@ private:
   friend class Shader;
 
   std::string program_name_;
-  std::map<std::string, std::shared_ptr<fw::Texture>> textures_;
+  std::map<std::string, std::shared_ptr<fw::TextureBase>> textures_;
   std::map<std::string, Matrix> matrices_;
   std::map<std::string, Vector> vectors_;
   std::map<std::string, Color> colors_;
@@ -35,6 +35,7 @@ public:
 
   void set_program_name(std::string const &name);
   void set_texture(std::string const &name, std::shared_ptr<fw::Texture> const &t);
+  void set_texture(std::string const& name, std::shared_ptr<fw::TextureArray> const& t);
   void set_matrix(std::string const &name, Matrix const &m);
   void set_vector(std::string const &name, Vector const &v);
   void set_color(std::string const &name, Color const &c);

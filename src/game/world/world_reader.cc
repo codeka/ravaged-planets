@@ -139,7 +139,9 @@ void WorldReader::read_mapdesc_players(fw::XmlElement players_node) {
 }
 
 Terrain *WorldReader::create_terrain(int width, int length, float* height_data) {
-  return new Terrain(width, length, height_data);
+  Terrain *terrain = new Terrain(width, length, height_data);
+  terrain->initialize();
+  return terrain;
 }
 
 Terrain *WorldReader::get_terrain() {

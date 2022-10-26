@@ -275,6 +275,10 @@ void ShaderParameters::set_texture(std::string const &name, std::shared_ptr<Text
   textures_[name] = tex;
 }
 
+void ShaderParameters::set_texture(std::string const& name, std::shared_ptr<TextureArray> const& tex) {
+  textures_[name] = tex;
+}
+
 void ShaderParameters::set_matrix(std::string const &name, Matrix const &m) {
   matrices_[name] = m;
 }
@@ -307,7 +311,7 @@ void ShaderParameters::apply(ShaderProgram *prog) const {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
-      std::shared_ptr<fw::Texture> texture = it->second;
+      auto& texture = it->second;
       if(texture) {
         texture->ensure_created();
         texture->bind();

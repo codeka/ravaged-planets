@@ -179,6 +179,8 @@ void Texture::bind() const {
   FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 }
 
 void Texture::save_png(fs::path const &filename) {
@@ -203,6 +205,54 @@ int Texture::get_height() const {
 
 fs::path Texture::get_filename() const {
   return data_->filename;
+}
+
+//-----------------------------------------------------------------------------
+
+TextureArray::TextureArray(int width, int height)
+  : width_(width), height_(height) {
+}
+
+TextureArray::~TextureArray() {
+}
+
+void TextureArray::add(boost::filesystem::path const& filename) {
+  // TODO: check if data has been created.
+  auto bmp = std::make_shared<Bitmap>(filename);
+  bmp->resize(width_, height_);
+  bitmaps_.push_back(bmp);
+}
+
+void TextureArray::add(std::shared_ptr<fw::Bitmap> bmp) {
+  bmp->resize(width_, height_);
+  bitmaps_.push_back(bmp);
+}
+
+void TextureArray::ensure_created() {
+  FW_ENSURE_RENDER_THREAD();
+  if (data_) return;
+
+  data_ = std::make_shared<TextureData>();
+  glGenTextures(1, &data_->texture_id);
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D_ARRAY, data_->texture_id));
+  FW_CHECKED(glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width_, height_, bitmaps_.size()));
+  for (int i = 0; i < bitmaps_.size(); i++) {
+    auto& bitmap = bitmaps_[i];
+    FW_CHECKED(
+      glTexSubImage3D(
+        GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width_, height_, 1, GL_RGBA, GL_UNSIGNED_BYTE, bitmap->get_pixels().data()));
+  }
+}
+
+void TextureArray::bind() const {
+  FW_ENSURE_RENDER_THREAD();
+  if (!data_) return;
+
+  FW_CHECKED(glBindTexture(GL_TEXTURE_2D_ARRAY, data_->texture_id));
+  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT));
+  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT));
 }
 
 //-----------------------------------------------------------------------------
@@ -257,7 +307,6 @@ struct FramebufferData {
     }
   }
 };
-
 
 //-----------------------------------------------------------------------------
 Framebuffer::Framebuffer() : data_(new FramebufferData()) {
