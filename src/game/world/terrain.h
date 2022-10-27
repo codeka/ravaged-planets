@@ -73,6 +73,7 @@ protected:
 
   // gets or sets the splatt texture for the given patch
   std::shared_ptr<fw::Texture> get_patch_splatt(int patch_x, int patch_z);
+  std::shared_ptr<fw::Texture> create_splatt(fw::Bitmap const& bmp);
   virtual void set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::Texture> texture);
 
   // Makes sure we've created all of the patches we'll need

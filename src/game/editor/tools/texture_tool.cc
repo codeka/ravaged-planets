@@ -108,7 +108,7 @@ REGISTER_TOOL("texture", TextureTool);
 float TextureTool::max_radius = 10;
 
 TextureTool::TextureTool(EditorWorld *wrld) :
-    Tool(wrld), radius_(4), _is_painting(false), _layer(0) {
+    Tool(wrld), radius_(4), is_painting_(false), layer_(0) {
   wnd_ = new TextureToolWindow(this);
 }
 
@@ -135,7 +135,7 @@ void TextureTool::deactivate() {
 void TextureTool::update() {
   Tool::update();
 
-  if (_is_painting) {
+  if (is_painting_) {
     fw::Vector cursor_loc = terrain_->get_cursor_location();
 
     // patch_x and patch_z are the patch number(s) we're inside of
@@ -167,7 +167,7 @@ void TextureTool::update() {
     // we have to take a copy of the splatt's pixels cause we'll be modifying them
     std::vector<uint32_t> data = splatt.get_pixels();
 
-    uint32_t new_value = get_selected_splatt_mask();
+    uint8_t new_value = layer_;
     for (int y = centre_y - static_cast<int>(radius_ * scale_y); y <= centre_y + static_cast<int>(radius_ * scale_y);
         y++) {
       for (int x = centre_x - static_cast<int>(radius_ * scale_x); x <= centre_x + static_cast<int>(radius_ * scale_x);
@@ -196,22 +196,7 @@ void TextureTool::render(fw::sg::Scenegraph &scenegraph) {
 
 void TextureTool::on_key(std::string keyname, bool is_down) {
   if (keyname == "Left-Mouse") {
-    _is_painting = is_down;
-  }
-}
-
-uint32_t TextureTool::get_selected_splatt_mask() {
-  switch (_layer) {
-  case 0:
-    return 0x000000FF;
-  case 1:
-    return 0x0000FF00;
-  case 2:
-    return 0x00FF0000;
-  case 3:
-    return 0xFF000000;
-  default:
-    return 0x00000000;
+    is_painting_ = is_down;
   }
 }
 

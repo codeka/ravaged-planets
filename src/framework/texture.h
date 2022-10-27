@@ -3,6 +3,8 @@
 #include <memory>
 #include <boost/filesystem.hpp>
 
+#include <framework/graphics.h>
+
 namespace fw {
 class Bitmap;
 struct TextureData;
@@ -35,8 +37,17 @@ public:
 
   void create(boost::filesystem::path const &filename);
   void create(std::shared_ptr<fw::Bitmap> bmp);
-  void create(fw::Bitmap const &bmp);
-  void create(int width, int height, bool is_shadowmap = false);
+  void create(
+    fw::Bitmap const &bmp, GLenum internal_format = GL_RGBA8, GLenum format = GL_RGBA,
+    GLenum component_type = GL_UNSIGNED_BYTE);
+  void create(
+    int width, int height, GLenum internal_format = GL_RGBA8, GLenum format = GL_RGBA,
+    GLenum component_type = GL_UNSIGNED_BYTE);
+  inline void create_shadowmap(int width, int height) {
+    create(width, height, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_FLOAT);
+  }
+
+  void set_filter(GLenum min_filter, GLenum mag_filter);
 
   // Ensures we are created before you call bind. Must be called on the render thread.
   void ensure_created() override;

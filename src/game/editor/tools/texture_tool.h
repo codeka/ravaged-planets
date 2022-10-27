@@ -20,12 +20,11 @@ public:
 
 private:
   int radius_;
-  int _layer;
+  uint8_t layer_;
   TextureToolWindow *wnd_;
-  bool _is_painting;
+  bool is_painting_;
 
   void on_key(std::string keyname, bool is_down);
-  uint32_t get_selected_splatt_mask();
 
 public:
   TextureTool(EditorWorld *wrld);
@@ -40,11 +39,11 @@ public:
   int get_radius() const {
     return radius_;
   }
-  void set_layer(int layer) {
-    _layer = layer;
+  void set_layer(uint8_t layer) {
+    layer_ = layer;
   }
-  int get_layer() const {
-    return _layer;
+  uint8_t get_layer() const {
+    return layer_;
   }
 
   virtual void update();

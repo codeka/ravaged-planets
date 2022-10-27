@@ -21,6 +21,9 @@ struct TextureData {
   int width = -1, height = -1;
   fs::path filename; // might be empty if we weren't created from a file
 
+  GLenum min_filter = GL_LINEAR;
+  GLenum mag_filter = GL_LINEAR;
+
   TextureData() = default;
   TextureData(const TextureData&) = delete;
   TextureData& operator=(const TextureData&) = delete;
@@ -116,7 +119,8 @@ void Texture::create(std::shared_ptr<fw::Bitmap> bmp) {
   create(*bmp);
 }
 
-void Texture::create(fw::Bitmap const &bmp) {
+void Texture::create(fw::Bitmap const &bmp, GLenum internal_format /*= GL_RGBA8*/, GLenum format /*= GL_RGBA*/,
+                     GLenum component_type /*= GL_UNSIGNED_BYTE*/) {
   Graphics *g = fw::Framework::get_instance()->get_graphics();
   fw::Bitmap bitmap(bmp);
 
@@ -126,19 +130,20 @@ void Texture::create(fw::Bitmap const &bmp) {
   data_->width = bitmap.get_width();
   data_->height = bitmap.get_height();
 
-  data_creator_ = [g, bitmap](TextureData& data) {
+  data_creator_ = [g, bitmap, internal_format, format, component_type](TextureData& data) {
     if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
     FW_CHECKED(
       glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0,
-        GL_RGBA, GL_UNSIGNED_BYTE, bitmap.get_pixels().data()));
+        GL_TEXTURE_2D, 0, internal_format, data.width, data.height, 0,
+        format, component_type, bitmap.get_pixels().data()));
   };
 }
 
-void Texture::create(int width, int height, bool is_shadowmap) {
+void Texture::create(int width, int height, GLenum internal_format /*=GL_RGBA8*/, GLenum format /*= GL_RGBA*/,
+                     GLenum component_type /*= GL_UNSIGNED_BYTE*/) {
   Graphics *g = fw::Framework::get_instance()->get_graphics();
 
   if (!data_) {
@@ -147,19 +152,21 @@ void Texture::create(int width, int height, bool is_shadowmap) {
   data_->width = width;
   data_->height = height;
 
-  data_creator_ = [g, width, height, is_shadowmap](TextureData& data) {
+  data_creator_ = [g, width, height, internal_format, format, component_type](TextureData& data) {
     if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }
     FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
-    if (is_shadowmap) {
-      FW_CHECKED(glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, data.width, data.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr));
-    } else {
-      FW_CHECKED(glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-    }
+    FW_CHECKED(glTexImage2D(
+      GL_TEXTURE_2D, 0, internal_format, data.width, data.height, 0, format, component_type, nullptr));
   };
+}
+
+void Texture::set_filter(GLenum min_filter, GLenum mag_filter) {
+  if (!data_) return;
+
+  data_->min_filter = min_filter;
+  data_->mag_filter = mag_filter;
 }
 
 void Texture::ensure_created() {
@@ -177,8 +184,8 @@ void Texture::bind() const {
   }
 
   FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
-  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, data_->min_filter));
+  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, data_->mag_filter));
   FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
   FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 }

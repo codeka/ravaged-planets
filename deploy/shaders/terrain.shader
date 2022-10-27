@@ -28,7 +28,7 @@
     in float NdotL;
 
     uniform sampler2DArray textures;
-    uniform sampler2D splatt;
+    uniform usampler2D splatt;
     uniform sampler2DShadow shadow_map;
 
     out vec4 color;
@@ -43,23 +43,14 @@
       float ambient = 0.5;
       float diffuse = (clamp(NdotL, 0.0, 1.0) * light_amount * ambient) + ambient;
 
-      // get the color information from the texture
-      vec4 weights = texture(splatt, tex / patch_size);
-      float weight_sum = dot(weights, vec4(1.0, 1.0, 1.0, 1.0)); // weights[0] + weight[1] + ...
-      weights /= weight_sum;
+      // The splatt texture will tell us which layer this texel comes from.
+      uint layer = texture(splatt, tex / patch_size).r;
 
-      // calculate the base texture by splatting the various other textures together.
-      // this only allows for four different kinds of texture, but maybe there's something
-      // we can do about this (encoding the splatt texture differently, perhaps?)
-      vec4 base_color;
+      // Now query the actual texture.
+      // TODO: make the 8.0 somehow configurable?
       uv = tex / 8.0;
-      base_color  = weights.r * texture(textures, vec3(uv, 0));
-      base_color += weights.g * texture(textures, vec3(uv, 1));
-      base_color += weights.b * texture(textures, vec3(uv, 2));
-      base_color += weights.a * texture(textures, vec3(uv, 3));
+      color = texture(textures, vec3(uv, layer));
 
-      color = base_color * diffuse;
-      color.a = 1.0;
     }
   ]]></source>
   <program name="default">

@@ -69,7 +69,7 @@ void EditorTerrain::initialize_splatt() {
   std::vector<uint32_t> buffer(splatt_width * splatt_height);
   for (int y = 0; y < splatt_height; y++) {
     for (int x = 0; x < splatt_width; x++) {
-      buffer[(y * splatt_width) + x] = 0x000000ff;
+      buffer[(y * splatt_width) + x] = 0x00000000;
     }
   }
 
@@ -85,9 +85,10 @@ void EditorTerrain::initialize_splatt() {
 }
 
 void EditorTerrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) {
+  Terrain::set_splatt(patch_x, patch_z, bmp);
   std::shared_ptr<fw::Texture> splatt = get_patch_splatt(patch_x, patch_z);
   if (splatt == std::shared_ptr<fw::Texture>()) {
-    splatt = std::shared_ptr<fw::Texture>(new fw::Texture());
+    splatt = create_splatt(bmp);
     set_patch_splatt(patch_x, patch_z, splatt);
   }
 
@@ -99,7 +100,10 @@ void EditorTerrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) 
   }
 
   splatt_bitmaps_[index] = bmp;
-  splatt->create(bmp);
+
+  // TODO: this is duplicated with create_splatt.
+  splatt->create(bmp, /*internal_format=*/GL_R8UI, /*format=*/GL_RED_INTEGER, /*component_type=*/GL_INT);
+  splatt->set_filter(GL_NEAREST, GL_NEAREST);
 }
 
 fw::Bitmap &EditorTerrain::get_splatt(int patch_x, int patch_z) {

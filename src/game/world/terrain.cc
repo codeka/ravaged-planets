@@ -88,10 +88,16 @@ void Terrain::set_patch_splatt(int patch_x, int patch_z, std::shared_ptr<fw::Tex
 }
 
 void Terrain::set_splatt(int patch_x, int patch_z, fw::Bitmap const &bmp) {
-  std::shared_ptr<fw::Texture> splatt(new fw::Texture());
-  splatt->create(bmp);
+  auto splatt = create_splatt(bmp);
 
   set_patch_splatt(patch_x, patch_z, splatt);
+}
+
+std::shared_ptr<fw::Texture> Terrain::create_splatt(fw::Bitmap const& bmp) {
+  auto splatt = std::make_shared<fw::Texture>();
+  splatt->create(bmp, /*internal_format=*/GL_R8UI, /*format=*/GL_RED_INTEGER, /*component_type=*/GL_INT);
+  splatt->set_filter(GL_NEAREST, GL_NEAREST);
+  return splatt;
 }
 
 void Terrain::bake_patch(int patch_x, int patch_z) {
