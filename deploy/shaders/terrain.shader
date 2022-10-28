@@ -35,6 +35,24 @@
 
     float patch_size = 64;
 
+    vec4 splattQuery(in usampler2D splatt, in vec2 splattUv, in vec2 splattSize, in sampler2DArray textures, in vec2 textureUv) {
+      uint layer_tl = texture(splatt, splattUv).r;
+      uint layer_tr = texture(splatt, splattUv + vec2(1.0 / splattSize.x, 0.0)).r;
+      uint layer_bl = texture(splatt, splattUv + vec2(0.0, 1.0 / splattSize.y)).r;
+      uint layer_br = texture(splatt, splattUv + vec2(1.0 / splattSize.x, 1.0 / splattSize.y)).r;
+
+      vec4 tl = texture(textures, vec3(textureUv, layer_tl));
+      vec4 tr = texture(textures, vec3(textureUv, layer_tr));
+      vec4 bl = texture(textures, vec3(textureUv, layer_bl));
+      vec4 br = texture(textures, vec3(textureUv, layer_br));
+
+      vec2 f = fract(splattUv * vec2(128.0, 128.0));
+      //vec2 f = fract(textureUv * vec2(512.0, 512.0));
+      vec4 tA = mix(tl, tr, f.x);
+      vec4 tB = mix(bl, br, f.x);
+      return mix(tA, tB, f.y);
+    }
+
     void main() {
       vec2 uv = 0.5 * (light_pos.xy / light_pos.w) + 0.5;
       float light_amount = 1.0;// texture(shadow_map, vec3(uv, light_pos.z / light_pos.w));
@@ -43,14 +61,8 @@
       float ambient = 0.5;
       float diffuse = (clamp(NdotL, 0.0, 1.0) * light_amount * ambient) + ambient;
 
-      // The splatt texture will tell us which layer this texel comes from.
-      uint layer = texture(splatt, tex / patch_size).r;
-
-      // Now query the actual texture.
       // TODO: make the 8.0 somehow configurable?
-      uv = tex / 8.0;
-      color = texture(textures, vec3(uv, layer));
-
+      color = splattQuery(splatt, tex / patch_size, vec2(128.0), textures, tex / 8.0);
     }
   ]]></source>
   <program name="default">
