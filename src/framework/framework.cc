@@ -329,7 +329,9 @@ void Framework::render() {
   scenegraph_manager_->before_render();
   
   auto& scenegraph = scenegraph_manager_->get_scenegraph();
+  scenegraph.push_camera(fw::Framework::get_instance()->get_camera()->get_render_state());
   fw::render(scenegraph);
+  scenegraph.pop_camera();
 
   // if we've been asked for some screenshots, take them after we've done the normal render.
   if (screenshots_.size() > 0)

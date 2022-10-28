@@ -310,14 +310,12 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   }
 
   // now, render the main scene
-  scenegraph.push_camera(fw::Framework::get_instance()->get_camera()->get_render_state());
   g->begin_scene(scenegraph.get_clear_color());
   for(auto& node : scenegraph.get_nodes()) {
     node->render(&scenegraph);
   }
 
   scenegraph.call_after_render(timer->get_frame_time());
-  scenegraph.pop_camera();
 
   // make sure the shadowsrc is empty
   std::shared_ptr<ShadowSource> debug_shadowsrc;
