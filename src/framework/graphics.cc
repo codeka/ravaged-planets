@@ -176,6 +176,12 @@ void Graphics::after_render() {
 }
 
 void Graphics::run_on_render_thread(std::function<void()> fn) {
+  if (is_render_thread()) {
+    // If we're already on the render thread, just run it now.
+    fn();
+    return;
+  }
+
   std::lock_guard<std::mutex> lock(run_queue_mutex_);
   run_queue_.push_back(fn);
 }
@@ -201,9 +207,15 @@ void Graphics::check_error(char const *msg) {
   BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(msg) << fw::gl_error_info(err));
 }
 
-void Graphics::ensure_render_thread() {
+/* static */
+bool Graphics::is_render_thread() {
   std::thread::id this_thread_id = std::this_thread::get_id();
-  if (this_thread_id != render_thread_id) {
+  return this_thread_id == render_thread_id;
+}
+
+/* static */
+void Graphics::ensure_render_thread() {
+  if (!is_render_thread()) {
     BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Expected to be running on the render thread."));
   }
 }

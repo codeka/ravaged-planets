@@ -87,7 +87,8 @@ public:
   // Checks glGetError() and throws an exception if it detects something.
   static void check_error(char const *msg);
 
-  /** For things that must run on the render thread, this can be sure to enforce it. */
+  // For things that must run on the render thread, this can be sure to enforce it.
+  static bool is_render_thread();
   static void ensure_render_thread();
 };
 

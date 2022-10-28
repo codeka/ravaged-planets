@@ -392,7 +392,7 @@ void call_callacks_thread_proc(std::shared_ptr<std::list<ScreenshotRequest *>> r
  * This is called at the end of a frame if there are pending screenshot callbacks. We'll grab the contents of the,
  * frame buffer, then (on another thread) call the callbacks.
  */
-void Framework::take_screenshots(sg::Scenegraph &Scenegraph) {
+void Framework::take_screenshots(sg::Scenegraph &scenegraph) {
   if (screenshots_.empty()) {
     return;
   }
@@ -401,16 +401,18 @@ void Framework::take_screenshots(sg::Scenegraph &Scenegraph) {
   for(ScreenshotRequest *request : screenshots_) {
     // render the scene to a separate render target first
     std::shared_ptr<fw::Texture> color_target(new fw::Texture());
-    color_target->create(request->width, request->height, false);
+    color_target->create(request->width, request->height);
 
     std::shared_ptr<fw::Texture> depth_target(new fw::Texture());
-    depth_target->create(request->width, request->height, true);
+    depth_target->create_depth(request->width, request->height);
 
     std::shared_ptr<fw::Framebuffer> framebuffer(new fw::Framebuffer());
     framebuffer->set_color_buffer(color_target);
     framebuffer->set_depth_buffer(depth_target);
 
-    fw::render(Scenegraph, framebuffer, request->include_gui);
+    scenegraph.push_camera(fw::Framework::get_instance()->get_camera()->get_render_state());
+    fw::render(scenegraph, framebuffer, request->include_gui);
+    scenegraph.pop_camera();
 
     request->bitmap = std::make_shared<fw::Bitmap>(*color_target.get());
     requests->push_back(request);
