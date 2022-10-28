@@ -71,10 +71,10 @@ EntityIcon::EntityIcon() : rotation_(0.0f) {
 
 void EntityIcon::initialize() {
   color_texture_ = std::shared_ptr<fw::Texture>(new fw::Texture());
-  color_texture_->create(64, 64, false);
+  color_texture_->create(64, 64);
 
   depth_texture_ = std::shared_ptr<fw::Texture>(new fw::Texture());
-  depth_texture_->create(64, 64, true);
+  depth_texture_->create_depth(64, 64);
 
   framebuffer_ = std::shared_ptr<fw::Framebuffer>(new fw::Framebuffer());
   framebuffer_->set_color_buffer(color_texture_);

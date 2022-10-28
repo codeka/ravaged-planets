@@ -43,7 +43,7 @@ public:
   void create(
     int width, int height, GLenum internal_format = GL_RGBA8, GLenum format = GL_RGBA,
     GLenum component_type = GL_UNSIGNED_BYTE);
-  inline void create_shadowmap(int width, int height) {
+  inline void create_depth(int width, int height) {
     create(width, height, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_FLOAT);
   }
 
