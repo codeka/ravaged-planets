@@ -1,6 +1,9 @@
 #pragma once
 
+#include <memory>
+
 #include <game/editor/tools/tools.h>
+#include <game/editor/tools/indicator_node.h>
 
 class HeightfieldToolWindow;
 class HeightfieldBrush;
@@ -22,6 +25,8 @@ private:
   HeightfieldToolWindow *wnd_;
   HeightfieldBrush *brush_;
 
+  std::shared_ptr<IndicatorNode> indicator_;
+
   void on_key(std::string keyname, bool is_down);
 
 public:
@@ -31,9 +36,7 @@ public:
   virtual void activate();
   virtual void deactivate();
 
-  void set_radius(int value) {
-    radius_ = value;
-  }
+  void set_radius(int value);
   int get_radius() const {
     return radius_;
   }
@@ -45,7 +48,6 @@ public:
   void set_brush(HeightfieldBrush *brush);
 
   virtual void update();
-  virtual void render(fw::sg::Scenegraph &scenegraph);
 };
 
 }

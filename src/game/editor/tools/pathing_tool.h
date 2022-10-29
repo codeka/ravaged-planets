@@ -42,8 +42,6 @@ public:
   virtual void activate();
   virtual void deactivate();
 
-  virtual void render(fw::sg::Scenegraph &scenegraph);
-
   void set_simplify(bool enabled);
   void set_test_start();
   void set_test_end();

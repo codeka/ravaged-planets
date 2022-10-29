@@ -108,8 +108,6 @@ private:
 
 public:
   void bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z);
-
-  void render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &world);
 };
 
 std::shared_ptr<fw::IndexBuffer> CollisionPatch::ib_;
@@ -142,7 +140,7 @@ void CollisionPatch::bake(std::vector<bool> &data, float *heights, int width, in
   vb_ = fw::VertexBuffer::create<fw::vertex::xyz_c>();
   vb_->set_data(vertices.size(), vertices.data());
 }
-
+/*
 void CollisionPatch::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &world) {
   std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
   Node->set_world_matrix(world);
@@ -158,7 +156,7 @@ void CollisionPatch::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &wo
   Node->set_shader_parameters(shader_params);
 
   Scenegraph.add_node(Node);
-}
+}*/
 
 //-----------------------------------------------------------------------------
 
@@ -212,7 +210,7 @@ int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_len
 
   return patch_z * patches_width + patch_x;
 }
-
+/*
 void PathingTool::render(fw::sg::Scenegraph &Scenegraph) {
   // we want to render the patches centred on where the camera is looking
   fw::Camera *camera = fw::Framework::get_instance()->get_camera();
@@ -267,7 +265,7 @@ void PathingTool::render(fw::sg::Scenegraph &Scenegraph) {
     Scenegraph.add_node(sgnode);
   }
 }
-
+*/
 std::shared_ptr<CollisionPatch> PathingTool::bake_patch(int patch_x, int patch_z) {
   std::shared_ptr<CollisionPatch> patch(new CollisionPatch());
   patch->bake(collision_data_, get_terrain()->get_height_data(), get_terrain()->get_width(),

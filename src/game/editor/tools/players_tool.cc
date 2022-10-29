@@ -127,7 +127,7 @@ void PlayersTool::deactivate() {
   Tool::deactivate();
   wnd_->hide();
 }
-
+/*
 void PlayersTool::render(fw::sg::Scenegraph &Scenegraph) {
   if (player_no_ <= 0)
     return;
@@ -145,7 +145,7 @@ void PlayersTool::render(fw::sg::Scenegraph &Scenegraph) {
 //  marker_->set_color(fw::Color(0.75f, 0.0f, 1.0f, 0.0f));
 //  marker_->render(Scenegraph, loc);
 }
-
+*/
 void PlayersTool::set_curr_player(int player_no) {
   player_no_ = player_no;
 }

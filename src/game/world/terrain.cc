@@ -208,10 +208,7 @@ float Terrain::get_vertex_height(int x, int z) {
   return heights_[fw::constrain(z, length_) * width_ + fw::constrain(x, width_)];
 }
 
-//
-// this method is pretty simple. we basically get the height at (x, z) then interpolate that
-// ParticleRotation between (x+1, z+1).
-//
+// this method is pretty simple. we basically get the height at (x, z) then interpolate that value between (x+1, z+1).
 float Terrain::get_height(float x, float z) {
   int x0 = (int) floor(x);
   int x1 = x0 + 1;
@@ -221,7 +218,7 @@ float Terrain::get_height(float x, float z) {
 
   float h00 = get_vertex_height(x0, z0);
   float h10 = get_vertex_height(x1, z0);
-  ;
+
   float h01 = get_vertex_height(x0, z1);
   float h11 = get_vertex_height(x1, z1);
 

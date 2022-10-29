@@ -22,9 +22,6 @@ public:
   // updates the "world", this is only called if we're the active Screen
   virtual void update();
 
-  // renders this Screen, this is only called if we're the active Screen
-  virtual void render(fw::sg::Scenegraph &scenegraph);
-
   // create a new map to edit
   void new_map(int width, int height);
 

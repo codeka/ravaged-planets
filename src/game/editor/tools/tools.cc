@@ -37,11 +37,8 @@ void Tool::deactivate() {
 void Tool::update() {
 }
 
-void Tool::render(fw::sg::Scenegraph &) {
-}
-
 // This is used by a number of of the tools for giving a basic indication of it's area of effect.
-void draw_circle(fw::sg::Scenegraph &Scenegraph, game::Terrain *terrain, fw::Vector const &center, float radius) {
+void draw_circle(fw::sg::Scenegraph &scenegraph, game::Terrain *terrain, fw::Vector const &center, float radius) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * M_PI * radius);
@@ -74,16 +71,16 @@ void draw_circle(fw::sg::Scenegraph &Scenegraph, game::Terrain *terrain, fw::Vec
   ib->set_data(num_segments + 1, indices);
   delete[] indices;
 
-  std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
-  Node->set_vertex_buffer(vb);
-  Node->set_index_buffer(ib);
-  Node->set_primitive_type(fw::sg::PrimitiveType::kLineStrip);
+  std::shared_ptr<fw::sg::Node> node(new fw::sg::Node());
+  node->set_vertex_buffer(vb);
+  node->set_index_buffer(ib);
+  node->set_primitive_type(fw::sg::PrimitiveType::kLineStrip);
   std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
   std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
   shader_params->set_program_name("notexture");
-  Node->set_shader(Shader);
-  Node->set_shader_parameters(shader_params);
-  Scenegraph.add_node(Node);
+  node->set_shader(Shader);
+  node->set_shader_parameters(shader_params);
+  scenegraph.add_node(node);
 }
 
 //-------------------------------------------------------------------------

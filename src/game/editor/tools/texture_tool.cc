@@ -123,20 +123,39 @@ void TextureTool::activate() {
   keybind_tokens_.push_back(
       inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&TextureTool::on_key, this, _1, _2))));
 
+  indicator_ = std::make_shared<IndicatorNode>(terrain_);
+  indicator_->set_radius(radius_);
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [indicator = indicator_](fw::sg::Scenegraph& sg) {
+      sg.add_node(indicator);
+    });
+
   wnd_->show();
 }
 
 void TextureTool::deactivate() {
   Tool::deactivate();
 
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [indicator = indicator_](fw::sg::Scenegraph& sg) {
+      sg.remove_node(indicator);
+    });
+  indicator_.reset();
+
   wnd_->hide();
+}
+
+void TextureTool::set_radius(int radius) {
+  radius_ = radius;
+  indicator_->set_radius(radius);
 }
 
 void TextureTool::update() {
   Tool::update();
 
+  fw::Vector cursor_loc = terrain_->get_cursor_location();
+
   if (is_painting_) {
-    fw::Vector cursor_loc = terrain_->get_cursor_location();
 
     // patch_x and patch_z are the patch number(s) we're inside of
     int patch_x = static_cast<int>(cursor_loc[0] / game::Terrain::PATCH_SIZE);
@@ -188,10 +207,8 @@ void TextureTool::update() {
       terrain_->set_splatt(patch_x, patch_z, splatt);
     });
   }
-}
 
-void TextureTool::render(fw::sg::Scenegraph &scenegraph) {
-  draw_circle(scenegraph, terrain_, terrain_->get_cursor_location(), (float) radius_);
+  indicator_->set_center(cursor_loc);
 }
 
 void TextureTool::on_key(std::string keyname, bool is_down) {

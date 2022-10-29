@@ -302,11 +302,24 @@ void HeightfieldTool::activate() {
   }
   set_brush(new RaiseLowerBrush());
 
+  indicator_ = std::make_shared<IndicatorNode>(terrain_);
+  indicator_->set_radius(radius_);
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [indicator = indicator_](fw::sg::Scenegraph& sg) {
+      sg.add_node(indicator);
+    });
+
   wnd_->show();
 }
 
 void HeightfieldTool::deactivate() {
   Tool::deactivate();
+
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [indicator = indicator_](fw::sg::Scenegraph& sg) {
+      sg.remove_node(indicator);
+    });
+  indicator_.reset();
 
   wnd_->hide();
 }
@@ -317,13 +330,19 @@ void HeightfieldTool::set_brush(HeightfieldBrush *brush) {
   brush_->initialize(this, terrain_);
 }
 
-// This is called when you press or release one of the keys we use for
-// interacting with the terrain (left mouse button for "raise", right mouse button
-// for "lower" etc)
+// This is called when you press or release one of the keys we use for interacting with the terrain (left mouse button
+// for "raise", right mouse button for "lower" etc)
 void HeightfieldTool::on_key(std::string keyname, bool is_down) {
   if (brush_ != nullptr) {
     brush_->on_key(keyname, is_down);
   }
+}
+
+void HeightfieldTool::set_radius(int radius) {
+  if (radius_ == radius) return;
+
+  radius_ = radius;
+  indicator_->set_radius(radius);
 }
 
 void HeightfieldTool::update() {
@@ -333,6 +352,7 @@ void HeightfieldTool::update() {
   if (brush_ != nullptr) {
     brush_->update(cursor_loc);
   }
+  indicator_->set_center(cursor_loc);
 }
 
 void HeightfieldTool::import_heightfield(fw::Bitmap &bm) {
@@ -355,8 +375,9 @@ void HeightfieldTool::import_heightfield(fw::Bitmap &bm) {
     }
   }
 }
-
+/*
 void HeightfieldTool::render(fw::sg::Scenegraph &scenegraph) {
   draw_circle(scenegraph, terrain_, terrain_->get_cursor_location(), (float) radius_);
-}
+}*/
+
 }

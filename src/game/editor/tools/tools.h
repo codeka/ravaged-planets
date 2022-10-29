@@ -52,7 +52,6 @@ public:
   virtual void deactivate();
 
   virtual void update();
-  virtual void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 typedef Tool *(*create_tool_fn)(EditorWorld *wrld);

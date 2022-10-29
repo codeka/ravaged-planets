@@ -83,16 +83,6 @@ void EditorScreen::update() {
     tool_->update();
 }
 
-void EditorScreen::render(fw::sg::Scenegraph &scenegraph) {
-//TODO:
-  if (tool_ != nullptr) {
-    // Only render the tool if the mouse isn't currently over a widget.
-    if (!fw::Framework::get_instance()->get_gui()->is_mouse_over_widget()) {
-      tool_->render(scenegraph);
-    }
-  }
-}
-
 void EditorScreen::new_map(int width, int height) {
   // unset the current tool
   set_active_tool("");
