@@ -293,7 +293,7 @@ VertexBuffer::~VertexBuffer() {
   FW_CHECKED(glDeleteBuffers(1, &id_));
 }
 
-void VertexBuffer::set_data(int num_vertices, void *vertices, int flags /*= -1*/) {
+void VertexBuffer::set_data(int num_vertices, const void *vertices, int flags /*= -1*/) {
   FW_ENSURE_RENDER_THREAD();
   if (flags <= 0) {
     flags = dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;

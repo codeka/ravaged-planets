@@ -143,7 +143,7 @@ public:
         T::get_setup_function(), sizeof(T), dynamic));
   }
 
-  void set_data(int num_vertices, void *vertices, int flags = -1);
+  void set_data(int num_vertices, const void *vertices, int flags = -1);
 
   inline int get_num_vertices() const {
     return num_vertices_;

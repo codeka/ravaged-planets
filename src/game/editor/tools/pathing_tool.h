@@ -1,15 +1,15 @@
 #pragma once
 
 #include <memory>
+
+#include <framework/model.h>
+#include <framework/path_find.h>
+#include <framework/scenegraph.h>
+
 #include <game/editor/tools/tools.h>
 
 class PathingToolWindow;
-class CollisionPatch;
-
-namespace fw {
-class Model;
-class TimedPathFind;
-}
+class CollisionPatchNode;
 
 namespace ed {
 class EditorWorld;
@@ -29,11 +29,12 @@ private:
   fw::Vector end_pos_;
   bool end_set_;
   bool simplify_;
-  std::vector<std::shared_ptr<CollisionPatch>> patches_;
+  std::vector<std::shared_ptr<CollisionPatchNode>> patches_;
   std::shared_ptr<fw::TimedPathFind> path_find_;
 
+  std::shared_ptr<fw::sg::Node> current_path_node_;
+
   void on_key(std::string keyname, bool is_down);
-  std::shared_ptr<CollisionPatch> bake_patch(int patch_x, int patch_z);
   void find_path();
 public:
   PathingTool(EditorWorld *wrld);

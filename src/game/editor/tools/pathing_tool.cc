@@ -36,6 +36,19 @@ enum IDS {
   END_ID,
 };
 
+int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_length, int* new_patch_x,
+  int* new_patch_z) {
+  patch_x = fw::constrain(patch_x, patches_width);
+  patch_z = fw::constrain(patch_z, patches_length);
+
+  if (new_patch_x != 0)
+    *new_patch_x = patch_x;
+  if (new_patch_z != 0)
+    *new_patch_z = patch_z;
+
+  return patch_z * patches_width + patch_x;
+}
+
 class PathingToolWindow {
 private:
   Window *wnd_;
@@ -100,28 +113,23 @@ bool PathingToolWindow::on_simplify_click(Widget *w) {
 
 //-----------------------------------------------------------------------------
 
-class CollisionPatch {
+// CollisionPatchNode renders the 'state' of the collision information for a patch of terrain.
+class CollisionPatchNode : public fw::sg::Node {
 private:
-  int _patch_x, _patch_z;
-  static std::shared_ptr<fw::IndexBuffer> ib_;
-  std::shared_ptr<fw::VertexBuffer> vb_;
+  int patch_x_, patch_z_;
 
 public:
   void bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z);
 };
 
-std::shared_ptr<fw::IndexBuffer> CollisionPatch::ib_;
-std::shared_ptr<fw::VertexBuffer> current_path_vb;
-std::shared_ptr<fw::IndexBuffer> current_path_ib;
+void CollisionPatchNode::bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
 
-void CollisionPatch::bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
-  if (!ib_) {
-    std::vector<uint16_t> indices;
-    game::generate_terrain_indices_wireframe(indices, PATCH_SIZE);
+  std::vector<uint16_t> indices;
+  game::generate_terrain_indices_wireframe(indices, PATCH_SIZE);
 
-    ib_ = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
-    ib_->set_data(indices.size(), &indices[0]);
-  }
+  auto ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
+  ib->set_data(indices.size(), &indices[0]);
+  set_index_buffer(ib);
 
   std::vector<fw::vertex::xyz_c> vertices((PATCH_SIZE + 1) * (PATCH_SIZE + 1));
   for (int z = 0; z <= PATCH_SIZE; z++) {
@@ -137,26 +145,21 @@ void CollisionPatch::bake(std::vector<bool> &data, float *heights, int width, in
     }
   }
 
-  vb_ = fw::VertexBuffer::create<fw::vertex::xyz_c>();
-  vb_->set_data(vertices.size(), vertices.data());
-}
-/*
-void CollisionPatch::render(fw::sg::Scenegraph &Scenegraph, fw::Matrix const &world) {
-  std::shared_ptr<fw::sg::Node> Node(new fw::sg::Node());
-  Node->set_world_matrix(world);
+  auto vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
+  vb->set_data(vertices.size(), vertices.data());
+  set_vertex_buffer(vb);
 
-  // we have to set up the Scenegraph Node with these manually
-  Node->set_vertex_buffer(vb_);
-  Node->set_index_buffer(ib_);
-  Node->set_primitive_type(fw::sg::PrimitiveType::kLineList);
-  std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
-  std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
+  set_primitive_type(fw::sg::PrimitiveType::kLineList);
+  std::shared_ptr<fw::Shader> shader = fw::Shader::create("basic.shader");
+  std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
   shader_params->set_program_name("notexture");
-  Node->set_shader(Shader);
-  Node->set_shader_parameters(shader_params);
+  set_shader(shader);
+  set_shader_parameters(shader_params);
 
-  Scenegraph.add_node(Node);
-}*/
+  fw::Matrix world = fw::translation(static_cast<float>(patch_x * PATCH_SIZE), 0,
+    static_cast<float>(patch_z * PATCH_SIZE));
+  set_world_matrix(world);
+}
 
 //-----------------------------------------------------------------------------
 
@@ -191,25 +194,54 @@ void PathingTool::activate() {
   fw::Input *inp = fw::Framework::get_instance()->get_input();
   keybind_tokens_.push_back(
       inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&PathingTool::on_key, this, _1, _2))));
+
+  int patch_width = get_terrain()->get_width() / PATCH_SIZE;
+  int patch_length = get_terrain()->get_length() / PATCH_SIZE;
+  for (int patch_z = 0; patch_z <= patch_length; patch_z++) {
+    for (int patch_x = 0; patch_x <= patch_width; patch_x++) {
+      int new_patch_x, new_patch_z;
+      int patch_index = get_patch_index(patch_x, patch_z, patch_width, patch_length, &new_patch_x, &new_patch_z);
+
+      if (!patches_[patch_index]) {
+        patches_[patch_index] = std::make_shared<CollisionPatchNode>();
+      }
+    }
+  }
+
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [this, patch_width, patch_length](fw::sg::Scenegraph& sg) {
+      auto data = terrain_->get_collision_data();
+      auto heights = terrain_->get_height_data();
+      int width = terrain_->get_width();
+      int length = terrain_->get_length();
+
+      for (int patch_z = 0; patch_z <= patch_length; patch_z++) {
+        for (int patch_x = 0; patch_x <= patch_width; patch_x++) {
+          int new_patch_x, new_patch_z;
+          int patch_index = get_patch_index(patch_x, patch_z, patch_width, patch_length, &new_patch_x, &new_patch_z);
+          auto patch = patches_[patch_index];
+          if (patch) {
+            patch->bake(data, heights, width, length, patch_x, patch_z);
+            sg.add_node(patch);
+          }
+        }
+      }
+    });
 }
 
 void PathingTool::deactivate() {
   Tool::deactivate();
+
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [this](fw::sg::Scenegraph& sg) {
+      for (auto patch : patches_) {
+        sg.remove_node(patch);
+      }
+    });
+
   wnd_->hide();
 }
 
-int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_length, int *new_patch_x,
-    int *new_patch_z) {
-  patch_x = fw::constrain(patch_x, patches_width);
-  patch_z = fw::constrain(patch_z, patches_length);
-
-  if (new_patch_x != 0)
-    *new_patch_x = patch_x;
-  if (new_patch_z != 0)
-    *new_patch_z = patch_z;
-
-  return patch_z * patches_width + patch_x;
-}
 /*
 void PathingTool::render(fw::sg::Scenegraph &Scenegraph) {
   // we want to render the patches centred on where the camera is looking
@@ -266,15 +298,9 @@ void PathingTool::render(fw::sg::Scenegraph &Scenegraph) {
   }
 }
 */
-std::shared_ptr<CollisionPatch> PathingTool::bake_patch(int patch_x, int patch_z) {
-  std::shared_ptr<CollisionPatch> patch(new CollisionPatch());
-  patch->bake(collision_data_, get_terrain()->get_height_data(), get_terrain()->get_width(),
-      get_terrain()->get_length(), patch_x, patch_z);
-  return patch;
-}
 
-void PathingTool::set_simplify(bool ParticleRotation) {
-  simplify_ = ParticleRotation;
+void PathingTool::set_simplify(bool value) {
+  simplify_ = value;
   find_path();
 }
 
@@ -337,17 +363,33 @@ void PathingTool::find_path() {
       }
     }
 
-    std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
-    vb->set_data(buffer.size(), &buffer[0]);
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [this, buffer](fw::sg::Scenegraph& sg) {
+        if (!current_path_node_) {
+          current_path_node_ = std::make_shared<fw::sg::Node>();
+         // current_path_node_->set_cast_shadows(false);
+          current_path_node_->set_primitive_type(fw::sg::PrimitiveType::kLineStrip);
+          std::shared_ptr<fw::Shader> shader = fw::Shader::create("basic.shader");
+          std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
+          shader_params->set_program_name("notexture");
+          current_path_node_->set_shader(shader);
+          current_path_node_->set_shader_parameters(shader_params);
 
-    current_path_vb = vb;
+          sg.add_node(current_path_node_);
+        }
 
-    current_path_ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
-    std::vector<uint16_t> indices(buffer.size());
-    for (int i = 0; i < buffer.size(); i++) {
-      indices[i] = i;
-    }
-    current_path_ib->set_data(indices.size(), indices.data());
+        auto vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
+        vb->set_data(buffer.size(), buffer.data());
+        current_path_node_->set_vertex_buffer(vb);
+
+        auto ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
+        std::vector<uint16_t> indices(buffer.size());
+        for (int i = 0; i < buffer.size(); i++) {
+          indices[i] = i;
+        }
+        ib->set_data(indices.size(), indices.data());
+        current_path_node_->set_index_buffer(ib);
+      });
   }
 }
 
