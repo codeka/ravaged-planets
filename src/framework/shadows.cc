@@ -16,8 +16,8 @@ LightCamera::~LightCamera() {
 }
 
 //---------------------------------------------------------------------------------------------------------
-// this is a static list of shadow map textures, so we don't have create/destroy them
-// over and over (as shadow_sources get created/destroyed)
+// this is a static list of shadow map textures, so we don't have create/destroy them over and over (as shadow_sources
+// get created/destroyed)
 static std::list<std::shared_ptr<Framebuffer>> g_shadowbuffers;
 
 ShadowSource::ShadowSource() {

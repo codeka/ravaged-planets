@@ -61,7 +61,7 @@ void GameScreen::show() {
 
   // Add a light to the scene. TODO: remove it on close? also update it somehow?
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue([=](fw::sg::Scenegraph& scenegraph) {
-      fw::Vector sun(0.485f, 0.485f, 0.727f);
+      fw::Vector sun(0.485f, 0.485f, 100.727f);
       std::shared_ptr <fw::sg::Light> light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
       scenegraph.add_light(light);
     });

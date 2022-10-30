@@ -63,6 +63,8 @@
 
       // TODO: make the 8.0 somehow configurable?
       color = splattQuery(splatt, tex / patch_size, vec2(128.0), textures, tex / 8.0);
+
+      color = diffuse * color;
     }
   ]]></source>
   <program name="default">

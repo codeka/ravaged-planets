@@ -319,11 +319,8 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
 
   // make sure the shadowsrc is empty
   std::shared_ptr<ShadowSource> debug_shadowsrc;
-  if (g_shadow_debug) {
-    debug_shadowsrc = shadowsrc;
-  }
-  if (shadowsrc) {
-    shadowsrc.reset();
+  if (g_shadow_debug && shadows.size() > 0) {
+    debug_shadowsrc = shadows[0];
   }
 
   if (render_gui) {
@@ -331,14 +328,14 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
     g->before_gui();
 
     if (g_shadow_debug && debug_shadowsrc) {
-      std::shared_ptr<Shader> Shader = Shader::create("gui.shader");
-      std::shared_ptr<ShaderParameters> shader_params = Shader->create_parameters();
+      std::shared_ptr<Shader> shader = Shader::create("gui.shader");
+      std::shared_ptr<ShaderParameters> shader_params = shader->create_parameters();
       // TODO: recalculating this every time seems wasteful
       fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
       fw::Matrix pos_transform;
       cml::matrix_orthographic_RH(pos_transform, 0.0f,
           static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
-      pos_transform = fw::scale(fw::Vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::Vector(440.0f, 280.0f, 0)) * pos_transform;
+      pos_transform = fw::scale(fw::Vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::Vector(10.0f, 10.0f, 0)) * pos_transform;
       shader_params->set_matrix("pos_transform", pos_transform);
       shader_params->set_matrix("uv_transform", fw::identity());
       shader_params->set_texture("texsampler", debug_shadowsrc->get_shadowmap()->get_color_buffer());
@@ -361,9 +358,9 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
 
       vb->begin();
       ib->begin();
-      Shader->begin(shader_params);
+      shader->begin(shader_params);
       FW_CHECKED(glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr));
-      Shader->end();
+      shader->end();
       ib->end();
       vb->end();
     }
