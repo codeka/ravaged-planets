@@ -13,6 +13,7 @@
 #include <framework/input.h>
 #include <framework/model.h>
 #include <framework/model_manager.h>
+#include <framework/model_node.h>
 #include <framework/scenegraph.h>
 #include <framework/shader.h>
 #include <framework/paths.h>
@@ -208,6 +209,9 @@ void PathingTool::activate() {
     }
   }
 
+  start_marker_ = marker_->create_node(fw::Color(0.0f, 1.0f, 0.0f));
+  end_marker_ = marker_->create_node(fw::Color(1.0f, 0.0f, 0.0f));
+
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
     [this, patch_width, patch_length](fw::sg::Scenegraph& sg) {
       auto data = terrain_->get_collision_data();
@@ -226,6 +230,11 @@ void PathingTool::activate() {
           }
         }
       }
+
+      start_marker_->set_enabled(false);
+      sg.add_node(start_marker_);
+      end_marker_->set_enabled(false);
+      sg.add_node(end_marker_);
     });
 }
 
@@ -241,63 +250,6 @@ void PathingTool::deactivate() {
 
   wnd_->hide();
 }
-
-/*
-void PathingTool::render(fw::sg::Scenegraph &Scenegraph) {
-  // we want to render the patches centred on where the camera is looking
-  fw::Camera *camera = fw::Framework::get_instance()->get_camera();
-  fw::Vector cam_loc = camera->get_position();
-  fw::Vector cam_dir = camera->get_direction();
-  fw::Vector location = get_terrain()->get_cursor_location(cam_loc, cam_dir);
-
-  int centre_patch_x = (int) (location[0] / PATCH_SIZE);
-  int centre_patch_z = (int) (location[2] / PATCH_SIZE);
-
-  int patch_width = get_terrain()->get_width() / PATCH_SIZE;
-  int patch_length = get_terrain()->get_length() / PATCH_SIZE;
-  for (int patch_z = centre_patch_z - 1; patch_z <= centre_patch_z + 1; patch_z++) {
-    for (int patch_x = centre_patch_x - 1; patch_x <= centre_patch_x + 1; patch_x++) {
-      int new_patch_x, new_patch_z;
-      int patch_index = get_patch_index(patch_x, patch_z, patch_width, patch_length, &new_patch_x, &new_patch_z);
-
-      if (!patches_[patch_index])
-        patches_[patch_index] = bake_patch(new_patch_x, new_patch_z);
-
-      fw::Matrix world = fw::translation(static_cast<float>(patch_x * PATCH_SIZE), 0,
-          static_cast<float>(patch_z * PATCH_SIZE));
-
-      patches_[patch_index]->render(Scenegraph, world);
-    }
-  }
-
-  if (start_set_) {
-    fw::Matrix loc(fw::translation(start_pos_));
-//    marker_->set_color(fw::Color(1, 0.1f, 1, 0.1f));
-//    marker_->render(Scenegraph, loc);
-  }
-
-  if (end_set_) {
-    fw::Matrix loc(fw::translation(end_pos_));
-//    marker_->set_color(fw::Color(1, 1, 0.1f, 0.1f));
-//    marker_->render(Scenegraph, loc);
-  }
-
-  if (current_path_vb) {
-    std::shared_ptr<fw::sg::Node> sgnode(new fw::sg::Node());
-    sgnode->set_vertex_buffer(current_path_vb);
-    sgnode->set_index_buffer(current_path_ib);
-    sgnode->set_cast_shadows(false);
-    sgnode->set_primitive_type(fw::sg::PrimitiveType::kLineList);
-    std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
-    std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
-    shader_params->set_program_name("notexture");
-    sgnode->set_shader(Shader);
-    sgnode->set_shader_parameters(shader_params);
-
-    Scenegraph.add_node(sgnode);
-  }
-}
-*/
 
 void PathingTool::set_simplify(bool value) {
   simplify_ = value;
@@ -322,13 +274,25 @@ void PathingTool::on_key(std::string keyname, bool is_down) {
   }
 
   if (!is_down) {
+    fw::Vector cursor_loc = terrain_->get_cursor_location();
     if (test_mode_ == kTestStart) {
-      start_pos_ = terrain_->get_cursor_location();
+      start_pos_ = cursor_loc;
       start_set_ = true;
     } else if (test_mode_ == kTestEnd) {
-      end_pos_ = terrain_->get_cursor_location();
+      end_pos_ = cursor_loc;
       end_set_ = true;
     }
+
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [this, cursor_loc](fw::sg::Scenegraph& sg) {
+        if (test_mode_ == kTestStart) {
+          start_marker_->set_enabled(true);
+          start_marker_->set_world_matrix(fw::translation(cursor_loc));
+        } else if (test_mode_ == kTestEnd) {
+          end_marker_->set_enabled(true);
+          end_marker_->set_world_matrix(fw::translation(cursor_loc));
+        }
+      });
 
     find_path();
   }

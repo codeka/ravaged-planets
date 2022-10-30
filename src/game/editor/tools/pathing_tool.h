@@ -33,6 +33,8 @@ private:
   std::shared_ptr<fw::TimedPathFind> path_find_;
 
   std::shared_ptr<fw::sg::Node> current_path_node_;
+  std::shared_ptr<fw::ModelNode> start_marker_;
+  std::shared_ptr<fw::ModelNode> end_marker_;
 
   void on_key(std::string keyname, bool is_down);
   void find_path();
