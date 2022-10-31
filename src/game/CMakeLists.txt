@@ -31,7 +31,7 @@ file(GLOB GAME_HEADERS
 
 add_custom_command(
    OUTPUT version.cc
-   COMMAND version-number "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_BUILD_TYPE}$<CONFIG>" "${CMAKE_CURRENT_BINARY_DIR}/version.cc"
+   COMMAND version-number "${CMAKE_CURRENT_SOURCE_DIR}" "$<CONFIG>" "${CMAKE_CURRENT_BINARY_DIR}/version.cc"
    DEPENDS version-number
 )
 
