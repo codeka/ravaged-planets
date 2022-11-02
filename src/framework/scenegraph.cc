@@ -277,14 +277,14 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
 
   // set up the shadow sources that we'll need to render from first to get the various shadows going.
   std::vector<std::shared_ptr<ShadowSource>> shadows;
-  for(auto it = scenegraph.get_lights().begin(); it != scenegraph.get_lights().end(); ++it) {
-    if ((*it)->get_cast_shadows()) {
+  for (auto& light : scenegraph.get_lights()) {
+    if (light->get_cast_shadows()) {
       std::shared_ptr<ShadowSource> shdwsrc(new ShadowSource());
       shdwsrc->initialize(g_shadow_debug);
 
       LightCamera &cam = shdwsrc->get_camera();
-      cam.set_location((*it)->get_position());
-      cam.set_direction((*it)->get_direction());
+      cam.set_location(light->get_position());
+      cam.set_direction(light->get_direction());
 
       shadows.push_back(shdwsrc);
     }

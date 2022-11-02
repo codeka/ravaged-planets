@@ -72,7 +72,7 @@ public:
 
   virtual void set_location(Vector const & location) {
     position_ = location;
-    //_updated = true;
+    updated_ = true;
   }
 
   virtual Vector const & get_location() const {
@@ -81,7 +81,7 @@ public:
 
   virtual void set_direction(Vector const & direction) {
     forward_ = direction;
-    //_updated = true;
+    updated_ = true;
   }
 
   virtual Vector const & get_direction() const {
