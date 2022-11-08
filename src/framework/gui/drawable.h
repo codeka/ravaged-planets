@@ -6,9 +6,9 @@
 #include <boost/filesystem.hpp>
 
 #include <framework/graphics.h>
+#include <framework/math.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
-#include <framework/vector.h>
 #include <framework/xml.h>
 
 namespace fw::gui {

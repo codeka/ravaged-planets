@@ -7,10 +7,10 @@
 #include <framework/camera.h>
 #include <framework/color.h>
 #include <framework/graphics.h>
+#include <framework/math.h>
 #include <framework/shader.h>
 #include <framework/shadows.h>
 #include <framework/texture.h>
-#include <framework/vector.h>
 
 namespace fw::sg {
 

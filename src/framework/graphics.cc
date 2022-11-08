@@ -285,6 +285,7 @@ void IndexBuffer::end() {
 
 VertexBuffer::VertexBuffer(setup_fn setup, size_t vertex_size, bool dynamic /*= false */) :
     num_vertices_(0), vertex_size_(vertex_size), id_(0), dynamic_(dynamic), setup_(setup) {
+  FW_ENSURE_RENDER_THREAD();
   FW_CHECKED(glGenBuffers(1, &id_));
 }
 

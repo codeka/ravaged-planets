@@ -1,13 +1,13 @@
 #include <framework/particle_config.h>
 #include <framework/particle_emitter.h>
-#include <framework/texture.h>
 #include <framework/exception.h>
 #include <framework/framework.h>
+#include <framework/logging.h>
+#include <framework/math.h>
 #include <framework/misc.h>
 #include <framework/paths.h>
-#include <framework/vector.h>
+#include <framework/texture.h>
 #include <framework/xml.h>
-#include <framework/logging.h>
 
 namespace fs = boost::filesystem;
 
@@ -94,10 +94,10 @@ void ParticleEffectConfig::load_emitter(XmlElement const &elem) {
 
 //-------------------------------------------------------------------------
 fw::Vector ParticleEmitterConfig::SphericalLocation::get_point() const {
-  fw::Vector Random(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f);
+  fw::Vector random(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f);
 
   // TODO: this is the implementation of "constant"
-  return center + (Random.normalize() * radius);
+  return center + (random.normalized() * radius);
 }
 
 //-------------------------------------------------------------------------

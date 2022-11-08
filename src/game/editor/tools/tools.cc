@@ -41,7 +41,7 @@ void Tool::update() {
 void draw_circle(fw::sg::Scenegraph &scenegraph, game::Terrain *terrain, fw::Vector const &center, float radius) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
-  int num_segments = (int) (2.0f * M_PI * radius);
+  int num_segments = (int) (2.0f * fw::pi() * radius);
 
   // at least 8 segments, though...
   if (num_segments < 8)
@@ -50,7 +50,7 @@ void draw_circle(fw::sg::Scenegraph &scenegraph, game::Terrain *terrain, fw::Vec
   std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
   fw::vertex::xyz_c *vertices = new fw::vertex::xyz_c[num_segments + 1];
   for (int i = 0; i < num_segments; i++) {
-    float factor = 2.0f * (float) M_PI * (i / (float) num_segments);
+    float factor = 2.0f * fw::pi() * (i / (float)num_segments);
     vertices[i].x = center[0] + radius * sin(factor);
     vertices[i].z = center[2] + radius * cos(factor);
     vertices[i].y = terrain->get_height(vertices[i].x, vertices[i].z) + 0.5f;

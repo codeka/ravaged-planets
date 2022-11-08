@@ -42,7 +42,8 @@ void PathingComponent::update(float dt) {
       curr_goal_node_ = 0;
       new_path_.clear();
 
-      fw::debug << "found path to [" << last_request_goal_ << "]: " << path_.size() << " node(s)" << std::endl;
+      //TODO vector operator << for osteam
+      //fw::debug << "found path to [" << last_request_goal_ << "]: " << path_.size() << " node(s)" << std::endl;
     }
   }
 
@@ -54,7 +55,7 @@ void PathingComponent::update(float dt) {
     fw::Vector goal = path_[curr_goal_node_];
     fw::Vector dir = position_->get_direction_to(goal);
     dir[1] = 0.0f; // ignore height component
-    if (dir.length_squared() <= 1.0f) {
+    if (dir.length() <= 1.0f) {
       // if we're "at" this Node, increment the _curr_goal_node and try again
       curr_goal_node_++;
       continue;

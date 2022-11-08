@@ -99,7 +99,7 @@ void TimedEmitPolicy::check_emit(float dt) {
   float time_offset = dt;
 
   fw::Vector pos = emitter_->get_position();
-  fw::Vector dir = (pos - last_position_).normalize();
+  fw::Vector dir = (pos - last_position_).normalized();
 
   while (time_since_last_particle_ > _seconds_per_particle) {
     time_offset -= _seconds_per_particle;
@@ -135,7 +135,7 @@ void DistanceEmitPolicy::check_emit(float) {
 
   fw::Vector next_pos = emitter_->get_position();
   fw::Vector last_pos = last_particle->pos;
-  fw::Vector dir = get_direction_to(last_pos, next_pos, wrap_x, wrap_z).normalize();
+  fw::Vector dir = get_direction_to(last_pos, next_pos, wrap_x, wrap_z).normalized();
   fw::Vector curr_pos = last_pos + (dir * max_distance_);
 
   float time_offset = 0.0f; // todo: this should be non-zero...

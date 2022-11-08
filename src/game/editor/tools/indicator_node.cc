@@ -40,12 +40,12 @@ void IndicatorNode::render(fw::sg::Scenegraph* sg, fw::Matrix const& model_matri
   if (dirty_) {
     // the number of segments is basically the diameter of our circle. That means
     // we'll have one segment per unit, approximately.
-    const int num_segments = std::max(8, (int)(2.0f * M_PI * radius_));
+    const int num_segments = std::max(8, (int)(2.0f * fw::pi() * radius_));
 
     std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_c>();
     fw::vertex::xyz_c* vertices = new fw::vertex::xyz_c[num_segments + 1];
     for (int i = 0; i < num_segments; i++) {
-      float factor = 2.0f * (float)M_PI * (i / (float)num_segments);
+      float factor = 2.0f * fw::pi() * (i / (float)num_segments);
       vertices[i].x = center_[0] + radius_ * sin(factor);
       vertices[i].z = center_[2] + radius_ * cos(factor);
       vertices[i].y = terrain_->get_height(vertices[i].x, vertices[i].z) + 0.5f;

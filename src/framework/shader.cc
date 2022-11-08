@@ -1,22 +1,24 @@
+#include <framework/shader.h>
+
 #include <string>
 #include <sstream>
 #include <map>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
-#include <framework/misc.h>
-#include <framework/framework.h>
 #include <framework/color.h>
-#include <framework/graphics.h>
-#include <framework/texture.h>
-#include <framework/settings.h>
-#include <framework/logging.h>
-#include <framework/paths.h>
-#include <framework/vector.h>
 #include <framework/exception.h>
+#include <framework/framework.h>
+#include <framework/graphics.h>
+#include <framework/logging.h>
+#include <framework/math.h>
+#include <framework/misc.h>
+#include <framework/paths.h>
 #include <framework/scenegraph.h>
-#include <framework/shader.h>
+#include <framework/settings.h>
+#include <framework/texture.h>
 #include <framework/xml.h>
 
 namespace fs = boost::filesystem;
@@ -329,14 +331,14 @@ void ShaderParameters::apply(ShaderProgram *prog) const {
   for (auto& it = matrices_.begin(); it != matrices_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
-      FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.data()));
+      FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.m[0]));
     }
   }
 
   for (auto& it = vectors_.begin(); it != vectors_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
-      FW_CHECKED(glUniform3fv(var.location, 1, it->second.data()));
+      FW_CHECKED(glUniform3fv(var.location, 1, it->second.v));
     }
   }
 

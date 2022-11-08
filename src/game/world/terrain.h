@@ -5,9 +5,9 @@
 #include <stdint.h>
 
 #include <framework/bitmap.h>
+#include <framework/math.h>
 #include <framework/scenegraph.h>
 #include <framework/texture.h>
-#include <framework/vector.h>
 
 namespace fw {
 class VertexBuffer;

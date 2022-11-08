@@ -164,7 +164,7 @@ void BallisticProjectileComponent::set_target(std::weak_ptr<Entity> target) {
   fw::Vector mid_pos = initial_pos + (goal_pos - initial_pos) + fw::Vector(0, max_height_, 0);
 
   // todo: this is *not* a nice-looking arc!
-  our_position_->set_direction((mid_pos - initial_pos).normalize());
+  our_position_->set_direction((mid_pos - initial_pos).normalized());
   our_moveable_->set_turn_speed(1.0f);
   our_moveable_->set_intermediate_goal(goal_pos);
 }

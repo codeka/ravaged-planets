@@ -1,7 +1,9 @@
 #pragma once
 
 #include <memory>
-#include <framework/vector.h>
+
+#include <framework/math.h>
+
 #include <game/entities/orderable_component.h>
 
 namespace fw {

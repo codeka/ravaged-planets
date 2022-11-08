@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <framework/vector.h>
+#include <framework/math.h>
 
 namespace fw {
 class Bitmap;

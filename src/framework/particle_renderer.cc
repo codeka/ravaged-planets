@@ -1,18 +1,18 @@
-
 #include <framework/particle_renderer.h>
-#include <framework/particle_manager.h>
-#include <framework/particle.h>
-#include <framework/particle_config.h>
+
+#include <framework/exception.h>
 #include <framework/graphics.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
 #include <framework/camera.h>
 #include <framework/logging.h>
-#include <framework/paths.h>
-#include <framework/vector.h>
+#include <framework/math.h>
 #include <framework/misc.h>
+#include <framework/particle_manager.h>
+#include <framework/particle.h>
+#include <framework/particle_config.h>
+#include <framework/paths.h>
 #include <framework/scenegraph.h>
-#include <framework/exception.h>
 
 //-----------------------------------------------------------------------------
 // This structure is used to sort particles first by texture and then by z-order (to avoid state changes and
@@ -188,11 +188,11 @@ bool ParticleRenderer::add_particle(RenderState &rs, int base_index, std::shared
   fw::Vector pos(p->pos[0] + offset_x, p->pos[1], p->pos[2] + offset_z);
 
   // only render if the (absolute, not wrapped) distance to the camera is < 50
-  fw::Vector dir_to_cam = (cam->get_position() - pos);
-  if (dir_to_cam.length_squared() > (50.0f * 50.0f))
+  const fw::Vector dir_to_cam = (cam->get_position() - pos);
+  if (dir_to_cam.length() > 50.0f)
     return false;
 
-  // if we've already drawn the Particle this frame, don't do it again.
+  // if we've already drawn the particle this frame, don't do it again.
   if (p->draw_frame == draw_frame_)
     return false;
   p->draw_frame = draw_frame_;
@@ -206,27 +206,27 @@ bool ParticleRenderer::add_particle(RenderState &rs, int base_index, std::shared
   Matrix m = fw::scale(p->size);
   if (p->rotation != ParticleRotation::kDirection) {
     m *= fw::rotate_axis_angle(Vector(0, 0, 1), p->angle);
-
-    Matrix m2;
-    cml::matrix_rotation_align(m2, dir_to_cam);
-    m *= m2;
+    m *= fw::align(dir_to_cam, Vector(0, 0, 1));
   } else {
-    Matrix m2;
-    cml::matrix_rotation_vec_to_vec(m2, Vector(-1, 0, 0), p->direction);
-    m *= m2;
+    m *= fw::rotate(Vector(-1, 0, 0), p->direction);
   }
   m *= fw::translation(pos);
 
-  float aspect = p->rect.height / p->rect.width;
+  const float aspect = p->rect.height / p->rect.width;
 
-  fw::Vector v = cml::transform_point(m, fw::Vector(-0.5f, -0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.top + p->rect.height));
-  v = cml::transform_point(m, fw::Vector(-0.5f, 0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.top));
-  v = cml::transform_point(m, fw::Vector(0.5f, 0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left + p->rect.width, p->rect.top));
-  v = cml::transform_point(m, fw::Vector(0.5f, -0.5f * aspect, 0));
-  rs.vertices.push_back(fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left + p->rect.width, p->rect.top + p->rect.height));
+  fw::Vector v = m * fw::Vector(-0.5f, -0.5f * aspect, 0);
+  rs.vertices.push_back(
+    fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.top + p->rect.height));
+  v = m * fw::Vector(-0.5f, 0.5f * aspect, 0);
+  rs.vertices.push_back(
+    fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left, p->rect.top));
+  v = m * fw::Vector(0.5f, 0.5f * aspect, 0);
+  rs.vertices.push_back(
+    fw::vertex::xyz_c_uv(v[0], v[1], v[2], color.to_abgr(), p->rect.left + p->rect.width, p->rect.top));
+  v = m * fw::Vector(0.5f, -0.5f * aspect, 0);
+  rs.vertices.push_back(
+    fw::vertex::xyz_c_uv(
+      v[0], v[1], v[2], color.to_abgr(), p->rect.left + p->rect.width, p->rect.top + p->rect.height));
 
   rs.indices.push_back(base_index);
   rs.indices.push_back(base_index + 1);

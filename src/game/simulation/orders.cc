@@ -150,7 +150,7 @@ bool MoveOrder::is_complete() {
     }
 
     ent::PositionComponent *pos = Entity->get_component<ent::PositionComponent>();
-    return (pos->get_direction_to(goal).length_squared() < 1.1f);
+    return (pos->get_direction_to(goal).length() < 1.1f);
   }
 
   return true;

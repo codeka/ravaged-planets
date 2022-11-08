@@ -1,15 +1,17 @@
 
 #include <framework/shadows.h>
-#include <framework/shader.h>
-#include <framework/graphics.h>
-#include <framework/texture.h>
+
 #include <framework/framework.h>
+#include <framework/graphics.h>
+#include <framework/math.h>
+#include <framework/shader.h>
+#include <framework/texture.h>
 #include <framework/timer.h>
 
 namespace fw {
 
 LightCamera::LightCamera() {
-  set_projection_matrix(cml::constantsf::pi() / 8.0f, 1.0f, 200.0f, 500.0f);
+  projection_ = fw::projection_perspective(fw::pi() / 8.0f, 1.0f, 200.0f, 500.0f);
 }
 
 LightCamera::~LightCamera() {

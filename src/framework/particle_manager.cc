@@ -36,22 +36,24 @@ void ParticleManager::set_world_wrap(float x, float z) {
 }
 
 void ParticleManager::update(float dt) {
-  // TODO: remove this method, all particle stuff runs on the render thread
+  paused_.store(fw::Framework::get_instance()->is_paused());
 }
 
 ParticleManager::ParticleList& ParticleManager::on_render(float dt) {
-  {
+  if (!paused_.load()) {
     std::unique_lock<std::mutex> lock(mutex_);
     for (EffectList::iterator it = effects_.begin(); it != effects_.end(); ++it) {
       (*it)->update(dt);
     }
   }
 
-  // remove any dead particles
-  particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [](const std::weak_ptr<Particle> &p) {
-    // If the underlying shared_ptr is gone, we remove it.
-    return p.expired();
-  }), particles_.end());
+  if (!paused_.load()) {
+    // remove any dead particles
+    particles_.erase(std::remove_if(particles_.begin(), particles_.end(), [](const std::weak_ptr<Particle>& p) {
+      // If the underlying shared_ptr is gone, we remove it.
+      return p.expired();
+    }), particles_.end());
+  }
 
   // Return the particles so that the renderer can render them.
   return particles_;

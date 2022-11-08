@@ -1,8 +1,8 @@
 
+#include <framework/math.h>
 #include <framework/particle_effect.h>
 #include <framework/particle_manager.h>
 #include <framework/particle_config.h>
-#include <framework/vector.h>
 
 namespace fw {
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <memory>
-#include <framework/vector.h>
+
+#include <framework/math.h>
+
 #include <game/simulation/simulation_thread.h>
 #include <game/entities/entity.h>
 

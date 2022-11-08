@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -32,6 +33,10 @@ private:
   ParticleList particles_;
   float wrap_x_;
   float wrap_z_;
+
+  // If true, the game is paused, so we shouldn't update any particules either. Particulars are updated on the render
+  // thread, so we need this to be atomic.
+  std::atomic<bool> paused_;
 
 public:
   ParticleManager();

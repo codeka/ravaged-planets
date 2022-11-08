@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include <framework/vector.h>
 #include <framework/color.h>
+#include <framework/math.h>
 #include <framework/particle.h>
 #include <framework/texture.h>
 #include <framework/xml.h>

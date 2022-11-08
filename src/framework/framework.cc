@@ -235,12 +235,12 @@ void Framework::exit() {
 }
 
 void Framework::set_camera(Camera *cam) {
-  if (camera_ != 0)
+  if (camera_ != nullptr)
     camera_->disable();
 
   camera_ = cam;
 
-  if (camera_ != 0)
+  if (camera_ != nullptr)
     camera_->enable();
 }
 
@@ -254,7 +254,6 @@ void Framework::update_proc() {
     }
 
     debug << "application initialization complete, running..." << std::endl;
-
 
     int64_t accum_micros = 0;
     int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
@@ -299,8 +298,8 @@ void Framework::update(float dt) {
   audio_manager_->update(dt);
   if (!paused_) {
     app_->update(dt);
-    particle_mgr_->update(dt);
   }
+  particle_mgr_->update(dt);
   if (debug_view_ != nullptr) {
     debug_view_->update(dt);
   }
@@ -320,7 +319,8 @@ void Framework::ensure_update_thread() {
 }
 
 void Framework::render() {
-  if (graphics_ == nullptr) {
+  Camera* cam = fw::Framework::get_instance()->get_camera();
+  if (graphics_ == nullptr || cam == nullptr) {
     return;
   }
 
@@ -329,7 +329,7 @@ void Framework::render() {
   scenegraph_manager_->before_render();
   
   auto& scenegraph = scenegraph_manager_->get_scenegraph();
-  scenegraph.push_camera(fw::Framework::get_instance()->get_camera()->get_render_state());
+  scenegraph.push_camera(cam->get_render_state());
   fw::render(scenegraph);
   scenegraph.pop_camera();
 

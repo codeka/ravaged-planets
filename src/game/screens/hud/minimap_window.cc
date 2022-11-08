@@ -1,3 +1,4 @@
+#include <game/screens/hud/minimap_window.h>
 
 #include <functional>
 #include <memory>
@@ -13,17 +14,16 @@
 #include <framework/gui/label.h>
 #include <framework/gui/window.h>
 #include <framework/logging.h>
+#include <framework/math.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
 #include <framework/timer.h>
-#include <framework/vector.h>
 
 #include <game/entities/entity.h>
 #include <game/entities/entity_manager.h>
 #include <game/entities/minimap_visible_component.h>
 #include <game/entities/ownable_component.h>
 #include <game/entities/position_component.h>
-#include <game/screens/hud/minimap_window.h>
 #include <game/world/world.h>
 #include <game/world/terrain.h>
 #include <game/simulation/player.h>
@@ -71,9 +71,9 @@ fw::Matrix MinimapDrawable::get_uv_transform() {
 
 fw::Matrix MinimapDrawable::get_pos_transform(float x, float y, float width, float height) {
   fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
-  fw::Matrix transform;
-  cml::matrix_orthographic_RH(transform, 0.0f,
-      static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+  fw::Matrix transform =
+    fw::projection_orthographic(
+      0.0f, static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
   transform = fw::translation(fw::Vector(x - width, y - height, 0)) * transform;
   transform = fw::scale(fw::Vector(width * 3, height * 3, 0.0f)) * transform;
   return transform_ * transform;
@@ -156,7 +156,7 @@ void MinimapWindow::update_drawable() {
 
   // rotate so that we're facing in the same direction as the camera
   fw::Vector cam_dir(camera->get_direction());
-  cam_dir = fw::Vector(cam_dir[0], -cam_dir[2], 0).normalize();
+  cam_dir = fw::Vector(cam_dir[0], -cam_dir[2], 0).normalized();
   transform *= fw::translation(-0.5f, -0.5f, 0);
   transform *= fw::rotate(fw::Vector(0, 1, 0), cam_dir);
   transform *= fw::translation(0.5f, 0.5f, 0);

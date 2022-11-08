@@ -4,8 +4,8 @@
 #include <boost/signals2.hpp>
 
 #include <framework/gui/window.h>
+#include <framework/math.h>
 #include <framework/texture.h>
-#include <framework/vector.h>
 
 namespace fw {
 class Shader;

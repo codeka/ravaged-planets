@@ -3,9 +3,10 @@
 #include <functional>
 #include <memory>
 #include <thread>
+
 #include <boost/noncopyable.hpp>
 
-#include <framework/vector.h>
+#include <framework/math.h>
 #include <framework/work_queue.h>
 
 namespace fw {

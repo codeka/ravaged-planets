@@ -54,9 +54,11 @@ std::shared_ptr<Model> ModelReader::read(fs::path const &filename) {
 void add_node(std::shared_ptr<ModelNode> node, Node const &pb_node) {
   node->mesh_index = pb_node.mesh_index();
   if (pb_node.transformation_size() == 16) {
+    float mat[4][4];
     for (int i = 0; i < 16; i++) {
-      node->transform.data()[i] = pb_node.transformation(i);
+      mat[i / 4][i % 4] = pb_node.transformation(i);
     }
+    node->transform = fw::Matrix(mat);
   } else {
     node->transform = fw::identity();
   }

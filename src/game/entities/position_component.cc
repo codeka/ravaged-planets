@@ -58,7 +58,7 @@ void PositionComponent::set_final_position() {
       // if we're supposed to orient ourselves with the terrain (so it looks like we're sitting flat on the
       // terrain, rather than perfectly horizontal) do that as well. Basically, we sample the terrain at three
       // places, calculate the normal and orient ourselves to that.
-      fw::Vector right = cml::cross(up_, dir_).normalize();
+      fw::Vector right = fw::cross(up_, dir_).normalized();
       fw::Vector v1 = pos_ + dir_;
       fw::Vector v2 = pos_ + right;
       fw::Vector v3 = pos_ - right;
@@ -67,8 +67,8 @@ void PositionComponent::set_final_position() {
       v2[1] = terrain->get_height(v2[0], v2[2]);
       v3[1] = terrain->get_height(v3[0], v3[2]);
 
-      up_ = cml::cross(v2 - v1, v3 - v1).normalize();
-      dir_ = fw::Vector(dir_[0], 0.0f, dir_[2]).normalize();
+      up_ = fw::cross(v2 - v1, v3 - v1).normalized();
+      dir_ = fw::Vector(dir_[0], 0.0f, dir_[2]).normalized();
     }
 
     // constrain our position to the map's dimensions
@@ -140,7 +140,7 @@ fw::Vector PositionComponent::get_direction_to(fw::Vector const &point) const {
       fw::Vector another_point(point[0] + (x * width), point[1], point[2] + (z * length));
       fw::Vector another_dir = another_point - pos_;
 
-      if (another_dir.length_squared() < dir.length_squared())
+      if (another_dir.length() < dir.length())
         dir = another_dir;
     }
   }
@@ -179,7 +179,7 @@ std::weak_ptr<Entity> PositionComponent::get_nearest_entity(
       continue;
     }
 
-    float dist = get_direction_to(their_pos->get_position()).length_squared();
+    float dist = get_direction_to(their_pos->get_position()).length();
     if (!closest || (closest_distance > dist && pred(ent))) {
       closest = ent;
       closest_distance = dist;

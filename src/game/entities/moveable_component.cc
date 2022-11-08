@@ -113,7 +113,7 @@ void MoveableComponent::update(float dt) {
       float obstacle_distance = obstacle_dir.length();
 
       // only worry about the obstacle when it's in front of us
-      float d = cml::dot(cml::normalize(position_component_->get_direction()), cml::normalize(obstacle_dir));
+      float d = fw::dot(position_component_->get_direction().normalized(), obstacle_dir.normalized());
     //  fw::debug << "cml::dot(_position_component->get_direction(), obstacle_dir) = " << d << std::endl;
       if (d > 0.0f) {
         // if they're selectable, reduce the distance by their selection radius - that's what we ACTUALLY want to
@@ -134,12 +134,12 @@ void MoveableComponent::update(float dt) {
           }
 
           // temporarily adjust the "goal" so as to avoid the obstacle
-          fw::Vector up = cml::cross(position_component_->get_direction(), obstacle_dir);
-          if (up.length_squared() < 0.01f) {
+          fw::Vector up = fw::cross(position_component_->get_direction(), obstacle_dir);
+          if (up.length() < 0.01f) {
             // if they're *directly* in front of us, just choose a Random direction, left or right. we'll choose... left
             up = fw::Vector(0, 1, 0);
           }
-          fw::Vector avoid_dir = cml::cross(cml::normalize(position_component_->get_direction()), cml::normalize(up));
+          fw::Vector avoid_dir = fw::cross(position_component_->get_direction().normalized(), up.normalized());
 
           if (show_steering) {
             // draw a blue line from the obstacle in the direction we're going to travel to avoid it.
@@ -195,18 +195,18 @@ fw::Vector MoveableComponent::steer(fw::Vector pos, fw::Vector curr_direction, f
   goal_direction.normalize();
 
   // If we're almost facing the right direction already, just point straight towards the goal, no steering.
-  if (cml::dot(curr_direction, goal_direction) > 0.95f) {
+  if (fw::dot(curr_direction, goal_direction) > 0.95f) {
     return goal_direction;
   }
 
   // so, to work out the steering factor, we start off by rotating the direction vector clockwise 90 degrees...
-  fw::Vector up = cml::cross(curr_direction, goal_direction);
-  fw::Matrix rotation = fw::rotate_axis_angle(up, static_cast<float>(M_PI / 2.0));
-  fw::Vector steer = cml::transform_vector(rotation, curr_direction).normalize();
+  fw::Vector up = fw::cross(curr_direction, goal_direction);
+  fw::Quaternion rotation = fw::rotate_axis_angle(up, fw::pi() / 2.0f);
+  fw::Vector steer = (rotation * curr_direction).normalized();
 
   // now, if the angle between steer and the goal is greater than 90,
   // we need to steer in the other direction.
-  steer = cml::dot(steer, goal_direction) < 0.0f ? steer * -1.0f : steer;
+  steer = fw::dot(steer, goal_direction) < 0.0f ? steer * -1.0f : steer;
 
   if (show_steering) {
     auto entity = entity_.lock();
@@ -232,10 +232,10 @@ fw::Vector MoveableComponent::steer(fw::Vector pos, fw::Vector curr_direction, f
   // direction, that means we'd be over-steering. rather than do that (and wobble), we'll
   // just start heading straight for the goal.
   fw::Vector old_direction = curr_direction;
-  fw::Vector rotated = cml::transform_vector(rotation, goal_direction).normalize();
+  fw::Vector rotated = (rotation * goal_direction).normalized();
 
-  float old_direction_dot = cml::dot(old_direction, rotated);
-  float new_direction_dot = cml::dot(new_direction, rotated);
+  float old_direction_dot = fw::dot(old_direction, rotated);
+  float new_direction_dot = fw::dot(new_direction, rotated);
   if ((old_direction_dot < 0 && new_direction_dot > 0) || (old_direction_dot > 0 && new_direction_dot < 0)) {
     return goal_direction;
   } else {

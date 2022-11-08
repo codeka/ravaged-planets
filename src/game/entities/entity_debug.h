@@ -1,7 +1,7 @@
 #pragma once
 
 #include <framework/color.h>
-#include <framework/vector.h>
+#include <framework/math.h>
 #include <framework/scenegraph.h>
 
 namespace fw {

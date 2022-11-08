@@ -15,10 +15,10 @@
 #include <framework/logging.h>
 #include <framework/particle_manager.h>
 #include <framework/particle_effect.h>
+#include <framework/math.h>
 #include <framework/misc.h>
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
-#include <framework/vector.h>
 
 namespace po = boost::program_options;
 
@@ -38,8 +38,8 @@ public:
 void update_effect_position() {
   fw::Vector pos;
   if (is_moving) {
-    fw::Matrix m = fw::rotate_axis_angle(fw::Vector(0, 1, 0), angle);
-    auto res = m * cml::vector4f(10.0f, 0, 0, 1);
+    fw::Quaternion q = fw::rotate_axis_angle(fw::Vector(0, 1, 0), angle);
+    auto res = q * fw::Vector4(10.0f, 0, 0, 1);
     pos = fw::Vector(res[0], res[1], res[2]);
   } else {
     pos = fw::Vector(0.0f, 0.0f, 0.0f);
@@ -70,12 +70,12 @@ bool restart_handler(fw::gui::Widget *wdgt) {
 
 bool pause_handler(fw::gui::Widget *wdgt) {
   fw::gui::Button *btn = dynamic_cast<fw::gui::Button *>(wdgt);
-  fw::Framework *Framework = fw::Framework::get_instance();
-  if (Framework->is_paused()) {
-    Framework->unpause();
+  fw::Framework *framework = fw::Framework::get_instance();
+  if (framework->is_paused()) {
+    framework->unpause();
     btn->set_text("Pause");
   } else {
-    Framework->pause();
+    framework->pause();
     btn->set_text("Unpause");
   }
 

@@ -1,3 +1,4 @@
+#include <game/screens/hud/build_window.h>
 
 #include <memory>
 
@@ -11,6 +12,7 @@
 #include <framework/gui/label.h>
 #include <framework/gui/window.h>
 #include <framework/logging.h>
+#include <framework/math.h>
 #include <framework/model.h>
 #include <framework/model_manager.h>
 #include <framework/model_node.h>
@@ -18,13 +20,11 @@
 #include <framework/scenegraph.h>
 #include <framework/texture.h>
 #include <framework/timer.h>
-#include <framework/vector.h>
 
 #include <game/entities/entity.h>
 #include <game/entities/entity_factory.h>
 #include <game/entities/builder_component.h>
 #include <game/entities/mesh_component.h>
-#include <game/screens/hud/build_window.h>
 #include <game/simulation/local_player.h>
 #include <game/simulation/simulation_thread.h>
 
@@ -116,7 +116,7 @@ void EntityIcon::render() {
   std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
   sg.add_light(Light);
 
-  model_node_->set_world_matrix(fw::rotate_axis_angle(fw::Vector(0, 1, 0), rotation_));
+  model_node_->set_world_matrix(fw::rotate_axis_angle(fw::Vector(0, 1, 0), rotation_).to_matrix());
   sg.add_node(model_node_);
 
   fw::render(sg, framebuffer_, false);

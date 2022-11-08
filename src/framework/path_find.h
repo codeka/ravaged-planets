@@ -1,6 +1,8 @@
 #pragma once
 
-#include <framework/vector.h>
+#include <vector>
+
+#include <framework/math.h>
 
 namespace fw {
 struct PathNode;

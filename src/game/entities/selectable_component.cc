@@ -1,13 +1,14 @@
+#include <game/entities/selectable_component.h>
 
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
 #include <framework/scenegraph.h>
-#include <framework/vector.h>
+#include <framework/math.h>
+
 #include <game/entities/entity.h>
 #include <game/entities/entity_factory.h>
-#include <game/entities/selectable_component.h>
 #include <game/entities/mesh_component.h>
 #include <game/entities/ownable_component.h>
 #include <game/entities/position_component.h>

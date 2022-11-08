@@ -99,9 +99,9 @@ fw::Matrix BitmapDrawable::get_uv_transform() {
 
 fw::Matrix BitmapDrawable::get_pos_transform(float x, float y, float width, float height) {
   fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
-  fw::Matrix transform;
-  cml::matrix_orthographic_RH(transform, 0.0f,
-      static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+  fw::Matrix transform =
+    fw::projection_orthographic(
+      0.0f, static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
   return fw::scale(fw::Vector(width, height, 0.0f)) * fw::translation(fw::Vector(x, y, 0)) * transform;
 }
 

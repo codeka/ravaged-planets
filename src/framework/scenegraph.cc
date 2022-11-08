@@ -151,17 +151,18 @@ void Node::render_shader(
 
   parameters->set_matrix("worldviewproj", worldviewproj);
   parameters->set_matrix("worldview", worldview);
+  parameters->set_matrix("proj", camera.projection);
 
   if (!is_rendering_shadow && shadowsrc) {
     fw::Matrix lightviewproj = transform * shadowsrc->get_camera().get_view_matrix();
     lightviewproj *= shadowsrc->get_camera().get_projection_matrix();
 
     fw::Matrix bias = fw::Matrix(
-        0.5, 0.0, 0.0, 0.0,
-        0.0, 0.5, 0.0, 0.0,
-        0.0, 0.0, 0.5, 0.0,
-        0.5, 0.5, 0.5, 1.0
-    );
+      mat4x4 {
+        { 0.5f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.5f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 0.5f, 0.0f },
+        { 0.5f, 0.5f, 0.5f, 1.0f }});
 
     parameters->set_matrix("lightviewproj", bias * lightviewproj);
     parameters->set_texture("shadow_map", shadowsrc->get_shadowmap()->get_depth_buffer());
@@ -333,8 +334,8 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       // TODO: recalculating this every time seems wasteful
       fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
       fw::Matrix pos_transform;
-      cml::matrix_orthographic_RH(pos_transform, 0.0f,
-          static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+      pos_transform = fw::projection_orthographic(
+          0.0f, static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
       pos_transform = fw::scale(fw::Vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::Vector(10.0f, 10.0f, 0)) * pos_transform;
       shader_params->set_matrix("pos_transform", pos_transform);
       shader_params->set_matrix("uv_transform", fw::identity());

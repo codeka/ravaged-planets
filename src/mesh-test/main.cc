@@ -15,12 +15,13 @@
 #include <framework/gui/window.h>
 #include <framework/logging.h>
 #include <framework/texture.h>
+#include <framework/math.h>
 #include <framework/model_manager.h>
 #include <framework/model.h>
+#include <framework/model_node.h>
 #include <framework/misc.h>
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
-#include <framework/vector.h>
 
 namespace po = boost::program_options;
 
@@ -32,10 +33,10 @@ class Application: public fw::BaseApp {
 public:
   bool initialize(fw::Framework *frmwrk);
   void update(float dt);
-  void render(fw::sg::Scenegraph &Scenegraph);
 };
 
 static std::shared_ptr<fw::Model> g_model;
+static std::shared_ptr<fw::ModelNode> g_model_node;
 static bool g_show_ground = false;
 static std::shared_ptr<fw::sg::Node> g_ground;
 static bool g_rotating = false;
@@ -55,6 +56,12 @@ bool ground_handler(fw::gui::Widget *wdgt) {
     g_show_ground = true;
     dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Hide ground");
   }
+
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [](fw::sg::Scenegraph& sg) {
+      g_ground->set_enabled(g_show_ground);
+    });
+
   return true;
 }
 
@@ -88,39 +95,42 @@ bool Application::initialize(fw::Framework *frmwrk) {
           << fw::gui::Widget::click(std::bind<bool>(rotate_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
-  fw::Settings stg;
-  g_model = frmwrk->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
-  g_ground = std::shared_ptr<fw::sg::Node>(new fw::sg::Node());
-  initialize_ground(g_ground);
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+    [frmwrk](fw::sg::Scenegraph& scenegraph) {
+      scenegraph.set_clear_color(fw::Color(1, 0, 0, 0));
+
+      // set up the properties of the sun that we'll use to Light and also cast shadows
+      fw::Vector sun(0.485f, 0.485f, 0.727f);
+      fw::Vector lookat(0, 0, 0);
+      std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(lookat + sun * 300.0f, sun * -1, true));
+      scenegraph.add_light(Light);
+
+      fw::Settings stg;
+      g_model = frmwrk->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
+      g_model_node = g_model->create_node(fw::Color::from_rgba(0xff0000ff));
+      scenegraph.add_node(g_model_node);
+      g_ground = std::shared_ptr<fw::sg::Node>(new fw::sg::Node());
+      g_ground->set_enabled(false);
+      scenegraph.add_node(g_ground);
+      initialize_ground(g_ground);
+    });
   return true;
 }
 
 void Application::update(float dt) {
   if (g_rotating) {
     g_rotate_angle += 3.14159f * dt;
+
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [](fw::sg::Scenegraph& sg) {
+        g_model_node->set_world_matrix(fw::rotate_axis_angle(fw::Vector(0, 1, 0), g_rotate_angle).to_matrix());
+      });
   }
-}
-
-void Application::render(fw::sg::Scenegraph &Scenegraph) {
-  Scenegraph.set_clear_color(fw::Color(1, 0, 1, 0));
-
-  // set up the properties of the sun that we'll use to Light and also cast shadows
-  fw::Vector sun(0.485f, 0.485f, 0.727f);
-  fw::Vector lookat(0, 0, 0);
-  std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(lookat + sun * 300.0f, sun * -1, true));
-  Scenegraph.add_light(Light);
-
-  if (g_show_ground) {
-    Scenegraph.add_node(g_ground);
-  }
-
-//  g_model->set_color(fw::Color(1.0f, 1.0f, 0.0f, 0.0f));
-//  g_model->render(Scenegraph, fw::rotate_axis_angle(fw::Vector(0, 1, 0), g_rotate_angle));
 }
 
 //-----------------------------------------------------------------------------
 
-void initialize_ground(std::shared_ptr<fw::sg::Node> Node) {
+void initialize_ground(std::shared_ptr<fw::sg::Node> node) {
   fw::vertex::xyz_n_uv vertices[] = {
       fw::vertex::xyz_n_uv(-100.0f, 0.0f, -100.0f,      0.0f, 1.0f, 0.0f,       0.0f,  0.0f),
       fw::vertex::xyz_n_uv(-100.0f, 0.0f,  100.0f,      0.0f, 1.0f, 0.0f,       0.0f,  8.0f),
@@ -143,12 +153,12 @@ void initialize_ground(std::shared_ptr<fw::sg::Node> Node) {
   std::shared_ptr<fw::ShaderParameters> params = Shader->create_parameters();
   params->set_texture("tex_sampler", texture);
 
-  Node->set_vertex_buffer(vb);
-  Node->set_index_buffer(ib);
-  Node->set_shader(Shader);
-  Node->set_shader_parameters(params);
-  Node->set_cast_shadows(false);
-  Node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
+  node->set_vertex_buffer(vb);
+  node->set_index_buffer(ib);
+  node->set_shader(Shader);
+  node->set_shader_parameters(params);
+  node->set_cast_shadows(false);
+  node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);
 }
 
 //-----------------------------------------------------------------------------

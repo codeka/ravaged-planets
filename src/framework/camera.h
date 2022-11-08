@@ -7,8 +7,8 @@
 
 #include <framework/exception.h>
 #include <framework/logging.h>
+#include <framework/math.h>
 #include <framework/graphics.h>
-#include <framework/vector.h>
 
 namespace fw {
 
@@ -20,10 +20,6 @@ struct CameraRenderState {
 // Note: All methods are expected to be called on the update thread, EXCEPT for get_render_state() which returns the
 // state of the camera for the render thread and is thread-safe.
 class Camera {
-private:
-  void set_look_at(Matrix &m, Vector const &eye, Vector const &look_at,
-      Vector const &up);
-
 protected:
   Matrix view_;
   Matrix projection_;
@@ -56,7 +52,6 @@ public:
   // this signal is fired when the camera has moved or rotated, etc
   boost::signals2::signal<void()> sig_updated;
 
-  void set_projection_matrix(float fov, float aspect, float near_plane, float far_plane);
   virtual void update(float dt);
   virtual void set_ground_height(float height);
   virtual float get_ground_height() const;

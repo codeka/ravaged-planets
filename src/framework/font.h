@@ -8,8 +8,8 @@
 
 #include <framework/bitmap.h>
 #include <framework/color.h>
+#include <framework/math.h>
 #include <framework/texture.h>
-#include <framework/vector.h>
 
 /* Cut'n'pasted from the freetype.h header so we don't have to include that whole thing. */
 typedef struct FT_LibraryRec_ *FT_Library;

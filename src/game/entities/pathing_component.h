@@ -2,8 +2,9 @@
 
 #include <mutex>
 
+#include <framework/math.h>
+
 #include <game/entities/entity.h>
-#include <framework/vector.h>
 
 namespace ent {
 class MoveableComponent;

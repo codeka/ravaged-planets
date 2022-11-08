@@ -2,7 +2,7 @@
 
 #include <sstream>
 #include <framework/color.h>
-#include <framework/vector.h>
+#include <framework/math.h>
 
 namespace fw::net {
 
@@ -117,12 +117,12 @@ inline packet_buffer &operator >>(packet_buffer &lhs, size_t &rhs) {
 #endif
 
 inline PacketBuffer &operator <<(PacketBuffer &lhs, fw::Vector const &rhs) {
-  lhs.add_bytes(reinterpret_cast<char const *>(rhs.data()), 0, sizeof(float) * 3);
+  lhs.add_bytes(reinterpret_cast<char const *>(rhs.v), 0, sizeof(float) * 3);
   return lhs;
 }
 
 inline PacketBuffer &operator >>(PacketBuffer &lhs, fw::Vector &rhs) {
-  lhs.get_bytes(reinterpret_cast<char *>(rhs.data()), 0, sizeof(float) * 3);
+  lhs.get_bytes(reinterpret_cast<char *>(rhs.v), 0, sizeof(float) * 3);
   return lhs;
 }
 

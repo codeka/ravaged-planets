@@ -39,8 +39,10 @@ void ModelWriter::write(std::string const &filename, Model &mdl) {
 void add_node(Node *pb_node, std::shared_ptr<ModelNode> node) {
   pb_node->set_mesh_index(node->mesh_index);
   pb_node->set_name(node->node_name);
-  for (int i = 0; i < 16; i++) {
-    pb_node->mutable_transformation()->Add(node->transform.data()[i]);
+  for (int col = 0; col < 4; col++) {
+    for (int row = 0; row < 4; row++) {
+      pb_node->mutable_transformation()->Add(node->transform.elem(row, col));
+    }
   }
 
   for (int i = 0; i < node->get_num_children(); i++) {

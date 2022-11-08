@@ -81,11 +81,11 @@ fw::Vector calculate_normal(float *heights, int width, int length, int x, int z)
   fw::Vector d = west - center;
 
   fw::Vector normal(0, 0, 0);
-  normal += cml::cross(a, b);
-  normal += cml::cross(b, c);
-  normal += cml::cross(c, d);
-  normal += cml::cross(d, a);
-  return normal.normalize();
+  normal += fw::cross(a, b);
+  normal += fw::cross(b, c);
+  normal += fw::cross(c, d);
+  normal += fw::cross(d, a);
+  return normal.normalized();
 }
 
 int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int width, int length,
@@ -124,7 +124,7 @@ void build_collision_data(std::vector<bool> &vertices, float *heights,  int widt
   for (int z = 0; z < length; z++) {
     for (int x = 0; x < width; x++) {
       fw::Vector normal = calculate_normal(heights, width, length, x, z);
-      float dot = cml::dot(up, normal);
+      float dot = fw::dot(up, normal);
 
       // todo: we should store the actual dot product, since it could be useful in other places.
       vertices[x + (z * width)] = (dot > 0.85f);

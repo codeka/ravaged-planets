@@ -4,9 +4,9 @@
 #include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
-#include <framework/logging.h>
 #include <framework/input.h>
-#include <framework/vector.h>
+#include <framework/logging.h>
+#include <framework/math.h>
 #include <framework/timer.h>
 
 using namespace std::placeholders;
@@ -25,7 +25,7 @@ Camera::Camera() {
   forward_ = Vector(0, 0, 1);
 
   view_ = fw::identity();
-  set_projection_matrix(cml::constantsf::pi() / 3.0f, 1.3f, 1.0f, 500.0f);
+  projection_ = fw::projection_perspective(fw::pi() / 3.0f, 1.3f, 1.0f, 500.0f);
 }
 
 Camera::~Camera() {
@@ -43,10 +43,10 @@ float Camera::get_ground_height() const {
 void Camera::update(float dt) {
   // cap speed to max speed
   if (velocity_.length() > max_speed_) {
-    velocity_ = velocity_.normalize() * max_speed_;
+    velocity_ = velocity_.normalized() * max_speed_;
   }
 
-  if (velocity_.length_squared() > 0.0f) {
+  if (velocity_.length() > 0.0f) {
     updated_ = true;
   }
 
@@ -57,10 +57,10 @@ void Camera::update(float dt) {
     fw::Vector lookat = position_ + forward_;
 
     // calculate the new view matrix
-    set_look_at(view_, position_, lookat, Vector(0, 1, 0));
+    view_ = fw::look_at(position_, lookat, Vector(0, 1, 0));
 
     // get the camera axes from the view matrix
-    cml::matrix_get_transposed_basis_vectors(view_, right_, up_, forward_);
+    view_.decompose(forward_, up_, right_);
     forward_ *= -1.0f; // TODO: why do these have to be multipled by -1?
     right_ *= -1.0f;
 
@@ -79,18 +79,10 @@ void Camera::update(float dt) {
 }
 
 Vector Camera::unproject(float x, float y) {
-  cml::vector4f vec(x, y, 0.3f, 1.0f);
-
-  Matrix m = projection_;
-  m.inverse();
-  vec = cml::transform_vector_4D(m, vec);
-
-  m = view_;
-  m.inverse();
-  vec = cml::transform_vector_4D(m, vec);
-
-  float invw = 1.0f / vec[3];
-  return Vector(vec[0] * invw, vec[1] * invw, vec[2] * invw);
+  fw::Vector4 vec(x, y, 0.3f, 1.0f);
+  vec = projection_.inverse() * vec;
+  vec = view_.inverse() * vec;
+  return vec;
 }
 
 CameraRenderState Camera::get_render_state() {
@@ -108,13 +100,6 @@ void Camera::disable() {
     inp->unbind_key(token);
   }
   keybindings_.clear();
-}
-
-void Camera::set_projection_matrix(float fov, float aspect, float near_plane, float far_plane) {
-  cml::matrix_perspective_xfov_RH(projection_, fov, aspect, near_plane, far_plane, cml::z_clip_neg_one);
-}
-void Camera::set_look_at(Matrix &m, Vector const &eye, Vector const &look_at, Vector const &up) {
-  cml::matrix_look_at_RH(m, eye, look_at, up);
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -151,7 +136,7 @@ void FirstPersonCamera::move_forward(float units) {
     velocity_ += forward_ * units;
   } else {
     Vector move_vector(forward_[0], 0.0f, forward_[2]);
-    move_vector = move_vector.normalize() * units;
+    move_vector = move_vector.normalized() * units;
     velocity_ += move_vector;
   }
 }
@@ -170,9 +155,9 @@ void FirstPersonCamera::yaw(float radians) {
   if (radians == 0.0f)
     return;
 
-  Matrix rotation = fw::rotate_axis_angle(up_, radians);
-  right_ = cml::transform_vector(rotation, right_);
-  forward_ = cml::transform_vector(rotation, forward_);
+  Quaternion rotation = fw::rotate_axis_angle(up_, radians);
+  right_ = rotation * right_;
+  forward_ = rotation * forward_;
 
   updated_ = true;
 }
@@ -181,9 +166,9 @@ void FirstPersonCamera::pitch(float radians) {
   if (radians == 0.0f)
     return;
 
-  Matrix rotation = fw::rotate_axis_angle(right_, radians);
-  right_ = cml::transform_vector(rotation, right_);
-  forward_ = cml::transform_vector(rotation, forward_);
+  Quaternion rotation = fw::rotate_axis_angle(right_, radians);
+  right_ = rotation * right_;
+  forward_ = rotation * forward_;
 
   updated_ = true;
 }
@@ -192,9 +177,9 @@ void FirstPersonCamera::roll(float radians) {
   if (radians == 0.0f)
     return;
 
-  Matrix rotation = fw::rotate_axis_angle(forward_, radians);
-  right_ = cml::transform_vector(rotation, right_);
-  up_ = cml::transform_vector(rotation, up_);
+  Quaternion rotation = fw::rotate_axis_angle(forward_, radians);
+  right_ = rotation * right_;
+  up_ = rotation * up_;
 
   updated_ = true;
 }
@@ -210,7 +195,7 @@ LookAtCamera::~LookAtCamera() {
 }
 
 void LookAtCamera::update(float dt) {
-  forward_ = (center_ - position_).normalize();
+  forward_ = (center_ - position_).normalized();
 
   Camera::update(dt);
 }
@@ -224,7 +209,7 @@ void LookAtCamera::set_location(Vector const &location) {
 
 void LookAtCamera::set_distance(float distance) {
   fw::Vector dir(position_ - center_);
-  position_ = center_ + (dir.normalize() * distance);
+  position_ = center_ + (dir.normalized() * distance);
   updated_ = true;
 }
 
@@ -280,7 +265,7 @@ void TopDownCamera::update(float dt) {
     fw::Vector dir = zoom_to_ - start;
     fw::Vector new_location = start + (dir * dt * 40.0f);
 
-    if ((new_location - start).length_squared() > dir.length_squared() || dir.length_squared() < 0.5f) {
+    if ((new_location - start).length() > dir.length() || dir.length() < 0.5f) {
       // if the new location is further away then we were before, it
       // means we've over-shot it so just set our location to the final
       // location and we're done zooming.
@@ -408,14 +393,14 @@ void TopDownCamera::rotate(float around_up, float around_right) {
 
   position_ -= center_;
   if (around_up != 0.0f) {
-    Matrix rotation = fw::rotate_axis_angle(Vector(0, 1, 0), around_up);
-    position_ = cml::transform_vector(rotation, position_);
+    Quaternion rotation = fw::rotate_axis_angle(Vector(0, 1, 0), around_up);
+    position_ = rotation * position_;
     updated_ = true;
   }
 
   if (around_right != 0.0f && allow_around_right) {
-    Matrix rotation = fw::rotate_axis_angle(right_, around_right);
-    position_ = cml::transform_vector(rotation, position_);
+    Quaternion rotation = fw::rotate_axis_angle(right_, around_right);
+    position_ = rotation * position_;
     updated_ = true;
   }
   position_ += center_;
@@ -425,7 +410,7 @@ void TopDownCamera::move(float forward, float right) {
   if (forward == 0.0f && right == 0.0f)
     return;
 
-  Vector fwd = Vector(forward_[0], 0, forward_[2]).normalize();
+  Vector fwd = Vector(forward_[0], 0, forward_[2]).normalized();
 
   Vector movement = (right_ * right) + (fwd * forward);
   position_ += movement;

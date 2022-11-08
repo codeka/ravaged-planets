@@ -3,7 +3,8 @@
 #include <list>
 #include <memory>
 
-#include <framework/vector.h>
+#include <framework/math.h>
+
 #include <game/entities/entity.h>
 
 namespace ent {

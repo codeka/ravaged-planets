@@ -2,10 +2,10 @@
 
 #include <framework/color.h>
 #include <framework/graphics.h>
-#include <framework/texture.h>
+#include <framework/math.h>
 #include <framework/shader.h>
 #include <framework/scenegraph.h>
-#include <framework/vector.h>
+#include <framework/texture.h>
 
 namespace fw {
 class ModelManager;

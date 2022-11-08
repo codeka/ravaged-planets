@@ -242,9 +242,9 @@ void FontFace::draw_string(int x, int y, std::basic_string<uint32_t> const &str,
 
   // TODO: recalculating this every time seems wasteful
   fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
-  fw::Matrix pos_transform;
-  cml::matrix_orthographic_RH(pos_transform, 0.0f,
-      static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f, cml::z_clip_neg_one);
+  fw::Matrix pos_transform =
+    fw::projection_orthographic(
+      0.0f, static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
   pos_transform = fw::translation(x, y, 0.0f) * pos_transform;
 
   data->shader_params->set_matrix("pos_transform", pos_transform);

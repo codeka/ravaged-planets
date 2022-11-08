@@ -59,7 +59,7 @@ void Particle::initialize(std::shared_ptr<ParticleEmitterConfig> const& config) 
     state.speed = (*it).speed.get_value();
     state.gravity = (*it).gravity.get_value();
     state.direction = (*it).direction.get_value();
-    if (state.direction.length_squared() > 0.001f) {
+    if (state.direction.length() > 0.001f) {
       state.direction.normalize();
     }
     states_.push_back(state);
@@ -73,7 +73,7 @@ void Particle::initialize(std::shared_ptr<ParticleEmitterConfig> const& config) 
     rect = config->billboard.areas[index];
   }
 
-  direction = fw::Vector(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f).normalize();
+  direction = fw::Vector(fw::random() - 0.5f, fw::random() - 0.5f, fw::random() - 0.5f).normalized();
   pos = config->position.get_point();
 }
 
@@ -116,7 +116,7 @@ bool Particle::update(float dt) {
 
   // adjust the Particle's direction based on it's gravity factor
   fw::Vector gravity = fw::Vector(0, -1, 0) * (fw::lerp(prev->gravity, next->gravity, t));
-  if (prev->direction.length_squared() < 0.001f || next->direction.length_squared() < 0.001f) {
+  if (prev->direction.length() < 0.001f || next->direction.length() < 0.001f) {
     direction += gravity * dt;
   } else {
     direction = fw::lerp(prev->direction, next->direction, t);

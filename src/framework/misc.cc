@@ -5,10 +5,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
-#include <cml/cml.h>
-
+#include <framework/math.h>
 #include <framework/misc.h>
-#include <framework/vector.h>
 
 namespace fs = boost::filesystem;
 
@@ -61,7 +59,7 @@ float angle_between(Vector const &a, Vector const &b) {
   Vector lhs = a;
   Vector rhs = b;
 
-  float cosangle = cml::dot(lhs.normalize(), rhs.normalize());
+  float cosangle = dot(lhs.normalized(), rhs.normalized());
   return acos(cosangle);
 }
 
@@ -70,8 +68,8 @@ fw::Vector point_plane_intersect(Vector const &plane_pt,
   // see: Http://local.wasp.uwa.edu.au/~pbourke/geometry/planeline/
   Vector end = p_start + p_dir;
 
-  float numerator = cml::dot(plane_normal, plane_pt - p_start);
-  float denominator = cml::dot(plane_normal, end - p_start);
+  float numerator = dot(plane_normal, plane_pt - p_start);
+  float denominator = dot(plane_normal, end - p_start);
   float u = numerator / denominator;
   return p_start + (p_dir * u);
 }
@@ -99,7 +97,7 @@ fw::Vector get_direction_to(fw::Vector const &from, fw::Vector const &to,
       fw::Vector another_to(to[0] + (x * wrap_x), to[1], to[2] + (z * wrap_z));
       fw::Vector another_dir = another_to - from;
 
-      if (another_dir.length_squared() < dir.length_squared())
+      if (another_dir.length() < dir.length())
         dir = another_dir;
     }
   }

@@ -1,3 +1,4 @@
+#include <game/world/terrain.h>
 
 #include <framework/graphics.h>
 #include <framework/misc.h>
@@ -7,10 +8,10 @@
 #include <framework/bitmap.h>
 #include <framework/texture.h>
 #include <framework/input.h>
-#include <framework/vector.h>
+#include <framework/math.h>
 #include <framework/scenegraph.h>
 #include <framework/shader.h>
-#include <game/world/terrain.h>
+
 #include <game/world/terrain_helper.h>
 
 namespace game {
@@ -138,7 +139,7 @@ void Terrain::update() {
       fw::constrain(old_loc[0], (float) width_),
       old_loc[1],
       fw::constrain(old_loc[2], (float) length_));
-  if ((old_loc - new_loc).length_squared() > 0.001f) {
+  if ((old_loc - new_loc).length() > 0.001f) {
     camera->set_location(new_loc);
   }
 
@@ -236,7 +237,7 @@ fw::Vector Terrain::get_camera_lookat() {
 
   fw::Vector center = camera->unproject(0.0f, 0.0f);
   fw::Vector start = camera->get_position();
-  fw::Vector direction = (center - start).normalize();
+  fw::Vector direction = (center - start).normalized();
 
   return get_cursor_location(start, direction);
 }
@@ -258,7 +259,7 @@ fw::Vector Terrain::get_cursor_location() {
   fw::Vector mvec = camera->unproject(-mx, my);
 
   fw::Vector start = camera->get_position();
-  fw::Vector direction = (mvec - start).normalize();
+  fw::Vector direction = (mvec - start).normalized();
 
   return get_cursor_location(start, direction);
 }
@@ -303,8 +304,8 @@ fw::Vector Terrain::get_cursor_location(fw::Vector const &start, fw::Vector cons
         fw::Vector p12(x1, get_vertex_height(static_cast<int>(x1), static_cast<int>(z2)), z2);
         fw::Vector p22(x2, get_vertex_height(static_cast<int>(x2), static_cast<int>(z2)), z2);
 
-        fw::Vector n1 = cml::cross(p12 - p11, p21 - p11);
-        fw::Vector n2 = cml::cross(p21 - p22, p12 - p22);
+        fw::Vector n1 = fw::cross(p12 - p11, p21 - p11);
+        fw::Vector n2 = fw::cross(p21 - p22, p12 - p22);
 
         // The line intersects the plane defined by the first triangle at i1. If that's within this triangle's "x,z"
         // coordinates, this is the intersection point!

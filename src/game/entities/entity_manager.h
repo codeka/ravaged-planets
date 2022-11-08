@@ -3,7 +3,8 @@
 #include <memory>
 
 #include <framework/scenegraph.h>
-#include <framework/vector.h>
+#include <framework/math.h>
+
 #include <game/entities/entity.h>
 
 namespace fw {
@@ -15,10 +16,8 @@ class Entity;
 class EntityDebug;
 class PatchManager;
 
-/**
- * Manages all the entities in the game, and contains various "indexes" of entities so that we
- * can access them efficiently.
- */
+// Manages all the entities in the game, and contains various "indexes" of entities so that we
+// can access them efficiently.
 class EntityManager {
 private:
   std::list<std::shared_ptr<Entity>> all_entities_;

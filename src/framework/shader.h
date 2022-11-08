@@ -8,8 +8,8 @@
 #include <framework/color.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
+#include <framework/math.h>
 #include <framework/texture.h>
-#include <framework/vector.h>
 
 namespace fw {
 class Shader;

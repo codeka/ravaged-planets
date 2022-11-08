@@ -146,7 +146,7 @@ std::weak_ptr<Entity> EntityManager::get_entity_at_cursor() {
   fw::Vector mvec = camera->unproject(-mx, my);
 
   fw::Vector start = camera->get_position();
-  fw::Vector direction = (mvec - start).normalize();
+  fw::Vector direction = (mvec - start).normalized();
 
   return get_entity(start, direction);
 }

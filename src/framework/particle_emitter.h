@@ -3,8 +3,8 @@
 #include <list>
 #include <memory>
 
+#include <framework/math.h>
 #include <framework/object_pool.h>
-#include <framework/vector.h>
 #include <framework/xml.h>
 
 namespace fw {

@@ -1,7 +1,7 @@
 
 #include <framework/framework.h>
 #include <framework/graphics.h>
-#include <framework/vector.h>
+#include <framework/math.h>
 #include <framework/xml.h>
 #include <framework/logging.h>
 #include <framework/timer.h>

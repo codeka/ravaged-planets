@@ -172,11 +172,11 @@ void EntityDebugView::add_line(fw::Vector const &from, fw::Vector const &to, fw:
 void EntityDebugView::add_circle(fw::Vector const &center, float radius, fw::Color const &col) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately. At least 8, though.
-  const int num_segments = std::max(8, (int) (2.0f * M_PI * radius));
+  const int num_segments = std::max(8, (int) (2.0f * fw::pi() * radius));
 
   fw::Vector last_point;
   for (int i = 0; i < num_segments; i++) {
-    float factor = 2.0f * (float) M_PI * (i / (float) num_segments);
+    float factor = 2.0f * fw::pi() * (i / (float)num_segments);
 
     fw::Vector point(center[0] + radius * sin(factor), center[1], center[2] + radius * cos(factor));
     if (i > 0) {

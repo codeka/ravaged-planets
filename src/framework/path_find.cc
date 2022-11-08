@@ -1,11 +1,12 @@
+#include <framework/path_find.h>
+
 #include <set>
 
-#include <framework/path_find.h>
-#include <framework/timer.h>
-#include <framework/vector.h>
 #include <framework/exception.h>
 #include <framework/logging.h>
+#include <framework/math.h>
 #include <framework/misc.h>
+#include <framework/timer.h>
 
 namespace fw {
 
@@ -206,7 +207,7 @@ void PathFind::simplify_path(std::vector<fw::Vector> const &full_path, std::vect
     }
   }
 
-  if (new_path[new_path.size() - 1] != full_path[full_path.size() - 1]) {
+  if ((new_path[new_path.size() - 1] - full_path[full_path.size() - 1]).length() > 0.01f) {
     new_path.push_back(full_path[full_path.size() - 1]);
   }
 }

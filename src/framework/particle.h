@@ -4,9 +4,9 @@
 #include <vector>
 
 #include <framework/color.h>
+#include <framework/math.h>
 #include <framework/misc.h>
 #include <framework/texture.h>
-#include <framework/vector.h>
 
 namespace fw {
 class ParticleEmitterConfig;
