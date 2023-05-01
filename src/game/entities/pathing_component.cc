@@ -53,7 +53,7 @@ void PathingComponent::update(float dt) {
   // follow the path... todo: this can be done SOOOOOO much better!
   while (is_following_path()) {
     fw::Vector goal = path_[curr_goal_node_];
-    fw::Vector dir = position_->get_direction_to(goal);
+    fw::Vector dir = position_->get_direction_to(goal, /*ignore_height=*/true);
     dir[1] = 0.0f; // ignore height component
     if (dir.length() <= 1.0f) {
       // if we're "at" this Node, increment the _curr_goal_node and try again
@@ -70,7 +70,7 @@ void PathingComponent::update(float dt) {
     for (int i = 0; i < static_cast<int>(path_.size()) - 1; i++) {
       const fw::Vector& from = path_[i];
       const fw::Vector& to = path_[i + 1];
-      entity->get_debug_view().add_line(from, to, fw::Color(0, 1, 1));
+      entity->get_debug_view().add_line(from, to, fw::Color(0, 1, 1), /*offset_terrain_height=*/ true);
     }
   }
 }

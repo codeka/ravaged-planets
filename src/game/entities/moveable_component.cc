@@ -54,7 +54,7 @@ void MoveableComponent::set_goal(fw::Vector goal, bool skip_pathing /*= false*/)
   // make sure we constraining the goal to the bounds of the map
   goal_ = fw::Vector(
       fw::constrain(goal[0], world_width, 0.0f),
-      goal[1],
+      0.0f,
       fw::constrain(goal[2], world_length, 0.0f));
   if (skip_pathing || pathing_component_ == nullptr) {
     set_intermediate_goal(goal_);
@@ -75,7 +75,7 @@ void MoveableComponent::set_intermediate_goal(fw::Vector goal) {
   // make sure we constraining the goal to the bounds of the map
   intermediate_goal_ = fw::Vector(
       fw::constrain(goal[0], world_width, 0.0f),
-      goal[1],
+      0.0f,
       fw::constrain(goal[2], world_length, 0.0f));
   is_moving_ = true;
 }
@@ -93,8 +93,9 @@ void MoveableComponent::update(float dt) {
   }
 
   fw::Vector pos = position_component_->get_position();
+  pos[1] = 0.0f; // ignore terrain height.
   fw::Vector goal = intermediate_goal_;
-  fw::Vector dir = position_component_->get_direction_to(goal);
+  fw::Vector dir = position_component_->get_direction_to(goal, /*ignore_height=*/true);
   float distance = dir.length();
   if (distance < 0.1f) {
     // we're close enough to the goal, so just stop!
@@ -103,7 +104,7 @@ void MoveableComponent::update(float dt) {
   }
 
   std::shared_ptr<Entity> entity(entity_);
-  bool show_steering = (entity->has_debug_view() && (entity->get_debug_flags() & kDebugShowSteering) != 0);
+  const bool show_steering = (entity->has_debug_view() && (entity->get_debug_flags() & kDebugShowSteering) != 0);
 
   // if we're avoiding obstacles, we'll need to figure out what is the closest Entity to us
   if (avoid_collisions_) {
@@ -136,7 +137,7 @@ void MoveableComponent::update(float dt) {
           // temporarily adjust the "goal" so as to avoid the obstacle
           fw::Vector up = fw::cross(position_component_->get_direction(), obstacle_dir);
           if (up.length() < 0.01f) {
-            // if they're *directly* in front of us, just choose a Random direction, left or right. we'll choose... left
+            // if they're *directly* in front of us, just choose a random direction, left or right. we'll choose.. left
             up = fw::Vector(0, 1, 0);
           }
           fw::Vector avoid_dir = fw::cross(position_component_->get_direction().normalized(), up.normalized());
@@ -159,14 +160,14 @@ void MoveableComponent::update(float dt) {
   float speed = speed_;
   float turn_speed = turn_speed_;
 
-  // adjust the speed and turn speed so that we slow down and turn faster when we get close
-  // (gives us a smaller turning circle, to ensure we don't overshoot the target)
+  // adjust the speed and turn speed so that we slow down and turn faster when we get close (gives us a smaller
+  // turning circle, to ensure we don't overshoot the target)
   float turn_radius = 1.0f / turn_speed_;
   float scale_factor = distance / (turn_radius / 0.25f);
 
   if (show_steering) {
     // a line from us to the goal
-    entity->get_debug_view().add_line(pos, goal, fw::Color(0, 1, 0));
+    entity->get_debug_view().add_line(pos, goal, fw::Color(0, 1, 0), /*offset_terrain_height=*/true);
   }
 
   if (scale_factor < 1.0f) {
@@ -200,7 +201,7 @@ fw::Vector MoveableComponent::steer(fw::Vector pos, fw::Vector curr_direction, f
   }
 
   // so, to work out the steering factor, we start off by rotating the direction vector clockwise 90 degrees...
-  fw::Vector up = fw::cross(curr_direction, goal_direction);
+  fw::Vector up = fw::cross(curr_direction, goal_direction).normalized();
   fw::Quaternion rotation = fw::rotate_axis_angle(up, fw::pi() / 2.0f);
   fw::Vector steer = (rotation * curr_direction).normalized();
 

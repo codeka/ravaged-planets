@@ -163,38 +163,12 @@ public:
   }
 
   static inline Matrix from_basis(Vector& forward, Vector& up, Vector& right) {
- //   mat4x4 m = {
- //     { right[0], up[0], forward[0], 0.0f },
- //     { right[1], up[1], forward[1], 0.0f },
- //     { right[2], up[2], forward[2], 0.0f },
- //     { 0.0f, 0.0f, 0.0f, 1.0f }};
-
-//      mat4x4 m = {
-//      { right[0], forward[0], up[0], 0.0f },
-//      { right[1], forward[1], up[1], 0.0f },
-//      { right[2], forward[2], up[2], 0.0f },
- //     { 0.0f, 0.0f, 0.0f, 1.0f }};
-//    mat4x4 m = {
-//  { forward[0], up[0], right[0], 0.0f },
-//  { forward[1], up[1], right[1], 0.0f },
-//  { forward[2], up[2], right[2], 0.0f },
-//  { 0.0f, 0.0f, 0.0f, 1.0f } };
+    // TODO: pretty sure this is wrong
     mat4x4 m = {
       { forward[0], right[0], up[0], 0.0f },
       { forward[1], right[1], up[1], 0.0f },
       { forward[2], right[2], up[2], 0.0f },
       { 0.0f, 0.0f, 0.0f, 1.0f } };
-
-//    mat4x4 m = {
-//      { forward[0], forward[1], forward[2], 0.0f },
-//      { up[0], up[1], up[2], 0.0f },
-//      { right[0], right[1], right[2], 0.0f },
-//      { 0.0f, 0.0f, 0.0f, 1.0f }};
-//    mat4x4 m = {
-//      { right[0], right[1], right[2], 0.0f },
-//      { forward[0], forward[1], forward[2], 0.0f },
-//      { up[0], up[1], up[2], 0.0f },
-//      { 0.0f, 0.0f, 0.0f, 1.0f }};
     return Matrix(m);
   }
 
@@ -261,7 +235,7 @@ inline Vector cross(const Vector& left, const Vector& right) {
 }
 
 inline Quaternion rotate(const Vector& from, const Vector& to) {
-  return Quaternion(cross(from, to), dot(from.normalized(), to.normalized()));
+  return Quaternion(cross(from.normalized(), to.normalized()), dot(from.normalized(), to.normalized()));
 }
 
 inline Quaternion rotate_axis_angle(const Vector& axis, float angle) {

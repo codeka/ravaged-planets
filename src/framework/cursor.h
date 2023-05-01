@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <string>
 
 typedef struct SDL_Cursor SDL_Cursor;
 

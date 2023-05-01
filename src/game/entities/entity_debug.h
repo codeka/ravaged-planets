@@ -1,15 +1,11 @@
 #pragma once
 
 #include <framework/color.h>
+#include <framework/gui/window.h>
 #include <framework/math.h>
 #include <framework/scenegraph.h>
 
-namespace fw {
-namespace gui {
-class Window;
-class Widget;
-}
-}
+#include <game/world/terrain.h>
 
 namespace ent {
 class Entity;
@@ -63,6 +59,7 @@ private:
   };
   std::vector<Line> lines_;
   MeshComponent* mesh_component_;
+  game::Terrain* terrain_;
 
   // The scenegraph node we are displaying. Only access this on the render thread.
   std::shared_ptr<fw::sg::Node> sg_node_;
@@ -72,7 +69,7 @@ public:
   ~EntityDebugView();
 
   void add_line(fw::Vector const &from, fw::Vector const &to,
-      fw::Color const &col);
+      fw::Color const &col, bool offset_terrain_height = false);
   void add_circle(fw::Vector const &center, float radius,
       fw::Color const &col);
 

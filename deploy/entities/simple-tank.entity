@@ -6,7 +6,7 @@ Entity = {
     Pathing = {},
     MinimapVisible = {},
     Moveable = {
-      TurnRadius = 0.15
+      TurnRadius = 5.15
     },
     Buildable = {
       BuildGroup = "vehicles",

@@ -122,15 +122,19 @@ fw::Vector PositionComponent::get_direction() const {
 
 fw::Matrix PositionComponent::get_transform() const {
   fw::Matrix m = fw::identity();
-  m *= fw::rotate(fw::Vector(0, 0, 1), dir_);
-  m *= fw::rotate(fw::Vector(0, 1, 0), up_);
+  
+  m *= fw::rotate(fw::Vector(0, 0, 1), dir_).to_matrix();
+ // m = fw::rotate(fw::Vector(0, 1, 0), up_).to_matrix() * m;
   m *= fw::translation(pos_);
 
   return m;
 }
 
-fw::Vector PositionComponent::get_direction_to(fw::Vector const &point) const {
+fw::Vector PositionComponent::get_direction_to(fw::Vector const &point, bool ignore_height /*= false*/) const {
   fw::Vector dir = point - pos_;
+  if (ignore_height) {
+    dir[1] = 0.0f;
+  }
 
   std::shared_ptr<ent::Entity> entity(entity_);
   float width = entity->get_manager()->get_patch_manager()->get_world_width();
@@ -139,6 +143,9 @@ fw::Vector PositionComponent::get_direction_to(fw::Vector const &point) const {
     for (int x = -1; x <= 1; x++) {
       fw::Vector another_point(point[0] + (x * width), point[1], point[2] + (z * length));
       fw::Vector another_dir = another_point - pos_;
+      if (ignore_height) {
+        another_dir[1] = 0.0f;
+      }
 
       if (another_dir.length() < dir.length())
         dir = another_dir;
@@ -148,10 +155,10 @@ fw::Vector PositionComponent::get_direction_to(fw::Vector const &point) const {
   return dir;
 }
 
-fw::Vector PositionComponent::get_direction_to(std::shared_ptr<Entity> entity) const {
+fw::Vector PositionComponent::get_direction_to(std::shared_ptr<Entity> entity, bool ignore_height /*= false*/) const {
   PositionComponent *their_position = entity->get_component<PositionComponent>();
   if (their_position != nullptr)
-    return get_direction_to(their_position->get_position());
+    return get_direction_to(their_position->get_position(), ignore_height);
 
   return fw::Vector(0, 0, 0);
 }

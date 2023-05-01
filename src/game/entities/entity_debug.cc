@@ -149,6 +149,7 @@ bool EntityDebug::on_show_path_changed(Widget* w) {
 
 EntityDebugView::EntityDebugView(Entity* entity) {
   mesh_component_ = entity->get_component<MeshComponent>();
+  terrain_ = game::World::get_instance()->get_terrain();
 }
 
 EntityDebugView::~EntityDebugView() {
@@ -160,11 +161,17 @@ EntityDebugView::~EntityDebugView() {
   }
 }
 
-void EntityDebugView::add_line(fw::Vector const &from, fw::Vector const &to, fw::Color const &col) {
+void EntityDebugView::add_line(fw::Vector const &from, fw::Vector const &to, fw::Color const &col,
+                               bool offset_terrain_height /*= false*/) {
   Line l;
   l.from = from;
   l.to = to;
   l.col = col;
+
+  if (offset_terrain_height) {
+    l.from[1] += terrain_->get_height(l.from[0], l.from[2]);
+    l.to[1] += terrain_->get_height(l.to[0], l.to[1]);
+  }
 
   lines_.push_back(l);
 }

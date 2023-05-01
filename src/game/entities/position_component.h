@@ -132,10 +132,10 @@ public:
     return patch_;
   }
 
-  // gets the direction to the given point/Entity, taking into account the fact
-  // that it might be quicker to wrap around the edges of the map
-  fw::Vector get_direction_to(fw::Vector const &point) const;
-  fw::Vector get_direction_to(std::shared_ptr<Entity> Entity) const;
+  // gets the direction to the given point/Entity, taking into account the fact that it might be quicker to wrap around
+  // the edges of the map. If ignore_height is true, we ignore the terrain height (basically set y to 0).
+  fw::Vector get_direction_to(fw::Vector const &point, bool ignore_height = false) const;
+  fw::Vector get_direction_to(std::shared_ptr<Entity> entity, bool ignore_height = false) const;
 
   // searches for the nearest Entity to us which matches the given predicate
   std::weak_ptr<Entity> get_nearest_entity(

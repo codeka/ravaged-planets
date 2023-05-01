@@ -7,13 +7,14 @@
 namespace fw {
 struct PathNode;
 
-// Class for finding a path between point "A" and point "B" in a grid.
+// Class for finding a path between point "A" and point "B" in a grid. This class is not thread safe, you should only
+// attempt to find one path at a time on a single thread.
 class PathFind {
 private:
-  int _width;
-  int _length;
-  PathNode *_nodes;
-  int _run_no;
+  int width_;
+  int length_;
+  PathNode *nodes_;
+  int run_no_;
 
   PathNode *get_node(fw::Vector const &loc) const;
   bool is_passable(fw::Vector const &start, fw::Vector const &end) const;
@@ -38,7 +39,7 @@ public:
   virtual void simplify_path(std::vector<fw::Vector> const &full_path, std::vector<fw::Vector> &new_path);
 };
 
-// This specialization of PathFfind adds some timing methods and it also keeps the final Node structure around
+// This specialization of PathFind adds some timing methods and it also keeps the final Node structure around
 // for visualization
 class TimedPathFind: public PathFind {
 public:
@@ -48,7 +49,7 @@ public:
   // the total time the last find() call took, in seconds.
   float total_time;
 
-  virtual bool find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end);
+  bool find(std::vector<fw::Vector> &path, fw::Vector const &start, fw::Vector const &end) override;
 };
 
 }

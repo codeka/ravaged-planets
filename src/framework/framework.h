@@ -3,6 +3,7 @@
 #include <functional>
 #include <list>
 #include <memory>
+#include <string>
 
 namespace fw {
 class Graphics;
