@@ -31,7 +31,6 @@ private:
   uint64_t session_id_;
   uint32_t user_id_;
   std::string user_name_;
-  std::string error_msg_;
 
   std::mutex mutex_;
 
@@ -94,11 +93,6 @@ public:
   }
   std::string get_user_name() const {
     return state_ == kLoggedIn ? user_name_ : "";
-  }
-
-  // if the state is session::in_error, this'll get the corresponding error message
-  std::string const &get_error_msg() const {
-    return error_msg_;
   }
 };
 

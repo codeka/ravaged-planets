@@ -63,6 +63,9 @@ target_link_libraries(framework SDL2::SDL2)
 target_link_libraries(framework ${OPENAL_LIBRARY})
 target_link_libraries(framework ${GLEW_LIBRARY})
 
+target_link_libraries(framework absl::status)
+target_link_libraries(framework absl::statusor)
+
 if(MSVC)
     # Set /EHsc so we can have proper unwind semantics in Visual C++
     target_compile_options(framework PUBLIC /EHsc)

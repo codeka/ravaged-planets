@@ -97,7 +97,6 @@ void Session::update() {
 
   session_id_ = curr_req_->get_session_id();
   user_id_ = curr_req_->get_user_id();
-  error_msg_ = curr_req_->get_error_msg();
 
   if (res == SessionRequest::kInError) {
     set_state(SessionState::kInError);

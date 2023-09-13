@@ -1,5 +1,6 @@
-#include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
+
+#include <absl/strings/numbers.h>
+#include <absl/strings/str_cat.h>
 
 #include <framework/logging.h>
 #include <framework/http.h>
@@ -29,7 +30,9 @@ void SessionRequest::begin(std::string base_url) {
 
 SessionRequest::UpdateResult SessionRequest::update() {
   if (post_->is_finished()) {
-    if (!parse_response()) {
+    const auto err = parse_response();
+    if (!err.ok()) {
+      fw::debug << "ERR: " << err.message() << std::endl;
       return SessionRequest::kInError;
     }
 
@@ -44,27 +47,22 @@ SessionRequest::UpdateResult SessionRequest::update() {
   return SessionRequest::kStillGoing;
 }
 
-bool SessionRequest::parse_response() {
-  if (post_->is_error()) {
-    fw::debug << boost::format("error communicating with server: %1%") % post_->get_error_msg() << std::endl;
-    error_msg_ = post_->get_error_msg();
-    return false;
+absl::Status SessionRequest::parse_response() {
+  auto xml = post_->get_xml_response();
+  if (!xml.ok()) {
+    return xml.status();
+  }
+  if (xml->get_value() == "error") {
+    return absl::InternalError(xml->get_attribute("msg"));
   }
 
-  fw::XmlElement xml = post_->get_xml_response();
-  if (xml.get_value() == "error") {
-    fw::debug << boost::format("error returned from server: %1%") % xml.get_attribute("msg") << std::endl;
-    error_msg_ = xml.get_attribute("msg");
-    return false;
-  }
+  fw::debug << xml->to_string() << std::endl;
 
-  fw::debug << xml.to_string() << std::endl;
-
-  return parse_response(xml);
+  return parse_response(*xml);
 }
 
-bool SessionRequest::parse_response(fw::XmlElement &) {
-  return true;
+absl::Status SessionRequest::parse_response(fw::XmlElement &) {
+  return absl::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -78,8 +76,8 @@ LoginSessionRequest::~LoginSessionRequest() {
 }
 
 void LoginSessionRequest::begin(std::string base_url) {
-  std::string url = (boost::format("Api/Session/New?name=%1%&password=%2%&listenPort=%3%") % _username % _password
-      % _listen_port).str();
+  std::string url =
+      absl::StrCat("Api/Session/New?name=", _username, "&password=", _password, "&listenPort=", _listen_port);
 
   fw::XmlElement xml(get_request_xml());
   post_ = fw::Http::perform(fw::Http::PUT, base_url + url);
@@ -89,21 +87,20 @@ void LoginSessionRequest::begin(std::string base_url) {
 }
 
 std::string LoginSessionRequest::get_description() {
-  return (boost::format("logging in (username: %1%)") % _username).str();
+  return absl::StrCat("logging in (username: ", _username, ")");
 }
 
-bool LoginSessionRequest::parse_response(fw::XmlElement &xml) {
+absl::Status LoginSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    fw::debug << boost::format("ERR: unexpected response from login request: %1%") % xml.get_value() << std::endl;
-    return false;
+    return absl::InvalidArgumentError(absl::StrCat("unexpected response from login request:", xml.get_value()));
   }
 
   session_id_ = boost::lexical_cast<uint64_t>(xml.get_attribute("sessionId"));
   user_id_ = boost::lexical_cast<uint32_t>(xml.get_attribute("userId"));
   Session::get_instance()->set_state(Session::kLoggedIn);
 
-  fw::debug << boost::format("login successful, session-id: %1%") % session_id_ << std::endl;
-  return true;
+  fw::debug << "login successful, session-id:" << session_id_ << std::endl;
+  return absl::OkStatus();
 }
 
 //------------------------------------------------------------------------
@@ -115,7 +112,7 @@ LogoutSessionRequest::~LogoutSessionRequest() {
 }
 
 void LogoutSessionRequest::begin(std::string base_url) {
-  std::string url = (boost::format("Api/Session/%1%") % session_id_).str();
+  std::string url = absl::StrCat("Api/Session/", session_id_);
 
   fw::XmlElement xml(get_request_xml());
   post_ = fw::Http::perform(fw::Http::DELETE, base_url + url);
@@ -129,16 +126,15 @@ std::string LogoutSessionRequest::get_description() {
   return "logging out";
 }
 
-bool LogoutSessionRequest::parse_response(fw::XmlElement &xml) {
+absl::Status LogoutSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    fw::debug << boost::format("ERR: unexpected response from logout request: %1%") % xml.get_value() << std::endl;
-    return false;
+    absl::InvalidArgumentError(absl::StrCat("unexpected response from logout request:", xml.get_value()));
   }
 
   Session::get_instance()->set_state(Session::kDisconnected);
 
   fw::debug << "logout successful" << std::endl;
-  return true;
+  return absl::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -150,7 +146,7 @@ CreateGameSessionRequest::~CreateGameSessionRequest() {
 }
 
 std::string CreateGameSessionRequest::get_request_xml() {
-  return (boost::format("<game sessionId=\"%1%\" />") % session_id_).str();
+  return absl::StrCat("<game sessionId=\"", session_id_, "\" />");
 }
 
 std::string CreateGameSessionRequest::get_url() {
@@ -161,24 +157,22 @@ std::string CreateGameSessionRequest::get_description() {
   return "registering new game with server";
 }
 
-bool CreateGameSessionRequest::parse_response(fw::XmlElement &xml) {
+absl::Status CreateGameSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    fw::debug << boost::format("ERR: unexpected response from \"join game\" request: %1%") % xml.get_value()
-        << std::endl;
-    return false;
+    return
+        absl::InvalidArgumentError(absl::StrCat("unexpected response from \"join game\" request: ", xml.get_value()));
   }
 
   if (!xml.is_attribute_defined("gameId")) {
-    fw::debug << "ERR: create game response did not include game identifier" << std::endl;
-    return false;
+    return absl::InvalidArgumentError("create game response did not include game identifier");
   }
 
   uint64_t game_id = boost::lexical_cast<uint64_t>(xml.get_attribute("gameId"));
-  fw::debug << boost::format("new game registered, identifier: %1%") % game_id << std::endl;
+  fw::debug << "new game registered, identifier: " << game_id << std::endl;
 
   // now let the simulation thread know we're starting a new game
   SimulationThread::get_instance()->new_game(game_id);
-  return true;
+  return absl::OkStatus();
 }
 
 //----------------------------------------------------------------------------
@@ -191,7 +185,7 @@ ListGamesSessionRequest::~ListGamesSessionRequest() {
 }
 
 std::string ListGamesSessionRequest::get_request_xml() {
-  return (boost::format("<list-games sessionId=\"%1%\" />") % session_id_).str();
+  return absl::StrCat("<list-games sessionId=\"", session_id_, "\" />");
 }
 
 std::string ListGamesSessionRequest::get_url() {
@@ -202,7 +196,7 @@ std::string ListGamesSessionRequest::get_description() {
   return "listing games";
 }
 
-bool ListGamesSessionRequest::parse_response(fw::XmlElement &xml) {
+absl::Status ListGamesSessionRequest::parse_response(fw::XmlElement &xml) {
   // parse out the list of games from the response
   std::vector<RemoteGame> games;
   for (fw::XmlElement game = xml.get_first_child(); game.is_valid(); game = game.get_next_sibling()) {
@@ -217,7 +211,7 @@ bool ListGamesSessionRequest::parse_response(fw::XmlElement &xml) {
   // call the callback with the list of games we just parsed!
   callback_(games);
 
-  return true;
+  return absl::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -230,7 +224,7 @@ JoinGameSessionRequest::~JoinGameSessionRequest() {
 }
 
 std::string JoinGameSessionRequest::get_request_xml() {
-  return (boost::format("<join sessionId=\"%1%\" gameId=\"%2%\" />") % session_id_ % game_id_).str();
+  return absl::StrCat("<join sessionId=\"", session_id_, "\" gameId=\"", game_id_, "\" />");
 }
 
 std::string JoinGameSessionRequest::get_url() {
@@ -246,34 +240,35 @@ void JoinGameSessionRequest::begin(std::string base_url) {
   Session::get_instance()->set_state(Session::kJoiningLobby);
 }
 
-bool JoinGameSessionRequest::parse_response(fw::XmlElement &xml) {
+absl::Status JoinGameSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    fw::debug << boost::format("ERR: unexpected response from \"join game\" request: %1%") % xml.get_value()
-        << std::endl;
-    return false;
+    return 
+        absl::InvalidArgumentError(absl::StrCat("unexpected response from \"join game\" request: ", xml.get_value()));
   }
 
   if (!xml.is_attribute_defined("serverAddr")) {
-    fw::debug << "ERR: joing game response did not include server address" << std::endl;
-    return false;
+    return absl::InvalidArgumentError("joing game response did not include server address");
   }
 
   if (!xml.is_attribute_defined("playerNo")) {
-    fw::debug << "ERR: joining game response did not include player#" << std::endl;
-    return false;
+    return absl::InvalidArgumentError("joining game response did not include player#");
   }
 
   std::string server_address = xml.get_attribute("serverAddr");
-  uint8_t player_no = static_cast<uint8_t>(boost::lexical_cast<int>(xml.get_attribute("playerNo")));
-  fw::debug << boost::format("joined game, address: %1% player# %2%") % server_address % static_cast<int>(player_no)
-      << std::endl;
+
+  int player_no = 0;
+  if (!absl::SimpleAtoi(xml.get_attribute("playerNo"), &player_no) || player_no > 255) {
+    return
+        absl::InvalidArgumentError(absl::StrCat("Couldn't convert playerNo to int: ", xml.get_attribute("playerNo")));
+  }
+  fw::debug << "joined game, address: " << server_address << " player# " << player_no << std::endl;
 
   // now connect to that server
-  SimulationThread::get_instance()->connect(game_id_, server_address, player_no);
+  SimulationThread::get_instance()->connect(game_id_, server_address, static_cast<uint8_t>(player_no));
 
   // set the state to logged_in as well....
   Session::get_instance()->set_state(Session::kLoggedIn);
-  return true;
+  return absl::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -286,8 +281,11 @@ ConfirmPlayerSessionRequest::~ConfirmPlayerSessionRequest() {
 }
 
 std::string ConfirmPlayerSessionRequest::get_request_xml() {
-  return (boost::format("<confirm sessionId=\"%1%\" gameId=\"%2%\" otherUserId=\"%3%\" />") % session_id_ % game_id_
-      % other_user_id_).str();
+  return 
+      absl::StrCat(
+          "<confirm sessionId=\"", session_id_,
+          "\" gameId=\"", game_id_,
+          "\" otherUserId=\"", other_user_id_, "\" />");
 }
 
 std::string ConfirmPlayerSessionRequest::get_url() {
@@ -295,19 +293,18 @@ std::string ConfirmPlayerSessionRequest::get_url() {
 }
 
 std::string ConfirmPlayerSessionRequest::get_description() {
-  return (boost::format("confirming player \"%1%\"") % other_user_id_).str();
+  return absl::StrCat("confirming player \"", other_user_id_, "\"");
 }
 
-bool ConfirmPlayerSessionRequest::parse_response(fw::XmlElement &xml) {
+absl::Status ConfirmPlayerSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    fw::debug << boost::format("ERR: unexpected response from \"confirm player\" request: %1%") % xml.get_value()
-        << std::endl;
-    return false;
+    return
+        absl::InvalidArgumentError(
+            absl::StrCat("unexpected response from \"confirm player\" request:", xml.get_value()));
   }
 
   if (!xml.is_attribute_defined("confirmed")) {
-    fw::debug << "ERR: confirm player response did not include confirmation" << std::endl;
-    return false;
+    return absl::InvalidArgumentError("confirm player response did not include confirmation");
   }
 
   std::string confirmed = xml.get_attribute("confirmed");
@@ -328,16 +325,19 @@ bool ConfirmPlayerSessionRequest::parse_response(fw::XmlElement &xml) {
     }
 
     fw::debug
-        << boost::format("connecting player confirmed, user-id: %1%, username: %2%, player#: %3%") % other_user_id_
-            % other_user_name_ % static_cast<int>(player_no_) << std::endl;
+        << "connecting player confirmed, user-id: " << other_user_id_
+        << ", username: " << other_user_name_
+        << ", player#: " << player_no_
+        << std::endl;
   } else {
     fw::debug
-        << boost::format("connecting player is not logged in to server, not allowing! user-id: %1%") % other_user_id_
+        << "connecting player is not logged in to server, not allowing! user-id: "
+        << other_user_id_
         << std::endl;
     confirmed_ = false;
   }
 
-  return true;
+  return absl::OkStatus();
 }
 
 }

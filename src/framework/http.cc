@@ -155,36 +155,36 @@ void Http::wait() {
   }
 }
 
-std::string Http::get_response() {
+absl::StatusOr<std::string> Http::get_response() {
   if (!is_finished())
-    return ""; // TODO: something better than just empty string?
+    return absl::UnavailableError("Not finished yet.");
 
-  if (is_error()) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(get_error_msg()));
+  const auto status = get_status();
+  if (!status.ok()) {
+    return status;
   }
-
   return download_data_.str();
 }
 
 // parses the response as XML and returns a reference to it. if no response has
 // been received yet, an XmlElement pointing to a NULL element is returned.
-XmlElement Http::get_xml_response() {
-  std::string response = get_response();
-  if (response == "")
-    return XmlElement();
+absl::StatusOr<XmlElement> Http::get_xml_response() {
+  absl::StatusOr<std::string> response = get_response();
+  if (!response.ok()) {
+    return response.status();
+  }
 
-  return XmlElement(response);
+  return XmlElement(*response);
 }
 
-bool Http::is_error() const {
-  return (last_error_ != CURLE_OK);
-}
-
-std::string Http::get_error_msg() const {
-  if (last_error_ == 0)
-    return "";
-
-  return curl_easy_strerror(last_error_);
+absl::Status Http::get_status() const {
+  switch (last_error_) {
+  case CURLE_OK:
+    return absl::OkStatus();
+  default:
+    // TODO: more error statuses?
+    return absl::InternalError(curl_easy_strerror(last_error_));
+  }
 }
 
 void Http::check_error(CURLcode error, char const *fn) {

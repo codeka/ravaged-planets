@@ -1,5 +1,7 @@
 #pragma once
 
+#include <absl/status/status.h>
+
 namespace fw {
 class Http;
 class XmlElement;
@@ -37,11 +39,10 @@ public:
 private:
   complete_handler_fn _on_complete_handler;
 
-  bool parse_response();
+  absl::Status parse_response();
 
 protected:
   std::shared_ptr<fw::Http> post_;
-  std::string error_msg_;
   uint64_t session_id_;
   uint32_t user_id_;
 
@@ -61,7 +62,7 @@ protected:
   }
 
   // parses the response from the server
-  virtual bool parse_response(fw::XmlElement &xml);
+  virtual absl::Status parse_response(fw::XmlElement &xml);
 
 public:
   SessionRequest();
@@ -76,11 +77,6 @@ public:
   // this is called each frame to update our state, we'll return update_result::finished
   // when the request is finished
   virtual UpdateResult update();
-
-  // gets the error message (if there is one)
-  std::string const &get_error_msg() const {
-    return error_msg_;
-  }
 
   // gets or sets the session_id, this can change (for example when you log in) and
   // the session will update itself when the request is finished.
@@ -107,8 +103,8 @@ private:
   int _listen_port;
 
 protected:
-  virtual std::string get_description();
-  virtual bool parse_response(fw::XmlElement &xml);
+  std::string get_description() override;
+  absl::Status parse_response(fw::XmlElement& xml) override;
 
 public:
   LoginSessionRequest(std::string const &username, std::string const &password);
@@ -121,8 +117,8 @@ public:
 // request succeeds.
 class LogoutSessionRequest: public SessionRequest {
 protected:
-  virtual std::string get_description();
-  virtual bool parse_response(fw::XmlElement &xml);
+  std::string get_description() override;
+  absl::Status parse_response(fw::XmlElement &xml) override;
 
 public:
   LogoutSessionRequest();
@@ -134,10 +130,10 @@ public:
 // this is a request to create a new game for us that people will be able to join and so on.
 class CreateGameSessionRequest: public SessionRequest {
 protected:
-  virtual std::string get_request_xml();
-  virtual std::string get_url();
-  virtual std::string get_description();
-  virtual bool parse_response(fw::XmlElement &xml);
+  std::string get_request_xml() override;
+  std::string get_url() override ;
+  std::string get_description() override;
+  absl::Status parse_response(fw::XmlElement &xml) override;
 
 public:
   CreateGameSessionRequest();
@@ -150,10 +146,10 @@ public:
   typedef std::function<void(std::vector<RemoteGame> const &games)> callback_fn;
 
 protected:
-  virtual std::string get_request_xml();
-  virtual std::string get_url();
-  virtual std::string get_description();
-  virtual bool parse_response(fw::XmlElement &xml);
+  std::string get_request_xml() override;
+  std::string get_url() override;
+  std::string get_description() override;
+  absl::Status parse_response(fw::XmlElement &xml) override;
 
   // this is the callback we'll call once we've fetched the game list
   callback_fn callback_;
@@ -170,10 +166,10 @@ private:
   uint64_t game_id_;
 
 protected:
-  virtual std::string get_request_xml();
-  virtual std::string get_url();
-  virtual std::string get_description();
-  virtual bool parse_response(fw::XmlElement &xml);
+  std::string get_request_xml() override;
+  std::string get_url() override;
+  std::string get_description() override;
+  absl::Status parse_response(fw::XmlElement &xml) override;
 
 public:
   JoinGameSessionRequest(uint64_t game_id);
@@ -195,10 +191,10 @@ private:
   bool confirmed_;
 
 protected:
-  virtual std::string get_request_xml();
-  virtual std::string get_url();
-  virtual std::string get_description();
-  virtual bool parse_response(fw::XmlElement &xml);
+  std::string get_request_xml() override;
+  std::string get_url() override;
+  std::string get_description() override;
+  absl::Status parse_response(fw::XmlElement &xml) override;
 
 public:
   ConfirmPlayerSessionRequest(uint64_t game_id, uint32_t user_id);

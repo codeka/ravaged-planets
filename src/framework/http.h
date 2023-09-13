@@ -7,6 +7,8 @@
 #include <thread>
 #include <curl/curl.h>
 
+#include <absl/status/statusor.h>
+
 #include <framework/xml.h>
 
 // this is defined in winnt.h... silly!!
@@ -86,20 +88,20 @@ public:
   /** Waits for the response to be complete. This will block the current thread. */
   void wait();
 
-  /** Gets the response we got from the server. If no response has been received yet, an empty string is returned. */
-  std::string get_response();
+  /**
+   * Gets the response we got from the server. If no response has been received yet, an absl::StatusUnavailable error
+   * is returned.
+   */
+  absl::StatusOr<std::string> get_response();
 
   /**
-   * Parses the response as XML and returns a reference to it. if no response has been received yet, an XmlElement
-   * pointing to a NULL element is returned.
+   * Parses the response as XML and returns a reference to it. if no response has been received yet, an unavailable
+   * status is returned instead.
    */
-  XmlElement get_xml_response();
+  absl::StatusOr<XmlElement> get_xml_response();
 
-  /** Returns a value which indicates whether there was an error making the request. */
-  bool is_error() const;
-
-  /** If there was an error making the request, returns a string indicating what the error was. */
-  std::string get_error_msg() const;
+  /** Returns an absl::Status that represents whatever error has occurred. */
+  absl::Status get_status() const;
 };
 
 }

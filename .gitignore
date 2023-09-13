@@ -22,6 +22,9 @@
 # User-specific files
 CMakeUserPresets.json
 
+# Abseil, which we keep in source form.
+abseil-cpp/
+
 # Visual Studio files
 out/
 .vs/

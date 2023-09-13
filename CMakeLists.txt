@@ -34,6 +34,9 @@ endif()
 include_directories(include)
 include_directories(src)
 
+# Make sure we can include abseil stuff.
+include_directories(abseil-cpp)
+
 # Make sure generated files are #includable.
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
@@ -63,6 +66,7 @@ elseif(APPLE)
     find_package(BZip2 REQUIRED)
 endif()
 
+add_subdirectory(abseil-cpp)
 add_subdirectory(src/version-number)
 add_subdirectory(src/framework)
 add_subdirectory(src/meshexp)
