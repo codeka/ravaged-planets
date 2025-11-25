@@ -56,7 +56,7 @@ find_package(OpenAL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ENet REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
-find_package(Boost COMPONENTS filesystem iostreams program_options system REQUIRED)
+find_package(Boost COMPONENTS filesystem iostreams program_options system REQUIRED) # TODO: remove
 
 if(LINUX)
     # I don't know why, but libSDL is importing symbols from libX11.

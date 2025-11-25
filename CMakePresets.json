@@ -7,34 +7,12 @@
   },
   "configurePresets": [
     {
-      "name": "VSConfigDebug",
-      "displayName": "Visual Studio Config (debug)",
+      "name": "vcpkg",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      },
-      "toolset": {
-        "value": "host=x64",
-        "strategy": "external"
-      },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
-      },
-      "vendor": {
-        "microsoft.com/VisualStudioSettings/CMake/1.0": {
-          "hostOS": [ "Windows" ]
-        }
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "VSDebugBuild",
-      "displayName": "Visual Studio Build (debug)",
-      "configurePreset": "VSConfigDebug"
     }
   ]
 }

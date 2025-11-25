@@ -1,0 +1,13 @@
+{
+  "dependencies": [
+    "boost",
+    "curl",
+    "enet",
+    "freetype",
+    "glew",
+    "lua",
+    "openal-soft",
+    "protobuf",
+    "sdl2"
+  ]
+}
