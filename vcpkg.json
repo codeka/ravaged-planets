@@ -8,6 +8,8 @@
     "lua",
     "openal-soft",
     "protobuf",
-    "sdl2"
+    "sdl2",
+    "assimp",
+    "abseil"
   ]
 }

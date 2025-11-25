@@ -57,6 +57,7 @@ find_package(Freetype REQUIRED)
 find_package(ENet REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
 find_package(Boost COMPONENTS filesystem iostreams program_options system REQUIRED) # TODO: remove
+find_package(Absl CONFIG REQUIRED)
 
 if(LINUX)
     # I don't know why, but libSDL is importing symbols from libX11.
@@ -66,7 +67,6 @@ elseif(APPLE)
     find_package(BZip2 REQUIRED)
 endif()
 
-add_subdirectory(abseil-cpp)
 add_subdirectory(src/version-number)
 add_subdirectory(src/framework)
 add_subdirectory(src/meshexp)
