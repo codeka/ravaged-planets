@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <functional>
 
 #include <framework/framework.h>
@@ -16,7 +17,7 @@
 #include <game/entities/ownable_component.h>
 #include <game/simulation/player.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 using namespace std::placeholders;
 
 namespace ent {

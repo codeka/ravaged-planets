@@ -1,8 +1,8 @@
 #pragma once
 
+#include <filesystem>
 #include <fstream>
 #include <memory>
-#include <boost/filesystem.hpp>
 
 #include <framework/bitmap.h>
 
@@ -26,7 +26,7 @@ private:
   void ensure_extra_loaded() const;
 
   // parse the <mapdesc> file and populate our extra stuff.
-  void parse_mapdesc_file(boost::filesystem::path const &filename) const;
+  void parse_mapdesc_file(std::filesystem::path const &filename) const;
 
 public:
   WorldSummary();

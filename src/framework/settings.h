@@ -1,7 +1,8 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
-#include <boost/filesystem.hpp>
+
 #include <boost/program_options.hpp>
 
 namespace fw {
@@ -39,7 +40,7 @@ public:
   void print_help();
 
   // Gets the full path to the executable.
-  boost::filesystem::path get_executable_path() const;
+  std::filesystem::path get_executable_path() const;
 };
 
 }

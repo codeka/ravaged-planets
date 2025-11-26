@@ -1,6 +1,6 @@
 
 #include <functional>
-#include <boost/filesystem.hpp>
+
 #include <boost/lexical_cast.hpp>
 
 #include <framework/camera.h>
@@ -21,7 +21,6 @@
 #include <game/editor/editor_world.h>
 #include <game/editor/editor_terrain.h>
 
-namespace fs = boost::filesystem;
 using namespace fw::gui;
 using namespace std::placeholders;
 

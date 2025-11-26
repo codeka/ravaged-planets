@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <framework/color.h>
 
@@ -20,7 +20,7 @@ private:
   void prepare_write(int width, int height);
 
   // Populates our bitmap_data with data from the given file
-  void load_bitmap(boost::filesystem::path const &filename);
+  void load_bitmap(std::filesystem::path const &filename);
 
   // Populates our bitmap_data with data from the given in-memory file
   void load_bitmap(uint8_t const *data, size_t data_size);
@@ -36,7 +36,7 @@ public:
   Bitmap(int width, int height, uint32_t *argb = 0);
 
   // Constructs a new bitmap and loads data from the given file.
-  Bitmap(boost::filesystem::path const &filename);
+  Bitmap(std::filesystem::path const &filename);
 
   // Constructs a new bitmap from data in memory (e.g. a PNG file loaded into memory)
   Bitmap(uint8_t const *data, size_t data_size);
@@ -54,10 +54,10 @@ public:
   Bitmap&operator =(fw::Bitmap const &copy);
 
   // Gets the filename of this bitmap (if it was loaded from a file).
-  boost::filesystem::path get_filename() const;
+  std::filesystem::path get_filename() const;
 
   // Saves the bitmap to the given file.
-  void save_bitmap(boost::filesystem::path const &filename) const;
+  void save_bitmap(std::filesystem::path const &filename) const;
 
   // Gets the width/height (in pixels) of this image
   int get_width() const;

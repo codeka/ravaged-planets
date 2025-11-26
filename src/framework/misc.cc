@@ -2,13 +2,10 @@
 #include <random>
 #include <math.h>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <framework/math.h>
 #include <framework/misc.h>
-
-namespace fs = boost::filesystem;
 
 // Our global random number generator.
 static std::mt19937 rng;

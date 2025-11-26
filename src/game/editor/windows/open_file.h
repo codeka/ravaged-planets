@@ -1,9 +1,9 @@
 #pragma once
 
+#include <filesystem>
 #include <functional>
 #include <string>
 #include <vector>
-#include <boost/filesystem.hpp>
 
 namespace fw {
 namespace gui {
@@ -23,7 +23,7 @@ public:
 
 private:
   fw::gui::Window *wnd_;
-  boost::filesystem::path _curr_directory;
+  std::filesystem::path _curr_directory;
   file_selected_handler _file_selected_handler;
   std::vector<std::string> _items;
   bool _show_hidden;
@@ -35,7 +35,7 @@ private:
   bool on_show_hidden_clicked(fw::gui::Widget *w);
 
   void refresh();
-  void navigate_to_directory(boost::filesystem::path const &new_directory);
+  void navigate_to_directory(std::filesystem::path const &new_directory);
   void add_row(fw::gui::Listbox *lbx, std::string const &name);
 
 public:
@@ -46,7 +46,7 @@ public:
   void show(file_selected_handler fn);
   void hide();
 
-  boost::filesystem::path get_selected_file() const;
+  std::filesystem::path get_selected_file() const;
 };
 
 extern OpenFileWindow *open_file;

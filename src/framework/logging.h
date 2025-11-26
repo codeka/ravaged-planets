@@ -1,7 +1,8 @@
 #pragma once
 
+#include <filesystem>
 #include <iostream>
-#include <boost/filesystem.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/shared_ptr.hpp>
@@ -19,7 +20,7 @@ namespace fw {
 class LogSink {
 private:
   bool open_;
-  boost::filesystem::path filename_;
+  std::filesystem::path filename_;
   boost::shared_ptr<std::ofstream> outs_;
 
 public:
@@ -30,7 +31,7 @@ public:
   LogSink(LogSink const &copy);
   ~LogSink();
 
-  void open(boost::filesystem::path const &filename);
+  void open(std::filesystem::path const &filename);
   std::streamsize write(const char* s, std::streamsize n);
 };
 
@@ -38,15 +39,15 @@ public:
 // in thread-local storage
 class LogWrapper {
 private:
-  boost::filesystem::path filename_;
+  std::filesystem::path filename_;
   static THREADLOCAL std::ostream *log_;
   LogSink sink_;
 
 public:
   LogWrapper();
 
-  void initialize(boost::filesystem::path const &filename);
-  boost::filesystem::path get_filename() const { return filename_; }
+  void initialize(std::filesystem::path const &filename);
+  std::filesystem::path get_filename() const { return filename_; }
 
   template<typename T> std::ostream &operator <<(T const &t);
 };

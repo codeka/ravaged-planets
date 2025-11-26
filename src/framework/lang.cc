@@ -1,8 +1,8 @@
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <string>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -10,7 +10,7 @@
 #include <framework/paths.h>
 #include <framework/logging.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 
@@ -75,7 +75,7 @@ std::string Lang::get_string(std::string const &name) {
 std::vector<LangDescription> g_langs;
 
 static void populate_lang_description(LangDescription &desc, fs::path file_name) {
-  desc.name = file_name.leaf().string();
+  desc.name = file_name.filename().string();
   std::fstream ins(file_name.string().c_str());
 
   int line_num = 0;

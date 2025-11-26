@@ -1,10 +1,10 @@
 
+#include <filesystem>
 #include <optional>
 
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <stb/stb_vorbis.h>
@@ -18,7 +18,7 @@ namespace fw {
 
 namespace {
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // Strings from alcGetString come as an array of nul-terminated string where the last string is empty. So something
 // like "foo\0bar\0baz\0\0". This will split those strings into a vector of strings.

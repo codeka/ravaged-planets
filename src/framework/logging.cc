@@ -1,5 +1,6 @@
 #include <ctime>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -16,7 +17,7 @@
 #include <framework/paths.h>
 
 namespace io = boost::iostreams;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 

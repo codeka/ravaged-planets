@@ -1,6 +1,5 @@
 #include <unordered_set>
 
-#include <boost/filesystem.hpp>
 #include <boost/unordered_set.hpp>
 
 #include <SDL2/SDL.h>
@@ -12,8 +11,6 @@
 #include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/settings.h>
-
-namespace fs = boost::filesystem;
 
 // in order to keep the header clean of platform-specific details, and also since keyboard/mouse Input
 // is inherently singleton anyway, we have a bunch of global variables here. Sorry.

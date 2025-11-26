@@ -2,8 +2,9 @@
 
 #include <string>
 #include <exception>
+#include <filesystem>
+
 #include <boost/exception/all.hpp>
-#include <boost/filesystem.hpp>
 
 namespace fw {
 
@@ -11,7 +12,7 @@ namespace fw {
 typedef boost::error_info<struct tag_errno, int> errno_error_info;
 
 // this can be added to an exception if you know the "filename" we were accessing at the time of the exception
-typedef boost::error_info<struct tag_filename, boost::filesystem::path> filename_error_info;
+typedef boost::error_info<struct tag_filename, std::filesystem::path> filename_error_info;
 
 // this can be added to an exception to provide an error message as to what you were
 // trying to do. this message doesn't always have to be useful to the end-user, but

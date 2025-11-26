@@ -1,8 +1,8 @@
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
 #include <boost/exception/all.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include <framework/exception.h>
@@ -10,7 +10,7 @@
 #include <framework/paths.h>
 
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 

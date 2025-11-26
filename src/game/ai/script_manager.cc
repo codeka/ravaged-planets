@@ -1,4 +1,4 @@
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <framework/logging.h>
 #include <framework/xml.h>
@@ -6,7 +6,7 @@
 
 #include <game/ai/script_manager.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace game {
 

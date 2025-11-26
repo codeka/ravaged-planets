@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <fstream>
 
 #include <framework/model.h>
@@ -10,7 +11,7 @@
 
 #include <framework/model_file.pb.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 

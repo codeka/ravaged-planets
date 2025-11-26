@@ -1,11 +1,11 @@
 #include <framework/shader.h>
 
+#include <filesystem>
 #include <string>
 #include <sstream>
 #include <map>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <framework/color.h>
@@ -21,7 +21,7 @@
 #include <framework/texture.h>
 #include <framework/xml.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 //-------------------------------------------------------------------------
 // This is a cache of .Shader files, so we don't have to load them over and over.

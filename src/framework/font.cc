@@ -1,4 +1,5 @@
 
+#include <filesystem>
 #include <mutex>
 
 #include <boost/locale.hpp>
@@ -18,7 +19,7 @@
 
 typedef std::basic_string<uint32_t> utf32string;
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 namespace conv = boost::locale::conv;
 
 #define FT_CHECK(fn) { \

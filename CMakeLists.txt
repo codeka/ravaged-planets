@@ -48,7 +48,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 # Look for the various libraries we depend on.
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(Protobuf REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
 find_package(Lua REQUIRED)
 find_package(CURL REQUIRED)
 find_package(SDL2 REQUIRED)
@@ -56,7 +56,7 @@ find_package(OpenAL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ENet REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
-find_package(Boost COMPONENTS filesystem iostreams program_options system REQUIRED) # TODO: remove
+find_package(Boost COMPONENTS iostreams program_options system REQUIRED) # TODO: remove
 find_package(Absl CONFIG REQUIRED)
 
 if(LINUX)

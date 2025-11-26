@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
@@ -10,7 +11,7 @@
 
 #include <game/world/world_vfs.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // populate the given world summary based on the maps found in the given path
 void populate_maps(std::vector<game::WorldSummary> &list, fs::path path);
@@ -214,7 +215,7 @@ void populate_maps(std::vector<game::WorldSummary> &list, fs::path path) {
     fw::debug << boost::format("  - %1%") % p.string() << std::endl;
     if (fs::is_directory(p)) {
       game::WorldSummary ws;
-      ws.initialize(p.leaf().string());
+      ws.initialize(p.filename().string());
 
       // todo: see if it already exists before adding it
       list.push_back(ws);

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <map>
 #include <memory>
+
 #include <boost/noncopyable.hpp>
 
 #include <framework/color.h>
@@ -60,12 +62,12 @@ public:
 // this Shader wraps Shader files and allows us to automatically reload them, and so on.
 class Shader {
 private:
-  boost::filesystem::path filename_;
+  std::filesystem::path filename_;
   std::map<std::string, ShaderProgram *> programs_;
   std::string default_program_name_;
 
   Shader();
-  void load(fw::Graphics *g, boost::filesystem::path const &full_path);
+  void load(fw::Graphics *g, std::filesystem::path const &full_path);
 
 public:
   ~Shader();

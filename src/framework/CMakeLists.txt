@@ -51,7 +51,7 @@ target_link_libraries(framework ${Boost_THREAD_LIBRARY})
 target_link_libraries(framework ${Boost_SYSTEM_LIBRARY})
 target_link_libraries(framework ${Boost_SIGNALS_LIBRARY})
 target_link_libraries(framework ${OPENGL_LIBRARY})
-target_link_libraries(framework ${PROTOBUF_LIBRARY})
+target_link_libraries(framework protobuf::libprotobuf)
 target_link_libraries(framework ${LUA_LIBRARIES})
 target_link_libraries(framework ${CURL_LIBRARY})
 target_link_libraries(framework ${ENET_LIBRARY})
@@ -102,6 +102,7 @@ elseif(WIN32)
         winmm
         version
         imm32
+        ws2_32
     )
 endif()
 

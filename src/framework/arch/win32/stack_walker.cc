@@ -1,18 +1,18 @@
 // adapted from: Http://www.codeproject.com/threads/StackWalker.asp
 
+#include <filesystem>
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <dbghelp.h>
 #include <psapi.h>
-
-#include <boost/filesystem.hpp>
 
 #include <framework/arch/win32/stack_walker.h>
 #include <framework/logging.h>
 #include <framework/settings.h>
 #include <framework/misc.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // normally it should be enough to use 'CONTEXT_FULL' (better would be 'CONTEXT_ALL')
 #define USED_CONTEXT_FLAGS CONTEXT_FULL
@@ -449,11 +449,6 @@ bool StackWalker::load_modules() {
 
     // add the current directory
     strcat_s(&symbol_path[0], symbol_path.size(), ".;");
-
-    // add the "initial" directory (which was the current directory when we started up)
-    fs::path initial_path = fs::initial_path();
-    strcat_s(&symbol_path[0], symbol_path.size(), initial_path.string().c_str());
-    strcat_s(&symbol_path[0], symbol_path.size(), ";");
 
     std::vector<char> tmp(1024);
     if (::GetEnvironmentVariable("_NT_SYMBOL_PATH", &tmp[0], tmp.size()) > 0) {

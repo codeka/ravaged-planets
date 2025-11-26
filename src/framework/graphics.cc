@@ -17,7 +17,7 @@ static std::thread::id render_thread_id = std::this_thread::get_id();
 
 std::string to_string(gl_error_info const &err_info) {
   GLenum err = err_info.value();
-  char const *err_msg = reinterpret_cast<char const *>(gluErrorString(err));
+  char const *err_msg = "TODO";//reinterpret_cast<char const *>(gluErrorString(err));
   if (err_msg == nullptr) {
     return (boost::format("0x%1$08x") % err).str();
   }

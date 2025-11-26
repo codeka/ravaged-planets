@@ -1,5 +1,7 @@
 #pragma once
 
+#include <filesystem>
+
 #include <boost/lexical_cast.hpp>
 
 #include <framework/exception.h>
@@ -66,7 +68,7 @@ public:
 //
 // \param format_name defines what we log (for debugging) and is also expected to be the name of the root XML element.
 // \param version The root XML element is expected to have a "version" attribute with a value corresponding to this.
-XmlElement load_xml(boost::filesystem::path const &filepath, std::string const &format_name, int version);
+XmlElement load_xml(std::filesystem::path const &filepath, std::string const &format_name, int version);
 }
 
 

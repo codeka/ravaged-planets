@@ -1,4 +1,6 @@
+#include <filesystem>
 #include <string>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -207,7 +209,7 @@ DrawableManager::DrawableManager() {
 DrawableManager::~DrawableManager() {
 }
 
-void DrawableManager::parse(boost::filesystem::path const &file) {
+void DrawableManager::parse(std::filesystem::path const &file) {
   xml::XMLDocument doc;
   try {
     XML_CHECK(doc.LoadFile(file.string().c_str()));

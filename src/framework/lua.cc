@@ -1,6 +1,6 @@
+#include <filesystem>
 #include <map>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -8,7 +8,7 @@
 #include <framework/logging.h>
 #include <framework/paths.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw::lua {
 

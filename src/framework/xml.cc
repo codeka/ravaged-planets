@@ -1,11 +1,12 @@
-#include <boost/filesystem.hpp>
+#include <filesystem>
+
 #include <boost/format.hpp>
 
 #include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/xml.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 

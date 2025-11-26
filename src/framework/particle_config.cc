@@ -1,3 +1,5 @@
+#include <filesystem>
+
 #include <framework/particle_config.h>
 #include <framework/particle_emitter.h>
 #include <framework/exception.h>
@@ -9,7 +11,7 @@
 #include <framework/texture.h>
 #include <framework/xml.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 

@@ -1,7 +1,5 @@
-
+#include <filesystem>
 #include <functional>
-
-#include <boost/filesystem.hpp>
 
 #include <framework/bitmap.h>
 #include <framework/framework.h>
@@ -23,7 +21,7 @@
 #include <game/simulation/simulation_thread.h>
 #include <game/simulation/local_player.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 using namespace std::placeholders;
 
 namespace game {
@@ -127,7 +125,7 @@ void World::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
   for (fs::directory_iterator it(base_path); it != fs::directory_iterator(); ++it) {
     fs::path p(*it);
     if (fs::is_regular_file(p)) {
-      std::string filename = p.leaf().string();
+      std::string filename = p.filename().string();
       if (boost::istarts_with(filename, "screen-") && boost::iends_with(filename, ".png")) {
         std::string number_part = filename.substr(7, filename.length() - 11);
         try {

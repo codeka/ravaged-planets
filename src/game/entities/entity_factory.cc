@@ -1,4 +1,4 @@
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <framework/xml.h>
 #include <framework/logging.h>
@@ -8,7 +8,7 @@
 #include <game/entities/entity_factory.h>
 #include <game/entities/buildable_component.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace ent {
 

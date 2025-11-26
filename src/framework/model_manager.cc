@@ -1,4 +1,4 @@
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <framework/model_manager.h>
 #include <framework/model.h>
@@ -7,7 +7,7 @@
 #include <framework/texture.h>
 #include <framework/paths.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 

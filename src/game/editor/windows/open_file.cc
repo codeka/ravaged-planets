@@ -1,6 +1,7 @@
+#include <filesystem>
 #include <functional>
+
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <framework/exception.h>
@@ -21,7 +22,7 @@
 
 #include <game/editor/windows/open_file.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 using namespace fw::gui;
 using namespace std::placeholders;
 

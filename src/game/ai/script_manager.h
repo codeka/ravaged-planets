@@ -1,5 +1,7 @@
 #pragma once
 
+#include <filesystem>
+
 namespace game {
 
 // This structure defines various bits of info about a script that we gather from the *.ai file.
@@ -9,7 +11,7 @@ struct ScriptDesc {
   std::string author;
   std::string url;
 
-  boost::filesystem::path filename;
+  std::filesystem::path filename;
 };
 
 /** This class manages the AI scripts. It enumerates them, lets you instantiate them, and so on. */

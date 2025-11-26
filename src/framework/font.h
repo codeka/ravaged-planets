@@ -60,7 +60,7 @@ private:
   std::shared_ptr<StringCacheEntry> get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
   std::shared_ptr<StringCacheEntry> create_cache_entry(std::basic_string<uint32_t> const &str);
 public:
-  FontFace(FontManager *manager, boost::filesystem::path const &filename);
+  FontFace(FontManager *manager, std::filesystem::path const &filename);
   ~FontFace();
 
   /** Called by the font_managed every update frame. */
@@ -108,7 +108,7 @@ public:
   std::shared_ptr<FontFace> get_face();
 
   /** Gets the \ref font_face for the font at the given path (assumed to be a .ttf file). */
-  std::shared_ptr<FontFace> get_face(boost::filesystem::path const &filename);
+  std::shared_ptr<FontFace> get_face(std::filesystem::path const &filename);
 };
 
 }

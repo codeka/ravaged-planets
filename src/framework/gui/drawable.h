@@ -1,9 +1,8 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include <framework/graphics.h>
 #include <framework/math.h>
@@ -120,7 +119,7 @@ public:
   ~DrawableManager();
 
   /** Parses the given XML file and extracts all of the drawables. */
-  void parse(boost::filesystem::path const& file);
+  void parse(std::filesystem::path const& file);
 
   std::shared_ptr<Drawable> get_drawable(std::string const& name);
   std::shared_ptr<Drawable> build_drawable(std::shared_ptr<fw::Texture> texture,

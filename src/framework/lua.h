@@ -1,8 +1,8 @@
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
-#include <boost/filesystem.hpp>
 
 #include <framework/lua/base.h>
 #include <framework/lua/callback.h>
@@ -31,10 +31,10 @@ public:
   LuaContext(const LuaContext&) = delete;
 
   // Adds a path to the package.path that LUA uses to search for modules reference in require(...) statements.
-  void add_path(boost::filesystem::path const& path);
+  void add_path(std::filesystem::path const& path);
 
   // Loads a .lua script (and executes it immediately - you should have set up the context ready to go).
-  bool load_script(boost::filesystem::path const& filename);
+  bool load_script(std::filesystem::path const& filename);
 
   // Gets a reference to the globals.
   Value globals();

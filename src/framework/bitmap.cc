@@ -1,3 +1,4 @@
+#include <filesystem>
 
 #include <framework/framework.h>
 #include <framework/bitmap.h>
@@ -12,7 +13,7 @@
 #include <stb/stb_image_write.h>
 #include <stb/stb_image_resize.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 

@@ -35,7 +35,7 @@ public:
   Texture();
   virtual ~Texture();
 
-  void create(boost::filesystem::path const &filename);
+  void create(std::filesystem::path const &filename);
   void create(std::shared_ptr<fw::Bitmap> bmp);
   void create(
     fw::Bitmap const &bmp, GLenum internal_format = GL_RGBA8, GLenum format = GL_RGBA,
@@ -53,7 +53,7 @@ public:
   void ensure_created() override;
 
   // save the contents of this texture to a .png file with the given name
-  void save_png(boost::filesystem::path const &filename);
+  void save_png(std::filesystem::path const &filename);
 
   int get_width() const override;
   int get_height() const override;
@@ -66,7 +66,7 @@ public:
 
   // gets the name of the file we were created from (or an empty string if we
   // weren't created from a file)
-  boost::filesystem::path get_filename() const;
+  std::filesystem::path get_filename() const;
 
   /** Gets the texture_data for this texture (used by framebuffer) */
   std::shared_ptr<TextureData> get_data() {
@@ -95,7 +95,7 @@ public:
   virtual ~TextureArray();
 
   // You cannot call any add() method once the texture has been bound once.
-  void add(boost::filesystem::path const& filename);
+  void add(std::filesystem::path const& filename);
   void add(std::shared_ptr<fw::Bitmap> bmp);
 
   // Call on the render thread to ensure we've been created.

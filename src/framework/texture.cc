@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <memory>
 
 #include <stb/stb_image.h>
@@ -11,7 +12,7 @@
 #include <framework/logging.h>
 #include <framework/exception.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 
@@ -43,7 +44,7 @@ struct TextureData {
 // This is a cache of textures, so we don't have to load them over and over.
 class TextureCache {
 private:
-  typedef std::map<boost::filesystem::path, std::shared_ptr<TextureData>> TexturesMap;
+  typedef std::map<fs::path, std::shared_ptr<TextureData>> TexturesMap;
   TexturesMap textures_;
 
 public:
@@ -223,7 +224,7 @@ TextureArray::TextureArray(int width, int height)
 TextureArray::~TextureArray() {
 }
 
-void TextureArray::add(boost::filesystem::path const& filename) {
+void TextureArray::add(fs::path const& filename) {
   // TODO: check if data has been created.
   auto bmp = std::make_shared<Bitmap>(filename);
   bmp->resize(width_, height_);

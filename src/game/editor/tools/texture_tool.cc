@@ -1,5 +1,5 @@
+#include <filesystem>
 #include <functional>
-#include <boost/filesystem.hpp>
 
 #include <framework/framework.h>
 #include <framework/graphics.h>
@@ -21,7 +21,7 @@
 #include <game/editor/editor_world.h>
 #include <game/editor/tools/texture_tool.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 using namespace fw::gui;
 using namespace std::placeholders;
 

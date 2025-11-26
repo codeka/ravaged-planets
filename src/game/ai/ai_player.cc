@@ -1,6 +1,6 @@
 #include <functional>
+
 #include <boost/bind/arg.hpp>
-#include <boost/filesystem.hpp>
 
 #include <framework/lua.h>
 #include <framework/logging.h>
@@ -16,8 +16,6 @@
 #include <game/entities/entity.h>
 #include <game/entities/ownable_component.h>
 #include <game/entities/orderable_component.h>
-
-namespace fs = boost::filesystem;
 
 namespace game {
 

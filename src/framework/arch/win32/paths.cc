@@ -1,12 +1,12 @@
 
 #include <Shlobj.h>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <framework/paths.h>
 #include <framework/settings.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace fw {
 
