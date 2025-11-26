@@ -9,6 +9,7 @@
 #include <framework/lua/base.h>
 #include <framework/lua/callback.h>
 #include <framework/lua/error.h>
+#include <framework/lua/method.h>
 #include <framework/lua/push.h>
 #include <framework/lua/reference.h>
 
@@ -162,62 +163,62 @@ private:
   }
 };
 
-// This is the value returned from the indexing operation. We use this 'proxy' type so that we don't have to
-// immediately move the return value of the [] operator into the registry, it can stay as a temporary object in the
-// stack.
+// This is the value returned from the indexing operation. We use this 'proxy' type so that we don't
+// have to immediately move the return value of the [] operator into the registry, it can stay as a
+// temporary object in the stack.
 template<typename NextType>
 class IndexValue : public BaseValue<IndexValue<NextType>> {
 public:
   template<typename T>
   inline IndexValue(const NextType& next, lua_State* l, const T& key)
     : BaseValue<IndexValue<NextType>>(l), key_index_(lua_gettop(l) + 1), next_(next) {
-    lua::push(l, key);
+    fw::lua::push(l, key);
   }
 
   inline ~IndexValue() {
-    lua_pop(l_, 1);
+    lua_pop(this->l_, 1);
   }
 
   operator Value();
 
   operator std::string() const {
     push();
-    impl::PopStack pop(l_, 1);
+    impl::PopStack pop(this->l_, 1);
     size_t len = 0;
-    const char* str = lua_tolstring(l_, -1, &len);
+    const char* str = lua_tolstring(this->l_, -1, &len);
     return std::string(str, len);
   }
 
   operator float() const {
     push();
-    impl::PopStack pop(l_, 1);
-    return static_cast<float>(lua_tonumber(l_, -1));
+    impl::PopStack pop(this->l_, 1);
+    return static_cast<float>(lua_tonumber(this->l_, -1));
   }
 
   operator int() const {
     push();
-    impl::PopStack pop(l_, 1);
-    return static_cast<int>(lua_tonumber(l_, -1));
+    impl::PopStack pop(this->l_, 1);
+    return static_cast<int>(lua_tonumber(this->l_, -1));
   }
 
   operator bool() const {
     push();
-    impl::PopStack pop(l_, 1);
-    return lua_toboolean(l_, -1);
+    impl::PopStack pop(this->l_, 1);
+    return lua_toboolean(this->l_, -1);
   }
 
   template<typename T>
   T value() {
     push();
-    impl::PopStack pop(l_, 1);
+    impl::PopStack pop(this->l_, 1);
 
-    return peek<T>(l_, -1);
+    return peek<T>(this->l_, -1);
   }
 
   template<typename... Arg>
   inline void operator()(Arg... args) const {
     push();
-    Callback callback(l_);
+    Callback callback(this->l_);
     callback(args...);
   }
 
@@ -225,43 +226,45 @@ public:
   inline IndexValue& operator=(const T& value) {
     // Push the table (which is next_), then push the key (again), push the new value, call set table with the value
     // below the key. Pop the table again once we're done (lua_settable automatically pops the key & value).
-    lua::push(l_, next_);
-    impl::PopStack pop(l_, 1);
+    fw::lua::push(this->l_, next_);
+    impl::PopStack pop(this->l_, 1);
 
-    lua_pushvalue(l_, key_index_);
-    lua::push(l_, value);
-    lua_settable(l_, -3);
+    lua_pushvalue(this->l_, key_index_);
+    fw::lua::push(this->l_, value);
+    lua_settable(this->l_, -3);
     return *this;
   }
 
   template<class T>
   inline IndexValue<IndexValue> operator[](const T& key) {
-    return IndexValue<IndexValue>(*this, l_, key);
+    return IndexValue<IndexValue>(*this, this->l_, key);
   }
 
   inline void push() const {
     // push the table, push the key, get the value (pops the key and pushes the value)
-    lua::push(l_, next_);
-    lua_pushvalue(l_, key_index_);
-    lua_gettable(l_, -2);
+    fw::lua::push(this->l_, next_);
+    lua_pushvalue(this->l_, key_index_);
+    lua_gettable(this->l_, -2);
 
     // pop the table (one below the value)
-    lua_remove(l_, -2);
+    lua_remove(this->l_, -2);
   }
 
   inline bool is_nil() {
-    return !ref_;
+    push();
+    impl::PopStack pop(this->l_, 1);
+    return lua_isnil(this->l_, -1);
   }
 
   std::string debug_string() const {
     push();
-    impl::PopStack pop(l_, 1);
+    impl::PopStack pop(this->l_, 1);
 
     // TODO: check if it's a table and convert that?
     {
       size_t len = 0;
-      const char* str = luaL_tolstring(l_, -1, &len);
-      impl::PopStack pop2(l_, 1);
+      const char* str = luaL_tolstring(this->l_, -1, &len);
+      impl::PopStack pop2(this->l_, 1);
       return std::string(str, len);
     }
   }
@@ -288,7 +291,7 @@ public:
   Value(lua_State* l, const T& value)
     : BaseValue<Value>(l) {
     push(value);
-    ref_(l, -1);
+    ref_ = Reference(l, -1);
     type_ = lua_type(l, -1);
   }
 
@@ -323,7 +326,7 @@ public:
   bool has_key(const T& key) {
     impl::PopStack pop(l_, 2);
     push();
-    lua::push(l_, key);
+    fw::lua::push(l_, key);
     return lua_gettable(l_, -2) != LUA_TNIL;
   }
 
@@ -373,6 +376,12 @@ private:
 inline std::ostream& operator <<(std::ostream& os, const Value& v) {
   os << v.debug_string();
   return os;
+}
+
+// Specializations of peek for Value. The generic peek<T> is declared in push.h.
+template<>
+inline fw::lua::Value peek(lua_State* l, int index) {
+  return fw::lua::Value(l, index);
 }
 
 template<>
@@ -453,8 +462,8 @@ IndexValue<NextType>::operator Value() {
   // Push our value onto the stack, construct a new Value with that pushed reference,
   // use PopStack to pop ourselves from the stack when done.
   push();
-  impl::PopStack pop(l_, 1);
-  return Value(l_, -1);
+  impl::PopStack pop(this->l_, 1);
+  return Value(this->l_, -1);
 }
 
 }

@@ -95,7 +95,7 @@ namespace ww {
 
 		case Session::logged_in:
 			{
-				std::string s = (boost::format(fw::text("title.login.logged-in")) % Session::get_instance()->get_user_name()).str();
+				std::string s = std::format(fw::text("title.login.logged-in"), Session::get_instance()->get_user_name());
 				fw::gui::set_text(msg_text, s);
 			}
 			msg_icon->setVisible(false);

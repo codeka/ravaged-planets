@@ -1,5 +1,4 @@
 #include <functional>
-#include <boost/format.hpp>
 
 //#include <luabind/error.hpp>
 //#include <luabind/object.hpp>

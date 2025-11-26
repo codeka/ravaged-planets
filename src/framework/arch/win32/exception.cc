@@ -1,13 +1,13 @@
+#include <framework/exception.h>
 
 #include <string>
 #include <vector>
 
+#include <absl/strings/str_cat.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <framework/arch/win32/stack_walker.h>
-#include <framework/exception.h>
 
 namespace fw {
 
@@ -28,20 +28,17 @@ public:
       char const *symbol_type, char const *pdb_name, uint64_t file_version) {
     std::string line;
     if (file_version == 0) {
-      line = (boost::format("%1%:%2% (%3%), size: %4% bytes (result: %5%), symbol-type: %6%, PDB: '%7%'")
-          % image % module % (void *)base_addr
-          % size % result % symbol_type % pdb_name).str();
+      line = absl::StrCat(image, ":", module, " (", absl::Hex(base_addr), "), size: ", size,
+          " bytes (result: ", result, "), symbol-type: ", symbol_type, ", PDB: '", pdb_name);
     } else {
       uint32_t v4 = static_cast<uint32_t>(file_version & 0xFFFF);
       uint32_t v3 = static_cast<uint32_t>((file_version >> 16) & 0xFFFF);
       uint32_t v2 = static_cast<uint32_t>((file_version >> 32) & 0xFFFF);
       uint32_t v1 = static_cast<uint32_t>((file_version >> 48) & 0xFFFF);
 
-      line = (boost::format(
-          "%1%:%2% (%3%), size: %4% bytes, version: %5%.%6%.%7%.%8% (result: %9%), symbol-type: %10%, PDB: '%11%'")
-          % image % module % (void *)base_addr
-          % size % v1 % v2 % v3 % v4
-          % result % symbol_type % pdb_name).str();
+      line = absl::StrCat(image, ":", module, " (", absl::Hex(base_addr), "), size: ", size,
+          " bytes, version: ", v1, ".", v2, ".", v3, ".", v4, " (result: ", result,
+          "), symbol-type: ", symbol_type, ", PDB: ", pdb_name);
     }
 
     _modules.push_back(line);

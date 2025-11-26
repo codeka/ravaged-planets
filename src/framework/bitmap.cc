@@ -116,7 +116,7 @@ void Bitmap::prepare_write(int width, int height) {
 }
 
 void Bitmap::load_bitmap(fs::path const &filename) {
-  debug << boost::format("loading image: %1%") % filename << std::endl;
+  debug << "loading image: " << filename << std::endl;
   prepare_write(0, 0);
   data_->filename = filename;
 
@@ -173,7 +173,7 @@ void Bitmap::save_bitmap(fs::path const &filename) const {
   if (data_ == 0)
     return;
 
-  debug << boost::format("saving image: %1%") % filename << std::endl;
+  debug << "saving image: " << filename << std::endl;
 
   fs::path path(filename);
   if (fs::exists(path)) {

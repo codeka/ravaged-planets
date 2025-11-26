@@ -1,8 +1,9 @@
 #include <functional>
 #include <memory>
 #include <string>
+
+#include <absl/strings/str_cat.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 
 #include <framework/framework.h>
 #include <framework/exception.h>
@@ -66,7 +67,7 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
       << (Builder<Label>(px(40), px(20), px(417), px(49))
         << Label::background("title_heading"))
       << (Builder<Label>(px(40), px(70), px(500), px(16))
-          << Label::text((boost::format(fw::text("title.sub-title")) % "Dean Harding" % "dean@codeka.com.au").str()))
+          << Label::text(std::vformat(fw::text("title.sub-title"), std::make_format_args("Dean Harding", "dean@codeka.com.au"))))
       << (Builder<Label>(px(40), px(100), px(200), px(20))
         << Label::text(fw::text("title.new-game.choose-map")))
       << (Builder<Listbox>(px(40), px(120), px(200), sum(pct(100), px(-190)))
@@ -183,7 +184,8 @@ void NewGameWindow::update() {
         // list and also print a message to the chat window saying that they're ready
         need_refresh_players_ = true;
 
-        std::string msg = (boost::format(fw::text("title.new-game.ready-to-go")) % p->get_user_name()).str();
+        std::string user_name = p->get_user_name();
+        std::string msg = std::vformat(fw::text("title.new-game.ready-to-go"), std::make_format_args(user_name));
         append_chat(msg);
       }
     }
@@ -331,9 +333,12 @@ void NewGameWindow::update_selection() {
   game::WorldSummary const &ws = get_selected_world_summary();
   SimulationThread::get_instance()->set_map_name(ws.get_name());
 
-  wnd_->find<Label>(MAP_NAME_ID)->set_text((boost::format("%s by %s") % ws.get_name() % ws.get_author()).str());
-  wnd_->find<Label>(MAP_SIZE_ID)->set_text((boost::format(fw::text("title.new-game.map-size"))
-      % ws.get_width() % ws.get_height() % ws.get_num_players()).str());
+  wnd_->find<Label>(MAP_NAME_ID)->set_text(absl::StrCat(ws.get_name(), " by ", ws.get_author()));
+  int width = ws.get_width();
+  int height = ws.get_height();
+  int num_players = ws.get_num_players();
+  wnd_->find<Label>(MAP_SIZE_ID)->set_text(std::vformat(fw::text("title.new-game.map-size"),
+      std::make_format_args(width, height, num_players)));
   wnd_->find<Label>(MAP_SCREENSHOT_ID)->set_background(ws.get_screenshot());
 }
 

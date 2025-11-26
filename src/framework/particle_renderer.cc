@@ -240,7 +240,7 @@ bool ParticleRenderer::add_particle(RenderState &rs, int base_index, std::shared
 
 void ParticleRenderer::render_particles(RenderState &rs, float offset_x, float offset_z) {
   for (ParticleRenderer::ParticleList::iterator it = rs.particles.begin(); it != rs.particles.end(); ++it) {
-    auto& p = it->lock();
+    auto p = it->lock();
     if (!p) {
       continue;
     }

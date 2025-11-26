@@ -3,6 +3,7 @@
 #include <framework/logging.h>
 #include <framework/lua/base.h>
 #include <framework/lua/error.h>
+#include <framework/lua/push.h>
 #include <framework/lua/reference.h>
 
 namespace fw::lua {

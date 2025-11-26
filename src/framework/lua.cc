@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <map>
 
-#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <framework/lua.h>
@@ -69,21 +68,19 @@ void LuaContext::add_path(fs::path const &path) {
 
 bool LuaContext::load_script(fs::path const &filename) {
   last_error_ = "";
-  debug << boost::format("loading script: %1%") % filename << std::endl;
+  debug << "loading script: " << filename << std::endl;
 
   int ret = luaL_loadfile(l_, filename.string().c_str());
   if (ret != 0) {
     last_error_ = lua_tostring(l_, -1);
-    debug << boost::format("ERR: could not load Lua script %1%:\n%2%")
-        % filename % last_error_ << std::endl;
+    debug << "ERR: could not load Lua script " << filename << ":\n" << last_error_ << std::endl;
     return false;
   }
 
   ret = lua_pcall(l_, 0, 0, 0);
   if (ret != 0) {
     last_error_ = lua_tostring(l_, -1);
-    debug << boost::format("ERR: could not load Lua script %1%:\n%2%")
-        % filename % last_error_ << std::endl;
+    debug << "ERR: could not load Lua script " << filename << ":\n" << last_error_ << std::endl;
     return false;
   }
 

@@ -1,6 +1,6 @@
+#include <format>
 #include <functional>
 #include <string>
-#include <boost/format.hpp>
 
 #include <framework/framework.h>
 #include <framework/lang.h>
@@ -35,13 +35,15 @@ MainMenuWindow::~MainMenuWindow() {
 
 void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
   new_game_window_ = new_game_window;
+  std::string name = "Dean Harding";
+  std::string email = "dean@codeka.com";
   wnd_ = Builder<Window>(px(0), px(0), pct(100), pct(100)) << Window::background("title_background")
       << Widget::visible(false)
       // Title "Ravaged Planets"
       << (Builder<Label>(px(40), px(20), px(417), px(49)) << Label::background("title_heading"))
       // "A game by Dean Harding (dean@codeka.com.au)" text
       << (Builder<Label>(px(40), px(70), px(500), px(16))
-          << Label::text((boost::format(fw::text("title.sub-title")) % "Dean Harding" % "dean@codeka.com.au").str()))
+          << Label::text(std::vformat(fw::text("title.sub-title"), std::make_format_args(name, email))))
       << (Builder<Button>(px(40), px(100), px(180), px(30)) << Button::text(fw::text("title.new-game"))
           << Widget::click(std::bind(&MainMenuWindow::new_game_clicked, this, _1)))
       << (Builder<Button>(px(40), px(140), px(180), px(30)) << Button::text(fw::text("title.join-game")))

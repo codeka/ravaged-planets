@@ -2,6 +2,8 @@
 #include <list>
 #include <thread>
 
+#include <absl/strings/str_cat.h>
+
 #include <SDL2/SDL.h>
 
 #include <framework/exception.h>
@@ -19,10 +21,10 @@ std::string to_string(gl_error_info const &err_info) {
   GLenum err = err_info.value();
   char const *err_msg = "TODO";//reinterpret_cast<char const *>(gluErrorString(err));
   if (err_msg == nullptr) {
-    return (boost::format("0x%1$08x") % err).str();
+    return absl::StrCat(absl::Hex(err));
   }
 
-  return (boost::format("0x%1$08x : %2%") % err % err_msg).str();
+  return absl::StrCat(absl::Hex(err), ": ", err_msg);
 }
 
 int query(GLenum pname) {
@@ -221,7 +223,7 @@ void Graphics::ensure_render_thread() {
 }
 
 void Graphics::toggle_fullscreen() {
-  fw::debug << boost::format("switching to %1%...") % (windowed_ ? "full-screen" : "windowed") << std::endl;
+  fw::debug << "switching to " << (windowed_ ? "full-screen" : "windowed") << std::endl;
   windowed_ = !windowed_;
 
   fw::Settings stg;

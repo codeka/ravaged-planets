@@ -1,5 +1,7 @@
 #include <memory>
 
+#include <absl/strings/str_cat.h>
+
 #include <framework/bitmap.h>
 #include <framework/framework.h>
 #include <framework/logging.h>
@@ -47,7 +49,7 @@ void WorldReader::read(std::string name) {
 
   for (int patch_z = 0; patch_z < terrain_->get_patches_length(); patch_z++) {
     for (int patch_x = 0; patch_x < terrain_->get_patches_width(); patch_x++) {
-      std::string name = (boost::format("splatt-%1%-%2%.png") % patch_x % patch_z).str();
+      std::string name = absl::StrCat("splatt-", patch_x, "-", patch_z, ".png");
       wfe = wf.get_entry(name, false /* for_write */);
 
       fw::Bitmap splatt(wfe.get_full_path().c_str());

@@ -1,6 +1,5 @@
 #include <functional>
 #include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 
 #include <framework/http.h>
 #include <framework/xml.h>
@@ -18,7 +17,7 @@ void Http::initialize() {
 
   curl_version_info_data *curl_version = curl_version_info(CURLVERSION_NOW);
   if (curl_version->age >= 0) {
-    debug << boost::format("libcurl (%1%) initialized") % curl_version->version << std::endl;
+    debug << "libcurl (" << curl_version->version << ") initialized" << std::endl;
   }
 
 #if defined(_DEBUG)
@@ -190,8 +189,8 @@ absl::Status Http::get_status() const {
 void Http::check_error(CURLcode error, char const *fn) {
   if (error != CURLE_OK) {
     last_error_ = error;
-    debug << boost::format("WARN: error returned from libcurl call: %1%") % fn << std::endl;
-    debug << boost::format("  [%1%] %2%") % last_error_ % curl_easy_strerror(last_error_) << std::endl;
+    debug << "WARN: error returned from libcurl call: " << fn << std::endl;
+    debug << "  [" << last_error_ << "] " << curl_easy_strerror(last_error_) << std::endl;
   }
 }
 
@@ -206,7 +205,7 @@ void Http::do_action() {
     last_error_ = CURLE_FAILED_INIT;
   } else {
     if (g_enable_debug) {
-      debug << boost::format("CURL begin: %1%") % url_ << std::endl;
+      debug << "CURL begin: " << url_ << std::endl;
       CHECK(curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1));
     }
     CHECK(curl_easy_setopt(handle_, CURLOPT_DEBUGFUNCTION, &write_debug));

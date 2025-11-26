@@ -1,3 +1,4 @@
+#include <format>
 #include <functional>
 
 #include <framework/framework.h>
@@ -105,19 +106,23 @@ void EntityDebug::update() {
     PositionComponent *pos = entity->get_component<PositionComponent>();
 
     if (pos != 0) {
-      new_pos_value = (boost::format("Pos: (%1$.1f, %2$.1f, %3$.1f)")
-          % pos->get_position()[0] % pos->get_position()[1] % pos->get_position()[2]).str();
+      new_pos_value =
+        std::format(
+          "Pos: ({:1f}, {:1f}, {:1f})",
+          pos->get_position()[0],
+          pos->get_position()[1],
+          pos->get_position()[2]);
     }
 
     MoveableComponent *moveable = entity->get_component<MoveableComponent>();
     if (moveable != nullptr) {
       fw::Vector goal = moveable->get_goal();
-      new_goal_value = (boost::format("Goal: (%1$.1f, %2$.1f, %3$.1f)") % goal[0] % goal[1] % goal[2]).str();
+      new_goal_value = std::format("Goal: ({:1f}, {:1f}, {:1f})", goal[0], goal[1], goal[2]);
     }
   }
 
   auto cursor = game::World::get_instance()->get_terrain()->get_cursor_location();
-  new_cursor_value = (boost::format("Cursor: (%1$.1f, %2$.1f, %3$.1f)") % cursor[0] % cursor[1] % cursor[2]).str();
+  new_cursor_value = std::format("Cursor: ({:1f}, {:1f}, {:1f})", cursor[0], cursor[1], cursor[2]);
 
   wnd_->find<Label>(POSITION_ID)->set_text(new_pos_value);
   wnd_->find<Label>(GOAL_ID)->set_text(new_goal_value);

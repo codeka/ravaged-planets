@@ -165,7 +165,7 @@ public:
       } else if (key == "state") {
         state_ = kvp.value<std::string>();
       } else {
-        fw::debug << boost::format("WARN: unknown option for findunits: %1%") % key << std::endl;
+        fw::debug << "WARN: unknown option for findunits: " << key << std::endl;
       }
     }
 
@@ -342,8 +342,8 @@ void AIPlayer::world_loaded() {
 
   auto start_it = game::World::get_instance()->get_player_starts().find(player_no_);
   if (start_it == game::World::get_instance()->get_player_starts().end()) {
-    fw::debug << boost::format("WARN: no player_start defined for player %1%, choosing random")
-        % static_cast<int>(player_no_) << std::endl;
+    fw::debug << "WARN: no player_start defined for player " << player_no_ << ", choosing random"
+              << std::endl;
     start_loc = fw::Vector(13.0f, 0, 13.0f); // <todo, Random
   } else {
     start_loc = start_it->second;

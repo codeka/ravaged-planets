@@ -1,5 +1,7 @@
 #include <memory>
 
+#include <absl/strings/str_cat.h>
+
 #include <framework/framework.h>
 #include <framework/logging.h>
 #include <framework/bitmap.h>
@@ -58,7 +60,7 @@ void WorldWriter::write_terrain(game::WorldFile &wf) {
     for (int patch_x = 0; patch_x < trn->get_patches_width(); patch_x++) {
       fw::Bitmap &splatt = trn->get_splatt(patch_x, patch_z);
 
-      std::string name = (boost::format("splatt-%1%-%2%.png") % patch_x % patch_z).str();
+      std::string name = absl::StrCat("splatt-", patch_x, "-", patch_z, ".png");
       wfe = wf.get_entry(name, true /* for_write */);
       splatt.save_bitmap(wfe.get_full_path());
     }
@@ -68,14 +70,15 @@ void WorldWriter::write_terrain(game::WorldFile &wf) {
 void WorldWriter::write_mapdesc(game::WorldFile &wf) {
   game::WorldFileEntry wfe = wf.get_entry(name_ + ".mapdesc", true /* for_write */);
   wfe.write("<mapdesc version=\"1\">");
-  wfe.write((boost::format("  <description>%1%</description>") % world_->get_description()).str());
-  wfe.write((boost::format("  <author>%1%</author>") % world_->get_author()).str());
+  wfe.write(absl::StrCat("  <description>", world_->get_description(), "</description>"));
+  wfe.write(absl::StrCat("  <author>", world_->get_author(), "</author>"));
   wfe.write("  <size width=\"3\" height=\"3\" />");
   wfe.write("  <players>");
   for (std::map<int, fw::Vector>::iterator it = world_->get_player_starts().begin();
       it != world_->get_player_starts().end(); ++it) {
     wfe.write(
-        (boost::format("    <player no=\"%1%\" start=\"%2% %3%\" />") % it->first % it->second[0] % it->second[2]).str());
+      absl::StrCat(
+        "    <player no=\"", it->first, "\" start=\"", it->second[0], " ", it->second[2], "\" />"));
   }
   wfe.write("  </players>");
   wfe.write("</mapdesc>");

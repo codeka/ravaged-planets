@@ -136,7 +136,7 @@ void SelectableComponent::update(float dt) {
 
       sg_node->set_world_matrix(m);
 
-      auto& shader_params = sg_node->get_shader_parameters();
+      auto shader_params = sg_node->get_shader_parameters();
       shader_params->set_color("selection_color", col);
     });
 }

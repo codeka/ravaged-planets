@@ -44,13 +44,14 @@ void Peer::send(Packet &pkt, int channel /*= 0*/) {
 }
 
 void Peer::on_connect() {
-  fw::debug << boost::format("connected to peer %1%:%2%") % peer_->address.host % peer_->address.port << std::endl;
+  fw::debug << "connected to peer " << peer_->address.host << ":" << peer_->address.port
+            << std::endl;
   connected_ = true;
 }
 
 void Peer::on_receive(ENetPacket *Packet, enet_uint8 /*channel*/) {
-  fw::debug << boost::format("packet received from %1%:%2%")
-      % peer_->address.host % peer_->address.port << std::endl;
+  fw::debug << "packet received from " << peer_->address.host << ":" << peer_->address.port
+            << std::endl;
 
   if (handler_) {
     PacketBuffer buff(reinterpret_cast<char *>(Packet->data), Packet->dataLength);
@@ -119,7 +120,7 @@ Peer *Host::connect(std::string address) {
   // connect to the server (we'll create 10 channels to begin with, maybe that'll change)
   ENetPeer *Peer = enet_host_connect(host_, &addr, 10, 0);
   if (Peer == nullptr) {
-    fw::debug << boost::format("error connecting to peer, no peer object created.") << std::endl;
+    fw::debug << "error connecting to peer, no peer object created." << std::endl;
     return 0;
   }
 
@@ -169,20 +170,20 @@ bool Host::try_listen(int port) {
   // 32 connections allowed, unlimited bandwidth
   host_ = enet_host_create(port == 0 ? 0 : &addr, 32, ENET_PROTOCOL_MAXIMUM_CHANNEL_COUNT, 0, 0);
   if (host_ == nullptr) {
-    fw::debug << boost::format("error listening on port %1%") % port << std::endl;
+    fw::debug << "error listening on port " << port << std::endl;
     return false;
   }
 
   return true;
 }
 
-void Host::on_peer_connect(ENetPeer *Peer) {
-  fw::debug << boost::format("new connection received from %1%:%2%") % Peer->address.host % Peer->address.port
-      << std::endl;
+void Host::on_peer_connect(ENetPeer *peer) {
+  fw::debug << "new connection received from " << peer->address.host << ":" << peer->address.port
+            << std::endl;
 
-  net::Peer *new_peer = new net::Peer(this, Peer, true);
+  net::Peer *new_peer = new net::Peer(this, peer, true);
   _new_connections.push_back(new_peer);
-  Peer->data = new_peer;
+  peer->data = new_peer;
 }
 
 std::vector<Peer *> Host::get_new_connections() {

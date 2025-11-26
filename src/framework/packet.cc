@@ -21,8 +21,8 @@ std::shared_ptr<Packet> create_packet(PacketBuffer &buff) {
   std::function<std::shared_ptr<Packet>()> fn = (*packet_registry)[buff.get_packet_type()];
   if (!fn) {
     fw::debug
-        << boost::format("  warning: received packet with unknown identifier %1%, dropping.") % buff.get_packet_type()
-        << std::endl;
+        << "  warning: received packet with unknown identifier " << buff.get_packet_type()
+        << ", dropping." << std::endl;
     return std::shared_ptr<Packet>();
   }
 

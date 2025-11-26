@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <string_view>
 
 #include <boost/lexical_cast.hpp>
 
@@ -31,7 +32,7 @@ public:
   XmlElement();
   XmlElement(std::shared_ptr<xml::XMLDocument> doc, xml::XMLElement *elem);
   XmlElement(XmlElement const &copy);
-  XmlElement(std::string const &xml);
+  XmlElement(std::string_view xml);
   ~XmlElement();
 
   XmlElement &operator =(XmlElement const &copy);
@@ -44,14 +45,14 @@ public:
   std::string get_name() const;
   std::string get_value() const;
   std::string get_text() const;
-  std::string get_attribute(std::string const &name) const;
+  std::string get_attribute(std::string_view name) const;
 
   template <typename T>
-  inline T get_attribute(std::string const &name) const {
+  inline T get_attribute(std::string_view name) const {
     return boost::lexical_cast<T>(get_attribute(name));
   }
 
-  bool is_attribute_defined(std::string const &name) const;
+  bool is_attribute_defined(std::string_view name) const;
 
   XmlElement get_first_child() const;
   XmlElement get_next_sibling() const;
@@ -68,7 +69,7 @@ public:
 //
 // \param format_name defines what we log (for debugging) and is also expected to be the name of the root XML element.
 // \param version The root XML element is expected to have a "version" attribute with a value corresponding to this.
-XmlElement load_xml(std::filesystem::path const &filepath, std::string const &format_name, int version);
+XmlElement load_xml(std::filesystem::path const &filepath, std::string_view format_name, int version);
 }
 
 

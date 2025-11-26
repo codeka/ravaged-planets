@@ -1,4 +1,4 @@
-#include <boost/format.hpp>
+#include <absl/strings/str_cat.h>
 
 #include <framework/logging.h>
 #include <framework/exception.h>
@@ -32,7 +32,7 @@ void Exception::log_stacktrace() {
 
 std::string to_string(errno_error_info const &err_info) {
   int err = err_info.value();
-  return (boost::format("(errno %1% \"%2%\") ") % err % strerror(err)).str();
+  return absl::StrCat("(errno ", err, " \"", strerror(err), "\") ");
 }
 
 std::string to_string(stacktrace_error_info const &err_info) {

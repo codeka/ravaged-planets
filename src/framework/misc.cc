@@ -2,8 +2,6 @@
 #include <random>
 #include <math.h>
 
-#include <boost/format.hpp>
-
 #include <framework/math.h>
 #include <framework/misc.h>
 

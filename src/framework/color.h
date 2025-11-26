@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/format.hpp>
+#include <absl/strings/str_format.h>
 
 #include <framework/misc.h>
 
@@ -186,7 +186,7 @@ inline bool operator !=(fw::Color const &lhs, fw::Color const &rhs) {
 }
 
 inline std::ostream &operator <<(std::ostream &str, fw::Color const &col) {
-  str << boost::format("[a=%1$.3f, r=%2$.3f, g=%3$.3f, b=%4$.3f]") % col.a % col.r % col.g % col.b;
+  str << absl::StrFormat("[a={:3f}, r={:3f}, g={:3f}, b={:3f}]", col.a, col.r, col.g, col.b);
   return str;
 }
 

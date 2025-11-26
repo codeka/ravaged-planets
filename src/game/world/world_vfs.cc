@@ -65,11 +65,11 @@ void WorldSummary::parse_mapdesc_file(fs::path const &filename) const {
         if (player.get_value() == "player") {
           num_players_ ++;
         } else {
-          fw::debug << boost::format("WARN: unknown child of <players>: %1%") % child.get_value() << std::endl;
+          fw::debug << "WARN: unknown child of <players>: " << child.get_value() << std::endl;
         }
       }
     } else {
-      fw::debug << boost::format("WARN: unknown child of <mapdesc>: %1%") % child.get_value() << std::endl;
+      fw::debug << "WARN: unknown child of <mapdesc>: " << child.get_value() << std::endl;
     }
   }
 }
@@ -204,7 +204,7 @@ WorldFileEntry WorldFile::get_entry(std::string name, bool for_write) {
 }
 
 void populate_maps(std::vector<game::WorldSummary> &list, fs::path path) {
-  fw::debug << boost::format("populating maps from: %1%") % path.string()
+  fw::debug << "populating maps from: " << path.string()
       << std::endl;
 
   if (!fs::exists(path) || !fs::is_directory(path))
@@ -212,7 +212,7 @@ void populate_maps(std::vector<game::WorldSummary> &list, fs::path path) {
 
   for (fs::directory_iterator it(path); it != fs::directory_iterator(); ++it) {
     fs::path p(*it);
-    fw::debug << boost::format("  - %1%") % p.string() << std::endl;
+    fw::debug << "  - " << p.string() << std::endl;
     if (fs::is_directory(p)) {
       game::WorldSummary ws;
       ws.initialize(p.filename().string());

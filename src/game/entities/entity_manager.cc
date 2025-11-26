@@ -76,7 +76,7 @@ std::shared_ptr<Entity> EntityManager::create_entity(
 
   ent->add_attribute(ent::EntityAttribute("patch_offset_", fw::Vector(0, 0, 0)));
 
-  fw::debug << boost::format("created entity: %1% (identifier: %2%)") % template_name % id << std::endl;
+  fw::debug << "created entity: " << template_name << "(identifier: " << id << ")" << std::endl;
 
   for (auto& pair : ent->components_) {
     EntityComponent *comp = pair.second;
@@ -94,7 +94,7 @@ void EntityManager::destroy(std::weak_ptr<Entity> entity) {
   std::shared_ptr<ent::Entity> sp = entity.lock();
   if (sp) {
     float age = sp->get_age();
-    fw::debug << boost::format("destroying entity: %1% (age: %2%)") % sp->get_name() % age << std::endl;
+    fw::debug << "destroying entity: " << sp->get_name() << "(age: " << age << ")" << std::endl;
 
     destroyed_entities_.push_back(sp);
   }

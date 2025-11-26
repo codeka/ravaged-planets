@@ -1,6 +1,6 @@
 #include <filesystem>
 
-#include <boost/format.hpp>
+#include <absl/strings/str_cat.h>
 
 #include <framework/exception.h>
 #include <framework/logging.h>
@@ -56,13 +56,13 @@ std::string to_string(xml_error_info const &err_info) {
   }
 }
 
-XmlElement load_xml(fs::path const &filepath, std::string const & format_name, int version) {
+XmlElement load_xml(fs::path const &filepath, std::string_view format_name, int version) {
   if (!fs::is_regular_file(filepath)) {
-    debug << boost::format("error: could not load %1% \"%2%\": no such file") % format_name % filepath.string()
-        << std::endl;
+    debug << "error: could not load " << format_name << " \"" << filepath << "\": no such file"
+          << std::endl;
     return XmlElement();
   }
-  debug << boost::format("loading %1%: \"%2%\"") % format_name % filepath.string() << std::endl;
+  debug << "loading " << format_name << ": \"" << filepath << "\"" << std::endl;
 
   std::shared_ptr<xml::XMLDocument> doc(new xml::XMLDocument());
   doc->LoadFile(filepath.string().c_str());
@@ -76,7 +76,7 @@ XmlElement load_xml(fs::path const &filepath, std::string const & format_name, i
   if (root != 0) {
     if (std::string(root->Value()) != format_name) {
       BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(
-          (boost::format("invalid root node, expected \"%1%\" found \"%2%\"") % format_name % root->Value()).str()));
+          absl::StrCat("invalid root node, expected \"", format_name, "\" found \"", root->Value(), "\"")));
     }
 
     std::string actual_version = "1";
@@ -85,8 +85,7 @@ XmlElement load_xml(fs::path const &filepath, std::string const & format_name, i
     }
     if (actual_version != boost::lexical_cast<std::string>(version)) {
       BOOST_THROW_EXCEPTION(fw::Exception()
-          << fw::message_error_info((boost::format("invalid %1% version: %2% (expected \"%3%\")")
-              % format_name % actual_version % version).str()));
+          << fw::message_error_info(absl::StrCat("invalid ", format_name, " version: ", actual_version, " (expected ", version, ")")));
     }
   }
 
@@ -107,9 +106,9 @@ XmlElement::XmlElement(XmlElement const &copy) :
     doc_(copy.doc_), elem_(copy.elem_) {
 }
 
-XmlElement::XmlElement(std::string const &xml) {
+XmlElement::XmlElement(std::string_view xml) {
   std::shared_ptr<xml::XMLDocument> doc(new xml::XMLDocument());
-  doc->Parse(xml.c_str());
+  doc->Parse(xml.data(), xml.size());
 
   doc_ = doc;
   elem_ = doc->FirstChildElement();
@@ -157,18 +156,20 @@ std::string XmlElement::get_text() const {
   return "";
 }
 
-std::string XmlElement::get_attribute(std::string const &name) const {
-  char const *ParticleRotation = elem_->Attribute(name.c_str());
-  if (ParticleRotation == 0) {
+std::string XmlElement::get_attribute(std::string_view name) const {
+  std::string name2(name);
+  char const *attr = elem_->Attribute(name2.c_str());
+  if (attr == nullptr) {
     BOOST_THROW_EXCEPTION(fw::Exception()
-        << fw::message_error_info((boost::format("'%1%' attribute expected.") % name).str()));
+        << fw::message_error_info(absl::StrCat("'", name, "' attribute expected.")));
   }
 
-  return ParticleRotation;
+  return attr;
 }
 
-bool XmlElement::is_attribute_defined(std::string const &name) const {
-  return (elem_->Attribute(name.c_str()) != 0);
+bool XmlElement::is_attribute_defined(std::string_view name) const {
+  std::string name2(name);
+  return (elem_->Attribute(name2.c_str()) != 0);
 }
 
 XmlElement XmlElement::get_first_child() const {

@@ -22,7 +22,7 @@ public:
   // Constructs a new Userdata that refers to the given object. When calling this constructor, you must use in-place
   // new with the userdata on the stack, like so:
   // new(lua_newuserdata(l_, sizeof(Userdata<T>))) Userdata<T>(l_, object)
-  Userdata(lua_State* l, T* owner) : BaseValue<Userdata<T>>(l), ref_(l_, -1), owner_(owner) {
+  Userdata(lua_State* l, T* owner) : BaseValue<Userdata<T>>(l), ref_(this->l_, -1), owner_(owner) {
   }
 
   // Attempt to cast the given value as a Userdata. Returns nullopt if it's not valid.

@@ -1,5 +1,5 @@
 
-#include <boost/format.hpp>
+#include <absl/strings/str_cat.h>
 
 #include <framework/debug_view.h>
 #include <framework/framework.h>
@@ -54,10 +54,11 @@ void DebugView::update(float dt) {
     fw::Framework *frmwrk = fw::Framework::get_instance();
 
     Label *fps = wnd_->find<Label>(FPS_ID);
-    fps->set_text((boost::format("%1% fps") % frmwrk->get_timer()->get_fps()).str());
+    fps->set_text(absl::StrCat(frmwrk->get_timer()->get_fps(), " fps"));
 
     Label *particles = wnd_->find<Label>(PARTICLES_ID);
-    particles->set_text((boost::format("%1% particles") % frmwrk->get_particle_mgr()->get_num_active_particles()).str());
+    particles->set_text(
+      absl::StrCat(frmwrk->get_particle_mgr()->get_num_active_particles(), " particles"));
 
     time_to_update_ = 1.0f;
   }

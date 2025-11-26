@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <format>
 #include <functional>
 
 #include <framework/bitmap.h>
@@ -140,7 +141,7 @@ void World::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
     }
   }
 
-  fs::path full_path = base_path / (boost::format("screen-%1$04d.png") % (max_file_number + 1)).str();
+  fs::path full_path = base_path / std::format("screen-{:04d}.png", (max_file_number + 1));
   screenshot->save_bitmap(full_path.string());
 }
 

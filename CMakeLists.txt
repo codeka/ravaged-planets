@@ -5,8 +5,8 @@ project (RavagedPlanets)
 # Add our custom CMAKE modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
-# Make sure we compile with C++17 features
-set(CMAKE_CXX_STANDARD 17)
+# Make sure we compile with C++20 features
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS off)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 

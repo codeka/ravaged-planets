@@ -90,7 +90,7 @@ void Texture::create(fs::path const &fn) {
 
   // Local the image on this thread to avoid loading it on the render thread.
   fs::path filename = fn;
-  debug << boost::format("loading texture: %1%") % filename << std::endl;
+  debug << "loading texture: " << filename << std::endl;
   int width, height, channels;
   unsigned char* pixels = stbi_load(filename.string().c_str(), &width, &height, &channels, 4);
 

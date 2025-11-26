@@ -1,6 +1,8 @@
 
 #include <functional>
 
+#include <absl/strings/str_cat.h>
+
 #include <framework/framework.h>
 #include <framework/camera.h>
 #include <framework/graphics.h>
@@ -304,26 +306,31 @@ void PathingTool::find_path() {
 
   std::vector<fw::Vector> full_path;
   if (!path_find_->find(full_path, start_pos_, end_pos_)) {
-    statusbar->set_message((boost::format("No path found after %1%ms") % (path_find_->total_time * 1000.0f)).str());
+    statusbar->set_message(
+      absl::StrCat("No path found after ", path_find_->total_time * 1000.0f, "ms"));
   } else {
     std::vector<fw::Vector> path;
     path_find_->simplify_path(full_path, path);
-    statusbar->set_message((boost::format("Path found in %1%ms, %2% nodes, %3% nodes (simplified)")
-        % (path_find_->total_time * 1000.0f)
-        % full_path.size()
-        % path.size()).str());
+    statusbar->set_message(
+      absl::StrCat(
+        "Path found in ", path_find_->total_time * 1000.0f, "ms, ", full_path.size(), " nodes, ",
+        path.size(), " nodes (simplified)"));
 
     std::vector<fw::vertex::xyz_c> buffer;
 
     if (simplify_) {
       for(fw::Vector loc : path) {
-        float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
-        buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));
+        float height = get_terrain()->get_vertex_height(
+          static_cast<int>(loc[0]), static_cast<int>(loc[2]));
+        buffer.push_back(
+          fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));
       }
     } else {
       for(fw::Vector loc : full_path) {
-        float height = get_terrain()->get_vertex_height(static_cast<int>(loc[0]), static_cast<int>(loc[2]));
-        buffer.push_back(fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));
+        float height = get_terrain()->get_vertex_height(
+          static_cast<int>(loc[0]), static_cast<int>(loc[2]));
+        buffer.push_back(
+          fw::vertex::xyz_c(loc[0], height + 0.2f, loc[2], fw::Color(1, 0.5f, 0.5f, 1)));
       }
     }
 

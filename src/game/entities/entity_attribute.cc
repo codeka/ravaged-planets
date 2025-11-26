@@ -1,4 +1,3 @@
-#include <boost/format.hpp>
 
 #include <framework/logging.h>
 #include <game/entities/entity_attribute.h>
@@ -28,8 +27,8 @@ EntityAttribute &EntityAttribute::operator =(EntityAttribute const &copy) {
 
 void EntityAttribute::set_value(boost::any value) {
   if (value_.type() != value.type()) {
-    fw::debug << boost::format("WARN: cannot set value of type %1% to value of type %2%")
-        % value_.type().name() % value.type().name() << std::endl;
+    fw::debug << "WARN: cannot set value of type " << value_.type().name() << " to value of type "
+              << value.type().name() << std::endl;
     return;
   }
 

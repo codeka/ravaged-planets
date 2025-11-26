@@ -162,9 +162,9 @@ void Framework::language_initialize() {
   Settings stg;
 
   const std::vector<LangDescription> langs = fw::get_languages();
-  debug << boost::format("%1% installed language(s):") % langs.size() << std::endl;
+  debug << langs.size() << " installed language(s):" << std::endl;
   for(const LangDescription &l : langs) {
-    debug << boost::format(" %1% (%2%)") % l.name % l.display_name << std::endl;
+    debug << l.name << " (" << l.display_name << ")" << std::endl;
   }
 
   std::string lang_name = stg.get_value<std::string>("lang");

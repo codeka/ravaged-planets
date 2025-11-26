@@ -3,7 +3,6 @@
 #include <fstream>
 #include <string>
 
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <framework/lang.h>
@@ -30,10 +29,10 @@ Lang::Lang(std::string const &lang_name) :
     ins.open(lang_path.string().c_str());
   }
   if (!ins) {
-    debug << boost::format("WARN: could not find language file: %1%, loading en.lang instead.") % lang_name
-        << std::endl;
+    debug << "WARN: could not find language file: " << lang_name << ", loading en.lang instead." 
+          << std::endl;
   } else {
-    debug << boost::format("loading language: \"%1%\"") % lang_path.string() << std::endl;
+    debug << "loading language: " << lang_path <<std::endl;
 
     std::string key, ParticleRotation;
     int line_num = 0;
@@ -60,11 +59,11 @@ std::string Lang::get_string(std::string const &name) {
   if (it == strings_.end()) {
     it = def_strings_.find(name);
     if (it == def_strings_.end()) {
-      debug << boost::format("WARN: string \"%1%\" does not exist in %2% *or* in en.lang!") % name % lang_name_
-          << std::endl;
+      debug << "WARN: string \"" << name << "\" does not exist in " << lang_name_
+            << " *or* in en.lang!" << std::endl;
       return name;
     } else {
-      debug << boost::format("WARN: string \"%1%\" does not exist in %2%") % name % lang_name_ << std::endl;
+      debug << "WARN: string \"" << name << "\" does not exist in " << lang_name_ << std::endl;
     }
   }
 
@@ -138,8 +137,8 @@ bool get_lang_line(std::fstream &fs, std::string &key, std::string &ParticleRota
       // if this is the first line in a sequence, we'll need to split on the first "="
       int equals = line.find('=');
       if (equals == std::string::npos) {
-        debug << boost::format("WARN: invalid line in %1%(%2%), expected to find '='") % file_name % line_num
-            << std::endl;
+        debug << "WARN: invalid line in " << file_name << " (" << line_num
+              << "), expected to find '='" << std::endl;
         continue;
       }
 

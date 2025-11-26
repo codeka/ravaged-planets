@@ -5,7 +5,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include <boost/format.hpp>
+#include <absl/strings/str_cat.h>
 
 #include <stb/stb_vorbis.h>
 
@@ -51,7 +51,7 @@ std::string describe_error(ALenum error) {
   case AL_OUT_OF_MEMORY:
     return "AL_OUT_OF_MEMORY";
   default:
-    return (boost::format("UNKNOWN:%1%") % error).str();
+    return absl::StrCat("UNKNOWN:", error);
   }
 }
 

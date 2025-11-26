@@ -50,7 +50,7 @@ public:
     build(l);
   }
 private:
-  void Metatable<Owner>::build(lua_State* l);
+  void build(lua_State* l);
 
   // This function is a callback that we push for the __index metamethod. We'll figure out the correct method or
   // property or whatever is being requested, and push that onto the stack so Lua can call it.

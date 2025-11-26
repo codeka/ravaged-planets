@@ -57,7 +57,7 @@ void MeshComponent::initialize() {
     }
   }
 
-  auto& model = fw::Framework::get_instance()->get_model_manager()->get_model(model_name_);
+  auto model = fw::Framework::get_instance()->get_model_manager()->get_model(model_name_);
   auto sg_node = model->create_node(color);
   sg_node_ = sg_node;
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(

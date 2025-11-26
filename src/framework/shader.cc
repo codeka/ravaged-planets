@@ -6,7 +6,6 @@
 #include <map>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 
 #include <framework/color.h>
 #include <framework/exception.h>
@@ -328,28 +327,28 @@ void ShaderParameters::apply(ShaderProgram *prog) const {
     texture_unit++;
   }
 
-  for (auto& it = matrices_.begin(); it != matrices_.end(); ++it) {
+  for (auto it = matrices_.begin(); it != matrices_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.m[0]));
     }
   }
 
-  for (auto& it = vectors_.begin(); it != vectors_.end(); ++it) {
+  for (auto it = vectors_.begin(); it != vectors_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform3fv(var.location, 1, it->second.v));
     }
   }
 
-  for (auto& it = colors_.begin(); it != colors_.end(); ++it) {
+  for (auto it = colors_.begin(); it != colors_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a));
     }
   }
 
-  for (auto& it = scalars_.begin(); it != scalars_.end(); ++it) {
+  for (auto it = scalars_.begin(); it != scalars_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
       FW_CHECKED(glUniform1f(var.location, it->second));
