@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+
+#include <absl/strings/ascii.h>
+
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/filesystem.hpp>
@@ -84,6 +87,20 @@ inline std::vector<T> split(std::string s, std::string delim = " \r\n\t") {
     values.push_back(boost::lexical_cast<T>(*it));
   }
   return values;
+}
+
+ABSL_MUST_USE_RESULT inline std::string_view StripLeadingSpaces(std::string_view str) { 
+  auto it = std::find_if_not(str.begin(), str.end(), absl::ascii_isspace);
+  return str.substr(it - str.begin());
+}
+
+ABSL_MUST_USE_RESULT inline std::string_view StripTrailingSpaces(std::string_view str) { 
+  auto it = std::find_if_not(str.rbegin(), str.rend(), absl::ascii_isspace);
+  return str.substr(0, str.rend() - it);
+}
+
+ABSL_MUST_USE_RESULT inline std::string_view StripSpaces(std::string_view str) { 
+  return StripLeadingSpaces(StripTrailingSpaces(str));
 }
 
 // generates a random float between 0 and 1.

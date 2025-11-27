@@ -36,17 +36,17 @@ fs::path user_base_path() {
 }
 
 /**
- * Install path is (usually) the directory up from where the exectuable is (that is, the exectuable is usually in
- * the bin/ folder under the install base path). It can be overwritten on the command line with --data-path.
+ * Install path is (usually) the directory up from where the exectuable is (that is, the exectuable
+ * is usually in the bin/ folder under the install base path). It can be overwritten on the command
+ * line with --data-path.
  */
 fs::path install_base_path() {
   if (g_install_base_path.empty()) {
-    Settings stg;
-    std::string data_path = stg.get_value<std::string>("data-path");
+    std::string data_path = Settings::get<std::string>("data-path");
     if (!data_path.empty()) {
       g_install_base_path = data_path;
     } else {
-      fs::path exe_path = stg.get_executable_path();
+      fs::path exe_path = Settings::get_executable_path();
       g_install_base_path = exe_path.parent_path().parent_path();
     }
   }

@@ -1,7 +1,7 @@
 #include <iostream>
 
+#include <absl/status/status.h>
 #include <boost/exception/all.hpp>
-#include <boost/program_options.hpp>
 
 #include <framework/bitmap.h>
 #include <framework/settings.h>
@@ -11,16 +11,19 @@
 #include <framework/misc.h>
 #include <framework/paths.h>
 
-namespace po = boost::program_options;
-
-void settings_initialize(int argc, char** argv);
+absl::Status settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 
 //-----------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
   try {
-    settings_initialize(argc, argv);
+    auto status = settings_initialize(argc, argv);
+    if (!status.ok()) {
+      std::cerr << status.message() << std::endl;
+      fw::Settings::print_help();
+      return 1;
+    }
 
     fw::ToolApplication app;
     new fw::Framework(&app);
@@ -55,11 +58,13 @@ void display_exception(std::string const &msg) {
   ss << msg;
 }
 
-void settings_initialize(int argc, char** argv) {
-  po::options_description options("Additional options");
-  options.add_options()
-      ("font-file", po::value<std::string>()->default_value("gui/SaccoVanzetti.ttf"), "Name of the font to load, we assume it can be fw::resolve'd.")
-    ;
+absl::Status settings_initialize(int argc, char** argv) {
+  fw::SettingDefinition extra_settings;
+  extra_settings.add_group("Additional options", "Font-test specific settings")
+      .add_setting<std::string>(
+          "font-file",
+          "Name of the font to load, we assume it can be fw::resolve'd.",
+          "gui/SaccoVanzetti.ttf");
 
-  fw::Settings::initialize(options, argc, argv, "font-test.conf");
+  return fw::Settings::initialize(extra_settings, argc, argv, "font-test.conf");
 }

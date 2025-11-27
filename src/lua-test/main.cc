@@ -1,15 +1,12 @@
 #include <iostream>
 
 #include <boost/exception/all.hpp>
-#include <boost/program_options.hpp>
 
 #include <framework/lua.h>
 #include <framework/settings.h>
 #include <framework/framework.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
-
-namespace po = boost::program_options;
 
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
@@ -205,7 +202,7 @@ void display_exception(std::string const &msg) {
 }
 
 void settings_initialize(int argc, char** argv) {
-  po::options_description options("Additional options");
+  fw::SettingDefinition extra_settings;
 
-  fw::Settings::initialize(options, argc, argv, "lua-test.conf");
+  fw::Settings::initialize(extra_settings, argc, argv, "lua-test.conf");
 }

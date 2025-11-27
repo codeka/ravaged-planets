@@ -128,7 +128,7 @@ std::string LogoutSessionRequest::get_description() {
 
 absl::Status LogoutSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    absl::InvalidArgumentError(absl::StrCat("unexpected response from logout request:", xml.get_value()));
+    return absl::InvalidArgumentError(absl::StrCat("unexpected response from logout request:", xml.get_value()));
   }
 
   Session::get_instance()->set_state(Session::kDisconnected);

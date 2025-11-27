@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include <boost/program_options.hpp>
-
 #include <framework/bitmap.h>
 #include <framework/camera.h>
 #include <framework/settings.h>
@@ -23,8 +21,6 @@
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
 
-namespace po = boost::program_options;
-
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 void initialize_ground(std::shared_ptr<fw::sg::Node> Node);
@@ -43,8 +39,8 @@ static bool g_rotating = false;
 static float g_rotate_angle = 0.0f;
 
 bool restart_handler(fw::gui::Widget *wdgt) {
-  fw::Settings stg;
-  g_model = fw::Framework::get_instance()->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
+  g_model = fw::Framework::get_instance()->get_model_manager()->get_model(
+      fw::Settings::get<std::string>("mesh-file"));
   return true;
 }
 
@@ -105,8 +101,7 @@ bool Application::initialize(fw::Framework *frmwrk) {
       std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(lookat + sun * 300.0f, sun * -1, true));
       scenegraph.add_light(Light);
 
-      fw::Settings stg;
-      g_model = frmwrk->get_model_manager()->get_model(stg.get_value<std::string>("mesh-file"));
+      g_model = frmwrk->get_model_manager()->get_model(fw::Settings::get<std::string>("mesh-file"));
       g_model_node = g_model->create_node(fw::Color::from_rgba(0xff0000ff));
       scenegraph.add_node(g_model_node);
       g_ground = std::shared_ptr<fw::sg::Node>(new fw::sg::Node());
@@ -196,10 +191,12 @@ void display_exception(std::string const &msg) {
 }
 
 void settings_initialize(int argc, char** argv) {
-  po::options_description options("Additional options");
-  options.add_options()("mesh-file",
-      po::value<std::string>()->default_value("tank-tracks"),
-      "Name of the mesh file to load, we assume it can be fw::resolve'd.");
+  fw::SettingDefinition extra_settings;
+  extra_settings.add_group("Additional options", "Mesh-test specific settings")
+      .add_setting<std::string>(
+          "mesh-file",
+          "Name of the mesh file to load, we assume it can be fw::resolve'd.",
+          "tank-tracks");
 
-  fw::Settings::initialize(options, argc, argv, "font-test.conf");
+  fw::Settings::initialize(extra_settings, argc, argv, "font-test.conf");
 }

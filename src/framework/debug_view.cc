@@ -27,8 +27,7 @@ DebugView::~DebugView() {
 }
 
 void DebugView::initialize() {
-  Settings stg;
-  if (stg.get_value<bool>("debug-view")) {
+  if (Settings::get<bool>("debug-view")) {
     time_to_update_ = 1.0f;
 
     wnd_ = Builder<Window>(sum(pct(100), px(-200)), sum(pct(100), px(-50)), px(190), px(40))

@@ -90,9 +90,8 @@ Framework *Framework::get_instance() {
 }
 
 bool Framework::initialize(char const *title) {
-  Settings stg;
-  if (stg.is_set("help")) {
-    stg.print_help();
+  if (Settings::get<bool>("help")) {
+    Settings::print_help();
     return false;
   }
 
@@ -136,7 +135,7 @@ bool Framework::initialize(char const *title) {
     gui_->initialize(graphics_, audio_manager_);
   }
 
-  if (stg.get_value<bool>("debug-view") && app_->wants_graphics()) {
+  if (Settings::get<bool>("debug-view") && app_->wants_graphics()) {
     debug_view_ = new DebugView();
     debug_view_->initialize();
   }
@@ -159,15 +158,13 @@ void Framework::on_fullscreen_toggle(std::string keyname, bool is_down) {
 }
 
 void Framework::language_initialize() {
-  Settings stg;
-
   const std::vector<LangDescription> langs = fw::get_languages();
   debug << langs.size() << " installed language(s):" << std::endl;
   for(const LangDescription &l : langs) {
     debug << l.name << " (" << l.display_name << ")" << std::endl;
   }
 
-  std::string lang_name = stg.get_value<std::string>("lang");
+  std::string lang_name = Settings::get<std::string>("lang");
   if (!boost::iends_with(lang_name, ".lang")) {
     lang_name += ".lang";
   }

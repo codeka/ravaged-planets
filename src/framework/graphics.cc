@@ -43,15 +43,13 @@ Graphics::~Graphics() {
 }
 
 void Graphics::initialize(char const *title) {
-  Settings stg;
-
-  windowed_ = stg.is_set("windowed");
+  windowed_ = Settings::get<bool>("windowed");
   if (windowed_) {
-    width_ = stg.get_value<int>("windowed-width");
-    height_ = stg.get_value<int>("windowed-height");
+    width_ = Settings::get<int>("windowed-width");
+    height_ = Settings::get<int>("windowed-height");
   } else {
-    width_ = stg.get_value<int>("fullscreen-width");
-    height_ = stg.get_value<int>("fullscreen-height");
+    width_ = Settings::get<int>("fullscreen-width");
+    height_ = Settings::get<int>("fullscreen-height");
   }
   fw::debug << "Graphics initializing; window size=" << width_ << "x" << height_ << ", windowed=" << windowed_
       << std::endl;
@@ -226,15 +224,14 @@ void Graphics::toggle_fullscreen() {
   fw::debug << "switching to " << (windowed_ ? "full-screen" : "windowed") << std::endl;
   windowed_ = !windowed_;
 
-  fw::Settings stg;
   if (windowed_) {
-    width_ = stg.get_value<int>("windowed-width");
-    height_ = stg.get_value<int>("windowed-height");
+    width_ = Settings::get<int>("windowed-width");
+    height_ = Settings::get<int>("windowed-height");
     SDL_SetWindowFullscreen(wnd_, 0);
     SDL_SetWindowSize(wnd_, width_, height_);
   } else {
-    width_ = stg.get_value<int>("fullscreen-width");
-    height_ = stg.get_value<int>("fullscreen-height");
+    width_ = Settings::get<int>("fullscreen-width");
+    height_ = Settings::get<int>("fullscreen-height");
     if (width_ != 0 && height_ != 0) {
       SDL_SetWindowSize(wnd_, width_, height_);
       SDL_SetWindowFullscreen(wnd_, SDL_WINDOW_FULLSCREEN);

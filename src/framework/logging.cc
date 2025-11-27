@@ -28,15 +28,13 @@ namespace fw {
   THREADLOCAL std::ostream *LogWrapper::log_;
 
   void logging_initialize() {
-    Settings stg;
-
     fs::path log_path;
-    std::string logfilename = stg.get_value<std::string>("debug-logfile");
+    std::string logfilename = Settings::get<std::string>("debug-logfile");
     if (logfilename != "") {
       log_path = resolve(logfilename, true);
     }
 
-    if (stg.is_set("debug-console")) {
+    if (Settings::get<bool>("debug-console")) {
       log_to_console = true;
     }
 

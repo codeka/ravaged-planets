@@ -187,8 +187,7 @@ public:
     if (parent_ == 0)
       return false;
 
-    Settings stg;
-    std::string base_path = stg.get_value<std::string>("dbghelp-path");
+    std::string base_path = Settings::get<std::string>("dbghelp-path");
     if (base_path != "") {
       fs::path path(base_path);
       if (fs::exists(path) && fs::is_directory(path))

@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include <boost/program_options.hpp>
-
 #include <framework/bitmap.h>
 #include <framework/camera.h>
 #include <framework/settings.h>
@@ -19,8 +17,6 @@
 #include <framework/misc.h>
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
-
-namespace po = boost::program_options;
 
 void settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
@@ -52,13 +48,13 @@ void update_effect_position() {
 }
 
 void restart_effect() {
-  fw::Settings stg;
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
-    [&stg](fw::sg::Scenegraph& scenegraph) {
+    [](fw::sg::Scenegraph& scenegraph) {
       if (g_effect) {
         g_effect->destroy();
       }
-      g_effect = fw::Framework::get_instance()->get_particle_mgr()->create_effect(stg.get_value<std::string>("particle-file"), fw::Vector(0, 0, 0));
+      g_effect = fw::Framework::get_instance()->get_particle_mgr()->create_effect(
+          fw::Settings::get<std::string>("particle-file"), fw::Vector(0, 0, 0));
     });
   update_effect_position();
 }
@@ -123,7 +119,6 @@ bool Application::initialize(fw::Framework *frmwrk) {
           << fw::gui::Widget::click(std::bind<bool>(movement_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
-  fw::Settings stg;
   restart_effect();
   return true;
 }
@@ -174,10 +169,12 @@ void display_exception(std::string const &msg) {
 }
 
 void settings_initialize(int argc, char** argv) {
-  po::options_description options("Additional options");
-  options.add_options()("particle-file",
-      po::value<std::string>()->default_value("explosion-01"),
-      "Name of the particle file to load, we assume it can be fw::resolve'd.");
+  fw::SettingDefinition extra_settings;
+  extra_settings.add_group("Additional options", "Particle-test specific settings")
+      .add_setting<std::string>(
+          "particle-file",
+          "Name of the particle file to load, we assume it can be fw::resolve'd.",
+          "explosion-01");
 
-  fw::Settings::initialize(options, argc, argv, "font-test.conf");
+  fw::Settings::initialize(extra_settings, argc, argv, "font-test.conf");
 }

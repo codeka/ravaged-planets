@@ -58,8 +58,7 @@ Input::~Input() {
 }
 
 int Input::bind_function(std::string const &name, input_bind_fn fn) {
-  Settings stg;
-  return bind_key(stg.get_value<std::string>("bind." + name), fn);
+  return bind_key(Settings::get<std::string>("bind." + name), fn);
 }
 
 int Input::bind_key(std::string const &keyname, input_bind_fn fn) {

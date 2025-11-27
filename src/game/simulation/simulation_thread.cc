@@ -130,10 +130,9 @@ void SimulationThread::add_ai_player(AIPlayer *plyr) {
 
 /** This is the thread procedure for running the simulation thread. */
 void SimulationThread::thread_proc() {
-  fw::Settings stg;
-  if (!host_->listen(stg.get_value<std::string> ("listen-port"))) {
+  if (!host_->listen(fw::Settings::get<std::string> ("listen-port"))) {
     BOOST_THROW_EXCEPTION(fw::Exception()
-        << fw::message_error_info("could not listen on port(s): " + stg.get_value<std::string>("listen-port")));
+        << fw::message_error_info("could not listen on port(s): " + fw::Settings::get<std::string>("listen-port")));
   }
 
   std::mutex mutex;

@@ -35,12 +35,11 @@ fs::path user_base_path() {
  */
 fs::path install_base_path() {
   if (g_install_base_path.empty()) {
-    settings stg;
-    std::string data_path = stg.get_value<std::string>("data-path");
+    std::string data_path = Settings::get<std::string>("data-path");
     if (!data_path.empty()) {
       g_install_base_path = data_path;
     } else {
-      fs::path exe_path = stg.get_executable_path();
+      fs::path exe_path = Settings::get_executable_path();
       g_install_base_path = exe_path.parent_path().parent_path();
     }
   }
