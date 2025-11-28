@@ -1,13 +1,14 @@
+#include <game/session/session_request.h>
 
 #include <absl/strings/numbers.h>
 #include <absl/strings/str_cat.h>
 
-#include <framework/logging.h>
 #include <framework/http.h>
+#include <framework/logging.h>
+#include <framework/status.h>
 #include <framework/xml.h>
 
 #include <game/session/session.h>
-#include <game/session/session_request.h>
 #include <game/simulation/simulation_thread.h>
 
 namespace game {
@@ -47,13 +48,13 @@ SessionRequest::UpdateResult SessionRequest::update() {
   return SessionRequest::kStillGoing;
 }
 
-absl::Status SessionRequest::parse_response() {
+fw::Status SessionRequest::parse_response() {
   auto xml = post_->get_xml_response();
   if (!xml.ok()) {
     return xml.status();
   }
   if (xml->get_value() == "error") {
-    return absl::InternalError(xml->get_attribute("msg"));
+    return fw::ErrorStatus(xml->get_attribute("msg"));
   }
 
   fw::debug << xml->to_string() << std::endl;
@@ -61,8 +62,8 @@ absl::Status SessionRequest::parse_response() {
   return parse_response(*xml);
 }
 
-absl::Status SessionRequest::parse_response(fw::XmlElement &) {
-  return absl::OkStatus();
+fw::Status SessionRequest::parse_response(fw::XmlElement &) {
+  return fw::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -90,9 +91,9 @@ std::string LoginSessionRequest::get_description() {
   return absl::StrCat("logging in (username: ", _username, ")");
 }
 
-absl::Status LoginSessionRequest::parse_response(fw::XmlElement &xml) {
+fw::Status LoginSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    return absl::InvalidArgumentError(absl::StrCat("unexpected response from login request:", xml.get_value()));
+    return fw::ErrorStatus("unexpected response from login request:") << xml.get_value();
   }
 
   session_id_ = boost::lexical_cast<uint64_t>(xml.get_attribute("sessionId"));
@@ -100,7 +101,7 @@ absl::Status LoginSessionRequest::parse_response(fw::XmlElement &xml) {
   Session::get_instance()->set_state(Session::kLoggedIn);
 
   fw::debug << "login successful, session-id:" << session_id_ << std::endl;
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 //------------------------------------------------------------------------
@@ -126,15 +127,15 @@ std::string LogoutSessionRequest::get_description() {
   return "logging out";
 }
 
-absl::Status LogoutSessionRequest::parse_response(fw::XmlElement &xml) {
+fw::Status LogoutSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    return absl::InvalidArgumentError(absl::StrCat("unexpected response from logout request:", xml.get_value()));
+    return fw::ErrorStatus(absl::StrCat("unexpected response from logout request:", xml.get_value()));
   }
 
   Session::get_instance()->set_state(Session::kDisconnected);
 
   fw::debug << "logout successful" << std::endl;
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -157,14 +158,13 @@ std::string CreateGameSessionRequest::get_description() {
   return "registering new game with server";
 }
 
-absl::Status CreateGameSessionRequest::parse_response(fw::XmlElement &xml) {
+fw::Status CreateGameSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    return
-        absl::InvalidArgumentError(absl::StrCat("unexpected response from \"join game\" request: ", xml.get_value()));
+    return fw::ErrorStatus("unexpected response from \"join game\" request: ") << xml.get_value();
   }
 
   if (!xml.is_attribute_defined("gameId")) {
-    return absl::InvalidArgumentError("create game response did not include game identifier");
+    return fw::ErrorStatus("create game response did not include game identifier");
   }
 
   uint64_t game_id = boost::lexical_cast<uint64_t>(xml.get_attribute("gameId"));
@@ -172,7 +172,7 @@ absl::Status CreateGameSessionRequest::parse_response(fw::XmlElement &xml) {
 
   // now let the simulation thread know we're starting a new game
   SimulationThread::get_instance()->new_game(game_id);
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 //----------------------------------------------------------------------------
@@ -196,7 +196,7 @@ std::string ListGamesSessionRequest::get_description() {
   return "listing games";
 }
 
-absl::Status ListGamesSessionRequest::parse_response(fw::XmlElement &xml) {
+fw::Status ListGamesSessionRequest::parse_response(fw::XmlElement &xml) {
   // parse out the list of games from the response
   std::vector<RemoteGame> games;
   for (fw::XmlElement game = xml.get_first_child(); game.is_valid(); game = game.get_next_sibling()) {
@@ -211,7 +211,7 @@ absl::Status ListGamesSessionRequest::parse_response(fw::XmlElement &xml) {
   // call the callback with the list of games we just parsed!
   callback_(games);
 
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -240,26 +240,24 @@ void JoinGameSessionRequest::begin(std::string base_url) {
   Session::get_instance()->set_state(Session::kJoiningLobby);
 }
 
-absl::Status JoinGameSessionRequest::parse_response(fw::XmlElement &xml) {
+fw::Status JoinGameSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    return 
-        absl::InvalidArgumentError(absl::StrCat("unexpected response from \"join game\" request: ", xml.get_value()));
+    return  fw::ErrorStatus("unexpected response from \"join game\" request: ") << xml.get_value();
   }
 
   if (!xml.is_attribute_defined("serverAddr")) {
-    return absl::InvalidArgumentError("joing game response did not include server address");
+    return fw::ErrorStatus("joing game response did not include server address");
   }
 
   if (!xml.is_attribute_defined("playerNo")) {
-    return absl::InvalidArgumentError("joining game response did not include player#");
+    return fw::ErrorStatus("joining game response did not include player#");
   }
 
   std::string server_address = xml.get_attribute("serverAddr");
 
   int player_no = 0;
   if (!absl::SimpleAtoi(xml.get_attribute("playerNo"), &player_no) || player_no > 255) {
-    return
-        absl::InvalidArgumentError(absl::StrCat("Couldn't convert playerNo to int: ", xml.get_attribute("playerNo")));
+    return fw::ErrorStatus("Couldn't convert playerNo to int: ") << xml.get_attribute("playerNo");
   }
   fw::debug << "joined game, address: " << server_address << " player# " << player_no << std::endl;
 
@@ -268,7 +266,7 @@ absl::Status JoinGameSessionRequest::parse_response(fw::XmlElement &xml) {
 
   // set the state to logged_in as well....
   Session::get_instance()->set_state(Session::kLoggedIn);
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -296,15 +294,14 @@ std::string ConfirmPlayerSessionRequest::get_description() {
   return absl::StrCat("confirming player \"", other_user_id_, "\"");
 }
 
-absl::Status ConfirmPlayerSessionRequest::parse_response(fw::XmlElement &xml) {
+fw::Status ConfirmPlayerSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
     return
-        absl::InvalidArgumentError(
-            absl::StrCat("unexpected response from \"confirm player\" request:", xml.get_value()));
+        fw::ErrorStatus("unexpected response from \"confirm player\" request:") << xml.get_value();
   }
 
   if (!xml.is_attribute_defined("confirmed")) {
-    return absl::InvalidArgumentError("confirm player response did not include confirmation");
+    return fw::ErrorStatus("confirm player response did not include confirmation");
   }
 
   std::string confirmed = xml.get_attribute("confirmed");
@@ -337,7 +334,7 @@ absl::Status ConfirmPlayerSessionRequest::parse_response(fw::XmlElement &xml) {
     confirmed_ = false;
   }
 
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 }

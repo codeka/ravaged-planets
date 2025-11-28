@@ -7,8 +7,7 @@
 #include <thread>
 #include <curl/curl.h>
 
-#include <absl/status/statusor.h>
-
+#include <framework/status.h>
 #include <framework/xml.h>
 
 // this is defined in winnt.h... silly!!
@@ -19,8 +18,8 @@
 namespace fw {
 
 /**
- * Represents a single HTTP request/response. Use the \ref Http::perform() methods to initiate a request, then use
- * \ref Http::wait() to wait for it to complete.
+ * Represents a single HTTP request/response. Use the \ref Http::perform() methods to initiate a
+ * request, then use \ref Http::wait() to wait for it to complete.
  */
 class Http {
 public:
@@ -66,21 +65,37 @@ public:
   /** Constructs a new Http, performs the specified verb on the specified URL. */
   static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url);
 
-  /* Constructs a new Http, performs the specified verb on the specified URL (with the specified XML data). */
+  /**
+   * Constructs a new Http, performs the specified verb on the specified URL (with the specified XML
+   * data).
+   */
   static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url, XmlElement &xml);
 
-  /** Constructs a new Http, performs the specified verb on the specified URL (with the specified name/value data). */
+  /**
+   * Constructs a new Http, performs the specified verb on the specified URL (with the specified
+   * name/value data).
+   */
   static std::shared_ptr<Http> perform(HttpVerb verb, std::string const &url,
       std::map<std::string, std::string> const &data);
 
-  /** Perform the given HTTP on the given URL. Cannot be called while a request is already in progress. */
+  /**
+   * Perform the given HTTP on the given URL. Cannot be called while a request is already in
+   * progress.
+   */
   void perform_action(HttpVerb verb, std::string const &url);
 
-  /** Perform the given HTTP on the given URL. Cannot be called while a request is already in progress. */
+  /**
+   * Perform the given HTTP on the given URL. Cannot be called while a request is already in
+   * progress.
+   */
   void perform_action(HttpVerb verb, std::string const &url, XmlElement &xml);
 
-  /** Perform the given HTTP on the given URL. Cannot be called while a request is already in progress. */
-  void perform_action(HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data);
+  /**
+   * Perform the given HTTP on the given URL. Cannot be called while a request is already in
+   * progress.
+   */
+  void perform_action(
+      HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data);
 
   /** Gets a value which indicates whether we've finished downloading the response. */
   bool is_finished();
@@ -89,19 +104,19 @@ public:
   void wait();
 
   /**
-   * Gets the response we got from the server. If no response has been received yet, an absl::StatusUnavailable error
-   * is returned.
+   * Gets the response we got from the server. If no response has been received yet, an fw::Status
+   * error is returned.
    */
-  absl::StatusOr<std::string> get_response();
+  StatusOr<std::string> get_response();
 
   /**
-   * Parses the response as XML and returns a reference to it. if no response has been received yet, an unavailable
-   * status is returned instead.
+   * Parses the response as XML and returns a reference to it. if no response has been received yet,
+   * an unavailable status is returned instead.
    */
-  absl::StatusOr<XmlElement> get_xml_response();
+  StatusOr<XmlElement> get_xml_response();
 
-  /** Returns an absl::Status that represents whatever error has occurred. */
-  absl::Status get_status() const;
+  /** Returns an fw::Status that represents whatever error has occurred. */
+  Status get_status() const;
 };
 
 }

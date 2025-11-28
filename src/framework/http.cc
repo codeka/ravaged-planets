@@ -1,12 +1,14 @@
+#include <framework/http.h>
+
 #include <functional>
 #include <boost/algorithm/string.hpp>
 
-#include <framework/http.h>
-#include <framework/xml.h>
-#include <framework/logging.h>
-#include <framework/framework.h>
 #include <framework/exception.h>
+#include <framework/framework.h>
+#include <framework/logging.h>
 #include <framework/settings.h>
+#include <framework/status.h>
+#include <framework/xml.h>
 
 namespace fw {
 
@@ -154,9 +156,9 @@ void Http::wait() {
   }
 }
 
-absl::StatusOr<std::string> Http::get_response() {
+StatusOr<std::string> Http::get_response() {
   if (!is_finished())
-    return absl::UnavailableError("Not finished yet.");
+    return ErrorStatus("Not finished yet.");
 
   const auto status = get_status();
   if (!status.ok()) {
@@ -167,8 +169,8 @@ absl::StatusOr<std::string> Http::get_response() {
 
 // parses the response as XML and returns a reference to it. if no response has
 // been received yet, an XmlElement pointing to a NULL element is returned.
-absl::StatusOr<XmlElement> Http::get_xml_response() {
-  absl::StatusOr<std::string> response = get_response();
+StatusOr<XmlElement> Http::get_xml_response() {
+  StatusOr<std::string> response = get_response();
   if (!response.ok()) {
     return response.status();
   }
@@ -176,13 +178,13 @@ absl::StatusOr<XmlElement> Http::get_xml_response() {
   return XmlElement(*response);
 }
 
-absl::Status Http::get_status() const {
+Status Http::get_status() const {
   switch (last_error_) {
   case CURLE_OK:
-    return absl::OkStatus();
+    return OkStatus();
   default:
     // TODO: more error statuses?
-    return absl::InternalError(curl_easy_strerror(last_error_));
+    return ErrorStatus(curl_easy_strerror(last_error_));
   }
 }
 

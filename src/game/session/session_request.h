@@ -1,6 +1,8 @@
 #pragma once
 
-#include <absl/status/status.h>
+#include <functional>
+
+#include <framework/status.h>
 
 namespace fw {
 class Http;
@@ -39,7 +41,7 @@ public:
 private:
   complete_handler_fn _on_complete_handler;
 
-  absl::Status parse_response();
+  fw::Status parse_response();
 
 protected:
   std::shared_ptr<fw::Http> post_;
@@ -62,7 +64,7 @@ protected:
   }
 
   // parses the response from the server
-  virtual absl::Status parse_response(fw::XmlElement &xml);
+  virtual fw::Status parse_response(fw::XmlElement &xml);
 
 public:
   SessionRequest();
@@ -104,7 +106,7 @@ private:
 
 protected:
   std::string get_description() override;
-  absl::Status parse_response(fw::XmlElement& xml) override;
+  fw::Status parse_response(fw::XmlElement& xml) override;
 
 public:
   LoginSessionRequest(std::string const &username, std::string const &password);
@@ -118,7 +120,7 @@ public:
 class LogoutSessionRequest: public SessionRequest {
 protected:
   std::string get_description() override;
-  absl::Status parse_response(fw::XmlElement &xml) override;
+  fw::Status parse_response(fw::XmlElement &xml) override;
 
 public:
   LogoutSessionRequest();
@@ -133,7 +135,7 @@ protected:
   std::string get_request_xml() override;
   std::string get_url() override ;
   std::string get_description() override;
-  absl::Status parse_response(fw::XmlElement &xml) override;
+  fw::Status parse_response(fw::XmlElement &xml) override;
 
 public:
   CreateGameSessionRequest();
@@ -149,7 +151,7 @@ protected:
   std::string get_request_xml() override;
   std::string get_url() override;
   std::string get_description() override;
-  absl::Status parse_response(fw::XmlElement &xml) override;
+  fw::Status parse_response(fw::XmlElement &xml) override;
 
   // this is the callback we'll call once we've fetched the game list
   callback_fn callback_;
@@ -169,7 +171,7 @@ protected:
   std::string get_request_xml() override;
   std::string get_url() override;
   std::string get_description() override;
-  absl::Status parse_response(fw::XmlElement &xml) override;
+  fw::Status parse_response(fw::XmlElement &xml) override;
 
 public:
   JoinGameSessionRequest(uint64_t game_id);
@@ -194,7 +196,7 @@ protected:
   std::string get_request_xml() override;
   std::string get_url() override;
   std::string get_description() override;
-  absl::Status parse_response(fw::XmlElement &xml) override;
+  fw::Status parse_response(fw::XmlElement &xml) override;
 
 public:
   ConfirmPlayerSessionRequest(uint64_t game_id, uint32_t user_id);
