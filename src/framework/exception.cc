@@ -2,6 +2,7 @@
 
 #include <framework/logging.h>
 #include <framework/exception.h>
+#include <framework/stack_trace.h>
 
 namespace fw {
 
@@ -16,14 +17,14 @@ char const *Exception::what() const throw () {
  * Adds a stacktrace_error_info to this exception, which contains a list of all the frames in the current stack.
  */
 void Exception::populate_stacktrace() {
-  (*this) << stacktrace_error_info(generate_stack_trace());
+  (*this) << stacktrace_error_info(fw::GenerateStackTrace());
 }
 
 void Exception::log_stacktrace() {
   int n = 0;
-  for(std::string frame : generate_stack_trace()) {
+  for(std::string frame : fw::GenerateStackTrace()) {
     if (n++ < 2) {
-      // Ignore the first two frame, they'll be this function and generate_stack_trace itself.
+      // Ignore the first two frame, they'll be this function and GenerateStackTrace itself.
       continue;
     }
     fw::debug << "  " << frame << std::endl;

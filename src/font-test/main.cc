@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include <absl/status/status.h>
 #include <boost/exception/all.hpp>
 
 #include <framework/bitmap.h>
@@ -10,8 +9,9 @@
 #include <framework/logging.h>
 #include <framework/misc.h>
 #include <framework/paths.h>
+#include <framework/status.h>
 
-absl::Status settings_initialize(int argc, char** argv);
+fw::Status settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 
 //-----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
   try {
     auto status = settings_initialize(argc, argv);
     if (!status.ok()) {
-      std::cerr << status.message() << std::endl;
+      std::cerr << status << std::endl;
       fw::Settings::print_help();
       return 1;
     }
@@ -58,7 +58,7 @@ void display_exception(std::string const &msg) {
   ss << msg;
 }
 
-absl::Status settings_initialize(int argc, char** argv) {
+fw::Status settings_initialize(int argc, char** argv) {
   fw::SettingDefinition extra_settings;
   extra_settings.add_group("Additional options", "Font-test specific settings")
       .add_setting<std::string>(

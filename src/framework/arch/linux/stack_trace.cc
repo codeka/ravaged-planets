@@ -1,3 +1,4 @@
+#include <framework/stack_trace.h>
 
 #include <string>
 #include <vector>
@@ -7,12 +8,10 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <framework/exception.h>
-
 namespace fw {
 std::string addr2line(std::string const &program, void *addr);
 
-std::vector<std::string> exception::generate_stack_trace() {
+std::vector<std::string> GenerateStackTrace() {
   const int MAX_TRACE_LEVEL = 16;
 
   void *trace[MAX_TRACE_LEVEL];

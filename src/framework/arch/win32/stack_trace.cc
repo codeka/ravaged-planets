@@ -1,31 +1,40 @@
-#include <framework/exception.h>
+#include <framework/stack_trace.h>
 
 #include <string>
 #include <vector>
 
 #include <absl/strings/str_cat.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <framework/arch/win32/stack_walker.h>
 
 namespace fw {
 
-class exception_stack_walker : public StackWalker {
-private:
-  std::vector<std::string> &_stacktrace;
-  std::vector<std::string> &_modules;
+namespace {
 
+class MyStackWalker : public StackWalker {
 public:
-  exception_stack_walker(std::vector<std::string> &stacktrace, std::vector<std::string> &modules)
-    : _stacktrace(stacktrace), _modules(modules) {
+  MyStackWalker(
+      std::vector<std::string> &stacktrace,
+      std::vector<std::string> &modules,
+      int skip_frames)
+    : stacktrace_(stacktrace), modules_(modules), skip_frames_(skip_frames) {
   }
 
-  virtual void on_sym_init(char const * /*search_path*/, uint32_t /*options*/, char const * /*user_name*/) {
+  virtual void on_sym_init(
+      char const * /*search_path*/,
+      uint32_t /*options*/,
+      char const * /*user_name*/) override {
   }
 
-  virtual void on_load_module(char const *image, char const *module, uint64_t base_addr, uint32_t size, uint32_t result,
-      char const *symbol_type, char const *pdb_name, uint64_t file_version) {
+  virtual void on_load_module(
+      char const *image,
+      char const *module,
+      uint64_t base_addr,
+      uint32_t size,
+      uint32_t result,
+      char const *symbol_type,
+      char const *pdb_name,
+      uint64_t file_version) override {
     std::string line;
     if (file_version == 0) {
       line = absl::StrCat(image, ":", module, " (", absl::Hex(base_addr), "), size: ", size,
@@ -41,10 +50,10 @@ public:
           "), symbol-type: ", symbol_type, ", PDB: ", pdb_name);
     }
 
-    _modules.push_back(line);
+    modules_.push_back(line);
   }
 
-  virtual void on_callstack_entry(CallstackEntryType entry_type, callstack_entry &entry) {
+  virtual void on_callstack_entry(CallstackEntryType entry_type, callstack_entry &entry) override {
     if (entry_type != last_entry && entry.offset != 0) {
       std::string fn_name = "(function-name not available)";
 
@@ -58,29 +67,43 @@ public:
       std::string file_name = "(filename not available)";
       if (entry.line_file_name[0] != 0) {
         file_name = entry.line_file_name;
-        file_name += ":" + boost::lexical_cast<std::string>(static_cast<int>(entry.line_number));
+        file_name += absl::StrCat(":", entry.line_number);
       }
 
       std::string module_name = "N/A";
       if (entry.module_name[0] != 0)
         module_name = entry.module_name;
 
-      _stacktrace.push_back("   " + fn_name + " [" + module_name + "] " + file_name);
+      if (skip_frames_ > 0) {
+        --skip_frames_;
+      } else {
+        stacktrace_.push_back("   " + fn_name + " [" + module_name + "] " + file_name);
+      }
     }
   }
 
-  virtual void on_dbghelp_error(char const * /*func_name*/, uint32_t /*gle*/, DWORD64 /*addr*/) {
+  virtual void on_dbghelp_error(
+      char const * /*func_name*/,
+      uint32_t /*gle*/,
+      DWORD64 /*addr*/) override {
   }
 
-  virtual void on_output(char const * /*text*/) {
+  virtual void on_output(char const * /*text*/) override {
   }
+
+private:
+  std::vector<std::string> &stacktrace_;
+  std::vector<std::string> &modules_;
+  int skip_frames_;
 };
 
-std::vector<std::string> Exception::generate_stack_trace() {
+}  // namespace
+
+std::vector<std::string> GenerateStackTrace(int skip_frames /*= 2*/) {
   std::vector<std::string> stacktrace;
   std::vector<std::string> modules;
   try {
-    exception_stack_walker sw(stacktrace, modules);
+    MyStackWalker sw(stacktrace, modules, skip_frames);
     sw.walk_stack();
   } catch (...) {
     // ignore exceptions

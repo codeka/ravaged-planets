@@ -7,8 +7,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include <absl/status/status.h>
-#include <absl/status/statusor.h>
 #include <absl/strings/str_cat.h>
 #include <absl/strings/str_split.h>
 
@@ -16,6 +14,7 @@
 #include <framework/logging.h>
 #include <framework/misc.h>
 #include <framework/paths.h>
+#include <framework/status.h>
 
 namespace fs = std::filesystem;
 
@@ -36,7 +35,7 @@ inline void dbg(std::string_view msg) {
   std::cerr << msg << std::endl;
 }
 
-absl::StatusOr<Setting> FindSetting(SettingDefinition const &settings, std::string_view name) {
+fw::StatusOr<Setting> FindSetting(SettingDefinition const &settings, std::string_view name) {
   for (const SettingGroup &group : settings.groups()) {
     for (const Setting &setting : group.settings) {
       if (setting.name == name) {
@@ -45,53 +44,50 @@ absl::StatusOr<Setting> FindSetting(SettingDefinition const &settings, std::stri
     }
   }
 
-  return absl::NotFoundError(absl::StrCat("unknown setting: ", name));
+  return fw::ErrorStatus(absl::StrCat("unknown setting: ", name));
 }
 
-absl::StatusOr<SettingValue> ParseSettingValue(
+fw::StatusOr<SettingValue> ParseSettingValue(
     SettingDefinition const &settings,
     std::string_view name,
     std::string_view value) {
-  const auto setting = FindSetting(settings, name);
-  if (!setting.ok()) {
-    return setting.status();
-  }
+  ASSIGN_OR_RETURN(const auto setting, FindSetting(settings, name));
 
-  if (setting->type == SettingType::kString) {
+  if (setting.type == SettingType::kString) {
     return SettingValue::of(std::string(value));
-  } else if (setting->type == SettingType::kBool) {
+  } else if (setting.type == SettingType::kBool) {
     bool bool_value;
     if (value == "true" || value == "1") {
       bool_value = true;
     } else if (value == "false" || value == "0") {
       bool_value = false;
     } else {
-      return absl::InternalError(absl::StrCat(name, " value must be boolean: ", value));
+      return fw::ErrorStatus(absl::StrCat(name, " value must be boolean: ", value));
     }
     return SettingValue::of(bool_value);
-  } else if (setting->type == SettingType::kInt) {
+  } else if (setting.type == SettingType::kInt) {
     int int_value;
     if (!absl::SimpleAtoi(value, &int_value)) {
-      return absl::InternalError(absl::StrCat(name, " value must be integer: ", value));
+      return fw::ErrorStatus(absl::StrCat(name, " value must be integer: ", value));
     }
     return SettingValue::of(int_value);
-  } else if (setting->type == SettingType::kFloat) {
+  } else if (setting.type == SettingType::kFloat) {
     float float_value;
     if (!absl::SimpleAtof(value, &float_value)) {
-      return absl::InternalError(absl::StrCat(name, " value must be float: ", value));
+      return fw::ErrorStatus(absl::StrCat(name, " value must be float: ", value));
     }
     return SettingValue::of(float_value);
   }
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
-absl::Status ParseConfigFile(fs::path const &path, SettingDefinition const &settings) {
+fw::Status ParseConfigFile(fs::path const &path, SettingDefinition const &settings) {
   dbg(absl::StrCat("Parsing config file: ", path.string()));
 
   std::ifstream ins(path);
   if (!ins.is_open()) {
     // File doesn't exist, that's fine.
-    return absl::OkStatus();
+    return fw::OkStatus();
   }
 
   std::string line_str;
@@ -110,8 +106,7 @@ absl::Status ParseConfigFile(fs::path const &path, SettingDefinition const &sett
     auto setting_value = ParseSettingValue(settings, name, value);
     if (!setting_value.ok()) {
       auto status = setting_value.status();
-      status.Update(absl::InternalError(absl::StrCat("in config file: ", path.string())));
-      return status;
+      return status << "; in config file: " << path.string();
     }
 
     // Only overwrite if not already set. For example, command-line options should override config
@@ -121,17 +116,17 @@ absl::Status ParseConfigFile(fs::path const &path, SettingDefinition const &sett
     }
   }
 
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 // Parse the command-line. We only have some very simple parsing logic here. All options must be of
 // the form --name=value. We also support --name only for boolean values (which will be set to
 // true). And "--name value" is also supported for convenience.
-absl::Status ParseCommandLine(int argc, char **argv, SettingDefinition const &settings) {
+fw::Status ParseCommandLine(int argc, char **argv, SettingDefinition const &settings) {
   for (int i = 1; i < argc; ++i) {
     std::string_view arg = argv[i];
     if (!arg.starts_with("--")) {
-      return absl::InvalidArgumentError(absl::StrCat("invalid command-line argument: ", arg));
+      return fw::ErrorStatus("invalid command-line argument: ") << arg;
     }
     arg.remove_prefix(2);
 
@@ -164,8 +159,7 @@ absl::Status ParseCommandLine(int argc, char **argv, SettingDefinition const &se
       if (setting->type == SettingType::kBool) {
         value = "true";
       } else {
-        return absl::InvalidArgumentError(
-            absl::StrCat("no value provided for setting: ", name));
+        return fw::ErrorStatus("no value provided for setting: ") << name;
       }
     }
 
@@ -177,7 +171,7 @@ absl::Status ParseCommandLine(int argc, char **argv, SettingDefinition const &se
     g_variables_map.emplace(std::string(name), *setting_value);
   }
 
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 }  // anonymous namespace
@@ -205,7 +199,7 @@ fs::path Settings::get_executable_path() {
 
 // you must call this at program startup (*before* you call the Framework::initialize() method!)
 // it'll parse the command-line options and so on.
-absl::Status Settings::initialize(
+fw::Status Settings::initialize(
     SettingDefinition const &additional_settings, int argc, char **argv,
     std::string_view options_file/* = "default.conf"*/) {
   g_executable_path = argv[0];
@@ -274,29 +268,8 @@ absl::Status Settings::initialize(
 
   all_settings.merge(additional_settings);
 
-  // Note: we need to parse the command-line first, because it could specify things like an
-  // alternative data-path or config file.
-  auto status = ParseCommandLine(argc, argv, all_settings);
-  if (!status.ok()) {
-    return status;
-  }
-
-  // Next if you have a user-specific config file, parse that. It will only set values that are not
-  // set on the command-line.
-  status = ParseConfigFile(fw::user_base_path() / options_file, all_settings);
-  if (!status.ok()) {
-    return status;
-  }
-
-  // Finally parse the system-wide config file. It will only set values that are not set by the
-  // command-line or user-specific config file.
-  status = ParseConfigFile(fw::install_base_path() / options_file, all_settings);
-  if (!status.ok()) {
-    return status;
-  }
-
-  // If all else fails, set the defaults based on the setting definitions. We can also take this
-  // opportunity to build up the help message.
+  // First, generate the options description/help message. Do this before we start parsing, so that
+  // we can still print the help message in case there's an errors.
   for (const SettingGroup &group : all_settings.groups()) {
     g_option_descriptions += absl::StrCat("\n", group.name, ":\n");
     if (group.description != "") {
@@ -312,18 +285,36 @@ absl::Status Settings::initialize(
       g_option_descriptions += "\n    ";
       g_option_descriptions += setting.description;
       g_option_descriptions += "\n";
+    }
 
+    g_option_descriptions += "\n";
+  }
+
+
+  // Note: we need to parse the command-line first, because it could specify things like an
+  // alternative data-path or config file.
+  RETURN_IF_ERROR(ParseCommandLine(argc, argv, all_settings));
+
+  // Next if you have a user-specific config file, parse that. It will only set values that are not
+  // set on the command-line.
+  RETURN_IF_ERROR(ParseConfigFile(fw::user_base_path() / options_file, all_settings));
+
+  // Finally parse the system-wide config file. It will only set values that are not set by the
+  // command-line or user-specific config file.
+  RETURN_IF_ERROR(ParseConfigFile(fw::install_base_path() / options_file, all_settings));
+
+  // If all else fails, set the defaults based on the setting definitions.
+  for (const SettingGroup &group : all_settings.groups()) {
+    for (const Setting &setting : group.settings) {
       // if the setting isn't already set, and it has a default value, set it now.
       if (g_variables_map.find(setting.name) == g_variables_map.end() &&
           setting.default_value.has_value()) {
         g_variables_map.emplace(setting.name, *setting.default_value);
       }
     }
-
-    g_option_descriptions += "\n";
   }
 
-  return absl::OkStatus();
+  return fw::OkStatus();
 }
 
 }

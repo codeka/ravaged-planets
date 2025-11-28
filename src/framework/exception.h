@@ -50,9 +50,6 @@ public:
   // generic method, so we can't be too specific
   virtual char const *what() const throw ();
 
-  // Generate a stack trace from the current call location.
-  static std::vector<std::string> generate_stack_trace();
-
   // Helper method that logs (to fw::debug) the current stack trace (useful only for debugging).
   static void log_stacktrace();
 };

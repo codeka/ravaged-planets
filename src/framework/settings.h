@@ -7,7 +7,7 @@
 #include <string_view>
 #include <vector>
 
-#include <absl/status/status.h>
+#include <framework/status.h>
 
 namespace fw {
 
@@ -196,7 +196,7 @@ public:
 
   // You must call this at program startup (*before* you call the Framework::initialize() method!)
   // it'll parse the command-line options, read the .conf file and so on.
-  static absl::Status initialize(SettingDefinition const &additional_settings,
+  static fw::Status initialize(SettingDefinition const &additional_settings,
       int argc, char **argv, std::string_view options_file = "default.conf");
 
   // Gets the value (as a \c std::optional<SettingValue>) of a single variable. If the value is not
