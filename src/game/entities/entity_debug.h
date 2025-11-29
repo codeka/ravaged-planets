@@ -59,7 +59,7 @@ private:
   };
   std::vector<Line> lines_;
   MeshComponent* mesh_component_;
-  game::Terrain* terrain_;
+  std::shared_ptr<game::Terrain> terrain_;
 
   // The scenegraph node we are displaying. Only access this on the render thread.
   std::shared_ptr<fw::sg::Node> sg_node_;

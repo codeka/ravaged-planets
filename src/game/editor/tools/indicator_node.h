@@ -13,7 +13,7 @@ namespace ed {
 class IndicatorNode : public fw::sg::Node {
 private:
   fw::sg::ScenegraphManager* mgr_;
-  EditorTerrain* terrain_;
+  std::shared_ptr<EditorTerrain> terrain_;
 
   // All these fields must be accessed only from the render thread. The accessors enforce that.
   float radius_ = 1.0f;
@@ -22,7 +22,7 @@ private:
   bool initialized_ = false;
 
 public:
-  IndicatorNode(EditorTerrain* terrain);
+  IndicatorNode(std::shared_ptr<EditorTerrain> terrain);
   virtual ~IndicatorNode();
 
   void set_radius(float radius);

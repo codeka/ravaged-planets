@@ -4,7 +4,7 @@
 
 namespace ed {
 
-IndicatorNode::IndicatorNode(EditorTerrain* terrain)
+IndicatorNode::IndicatorNode(std::shared_ptr<EditorTerrain> terrain)
   : mgr_(fw::Framework::get_instance()->get_scenegraph_manager()), terrain_(terrain) {
 }
 

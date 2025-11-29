@@ -6,13 +6,15 @@
 #include <string_view>
 #include <vector>
 
+#include <absl/base/attributes.h>
+
 namespace fw {
 
 // A status represents the result of an operation, possibly an error. Similar to absl::Status,
 // though we have a few conveniences that make it more suitable for our use cases. For example,
 // we do not support error codes, only a boolean success/failure state. Also, we can add details
 // to a status with the << operator.
-class Status {
+class [[nodiscard]] Status {
 public:
   Status();
   Status(bool ok, std::string_view message);
@@ -71,7 +73,7 @@ Status ErrorStatus(std::string_view message);
 
 // Represents either a value of type T or an error Status.
 template <typename T>
-class StatusOr {
+class [[nodiscard]] StatusOr {
 public:
   StatusOr(Status const &status) : status_(status) {}
   StatusOr(T const &value) : value_(value) {}

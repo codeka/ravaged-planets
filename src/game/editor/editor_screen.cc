@@ -97,12 +97,12 @@ void EditorScreen::new_map(int width, int height) {
   set_active_tool("heightfield");
 }
 
-void EditorScreen::open_map(std::string const &name) {
+fw::Status EditorScreen::open_map(std::string const &name) {
   // unset the current tool
   set_active_tool("");
 
   std::shared_ptr<WorldCreate> reader(new WorldCreate());
-  reader->read(name);
+  RETURN_IF_ERROR(reader->read(name));
 
   delete world_;
   world_ = new EditorWorld(reader);

@@ -26,7 +26,8 @@ WorldSummary::WorldSummary() :
 }
 
 WorldSummary::WorldSummary(WorldSummary const &copy) :
-    name_(copy.name_), extra_loaded_(false), screenshot_(nullptr), width_(0), height_(0), num_players_(0) {
+    name_(copy.name_), extra_loaded_(false), screenshot_(nullptr), width_(0), height_(0),
+    num_players_(0) {
 }
 
 WorldSummary::~WorldSummary() {
@@ -40,7 +41,12 @@ void WorldSummary::ensure_extra_loaded() const {
 
   auto screenshot_path = full_path / "screenshot.png";
   if (fs::exists(screenshot_path)) {
-    screenshot_ = std::make_shared<fw::Bitmap>(full_path / "screenshot.png");
+    auto screenshot = fw::load_bitmap(full_path / "screenshot.png");
+    if (screenshot.ok()) {
+      screenshot_ = *screenshot;
+    } else {
+      fw::debug << "Error loading world screenshot: " << screenshot.status() << std::endl;
+    }
   }
 
   parse_mapdesc_file(full_path / (name_ + ".mapdesc"));

@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <framework/math.h>
+#include <framework/status.h>
 
 namespace fw {
 class Bitmap;
@@ -18,15 +19,16 @@ class WorldFileEntry;
 // this class reads the map from the filesystem and lets the world populate itself.
 class WorldReader {
 protected:
-  std::shared_ptr<fw::Bitmap> minimap_background_;
-  std::shared_ptr<fw::Bitmap> screenshot_;
-  Terrain *terrain_;
+  fw::Bitmap minimap_background_;
+  fw::Bitmap screenshot_;
+  std::shared_ptr<Terrain> terrain_;
   std::map<int, fw::Vector> player_starts_;
   std::string name_;
   std::string description_;
   std::string author_;
 
-  virtual Terrain* create_terrain(int width, int length, float* height_data);
+  virtual fw::StatusOr<std::shared_ptr<Terrain>> create_terrain(
+      int width, int length, float* height_data);
 
   void read_mapdesc(fw::XmlElement root);
   void read_mapdesc_players(fw::XmlElement players_node);
@@ -37,19 +39,18 @@ public:
   virtual ~WorldReader();
 
   // reads the map with the given name and populates our members
-  void read(std::string name);
+  fw::Status read(std::string name);
 
-  // gets the various things that we loaded from the map file(s), so that the world
-  // can populate itself
-  Terrain *get_terrain();
-
+  std::shared_ptr<Terrain> get_terrain() const {
+    return terrain_;
+  }
   std::map<int, fw::Vector> const &get_player_starts() const {
     return player_starts_;
   }
-  std::shared_ptr<fw::Bitmap> get_minimap_background() const {
+  fw::Bitmap const &get_minimap_background() const {
     return minimap_background_;
   }
-  std::shared_ptr<fw::Bitmap> get_screenshot() const {
+  fw::Bitmap const &get_screenshot() const {
     return screenshot_;
   }
   std::string get_name() const {

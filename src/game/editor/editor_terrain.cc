@@ -115,14 +115,14 @@ int EditorTerrain::get_num_layers() const {
   return 8; // TODO textures_.size();
 }
 
-std::shared_ptr<fw::Bitmap> EditorTerrain::get_layer(int number) {
+fw::Bitmap const &EditorTerrain::get_layer(int number) {
   if (number < 0 || number >= static_cast<int>(layer_bitmaps_.size()))
-    return std::shared_ptr<fw::Bitmap>();
+    return fw::Bitmap();
 
   return layer_bitmaps_[number];
 }
 
-void EditorTerrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
+void EditorTerrain::set_layer(int number, fw::Bitmap const &bitmap) {
   if (number < 0)
     return;
 

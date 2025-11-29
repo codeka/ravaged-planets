@@ -23,7 +23,10 @@ void PathingThread::start() {
   // initialize the pather with the current world's map
   terrain_ = game::World::get_instance()->get_terrain();
   std::shared_ptr<fw::PathFind> pf(
-      new fw::PathFind(terrain_->get_width(), terrain_->get_length(), terrain_->get_collision_data()));
+      new fw::PathFind(
+          terrain_->get_width(),
+          terrain_->get_length(),
+          terrain_->get_collision_data()));
   pather_ = pf;
 
   // start the thread that will simply wait for jobs to arrive and

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <framework/color.h>
+#include <framework/status.h>
 
 namespace game {
 class WorldFile;
@@ -20,16 +21,16 @@ private:
   fw::Color get_terrain_color(int x, int z);
   void calculate_base_minimap_colors();
 
-  void write_terrain(game::WorldFile &wf);
+  fw::Status write_terrain(game::WorldFile &wf);
   void write_mapdesc(game::WorldFile &wf);
-  void write_minimap_background(game::WorldFile &wf);
+  fw::Status write_minimap_background(game::WorldFile &wf);
   void write_collision_data(game::WorldFile &wf);
 
 public:
   WorldWriter(EditorWorld *wrld);
   ~WorldWriter();
 
-  void write(std::string name);
+  fw::Status write(std::string name);
 };
 
 }

@@ -7,6 +7,7 @@
 #include <framework/bitmap.h>
 #include <framework/math.h>
 #include <framework/scenegraph.h>
+#include <framework/status.h>
 #include <framework/texture.h>
 
 namespace fw {
@@ -82,10 +83,10 @@ public:
   Terrain(int width, int height, float *height_data = nullptr);
   virtual ~Terrain();
 
-  virtual void initialize();
+  virtual fw::Status initialize();
   virtual void update();
 
-  virtual void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap);
+  virtual void set_layer(int number, fw::Bitmap const &bitmap);
 
   // gets the height of the terrain vertex at the given integer coordinates.
   float get_vertex_height(int x, int z);

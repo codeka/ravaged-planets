@@ -1,9 +1,11 @@
+#include <game/settings.h>
 
 #include <framework/settings.h>
+#include <framework/status.h>
 
 namespace game {
 
-void settings_initialize(int argc, char** argv) {
+fw::Status settings_initialize(int argc, char** argv) {
   fw::SettingDefinition extra_settings;
 
   extra_settings.add_group("Game", "Game-specific settings")
@@ -32,7 +34,7 @@ void settings_initialize(int argc, char** argv) {
       .add_setting<std::string>(
           "bind.screenshot", "Take a screenshot", "Ctrl+S");
 
-  fw::Settings::initialize(extra_settings, argc, argv, "default.conf");
+  return fw::Settings::initialize(extra_settings, argc, argv, "default.conf");
 }
 
 }

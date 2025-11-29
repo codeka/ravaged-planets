@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 namespace fw {
 class Graphics;
 namespace sg {
@@ -28,7 +30,7 @@ class EditorWorld;
 class Tool {
 protected:
   EditorWorld *world_;
-  EditorTerrain *terrain_;
+  std::shared_ptr<EditorTerrain> terrain_;
   EditorScreen *editor_;
 
   // for each key you bind in your tool's activate() method, you should add
@@ -40,7 +42,7 @@ public:
   Tool(EditorWorld *wrld);
   virtual ~Tool();
 
-  EditorTerrain *get_terrain() const {
+  std::shared_ptr<EditorTerrain> get_terrain() const {
     return terrain_;
   }
   EditorWorld *get_world() const {

@@ -10,10 +10,7 @@
 #include <framework/misc.h>
 
 #include <game/application.h>
-
-namespace game {
-  void settings_initialize(int argc, char** argv);
-}
+#include <game/settings.h>
 
 void display_exception(std::string const &msg);
 
@@ -21,7 +18,13 @@ extern "C" {
 
 int main(int argc, char** argv) {
   try {
-    game::settings_initialize(argc, argv);
+    auto status = game::settings_initialize(argc, argv);
+    if (!status.ok()) {
+      std::stringstream ss;
+      ss << status << std::endl;
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", ss.str().c_str(), nullptr);
+      return 1;
+    }
 
     game::Application app;
     new fw::Framework(&app);

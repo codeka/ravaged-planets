@@ -13,14 +13,21 @@ WorldCreate::WorldCreate() {
 }
 
 WorldCreate::WorldCreate(int width, int height) {
-  terrain_ = create_terrain(width, height, /*height_data*/ nullptr);
+  auto terrain = create_terrain(width, height, /* height_data= */ nullptr);
+  if (!terrain.ok()) {
+    // TODO: make this a factory method instead so we can return the error
+    fw::debug << "Error creating terrain: " << terrain.status() << std::endl;
+  } else {
+    terrain_ = *terrain;
+  }
 }
 
-game::Terrain *WorldCreate::create_terrain(int width, int length, float* height_data) {
-  EditorTerrain *et = new EditorTerrain(width, length, height_data);
-  et->initialize();
+fw::StatusOr<std::shared_ptr<game::Terrain>> WorldCreate::create_terrain(
+    int width, int length, float* height_data) {
+  auto et = std::make_shared<EditorTerrain>(width, length, height_data);
+  RETURN_IF_ERROR(et->initialize());
   et->initialize_splatt();
-  return et;
+  return std::static_pointer_cast<game::Terrain>(et);
 }
 
 //-------------------------------------------------------------------------

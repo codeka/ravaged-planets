@@ -18,7 +18,8 @@ namespace ed {
 // This is a specialization of world_reader that can create a brand new world from scratch, or load one as well.
 class WorldCreate: public game::WorldReader {
 protected:
-  game::Terrain *create_terrain(int width, int length, float* height_data) override;
+  fw::StatusOr<std::shared_ptr<game::Terrain>> create_terrain(
+        int width, int length, float* height_data) override;
 
 public:
   WorldCreate();
@@ -35,7 +36,7 @@ public:
   EditorWorld(std::shared_ptr<game::WorldReader> reader);
   virtual ~EditorWorld();
 
-  void set_screenshot(std::shared_ptr<fw::Bitmap> bmp) {
+  void set_screenshot(fw::Bitmap bmp) {
     screenshot_ = bmp;
   }
 };

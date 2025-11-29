@@ -74,10 +74,10 @@ void SaveMapWindow::show() {
 // updates the screenshot that we're displaying whenever it changes.
 void SaveMapWindow::update_screenshot() {
   auto world = dynamic_cast<EditorWorld *>(game::World::get_instance());
-  if (world->get_screenshot() == nullptr || world->get_screenshot()->get_width() == 0)
+  if (world->get_screenshot().get_width() == 0)
     return;
 
-  std::shared_ptr<fw::Bitmap> bmp = world->get_screenshot();
+  fw::Bitmap const &bmp = world->get_screenshot();
   wnd_->find<Label>(SCREENSHOT_ID)->set_background(bmp);
 }
 
@@ -88,11 +88,12 @@ bool SaveMapWindow::screenshot_clicked(Widget *w) {
   return true;
 }
 
-void SaveMapWindow::screenshot_complete(std::shared_ptr<fw::Bitmap> bitmap) {
-  bitmap->resize(640, 480);
+void SaveMapWindow::screenshot_complete(fw::Bitmap const &bitmap) {
+  fw::Bitmap resized = bitmap;
+  resized.resize(640, 480);
 
   auto world = dynamic_cast<EditorWorld *>(game::World::get_instance());
-  world->set_screenshot(bitmap);
+  world->set_screenshot(resized);
   fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this]() {
     update_screenshot();
   });
@@ -105,7 +106,12 @@ bool SaveMapWindow::save_clicked(Widget *w) {
   world->set_description(wnd_->find<TextEdit>(DESCRIPTION_ID)->get_text());
 
   WorldWriter writer(world);
-  writer.write(world->get_name());
+  auto status = writer.write(world->get_name());
+  if (!status.ok()) {
+    // TODO: show error to user?
+    fw::debug << "Error saving map: " << status << std::endl;
+    return true;
+  }
 
   wnd_->set_visible(false);
   return true;

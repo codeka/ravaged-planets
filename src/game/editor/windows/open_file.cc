@@ -156,8 +156,11 @@ void OpenFileWindow::on_item_selected(int index) {
     bool is_image = false;
     if (ext == ".jpg" || ext == ".png") {
       // we only support JPG and PNG image formats
-      try {
-        fw::Bitmap bmp(item_path);
+      auto bmp_or_status = fw::load_bitmap(item_path);
+      if (!bmp_or_status.ok()) {
+        fw::debug << "Error loading bitmap: " << bmp_or_status.status() << std::endl;
+      } else {
+        auto bmp = *bmp_or_status;
         is_image = true; // if we loaded it, then we know it's an image
 
         Label *preview = wnd_->find<Label>(IMAGE_PREVIEW_ID);
@@ -181,12 +184,10 @@ void OpenFileWindow::on_item_selected(int index) {
 
         std::shared_ptr<fw::Texture> texture = std::shared_ptr<fw::Texture>(new fw::Texture());
         texture->create(bmp);
-        std::shared_ptr<Drawable> drawable = fw::Framework::get_instance()->get_gui()->get_drawable_manager()
-            ->build_drawable(texture, 0, 0, bmp_width, bmp_height);
+        std::shared_ptr<Drawable> drawable =
+            fw::Framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
+                texture, 0, 0, bmp_width, bmp_height);
         preview->set_background(drawable, true);
-      } catch (fw::Exception &e) {
-        // couldn't load image, just ignore
-        fw::debug << "Error loading image. " << e.what() << std::endl;
       }
     }
 

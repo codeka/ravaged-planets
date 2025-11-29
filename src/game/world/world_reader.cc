@@ -3,11 +3,12 @@
 #include <absl/strings/str_cat.h>
 
 #include <framework/bitmap.h>
-#include <framework/framework.h>
-#include <framework/logging.h>
-#include <framework/graphics.h>
-#include <framework/misc.h>
 #include <framework/exception.h>
+#include <framework/framework.h>
+#include <framework/graphics.h>
+#include <framework/logging.h>
+#include <framework/misc.h>
+#include <framework/status.h>
 #include <framework/xml.h>
 
 #include <game/world/world_reader.h>
@@ -24,7 +25,7 @@ WorldReader::WorldReader() :
 WorldReader::~WorldReader() {
 }
 
-void WorldReader::read(std::string name) {
+fw::Status WorldReader::read(std::string name) {
   WorldVfs vfs;
   WorldFile wf = vfs.open_file(name, false);
 
@@ -45,14 +46,14 @@ void WorldReader::read(std::string name) {
   wfe.read(height_data, trn_width * trn_length * sizeof(float));
 
   name_ = name;
-  terrain_ = create_terrain(trn_width, trn_length, height_data);
+  ASSIGN_OR_RETURN(terrain_, create_terrain(trn_width, trn_length, height_data));
 
   for (int patch_z = 0; patch_z < terrain_->get_patches_length(); patch_z++) {
     for (int patch_x = 0; patch_x < terrain_->get_patches_width(); patch_x++) {
       std::string name = absl::StrCat("splatt-", patch_x, "-", patch_z, ".png");
       wfe = wf.get_entry(name, false /* for_write */);
 
-      fw::Bitmap splatt(wfe.get_full_path().c_str());
+      ASSIGN_OR_RETURN(auto splatt, fw::load_bitmap(wfe.get_full_path().c_str()));
       terrain_->set_splatt(patch_x, patch_z, splatt);
     }
   }
@@ -61,14 +62,14 @@ void WorldReader::read(std::string name) {
   if (wfe.exists()) {
     wfe.close();
 
-    minimap_background_ = std::make_shared<fw::Bitmap>(wfe.get_full_path());
+    ASSIGN_OR_RETURN(minimap_background_, fw::load_bitmap(wfe.get_full_path()));
   }
 
   wfe = wf.get_entry("screenshot.png", false /* for_write */);
   if (wfe.exists()) {
     wfe.close();
 
-    screenshot_ = std::make_shared<fw::Bitmap>(wfe.get_full_path());
+    ASSIGN_OR_RETURN(screenshot_, fw::load_bitmap(wfe.get_full_path()));
   }
 
   wfe = wf.get_entry(name + ".mapdesc", false /* for_write */);
@@ -83,6 +84,8 @@ void WorldReader::read(std::string name) {
   if (wfe.exists()) {
     read_collision_data(wfe);
   }
+
+  return fw::OkStatus();
 }
 
 void WorldReader::read_collision_data(WorldFileEntry &wfe) {
@@ -140,19 +143,11 @@ void WorldReader::read_mapdesc_players(fw::XmlElement players_node) {
   }
 }
 
-Terrain *WorldReader::create_terrain(int width, int length, float* height_data) {
-  Terrain *terrain = new Terrain(width, length, height_data);
-  terrain->initialize();
+fw::StatusOr<std::shared_ptr<Terrain>> WorldReader::create_terrain(
+    int width, int length, float* height_data) {
+  auto terrain = std::make_shared<Terrain>(width, length, height_data);
+  RETURN_IF_ERROR(terrain->initialize());
   return terrain;
-}
-
-Terrain *WorldReader::get_terrain() {
-  if (terrain_ == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::Exception()
-        << fw::message_error_info("Terrain has not been created yet!"));
-  }
-
-  return terrain_;
 }
 
 }

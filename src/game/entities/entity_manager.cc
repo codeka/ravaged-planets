@@ -34,10 +34,12 @@ EntityManager::~EntityManager() {
 
 void EntityManager::initialize() {
   game::World *wrld = game::World::get_instance();
-  game::Terrain *trn = wrld->get_terrain();
+  auto terrain = wrld->get_terrain();
 
   debug_ = new EntityDebug(this);
-  patch_mgr_ = new PatchManager(static_cast<float>(trn->get_width()), static_cast<float>(trn->get_length()));
+  patch_mgr_ = new PatchManager(
+      static_cast<float>(terrain->get_width()),
+      static_cast<float>(terrain->get_length()));
 }
 
 std::shared_ptr<Entity> EntityManager::create_entity(std::string const &template_name, entity_id id) {

@@ -3,6 +3,8 @@
 #include <map>
 #include <string>
 
+#include <framework/status.h>
+
 typedef struct SDL_Cursor SDL_Cursor;
 
 namespace fw {
@@ -14,7 +16,7 @@ private:
   std::map<std::string, SDL_Cursor *> loaded_cursors_;
   bool cursor_visible_;
 
-  SDL_Cursor *load_cursor(std::string const &name);
+  StatusOr<SDL_Cursor *>load_cursor(std::string const &name);
   void set_cursor_for_real(std::string const &name);
   void update_cursor();
 public:

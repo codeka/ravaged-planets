@@ -25,7 +25,7 @@ Tool::~Tool() {
 void Tool::activate() {
   game::Application *app = dynamic_cast<game::Application *>(fw::Framework::get_instance()->get_app());
   editor_ = dynamic_cast<EditorScreen *>(app->get_screen_stack()->get_active_screen());
-  terrain_ = dynamic_cast<EditorTerrain *>(world_->get_terrain());
+  terrain_ = std::dynamic_pointer_cast<EditorTerrain>(world_->get_terrain());
 }
 
 void Tool::deactivate() {
@@ -38,7 +38,11 @@ void Tool::update() {
 }
 
 // This is used by a number of of the tools for giving a basic indication of it's area of effect.
-void draw_circle(fw::sg::Scenegraph &scenegraph, game::Terrain *terrain, fw::Vector const &center, float radius) {
+void draw_circle(
+    fw::sg::Scenegraph &scenegraph,
+    game::Terrain *terrain,
+    fw::Vector const &center,
+    float radius) {
   // the number of segments is basically the diameter of our circle. That means
   // we'll have one segment per unit, approximately.
   int num_segments = (int) (2.0f * fw::pi() * radius);

@@ -191,9 +191,9 @@ void Texture::bind() const {
   FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 }
 
-void Texture::save_png(fs::path const &filename) {
-  Bitmap bmp(*this);
-  bmp.save_bitmap(filename);
+fw::Status Texture::save_png(fs::path const &filename) {
+  Bitmap bmp = load_bitmap(*this);
+  return bmp.save_bitmap(filename);
 }
 
 void Texture::calculate_size() const {
@@ -224,16 +224,18 @@ TextureArray::TextureArray(int width, int height)
 TextureArray::~TextureArray() {
 }
 
-void TextureArray::add(fs::path const& filename) {
+Status TextureArray::add(fs::path const& filename) {
   // TODO: check if data has been created.
-  auto bmp = std::make_shared<Bitmap>(filename);
-  bmp->resize(width_, height_);
+  ASSIGN_OR_RETURN(auto bmp, load_bitmap(filename));
+  bmp.resize(width_, height_);
   bitmaps_.push_back(bmp);
+  return OkStatus();
 }
 
-void TextureArray::add(std::shared_ptr<fw::Bitmap> bmp) {
-  bmp->resize(width_, height_);
-  bitmaps_.push_back(bmp);
+void TextureArray::add(fw::Bitmap const &bmp) {
+  auto resized_bmp = bmp;
+  resized_bmp.resize(width_, height_);
+  bitmaps_.push_back(resized_bmp);
 }
 
 void TextureArray::ensure_created() {
@@ -248,7 +250,8 @@ void TextureArray::ensure_created() {
     auto& bitmap = bitmaps_[i];
     FW_CHECKED(
       glTexSubImage3D(
-        GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width_, height_, 1, GL_RGBA, GL_UNSIGNED_BYTE, bitmap->get_pixels().data()));
+          GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width_, height_, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+          bitmap.get_pixels().data()));
   }
 }
 

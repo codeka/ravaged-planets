@@ -1,5 +1,7 @@
 #pragma once
 
+#include <framework/status.h>
+
 #include <game/screens/screen.h>
 
 namespace ed {
@@ -26,7 +28,7 @@ public:
   void new_map(int width, int height);
 
   // load an existing map to edit
-  void open_map(std::string const &name);
+  fw::Status open_map(std::string const &name);
 
   Tool *get_active_tool() {
     return tool_;

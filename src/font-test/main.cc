@@ -31,7 +31,11 @@ int main(int argc, char** argv) {
 
     std::shared_ptr<fw::FontFace> font_face = fw::Framework::get_instance()->get_font_manager()->get_face();
     font_face->ensure_glyphs("wm");
-    font_face->get_bitmap()->save_bitmap(fw::resolve("test.png", true));
+    status = font_face->get_bitmap()->save_bitmap(fw::resolve("test.png", true));
+    if (!status.ok()) {
+      fw::debug << status << std::endl;
+      return 1;
+    }
     fw::debug << "Bitmap saved to:" << fw::resolve("test.png", true) << std::endl;
 
   } catch(std::exception &e) {

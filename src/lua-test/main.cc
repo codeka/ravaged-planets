@@ -7,8 +7,9 @@
 #include <framework/framework.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
+#include <framework/status.h>
 
-void settings_initialize(int argc, char** argv);
+fw::Status settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 
 //-----------------------------------------------------------------------------
@@ -129,7 +130,12 @@ LUA_DEFINE_METATABLE(TestClass)
 
 int main(int argc, char** argv) {
   try {
-    settings_initialize(argc, argv);
+    auto status = settings_initialize(argc, argv);
+    if (!status.ok()) {
+      std::cerr << status << std::endl;
+      fw::Settings::print_help();
+      return 1;
+    }
 
     fw::ToolApplication app;
     new fw::Framework(&app);
@@ -201,8 +207,8 @@ void display_exception(std::string const &msg) {
   ss << msg;
 }
 
-void settings_initialize(int argc, char** argv) {
+fw::Status settings_initialize(int argc, char** argv) {
   fw::SettingDefinition extra_settings;
 
-  fw::Settings::initialize(extra_settings, argc, argv, "lua-test.conf");
+  return fw::Settings::initialize(extra_settings, argc, argv, "lua-test.conf");
 }

@@ -44,8 +44,8 @@ struct ScreenshotRequest {
   int width;
   int height;
   bool include_gui;
-  std::function<void(std::shared_ptr<fw::Bitmap> bmp)> callback;
-  std::shared_ptr<fw::Bitmap> bitmap;
+  std::function<void(fw::Bitmap const &bmp)> callback;
+  fw::Bitmap bitmap;
 };
 
 static Framework *only_instance = 0;
@@ -331,8 +331,9 @@ void Framework::render() {
   scenegraph.pop_camera();
 
   // if we've been asked for some screenshots, take them after we've done the normal render.
-  if (screenshots_.size() > 0)
+  if (screenshot_requests_.size() > 0) {
     take_screenshots(scenegraph);
+  }
 
   graphics_->after_render();
 }
@@ -361,41 +362,45 @@ bool Framework::wait_events() {
   return true;
 }
 
-void Framework::take_screenshot(int width, int height, std::function<void(std::shared_ptr<fw::Bitmap> bmp)> callback_fn,
+void Framework::take_screenshot(
+    int width, int height, std::function<void(fw::Bitmap const &bmp)> callback_fn,
     bool include_gui /*= true */) {
   if (width == 0 || height == 0) {
     width = graphics_->get_width();
     height = graphics_->get_height();
   }
 
-  ScreenshotRequest *request = new ScreenshotRequest();
+  auto request = std::make_shared<ScreenshotRequest>();
   request->width = width;
   request->height = height;
   request->include_gui = include_gui;
   request->callback = callback_fn;
 
-  screenshots_.push_back(request);
+  screenshot_requests_.push_back(request);
 }
 
-/* This is called on another thread to call the callbacks that were registered against the "screenshot" request. */
-void call_callacks_thread_proc(std::shared_ptr<std::list<ScreenshotRequest *>> requests) {
-  for(ScreenshotRequest *request : *requests) {
+/**
+ * This is called on another thread to call the callbacks that were registered against the
+ * "screenshot" request.
+ */
+void call_callacks_thread_proc(
+    std::shared_ptr<std::list<std::shared_ptr<ScreenshotRequest>>> requests) {
+  for(auto request : *requests) {
     request->callback(request->bitmap);
-    delete request;
   }
 }
 
 /**
- * This is called at the end of a frame if there are pending screenshot callbacks. We'll grab the contents of the,
- * frame buffer, then (on another thread) call the callbacks.
+ * This is called at the end of a frame if there are pending screenshot callbacks. We'll grab the
+ * contents of the, frame buffer, then (on another thread) call the callbacks.
  */
 void Framework::take_screenshots(sg::Scenegraph &scenegraph) {
-  if (screenshots_.empty()) {
+  if (screenshot_requests_.empty()) {
     return;
   }
 
-  std::shared_ptr<std::list<ScreenshotRequest *>> requests(new std::list<ScreenshotRequest *>());
-  for(ScreenshotRequest *request : screenshots_) {
+  auto requests = std::make_shared<std::list<std::shared_ptr<ScreenshotRequest>>>();
+  for(auto request : screenshot_requests_) {
     // render the scene to a separate render target first
     std::shared_ptr<fw::Texture> color_target(new fw::Texture());
     color_target->create(request->width, request->height);
@@ -411,7 +416,8 @@ void Framework::take_screenshots(sg::Scenegraph &scenegraph) {
     fw::render(scenegraph, framebuffer, request->include_gui);
     scenegraph.pop_camera();
 
-    request->bitmap = std::make_shared<fw::Bitmap>(*color_target.get());
+    auto bitmap = load_bitmap(*color_target.get());
+    request->bitmap = load_bitmap(*color_target.get());
     requests->push_back(request);
   }
 
@@ -419,7 +425,7 @@ void Framework::take_screenshots(sg::Scenegraph &scenegraph) {
   std::thread t(std::bind(&call_callacks_thread_proc, requests));
   t.detach();
 
-  screenshots_.clear();
+  screenshot_requests_.clear();
 }
 
 }

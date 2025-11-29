@@ -3,12 +3,11 @@
 #include <map>
 #include <memory>
 
+#include <framework/bitmap.h>
 #include <framework/math.h>
 
 namespace fw {
 class Graphics;
-class Bitmap;
-class texture;
 
 namespace sg {
 class Scenegraph;
@@ -31,12 +30,12 @@ class PathingThread;
 class World {
 private:
   std::shared_ptr<WorldReader> reader_;
-  Terrain *terrain_;
+  std::shared_ptr<Terrain> terrain_;
   ent::EntityManager *entities_;
   PathingThread *pathing_;
   std::vector<int> keybind_tokens_;
   CursorHandler *cursor_;
-  std::shared_ptr<fw::Bitmap> minimap_background_;
+  fw::Bitmap minimap_background_;
   std::map<int, fw::Vector> player_starts_;
 
   std::string description_;
@@ -50,10 +49,10 @@ private:
   void on_key_screenshot(std::string key, bool is_down);
 
   // This is called after a screenshot is taken, we'll save it to disk.
-  void screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot);
+  void screenshot_callback(fw::Bitmap const &screenshot);
 
 protected:
-  std::shared_ptr<fw::Bitmap> screenshot_;
+  fw::Bitmap screenshot_;
 
   virtual void initialize_pathing();
   virtual void initialize_entities();
@@ -77,11 +76,11 @@ public:
     instance_ = wrld;
   }
 
-  std::shared_ptr<fw::Bitmap> const &get_minimap_background() const {
+  fw::Bitmap const &get_minimap_background() const {
     return minimap_background_;
   }
 
-  std::shared_ptr<fw::Bitmap> get_screenshot() const {
+  fw::Bitmap const &get_screenshot() const {
     return screenshot_;
   }
 
@@ -89,7 +88,7 @@ public:
     return player_starts_;
   }
 
-  Terrain *get_terrain() const {
+  std::shared_ptr<Terrain> get_terrain() const {
     return terrain_;
   }
   ent::EntityManager *get_entity_manager() const {

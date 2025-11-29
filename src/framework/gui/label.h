@@ -43,7 +43,7 @@ public:
   std::string get_text() const;
 
   void set_background(std::shared_ptr<Drawable> background, bool centred = false);
-  void set_background(std::shared_ptr<Bitmap> bmp, bool centred = false);
+  void set_background(Bitmap const &bmp, bool centred = false);
 };
 
 }

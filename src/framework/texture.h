@@ -4,6 +4,7 @@
 #include <boost/filesystem.hpp>
 
 #include <framework/graphics.h>
+#include <framework/status.h>
 
 namespace fw {
 class Bitmap;
@@ -25,8 +26,9 @@ class Texture : public TextureBase {
 private:
   std::shared_ptr<TextureData> data_;
 
-  // If this is set, we'll call it (once) on the render thread to finish creating the actual TextureData. We do expect
-  // to have data_->width, height etc set before the render thread runs though.
+  // If this is set, we'll call it (once) on the render thread to finish creating the actual
+  // TextureData. We do expect to have data_->width, height etc set before the render thread runs
+  // though.
   std::function<void(TextureData& data)> data_creator_;
 
   void calculate_size() const;
@@ -53,7 +55,7 @@ public:
   void ensure_created() override;
 
   // save the contents of this texture to a .png file with the given name
-  void save_png(std::filesystem::path const &filename);
+  fw::Status save_png(std::filesystem::path const &filename);
 
   int get_width() const override;
   int get_height() const override;
@@ -75,28 +77,28 @@ public:
   }
 };
 
-// TextureArray represents an array of textures (surprise!) and allows to bind them all to a single sampler in the
-// shader, allowing for more efficient access.
+// TextureArray represents an array of textures (surprise!) and allows to bind them all to a single
+// sampler in the shader, allowing for more efficient access.
 //
-// When you create a TextureArray, you must specify the width and height. Any images you add to the texture will be
-// automatically resized (all textures in an array must have the same size).
+// When you create a TextureArray, you must specify the width and height. Any images you add to the
+// texture will be automatically resized (all textures in an array must have the same size).
 class TextureArray : public TextureBase {
 private:
   int width_;
   int height_;
   std::shared_ptr<TextureData> data_;
 
-  // The bitmaps we use to create the texture data. These last only long enough to create the TextureData. Once we have
-  // the TextureData, they are released.
-  std::vector<std::shared_ptr<fw::Bitmap>> bitmaps_;
+  // The bitmaps we use to create the texture data. These last only long enough to create the
+  // TextureData. Once we have the TextureData, they are released.
+  std::vector<fw::Bitmap> bitmaps_;
 
 public:
   TextureArray(int width, int height);
   virtual ~TextureArray();
 
   // You cannot call any add() method once the texture has been bound once.
-  void add(std::filesystem::path const& filename);
-  void add(std::shared_ptr<fw::Bitmap> bmp);
+  Status add(std::filesystem::path const& filename);
+  void add(fw::Bitmap const &bmp);
 
   // Call on the render thread to ensure we've been created.
   void ensure_created() override;
@@ -107,7 +109,8 @@ public:
   void bind() const override;
 };
 
-// A framebuffer holds either a color texture, a depth texture or bother, and lets use render to those.
+// A framebuffer holds either a color texture, a depth texture or bother, and lets use render to
+// those.
 class Framebuffer {
 private:
   std::shared_ptr<FramebufferData> data_;

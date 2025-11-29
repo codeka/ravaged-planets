@@ -48,7 +48,7 @@ void PositionComponent::update(float) {
 
 void PositionComponent::set_final_position() {
   if (pos_updated_) {
-    game::Terrain *terrain = game::World::get_instance()->get_terrain();
+    auto terrain = game::World::get_instance()->get_terrain();
     if (sit_on_terrain_) {
       // if we're supposed to sit on the terrain, make sure we're doing that now.
       pos_ = fw::Vector(pos_[0], terrain->get_height(pos_[0], pos_[2]), pos_[2]);

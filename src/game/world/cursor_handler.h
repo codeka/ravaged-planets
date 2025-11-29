@@ -14,7 +14,7 @@ class CursorHandler {
 private:
   std::vector<int> keybind_tokens_;
   ent::EntityManager *entities_;
-  Terrain *terrain_;
+  std::shared_ptr<Terrain> terrain_;
   std::weak_ptr<ent::Entity> last_highlighted_;
   std::weak_ptr<ent::Entity> entity_under_cursor_;
 

@@ -9,6 +9,7 @@
 #include <framework/graphics.h>
 #include <framework/misc.h>
 #include <framework/exception.h>
+#include <framework/status.h>
 #include <framework/texture.h>
 
 #include <game/world/world_vfs.h>
@@ -26,26 +27,31 @@ WorldWriter::WorldWriter(EditorWorld *wrld) :
 WorldWriter::~WorldWriter() {
 }
 
-void WorldWriter::write(std::string name) {
+fw::Status WorldWriter::write(std::string name) {
   name_ = name;
 
   game::WorldVfs vfs;
   game::WorldFile wf = vfs.open_file(name, true);
 
-  write_terrain(wf);
+  RETURN_IF_ERROR(write_terrain(wf));
   write_mapdesc(wf);
-  write_minimap_background(wf);
+  RETURN_IF_ERROR(write_minimap_background(wf));
   write_collision_data(wf);
 
   // write the screenshot as well, which is pretty simple...
-  if (world_->get_screenshot()) {
+  if (world_->get_screenshot().get_width() > 0) {
     game::WorldFileEntry wfe = wf.get_entry("screenshot.png", true /* for_write */);
-    world_->get_screenshot()->save_bitmap(wfe.get_full_path());
+    auto status = world_->get_screenshot().save_bitmap(wfe.get_full_path());
+    if (!status.ok()) {
+      return status;
+    }
   }
+
+  return fw::OkStatus();
 }
 
-void WorldWriter::write_terrain(game::WorldFile &wf) {
-  EditorTerrain *trn = dynamic_cast<EditorTerrain *>(world_->get_terrain());
+fw::Status WorldWriter::write_terrain(game::WorldFile &wf) {
+  auto trn = dynamic_pointer_cast<EditorTerrain>(world_->get_terrain());
   int version = 1;
   int trn_width = trn->get_width();
   int trn_length = trn->get_length();
@@ -62,7 +68,7 @@ void WorldWriter::write_terrain(game::WorldFile &wf) {
 
       std::string name = absl::StrCat("splatt-", patch_x, "-", patch_z, ".png");
       wfe = wf.get_entry(name, true /* for_write */);
-      splatt.save_bitmap(wfe.get_full_path());
+      RETURN_IF_ERROR(splatt.save_bitmap(wfe.get_full_path()));
     }
   }
 }
@@ -87,8 +93,8 @@ void WorldWriter::write_mapdesc(game::WorldFile &wf) {
 // The minimap background consist of basically one pixel per vertex. We calculate the color
 // of the pixel as a combination of the height of the terrain at that point and the texture that
 // is displayed on the terrain at that point (so "high" and "grass" would be a Light green, etc)
-void WorldWriter::write_minimap_background(game::WorldFile &wf) {
-  game::Terrain *trn = world_->get_terrain();
+fw::Status WorldWriter::write_minimap_background(game::WorldFile &wf) {
+  auto trn = world_->get_terrain();
   int width = trn->get_width();
   int height = trn->get_length();
 
@@ -140,7 +146,7 @@ void WorldWriter::write_minimap_background(game::WorldFile &wf) {
   img.set_pixels(pixels);
 
   game::WorldFileEntry wfe = wf.get_entry("minimap.png", true /* for_write */);
-  img.save_bitmap(wfe.get_full_path());
+  return img.save_bitmap(wfe.get_full_path());
 }
 
 // gets the basic color of the terrain at the given (x,z) location
@@ -148,7 +154,7 @@ fw::Color WorldWriter::get_terrain_color(int x, int z) {
   int patch_x = static_cast<int>(static_cast<float>(x) / game::Terrain::PATCH_SIZE);
   int patch_z = static_cast<int>(static_cast<float>(z) / game::Terrain::PATCH_SIZE);
 
-  EditorTerrain *trn = dynamic_cast<EditorTerrain *>(world_->get_terrain());
+  auto trn = std::dynamic_pointer_cast<EditorTerrain>(world_->get_terrain());
   fw::Bitmap &bmp = trn->get_splatt(patch_x, patch_z);
 
   // centre_u and centre_v are the texture coordinates (in the range [0..1])
@@ -174,17 +180,17 @@ fw::Color WorldWriter::get_terrain_color(int x, int z) {
 }
 
 void WorldWriter::calculate_base_minimap_colors() {
-  EditorTerrain *trn = dynamic_cast<EditorTerrain *>(world_->get_terrain());
+  auto trn = std::dynamic_pointer_cast<EditorTerrain>(world_->get_terrain());
   for (int i = 0; i < 4; i++) {
      // Use the average color of this layer
-    std::shared_ptr<fw::Bitmap> layer_bmp = trn->get_layer(i);
-    base_minimap_colors_[i] = layer_bmp->get_dominant_color();
+    fw::Bitmap const &layer_bmp = trn->get_layer(i);
+    base_minimap_colors_[i] = layer_bmp.get_dominant_color();
     fw::debug << "base minimap color [" << i << "] = " << base_minimap_colors_[i] << std::endl;
   }
 }
 
 void WorldWriter::write_collision_data(game::WorldFile &wf) {
-  EditorTerrain *trn = dynamic_cast<EditorTerrain *>(world_->get_terrain());
+  auto trn = std::dynamic_pointer_cast<EditorTerrain>(world_->get_terrain());
   int width = trn->get_width();
   int length = trn->get_length();
 

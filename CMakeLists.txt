@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 # Make sure we compile with C++20 features
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_EXTENSIONS off)
+set(CMAKE_CXX_EXTENSIONS on)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -65,6 +65,11 @@ if(LINUX)
     list(APPEND SDL2_LIBRARY ${X11_LIBRARIES} pthread)
 elseif(APPLE)
     find_package(BZip2 REQUIRED)
+endif()
+
+if (WIN32)
+  # Make Warning 4834 "unused variable annotated with [[nodiscard]]" an error instead of warning.
+  add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/we4834>")
 endif()
 
 add_subdirectory(src/version-number)

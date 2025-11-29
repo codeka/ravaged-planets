@@ -24,7 +24,7 @@ private:
   std::vector<fw::Bitmap> splatt_bitmaps_;
 
   // We also keep a separate vector of the layer bitmaps
-  std::vector<std::shared_ptr<fw::Bitmap>> layer_bitmaps_;
+  std::vector<fw::Bitmap> layer_bitmaps_;
 
 public:
   EditorTerrain(int width, int height, float* height_data = nullptr);
@@ -35,8 +35,8 @@ public:
 
   // gets and sets the texture of the given layer.
   int get_num_layers() const;
-  std::shared_ptr<fw::Bitmap> get_layer(int number);
-  void set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) override;
+  fw::Bitmap const &get_layer(int number);
+  void set_layer(int number, fw::Bitmap const &bitmap) override;
 
   // creates all of the splatt textures and sets them up initially
   void initialize_splatt();

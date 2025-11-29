@@ -58,7 +58,12 @@ bool OpenMapWindow::open_clicked(Widget *w) {
   }
 
   game::WorldSummary const &ws = boost::any_cast<game::WorldSummary const &>(selected_widget->get_data());
-  EditorScreen::get_instance()->open_map(ws.get_name());
+  auto status = EditorScreen::get_instance()->open_map(ws.get_name());
+  if (!status.ok()) {
+    // TODO: show error to user?
+    fw::debug << "Error opening map: " << status << std::endl;
+    return true;
+  }
 
   hide();
   return true;

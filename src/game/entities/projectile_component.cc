@@ -71,10 +71,10 @@ void ProjectileComponent::update(float) {
 
   if (!exploded) {
     // check whether we've hit the ground
-    game::Terrain *trn = game::World::get_instance()->get_terrain();
+    auto terrain = game::World::get_instance()->get_terrain();
 
     fw::Vector pos = our_position_->get_position();
-    float height = trn->get_height(pos[0], pos[2]);
+    float height = terrain->get_height(pos[0], pos[2]);
     if (height > pos[1]) {
       explode (std::shared_ptr<ent::Entity>());
       exploded = true;

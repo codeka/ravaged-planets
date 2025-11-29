@@ -1,11 +1,12 @@
+#include <framework/cursor.h>
 
 #include <SDL2/SDL.h>
 
 #include <framework/bitmap.h>
-#include <framework/cursor.h>
 #include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
+#include <framework/status.h>
 #include <framework/paths.h>
 
 namespace fw {
@@ -27,8 +28,8 @@ void Cursor::destroy() {
   loaded_cursors_.clear();
 }
 
-SDL_Cursor *Cursor::load_cursor(std::string const &name) {
-  fw::Bitmap bmp(fw::resolve("cursors/" + name + ".png"));
+StatusOr<SDL_Cursor *> Cursor::load_cursor(std::string const &name) {
+  ASSIGN_OR_RETURN(fw::Bitmap bmp, load_bitmap(fw::resolve("cursors/" + name + ".png")));
 
   int hot_x = bmp.get_width() / 2;
   int hot_y = bmp.get_height() / 2;
@@ -62,8 +63,13 @@ void Cursor::set_cursor_for_real(std::string const &name) {
   SDL_Cursor *cursor;
   auto it = loaded_cursors_.find(name);
   if (it == loaded_cursors_.end()) {
-    cursor = load_cursor(name);
-    loaded_cursors_[name] = cursor;
+    auto new_cursor = load_cursor(name);
+    if (!new_cursor.ok()) {
+      fw::debug << "Error loading cursor: " << new_cursor.status() << std::endl;
+    } else {
+      cursor = *new_cursor;
+      loaded_cursors_[name] = cursor;
+    }
   } else {
     cursor = it->second;
   }

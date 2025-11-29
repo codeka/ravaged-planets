@@ -31,7 +31,7 @@ namespace game {
 World *World::instance_ = nullptr;
 
 World::World(std::shared_ptr<WorldReader> reader) :
-    reader_(reader), entities_(nullptr), terrain_(nullptr), pathing_(nullptr), initialized_(false) {
+    reader_(reader), entities_(nullptr), pathing_(nullptr), initialized_(false) {
   cursor_ = new CursorHandler();
 }
 
@@ -55,7 +55,8 @@ void World::initialize() {
   }
 
   // tell the Particle manager to wrap particles at the world boundary
-  fw::Framework::get_instance()->get_particle_mgr()->set_world_wrap(terrain_->get_width(), terrain_->get_length());
+  fw::Framework::get_instance()->get_particle_mgr()->set_world_wrap(
+      terrain_->get_width(), terrain_->get_length());
 
   fw::Input *input = fw::Framework::get_instance()->get_input();
 
@@ -64,9 +65,11 @@ void World::initialize() {
   initialize_entities();
   if (entities_ != nullptr) {
     cursor_->initialize();
-    keybind_tokens_.push_back(input->bind_function("pause", std::bind(&World::on_key_pause, this, _1, _2)));
+    keybind_tokens_.push_back(
+        input->bind_function("pause", std::bind(&World::on_key_pause, this, _1, _2)));
   }
-  keybind_tokens_.push_back(input->bind_function("screenshot", std::bind(&World::on_key_screenshot, this, _1, _2)));
+  keybind_tokens_.push_back(
+      input->bind_function("screenshot", std::bind(&World::on_key_screenshot, this, _1, _2)));
 
   initialize_pathing();
 
@@ -109,11 +112,12 @@ void World::on_key_pause(std::string, bool is_down) {
 
 void World::on_key_screenshot(std::string, bool is_down) {
   if (!is_down) {
-    fw::Framework::get_instance()->take_screenshot(0, 0, std::bind(&World::screenshot_callback, this, _1));
+    fw::Framework::get_instance()->take_screenshot(
+        0, 0, std::bind(&World::screenshot_callback, this, _1));
   }
 }
 
-void World::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
+void World::screenshot_callback(fw::Bitmap const &screenshot) {
   // screenshots go under the data directory\screens folder
   fs::path base_path = fw::resolve("screens", true);
   if (!fs::exists(base_path)) {
@@ -142,7 +146,10 @@ void World::screenshot_callback(std::shared_ptr<fw::Bitmap> screenshot) {
   }
 
   fs::path full_path = base_path / std::format("screen-{:04d}.png", (max_file_number + 1));
-  screenshot->save_bitmap(full_path.string());
+  auto status = screenshot.save_bitmap(full_path.string());
+  if (!status.ok()) {
+    fw::debug << "Error saving screenshot: " << status << std::endl;
+  }
 }
 
 void World::update() {

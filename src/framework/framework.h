@@ -109,7 +109,7 @@ private:
   // game updates happen (synchronized) on this thread in constant timestep
   void update_proc();
 
-  std::list<ScreenshotRequest *> screenshots_;
+  std::list<std::shared_ptr<ScreenshotRequest>> screenshot_requests_;
   void take_screenshots(sg::Scenegraph &Scenegraph);
 
   void language_initialize();
@@ -141,7 +141,8 @@ public:
   // takes a screenshot at the end of the next frame, saves it to an fw::Bitmap and
   // calls the given callback with the bitmap, specify 0 for width/height to take a
   // screenshot at the current resolution
-  void take_screenshot(int with, int height, std::function<void(std::shared_ptr<fw::Bitmap> bmp)> callback_fn,
+  void take_screenshot(
+      int with, int height, std::function<void(fw::Bitmap const &bmp)> callback_fn,
       bool include_gui = true);
 
   // gets or sets the camera we'll use for camera control

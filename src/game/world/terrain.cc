@@ -11,6 +11,7 @@
 #include <framework/math.h>
 #include <framework/scenegraph.h>
 #include <framework/shader.h>
+#include <framework/status.h>
 
 #include <game/world/terrain_helper.h>
 
@@ -31,21 +32,28 @@ Terrain::~Terrain() {
   delete[] heights_;
 }
 
-void Terrain::initialize() {
+fw::Status Terrain::initialize() {
   // generate indices
   std::vector<uint16_t> index_data;
   generate_terrain_indices(index_data, PATCH_SIZE);
 
   // TODO: this should come from the world_reader
   textures_ = std::make_shared<fw::TextureArray>(512, 512);
-  set_layer(0, std::make_shared<fw::Bitmap>(fw::resolve("terrain/grass-01.jpg")));
-  set_layer(1, std::make_shared<fw::Bitmap>(fw::resolve("terrain/rock-01.jpg")));
-  set_layer(2, std::make_shared<fw::Bitmap>(fw::resolve("terrain/snow-01.jpg")));
-  set_layer(3, std::make_shared<fw::Bitmap>(fw::resolve("terrain/rock-snow-01.jpg")));
-  set_layer(4, std::make_shared<fw::Bitmap>(fw::resolve("terrain/sand-01.png")));
-  set_layer(5, std::make_shared<fw::Bitmap>(fw::resolve("terrain/cracked-dirt-01.jpg")));
-  set_layer(6, std::make_shared<fw::Bitmap>(fw::resolve("terrain/grass-02.jpg")));
-  set_layer(7, std::make_shared<fw::Bitmap>(fw::resolve("terrain/road-01.png")));
+  const auto bitmap_names = {
+    fw::resolve("terrain/grass-01.jpg"),
+    fw::resolve("terrain/rock-01.jpg"),
+    fw::resolve("terrain/rock-01.jpg"),
+    fw::resolve("terrain/snow-01.jpg"),
+    fw::resolve("terrain/rock-snow-01.jpg"),
+    fw::resolve("terrain/sand-01.png"),
+    fw::resolve("terrain/grass-02.jpg"),
+    fw::resolve("terrain/road-01.png"),
+  };
+  int index = 0;
+  for (const auto& bitmap_name : bitmap_names) {
+     ASSIGN_OR_RETURN(auto bitmap, fw::load_bitmap(bitmap_name));
+     set_layer(index++, bitmap);
+  }
 
   std::shared_ptr<fw::sg::Node> root_node = root_node_;
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
@@ -73,7 +81,7 @@ std::shared_ptr<fw::Texture> Terrain::get_patch_splatt(int patch_x, int patch_z)
   return patches_[index]->texture;
 }
 
-void Terrain::set_layer(int number, std::shared_ptr<fw::Bitmap> bitmap) {
+void Terrain::set_layer(int number, fw::Bitmap const &bitmap) {
   if (number < 0)
     return;
 

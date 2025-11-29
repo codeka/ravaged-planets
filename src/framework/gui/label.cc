@@ -125,17 +125,13 @@ void Label::set_background(std::shared_ptr<Drawable> background, bool centred /*
   background_centred_ = centred;
 }
 
-void Label::set_background(std::shared_ptr<Bitmap> bmp, bool centred /*= false*/) {
-  if (!bmp) {
-    background_ = nullptr;
-    background_centred_ = centred;
-  } else {
-    std::shared_ptr<fw::Texture> texture(new fw::Texture());
-    texture->create(bmp);
-    background_ =
-        gui_->get_drawable_manager()->build_drawable(texture, 0, 0, bmp->get_width(), bmp->get_height());
-    background_centred_ = centred;
-  }
+void Label::set_background(Bitmap const &bmp, bool centred /*= false*/) {
+  std::shared_ptr<fw::Texture> texture(new fw::Texture());
+  texture->create(bmp);
+  background_ =
+      gui_->get_drawable_manager()->build_drawable(
+          texture, 0, 0, bmp.get_width(), bmp.get_height());
+  background_centred_ = centred;
 }
 
 }

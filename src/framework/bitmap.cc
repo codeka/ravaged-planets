@@ -1,12 +1,14 @@
-#include <filesystem>
-
-#include <framework/framework.h>
 #include <framework/bitmap.h>
-#include <framework/misc.h>
+
+#include <filesystem>
+#include <memory>
+
 #include <framework/color.h>
-#include <framework/logging.h>
-#include <framework/graphics.h>
 #include <framework/exception.h>
+#include <framework/framework.h>
+#include <framework/graphics.h>
+#include <framework/logging.h>
+#include <framework/misc.h>
 #include <framework/texture.h>
 
 #include <stb/stb_image.h>
@@ -25,13 +27,14 @@ struct BitmapData {
   std::vector<uint32_t> rgba;
   fs::path filename;
 
-  // This is the number of bitmaps that have a reference to us.
-  int ref_count;
-
   // constructs a new BitmapData (just set everything to 0)
   inline BitmapData() {
     width = height = 0;
-    ref_count = 1;
+  }
+
+  inline BitmapData(int width, int height)
+      : width(width), height(height) {
+    rgba.resize(width * height);
   }
 
   BitmapData(const BitmapData&) = delete;
@@ -43,37 +46,23 @@ Bitmap::Bitmap() :
     data_(nullptr) {
 }
 
-Bitmap::Bitmap(int width, int height, uint32_t *argb /*= 0*/) :
-    data_(nullptr) {
-  prepare_write(width, height);
+Bitmap::Bitmap(std::shared_ptr<BitmapData> const& data) :
+    data_(data) {
+}
 
+Bitmap::Bitmap(int width, int height, uint32_t *argb /*= nullptr*/) :
+    data_(std::make_shared<BitmapData>(width, height)) {
   if (argb != nullptr) {
     memcpy(&data_->rgba[0], argb, width * height * sizeof(uint32_t));
   }
 }
 
-Bitmap::Bitmap(fs::path const &filename) :
-    data_(nullptr) {
-  load_bitmap(filename);
-}
-
-Bitmap::Bitmap(uint8_t const *data, size_t data_size) :
-    data_(nullptr) {
-  load_bitmap(data, data_size);
-}
-
-Bitmap::Bitmap(Texture &tex) :
-    data_(nullptr) {
-  load_bitmap(tex);
-}
-
 Bitmap::Bitmap(Bitmap const &copy) {
   data_ = copy.data_;
-  data_->ref_count++;
 }
 
 Bitmap::~Bitmap() {
-  release();
+  data_.reset();
 }
 
 Bitmap& Bitmap::operator =(fw::Bitmap const &copy) {
@@ -81,97 +70,80 @@ Bitmap& Bitmap::operator =(fw::Bitmap const &copy) {
   if (this == &copy)
     return (*this);
 
-  release();
-
   data_ = copy.data_;
-  data_->ref_count++;
 
   return (*this);
 }
 
-void Bitmap::release() {
-  if (data_ != 0) {
-    data_->ref_count--;
-    if (data_->ref_count == 0) {
-      delete data_;
-    }
-  }
-}
-
-void Bitmap::prepare_write(int width, int height) {
-  if (data_ == nullptr || data_->ref_count > 1) {
-    // we'll have to create a new bitmapdata_ if there's currently no data or
-    // the ref_count is > 1
-    if (data_ != nullptr)
-      data_->ref_count--;
-
-    data_ = new BitmapData();
-  }
-
-  // make sure the pixel buffer is big enough to hold the required width/height
-  data_->rgba.resize(width * height);
-  data_->width = width;
-  data_->height = height;
-  data_->filename = fs::path();
-}
-
-void Bitmap::load_bitmap(fs::path const &filename) {
+StatusOr<Bitmap> load_bitmap(fs::path const &filename) {
   debug << "loading image: " << filename << std::endl;
-  prepare_write(0, 0);
-  data_->filename = filename;
+  auto data = std::make_shared<BitmapData>(0, 0);
 
   int channels;
-  unsigned char *pixels = stbi_load(filename.string().c_str(), &data_->width, &data_->height, &channels, 4);
+  unsigned char *pixels =
+      stbi_load(filename.string().c_str(), &data->width, &data->height, &channels, 4);
   if (pixels == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error reading image."));
+    return ErrorStatus("Error reading image: ") << filename.string();
   }
 
   // copy pixels from what stb returned into our own buffer
-  data_->rgba.resize(data_->width * data_->height);
-  memcpy(data_->rgba.data(), reinterpret_cast<uint32_t const *>(pixels),
-      data_->width * data_->height * sizeof(uint32_t));
+  data->rgba.resize(data->width * data->height);
+  memcpy(data->rgba.data(), reinterpret_cast<uint32_t const *>(pixels),
+      data->width * data->height * sizeof(uint32_t));
 
   // don't need this anymore
   stbi_image_free(pixels);
+  return Bitmap(data);
 }
 
-// Populates our bitmapdata_ with data from the given in-memory file
-void Bitmap::load_bitmap(uint8_t const *data, size_t data_size) {
+StatusOr<Bitmap> load_bitmap(uint8_t const *data, size_t data_size) {
   int channels;
+  int width;
+  int height;
   unsigned char *pixels = stbi_load_from_memory(
-      reinterpret_cast<unsigned char const *>(data), data_size, &data_->width, &data_->height, &channels, 4);
+      reinterpret_cast<unsigned char const *>(data), data_size, &width, &height, &channels, 4);
   if (pixels == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error reading image."));
+    return ErrorStatus("Error reading image.");
   }
 
   // copy pixels from what stb returned into our own buffer
-  memcpy(data_->rgba.data(), reinterpret_cast<uint32_t const *>(pixels), data_->width * data_->height);
+  auto bitmap_data = std::make_shared<BitmapData>(width, height);
+  memcpy(bitmap_data->rgba.data(), reinterpret_cast<uint32_t const *>(pixels), width * height);
 
   // don't need this anymore
   stbi_image_free(pixels);
+  return Bitmap(bitmap_data);
 }
 
-void Bitmap::load_bitmap(Texture &tex) {
+Bitmap load_bitmap(Texture &tex) {
   FW_ENSURE_RENDER_THREAD();
 
   tex.ensure_created();
-  prepare_write(tex.get_width(), tex.get_height());
+  auto data = std::make_shared<BitmapData>(tex.get_width(), tex.get_height());
   tex.bind();
-  FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data_->rgba.data()));
+  FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data->rgba.data()));
 
   // OpenGL returns images with 0 at the bottom, but we want 0 at the top so we have to flip it
-  uint32_t *row_buffer = new uint32_t[data_->width];
-  for (int y = 0; y < data_->height / 2; y++) {
-    memcpy(row_buffer, &data_->rgba[y * data_->width], sizeof(uint32_t) * data_->width);
-    memcpy(&data_->rgba[y * data_->width], &data_->rgba[(data_->height - y - 1) * data_->width], sizeof(uint32_t) * data_->width);
-    memcpy(&data_->rgba[(data_->height - y - 1) * data_->width], row_buffer, sizeof(uint32_t) * data_->width);
+  uint32_t *row_buffer = new uint32_t[data->width];
+  for (int y = 0; y < data->height / 2; y++) {
+    memcpy(row_buffer, &data->rgba[y * data->width], sizeof(uint32_t) * data->width);
+    memcpy(
+        &data->rgba[y * data->width],
+        &data->rgba[(data->height - y - 1) * data->width],
+        sizeof(uint32_t) * data->width);
+    memcpy(
+        &data->rgba[(data->height - y - 1) * data->width],
+        row_buffer,
+        sizeof(uint32_t) * data->width);
   }
   delete[] row_buffer;
+
+  return Bitmap(data);
 }
 
-void Bitmap::save_bitmap(fs::path const &filename) const {
-  if (data_ == 0)
-    return;
+Status Bitmap::save_bitmap(fs::path const &filename) const {
+  if (data_ == nullptr)
+    return OkStatus();
 
   debug << "saving image: " << filename << std::endl;
 
@@ -191,32 +163,34 @@ void Bitmap::save_bitmap(fs::path const &filename) const {
     res = 0;
   }
   if (res == 0) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Error writing file."));
+    return ErrorStatus("Error writing file.");
   }
+
+  return OkStatus();
 }
 
 int Bitmap::get_width() const {
-  if (data_ == 0)
+  if (!data_)
     return 0;
 
   return data_->width;
 }
 
 int Bitmap::get_height() const {
-  if (data_ == 0)
+  if (!data_)
     return 0;
 
   return data_->height;
 }
 
 fs::path Bitmap::get_filename() const {
-  if (data_ == nullptr) {
+  if (!data_) {
     return fs::path();
   }
   return data_->filename;
 }
 
-std::vector<uint32_t> const & Bitmap::get_pixels() const {
+std::vector<uint32_t> const &Bitmap::get_pixels() const {
   return data_->rgba;
 }
 
@@ -236,7 +210,7 @@ void Bitmap::set_pixels(std::vector<uint32_t> const &rgba) {
   int width = get_width();
   int height = get_height();
 
-  prepare_write(width, height);
+  data_ = std::make_shared<BitmapData>(width, height);
   memcpy(data_->rgba.data(), rgba.data(), width * height * sizeof(uint32_t));
 }
 
@@ -264,8 +238,8 @@ void Bitmap::resize(int new_width, int new_height) {
   stbir_resize_uint8(reinterpret_cast<unsigned char const *>(data_->rgba.data()), curr_width, curr_height, 0,
       reinterpret_cast<unsigned char *>(resized.data()), new_width, new_height, 0, 4);
 
-  prepare_write(new_width, new_height);
-  set_pixels(resized);
+  data_ = std::make_shared<BitmapData>(new_width, new_height);
+  memcpy(data_->rgba.data(), resized.data(), new_width * new_height * sizeof(uint32_t));
 }
 
 /**

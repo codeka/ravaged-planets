@@ -71,7 +71,7 @@ void TextureToolWindow::show() {
   Listbox *lbx = wnd_->find<Listbox>(TEXTURES_ID);
   lbx->clear();
   for (int i = 0; i < tool_->get_terrain()->get_num_layers(); i++) {
-    fs::path filename = tool_->get_terrain()->get_layer(i)->get_filename();
+    fs::path filename = tool_->get_terrain()->get_layer(i).get_filename();
     lbx->add_item(Builder<Label>(px(0), px(0), pct(100), px(18)) << Label::text(filename.stem().string()));
   }
   lbx->select_item(0);

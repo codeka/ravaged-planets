@@ -29,14 +29,14 @@ using namespace std::placeholders;
 /** This is the base "brush" class which handles the actual modification of the terrain. */
 class HeightfieldBrush {
 protected:
-  ed::EditorTerrain *terrain_;
+  std::shared_ptr<ed::EditorTerrain> terrain_;
   ed::HeightfieldTool *tool_;
 
 public:
   HeightfieldBrush();
   virtual ~HeightfieldBrush();
 
-  void initialize(ed::HeightfieldTool *tool, ed::EditorTerrain *terrain);
+  void initialize(ed::HeightfieldTool *tool, std::shared_ptr<ed::EditorTerrain> terrain);
 
   virtual void on_key(std::string, bool) {
   }
@@ -51,7 +51,9 @@ HeightfieldBrush::HeightfieldBrush() :
 HeightfieldBrush::~HeightfieldBrush() {
 }
 
-void HeightfieldBrush::initialize(ed::HeightfieldTool *Tool, ed::EditorTerrain *terrain) {
+void HeightfieldBrush::initialize(
+    ed::HeightfieldTool *Tool,
+    std::shared_ptr<ed::EditorTerrain> terrain) {
   tool_ = Tool;
   terrain_ = terrain;
 }
@@ -248,12 +250,12 @@ bool HeightfieldToolWindow::on_import_clicked(fw::gui::Widget *w) {
 }
 
 void HeightfieldToolWindow::on_import_file_selected(ed::OpenFileWindow *ofw) {
-  try {
-    fw::Bitmap bmp(ofw->get_selected_file());
-    tool_->import_heightfield(bmp);
-  } catch (fw::Exception &e) {
-    // error, probably not a bitmap?
+  auto bmp = fw::load_bitmap(ofw->get_selected_file());
+  if (!bmp.ok()) {
+    // error, probably not an image?
+    return;
   }
+  tool_->import_heightfield(*bmp);
 }
 
 bool HeightfieldToolWindow::on_tool_clicked(fw::gui::Widget *w) {

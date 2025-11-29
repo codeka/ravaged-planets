@@ -31,7 +31,7 @@ private:
   };
 
   std::shared_ptr<fw::PathFind> pather_;
-  Terrain *terrain_;
+  std::shared_ptr<Terrain> terrain_;
   std::thread thread_;
   fw::WorkQueue<PathRequestData> work_queue_;
 

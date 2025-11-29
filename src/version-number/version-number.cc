@@ -30,11 +30,6 @@ int main(int argc, char const **argv) {
   char const *build_type_in = argv[2];
   char const *dest_file = argv[3];
 
-  std::cout << "hello world " << argc << std::endl;
-  std::cout << "src=" << src_directory << std::endl;
-  std::cout << "build=" << build_type_in << std::endl;
-  std::cout << "dest = " << dest_file << std::endl;
-
   int major = 0;
   int minor = 1;
   int revision = get_revision_number(src_directory);
