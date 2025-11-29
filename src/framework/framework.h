@@ -51,8 +51,8 @@ public:
   }
 
   // This is called to initialize the Application
-  virtual bool initialize(Framework *frmwrk) {
-    return false;
+  virtual fw::Status initialize(Framework *frmwrk) {
+    return fw::OkStatus();
   }
 
   // This is called when the Application is exiting.

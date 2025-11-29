@@ -23,7 +23,7 @@ Application::Application()
 Application::~Application() {
 }
 
-bool Application::initialize(fw::Framework * framework) {
+fw::Status Application::initialize(fw::Framework * framework) {
   framework_ = framework;
   framework_->get_cursor()->set_visible(true);
 
@@ -47,7 +47,7 @@ bool Application::initialize(fw::Framework * framework) {
   screen_stack_ = new ScreenStack();
   screen_stack_->set_active_screen("title");
 
-  return true;
+  return fw::OkStatus();
 }
 
 void Application::destroy() {

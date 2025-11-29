@@ -246,8 +246,10 @@ void Framework::update_proc() {
 
   try {
     debug << "framework initialization complete, application initialization starting..." << std::endl;
-    if (!app_->initialize(this)) {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("application did not initialize"));
+    auto status = app_->initialize(this);
+    if (!status.ok()) {
+      debug << "app did not iniatilize: " << status << std::endl;
+      return;
     }
 
     debug << "application initialization complete, running..." << std::endl;

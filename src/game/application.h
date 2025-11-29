@@ -1,6 +1,7 @@
 #pragma once
 
 #include <framework/framework.h>
+#include <framework/status.h>
 
 namespace game {
 class World;
@@ -11,7 +12,7 @@ public:
   Application();
   ~Application();
 
-  bool initialize(fw::Framework *framework) override;
+  fw::Status initialize(fw::Framework *framework) override;
   void destroy() override;
   void update(float dt) override;
   

@@ -28,7 +28,7 @@ void initialize_ground(std::shared_ptr<fw::sg::Node> Node);
 
 class Application: public fw::BaseApp {
 public:
-  bool initialize(fw::Framework *frmwrk);
+  fw::Status initialize(fw::Framework *frmwrk);
   void update(float dt);
 };
 
@@ -73,7 +73,7 @@ bool rotate_handler(fw::gui::Widget *wdgt) {
   return true;
 }
 
-bool Application::initialize(fw::Framework *frmwrk) {
+fw::Status Application::initialize(fw::Framework *frmwrk) {
   fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
@@ -110,7 +110,7 @@ bool Application::initialize(fw::Framework *frmwrk) {
       scenegraph.add_node(g_ground);
       initialize_ground(g_ground);
     });
-  return true;
+  return fw::OkStatus();
 }
 
 void Application::update(float dt) {

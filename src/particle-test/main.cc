@@ -27,7 +27,7 @@ static float angle;
 
 class Application: public fw::BaseApp {
 public:
-  bool initialize(fw::Framework *frmwrk);
+  fw::Status initialize(fw::Framework *frmwrk);
   void update(float dt);
 };
 
@@ -92,7 +92,7 @@ bool movement_handler(fw::gui::Widget *wdgt) {
   return true;
 }
 
-bool Application::initialize(fw::Framework *frmwrk) {
+fw::Status Application::initialize(fw::Framework *frmwrk) {
   fw::TopDownCamera *cam = new fw::TopDownCamera();
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
@@ -120,7 +120,7 @@ bool Application::initialize(fw::Framework *frmwrk) {
   frmwrk->get_gui()->attach_widget(wnd);
 
   restart_effect();
-  return true;
+  return fw::OkStatus();
 }
 
 void Application::update(float dt) {
