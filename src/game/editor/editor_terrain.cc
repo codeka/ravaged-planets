@@ -116,8 +116,10 @@ int EditorTerrain::get_num_layers() const {
 }
 
 fw::Bitmap const &EditorTerrain::get_layer(int number) {
-  if (number < 0 || number >= static_cast<int>(layer_bitmaps_.size()))
+  if (number < 0 || number >= static_cast<int>(layer_bitmaps_.size())) {
+    // TODO: this isn't right...
     return fw::Bitmap();
+  }
 
   return layer_bitmaps_[number];
 }

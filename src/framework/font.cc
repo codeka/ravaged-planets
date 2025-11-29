@@ -298,7 +298,7 @@ void FontFace::draw_string(
   data->vb->begin();
   data->ib->begin();
   data->Shader->begin(data->shader_params);
-  FW_CHECKED(glDrawElements(GL_TRIANGLES, data->ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
+  glDrawElements(GL_TRIANGLES, data->ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr);
   data->Shader->end();
   data->ib->end();
   data->vb->end();

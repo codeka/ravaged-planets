@@ -105,13 +105,12 @@ void Texture::create(fs::path const &fn) {
     if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }
-    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
+    glBindTexture(GL_TEXTURE_2D, data.texture_id);
     // TODO: pre-multiply alpha
     // TODO: DXT compress
     // TODO: mipmaps
-    FW_CHECKED(
-      glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels));
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA, data.width, data.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     stbi_image_free(pixels);
   };
 }
@@ -135,11 +134,10 @@ void Texture::create(fw::Bitmap const &bmp, GLenum internal_format /*= GL_RGBA8*
     if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }
-    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
-    FW_CHECKED(
-      glTexImage2D(
+    glBindTexture(GL_TEXTURE_2D, data.texture_id);
+    glTexImage2D(
         GL_TEXTURE_2D, 0, internal_format, data.width, data.height, 0,
-        format, component_type, bitmap.get_pixels().data()));
+        format, component_type, bitmap.get_pixels().data());
   };
 }
 
@@ -157,9 +155,10 @@ void Texture::create(int width, int height, GLenum internal_format /*=GL_RGBA8*/
     if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }
-    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data.texture_id));
-    FW_CHECKED(glTexImage2D(
-      GL_TEXTURE_2D, 0, internal_format, data.width, data.height, 0, format, component_type, nullptr));
+    glBindTexture(GL_TEXTURE_2D, data.texture_id);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, internal_format, data.width, data.height, 0, format, component_type,
+        nullptr);
   };
 }
 
@@ -180,15 +179,15 @@ void Texture::ensure_created() {
 
 void Texture::bind() const {
   if (!data_) {
-    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
+    glBindTexture(GL_TEXTURE_2D, 0);
     return;
   }
 
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D, data_->texture_id));
-  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, data_->min_filter));
-  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, data_->mag_filter));
-  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+  glBindTexture(GL_TEXTURE_2D, data_->texture_id);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, data_->min_filter);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, data_->mag_filter);
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 fw::Status Texture::save_png(fs::path const &filename) {
@@ -244,14 +243,13 @@ void TextureArray::ensure_created() {
 
   data_ = std::make_shared<TextureData>();
   glGenTextures(1, &data_->texture_id);
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D_ARRAY, data_->texture_id));
-  FW_CHECKED(glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width_, height_, bitmaps_.size()));
+  glBindTexture(GL_TEXTURE_2D_ARRAY, data_->texture_id);
+  glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, width_, height_, bitmaps_.size());
   for (int i = 0; i < bitmaps_.size(); i++) {
     auto& bitmap = bitmaps_[i];
-    FW_CHECKED(
-      glTexSubImage3D(
-          GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width_, height_, 1, GL_RGBA, GL_UNSIGNED_BYTE,
-          bitmap.get_pixels().data()));
+    glTexSubImage3D(
+        GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width_, height_, 1, GL_RGBA, GL_UNSIGNED_BYTE,
+        bitmap.get_pixels().data());
   }
 }
 
@@ -259,11 +257,11 @@ void TextureArray::bind() const {
   FW_ENSURE_RENDER_THREAD();
   if (!data_) return;
 
-  FW_CHECKED(glBindTexture(GL_TEXTURE_2D_ARRAY, data_->texture_id));
-  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-  FW_CHECKED(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT));
-  FW_CHECKED(glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT));
+  glBindTexture(GL_TEXTURE_2D_ARRAY, data_->texture_id);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 //-----------------------------------------------------------------------------
@@ -275,14 +273,14 @@ struct FramebufferData {
   bool initialized;
 
   FramebufferData() : initialized(false) {
-    FW_CHECKED(glGenFramebuffers(1, &fbo_id));
+    glGenFramebuffers(1, &fbo_id);
   }
 
   FramebufferData(const FramebufferData&) = delete;
   FramebufferData& operator=(const FramebufferData&) = delete;
 
   ~FramebufferData() {
-    FW_CHECKED(glDeleteFramebuffers(1, &fbo_id));
+    glDeleteFramebuffers(1, &fbo_id);
   }
 
   void ensure_initialized() {
@@ -291,25 +289,25 @@ struct FramebufferData {
     }
     initialized = true;
 
-    FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, fbo_id));
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
     if (depth_texture) {
       GLuint texture_id = depth_texture->get_data()->texture_id;
-      FW_CHECKED(glBindTexture(GL_TEXTURE_2D, texture_id));
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-      FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_id, 0));
+      glBindTexture(GL_TEXTURE_2D, texture_id);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture_id, 0);
     }
 
     if (color_texture) {
       GLuint texture_id = color_texture->get_data()->texture_id;
-      FW_CHECKED(glBindTexture(GL_TEXTURE_2D, texture_id));
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-      FW_CHECKED(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-      FW_CHECKED(glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0));
+      glBindTexture(GL_TEXTURE_2D, texture_id);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_id, 0);
     }
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -344,7 +342,7 @@ std::shared_ptr<Texture> Framebuffer::get_depth_buffer() const {
 
 void Framebuffer::bind() {
   data_->ensure_initialized();
-  FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, data_->fbo_id));
+  glBindFramebuffer(GL_FRAMEBUFFER, data_->fbo_id);
 }
 
 void Framebuffer::clear() {
@@ -355,11 +353,11 @@ void Framebuffer::clear() {
   if (data_->depth_texture) {
     bits |= GL_DEPTH_BUFFER_BIT;
   }
-  FW_CHECKED(glClear(bits));
+  glClear(bits);
 }
 
 void Framebuffer::unbind() {
-  FW_CHECKED(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 int Framebuffer::get_width() const {

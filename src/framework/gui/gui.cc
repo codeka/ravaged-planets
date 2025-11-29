@@ -118,7 +118,7 @@ bool Gui::inject_key(int key, bool is_down) {
 }
 
 void Gui::render() {
-  FW_CHECKED(glEnable(GL_SCISSOR_TEST));
+  glEnable(GL_SCISSOR_TEST);
   std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
   for(Widget *widget : top_level_widgets_) {
     if (widget->is_visible() && widget->prerender()) {
@@ -126,7 +126,7 @@ void Gui::render() {
       widget->postrender();
     }
   }
-  FW_CHECKED(glDisable(GL_SCISSOR_TEST));
+  glDisable(GL_SCISSOR_TEST);
 }
 
 Widget *Gui::get_widget_at(float x, float y) {

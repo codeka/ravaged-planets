@@ -108,7 +108,7 @@ fw::StatusOr<bool> Framework::initialize(char const *title) {
   // initialize graphics
   if (app_->wants_graphics()) {
     graphics_ = new Graphics();
-    graphics_->initialize(title);
+    RETURN_IF_ERROR(graphics_->initialize(title));
 
     model_manager_ = new ModelManager();
     scenegraph_manager_ = new sg::ScenegraphManager();
@@ -313,7 +313,9 @@ void Framework::update(float dt) {
 void Framework::ensure_update_thread() {
   std::thread::id this_thread_id = std::this_thread::get_id();
   if (this_thread_id != g_update_thread_id) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Expected to be running on the update thread."));
+    debug << fw::ErrorStatus("expected to be running on the update thread.") << std::endl;
+    // TODO: something else?
+    std::terminate();
   }
 }
 

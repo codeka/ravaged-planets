@@ -109,8 +109,8 @@ std::string load_include(std::string const &file, std::string const &function_na
 
 void compile_shader(GLuint shader_id, std::string source) {
   char const *shader_str = source.c_str();
-  FW_CHECKED(glShaderSource(shader_id, 1, &shader_str, nullptr));
-  FW_CHECKED(glCompileShader(shader_id));
+  glShaderSource(shader_id, 1, &shader_str, nullptr);
+  glCompileShader(shader_id);
 
   GLint status;
   glGetShaderiv(shader_id, GL_COMPILE_STATUS, &status);
@@ -128,9 +128,9 @@ void compile_shader(GLuint shader_id, std::string source) {
 }
 
 void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id) {
-  FW_CHECKED(glAttachShader(program_id, vertex_shader_id));
-  FW_CHECKED(glAttachShader(program_id, fragment_shader_id));
-  FW_CHECKED(glLinkProgram(program_id));
+  glAttachShader(program_id, vertex_shader_id);
+  glAttachShader(program_id, fragment_shader_id);
+  glLinkProgram(program_id);
 
   GLint status;
   glGetProgramiv(program_id, GL_LINK_STATUS, &status);
@@ -195,13 +195,13 @@ ShaderProgram::ShaderProgram(fw::XmlElement &program_elem) : _program_id(0) {
   link_shader(_program_id, vertex_shader_id, fragment_shader_id);
 
   int num_uniforms;
-  FW_CHECKED(glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &num_uniforms));
+  glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &num_uniforms);
   GLchar buffer[1024];
   for (int i = 0; i < num_uniforms; i++) {
     GLint size;
     GLint length;
     GLenum type;
-    FW_CHECKED(glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer));
+    glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer);
     GLint location = glGetUniformLocation(_program_id, buffer);
     std::string name(buffer);
     _shader_variables[name] = fw::ShaderVariable(location, name, size, type);
@@ -212,11 +212,11 @@ ShaderProgram::~ShaderProgram() {
 }
 
 void ShaderProgram::begin() {
-  FW_CHECKED(glUseProgram(_program_id));
+  glUseProgram(_program_id);
 
 #ifdef DEBUG
   GLint status;
-  FW_CHECKED(glValidateProgram(_program_id));
+  glValidateProgram(_program_id);
   glGetProgramiv(_program_id, GL_VALIDATE_STATUS, &status);
   if (status != GL_TRUE) {
     GLint log_length;
@@ -237,26 +237,26 @@ void ShaderProgram::apply_state(std::string const &name, std::string const &Part
   // TODO: we could probably do something better than this (e.g. at load time rather than at run time)
   if (name == "z-write") {
     if (ParticleRotation == "on") {
-      FW_CHECKED(glDepthMask(GL_TRUE));
+      glDepthMask(GL_TRUE);
     } else {
-      FW_CHECKED(glDepthMask(GL_FALSE));
+      glDepthMask(GL_FALSE);
     }
   } else if (name == "z-test") {
     if (ParticleRotation == "on") {
-      FW_CHECKED(glEnable(GL_DEPTH_TEST));
-      FW_CHECKED(glDepthFunc(GL_LEQUAL));
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LEQUAL);
     } else {
-      FW_CHECKED(glDisable(GL_DEPTH_TEST));
+      glDisable(GL_DEPTH_TEST);
     }
   } else if (name == "blend") {
     if (ParticleRotation == "alpha") {
-      FW_CHECKED(glEnable(GL_BLEND));
-      FW_CHECKED(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     } else if (ParticleRotation == "additive") {
-      FW_CHECKED(glEnable(GL_BLEND));
-      FW_CHECKED(glBlendFunc(GL_ONE, GL_ONE));
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE, GL_ONE);
     } else {
-      FW_CHECKED(glDisable(GL_BLEND));
+      glDisable(GL_BLEND);
     }
   }
 }
@@ -311,47 +311,47 @@ void ShaderParameters::apply(ShaderProgram *prog) const {
   for (auto it = textures_.begin(); it != textures_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
-      FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
+      glActiveTexture(GL_TEXTURE0 + texture_unit);
       auto& texture = it->second;
       if(texture) {
         texture->ensure_created();
         texture->bind();
       }
-      FW_CHECKED(glUniform1i(var.location, texture_unit));
+      glUniform1i(var.location, texture_unit);
       texture_unit ++;
     }
   }
   while (texture_unit < 9) {
-    FW_CHECKED(glActiveTexture(GL_TEXTURE0 + texture_unit));
-    FW_CHECKED(glBindTexture(GL_TEXTURE_2D, 0));
+    glActiveTexture(GL_TEXTURE0 + texture_unit);
+    glBindTexture(GL_TEXTURE_2D, 0);
     texture_unit++;
   }
 
   for (auto it = matrices_.begin(); it != matrices_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
-      FW_CHECKED(glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.m[0]));
+      glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.m[0]);
     }
   }
 
   for (auto it = vectors_.begin(); it != vectors_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
-      FW_CHECKED(glUniform3fv(var.location, 1, it->second.v));
+      glUniform3fv(var.location, 1, it->second.v);
     }
   }
 
   for (auto it = colors_.begin(); it != colors_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
-      FW_CHECKED(glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a));
+      glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a);
     }
   }
 
   for (auto it = scalars_.begin(); it != scalars_.end(); ++it) {
     ShaderVariable const &var = prog->_shader_variables[it->first];
     if (var.valid) {
-      FW_CHECKED(glUniform1f(var.location, it->second));
+      glUniform1f(var.location, it->second);
     }
   }
 }
@@ -403,7 +403,7 @@ void Shader::begin(std::shared_ptr<ShaderParameters> parameters) {
 }
 
 void Shader::end() {
-  FW_CHECKED(glUseProgram(0));
+  glUseProgram(0);
 }
 
 std::shared_ptr<ShaderParameters> Shader::create_parameters() {

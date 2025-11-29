@@ -121,7 +121,7 @@ Bitmap load_bitmap(Texture &tex) {
   tex.ensure_created();
   auto data = std::make_shared<BitmapData>(tex.get_width(), tex.get_height());
   tex.bind();
-  FW_CHECKED(glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data->rgba.data()));
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data->rgba.data());
 
   // OpenGL returns images with 0 at the bottom, but we want 0 at the top so we have to flip it
   uint32_t *row_buffer = new uint32_t[data->width];

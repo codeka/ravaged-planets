@@ -71,6 +71,7 @@ fw::Status WorldWriter::write_terrain(game::WorldFile &wf) {
       RETURN_IF_ERROR(splatt.save_bitmap(wfe.get_full_path()));
     }
   }
+  return fw::OkStatus();
 }
 
 void WorldWriter::write_mapdesc(game::WorldFile &wf) {

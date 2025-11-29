@@ -172,11 +172,11 @@ void Node::render_shader(
   shader->begin(parameters);
   if (ib_) {
     ib_->begin();
-    FW_CHECKED(
-      glDrawElements(g_primitive_type_map[primitive_type_], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr));
+    glDrawElements(
+        g_primitive_type_map[primitive_type_], ib_->get_num_indices(), GL_UNSIGNED_SHORT, nullptr);
     ib_->end();
   } else {
-    FW_CHECKED(glDrawArrays(g_primitive_type_map[primitive_type_], 0, vb_->get_num_vertices()));
+    glDrawArrays(g_primitive_type_map[primitive_type_], 0, vb_->get_num_vertices());
   }
   shader->end();
   vb_->end();
@@ -360,7 +360,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       vb->begin();
       ib->begin();
       shader->begin(shader_params);
-      FW_CHECKED(glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr));
+      glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
       shader->end();
       ib->end();
       vb->end();

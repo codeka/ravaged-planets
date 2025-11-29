@@ -116,7 +116,7 @@ void BitmapDrawable::render(float x, float y, float width, float height) {
   vb->begin();
   g_index_buffer->begin();
   shader_->begin(shader_params_);
-  FW_CHECKED(glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr));
+  glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
   shader_->end();
   g_index_buffer->end();
   vb->end();

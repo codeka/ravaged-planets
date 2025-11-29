@@ -13,19 +13,9 @@
 #include <framework/texture.h>
 
 namespace fw {
-
+namespace {
 // The render thread is the thread we start on, so this is right.
 static std::thread::id render_thread_id = std::this_thread::get_id();
-
-std::string to_string(gl_error_info const &err_info) {
-  GLenum err = err_info.value();
-  char const *err_msg = "TODO";//reinterpret_cast<char const *>(gluErrorString(err));
-  if (err_msg == nullptr) {
-    return absl::StrCat(absl::Hex(err));
-  }
-
-  return absl::StrCat(absl::Hex(err), ": ", err_msg);
-}
 
 int query(GLenum pname) {
   int value;
@@ -33,7 +23,15 @@ int query(GLenum pname) {
   return value;
 }
 
-//--------------------------------------------------------------
+void GLAPIENTRY debug_callback(
+    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
+    const void* userParam) {
+  debug << "opengl error (source=" << source << " type=" << type << " id=" << id
+        << " severity=" << severity << "): " << message << std::endl;
+  // TODO: can we use userParam?
+}
+
+}  // namespace
 
 Graphics::Graphics() :
     wnd_(nullptr), context_(nullptr), windowed_(false), width_(0), height_(0) {
@@ -42,7 +40,7 @@ Graphics::Graphics() :
 Graphics::~Graphics() {
 }
 
-void Graphics::initialize(char const *title) {
+fw::Status Graphics::initialize(char const *title) {
   windowed_ = Settings::get<bool>("windowed");
   if (windowed_) {
     width_ = Settings::get<int>("windowed-width");
@@ -51,8 +49,15 @@ void Graphics::initialize(char const *title) {
     width_ = Settings::get<int>("fullscreen-width");
     height_ = Settings::get<int>("fullscreen-height");
   }
-  fw::debug << "Graphics initializing; window size=" << width_ << "x" << height_ << ", windowed=" << windowed_
-      << std::endl;
+  fw::debug << "Graphics initializing; window size=" << width_ << "x" << height_ 
+            << ", windowed=" << windowed_ << std::endl;
+
+  // Add SDL_GL_CONTEXT_DEBUG_FLAG to the default set of context flags. This will let us work with
+  // GL_ARB_debug_output to get better error information.
+  int context_flags = 0;
+  SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &context_flags);
+  context_flags |= SDL_GL_CONTEXT_DEBUG_FLAG;
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, context_flags);
 
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 4);
@@ -69,7 +74,7 @@ void Graphics::initialize(char const *title) {
   }
   wnd_ = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_, height_, flags);
   if (wnd_ == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::sdl_error_info(SDL_GetError()));
+    return fw::ErrorStatus("Could not create window: ") << SDL_GetError();
   }
 
   // If we didn't specify a width/height, we'll need to query the window for how big it is.
@@ -79,14 +84,14 @@ void Graphics::initialize(char const *title) {
 
   context_ = SDL_GL_CreateContext(wnd_);
   if (context_ == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::sdl_error_info(SDL_GetError()));
+    return fw::ErrorStatus("Could not create context: ") << SDL_GetError();
   }
   SDL_GL_MakeCurrent(wnd_, context_);
 
   glewExperimental = GL_TRUE;
   GLenum glewError = glewInit();
   if(glewError != GLEW_OK) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::gl_error_info(glewError));
+    return fw::ErrorStatus("Error initializing GLEW: ") << glewError;
   }
   GLenum err = glGetError();
   if (err == GL_INVALID_ENUM) {
@@ -94,10 +99,9 @@ void Graphics::initialize(char const *title) {
     // See: https://www.opengl.org/wiki/OpenGL_Loading_Library
   } else if (err != GL_NO_ERROR) {
     // Something else happened!
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::gl_error_info(err));
+    return fw::ErrorStatus("Error after initializing GLEW: ") << err;
   }
 
-//  if(SDL_GL_SetSwapInterval(1) < 0) {
   if(SDL_GL_SetSwapInterval(0) < 0) {
     fw::debug << "Unable to set vsync, vsync is disabled. error: " << SDL_GetError() << std::endl;
   }
@@ -111,14 +115,24 @@ void Graphics::initialize(char const *title) {
   fw::debug << "  GL_MAX_TEXTURE_IMAGE_UNITS=" << query(GL_MAX_TEXTURE_IMAGE_UNITS) << std::endl;
   fw::debug << "  GL_MAX_ARRAY_TEXTURE_LAYERS=" << query(GL_MAX_ARRAY_TEXTURE_LAYERS) << std::endl;
 
-  { // Bind a vertex array, but we never actually use it...
-    GLuint id;
-    FW_CHECKED(glGenVertexArrays(1, &id));
-    FW_CHECKED(glBindVertexArray(id));
+  if (GLEW_ARB_debug_output) {
+    glDebugMessageCallbackARB(&debug_callback, nullptr);
+#ifdef DEBUG
+    // In debug builds, enable synchronous output for easier debugging (performance heavy)
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+#endif
+    fw::debug << "ARB_debug_output enabled" << std::endl;
   }
 
-  FW_CHECKED(glEnable(GL_DEPTH_TEST));
-  FW_CHECKED(glViewport(0, 0, width_, height_));
+  { // Bind a vertex array, but we never actually use it...
+    GLuint id;
+    glGenVertexArrays(1, &id);
+    glBindVertexArray(id);
+  }
+
+  glEnable(GL_DEPTH_TEST);
+  glViewport(0, 0, width_, height_);
+  return OkStatus();
 }
 
 void Graphics::destroy() {
@@ -128,15 +142,15 @@ void Graphics::destroy() {
 
 void Graphics::begin_scene(fw::Color clear_color /*= fw::color(1,0,0,0)*/) {
   if (framebuffer_) {
-    FW_CHECKED(glViewport(0, 0, framebuffer_->get_width(), framebuffer_->get_height()));
-    FW_CHECKED(glScissor(0, 0, framebuffer_->get_width(), framebuffer_->get_height()));
-    FW_CHECKED(glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a));
+    glViewport(0, 0, framebuffer_->get_width(), framebuffer_->get_height());
+    glScissor(0, 0, framebuffer_->get_width(), framebuffer_->get_height());
+    glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
     framebuffer_->clear();
   } else {
-    FW_CHECKED(glViewport(0, 0, width_, height_));
-    FW_CHECKED(glScissor(0, 0, width_, height_));
-    FW_CHECKED(glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a));
-    FW_CHECKED(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    glViewport(0, 0, width_, height_);
+    glScissor(0, 0, width_, height_);
+    glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 }
 
@@ -144,8 +158,8 @@ void Graphics::end_scene() {
 }
 
 void Graphics::before_gui() {
-  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Graphics::after_gui() {
@@ -156,8 +170,10 @@ void Graphics::present() {
 
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {
-    // this might happen in Release mode, where we don't actually check errors on every single call (it's expensive).
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::gl_error_info(err));
+    // This might happen in Release mode, where we don't actually check errors on every single call
+    // (it's expensive).
+    fw::debug << "opengl error occured: " << err << std::endl;
+    // TODO: better error info?
   }
 
   SDL_GL_SwapWindow(wnd_);
@@ -199,14 +215,6 @@ void Graphics::set_render_target(std::shared_ptr<Framebuffer> fb) {
   }
 }
 
-void Graphics::check_error(char const *msg) {
-  GLenum err = glGetError();
-  if (err == GL_NO_ERROR)
-    return;
-
-  BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(msg) << fw::gl_error_info(err));
-}
-
 /* static */
 bool Graphics::is_render_thread() {
   std::thread::id this_thread_id = std::this_thread::get_id();
@@ -246,12 +254,12 @@ void Graphics::toggle_fullscreen() {
 
 IndexBuffer::IndexBuffer(bool dynamic/*= false */) :
     num_indices_(0), id_(0), dynamic_(dynamic) {
-  FW_CHECKED(glGenBuffers(1, &id_));
+  glGenBuffers(1, &id_);
 }
 
 IndexBuffer::~IndexBuffer() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glDeleteBuffers(1, &id_));
+  glDeleteBuffers(1, &id_);
 }
 
 std::shared_ptr<IndexBuffer> IndexBuffer::create() {
@@ -265,19 +273,19 @@ void IndexBuffer::set_data(int num_indices, uint16_t const *indices, int flags) 
   if (flags <= 0)
     flags = dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
 
-  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_));
-  FW_CHECKED(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-      num_indices * sizeof(uint16_t), reinterpret_cast<void const *>(indices), flags));
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+      num_indices * sizeof(uint16_t), reinterpret_cast<void const *>(indices), flags);
 }
 
 void IndexBuffer::begin() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_));
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id_);
 }
 
 void IndexBuffer::end() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -285,12 +293,12 @@ void IndexBuffer::end() {
 VertexBuffer::VertexBuffer(setup_fn setup, size_t vertex_size, bool dynamic /*= false */) :
     num_vertices_(0), vertex_size_(vertex_size), id_(0), dynamic_(dynamic), setup_(setup) {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glGenBuffers(1, &id_));
+  glGenBuffers(1, &id_);
 }
 
 VertexBuffer::~VertexBuffer() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glDeleteBuffers(1, &id_));
+  glDeleteBuffers(1, &id_);
 }
 
 void VertexBuffer::set_data(int num_vertices, const void *vertices, int flags /*= -1*/) {
@@ -301,19 +309,19 @@ void VertexBuffer::set_data(int num_vertices, const void *vertices, int flags /*
 
   num_vertices_ = num_vertices;
 
-  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, id_));
-  FW_CHECKED(glBufferData(GL_ARRAY_BUFFER, num_vertices_ * vertex_size_, vertices, flags));
+  glBindBuffer(GL_ARRAY_BUFFER, id_);
+  glBufferData(GL_ARRAY_BUFFER, num_vertices_ * vertex_size_, vertices, flags);
 }
 
 void VertexBuffer::begin() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, id_));
+  glBindBuffer(GL_ARRAY_BUFFER, id_);
   setup_();
 }
 
 void VertexBuffer::end() {
   FW_ENSURE_RENDER_THREAD();
-  FW_CHECKED(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
   // todo: opposite of setup_()?
 }
 
@@ -325,8 +333,8 @@ namespace vertex {
   reinterpret_cast<void const *>(offsetof(struct, member))
 
 static void xyz_setup() {
-  FW_CHECKED(glEnableVertexAttribArray(0));
-  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz), OFFSET_OF(xyz, x)));
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz), OFFSET_OF(xyz, x));
 }
 
 std::function<void()> xyz::get_setup_function() {
@@ -334,10 +342,11 @@ std::function<void()> xyz::get_setup_function() {
 }
 
 static void xyz_c_setup() {
-  FW_CHECKED(glEnableVertexAttribArray(0));
-  FW_CHECKED(glEnableVertexAttribArray(1));
-  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, color)));
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, x));
+  glVertexAttribPointer(
+      1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c), OFFSET_OF(xyz_c, color));
 }
 
 std::function<void()> xyz_c::get_setup_function() {
@@ -345,10 +354,10 @@ std::function<void()> xyz_c::get_setup_function() {
 }
 
 static void xyz_uv_setup() {
-  FW_CHECKED(glEnableVertexAttribArray(0));
-  FW_CHECKED(glEnableVertexAttribArray(1));
-  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_uv), OFFSET_OF(xyz_uv, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_uv), OFFSET_OF(xyz_uv, u)));
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_uv), OFFSET_OF(xyz_uv, x));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_uv), OFFSET_OF(xyz_uv, u));
 }
 
 std::function<void()> xyz_uv::get_setup_function() {
@@ -356,12 +365,15 @@ std::function<void()> xyz_uv::get_setup_function() {
 }
 
 void xyz_c_uv_setup() {
-  FW_CHECKED(glEnableVertexAttribArray(0));
-  FW_CHECKED(glEnableVertexAttribArray(1));
-  FW_CHECKED(glEnableVertexAttribArray(2));
-  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, color)));
-  FW_CHECKED(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, u)));
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(
+      0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, x));
+  glVertexAttribPointer(
+      1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, color));
+  glVertexAttribPointer(
+      2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_c_uv), OFFSET_OF(xyz_c_uv, u));
 }
 
 std::function<void()> xyz_c_uv::get_setup_function() {
@@ -369,12 +381,15 @@ std::function<void()> xyz_c_uv::get_setup_function() {
 }
 
 void xyz_n_uv_setup() {
-  FW_CHECKED(glEnableVertexAttribArray(0));
-  FW_CHECKED(glEnableVertexAttribArray(1));
-  FW_CHECKED(glEnableVertexAttribArray(2));
-  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, nx)));
-  FW_CHECKED(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, u)));
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(
+      0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, x));
+  glVertexAttribPointer(
+      1, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, nx));
+  glVertexAttribPointer(
+      2, 2, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n_uv), OFFSET_OF(xyz_n_uv, u));
 }
 
 std::function<void()> xyz_n_uv::get_setup_function() {
@@ -382,10 +397,12 @@ std::function<void()> xyz_n_uv::get_setup_function() {
 }
 
 void xyz_n_setup() {
-  FW_CHECKED(glEnableVertexAttribArray(0));
-  FW_CHECKED(glEnableVertexAttribArray(1));
-  FW_CHECKED(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n), OFFSET_OF(xyz_n_uv, x)));
-  FW_CHECKED(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n), OFFSET_OF(xyz_n_uv, nx)));
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(
+      0, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n), OFFSET_OF(xyz_n_uv, x));
+  glVertexAttribPointer(
+      1, 3, GL_FLOAT, GL_FALSE, sizeof(fw::vertex::xyz_n), OFFSET_OF(xyz_n_uv, nx));
 }
 
 std::function<void()> xyz_n::get_setup_function() {

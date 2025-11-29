@@ -108,6 +108,7 @@ fw::Status EditorScreen::open_map(std::string const &name) {
   world_ = new EditorWorld(reader);
   world_->initialize();
   set_active_tool("heightfield");
+  return fw::OkStatus();
 }
 
 void EditorScreen::set_active_tool(std::string const &name) {

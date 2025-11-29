@@ -293,7 +293,7 @@ bool Widget::prerender() {
   }
 
   scissor_rectangles.push(rect);
-  FW_CHECKED(glScissor(rect.left, gui_->get_height() - rect.top - rect.height, rect.width, rect.height));
+  glScissor(rect.left, gui_->get_height() - rect.top - rect.height, rect.width, rect.height);
   return true;
 }
 
@@ -310,7 +310,7 @@ void Widget::postrender() {
   scissor_rectangles.pop();
   if (!scissor_rectangles.empty()) {
     fw::Rectangle<float> const &top = scissor_rectangles.top();
-    FW_CHECKED(glScissor(top.left, gui_->get_height() - top.top - top.height, top.width, top.height));
+    glScissor(top.left, gui_->get_height() - top.top - top.height, top.width, top.height);
   }
 }
 
