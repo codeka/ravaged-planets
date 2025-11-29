@@ -49,11 +49,11 @@ void CursorHandler::update() {
   entity_under_cursor_ = entities_->get_entity_at_cursor();
   std::shared_ptr<ent::Entity> entity_under_cursor = entity_under_cursor_.lock();
   if (entity_under_cursor) {
-    LocalPlayer *lplyr = game::SimulationThread::get_instance()->get_local_player();
+    auto local_player = game::SimulationThread::get_instance()->get_local_player();
 
     ent::OwnableComponent *ownable = entity_under_cursor->get_component<ent::OwnableComponent>();
     if (ownable != nullptr) {
-      if (ownable->get_owner() == lplyr) {
+      if (ownable->get_owner() == local_player) {
         //highlight = true;
         //highlight_color = fw::color(1, 1, 1);
         cursor_name = "select";

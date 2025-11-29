@@ -21,7 +21,7 @@ class Order;
 // have been queued up for that turn. Each "action" in the game is represented by a command.
 class Command {
 private:
-  Player *player_;
+  std::shared_ptr<Player> player_;
 
 protected:
   Command(uint8_t player_no);
@@ -33,7 +33,7 @@ public:
   virtual void deserialize(fw::net::PacketBuffer &buffer) = 0;
 
   /** Gets an instance of the player who executed this command. */
-  Player *get_player() const {
+  std::shared_ptr<Player> const &get_player() const {
     return player_;
   }
 

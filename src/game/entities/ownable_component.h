@@ -10,7 +10,7 @@ namespace ent {
 
 class OwnableComponent: public EntityComponent {
 private:
-  game::Player *owner_;
+  std::shared_ptr<game::Player> owner_;
 
 public:
   static const int identifier = 900;
@@ -21,10 +21,10 @@ public:
   OwnableComponent();
   ~OwnableComponent();
 
-  game::Player *get_owner() const {
+  std::shared_ptr<game::Player> get_owner() const {
     return owner_;
   }
-  void set_owner(game::Player *owner);
+  void set_owner(std::shared_ptr<game::Player> const &owner);
 
   // helper for checking whether this Entity is owned by the local player
   bool is_local_player() const;

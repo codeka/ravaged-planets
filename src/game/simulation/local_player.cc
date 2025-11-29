@@ -29,9 +29,9 @@ LocalPlayer::~LocalPlayer() {
 
 void LocalPlayer::local_player_is_ready() {
   // let all the other players know that we're ready to start
-  for (Player *p : SimulationThread::get_instance()->get_players()) {
+  for (auto p : SimulationThread::get_instance()->get_players()) {
     // obviously, we don't have to tell ourselves...
-    if (p == this)
+    if (p.get() == this)
       continue;
 
     p->local_player_is_ready();

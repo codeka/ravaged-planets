@@ -74,7 +74,7 @@ void NewAIPlayerWindow::show() {
   wnd_->set_visible(true);
 
   int max_player_no = 0;
-  for (Player *plyr : SimulationThread::get_instance()->get_players()) {
+  for (auto plyr : SimulationThread::get_instance()->get_players()) {
     int player_no = plyr->get_player_no();
     if (player_no > max_player_no)
       max_player_no = player_no;
@@ -101,7 +101,7 @@ bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
     // done with it (choose a player_id based on the number of players so far)
     int num_players = SimulationThread::get_instance()->get_players().size();
 
-    AIPlayer *ply = new AIPlayer(name, desc, static_cast<uint8_t>(num_players + 1));
+    auto ply = std::make_shared<AIPlayer>(name, desc, static_cast<uint8_t>(num_players + 1));
     if (!ply->is_valid_state()) {
       new_game_window_->append_chat("Error loading player script, check error log.");
     } else {

@@ -68,19 +68,21 @@ void LuaContext::add_path(fs::path const &path) {
 
 bool LuaContext::load_script(fs::path const &filename) {
   last_error_ = "";
-  debug << "loading script: " << filename << std::endl;
+  debug << "loading script: " << filename.string() << std::endl;
 
   int ret = luaL_loadfile(l_, filename.string().c_str());
   if (ret != 0) {
     last_error_ = lua_tostring(l_, -1);
-    debug << "ERR: could not load Lua script " << filename << ":\n" << last_error_ << std::endl;
+    debug << "ERR: could not load Lua script " << filename.string() << ":\n" << last_error_
+          << std::endl;
     return false;
   }
 
   ret = lua_pcall(l_, 0, 0, 0);
   if (ret != 0) {
     last_error_ = lua_tostring(l_, -1);
-    debug << "ERR: could not load Lua script " << filename << ":\n" << last_error_ << std::endl;
+    debug << "ERR: could not load Lua script " << filename.string() << ":\n" << last_error_
+          << std::endl;
     return false;
   }
 

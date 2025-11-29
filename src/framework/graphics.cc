@@ -26,8 +26,79 @@ int query(GLenum pname) {
 void GLAPIENTRY debug_callback(
     GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
     const void* userParam) {
-  debug << "opengl error (source=" << source << " type=" << type << " id=" << id
-        << " severity=" << severity << "): " << message << std::endl;
+  std::string_view source_name = absl::StrCat(source);
+  switch (source) {
+    case GL_DEBUG_SOURCE_API:
+      source_name = "GL_DEBUG_SOURCE_API";
+      break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+      source_name = "GL_DEBUG_SOURCE_WINDOW_SYSTEM";
+      break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+      source_name = "GL_DEBUG_SOURCE_SHADER_COMPILER";
+      break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+      source_name = "GL_DEBUG_SOURCE_THIRD_PARTY";
+      break;
+    case GL_DEBUG_SOURCE_APPLICATION:
+      source_name = "GL_DEBUG_SOURCE_APPLICATION";
+      break;
+    case GL_DEBUG_SOURCE_OTHER:
+      source_name = "GL_DEBUG_SOURCE_OTHER";
+      break;
+  }
+
+  std::string_view type_name = absl::StrCat(type);
+  switch (type) {
+    case GL_DEBUG_TYPE_ERROR:
+      type_name = "GL_DEBUG_TYPE_ERROR";
+      break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+      type_name = "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR";
+      break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+      type_name = "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR";
+      break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+      type_name = "GL_DEBUG_TYPE_PORTABILITY";
+      break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+      type_name = "GL_DEBUG_TYPE_PERFORMANCE";
+      break;
+    case GL_DEBUG_TYPE_MARKER:
+      type_name = "GL_DEBUG_TYPE_MARKER";
+      break;
+    case GL_DEBUG_TYPE_PUSH_GROUP:
+      type_name = "GL_DEBUG_TYPE_PUSH_GROUP";
+      break;
+    case GL_DEBUG_TYPE_POP_GROUP:
+      type_name = "GL_DEBUG_TYPE_POP_GROUP";
+      break;
+    case GL_DEBUG_TYPE_OTHER:
+      type_name = "GL_DEBUG_TYPE_OTHER";
+      break;
+  }
+
+  std::string_view severity_name = absl::StrCat(severity);
+  switch (severity) {
+    case GL_DEBUG_SEVERITY_LOW:
+      severity_name = "GL_DEBUG_SEVERITY_LOW";
+      break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+      severity_name = "GL_DEBUG_SEVERITY_MEDIUM";
+      break;
+    case GL_DEBUG_SEVERITY_HIGH:
+      severity_name = "GL_DEBUG_SEVERITY_HIGH";
+      break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+      severity_name = "GL_DEBUG_SEVERITY_NOTIFICATION";
+      break;
+  }
+
+
+  debug << "opengl error\n  source=" << source_name << "\n  type=" << type_name
+        << "\n  severity=" << severity_name << "\n  id=" << id << "\n  "
+        << message << std::endl;
   // TODO: can we use userParam?
 }
 
@@ -72,7 +143,8 @@ fw::Status Graphics::initialize(char const *title) {
       flags |= SDL_WINDOW_FULLSCREEN;
     }
   }
-  wnd_ = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_, height_, flags);
+  wnd_ = SDL_CreateWindow(
+      title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width_, height_, flags);
   if (wnd_ == nullptr) {
     return fw::ErrorStatus("Could not create window: ") << SDL_GetError();
   }
@@ -121,6 +193,14 @@ fw::Status Graphics::initialize(char const *title) {
     // In debug builds, enable synchronous output for easier debugging (performance heavy)
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 #endif
+
+    // Limit the debug messages to just errors.
+    // TODO: add a command-line flag to enable more detailed debugging?
+    glDebugMessageControl(
+        GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
+    glDebugMessageControl(
+        GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_ERROR, GL_DONT_CARE, 0, NULL, GL_TRUE);
+
     fw::debug << "ARB_debug_output enabled" << std::endl;
   }
 

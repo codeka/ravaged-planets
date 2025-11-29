@@ -18,9 +18,12 @@ using namespace std::placeholders;
 
 namespace game {
 
-RemotePlayer::RemotePlayer(fw::net::Host *Host, fw::net::Peer *Peer, bool connected) :
-    host_(Host), peer_(Peer), connected_(connected) {
-  Peer->set_handler(std::bind(&RemotePlayer::packet_handler, this, _1));
+RemotePlayer::RemotePlayer(
+    std::shared_ptr<fw::net::Host> const &host,
+    std::shared_ptr<fw::net::Peer> const &peer,
+    bool connected)
+    : host_(host), peer_(peer), connected_(connected) {
+  peer->set_handler(std::bind(&RemotePlayer::packet_handler, this, _1));
 
   // give them a temporary username until the connection process has completed.
   user_name_ = "Joining...";
@@ -30,9 +33,10 @@ RemotePlayer::~RemotePlayer() {
 }
 
 // connect to the specified remote player
-RemotePlayer *RemotePlayer::connect(fw::net::Host *Host, std::string address) {
-  fw::net::Peer *Peer = Host->connect(address);
-  return new RemotePlayer(Host, Peer, false);
+fw::StatusOr<std::shared_ptr<RemotePlayer>> RemotePlayer::connect(
+    std::shared_ptr<fw::net::Host> const &host, std::string address) {
+  ASSIGN_OR_RETURN(auto peer, host->connect(address));
+  return std::make_shared<RemotePlayer>(host, peer, false);
 }
 
 void RemotePlayer::send_chat_msg(std::string const &msg) {
@@ -119,7 +123,7 @@ void RemotePlayer::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
       // but first, check whether we've already connected to them
       bool need_connect = true;
       if (other_user_id != 0) { // (it'll be zero if this is an AI player)
-        for (Player *plyr : SimulationThread::get_instance()->get_players()) {
+        for (auto &plyr : SimulationThread::get_instance()->get_players()) {
           if (plyr->get_user_id() == other_user_id) {
             fw::debug << "Already connected to player with user_id #" << other_user_id
                       << ", not connecting again" << std::endl;
@@ -130,7 +134,8 @@ void RemotePlayer::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
       }
 
       if (need_connect) {
-        // call the session and confirm the fact that this player is valid and that, then connect to them
+        // call the session and confirm the fact that this player is valid and that, then connect to
+        // them
         std::shared_ptr<game::SessionRequest> sess_req = Session::get_instance()->confirm_player(
             SimulationThread::get_instance()->get_game_id(), other_user_id);
         sess_req->set_complete_handler(std::bind(&RemotePlayer::new_player_confirmed, this, _1));
@@ -165,8 +170,8 @@ void RemotePlayer::pkt_command(std::shared_ptr<fw::net::Packet> pkt) {
 
 // checks whether the given color is already taken (ignoring the given player)
 bool color_already_taken(Player *except_for, fw::Color &col) {
-  for (Player *plyr : SimulationThread::get_instance()->get_players()) {
-    if (plyr != except_for && plyr->get_color() == col) {
+  for (auto &plyr : SimulationThread::get_instance()->get_players()) {
+    if (plyr.get() != except_for && plyr->get_color() == col) {
       return true;
     }
   }
@@ -208,9 +213,8 @@ void RemotePlayer::join_complete(SessionRequest &req) {
   resp.set_map_name(SimulationThread::get_instance()->get_map_name());
   resp.set_your_color(color_);
   resp.set_my_color(SimulationThread::get_instance()->get_local_player()->get_color());
-  std::vector<Player *> players = SimulationThread::get_instance()->get_players();
-  for (Player *plyr : players) {
-    if (plyr == this) {
+  for (auto plyr : SimulationThread::get_instance()->get_players()) {
+    if (plyr.get() == this) {
       continue;
     }
 
@@ -236,7 +240,11 @@ void RemotePlayer::new_player_confirmed(SessionRequest &req) {
   fw::debug << "additional player (username: " << cpsr.get_user_name()
             << " confirmed, connecting to them as well..." << std::endl;
 
-  SimulationThread::get_instance()->connect_player(cpsr.get_address());
+  auto status = SimulationThread::get_instance()->connect_player(cpsr.get_address());
+  if (!status.ok()) {
+    fw::debug << "ERROR connecting to remote player: " << status << std::endl;
+    // TODO: now what?
+  }
 }
 
 void RemotePlayer::update() {

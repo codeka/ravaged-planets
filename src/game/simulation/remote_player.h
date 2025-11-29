@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+
+#include <framework/status.h>
+
 #include "player.h"
 
 namespace fw {
@@ -15,9 +19,30 @@ class SessionRequest;
 
 /** This class represents a remote player which is connected to us via the internet. */
 class RemotePlayer: public Player {
-private:
-  fw::net::Host *host_;
-  fw::net::Peer *peer_;
+public:
+  RemotePlayer(
+      std::shared_ptr<fw::net::Host> const &host,
+      std::shared_ptr<fw::net::Peer> const &peer,
+      bool connected);
+  virtual ~RemotePlayer();
+
+  // connect to the specified remote player
+  static fw::StatusOr<std::shared_ptr<RemotePlayer>> connect(
+      std::shared_ptr<fw::net::Host> const &host, std::string address);
+
+  // this is called when our local player is ready to start the game, we should notify
+  // our Peer that we're ready.
+  virtual void local_player_is_ready();
+
+  // posts the given commands to this player for the next turn
+  virtual void post_commands(std::vector<std::shared_ptr<Command>> &commands);
+
+  virtual void update();
+  virtual void send_chat_msg(std::string const &msg);
+
+  private:
+  std::shared_ptr<fw::net::Host> host_;
+  std::shared_ptr<fw::net::Peer> peer_;
   bool connected_;
 
   /** This is called whenever we receive a Packet from our Peer. */
@@ -44,23 +69,6 @@ private:
   // when we get a response to our pkt_join, we ask the server to confirm the Host of
   // the game. when it's done that, we'll call this to set up the user_name and such
   void connect_complete(SessionRequest &req);
-
-public:
-  RemotePlayer(fw::net::Host *Host, fw::net::Peer *Peer, bool connected);
-  virtual ~RemotePlayer();
-
-  // connect to the specified remote player
-  static RemotePlayer *connect(fw::net::Host *Host, std::string address);
-
-  // this is called when our local player is ready to start the game, we should notify
-  // our Peer that we're ready.
-  virtual void local_player_is_ready();
-
-  // posts the given commands to this player for the next turn
-  virtual void post_commands(std::vector<std::shared_ptr<Command>> &commands);
-
-  virtual void update();
-  virtual void send_chat_msg(std::string const &msg);
 };
 
 }

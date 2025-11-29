@@ -38,9 +38,9 @@ void GameScreen::set_options(std::shared_ptr<ScreenOptions> opt) {
 }
 
 void GameScreen::show() {
-  if (options_ == 0) {
-    BOOST_THROW_EXCEPTION(
-        fw::Exception() << fw::message_error_info("no GameScreenOptions has been set, cannot start new game!"));
+  if (options_ == nullptr) {
+    fw::debug << "ERROR no GameScreenOptions has been set, cannot start new game!" << std::endl;
+    return;
   }
 
   std::shared_ptr<WorldReader> reader(new WorldReader());
@@ -55,7 +55,7 @@ void GameScreen::show() {
   world_->initialize();
 
   // notify all of the players that the world is loaded
-  for(Player * plyr : SimulationThread::get_instance()->get_players()) {
+  for(auto plyr : SimulationThread::get_instance()->get_players()) {
     plyr->world_loaded();
   }
 
@@ -64,10 +64,10 @@ void GameScreen::show() {
   hud_minimap->show();
 
   // Add a light to the scene. TODO: remove it on close? also update it somehow?
-  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue([=](fw::sg::Scenegraph& scenegraph) {
+  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue([=](fw::sg::Scenegraph& sg) {
       fw::Vector sun(0.485f, 0.485f, 100.727f);
       std::shared_ptr <fw::sg::Light> light(new fw::sg::Light(sun * 200.0f, sun * -1, true));
-      scenegraph.add_light(light);
+      sg.add_light(light);
     });
 }
 

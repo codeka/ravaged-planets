@@ -140,7 +140,7 @@ fw::StatusOr<bool> Framework::initialize(char const *title) {
     debug_view_->initialize();
   }
 
-  net::initialize();
+  RETURN_IF_ERROR(net::initialize());
   Http::initialize();
 
   // start the game Timer that'll record fps, elapsed time, etc.

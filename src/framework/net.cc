@@ -1,18 +1,24 @@
+#include <framework/net.h>
+
 #include <boost/algorithm/string.hpp>
 
-#include <framework/net.h>
-#include <framework/logging.h>
+#include <absl/strings/str_cat.h>
+
 #include <framework/exception.h>
+#include <framework/logging.h>
 #include <framework/packet.h>
 #include <framework/packet_buffer.h>
+#include <framework/status.h>
 
 namespace fw::net {
 
-void initialize() {
+fw::Status initialize() {
   fw::debug << "initializing networking..." << std::endl;
   if (enet_initialize() != 0) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("error initializing ENet"));
+    return fw::ErrorStatus("error initializing ENet");
   }
+
+  return fw::OkStatus();
 }
 
 void destroy() {
@@ -20,8 +26,8 @@ void destroy() {
 }
 
 //-------------------------------------------------------------------------
-Peer::Peer(Host *hst, ENetPeer *Peer, bool connected) :
-    host_(hst), peer_(Peer), connected_(connected) {
+Peer::Peer(Host *host, ENetPeer *peer, bool connected) :
+    host_(host), peer_(peer), connected_(connected) {
 }
 
 Peer::~Peer() {
@@ -68,13 +74,13 @@ void Peer::on_disconnect() {
 //-------------------------------------------------------------------------
 
 Host::Host() :
-    host_(0), _listen_port(0) {
+    host_(0), listen_port_(0) {
 }
 
 Host::~Host() {
 }
 
-bool Host::listen(std::string port_range) {
+fw::Status Host::listen(std::string port_range) {
   int min_port, max_port;
 
   std::vector<std::string> ports;
@@ -92,25 +98,27 @@ bool Host::listen(std::string port_range) {
   return listen(min_port, max_port);
 }
 
-bool Host::listen(int min_port, int max_port) {
+fw::Status Host::listen(int min_port, int max_port) {
   for (int port = min_port; port <= max_port; port++) {
-    if (try_listen(port)) {
-      _listen_port = port;
-      return true;
+    if (try_listen(port).ok()) {
+      listen_port_ = port;
+      return fw::OkStatus();
     }
   }
 
-  return false;
+  return fw::ErrorStatus(
+    absl::StrCat("unable to listen on any port min=", min_port, " max=", max_port));
 }
 
-Peer *Host::connect(std::string address) {
-  if (host_ == nullptr)
-    try_listen(0);
+fw::StatusOr<std::shared_ptr<Peer>> Host::connect(std::string address) {
+  if (host_ == nullptr) {
+    RETURN_IF_ERROR(try_listen(0));
+  }
 
   std::vector<std::string> parts;
   boost::split(parts, address, boost::algorithm::is_any_of(":"));
   if (parts.size() != 2) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("invalid address, 2 parts expected, IP & port"));
+    return fw::ErrorStatus("invalid address, 2 parts expected, IP & port: ") << address;
   }
 
   ENetAddress addr;
@@ -118,15 +126,14 @@ Peer *Host::connect(std::string address) {
   addr.port = boost::lexical_cast<int>(parts[1]);
 
   // connect to the server (we'll create 10 channels to begin with, maybe that'll change)
-  ENetPeer *Peer = enet_host_connect(host_, &addr, 10, 0);
-  if (Peer == nullptr) {
-    fw::debug << "error connecting to peer, no peer object created." << std::endl;
-    return 0;
+  ENetPeer *enet_peer = enet_host_connect(host_, &addr, 10, 0);
+  if (enet_peer == nullptr) {
+    return fw::ErrorStatus("error connecting to peer");
   }
 
-  net::Peer *new_peer = new net::Peer(this, Peer, false);
-  Peer->data = new_peer;
-  return new_peer;
+  auto peer = std::make_shared<Peer>(this, enet_peer, false);
+  enet_peer->data = peer.get();
+  return peer;
 }
 
 void Host::update() {
@@ -135,34 +142,34 @@ void Host::update() {
 
   ENetEvent evnt;
   while (enet_host_service(host_, &evnt, 0) > 0) {
-    net::Peer *Peer = static_cast<net::Peer *>(evnt.peer->data);
+    net::Peer *peer = static_cast<net::Peer *>(evnt.peer->data);
 
     switch (evnt.type) {
     case ENET_EVENT_TYPE_CONNECT:
-      if (Peer == nullptr) {
+      if (peer == nullptr) {
         on_peer_connect(evnt.peer);
       } else {
-        Peer->on_connect();
+        peer->on_connect();
       }
       break;
 
     case ENET_EVENT_TYPE_RECEIVE:
-      if (Peer != nullptr) {
-        Peer->on_receive(evnt.packet, evnt.channelID);
+      if (peer != nullptr) {
+        peer->on_receive(evnt.packet, evnt.channelID);
       }
       enet_packet_destroy(evnt.packet);
       break;
 
     case ENET_EVENT_TYPE_DISCONNECT:
-      if (Peer != nullptr) {
-        Peer->on_disconnect();
+      if (peer != nullptr) {
+        peer->on_disconnect();
       }
       break;
     }
   }
 }
 
-bool Host::try_listen(int port) {
+fw::Status Host::try_listen(int port) {
   ENetAddress addr;
   addr.host = ENET_HOST_ANY;
   addr.port = static_cast<enet_uint16>(port);
@@ -171,24 +178,24 @@ bool Host::try_listen(int port) {
   host_ = enet_host_create(port == 0 ? 0 : &addr, 32, ENET_PROTOCOL_MAXIMUM_CHANNEL_COUNT, 0, 0);
   if (host_ == nullptr) {
     fw::debug << "error listening on port " << port << std::endl;
-    return false;
+    return fw::ErrorStatus(absl::StrCat("error listening on port ", port));
   }
 
-  return true;
+  return fw::OkStatus();
 }
 
 void Host::on_peer_connect(ENetPeer *peer) {
   fw::debug << "new connection received from " << peer->address.host << ":" << peer->address.port
             << std::endl;
 
-  net::Peer *new_peer = new net::Peer(this, peer, true);
-  _new_connections.push_back(new_peer);
-  peer->data = new_peer;
+  auto new_peer = std::make_shared<Peer>(this, peer, true);
+  new_connections_.push_back(new_peer);
+  peer->data = new_peer.get();
 }
 
-std::vector<Peer *> Host::get_new_connections() {
-  std::vector<Peer *> new_conns;
-  std::swap(new_conns, _new_connections);
+std::vector<std::shared_ptr<Peer>> Host::get_new_connections() {
+  std::vector<std::shared_ptr<Peer>> new_conns;
+  std::swap(new_conns, new_connections_);
 
   return new_conns;
 }

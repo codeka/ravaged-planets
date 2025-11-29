@@ -167,7 +167,7 @@ void NewGameWindow::update() {
 
   // check which players are now ready that weren't ready before
   int num_players = 0;
-  for (Player* p : SimulationThread::get_instance()->get_players()) {
+  for (auto &p : SimulationThread::get_instance()->get_players()) {
     num_players++;
     if (p->is_ready()) {
       bool was_ready_before = false;
@@ -185,7 +185,8 @@ void NewGameWindow::update() {
         need_refresh_players_ = true;
 
         std::string user_name = p->get_user_name();
-        std::string msg = std::vformat(fw::text("title.new-game.ready-to-go"), std::make_format_args(user_name));
+        std::string msg = std::vformat(
+          fw::text("title.new-game.ready-to-go"), std::make_format_args(user_name));
         append_chat(msg);
       }
     }
@@ -253,11 +254,9 @@ void NewGameWindow::on_players_changed() {
 
 // refreshes the list of players in the game
 void NewGameWindow::refresh_players() {
-  std::vector<Player *> players = SimulationThread::get_instance()->get_players();
-
   Listbox *players_list = wnd_->find<Listbox>(PLAYER_LIST_ID);
   players_list->clear();
-  for (Player *plyr : players) {
+  for (auto &plyr : SimulationThread::get_instance()->get_players()) {
     int player_no = static_cast<int>(plyr->get_player_no());
 
     std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";

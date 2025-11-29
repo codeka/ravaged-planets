@@ -262,7 +262,9 @@ fw::Status JoinGameSessionRequest::parse_response(fw::XmlElement &xml) {
   fw::debug << "joined game, address: " << server_address << " player# " << player_no << std::endl;
 
   // now connect to that server
-  SimulationThread::get_instance()->connect(game_id_, server_address, static_cast<uint8_t>(player_no));
+  RETURN_IF_ERROR(
+      SimulationThread::get_instance()->connect(
+          game_id_, server_address, static_cast<uint8_t>(player_no)));
 
   // set the state to logged_in as well....
   Session::get_instance()->set_state(Session::kLoggedIn);

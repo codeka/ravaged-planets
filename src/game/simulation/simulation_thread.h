@@ -8,6 +8,8 @@
 #define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
 #include <boost/signals2/signal.hpp>
 
+#include <framework/status.h>
+
 namespace fw {
 namespace net {
 class Host;
@@ -29,44 +31,18 @@ public:
   // these are the functions we use when various events occur in the simulation.
   typedef std::function<void()> callback_fn;
 
-private:
-  static SimulationThread *instance;
-
-  std::thread thread_;
-  bool stopped_;
-  std::condition_variable stopped_cond_;
-
-  fw::net::Host *host_;
-  LocalPlayer *local_player_;
-  std::vector<Player *> players_;
-  std::string map_name_;
-  uint64_t game_id_;
-  turn_id turn_;
-
-  std::map<turn_id, std::vector<std::shared_ptr<Command>>> commands_;
-
-  // This is the list of commands that the player posted to us in this turn. At the end of the current turn, we'll
-  // enqueue it to the command queue and also notify other players of it.
-  std::vector<std::shared_ptr<Command>> posted_commands_;
-
-  // At the end of each turn, this is called to enqueue all the commands that were posted and notify other players
-  // of them as well.
-  void enqueue_posted_commands();
-
-  void thread_proc();
-public:
   SimulationThread();
-  ~SimulationThread();
+  ~SimulationThread() = default;
 
   void initialize();
   void destroy();
 
   // Connect to a remote simulation on another computer, the given player_no is our player# for the game.
-  void connect(uint64_t game_id, std::string address, uint8_t player_no);
+  fw::Status connect(uint64_t game_id, std::string address, uint8_t player_no);
 
   // Connect to another remote player who's already part of this simulation (this is called when we're joining
   // an existing game)
-  void connect_player(std::string address);
+  fw::Status connect_player(std::string address);
 
   // When a new multiplayer game is started, this is called to set up the game_id and that, once everything is ready
   // to go, call start_game()
@@ -103,25 +79,25 @@ public:
   void enqueue_command(std::shared_ptr<Command> &cmd);
 
   // Adds a new AI player to the list of players.
-  void add_ai_player(AIPlayer *plyr);
+  void add_ai_player(std::shared_ptr<AIPlayer> const &player);
 
   // Gets an std::vector<> of the current players in the game. This is a copy of our vector, so don't call this
   // too often.
-  std::vector<Player *> get_players() const {
+  std::vector<std::shared_ptr<Player>> const &get_players() const {
     return players_;
   }
 
   /** Gets the local_player instance that represents the local player. */
-  LocalPlayer *get_local_player() const {
+  std::shared_ptr<LocalPlayer> get_local_player() const {
     return local_player_;
   }
 
   /** Gets a pointer to the player with the given player_no. */
-  Player *get_player(uint8_t player_no) const;
+  std::shared_ptr<Player> get_player(uint8_t player_no) const;
 
   /** Gets the port number we're listening for Peer connections on. */
   int get_listen_port() const;
-  fw::net::Host *get_host() const {
+  std::shared_ptr<fw::net::Host> get_host() const {
     return host_;
   }
   uint64_t get_game_id() const {
@@ -130,6 +106,32 @@ public:
   static SimulationThread *get_instance() {
     return instance;
   }
+
+private:
+  static SimulationThread *instance;
+
+  std::thread thread_;
+  bool stopped_;
+  std::condition_variable stopped_cond_;
+
+  std::shared_ptr<fw::net::Host> host_;
+  std::shared_ptr<LocalPlayer> local_player_;
+  std::vector<std::shared_ptr<Player>> players_;
+  std::string map_name_;
+  uint64_t game_id_;
+  turn_id turn_;
+
+  std::map<turn_id, std::vector<std::shared_ptr<Command>>> commands_;
+
+  // This is the list of commands that the player posted to us in this turn. At the end of the current turn, we'll
+  // enqueue it to the command queue and also notify other players of it.
+  std::vector<std::shared_ptr<Command>> posted_commands_;
+
+  // At the end of each turn, this is called to enqueue all the commands that were posted and notify other players
+  // of them as well.
+  void enqueue_posted_commands();
+
+  void thread_proc();
 };
 
 }

@@ -51,8 +51,8 @@ void MeshComponent::initialize() {
   fw::Color color = fw::Color::WHITE();
   auto ownable_component = entity->get_component<OwnableComponent>();
   if (ownable_component != nullptr) {
-    game::Player* player = ownable_component->get_owner();
-    if (player != nullptr) {
+    auto player = ownable_component->get_owner();
+    if (player) {
       color = player->get_color();
     }
   }

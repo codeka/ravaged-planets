@@ -16,7 +16,7 @@ OwnableComponent::OwnableComponent() :
 OwnableComponent::~OwnableComponent() {
 }
 
-void OwnableComponent::set_owner(game::Player *owner) {
+void OwnableComponent::set_owner(std::shared_ptr<game::Player> const &owner) {
   owner_ = owner;
   owner_changed_event(this);
 }
@@ -25,7 +25,7 @@ bool OwnableComponent::is_local_player() const {
   if (owner_ == nullptr)
     return false;
 
-  game::Player *local_player = game::SimulationThread::get_instance()->get_local_player();
+  auto local_player = game::SimulationThread::get_instance()->get_local_player();
   return (local_player == owner_);
 }
 
@@ -36,9 +36,10 @@ bool OwnableComponent::is_local_or_ai_player() const {
   if (is_local_player())
     return true;
 
-  game::AIPlayer *ai_owner = dynamic_cast<game::AIPlayer *>(owner_);
-  if (ai_owner != nullptr)
+  auto ai_owner = std::dynamic_pointer_cast<std::shared_ptr<game::AIPlayer>>(owner_);
+  if (ai_owner != nullptr) {
     return true;
+  }
 
   return false;
 }
