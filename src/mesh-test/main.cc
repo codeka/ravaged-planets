@@ -40,8 +40,13 @@ static bool g_rotating = false;
 static float g_rotate_angle = 0.0f;
 
 bool restart_handler(fw::gui::Widget *wdgt) {
-  g_model = fw::Framework::get_instance()->get_model_manager()->get_model(
+  auto model = fw::Framework::get_instance()->get_model_manager()->get_model(
       fw::Settings::get<std::string>("mesh-file"));
+  if (!model.ok()) {
+    fw::debug << "Error loading model: " << model.status() << std::endl;
+  } else {
+    g_model = *model;
+  }
   return true;
 }
 
@@ -99,12 +104,18 @@ fw::Status Application::initialize(fw::Framework *frmwrk) {
       // set up the properties of the sun that we'll use to Light and also cast shadows
       fw::Vector sun(0.485f, 0.485f, 0.727f);
       fw::Vector lookat(0, 0, 0);
-      std::shared_ptr <fw::sg::Light> Light(new fw::sg::Light(lookat + sun * 300.0f, sun * -1, true));
-      scenegraph.add_light(Light);
+      auto light = std::make_shared<fw::sg::Light>(lookat + sun * 300.0f, sun * -1, true);
+      scenegraph.add_light(light);
 
-      g_model = frmwrk->get_model_manager()->get_model(fw::Settings::get<std::string>("mesh-file"));
-      g_model_node = g_model->create_node(fw::Color::from_rgba(0xff0000ff));
-      scenegraph.add_node(g_model_node);
+      auto model =
+          frmwrk->get_model_manager()->get_model(fw::Settings::get<std::string>("mesh-file"));
+      if (!model.ok()) {
+        fw::debug << "Error loading model: " << model.status() << std::endl;
+      } else {
+        g_model = *model;
+        g_model_node = g_model->create_node(fw::Color::from_rgba(0xff0000ff));
+        scenegraph.add_node(g_model_node);
+      }
       g_ground = std::shared_ptr<fw::sg::Node>(new fw::sg::Node());
       g_ground->set_enabled(false);
       scenegraph.add_node(g_ground);

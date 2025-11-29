@@ -106,7 +106,12 @@ REGISTER_TOOL("players", PlayersTool);
 
 PlayersTool::PlayersTool(EditorWorld *wrld) : wnd_(nullptr), player_no_(1), Tool(wrld) {
   wnd_ = new PlayersToolWindow(this);
-  marker_ = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
+  auto model = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
+  if (!model.ok()) {
+    fw::debug << "ERROR loading marker: " << model.status() << std::endl;
+  } else {
+    marker_ = *model;
+  }
 }
 
 PlayersTool::~PlayersTool() {

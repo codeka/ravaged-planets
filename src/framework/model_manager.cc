@@ -11,15 +11,16 @@ namespace fs = std::filesystem;
 
 namespace fw {
 
-std::shared_ptr<Model> ModelManager::get_model(std::string const &name) {
+fw::StatusOr<std::shared_ptr<Model>> ModelManager::get_model(std::string const &name) {
   fs::path path = fw::resolve("meshes/" + name + ".mesh");
   debug << "loading mesh: " << path << std::endl;
 
   auto it = models_.find(name);
   if (it == models_.end()) {
     ModelReader reader;
-    std::shared_ptr<Model> model = reader.read(path);
-    model->texture_ = std::shared_ptr<Texture>(new Texture());
+    ASSIGN_OR_RETURN(auto model, reader.read(path));
+
+    model->texture_ = std::make_shared<Texture>();
     model->texture_->create(fw::resolve("meshes/" + name + ".png"));
     model->root_node_->initialize(model.get());
     models_[name] = model;

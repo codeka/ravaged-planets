@@ -172,7 +172,12 @@ REGISTER_TOOL("pathing", PathingTool);
 PathingTool::PathingTool(EditorWorld *wrld) :
     Tool(wrld), start_set_(false), end_set_(false), test_mode_(kTestNone), simplify_(true) {
   wnd_ = new PathingToolWindow(this);
-  marker_ = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
+  auto model = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
+  if (!model.ok()) {
+    fw::debug << "ERROR loading marker: " << model.status() << std::endl;
+  } else {
+    marker_ = *model;
+  }
 }
 
 PathingTool::~PathingTool() {

@@ -224,7 +224,9 @@ bool Graphics::is_render_thread() {
 /* static */
 void Graphics::ensure_render_thread() {
   if (!is_render_thread()) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Expected to be running on the render thread."));
+    debug << ErrorStatus("expected to be running on the render thread") << std::endl;
+    // TODO: something better?
+    std::terminate();
   }
 }
 

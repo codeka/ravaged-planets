@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <framework/model.h>
+#include <framework/status.h>
 
 namespace fw {
 
@@ -14,6 +15,6 @@ private:
 
 public:
   /** Fetches the given Model, must be called on the render thread. */
-  std::shared_ptr<Model> get_model(std::string const &name);
+  fw::StatusOr<std::shared_ptr<Model>> get_model(std::string const &name);
 };
 }

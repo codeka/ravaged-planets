@@ -251,10 +251,13 @@ void BuildWindow::do_refresh() {
     std::string mesh_file_name = tmpl["components"]["Mesh"]["FileName"];
     std::string tmpl_name = tmpl["name"];
     fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
-      std::shared_ptr<fw::Model> mdl =
-          fw::Framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
+      auto mdl = fw::Framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
+      if (!mdl.ok()) {
+        fw::debug << "ERROR loading mesh '" << mesh_file_name << "': " << mdl.status() << std::endl;
+      } else {
 //      mdl->set_color(game::SimulationThread::get_instance()->get_local_player()->get_color());
-      icon->set_model(tmpl_name, mdl);
+        icon->set_model(tmpl_name, *mdl);
+      }
     });
 
     index ++;

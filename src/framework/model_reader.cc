@@ -17,13 +17,13 @@ namespace fw {
 
 void add_node(std::shared_ptr<ModelNode> node, Node const &pb_node);
 
-std::shared_ptr<Model> ModelReader::read(fs::path const &filename) {
+fw::StatusOr<std::shared_ptr<Model>> ModelReader::read(fs::path const &filename) {
   ::Model pb_model;
 
   std::fstream ins;
   ins.open(filename.c_str(), std::ios::in | std::ifstream::binary);
   if (ins.fail()) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(filename));
+    return fw::ErrorStatus("error opening file: ") << filename.string();
   }
   pb_model.ParseFromIstream(&ins);
   ins.close();
@@ -31,12 +31,15 @@ std::shared_ptr<Model> ModelReader::read(fs::path const &filename) {
   std::vector<std::shared_ptr<fw::ModelMesh>> meshes;
   for (int i = 0; i < pb_model.meshes_size(); i++) {
     Mesh const &pb_mesh = pb_model.meshes(i);
-    std::shared_ptr<ModelMeshNoanim> mesh_noanim = std::shared_ptr<ModelMeshNoanim>(new ModelMeshNoanim(
-        pb_mesh.vertices().size() / sizeof(vertex::xyz_n_uv),
-        pb_mesh.indices().size() / sizeof(uint16_t)));
-    vertex::xyz_n_uv const *vertex_begin = reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data());
+    std::shared_ptr<ModelMeshNoanim> mesh_noanim =
+        std::make_shared<ModelMeshNoanim>(
+            pb_mesh.vertices().size() / sizeof(vertex::xyz_n_uv),
+            pb_mesh.indices().size() / sizeof(uint16_t));
+    vertex::xyz_n_uv const *vertex_begin =
+        reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data());
     vertex::xyz_n_uv const *vertex_end =
-        reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data() + pb_mesh.vertices().size());
+        reinterpret_cast<vertex::xyz_n_uv const *>(
+            pb_mesh.vertices().data() + pb_mesh.vertices().size());
     mesh_noanim->vertices.assign(vertex_begin, vertex_end);
 
     uint16_t const *indices_begin = reinterpret_cast<uint16_t const *>(pb_mesh.indices().data());

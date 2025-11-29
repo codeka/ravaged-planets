@@ -58,12 +58,16 @@ void MeshComponent::initialize() {
   }
 
   auto model = fw::Framework::get_instance()->get_model_manager()->get_model(model_name_);
-  auto sg_node = model->create_node(color);
-  sg_node_ = sg_node;
-  fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
-    [sg_node](fw::sg::Scenegraph& scenegraph) {
-      scenegraph.add_node(std::dynamic_pointer_cast<fw::sg::Node>(sg_node));
-    });
+  if (!model.ok()) {
+    fw::debug << "ERROR loading model: " << model.status() << std::endl;
+  } else {
+    auto sg_node = (*model)->create_node(color);
+    sg_node_ = sg_node;
+    fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
+      [sg_node](fw::sg::Scenegraph& scenegraph) {
+        scenegraph.add_node(std::dynamic_pointer_cast<fw::sg::Node>(sg_node));
+      });
+  }
 }
 
 void MeshComponent::update(float dt) {
