@@ -1,8 +1,8 @@
 #include <framework/net.h>
 
-#include <boost/algorithm/string.hpp>
-
+#include <absl/strings/numbers.h>
 #include <absl/strings/str_cat.h>
+#include <absl/strings/str_split.h>
 
 #include <framework/exception.h>
 #include <framework/logging.h>
@@ -83,16 +83,21 @@ Host::~Host() {
 fw::Status Host::listen(std::string port_range) {
   int min_port, max_port;
 
-  std::vector<std::string> ports;
-  boost::split(ports, port_range, boost::algorithm::is_any_of("-"));
+  std::vector<std::string> ports = absl::StrSplit(port_range, "-");
   if (ports.size() == 1) {
-    min_port = max_port = boost::lexical_cast<int>(ports[0]);
+    if (!absl::SimpleAtoi(ports[0], &min_port)) {
+      return fw::ErrorStatus("invalid port: ") << ports[0];
+    }
+    max_port = min_port;
   } else if (ports.size() == 2) {
-    min_port = boost::lexical_cast<int>(ports[0]);
-    max_port = boost::lexical_cast<int>(ports[1]);
+    if (!absl::SimpleAtoi(ports[0], &min_port)) {
+      return fw::ErrorStatus("invalid port: ") << ports[0];
+    }
+    if (!absl::SimpleAtoi(ports[1], &max_port)) {
+      return fw::ErrorStatus("invalid port: ") << ports[1];
+    }
   } else {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Invalid 'port_range': " + port_range));
-    min_port = max_port = 0; // stop the "possibly unassigned variable" warning... obviously we never get here, though
+    return fw::ErrorStatus("Invalid 'port_range': ") << port_range;
   }
 
   return listen(min_port, max_port);
@@ -115,15 +120,16 @@ fw::StatusOr<std::shared_ptr<Peer>> Host::connect(std::string address) {
     RETURN_IF_ERROR(try_listen(0));
   }
 
-  std::vector<std::string> parts;
-  boost::split(parts, address, boost::algorithm::is_any_of(":"));
+  std::vector<std::string> parts = absl::StrSplit(address, ":");
   if (parts.size() != 2) {
     return fw::ErrorStatus("invalid address, 2 parts expected, IP & port: ") << address;
   }
 
   ENetAddress addr;
   enet_address_set_host(&addr, parts[0].c_str());
-  addr.port = boost::lexical_cast<int>(parts[1]);
+  if (!absl::SimpleAtoi(parts[1], &addr.port)) {
+    return fw::ErrorStatus("invalid port: ") << parts[1];
+  }
 
   // connect to the server (we'll create 10 channels to begin with, maybe that'll change)
   ENetPeer *enet_peer = enet_host_connect(host_, &addr, 10, 0);
