@@ -89,7 +89,7 @@ Framework *Framework::get_instance() {
   return only_instance;
 }
 
-bool Framework::initialize(char const *title) {
+fw::StatusOr<bool> Framework::initialize(char const *title) {
   if (Settings::get<bool>("help")) {
     Settings::print_help();
     return false;
@@ -100,7 +100,7 @@ bool Framework::initialize(char const *title) {
   language_initialize();
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::sdl_error_info(SDL_GetError()));
+    return fw::ErrorStatus("error initalizing SDL: ") << SDL_GetError();
   }
 
   timer_ = new Timer();
@@ -128,7 +128,7 @@ bool Framework::initialize(char const *title) {
   input_->initialize();
 
   font_manager_ = new FontManager();
-  font_manager_->initialize();
+  RETURN_IF_ERROR(font_manager_->initialize());
 
   if (app_->wants_graphics()) {
     gui_ = new gui::Gui();

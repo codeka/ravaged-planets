@@ -58,11 +58,11 @@ std::string to_string(xml_error_info const &err_info) {
 
 XmlElement load_xml(fs::path const &filepath, std::string_view format_name, int version) {
   if (!fs::is_regular_file(filepath)) {
-    debug << "error: could not load " << format_name << " \"" << filepath << "\": no such file"
-          << std::endl;
+    debug << "error: could not load " << format_name << " " << filepath.string()
+        << ": no such file" << std::endl;
     return XmlElement();
   }
-  debug << "loading " << format_name << ": \"" << filepath << "\"" << std::endl;
+  debug << "loading " << format_name << ": " << filepath.string() << std::endl;
 
   std::shared_ptr<xml::XMLDocument> doc(new xml::XMLDocument());
   doc->LoadFile(filepath.string().c_str());

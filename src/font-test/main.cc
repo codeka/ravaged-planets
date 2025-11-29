@@ -27,7 +27,14 @@ int main(int argc, char** argv) {
 
     fw::ToolApplication app;
     new fw::Framework(&app);
-    fw::Framework::get_instance()->initialize("Font Test");
+    auto continue_or_status = fw::Framework::get_instance()->initialize("Font Test");
+    if (!continue_or_status.ok()) {
+      fw::debug << continue_or_status.status() << std::endl;
+      return 1;
+    }
+    if (!continue_or_status.value()) {
+      return 0;
+    }
 
     std::shared_ptr<fw::FontFace> font_face = fw::Framework::get_instance()->get_font_manager()->get_face();
     font_face->ensure_glyphs("wm");

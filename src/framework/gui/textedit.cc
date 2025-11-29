@@ -47,7 +47,11 @@ char STB_TEXTEDIT_GETCHAR(const TextEditBuffer *buffer, int idx) {
 }
 
 float STB_TEXTEDIT_GETWIDTH(TextEditBuffer *buffer, int line_start_idx, int char_idx) {
-  return buffer->font->measure_glyph(buffer->codepoints[char_idx])[0];
+  auto size = buffer->font->measure_glyph(buffer->codepoints[char_idx]);
+  if (!size.ok()) {
+    return 0.0f;
+  }
+  return (*size)[0];
 }
 
 int STB_TEXTEDIT_KEYTOTEXT(int key) {

@@ -143,7 +143,15 @@ int main(int argc, char** argv) {
 
     Application app;
     new fw::Framework(&app);
-    fw::Framework::get_instance()->initialize("Particle Test");
+    auto continue_or_status = fw::Framework::get_instance()->initialize("Particle Test");
+    if (!continue_or_status.ok()) {
+      fw::debug << continue_or_status.status() << std::endl;
+      return 1;
+    }
+    if (!continue_or_status.value()) {
+      return 0;
+    }
+
     fw::Framework::get_instance()->run();
   } catch (std::exception &e) {
     std::string msg = boost::diagnostic_information(e);

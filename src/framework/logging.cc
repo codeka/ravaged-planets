@@ -40,8 +40,8 @@ namespace fw {
 
     debug.initialize(log_path);
     debug << "Logging started." << std::endl;
-    debug << "Install base: " << fw::install_base_path() << std::endl;
-    debug << "User base: " << fw::user_base_path() << std::endl;
+    debug << "Install base: " << fw::install_base_path().string() << std::endl;
+    debug << "User base: " << fw::user_base_path().string() << std::endl;
   }
 
   //-------------------------------------------------------------------------

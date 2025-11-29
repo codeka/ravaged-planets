@@ -32,7 +32,7 @@ Lang::Lang(std::string const &lang_name) :
     debug << "WARN: could not find language file: " << lang_name << ", loading en.lang instead." 
           << std::endl;
   } else {
-    debug << "loading language: " << lang_path <<std::endl;
+    debug << "loading language: " << lang_path.string() <<std::endl;
 
     std::string key, ParticleRotation;
     int line_num = 0;

@@ -199,9 +199,11 @@ AudioBuffer::AudioBuffer(AudioManager *mgr, std::string const &name) {
     return;
   }
 
-  fw::debug << "loaded sound: " << path << " " << static_cast<float>((*pcm_data)->sample_rate) / 1000.0f << "kHz, "
+  fw::debug << "loaded sound: " << path.string() << " "
+    << static_cast<float>((*pcm_data)->sample_rate) / 1000.0f << "kHz, "
     << (*pcm_data)->channels << " channels, "
-    << static_cast<float>((*pcm_data)->samples) / (*pcm_data)->sample_rate << " seconds" << std::endl;
+    << static_cast<float>((*pcm_data)->samples) / (*pcm_data)->sample_rate << " seconds"
+    << std::endl;
 }
 
 AudioBuffer::~AudioBuffer() {

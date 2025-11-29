@@ -7,6 +7,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <freetype/fterrors.h>
+
 #include <framework/bitmap.h>
 #include <framework/exception.h>
 #include <framework/font.h>
@@ -22,14 +24,27 @@ typedef std::basic_string<uint32_t> utf32string;
 namespace fs = std::filesystem;
 namespace conv = boost::locale::conv;
 
-#define FT_CHECK(fn) { \
-  FT_Error err = fn; \
-  if (err) { \
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(#fn)/*TODO << freetype_error_info(err)*/); \
-  } \
+namespace fw {
+namespace {
+
+const std::string get_error_message(FT_Error err) {
+  #undef FTERRORS_H_
+  #define FT_ERRORDEF( e, v, s )  case e: return s;
+  #define FT_ERROR_START_LIST     switch (err) {
+  #define FT_ERROR_END_LIST       }
+  #include FT_ERRORS_H
+  return "(Unknown error)";
 }
 
-namespace fw {
+fw::Status check_error(FT_Error error) {
+  if (!error) {
+    return fw::OkStatus();
+  }
+
+  return fw::ErrorStatus("font error: ") << get_error_message(error);
+}
+
+}  // namespace
 
 class Glyph {
 public:
@@ -96,24 +111,32 @@ StringCacheEntry::~StringCacheEntry() {
 
 //-----------------------------------------------------------------------------
 
-FontFace::FontFace(FontManager *manager, fs::path const &filename) :
-    manager_(manager), size_(16) {
-  FT_CHECK(FT_New_Face(manager_->library_, filename.string().c_str(), 0, &face_));
-  fw::debug << "Loaded " << filename << ": " << face_->num_faces << " face(s) "
-      << face_->num_glyphs << " glyph(s)" << std::endl;
-
-  FT_CHECK(FT_Set_Pixel_Sizes(face_, 0, size_));
-
-  // TODO: allow us to resize the bitmap?
-  bitmap_ = std::make_shared<fw::Bitmap>(256, 256);
-  texture_ = std::shared_ptr<fw::Texture>(new fw::Texture());
-  texture_dirty_ = true;
+FontFace::FontFace(FontManager *manager)
+ : manager_(manager), size_(16) {
 }
 
 FontFace::~FontFace() {
   for(auto entry : glyphs_) {
     delete entry.second;
   }
+}
+
+fw::Status FontFace::initialize(std::filesystem::path const &filename) {
+  auto err = FT_New_Face(manager_->library_, filename.string().c_str(), 0, &face_);
+  RETURN_IF_ERROR(check_error(err));
+
+  fw::debug << "loaded " << filename.string() << ": " << face_->num_faces << " face(s) "
+      << face_->num_glyphs << " glyph(s)" << std::endl;
+
+  err = FT_Set_Pixel_Sizes(face_, 0, size_);
+  RETURN_IF_ERROR(check_error(err));
+
+  // TODO: allow us to resize the bitmap?
+  bitmap_ = std::make_shared<fw::Bitmap>(256, 256);
+  texture_ = std::shared_ptr<fw::Texture>(new fw::Texture());
+  texture_dirty_ = true;
+
+  return fw::OkStatus();
 }
 
 void FontFace::update(float dt) {
@@ -139,19 +162,23 @@ void FontFace::ensure_glyphs(std::string const &str) {
   ensure_glyphs(conv::utf_to_utf<uint32_t>(str));
 }
 
-void FontFace::ensure_glyph(uint32_t ch) {
+fw::Status FontFace::ensure_glyph(uint32_t ch) {
   if (glyphs_.find(ch) != glyphs_.end()) {
     // Already cached.
-    return;
+    return OkStatus();
+  }
+  if (error_glyphs_.contains(ch)) {
+    // We got an error last we tried, don't try again.
+    return OkStatus();
   }
 
   int glyph_index = FT_Get_Char_Index(face_, ch);
 
   // Load the glyph into the glyph slot and render it if it's not a bitmap
-  FT_CHECK(FT_Load_Glyph(face_, glyph_index, FT_LOAD_DEFAULT));
+  RETURN_IF_ERROR(check_error(FT_Load_Glyph(face_, glyph_index, FT_LOAD_DEFAULT)));
   if (face_->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
     // TODO: FT_RENDER_MODE_LCD?
-    FT_CHECK(FT_Render_Glyph(face_->glyph, FT_RENDER_MODE_NORMAL));
+    RETURN_IF_ERROR(check_error(FT_Render_Glyph(face_->glyph, FT_RENDER_MODE_NORMAL)));
   }
 
   // TODO: better bitmap packing than just a straight grid
@@ -176,11 +203,21 @@ void FontFace::ensure_glyph(uint32_t ch) {
       face_->glyph->metrics.horiBearingY / 64.0f,
       (face_->glyph->metrics.height - face_->glyph->metrics.horiBearingY) / 64.0f);
   texture_dirty_ = true;
+
+  return fw::OkStatus();
 }
 
 void FontFace::ensure_glyphs(std::basic_string<uint32_t> const &str) {
   for (uint32_t ch : str) {
-    ensure_glyph(ch);
+    auto status = ensure_glyph(ch);
+    if (!status.ok()) {
+      fw::debug << "error ensuring glyph '"
+                << conv::utf_to_utf<char>(std::basic_string<uint32_t>(1, ch)) << "' " << status
+                << std::endl;
+
+      error_glyphs_.emplace(ch);
+      // But keep going.
+    }
   }
 }
 
@@ -198,7 +235,11 @@ fw::Point FontFace::measure_substring(std::basic_string<uint32_t> const &str, in
 
   fw::Point size(0, 0);
   for (int i = pos; i < pos + num_chars; i++) {
-    fw::Point glyph_size = measure_glyph(str[i]);
+    auto glyph_size_or_status = measure_glyph(str[i]);
+    if (!glyph_size_or_status.ok()) {
+      continue;
+    }
+    auto glyph_size = *glyph_size_or_status;
     size[0] += glyph_size[0];
     if (size[1] < glyph_size[1]) {
       size[1] = glyph_size[1];
@@ -208,8 +249,8 @@ fw::Point FontFace::measure_substring(std::basic_string<uint32_t> const &str, in
   return size;
 }
 
-fw::Point FontFace::measure_glyph(uint32_t ch) {
-  ensure_glyph(ch);
+fw::StatusOr<fw::Point> FontFace::measure_glyph(uint32_t ch) {
+  RETURN_IF_ERROR(ensure_glyph(ch));
   Glyph *g = glyphs_[ch];
   float y = g->distance_from_baseline_to_top + g->distance_from_baseline_to_bottom;
   return fw::Point(g->advance_x, y);
@@ -220,7 +261,8 @@ void FontFace::draw_string(int x, int y, std::string const &str, DrawFlags flags
   draw_string(x, y, conv::utf_to_utf<uint32_t>(str), flags, color);
 }
 
-void FontFace::draw_string(int x, int y, std::basic_string<uint32_t> const &str, DrawFlags flags, fw::Color color) {
+void FontFace::draw_string(
+    int x, int y, std::basic_string<uint32_t> const &str, DrawFlags flags, fw::Color color) {
   std::shared_ptr<StringCacheEntry> data = get_or_create_cache_entry(str);
 
   if (texture_dirty_) {
@@ -332,8 +374,10 @@ std::shared_ptr<StringCacheEntry> FontFace::create_cache_entry(std::basic_string
 
 //-----------------------------------------------------------------------------
 
-void FontManager::initialize() {
-  FT_CHECK(FT_Init_FreeType(&library_));
+fw::Status FontManager::initialize() {
+  RETURN_IF_ERROR(check_error(FT_Init_FreeType(&library_)));
+
+  return fw::OkStatus();
 }
 
 void FontManager::update(float dt) {
@@ -351,7 +395,12 @@ std::shared_ptr<FontFace> FontManager::get_face(fs::path const &filename) {
   // TODO: thread-safety?
   std::shared_ptr<FontFace> face = faces_[filename.string()];
   if (!face) {
-    face = std::shared_ptr<FontFace>(new FontFace(this, filename));
+    face = std::make_shared<FontFace>(this);
+    auto status = face->initialize(filename);
+    if (!status.ok()) {
+      fw::debug << "error loading font from " << filename.string() << ": " << status << std::endl;
+      // Keep going, we'll add the uninitialized font so we don't keep trying.
+    }
     faces_[filename.string()] = face;
   }
   return face;

@@ -76,7 +76,7 @@ Bitmap& Bitmap::operator =(fw::Bitmap const &copy) {
 }
 
 StatusOr<Bitmap> load_bitmap(fs::path const &filename) {
-  debug << "loading image: " << filename << std::endl;
+  debug << "loading image: " << filename.string() << std::endl;
   auto data = std::make_shared<BitmapData>(0, 0);
 
   int channels;

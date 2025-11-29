@@ -139,8 +139,14 @@ int main(int argc, char** argv) {
 
     fw::ToolApplication app;
     new fw::Framework(&app);
-    fw::Framework::get_instance()->initialize("Lua Test");
-
+    auto continue_or_status = fw::Framework::get_instance()->initialize("Lua Test");
+    if (!continue_or_status.ok()) {
+      fw::debug << continue_or_status.status() << std::endl;
+      return 1;
+    }
+    if (!continue_or_status.value()) {
+      return 0;
+    }
 
     fw::lua::LuaContext ctx;
 

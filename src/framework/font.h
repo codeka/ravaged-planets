@@ -3,6 +3,7 @@
 #include <memory>
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <boost/filesystem.hpp>
 
@@ -10,6 +11,7 @@
 #include <framework/color.h>
 #include <framework/math.h>
 #include <framework/texture.h>
+#include <framework/status.h>
 
 /* Cut'n'pasted from the freetype.h header so we don't have to include that whole thing. */
 typedef struct FT_LibraryRec_ *FT_Library;
@@ -49,19 +51,25 @@ private:
   /** Mapping of UTF-32 character to glyph object describing the glyph. */
   std::map<uint32_t, Glyph *> glyphs_;
 
+  // If we try to ensure a glyph and get error, they're added here so that we don't try over and
+  // over.
+  std::set<uint32_t> error_glyphs_;
+
   /**
-   * Mapping of UTF-32 strings to a \ref string_cache_entry which caches the data we need to draw the
-   * given string.
+   * Mapping of UTF-32 strings to a \ref string_cache_entry which caches the data we need to draw
+   * the given string.
    */
   std::map<std::basic_string<uint32_t>, std::shared_ptr<StringCacheEntry>> string_cache_;
 
-  void ensure_glyph(uint32_t ch);
+  fw::Status ensure_glyph(uint32_t ch);
   void ensure_glyphs(std::basic_string<uint32_t> const &str);
   std::shared_ptr<StringCacheEntry> get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
   std::shared_ptr<StringCacheEntry> create_cache_entry(std::basic_string<uint32_t> const &str);
 public:
-  FontFace(FontManager *manager, std::filesystem::path const &filename);
+  FontFace(FontManager *manager);
   ~FontFace();
+
+  fw::Status initialize(std::filesystem::path const &filename);
 
   /** Called by the font_managed every update frame. */
   void update(float dt);
@@ -83,14 +91,16 @@ public:
   fw::Point measure_substring(std::basic_string<uint32_t> const &str, int pos, int num_chars);
 
   /** Measures a single glyph. */
-  fw::Point measure_glyph(uint32_t ch);
+  fw::StatusOr<fw::Point> measure_glyph(uint32_t ch);
 
   /**
    * Draws the given string on the Screen at the given (x,y) coordinates.
    */
-  void draw_string(int x, int y, std::string const &str, DrawFlags flags = kDrawDefault,
+  void draw_string(
+      int x, int y, std::string const &str, DrawFlags flags = kDrawDefault,
       fw::Color color = fw::Color::WHITE());
-  void draw_string(int x, int y, std::basic_string<uint32_t> const &str, DrawFlags flags, fw::Color color);
+  void draw_string(
+      int x, int y, std::basic_string<uint32_t> const &str, DrawFlags flags, fw::Color color);
 };
 
 class FontManager {
@@ -101,7 +111,7 @@ private:
   std::map<std::string, std::shared_ptr<FontFace>> faces_;
 
 public:
-  void initialize();
+  fw::Status initialize();
   void update(float dt);
 
   /** Gets the default \ref font_face. */

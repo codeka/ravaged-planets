@@ -5,6 +5,8 @@
 #include <memory>
 #include <string>
 
+#include <framework/status.h>
+
 namespace fw {
 class Graphics;
 class Framework;
@@ -151,8 +153,9 @@ public:
     return camera_;
   }
 
-  // Initializes the game and gets everything ready to go.
-  bool initialize(char const *title);
+  // Initializes the game and gets everything ready to go. Returns true if execution should continue
+  // or false if it should not. Or an error if initialization failed.
+  fw::StatusOr<bool> initialize(char const *title);
 
   // shutdown the Framework, this is called automatically when the main window
   // is closed/destroyed.

@@ -72,6 +72,7 @@ fw::Status Terrain::initialize() {
 
       scenegraph.add_node(root_node);
     });
+  return fw::OkStatus();
 }
 
 std::shared_ptr<fw::Texture> Terrain::get_patch_splatt(int patch_x, int patch_z) {
