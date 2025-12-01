@@ -2,7 +2,6 @@
 
 #include <set>
 
-#include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/math.h>
 #include <framework/misc.h>

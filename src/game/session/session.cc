@@ -1,4 +1,4 @@
-#include <framework/exception.h>
+
 #include <framework/settings.h>
 #include <framework/http.h>
 #include <framework/logging.h>

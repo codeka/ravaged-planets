@@ -3,7 +3,6 @@
 
 #include <absl/strings/str_cat.h>
 
-#include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/packet_buffer.h>
 #include <framework/status.h>

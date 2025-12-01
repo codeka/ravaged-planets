@@ -10,7 +10,6 @@
 #include <framework/misc.h>
 #include <framework/paths.h>
 #include <framework/logging.h>
-#include <framework/exception.h>
 
 namespace fs = std::filesystem;
 

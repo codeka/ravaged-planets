@@ -1,6 +1,8 @@
 #pragma once
 
 #include <filesystem>
+#include <map>
+#include <memory>
 
 #include <framework/model.h>
 #include <framework/status.h>

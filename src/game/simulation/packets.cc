@@ -1,6 +1,5 @@
 
 #include <framework/packet_buffer.h>
-#include <framework/exception.h>
 
 #include <game/simulation/packets.h>
 #include <game/simulation/commands.h>

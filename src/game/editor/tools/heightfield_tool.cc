@@ -3,7 +3,6 @@
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
 #include <framework/color.h>
-#include <framework/exception.h>
 #include <framework/input.h>
 #include <framework/timer.h>
 #include <framework/logging.h>

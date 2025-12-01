@@ -8,7 +8,6 @@
 #include <framework/color.h>
 #include <framework/graphics.h>
 #include <framework/misc.h>
-#include <framework/exception.h>
 #include <framework/status.h>
 #include <framework/texture.h>
 

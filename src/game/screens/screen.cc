@@ -1,5 +1,4 @@
 
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <game/screens/screen.h>

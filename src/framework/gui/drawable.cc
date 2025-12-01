@@ -6,7 +6,6 @@
 #include <absl/strings/numbers.h>
 #include <absl/strings/str_split.h>
 
-#include <framework/exception.h>
 #include <framework/graphics.h>
 #include <framework/paths.h>
 #include <framework/texture.h>

@@ -8,7 +8,6 @@
 #include <framework/input.h>
 #include <framework/framework.h>
 #include <framework/misc.h>
-#include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/settings.h>
 

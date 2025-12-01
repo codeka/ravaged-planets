@@ -12,7 +12,6 @@
 #include <framework/logging.h>
 #include <framework/camera.h>
 #include <framework/bitmap.h>
-#include <framework/exception.h>
 #include <framework/settings.h>
 #include <framework/graphics.h>
 #include <framework/cursor.h>
@@ -277,10 +276,9 @@ void Framework::update_proc() {
       std::this_thread::yield();
     }
   }catch(std::exception &e) {
-    std::string msg = boost::diagnostic_information(e);
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;
     fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
-    fw::debug << msg << std::endl;
+    fw::debug << e.what() << std::endl;
     throw;
   } catch (...) {
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;

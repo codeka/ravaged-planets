@@ -5,7 +5,6 @@
 #define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
 #include <boost/signals2.hpp>
 
-#include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/math.h>
 #include <framework/graphics.h>

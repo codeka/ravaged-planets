@@ -5,7 +5,6 @@
 #include <framework/xml.h>
 #include <framework/logging.h>
 #include <framework/timer.h>
-#include <framework/exception.h>
 
 #include <game/entities/entity.h>
 #include <game/entities/entity_debug.h>

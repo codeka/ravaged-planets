@@ -4,7 +4,6 @@
 #include <memory>
 
 #include <framework/color.h>
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/logging.h>

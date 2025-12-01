@@ -8,7 +8,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include <framework/framework.h>
-#include <framework/exception.h>
 #include <framework/misc.h>
 #include <framework/texture.h>
 #include <framework/logging.h>

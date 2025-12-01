@@ -3,7 +3,6 @@
 #include <memory>
 #include <thread>
 
-#include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/lua.h>
 #include <framework/net.h>

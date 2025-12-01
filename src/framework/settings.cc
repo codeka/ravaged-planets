@@ -10,7 +10,6 @@
 #include <absl/strings/str_cat.h>
 #include <absl/strings/str_split.h>
 
-#include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/misc.h>
 #include <framework/paths.h>

@@ -10,7 +10,6 @@
 #include <stb/stb_vorbis.h>
 
 #include <framework/audio.h>
-#include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
 
@@ -266,12 +265,6 @@ bool AudioSource::play(std::shared_ptr<AudioBuffer> audio) {
   }
 
   return true;
-}
-
-//-----------------------------------------------------------------------------
-std::string to_string(audio_error_info const &err_info) {
-  std::string msg = err_info.value();
-  return msg;
 }
 
 }

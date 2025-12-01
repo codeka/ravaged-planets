@@ -1,7 +1,6 @@
 #include <functional>\
 
 #include <framework/camera.h>
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/input.h>

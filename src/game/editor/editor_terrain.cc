@@ -3,7 +3,6 @@
 #include <framework/graphics.h>
 #include <framework/bitmap.h>
 #include <framework/texture.h>
-#include <framework/exception.h>
 
 #include <game/world/terrain_helper.h>
 #include <game/editor/editor_terrain.h>

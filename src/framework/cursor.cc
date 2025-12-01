@@ -3,7 +3,6 @@
 #include <SDL2/SDL.h>
 
 #include <framework/bitmap.h>
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/status.h>

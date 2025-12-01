@@ -7,7 +7,6 @@
 #include <absl/strings/str_split.h>
 
 #include <framework/bitmap.h>
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/logging.h>

@@ -3,7 +3,6 @@
 #include <functional>
 #include <boost/algorithm/string.hpp>
 
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/logging.h>
 #include <framework/settings.h>

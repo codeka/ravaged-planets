@@ -5,7 +5,6 @@
 #include <framework/model.h>
 #include <framework/model_writer.h>
 #include <framework/model_node.h>
-#include <framework/exception.h>
 
 #include <framework/model_file.pb.h>
 

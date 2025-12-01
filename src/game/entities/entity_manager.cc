@@ -2,7 +2,6 @@
 
 #include <framework/framework.h>
 #include <framework/camera.h>
-#include <framework/exception.h>
 #include <framework/input.h>
 #include <framework/graphics.h>
 #include <framework/timer.h>

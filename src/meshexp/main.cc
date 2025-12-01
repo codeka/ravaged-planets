@@ -7,7 +7,6 @@
 #include <framework/settings.h>
 #include <framework/framework.h>
 #include <framework/logging.h>
-#include <framework/exception.h>
 #include <framework/model.h>
 #include <framework/model_node.h>
 #include <framework/model_writer.h>
@@ -212,10 +211,9 @@ int main(int argc, char** argv) {
     fw::settings stg;
     meshexp(stg.get_value<std::string>("input"), stg.get_value<std::string>("output"));
   } catch (std::exception &e) {
-    std::string msg = boost::diagnostic_information(e);
     fw::debug << "--------------------------------------------------------------------------------" << std::endl;
     fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
-    fw::debug << msg << std::endl;
+    fw::debug << e.what() << std::endl;
 
     display_exception(e.what());
   } catch (...) {

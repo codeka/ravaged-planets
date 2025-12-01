@@ -6,7 +6,6 @@
 #include <framework/framework.h>
 #include <framework/camera.h>
 #include <framework/logging.h>
-#include <framework/exception.h>
 #include <framework/misc.h>
 #include <framework/shader.h>
 #include <framework/shadows.h>

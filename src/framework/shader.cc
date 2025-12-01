@@ -9,7 +9,6 @@
 #include <absl/strings/str_split.h>
 
 #include <framework/color.h>
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/logging.h>

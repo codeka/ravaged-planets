@@ -7,7 +7,6 @@
 #include <framework/texture.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>
-#include <framework/exception.h>
 
 #include <framework/model_file.pb.h>
 

@@ -3,20 +3,14 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
+#include <list>
 #include <map>
 #include <memory>
 #include <string>
-#include <framework/exception.h>
 
 namespace fw {
 class AudioBuffer;
 class AudioSource;
-
-// this is the type of error info we include with exception's when an error is detected by SDL_mixer
-typedef boost::error_info<struct tag_audioerr, std::string> audio_error_info;
-
-// converts an audio_error_info into a string
-std::string to_string(audio_error_info const &err_info);
 
 // The audio manager creates audio sources, buffers and manages them all.
 class AudioManager {

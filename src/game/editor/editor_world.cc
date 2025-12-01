@@ -2,7 +2,6 @@
 #include <memory>
 
 #include <framework/graphics.h>
-#include <framework/exception.h>
 
 #include <game/editor/editor_world.h>
 #include <game/editor/editor_terrain.h>

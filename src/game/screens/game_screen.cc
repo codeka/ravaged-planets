@@ -1,6 +1,5 @@
 
 #include <framework/camera.h>
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/scenegraph.h>
 

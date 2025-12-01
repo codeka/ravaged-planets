@@ -7,7 +7,6 @@
 
 #include <absl/strings/numbers.h>
 
-#include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/status.h>
 #include <framework/tinyxml2.h>

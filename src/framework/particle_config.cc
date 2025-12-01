@@ -7,7 +7,6 @@
 #include <absl/strings/str_split.h>
 
 #include <framework/particle_emitter.h>
-#include <framework/exception.h>
 #include <framework/framework.h>
 #include <framework/logging.h>
 #include <framework/math.h>

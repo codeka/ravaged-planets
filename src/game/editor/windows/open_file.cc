@@ -4,7 +4,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <framework/exception.h>
 #include <framework/bitmap.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>

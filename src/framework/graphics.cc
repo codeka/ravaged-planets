@@ -6,7 +6,6 @@
 
 #include <SDL2/SDL.h>
 
-#include <framework/exception.h>
 #include <framework/graphics.h>
 #include <framework/settings.h>
 #include <framework/logging.h>

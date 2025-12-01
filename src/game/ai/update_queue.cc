@@ -7,7 +7,6 @@
 #include <framework/lua.h>
 #include <framework/timer.h>
 #include <framework/logging.h>
-#include <framework/exception.h>
 
 #include <game/ai/update_queue.h>
 
@@ -60,9 +59,8 @@ void UpdateQueue::update() {
       try {
         qntry.fn();
       } catch (std::exception &e) {
-        std::string msg = boost::diagnostic_information(e);
         fw::debug << "ERR: an exception occurred executing an update function" << std::endl;
-        fw::debug << msg << std::endl;
+        fw::debug << e.what() << std::endl;
       }
     }
   }

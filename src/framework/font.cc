@@ -10,7 +10,6 @@
 #include <freetype/fterrors.h>
 
 #include <framework/bitmap.h>
-#include <framework/exception.h>
 #include <framework/font.h>
 #include <framework/graphics.h>
 #include <framework/lang.h>

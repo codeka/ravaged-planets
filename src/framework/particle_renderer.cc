@@ -1,6 +1,5 @@
 #include <framework/particle_renderer.h>
 
-#include <framework/exception.h>
 #include <framework/graphics.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
