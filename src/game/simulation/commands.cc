@@ -1,9 +1,12 @@
 #include <atomic>
 #include <functional>
 
+#include <absl/strings/str_cat.h>
+
 #include <framework/exception.h>
 #include <framework/logging.h>
 #include <framework/packet_buffer.h>
+#include <framework/status.h>
 
 #include <game/simulation/commands.h>
 #include <game/simulation/player.h>
@@ -48,22 +51,20 @@ CommandRegistrar::CommandRegistrar(uint8_t id, create_command_fn fn) {
 }
 
 // creates the Packet object from the given command identifier
-std::shared_ptr<Command> create_command(uint8_t id, uint8_t player_no) {
+fw::StatusOr<std::shared_ptr<Command>> CreateCommand(uint8_t id, uint8_t player_no) {
   create_command_fn fn = (*g_command_registry)[id];
   if (fn == nullptr) {
-    BOOST_THROW_EXCEPTION(
-        fw::Exception() << fw::message_error_info("command does not exist: " + boost::lexical_cast<std::string>(id)));
+    return fw::ErrorStatus(absl::StrCat("command does not exist: ", id));
   }
 
   return fn(player_no);
 }
 
 // creates the Packet object from the given command identifier
-std::shared_ptr<Command> create_command(uint8_t id) {
+fw::StatusOr<std::shared_ptr<Command>> CreateCommand(uint8_t id) {
   create_command_fn fn = (*g_command_registry)[id];
   if (fn == nullptr) {
-    BOOST_THROW_EXCEPTION(
-        fw::Exception() << fw::message_error_info("command does not exist: " + boost::lexical_cast<std::string>(id)));
+    return fw::ErrorStatus(absl::StrCat("command does not exist: ", id));
   }
 
   return fn(SimulationThread::get_instance()->get_local_player()->get_player_no());
@@ -183,8 +184,12 @@ void OrderCommand::deserialize(fw::net::PacketBuffer &buffer) {
   uint16_t order_id;
   buffer >> order_id;
 
-  order = create_order(order_id);
-  order->deserialize(buffer);
+  // TODO: return error
+  auto order_or_status = CreateOrder(order_id);
+  if (order_or_status.ok()) {
+    order = *order_or_status;
+    order->deserialize(buffer);
+  }
 }
 
 void OrderCommand::execute() {

@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <framework/math.h>
+#include <framework/status.h>
 
 #include <game/entities/orderable_component.h>
 
@@ -131,11 +132,16 @@ public:
 };
 
 // creates the order object from the given identifier
-std::shared_ptr<Order> create_order(uint16_t id);
+fw::StatusOr<std::shared_ptr<Order>> CreateOrder(uint16_t id);
 
 template<typename T>
 inline std::shared_ptr<T> create_order() {
-  return std::dynamic_pointer_cast<T>(create_order(T::identifier));
+  auto order = CreateOrder(T::identifier);
+  if (!order.ok()) {
+    fw::debug << order.status() << std::endl;
+    std::terminate();
+  }
+  return std::dynamic_pointer_cast<T>(*order);
 }
 
 }

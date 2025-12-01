@@ -23,8 +23,8 @@ private:
 
   fw::Status write_terrain(game::WorldFile &wf);
   void write_mapdesc(game::WorldFile &wf);
-  fw::Status write_minimap_background(game::WorldFile &wf);
-  void write_collision_data(game::WorldFile &wf);
+  fw::Status WriteMinimapBackground(game::WorldFile &wf);
+  fw::Status WriteCollisionData(game::WorldFile &wf);
 
 public:
   WorldWriter(EditorWorld *wrld);

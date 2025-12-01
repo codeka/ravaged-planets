@@ -190,8 +190,7 @@ fw::Status ParticleEmitterConfig::LoadPosition(XmlElement const &elem) {
   ASSIGN_OR_RETURN(std::string offset, elem.GetAttribute("offset"));
   std::vector<std::string> components = absl::StrSplit(offset, " ");
   if (components.size() != 3) {
-    BOOST_THROW_EXCEPTION(fw::Exception()
-        << fw::message_error_info("'offset' attribute requires 3 floating point values"));
+    return fw::ErrorStatus("'offset' attribute requires 3 floating point values") << offset;
   }
   position.center =
       fw::Vector(std::stoi(components[0]), std::stoi(components[1]), std::stoi(components[2]));

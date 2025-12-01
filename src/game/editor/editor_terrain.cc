@@ -138,12 +138,12 @@ void EditorTerrain::set_layer(int number, fw::Bitmap const &bitmap) {
   textures_->add(bitmap);
 }
 
-void EditorTerrain::build_collision_data(std::vector<bool> &vertices) {
+fw::Status EditorTerrain::BuildCollisionData(std::vector<bool> &vertices) {
   if (static_cast<int>(vertices.size()) < (width_ * length_)) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("vertices vector is too small!"));
+    return fw::ErrorStatus("vertices vector is too small!");
   }
 
-  game::build_collision_data(vertices, heights_, width_, length_);
+  return game::BuildCollisionData(vertices, heights_, width_, length_);
 }
 
 }

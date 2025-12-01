@@ -92,10 +92,9 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int wid
     int patch_size /* = 0 */, int patch_x /* = 0 */, int patch_z /* = 0 */) {
   if (patch_size == 0) {
     if (width != length) {
-      BOOST_THROW_EXCEPTION(
-          fw::Exception()
-              << fw::message_error_info(
-                  "If you don't specify a patch_size, width and height must be the same"));
+      fw::debug << "ERROR - if you don't specify a patch_size, width and height must be the same"
+                << std::endl;
+      return 0;
     }
 
     patch_size = width;
@@ -118,7 +117,7 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int wid
   return (patch_size + 1) * (patch_size + 1);
 }
 
-void build_collision_data(std::vector<bool> &vertices, float *heights,  int width, int length) {
+fw::Status BuildCollisionData(std::vector<bool> &vertices, float *heights,  int width, int length) {
   fw::Vector up(0, 1, 0);
 
   for (int z = 0; z < length; z++) {
@@ -130,6 +129,8 @@ void build_collision_data(std::vector<bool> &vertices, float *heights,  int widt
       vertices[x + (z * width)] = (dot > 0.85f);
     }
   }
+
+  return fw::OkStatus();
 }
 
 }

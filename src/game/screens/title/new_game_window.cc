@@ -1,3 +1,5 @@
+#include <game/screens/title/new_game_window.h>
+
 #include <functional>
 #include <memory>
 #include <string>
@@ -20,12 +22,12 @@
 #include <framework/gui/label.h>
 #include <framework/gui/listbox.h>
 #include <framework/gui/textedit.h>
+#include <framework/status.h>
 #include <framework/version.h>
 
 #include <game/application.h>
 #include <game/session/session.h>
 #include <game/screens/game_screen.h>
-#include <game/screens/title/new_game_window.h>
 #include <game/screens/title/main_menu_window.h>
 #include <game/screens/title/new_ai_player_window.h>
 #include <game/screens/title/player_properties_window.h>
@@ -283,14 +285,14 @@ void NewGameWindow::on_maps_selection_changed(int index) {
   update_selection();
 }
 
-game::WorldSummary const &NewGameWindow::get_selected_world_summary() {
+fw::StatusOr<game::WorldSummary> NewGameWindow::GetSelectedWorldSummary() {
   Widget *selected_widget = wnd_->find<Listbox>(MAP_LIST_ID)->get_selected_item();
   if (selected_widget == nullptr) {
-    // should never happen (unless you have no maps installed at all)
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("No selected world!"));
+    // Can happen if there are no maps installed at all.
+    return fw::ErrorStatus("no selected world");
   }
 
-  return boost::any_cast<game::WorldSummary const &>(selected_widget->get_data());
+  return boost::any_cast<game::WorldSummary>(selected_widget->get_data());
 }
 
 bool NewGameWindow::on_new_ai_clicked(Widget *w) {
@@ -329,16 +331,20 @@ void NewGameWindow::append_chat(std::string const &msg) {
 }
 
 void NewGameWindow::update_selection() {
-  game::WorldSummary const &ws = get_selected_world_summary();
-  SimulationThread::get_instance()->set_map_name(ws.get_name());
+  auto ws = GetSelectedWorldSummary();
+  if (!ws.ok()) {
+    return;
+  }
 
-  wnd_->find<Label>(MAP_NAME_ID)->set_text(absl::StrCat(ws.get_name(), " by ", ws.get_author()));
-  int width = ws.get_width();
-  int height = ws.get_height();
-  int num_players = ws.get_num_players();
+  SimulationThread::get_instance()->set_map_name(ws->get_name());
+
+  wnd_->find<Label>(MAP_NAME_ID)->set_text(absl::StrCat(ws->get_name(), " by ", ws->get_author()));
+  int width = ws->get_width();
+  int height = ws->get_height();
+  int num_players = ws->get_num_players();
   wnd_->find<Label>(MAP_SIZE_ID)->set_text(std::vformat(fw::text("title.new-game.map-size"),
       std::make_format_args(width, height, num_players)));
-  wnd_->find<Label>(MAP_SCREENSHOT_ID)->set_background(ws.get_screenshot());
+  wnd_->find<Label>(MAP_SCREENSHOT_ID)->set_background(ws->get_screenshot());
 }
 
 // when we're ready to start, we need to mark our own player as ready and then

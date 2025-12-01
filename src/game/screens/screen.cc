@@ -44,7 +44,8 @@ void ScreenStack::set_active_screen(std::string const &name,
 
   auto it = screens_.find(name);
   if (it == screens_.end()) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("invalid screen name!"));
+    fw::debug << "ERROR - invalid screen name: " << name << std::endl;
+    return;
   }
 
   if (active_ != name) {

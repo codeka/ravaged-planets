@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <framework/math.h>
+#include <framework/status.h>
 
 #include <game/simulation/simulation_thread.h>
 #include <game/entities/entity.h>
@@ -114,17 +115,27 @@ public:
 };
 
 // creates the Packet object from the given command identifier
-std::shared_ptr<Command> create_command(uint8_t id);
-std::shared_ptr<Command> create_command(uint8_t id, uint8_t player_no);
+fw::StatusOr<std::shared_ptr<Command>> CreateCommand(uint8_t id);
+fw::StatusOr<std::shared_ptr<Command>> CreateCommand(uint8_t id, uint8_t player_no);
 
 template<typename T>
 std::shared_ptr<T> create_command() {
-  return std::dynamic_pointer_cast<T>(create_command(T::identifier));
+  auto cmd = CreateCommand(T::identifier);
+  if (!cmd.ok()) {
+    fw::debug << cmd.status() << std::endl;
+    std::terminate();
+  }
+  return std::dynamic_pointer_cast<T>(*cmd);
 }
 
 template<typename T>
 std::shared_ptr<T> create_command(uint8_t player_no) {
-  return std::dynamic_pointer_cast<T>(create_command(T::identifier, player_no));
+  auto cmd = CreateCommand(T::identifier, player_no);
+  if (!cmd.ok()) {
+    fw::debug << cmd.status() << std::endl;
+    std::terminate();
+  }
+  return std::dynamic_pointer_cast<T>(*cmd);
 }
 
 }

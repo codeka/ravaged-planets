@@ -1,8 +1,11 @@
 #include <functional>
 #include <memory>
 
+#include <absl/strings/str_cat.h>
+
 #include <framework/packet_buffer.h>
 #include <framework/exception.h>
+#include <framework/status.h>
 
 #include <game/simulation/orders.h>
 #include <game/entities/builder_component.h>
@@ -41,11 +44,10 @@ OrderRegistrar::OrderRegistrar(uint16_t id, create_order_fn fn) {
 }
 
 // creates the order object from the given order identifier
-std::shared_ptr<Order> create_order(uint16_t id) {
+fw::StatusOr<std::shared_ptr<Order>> CreateOrder(uint16_t id) {
   create_order_fn fn = (*g_order_registry)[id];
   if (fn == nullptr) {
-    BOOST_THROW_EXCEPTION(
-        fw::Exception() << fw::message_error_info("order does not exist: " + boost::lexical_cast<std::string>(id)));
+    return fw::ErrorStatus(absl::StrCat("order does not exist: ", id));
   }
 
   return fn();

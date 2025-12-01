@@ -199,7 +199,10 @@ void PathingTool::activate() {
   int width = get_terrain()->get_width();
   int length = get_terrain()->get_length();
   collision_data_.resize(width * length);
-  get_terrain()->build_collision_data(collision_data_);
+  auto status = get_terrain()->BuildCollisionData(collision_data_);
+  if (!status.ok()) {
+    fw::debug << "ERROR building collision data: " << status << std::endl;
+  }
 
   patches_.resize((width / PATCH_SIZE) * (length / PATCH_SIZE));
 

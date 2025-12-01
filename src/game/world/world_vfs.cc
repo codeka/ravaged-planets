@@ -1,25 +1,56 @@
 #include <filesystem>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
+#include <absl/strings/str_cat.h>
 
-#include <framework/logging.h>
-#include <framework/paths.h>
-#include <framework/exception.h>
 #include <framework/bitmap.h>
+#include <framework/exception.h>
+#include <framework/logging.h>
+#include <framework/misc.h>
+#include <framework/paths.h>
+#include <framework/status.h>
 #include <framework/xml.h>
 
 #include <game/world/world_vfs.h>
 
 namespace fs = std::filesystem;
 
-// populate the given world summary based on the maps found in the given path
-void populate_maps(std::vector<game::WorldSummary> &list, fs::path path);
-
-// looks for the full path to the map with the given name
-fs::path find_map(std::string name);
-
 namespace game {
+namespace {
+
+void PopulateMaps(std::vector<game::WorldSummary> &list, fs::path path) {
+  fw::debug << "populating maps from: " << path.string()
+      << std::endl;
+
+  if (!fs::exists(path) || !fs::is_directory(path))
+    return;
+
+  for (fs::directory_iterator it(path); it != fs::directory_iterator(); ++it) {
+    fs::path p(*it);
+    fw::debug << "  - " << p.string() << std::endl;
+    if (fs::is_directory(p)) {
+      game::WorldSummary ws;
+      ws.initialize(p.filename().string());
+
+      // todo: see if it already exists before adding it
+      list.push_back(ws);
+    }
+  }
+}
+
+fw::StatusOr<fs::path> FindMap(std::string name) {
+  fs::path p(fw::install_base_path() / "maps" / name);
+  if (fs::is_directory(p))
+    return p;
+
+  p = fw::user_base_path() / "maps" / name;
+  if (fs::is_directory(p))
+    return p;
+
+  return fw::ErrorStatus("could not find map: ") << name;
+}
+
+}
 
 WorldSummary::WorldSummary() :
     name_(""), extra_loaded_(false), screenshot_(nullptr), width_(0), height_(0), num_players_(0) {
@@ -37,11 +68,15 @@ void WorldSummary::ensure_extra_loaded() const {
   if (extra_loaded_)
     return;
 
-  fs::path full_path(find_map(name_));
+  auto full_path = FindMap(name_);
+  if (!full_path.ok()) {
+    fw::debug << "ERROR map does not exist: " << name_ << ": " << full_path.status() << std::endl;
+    return;
+  }
 
-  auto screenshot_path = full_path / "screenshot.png";
+  auto screenshot_path = (*full_path) / "screenshot.png";
   if (fs::exists(screenshot_path)) {
-    auto screenshot = fw::load_bitmap(full_path / "screenshot.png");
+    auto screenshot = fw::load_bitmap((*full_path) / "screenshot.png");
     if (screenshot.ok()) {
       screenshot_ = *screenshot;
     } else {
@@ -49,7 +84,7 @@ void WorldSummary::ensure_extra_loaded() const {
     }
   }
 
-  auto status = ParseMapdescFile(full_path / (name_ + ".mapdesc"));
+  auto status = ParseMapdescFile((*full_path) / (name_ + ".mapdesc"));
   if (!status.ok()) {
     fw::debug << "Error parsing mapdesc file: " << status << std::endl;
   }
@@ -98,15 +133,15 @@ WorldVfs::~WorldVfs() {
 
 std::vector<WorldSummary> WorldVfs::list_maps() {
   std::vector<WorldSummary> list;
-  populate_maps(list, fw::install_base_path() / "maps");
-  populate_maps(list, fw::user_base_path() / "maps");
+  PopulateMaps(list, fw::install_base_path() / "maps");
+  PopulateMaps(list, fw::user_base_path() / "maps");
 
   // todo: sort
 
   return list;
 }
 
-WorldFile WorldVfs::open_file(std::string name, bool for_writing /*= false*/) {
+fw::StatusOr<WorldFile> WorldVfs::OpenFile(std::string name, bool for_writing /*= false*/) {
   // check the user's profile directory first
   fs::path map_path = fw::user_base_path() / "maps";
   fs::path full_path = map_path / name;
@@ -125,8 +160,7 @@ WorldFile WorldVfs::open_file(std::string name, bool for_writing /*= false*/) {
   }
 
   // todo: not for writing, check other locations...
-  BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("map doesn't exist"));
-  return WorldFile(""); // can't get here (the above line throws an exception)
+  return fw::ErrorStatus(absl::StrCat("map '", name, "' doesn't exist"));
 }
 
 //-------------------------------------------------------------------------
@@ -156,9 +190,9 @@ void WorldFileEntry::copy(WorldFileEntry const &copy) {
   for_write_ = copy.for_write_;
 }
 
-void WorldFileEntry::ensure_open(bool throw_on_error) {
+fw::Status WorldFileEntry::EnsureOpen() {
   if (stream_.is_open()) {
-    return;
+    return fw::OkStatus();
   }
 
   if (for_write_) {
@@ -167,10 +201,10 @@ void WorldFileEntry::ensure_open(bool throw_on_error) {
     stream_.open(full_path_.c_str(), std::ios::in | std::ifstream::binary);
   }
   if (stream_.fail()) {
-    if (throw_on_error) {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(full_path_));
-    }
+    return fw::ErrorStatus("entry is not open: ") << full_path_;
   }
+
+  return fw::OkStatus();
 }
 
 void WorldFileEntry::close() {
@@ -180,24 +214,28 @@ void WorldFileEntry::close() {
 }
 
 void WorldFileEntry::write(void const *buffer, int num_bytes) {
-  ensure_open();
-  stream_.write(reinterpret_cast<char const *>(buffer), num_bytes);
+  if (EnsureOpen().ok()) {
+    stream_.write(reinterpret_cast<char const *>(buffer), num_bytes);
+  }
 }
 
 void WorldFileEntry::write(std::string const &line) {
-  std::string full_line = boost::algorithm::trim_right_copy(line);
+  std::string full_line(fw::StripTrailingSpaces(line));
   full_line += "\r\n";
 
   write(full_line.c_str(), full_line.length());
 }
 
 void WorldFileEntry::read(void *buffer, int num_bytes) {
-  ensure_open();
-  stream_.read(reinterpret_cast<char *>(buffer), num_bytes);
+  if (EnsureOpen().ok()) {
+    stream_.read(reinterpret_cast<char *>(buffer), num_bytes);
+  }
 }
 
 bool WorldFileEntry::exists() {
-  ensure_open(false);
+  if (!EnsureOpen().ok()) {
+    return false;
+  }
   return (stream_.is_open());
 }
 
@@ -211,39 +249,5 @@ WorldFileEntry WorldFile::get_entry(std::string name, bool for_write) {
   fs::path file_path = fs::path(path_) / name;
   return WorldFileEntry(file_path.string(), for_write);
 }
-}
 
-void populate_maps(std::vector<game::WorldSummary> &list, fs::path path) {
-  fw::debug << "populating maps from: " << path.string()
-      << std::endl;
-
-  if (!fs::exists(path) || !fs::is_directory(path))
-    return;
-
-  for (fs::directory_iterator it(path); it != fs::directory_iterator(); ++it) {
-    fs::path p(*it);
-    fw::debug << "  - " << p.string() << std::endl;
-    if (fs::is_directory(p)) {
-      game::WorldSummary ws;
-      ws.initialize(p.filename().string());
-
-      // todo: see if it already exists before adding it
-      list.push_back(ws);
-    }
-  }
-}
-
-fs::path find_map(std::string name) {
-  fs::path p(fw::install_base_path() / "maps" / name);
-  if (fs::is_directory(p))
-    return p;
-
-  p = fw::user_base_path() / "maps" / name;
-  if (fs::is_directory(p))
-    return p;
-
-  BOOST_THROW_EXCEPTION(fw::Exception()
-      << fw::message_error_info("could not find map!")
-      << fw::filename_error_info(name));
-  return "";
-}
+}  // namespace game

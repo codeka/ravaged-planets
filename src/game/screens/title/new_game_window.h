@@ -3,6 +3,8 @@
 #define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
 #include <boost/signals2.hpp>
 
+#include <framework/status.h>
+
 #include <game/session/session.h>
 
 namespace fw {
@@ -56,7 +58,7 @@ private:
 
   void start_game();
 
-  game::WorldSummary const &get_selected_world_summary();
+  fw::StatusOr<game::WorldSummary> GetSelectedWorldSummary();
 public:
   NewGameWindow();
   ~NewGameWindow();

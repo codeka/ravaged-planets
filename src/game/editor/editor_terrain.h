@@ -52,7 +52,7 @@ public:
   // builds the collision data for the whole map. we assume the vertices buffer
   // is big enough to hold one data point per vertex in the map. each data point
   // holds a single boolean flag - true means "passable", false means "impassable"
-  void build_collision_data(std::vector<bool> &vertices);
+  fw::Status BuildCollisionData(std::vector<bool> &vertices);
 };
 
 }

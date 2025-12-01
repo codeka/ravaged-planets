@@ -132,10 +132,14 @@ void CommandPacket::deserialize(fw::net::PacketBuffer &buffer) {
     buffer >> id;
     buffer >> player_no;
 
-    std::shared_ptr<Command> cmd = create_command(id, player_no);
-    cmd->deserialize(buffer);
-
-    commands_.push_back(cmd);
+    auto cmd = CreateCommand(id, player_no);
+    if (!cmd.ok()) {
+      // TODO: return error
+      fw::debug << "ERROR deserializing command packet: " << cmd.status() << std::endl;
+    } else {
+      (*cmd)->deserialize(buffer);
+      commands_.push_back(*cmd);
+    }
   }
 }
 

@@ -73,7 +73,7 @@ private:
   bool for_write_;
 
   void copy(WorldFileEntry const &copy);
-  void ensure_open(bool throw_on_error = true);
+  fw::Status EnsureOpen();
 
 public:
   WorldFileEntry(std::string full_path, bool for_write);
@@ -125,7 +125,7 @@ public:
   std::vector<WorldSummary> list_maps();
 
   // opens a new world_file with the complete details of the given map
-  WorldFile open_file(std::string name, bool for_writing = false);
+  fw::StatusOr<WorldFile> OpenFile(std::string name, bool for_writing = false);
 };
 
 }

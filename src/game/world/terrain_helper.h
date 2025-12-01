@@ -1,5 +1,7 @@
 #pragma once
 
+#include <framework/status.h>
+
 namespace fw {
 namespace vertex {
 struct xyz_n;
@@ -25,8 +27,7 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height,
     int width, int length, int patch_size = 0, int patch_x = 0,
     int patch_z = 0);
 
-// see editor_terrain::build_collision_data, which we're based off of
-void build_collision_data(std::vector<bool> &vertices, float *heights,
-    int width, int length);
+// see editor_terrain::BuildCollisionData, which we're based off of
+fw::Status BuildCollisionData(std::vector<bool> &vertices, float *heights, int width, int length);
 
 }

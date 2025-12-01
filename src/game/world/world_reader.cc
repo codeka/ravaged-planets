@@ -30,7 +30,7 @@ WorldReader::~WorldReader() {
 
 fw::Status WorldReader::Read(std::string name) {
   WorldVfs vfs;
-  WorldFile wf = vfs.open_file(name, false);
+  ASSIGN_OR_RETURN(WorldFile wf, vfs.OpenFile(name, false));
 
   int version;
   int trn_width;
@@ -39,7 +39,7 @@ fw::Status WorldReader::Read(std::string name) {
   WorldFileEntry wfe = wf.get_entry("heightfield", false /* for_write */);
   wfe.read(&version, sizeof(int));
   if (version != 1) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown terrain version"));
+    return fw::ErrorStatus("unknown terrain version: ") << version;
   }
 
   wfe.read(&trn_width, sizeof(int));
@@ -95,8 +95,7 @@ fw::Status WorldReader::ReadCollisionData(WorldFileEntry &wfe) {
   int version;
   wfe.read(&version, sizeof(int));
   if (version != 1) {
-    BOOST_THROW_EXCEPTION(fw::Exception()
-        << fw::message_error_info("unknown collision_data version"));
+    return fw::ErrorStatus("unknown collision_data version: ") << version;
   }
 
   int width, length;
@@ -132,8 +131,7 @@ fw::Status WorldReader::ReadMapdesc(fw::XmlElement root) {
 fw::Status WorldReader::ReadMapdescPlayers(fw::XmlElement players_node) {
   for (fw::XmlElement child : players_node.children()) {
     if (child.get_value() != "player") {
-      BOOST_THROW_EXCEPTION(fw::Exception()
-          << fw::message_error_info("Unknown child element of <players> node!"));
+      return fw::ErrorStatus("unknown child element of <players> node: ") << child.get_value();
     }
 
     ASSIGN_OR_RETURN(int player_no, child.GetAttributei<int>("no"));

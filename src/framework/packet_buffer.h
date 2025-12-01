@@ -152,14 +152,14 @@ inline PacketBuffer &operator >>(PacketBuffer &lhs, std::string &rhs) {
   lhs >> length;
 
   if (length < 80) { // If it's < 80 bytes, just allocate on the stack.
-    char *ParticleRotation = reinterpret_cast<char *>(alloca(length));
-    lhs.get_bytes(ParticleRotation, 0, length);
-    rhs = std::string(ParticleRotation, length);
+    char *value = reinterpret_cast<char *>(alloca(length));
+    lhs.get_bytes(value, 0, length);
+    rhs = std::string(value, length);
   } else {
-    char *ParticleRotation = new char[length];
-    lhs.get_bytes(ParticleRotation, 0, length);
-    rhs = std::string(ParticleRotation, length);
-    delete[] ParticleRotation;
+    char *value = new char[length];
+    lhs.get_bytes(value, 0, length);
+    rhs = std::string(value, length);
+    delete[] value;
   }
 
   return lhs;

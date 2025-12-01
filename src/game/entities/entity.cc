@@ -31,8 +31,11 @@ Entity::~Entity() {
 void Entity::add_component(EntityComponent *comp) {
   // you can only have one component of each type
   auto it = components_.find(comp->get_identifier());
-  if (it != components_.end())
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("only one component of each type is allowed."));
+  if (it != components_.end()) {
+    fw::debug << "ERROR - only one component of each type is allowed: " << comp->get_identifier()
+              << std::endl;
+    return;
+  }
 
   components_[comp->get_identifier()] = comp;
 }
@@ -54,8 +57,9 @@ void Entity::add_attribute(EntityAttribute const &attr) {
   // you can only have one attribute with a given name
   auto it = attributes_.find(attr.get_name());
   if (it != attributes_.end()) {
-    BOOST_THROW_EXCEPTION(
-        fw::Exception() << fw::message_error_info("only one attribute with the same name is allowed"));
+    fw::debug << "ERROR - only one attribute with the same name is allowed: " << attr.get_name()
+              << std::endl;
+    return;
   }
 
   attributes_[attr.get_name()] = attr;

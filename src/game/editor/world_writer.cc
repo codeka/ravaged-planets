@@ -31,12 +31,12 @@ fw::Status WorldWriter::write(std::string name) {
   name_ = name;
 
   game::WorldVfs vfs;
-  game::WorldFile wf = vfs.open_file(name, true);
+  ASSIGN_OR_RETURN(game::WorldFile wf, vfs.OpenFile(name, /* for_writing= */ true));
 
   RETURN_IF_ERROR(write_terrain(wf));
   write_mapdesc(wf);
-  RETURN_IF_ERROR(write_minimap_background(wf));
-  write_collision_data(wf);
+  RETURN_IF_ERROR(WriteMinimapBackground(wf));
+  RETURN_IF_ERROR(WriteCollisionData(wf));
 
   // write the screenshot as well, which is pretty simple...
   if (world_->get_screenshot().get_width() > 0) {
@@ -94,7 +94,7 @@ void WorldWriter::write_mapdesc(game::WorldFile &wf) {
 // The minimap background consist of basically one pixel per vertex. We calculate the color
 // of the pixel as a combination of the height of the terrain at that point and the texture that
 // is displayed on the terrain at that point (so "high" and "grass" would be a Light green, etc)
-fw::Status WorldWriter::write_minimap_background(game::WorldFile &wf) {
+fw::Status WorldWriter::WriteMinimapBackground(game::WorldFile &wf) {
   auto trn = world_->get_terrain();
   int width = trn->get_width();
   int height = trn->get_length();
@@ -190,13 +190,13 @@ void WorldWriter::calculate_base_minimap_colors() {
   }
 }
 
-void WorldWriter::write_collision_data(game::WorldFile &wf) {
+fw::Status WorldWriter::WriteCollisionData(game::WorldFile &wf) {
   auto trn = std::dynamic_pointer_cast<EditorTerrain>(world_->get_terrain());
   int width = trn->get_width();
   int length = trn->get_length();
 
   std::vector<bool> collision_data(width * length);
-  trn->build_collision_data(collision_data);
+  RETURN_IF_ERROR(trn->BuildCollisionData(collision_data));
 
   int version = 1;
 
@@ -209,6 +209,8 @@ void WorldWriter::write_collision_data(game::WorldFile &wf) {
     uint8_t n = static_cast<uint8_t>(b);
     wfe.write(&n, 1);
   }
+
+  return fw::OkStatus();
 }
 
 }
