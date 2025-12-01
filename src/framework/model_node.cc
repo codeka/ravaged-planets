@@ -33,7 +33,7 @@ void ModelNode::render(sg::Scenegraph *sg, fw::Matrix const &model_matrix /*= fw
       set_shader(mesh->get_shader());
       set_primitive_type(sg::kTriangleList);
 
-      std::shared_ptr<ShaderParameters> params = get_shader()->create_parameters();
+      auto params = get_shader()->CreateParameters();
       if (model_->texture_) {
         params->set_texture("entity_texture", model_->texture_);
       }

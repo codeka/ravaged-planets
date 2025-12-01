@@ -231,8 +231,8 @@ void EntityDebugView::update(float dt) {
       if (!sg_node) {
         sg_node = std::make_shared<fw::sg::Node>();
 
-        std::shared_ptr<fw::Shader> shader(fw::Shader::create("basic.shader"));
-        std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
+        auto shader = fw::Shader::CreateOrEmpty("basic.shader");
+        auto shader_params = shader->CreateParameters();
         shader_params->set_program_name("notexture");
 
         sg_node->set_primitive_type(fw::sg::PrimitiveType::kLineList);

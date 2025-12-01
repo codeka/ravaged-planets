@@ -13,6 +13,7 @@
 #include <framework/particle_config.h>
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
+#include <framework/status.h>
 
 //-----------------------------------------------------------------------------
 // This structure is used to sort particles first by texture and then by z-order (to avoid state changes and
@@ -135,16 +136,18 @@ ParticleRenderer::ParticleRenderer(ParticleManager *mgr) :
 ParticleRenderer::~ParticleRenderer() {
 }
 
-void ParticleRenderer::initialize(Graphics *g) {
+fw::Status ParticleRenderer::Initialize(Graphics *g) {
   graphics_ = g;
 
   color_texture_->create(fw::resolve("particles/colors.png"));
-  shader_ = fw::Shader::create("particle.shader");
-  shader_params_ = shader_->create_parameters();
+  ASSIGN_OR_RETURN(shader_, fw::Shader::Create("particle.shader"));
+  shader_params_ = shader_->CreateParameters();
   shader_params_->set_texture("color_texture", color_texture_);
+
+  return fw::OkStatus();
 }
 
-/** Gets the name of the program in the Particle.Shader file we'll use for the given BillboardMode. */
+/** Gets the name of the program in the Particle.shader file we'll use for the given BillboardMode. */
 std::string get_program_name(ParticleEmitterConfig::BillboardMode mode) {
   switch (mode) {
   case ParticleEmitterConfig::kNormal:
@@ -169,7 +172,7 @@ void render_particle_batch(RenderState &rs) {
   rs.indices.clear();
   rs.index_buffers.push_back(ib);
 
-  std::shared_ptr<fw::ShaderParameters> shader_params = rs.shader_parameters->clone();
+  auto shader_params = rs.shader_parameters->Clone();
   shader_params->set_program_name(get_program_name(rs.mode));
   shader_params->set_texture("particle_texture", rs.texture);
 

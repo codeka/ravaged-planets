@@ -6,6 +6,7 @@
 #include <framework/color.h>
 #include <framework/math.h>
 #include <framework/particle.h>
+#include <framework/status.h>
 #include <framework/texture.h>
 #include <framework/xml.h>
 
@@ -14,22 +15,17 @@ class EmitPolicy;
 class ParticleEmitterConfig;
 
 /**
- * particle_effect_config represents a collection of particle_emitter_configs, one for each emitter the corresponding
- * effect represents.
+ * particle_effect_config represents a collection of particle_emitter_configs, one for each emitter
+ * the corresponding effect represents.
  */
 class ParticleEffectConfig {
 public:
   typedef std::vector<std::shared_ptr<ParticleEmitterConfig>> EmitterConfigList;
-private:
-  EmitterConfigList emitter_configs_;
 
   ParticleEffectConfig();
+  ~ParticleEffectConfig() = default;
 
-  bool load_document(XmlElement const &root);
-  void load_emitter(XmlElement const &elem);
-
-public:
-  static std::shared_ptr<ParticleEffectConfig> load(std::string const &name);
+  static fw::StatusOr<std::shared_ptr<ParticleEffectConfig>> Load(std::string_view name);
 
   inline EmitterConfigList::iterator emitter_config_begin() {
     return emitter_configs_.begin();
@@ -44,6 +40,11 @@ public:
   inline EmitterConfigList::const_iterator emitter_config_end() const {
     return emitter_configs_.end();
   }
+private:
+  EmitterConfigList emitter_configs_;
+
+  fw::Status LoadDocument(XmlElement const &root);
+  fw::Status LoadEmitter(XmlElement const &elem);
 };
 
 // This class represents the configuration for a Particle emitter within an effect.
@@ -51,30 +52,33 @@ class ParticleEmitterConfig {
 public:
   friend class ParticleEffectConfig;
 
-  // Represents the different kinds of falloff that is possible when we're talking about something centered at
-  // a point with a radius.
+  // Represents the different kinds of falloff that is possible when we're talking about something
+  // centered at a point with a radius.
   enum FalloffKind {
-    // A constant fall-off. we choose a spot in the sphere with an equal probability for anywhere in the sphere.
+    // A constant fall-off. we choose a spot in the sphere with an equal probability for anywhere in
+    // the sphere.
     kConstant,
 
-    // A linear falloff. we choose the center of the sphere with a high probability, falling off linearly to the
-    // circumference, which has a zero probability.
+    // A linear falloff. we choose the center of the sphere with a high probability, falling off
+    // linearly to the circumference, which has a zero probability.
     kLinear,
 
-    // An exponential fallout. we choose the center of the sphere with a very high probability, falling off
-    // exponentially to the circumference, which has a zero probability.
+    // An exponential fallout. we choose the center of the sphere with a very high probability,
+    // falling off exponentially to the circumference, which has a zero probability.
     kExponential
   };
 
   /**
-   * This defines a spherical area where we choose a point inside the sphere with a certain probability.
+   * This defines a spherical area where we choose a point inside the sphere with a certain
+   * probability.
    */
   struct SphericalLocation {
     Vector center;
     float radius;
     FalloffKind falloff;
 
-    // Gets a point within this location, using the probability rules to work out exactly where to go.
+    // Gets a point within this location, using the probability rules to work out exactly where to
+    // go.
     Vector get_point() const;
   };
 
@@ -91,21 +95,21 @@ public:
     BillboardMode mode;
 
     /**
-     * These are the (u,v) coords of the top/left and bottom/right of the part of the texture we get our values from,
-     * we use (0,0) and (1,1) by default we choose a Random one for a given Particle - each one is basically a
-     * "variant" of the texture we'll use.
+     * These are the (u,v) coords of the top/left and bottom/right of the part of the texture we get
+     * our values from, we use (0,0) and (1,1) by default we choose a Random one for a given
+     * Particle - each one is basically a "variant" of the texture we'll use.
      */
     std::vector<Rectangle<float>> areas;
   };
 
-  // Represents a Random ParticleRotation between a specified min and max ParticleRotation.
+  // Represents a Random value between a specified min and max value.
   template<typename T>
   struct Random {
     T min;
     T max;
 
-    // gets a Random ParticleRotation between min and max
-    inline T get_value() const {
+    // gets a Random value between min and max
+    inline T GetValue() const {
       return min + ((max - min) * fw::random());
     }
   };
@@ -125,33 +129,18 @@ public:
     LifeState(LifeState const &copy);
   };
 
-private:
-  ParticleEmitterConfig();
-
-  void load_emitter(XmlElement const &elem);
-  void load_position(XmlElement const &elem);
-  void load_billboard(XmlElement const &elem);
-  void load_life(XmlElement const &elem);
-  void load_emit_policy(XmlElement const &elem);
-  void parse_life_state(LifeState &state, XmlElement const &elem);
-  void parse_random_float(Random<float> &ParticleRotation, XmlElement const &elem);
-  void parse_random_color(Random<fw::Color> &ParticleRotation, XmlElement const &elem);
-  void parse_random_vector(Random<fw::Vector> &ParticleRotation, XmlElement const &elem);
-
-public:
-
   /**
-   * This is the start and end time for the emitter. the emitter will only emit particles after start_time seconds have
-   * passed, and will kill itself after end_time seconds have passed (if end_time is zero, the emitter lasts until
-   * the effect itself is destroyed)
+   * This is the start and end time for the emitter. the emitter will only emit particles after
+   * start_time seconds have passed, and will kill itself after end_time seconds have passed (if
+   * end_time is zero, the emitter lasts until the effect itself is destroyed)
    */
   float start_time;
   float end_time;
 
   /**
-   * When the emitter starts up, this is the initial number of particles we'll emit immediately (you'd usually make
-   * this relatively low). Useful for explosions and stuff which basically emit a bunch of particles and then die
-   * immediately.
+   * When the emitter starts up, this is the initial number of particles we'll emit immediately
+   * (you'd usually make this relatively low). Useful for explosions and stuff which basically emit
+   * a bunch of particles and then die immediately.
    */
   int initial_count;
 
@@ -162,20 +151,33 @@ public:
   BillboardTexture billboard;
 
   /**
-   * This is the maximum age we'll allow for a Particle to exist. The ParticleRotation is Random, and it causes ALL "age-based"
-   * calculations to be randomized as well.
+   * This is the maximum age we'll allow for a Particle to exist. The ParticleRotation is Random,
+   * and it causes ALL "age-based" calculations to be randomized as well.
    */
   Random<float> max_age;
 
-  // this is the list of LifeState instances for this Particle. Each state contains
-  // things like the size of the Particle at that point of time, the color and so
-  // on. As the Particle ages, we want to lerp between each LifeState to provide
-  // smooth Particle effects.
+  // This is the list of LifeState instances for this Particle. Each state contains things like the
+  // size of the Particle at that point of time, the color and so on. As the Particle ages, we want
+  // to lerp between each LifeState to provide smooth Particle effects.
   std::vector<LifeState> life;
 
-  // this is the "policy" we use for deciding when to emit a new Particle.
+  // This is the "policy" we use for deciding when to emit a new Particle.
   std::string emit_policy_name;
   float emit_policy_value;
+
+private:
+  ParticleEmitterConfig();
+
+  fw::Status LoadEmitter(XmlElement const &elem);
+  fw::Status LoadPosition(XmlElement const &elem);
+  fw::Status LoadBillboard(XmlElement const &elem);
+  fw::Status LoadLife(XmlElement const &elem);
+  fw::Status LoadEmitPolicy(XmlElement const &elem);
+  fw::StatusOr<LifeState> ParseLifeState(
+      XmlElement const &elem, std::optional<LifeState> last_life_state = std::nullopt);
+  fw::StatusOr<Random<float>> ParseRandomFloat(XmlElement const &elem);
+  fw::StatusOr<Random<fw::Color>> ParseRandomColor(XmlElement const &elem);
+  fw::StatusOr<Random<fw::Vector>> ParseRandomVector(XmlElement const &elem);
 };
 
 }

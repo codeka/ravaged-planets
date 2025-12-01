@@ -3,12 +3,61 @@
 #include <framework/logging.h>
 #include <framework/xml.h>
 #include <framework/paths.h>
+#include <framework/status.h>
 
 #include <game/ai/script_manager.h>
 
 namespace fs = std::filesystem;
 
 namespace game {
+
+namespace {
+
+fw::StatusOr<ScriptDesc> ParseAi(fs::path containing_dir, fs::path ai_file) {
+  ASSIGN_OR_RETURN(fw::XmlElement root, fw::LoadXml(ai_file, "ai", /* version= */ 1));
+
+  ScriptDesc desc;
+  for (fw::XmlElement elem : root.children()) {
+    if (elem.get_value() == "description") {
+      ASSIGN_OR_RETURN(desc.name, elem.GetAttribute("name"));
+      desc.desc = elem.get_text();
+      auto author = elem.GetAttribute("author");
+      if (author.ok()) {
+        desc.author = *author;
+      }
+      auto url = elem.GetAttribute("url");
+      if (url.ok()) {
+        desc.url = *url;
+      }
+    } else if (elem.get_value() == "script") {
+      desc.filename = (containing_dir / elem.get_text());
+    }
+  }
+
+  return desc;
+}
+
+void EnumerateFiles(fs::path dir, std::vector<ScriptDesc> &desc_list) {
+  if (!fs::exists(dir))
+    return;
+
+  fs::directory_iterator end;
+  for (fs::directory_iterator it(dir); it != end; ++it) {
+    if (fs::is_directory(it->status())) {
+      EnumerateFiles(it->path(), desc_list);
+    } else if (it->path().extension() == ".ai") {
+      auto desc = ParseAi(dir, it->path());
+      if (!desc.ok()) {
+        fw::debug << "ERROR loading AI file '" << it->path() << "': " << desc.status() << std::endl;
+      } else {
+        desc_list.push_back(*desc);
+      }
+    }
+  }
+}
+
+}  // namespace
+
 
 static std::vector<ScriptDesc> g_scripts;
 static bool g_populated;
@@ -25,48 +74,13 @@ std::vector<ScriptDesc> &ScriptManager::get_scripts() {
   return g_scripts;
 }
 
-void parse_ai(fs::path containing_dir, fw::XmlElement &root, ScriptDesc &desc) {
-  for (fw::XmlElement elem = root.get_first_child(); elem.is_valid(); elem = elem.get_next_sibling()) {
-    if (elem.get_value() == "description") {
-      desc.name = elem.get_attribute("name");
-      desc.desc = elem.get_text();
-      if (elem.is_attribute_defined("author")) {
-        desc.author = elem.get_attribute("author");
-      }
-      if (elem.is_attribute_defined("url")) {
-        desc.url = elem.get_attribute("url");
-      }
-    } else if (elem.get_value() == "script") {
-      desc.filename = (containing_dir / elem.get_text());
-    }
-  }
-}
-
-void enumerate_files(fs::path dir, std::vector<ScriptDesc> &desc_list) {
-  if (!fs::exists(dir))
-    return;
-
-  fs::directory_iterator end;
-  for (fs::directory_iterator it(dir); it != end; ++it) {
-    if (fs::is_directory(it->status())) {
-      enumerate_files(it->path(), desc_list);
-    } else if (it->path().extension() == ".ai") {
-      fw::XmlElement root = fw::load_xml(it->path(), "ai", 1);
-
-      ScriptDesc desc;
-      parse_ai(dir, root, desc);
-      desc_list.push_back(desc);
-    }
-  }
-}
-
 void ScriptManager::populate_scripts() {
-  // look through all the files and directories under .\data\ai for *.ai
-  // files, and populate the script definitions from there
-  enumerate_files(fw::install_base_path() / "ai", g_scripts);
+  // look through all the files and directories under .\data\ai for *.ai files, and populate the
+  // script definitions from there
+  EnumerateFiles(fw::install_base_path() / "ai", g_scripts);
 
   // also look through the data directory.
-  enumerate_files(fw::user_base_path() / "ai", g_scripts);
+  EnumerateFiles(fw::user_base_path() / "ai", g_scripts);
 }
 
 }

@@ -602,8 +602,8 @@ public:
 
     static const char* ReadBOM( const char* p, bool* hasBOM );
     // p is the starting location,
-    // the UTF-8 ParticleRotation of the Entity will be placed in ParticleRotation, and length filled in.
-    static const char* GetCharacterRef( const char* p, char* ParticleRotation, int* length );
+    // the UTF-8 value of the Entity will be placed in value, and length filled in.
+    static const char* GetCharacterRef( const char* p, char* value, int* length );
     static void ConvertUTF32ToUTF8( unsigned long Input, char* output, int* length );
 
     // converts primitive types to strings
@@ -614,11 +614,11 @@ public:
     static void ToStr( double v, char* buffer, int bufferSize );
 
     // converts strings to primitive types
-    static bool ToInt( const char* str, int* ParticleRotation );
-    static bool ToUnsigned( const char* str, unsigned* ParticleRotation );
-    static bool ToBool( const char* str, bool* ParticleRotation );
-    static bool ToFloat( const char* str, float* ParticleRotation );
-    static bool ToDouble( const char* str, double* ParticleRotation );
+    static bool ToInt( const char* str, int* value );
+    static bool ToUnsigned( const char* str, unsigned* value );
+    static bool ToBool( const char* str, bool* value );
+    static bool ToFloat( const char* str, float* value );
+    static bool ToDouble( const char* str, double* value );
 };
 
 
@@ -706,7 +706,7 @@ public:
         return 0;
     }
 
-    /** The meaning of 'ParticleRotation' changes for the specific type.
+    /** The meaning of 'value' changes for the specific type.
       @verbatim
       Document: empty
       Element:  name of the element
@@ -748,10 +748,10 @@ public:
     /** Get the first child element, or optionally the first child
         element with the specified name.
     */
-    const XMLElement* FirstChildElement( const char* ParticleRotation=0 ) const;
+    const XMLElement* FirstChildElement( const char* value=0 ) const;
 
-    XMLElement* FirstChildElement( const char* ParticleRotation=0 )  {
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( ParticleRotation ));
+    XMLElement* FirstChildElement( const char* value=0 )  {
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->FirstChildElement( value ));
     }
 
     /// Get the last child Node, or null if none exists.
@@ -766,10 +766,10 @@ public:
     /** Get the last child element or optionally the last child
         element with the specified name.
     */
-    const XMLElement* LastChildElement( const char* ParticleRotation=0 ) const;
+    const XMLElement* LastChildElement( const char* value=0 ) const;
 
-    XMLElement* LastChildElement( const char* ParticleRotation=0 ) {
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(ParticleRotation) );
+    XMLElement* LastChildElement( const char* value=0 ) {
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->LastChildElement(value) );
     }
 
     /// Get the previous (left) sibling Node of this Node.
@@ -782,10 +782,10 @@ public:
     }
 
     /// Get the previous (left) sibling element of this Node, with an optionally supplied name.
-    const XMLElement* PreviousSiblingElement( const char* ParticleRotation=0 ) const ;
+    const XMLElement* PreviousSiblingElement( const char* value=0 ) const ;
 
-    XMLElement* PreviousSiblingElement( const char* ParticleRotation=0 ) {
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( ParticleRotation ) );
+    XMLElement* PreviousSiblingElement( const char* value=0 ) {
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->PreviousSiblingElement( value ) );
     }
 
     /// Get the next (right) sibling Node of this Node.
@@ -798,10 +798,10 @@ public:
     }
 
     /// Get the next (right) sibling element of this Node, with an optionally supplied name.
-    const XMLElement* NextSiblingElement( const char* ParticleRotation=0 ) const;
+    const XMLElement* NextSiblingElement( const char* value=0 ) const;
 
-    XMLElement* NextSiblingElement( const char* ParticleRotation=0 ) {
-        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( ParticleRotation ) );
+    XMLElement* NextSiblingElement( const char* value=0 ) {
+        return const_cast<XMLElement*>(const_cast<const XMLNode*>(this)->NextSiblingElement( value ) );
     }
 
     /**
@@ -1070,7 +1070,7 @@ private:
 
 
 
-/** An attribute is a name-ParticleRotation pair. Elements have an arbitrary
+/** An attribute is a name-value pair. Elements have an arbitrary
   number of attributes, each with a unique name.
 
   @note The attributes are not XMLNodes. You may only query the
@@ -1083,7 +1083,7 @@ public:
     /// The name of the attribute.
     const char* Name() const;
 
-    /// The ParticleRotation of the attribute.
+    /// The value of the attribute.
     const char* Value() const;
 
     /// The next attribute in the list.
@@ -1091,8 +1091,8 @@ public:
         return _next;
     }
 
-    /** IntValue interprets the attribute as an integer, and returns the ParticleRotation.
-        If the ParticleRotation isn't an integer, 0 will be returned. There is no error checking;
+    /** IntValue interprets the attribute as an integer, and returns the value.
+        If the value isn't an integer, 0 will be returned. There is no error checking;
       use QueryIntValue() if you need error checking.
     */
     int    IntValue() const       {
@@ -1125,32 +1125,32 @@ public:
         return f;
     }
 
-    /** QueryIntValue interprets the attribute as an integer, and returns the ParticleRotation
+    /** QueryIntValue interprets the attribute as an integer, and returns the value
       in the provided parameter. The function will return XML_NO_ERROR on success,
       and XML_WRONG_ATTRIBUTE_TYPE if the conversion is not successful.
     */
-    XMLError QueryIntValue( int* ParticleRotation ) const;
+    XMLError QueryIntValue( int* value ) const;
     /// See QueryIntValue
-    XMLError QueryUnsignedValue( unsigned int* ParticleRotation ) const;
+    XMLError QueryUnsignedValue( unsigned int* value ) const;
     /// See QueryIntValue
-    XMLError QueryBoolValue( bool* ParticleRotation ) const;
+    XMLError QueryBoolValue( bool* value ) const;
     /// See QueryIntValue
-    XMLError QueryDoubleValue( double* ParticleRotation ) const;
+    XMLError QueryDoubleValue( double* value ) const;
     /// See QueryIntValue
-    XMLError QueryFloatValue( float* ParticleRotation ) const;
+    XMLError QueryFloatValue( float* value ) const;
 
-    /// Set the attribute to a string ParticleRotation.
-    void SetAttribute( const char* ParticleRotation );
-    /// Set the attribute to ParticleRotation.
-    void SetAttribute( int ParticleRotation );
-    /// Set the attribute to ParticleRotation.
-    void SetAttribute( unsigned ParticleRotation );
-    /// Set the attribute to ParticleRotation.
-    void SetAttribute( bool ParticleRotation );
-    /// Set the attribute to ParticleRotation.
-    void SetAttribute( double ParticleRotation );
-    /// Set the attribute to ParticleRotation.
-    void SetAttribute( float ParticleRotation );
+    /// Set the attribute to a string value.
+    void SetAttribute( const char* value );
+    /// Set the attribute to value.
+    void SetAttribute( int value );
+    /// Set the attribute to value.
+    void SetAttribute( unsigned value );
+    /// Set the attribute to value.
+    void SetAttribute( bool value );
+    /// Set the attribute to value.
+    void SetAttribute( double value );
+    /// Set the attribute to value.
+    void SetAttribute( float value );
 
 private:
     enum { BUF_SIZE = 200 };
@@ -1171,7 +1171,7 @@ private:
 };
 
 
-/** The element is a container class. It has a ParticleRotation, the element name,
+/** The element is a container class. It has a value, the element name,
   and can contain other elements, text, comments, and unknowns.
   Elements also contain an arbitrary number of attributes.
 */
@@ -1197,16 +1197,16 @@ public:
     }
     virtual bool Accept( XMLVisitor* visitor ) const;
 
-    /** Given an attribute name, Attribute() returns the ParticleRotation
+    /** Given an attribute name, Attribute() returns the value
       for the attribute of that name, or null if none
       exists. For example:
 
       @verbatim
-      const char* ParticleRotation = ele->Attribute( "foo" );
+      const char* value = ele->Attribute( "foo" );
       @endverbatim
 
-      The 'ParticleRotation' parameter is normally null. However, if specified,
-      the attribute will only be returned if the 'name' and 'ParticleRotation'
+      The 'value' parameter is normally null. However, if specified,
+      the attribute will only be returned if the 'name' and 'value'
       match. This allow you to write code:
 
       @verbatim
@@ -1220,9 +1220,9 @@ public:
       }
       @endverbatim
     */
-    const char* Attribute( const char* name, const char* ParticleRotation=0 ) const;
+    const char* Attribute( const char* name, const char* value=0 ) const;
 
-    /** Given an attribute name, IntAttribute() returns the ParticleRotation
+    /** Given an attribute name, IntAttribute() returns the value
       of the attribute interpreted as an integer. 0 will be
       returned if there is an error. For a method with error
       checking, see QueryIntAttribute()
@@ -1261,53 +1261,53 @@ public:
       XML_NO_ERROR, XML_WRONG_ATTRIBUTE_TYPE if the conversion
       can't be performed, or XML_NO_ATTRIBUTE if the attribute
       doesn't exist. If successful, the result of the conversion
-      will be written to 'ParticleRotation'. If not successful, nothing will
-      be written to 'ParticleRotation'. This allows you to provide default
-      ParticleRotation:
+      will be written to 'value'. If not successful, nothing will
+      be written to 'value'. This allows you to provide default
+      value:
 
       @verbatim
-      int ParticleRotation = 10;
-      QueryIntAttribute( "foo", &ParticleRotation );   // if "foo" isn't found, ParticleRotation will still be 10
+      int value = 10;
+      QueryIntAttribute( "foo", &value );   // if "foo" isn't found, value will still be 10
       @endverbatim
     */
-    XMLError QueryIntAttribute( const char* name, int* ParticleRotation ) const        {
+    XMLError QueryIntAttribute( const char* name, int* value ) const        {
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
         }
-        return a->QueryIntValue( ParticleRotation );
+        return a->QueryIntValue( value );
     }
     /// See QueryIntAttribute()
-    XMLError QueryUnsignedAttribute( const char* name, unsigned int* ParticleRotation ) const  {
+    XMLError QueryUnsignedAttribute( const char* name, unsigned int* value ) const  {
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
         }
-        return a->QueryUnsignedValue( ParticleRotation );
+        return a->QueryUnsignedValue( value );
     }
     /// See QueryIntAttribute()
-    XMLError QueryBoolAttribute( const char* name, bool* ParticleRotation ) const        {
+    XMLError QueryBoolAttribute( const char* name, bool* value ) const        {
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
         }
-        return a->QueryBoolValue( ParticleRotation );
+        return a->QueryBoolValue( value );
     }
     /// See QueryIntAttribute()
-    XMLError QueryDoubleAttribute( const char* name, double* ParticleRotation ) const      {
+    XMLError QueryDoubleAttribute( const char* name, double* value ) const      {
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
         }
-        return a->QueryDoubleValue( ParticleRotation );
+        return a->QueryDoubleValue( value );
     }
     /// See QueryIntAttribute()
-    XMLError QueryFloatAttribute( const char* name, float* ParticleRotation ) const      {
+    XMLError QueryFloatAttribute( const char* name, float* value ) const      {
         const XMLAttribute* a = FindAttribute( name );
         if ( !a ) {
             return XML_NO_ATTRIBUTE;
         }
-        return a->QueryFloatValue( ParticleRotation );
+        return a->QueryFloatValue( value );
     }
 
 
@@ -1319,64 +1319,64 @@ public:
     QueryIntAttribute() and related functions.
 
     If successful, the result of the conversion
-      will be written to 'ParticleRotation'. If not successful, nothing will
-      be written to 'ParticleRotation'. This allows you to provide default
-      ParticleRotation:
+      will be written to 'value'. If not successful, nothing will
+      be written to 'value'. This allows you to provide default
+      value:
 
       @verbatim
-      int ParticleRotation = 10;
-      QueryAttribute( "foo", &ParticleRotation );    // if "foo" isn't found, ParticleRotation will still be 10
+      int value = 10;
+      QueryAttribute( "foo", &value );    // if "foo" isn't found, value will still be 10
       @endverbatim
     */
-  int QueryAttribute( const char* name, int* ParticleRotation ) const {
-    return QueryIntAttribute( name, ParticleRotation );
+  int QueryAttribute( const char* name, int* value ) const {
+    return QueryIntAttribute( name, value );
   }
 
-  int QueryAttribute( const char* name, unsigned int* ParticleRotation ) const {
-    return QueryUnsignedAttribute( name, ParticleRotation );
+  int QueryAttribute( const char* name, unsigned int* value ) const {
+    return QueryUnsignedAttribute( name, value );
   }
 
-  int QueryAttribute( const char* name, bool* ParticleRotation ) const {
-    return QueryBoolAttribute( name, ParticleRotation );
+  int QueryAttribute( const char* name, bool* value ) const {
+    return QueryBoolAttribute( name, value );
   }
 
-  int QueryAttribute( const char* name, double* ParticleRotation ) const {
-    return QueryDoubleAttribute( name, ParticleRotation );
+  int QueryAttribute( const char* name, double* value ) const {
+    return QueryDoubleAttribute( name, value );
   }
 
-  int QueryAttribute( const char* name, float* ParticleRotation ) const {
-    return QueryFloatAttribute( name, ParticleRotation );
+  int QueryAttribute( const char* name, float* value ) const {
+    return QueryFloatAttribute( name, value );
   }
 
-  /// Sets the named attribute to ParticleRotation.
-    void SetAttribute( const char* name, const char* ParticleRotation )  {
+  /// Sets the named attribute to value.
+    void SetAttribute( const char* name, const char* value )  {
         XMLAttribute* a = FindOrCreateAttribute( name );
-        a->SetAttribute( ParticleRotation );
+        a->SetAttribute( value );
     }
-    /// Sets the named attribute to ParticleRotation.
-    void SetAttribute( const char* name, int ParticleRotation )      {
+    /// Sets the named attribute to value.
+    void SetAttribute( const char* name, int value )      {
         XMLAttribute* a = FindOrCreateAttribute( name );
-        a->SetAttribute( ParticleRotation );
+        a->SetAttribute( value );
     }
-    /// Sets the named attribute to ParticleRotation.
-    void SetAttribute( const char* name, unsigned ParticleRotation )   {
+    /// Sets the named attribute to value.
+    void SetAttribute( const char* name, unsigned value )   {
         XMLAttribute* a = FindOrCreateAttribute( name );
-        a->SetAttribute( ParticleRotation );
+        a->SetAttribute( value );
     }
-    /// Sets the named attribute to ParticleRotation.
-    void SetAttribute( const char* name, bool ParticleRotation )     {
+    /// Sets the named attribute to value.
+    void SetAttribute( const char* name, bool value )     {
         XMLAttribute* a = FindOrCreateAttribute( name );
-        a->SetAttribute( ParticleRotation );
+        a->SetAttribute( value );
     }
-    /// Sets the named attribute to ParticleRotation.
-    void SetAttribute( const char* name, double ParticleRotation )   {
+    /// Sets the named attribute to value.
+    void SetAttribute( const char* name, double value )   {
         XMLAttribute* a = FindOrCreateAttribute( name );
-        a->SetAttribute( ParticleRotation );
+        a->SetAttribute( value );
     }
-    /// Sets the named attribute to ParticleRotation.
-    void SetAttribute( const char* name, float ParticleRotation )    {
+    /// Sets the named attribute to value.
+    void SetAttribute( const char* name, float value )    {
         XMLAttribute* a = FindOrCreateAttribute( name );
-        a->SetAttribute( ParticleRotation );
+        a->SetAttribute( value );
     }
 
     /**
@@ -1412,7 +1412,7 @@ public:
         <foo><b>This is text</b></foo>
       @endverbatim
 
-      then the ParticleRotation of str would be null. The first child Node isn't a text Node, it is
+      then the value of str would be null. The first child Node isn't a text Node, it is
       another element. From this XML:
       @verbatim
         <foo>This is <b>text</b></foo>
@@ -1425,7 +1425,7 @@ public:
       and concise, SetText() is limited compared to creating an XMLText child
       and mutating it directly.
 
-      If the first child of 'this' is a XMLText, SetText() sets its ParticleRotation to
+      If the first child of 'this' is a XMLText, SetText() sets its value to
     the given string, otherwise it will create a first child that is an XMLText.
 
       This is a convenient method for setting the text of simple contained text:
@@ -1457,18 +1457,18 @@ public:
     */
   void SetText( const char* inText );
     /// Convenience method for setting text inside and element. See SetText() for important limitations.
-    void SetText( int ParticleRotation );
+    void SetText( int value );
     /// Convenience method for setting text inside and element. See SetText() for important limitations.
-    void SetText( unsigned ParticleRotation );
+    void SetText( unsigned value );
     /// Convenience method for setting text inside and element. See SetText() for important limitations.
-    void SetText( bool ParticleRotation );
+    void SetText( bool value );
     /// Convenience method for setting text inside and element. See SetText() for important limitations.
-    void SetText( double ParticleRotation );
+    void SetText( double value );
     /// Convenience method for setting text inside and element. See SetText() for important limitations.
-    void SetText( float ParticleRotation );
+    void SetText( float value );
 
     /**
-      Convenience method to query the ParticleRotation of a child text Node. This is probably best
+      Convenience method to query the value of a child text Node. This is probably best
       shown by example. Given you have a document is this form:
       @verbatim
         <point>
@@ -1478,7 +1478,7 @@ public:
       @endverbatim
 
       The QueryIntText() and similar functions provide a safe and easier way to get to the
-      "ParticleRotation" of x and y.
+      "value" of x and y.
 
       @verbatim
         int x = 0;
@@ -1778,7 +1778,7 @@ private:
   </Document>
   @endverbatim
 
-  Assuming you want the ParticleRotation of "attributeB" in the 2nd "Child" element, it's very
+  Assuming you want the value of "attributeB" in the 2nd "Child" element, it's very
   easy to write a *lot* of code that looks like:
 
   @verbatim
@@ -1844,8 +1844,8 @@ public:
         return XMLHandle( _node ? _node->FirstChild() : 0 );
     }
     /// Get the first child element of this handle.
-    XMLHandle FirstChildElement( const char* ParticleRotation=0 )            {
-        return XMLHandle( _node ? _node->FirstChildElement( ParticleRotation ) : 0 );
+    XMLHandle FirstChildElement( const char* value=0 )            {
+        return XMLHandle( _node ? _node->FirstChildElement( value ) : 0 );
     }
     /// Get the last child of this handle.
     XMLHandle LastChild()                         {
@@ -1923,8 +1923,8 @@ public:
     const XMLConstHandle FirstChild() const                     {
         return XMLConstHandle( _node ? _node->FirstChild() : 0 );
     }
-    const XMLConstHandle FirstChildElement( const char* ParticleRotation=0 ) const       {
-        return XMLConstHandle( _node ? _node->FirstChildElement( ParticleRotation ) : 0 );
+    const XMLConstHandle FirstChildElement( const char* value=0 ) const       {
+        return XMLConstHandle( _node ? _node->FirstChildElement( value ) : 0 );
     }
     const XMLConstHandle LastChild()  const                   {
         return XMLConstHandle( _node ? _node->LastChild() : 0 );
@@ -2028,32 +2028,32 @@ public:
     */
     void OpenElement( const char* name, bool compactMode=false );
     /// If streaming, add an attribute to an open element.
-    void PushAttribute( const char* name, const char* ParticleRotation );
-    void PushAttribute( const char* name, int ParticleRotation );
-    void PushAttribute( const char* name, unsigned ParticleRotation );
-    void PushAttribute( const char* name, bool ParticleRotation );
-    void PushAttribute( const char* name, double ParticleRotation );
+    void PushAttribute( const char* name, const char* value );
+    void PushAttribute( const char* name, int value );
+    void PushAttribute( const char* name, unsigned value );
+    void PushAttribute( const char* name, bool value );
+    void PushAttribute( const char* name, double value );
     /// If streaming, close the Element.
     virtual void CloseElement( bool compactMode=false );
 
     /// Add a text Node.
     void PushText( const char* text, bool cdata=false );
     /// Add a text Node from an integer.
-    void PushText( int ParticleRotation );
+    void PushText( int value );
     /// Add a text Node from an unsigned.
-    void PushText( unsigned ParticleRotation );
+    void PushText( unsigned value );
     /// Add a text Node from a bool.
-    void PushText( bool ParticleRotation );
+    void PushText( bool value );
     /// Add a text Node from a float.
-    void PushText( float ParticleRotation );
+    void PushText( float value );
     /// Add a text Node from a double.
-    void PushText( double ParticleRotation );
+    void PushText( double value );
 
     /// Add a comment
     void PushComment( const char* comment );
 
-    void PushDeclaration( const char* ParticleRotation );
-    void PushUnknown( const char* ParticleRotation );
+    void PushDeclaration( const char* value );
+    void PushUnknown( const char* value );
 
     virtual bool VisitEnter( const XMLDocument& /*doc*/ );
     virtual bool VisitExit( const XMLDocument& /*doc*/ )      {

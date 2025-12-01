@@ -39,8 +39,8 @@ enum IDS {
   END_ID,
 };
 
-int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_length, int* new_patch_x,
-  int* new_patch_z) {
+int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_length,
+  int* new_patch_x, int* new_patch_z) {
   patch_x = fw::constrain(patch_x, patches_width);
   patch_z = fw::constrain(patch_z, patches_length);
 
@@ -71,12 +71,18 @@ public:
 
 PathingToolWindow::PathingToolWindow(ed::PathingTool *tool) :
     tool_(tool), wnd_(nullptr) {
-  wnd_ = Builder<Window>(px(10), px(30), px(100), px(94)) << Window::background("frame")
-      << (Builder<Button>(px(4), px(4), sum(pct(100), px(-8)), px(30)) << Button::text("Start") << Widget::id(START_ID)
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(94))
+      << Window::background("frame")
+      << (Builder<Button>(px(4), px(4), sum(pct(100), px(-8)), px(30))
+          << Button::text("Start")
+          << Widget::id(START_ID)
           << Widget::click(std::bind(&PathingToolWindow::on_start_click, this, _1)))
-      << (Builder<Button>(px(4), px(38), sum(pct(100), px(-8)), px(30)) << Button::text("End") << Widget::id(END_ID)
+      << (Builder<Button>(px(4), px(38), sum(pct(100), px(-8)), px(30))
+          << Button::text("End")
+          << Widget::id(END_ID)
           << Widget::click(std::bind(&PathingToolWindow::on_end_click, this, _1)))
-      << (Builder<Checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18)) << Checkbox::text("Simplify")
+      << (Builder<Checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18))
+          << Checkbox::text("Simplify")
           << Widget::click(std::bind(&PathingToolWindow::on_simplify_click, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
@@ -122,10 +128,12 @@ private:
   int patch_x_, patch_z_;
 
 public:
-  void bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z);
+  void bake(
+      std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z);
 };
 
-void CollisionPatchNode::bake(std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
+void CollisionPatchNode::bake(
+    std::vector<bool> &data, float *heights, int width, int length, int patch_x, int patch_z) {
 
   std::vector<uint16_t> indices;
   game::generate_terrain_indices_wireframe(indices, PATCH_SIZE);
@@ -153,8 +161,8 @@ void CollisionPatchNode::bake(std::vector<bool> &data, float *heights, int width
   set_vertex_buffer(vb);
 
   set_primitive_type(fw::sg::PrimitiveType::kLineList);
-  std::shared_ptr<fw::Shader> shader = fw::Shader::create("basic.shader");
-  std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
+  auto shader = fw::Shader::CreateOrEmpty("basic.shader");
+  auto shader_params = shader->CreateParameters();
   shader_params->set_program_name("notexture");
   set_shader(shader);
   set_shader_parameters(shader_params);
@@ -196,19 +204,23 @@ void PathingTool::activate() {
   patches_.resize((width / PATCH_SIZE) * (length / PATCH_SIZE));
 
   std::shared_ptr<fw::TimedPathFind> pf(
-      new fw::TimedPathFind(get_terrain()->get_width(), get_terrain()->get_length(), collision_data_));
+      new fw::TimedPathFind(
+          get_terrain()->get_width(), get_terrain()->get_length(), collision_data_));
   path_find_ = pf;
 
   fw::Input *inp = fw::Framework::get_instance()->get_input();
   keybind_tokens_.push_back(
-      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&PathingTool::on_key, this, _1, _2))));
+      inp->bind_key(
+          "Left-Mouse",
+          fw::InputBinding(std::bind(&PathingTool::on_key, this, _1, _2))));
 
   int patch_width = get_terrain()->get_width() / PATCH_SIZE;
   int patch_length = get_terrain()->get_length() / PATCH_SIZE;
   for (int patch_z = 0; patch_z <= patch_length; patch_z++) {
     for (int patch_x = 0; patch_x <= patch_width; patch_x++) {
       int new_patch_x, new_patch_z;
-      int patch_index = get_patch_index(patch_x, patch_z, patch_width, patch_length, &new_patch_x, &new_patch_z);
+      int patch_index =
+          get_patch_index(patch_x, patch_z, patch_width, patch_length, &new_patch_x, &new_patch_z);
 
       if (!patches_[patch_index]) {
         patches_[patch_index] = std::make_shared<CollisionPatchNode>();
@@ -229,7 +241,9 @@ void PathingTool::activate() {
       for (int patch_z = 0; patch_z <= patch_length; patch_z++) {
         for (int patch_x = 0; patch_x <= patch_width; patch_x++) {
           int new_patch_x, new_patch_z;
-          int patch_index = get_patch_index(patch_x, patch_z, patch_width, patch_length, &new_patch_x, &new_patch_z);
+          int patch_index =
+              get_patch_index(
+                  patch_x, patch_z, patch_width, patch_length, &new_patch_x, &new_patch_z);
           auto patch = patches_[patch_index];
           if (patch) {
             patch->bake(data, heights, width, length, patch_x, patch_z);
@@ -345,8 +359,8 @@ void PathingTool::find_path() {
           current_path_node_ = std::make_shared<fw::sg::Node>();
          // current_path_node_->set_cast_shadows(false);
           current_path_node_->set_primitive_type(fw::sg::PrimitiveType::kLineStrip);
-          std::shared_ptr<fw::Shader> shader = fw::Shader::create("basic.shader");
-          std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
+          auto shader = fw::Shader::CreateOrEmpty("basic.shader");
+          auto shader_params = shader->CreateParameters();
           shader_params->set_program_name("notexture");
           current_path_node_->set_shader(shader);
           current_path_node_->set_shader_parameters(shader_params);

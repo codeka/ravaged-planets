@@ -25,16 +25,18 @@ void IndicatorNode::set_center(fw::Vector center) {
     });
 }
 
-void IndicatorNode::render(fw::sg::Scenegraph* sg, fw::Matrix const& model_matrix /*= fw::identity()*/) {
+void IndicatorNode::render(
+    fw::sg::Scenegraph* sg, fw::Matrix const& model_matrix /*= fw::identity()*/) {
   if (!initialized_) {
+    initialized_ = true;
+
+    // TODO: move this somewhere where we can handle errors better.
     set_primitive_type(fw::sg::PrimitiveType::kLineStrip);
-    std::shared_ptr<fw::Shader> shader = fw::Shader::create("basic.shader");
-    std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
+    auto shader = fw::Shader::CreateOrEmpty("basic.shader");
+    auto shader_params = shader->CreateParameters();
     shader_params->set_program_name("notexture");
     set_shader(shader);
     set_shader_parameters(shader_params);
-
-    initialized_ = true;
   }
 
   if (dirty_) {

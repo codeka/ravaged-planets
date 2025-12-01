@@ -1,6 +1,11 @@
+#include <framework/particle_config.h>
+
 #include <filesystem>
 
-#include <framework/particle_config.h>
+#include <absl/strings/numbers.h>
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_split.h>
+
 #include <framework/particle_emitter.h>
 #include <framework/exception.h>
 #include <framework/framework.h>
@@ -8,90 +13,85 @@
 #include <framework/math.h>
 #include <framework/misc.h>
 #include <framework/paths.h>
+#include <framework/status.h>
 #include <framework/texture.h>
 #include <framework/xml.h>
 
 namespace fs = std::filesystem;
 
 namespace fw {
+namespace {
 
-//-------------------------------------------------------------------------
 class ParticleEffectConfigCache {
 private:
   typedef std::map<std::string, std::shared_ptr<ParticleEffectConfig> > config_map;
   config_map _configs;
 public:
-  std::shared_ptr<ParticleEffectConfig> get_config(std::string const &name);
-  void add_config(std::string const &name, std::shared_ptr<ParticleEffectConfig> config);
+  std::shared_ptr<ParticleEffectConfig> GetConfig(std::string_view name);
+  void AddConfig(std::string_view name, std::shared_ptr<ParticleEffectConfig> config);
 };
 
-std::shared_ptr<ParticleEffectConfig> ParticleEffectConfigCache::get_config(std::string const &name) {
-  config_map::iterator it = _configs.find(name);
+std::shared_ptr<ParticleEffectConfig> ParticleEffectConfigCache::GetConfig(std::string_view name) {
+  config_map::iterator it = _configs.find(std::string(name));
   if (it == _configs.end())
     return std::shared_ptr<ParticleEffectConfig>();
 
   return it->second;
 }
 
-void ParticleEffectConfigCache::add_config(std::string const &name, std::shared_ptr<ParticleEffectConfig> config) {
-  _configs[name] = config;
+void ParticleEffectConfigCache::AddConfig(
+    std::string_view name, std::shared_ptr<ParticleEffectConfig> config) {
+  _configs[std::string(name)] = config;
 }
 
 static ParticleEffectConfigCache g_cache;
 
-//-------------------------------------------------------------------------
+}  // namespace
+
 ParticleEffectConfig::ParticleEffectConfig() {
 }
 
-std::shared_ptr<ParticleEffectConfig> ParticleEffectConfig::load(std::string const &name) {
+fw::StatusOr<std::shared_ptr<ParticleEffectConfig>> ParticleEffectConfig::Load(
+    std::string_view name) {
   fs::path filepath;
   if (fs::is_regular_file(name)) {
     filepath = name;
   } else {
     // first check whether the effect has been cached
-    std::shared_ptr<ParticleEffectConfig> config = g_cache.get_config(name);
+    std::shared_ptr<ParticleEffectConfig> config = g_cache.GetConfig(name);
     if (config) {
       return config;
     }
 
-    filepath = fw::resolve("particles/" + name + ".part").string();
+    filepath = fw::resolve(absl::StrCat("particles/", name, ".part")).string();
   }
-  fw::XmlElement xmldoc = fw::load_xml(filepath, "particle", 1);
+  ASSIGN_OR_RETURN(fw::XmlElement xmldoc, fw::LoadXml(filepath, "particle", 1));
 
-  std::shared_ptr<ParticleEffectConfig> config(new ParticleEffectConfig());
-  if (config->load_document(xmldoc)) {
-    g_cache.add_config(name, config);
-    return config;
-  }
-
-  return std::shared_ptr<ParticleEffectConfig>();
+  auto config = std::make_shared<ParticleEffectConfig>();
+  RETURN_IF_ERROR(config->LoadDocument(xmldoc));
+  g_cache.AddConfig(name, config);
+  return config;
 }
 
 // loads from the root Node of the document
-bool ParticleEffectConfig::load_document(XmlElement const &root) {
-  try {
-    for (XmlElement child = root.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
-      if (child.get_value() == "emitter") {
-        load_emitter(child);
-      } else {
-        BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown child element of <wwparticle>"));
-      }
+fw::Status ParticleEffectConfig::LoadDocument(XmlElement const &root) {
+  for (XmlElement child : root.children()) {
+    if (child.get_value() == "emitter") {
+      RETURN_IF_ERROR(LoadEmitter(child));
+    } else {
+      return fw::ErrorStatus("unknown child element of <wwparticle>: ") << child.get_value();
     }
-
-    return true;
-  } catch (fw::Exception const &e) {
-    // if we get an exception, we'll just report the error and return false. it means we weren't able to parse the file.
-    debug << "ERROR: could not parse .part file:" << std::endl;
-    debug << diagnostic_information(e) << std::endl;
-    return false;
   }
+
+  return fw::OkStatus();
 }
 
-void ParticleEffectConfig::load_emitter(XmlElement const &elem) {
+fw::Status ParticleEffectConfig::LoadEmitter(XmlElement const &elem) {
   std::shared_ptr<ParticleEmitterConfig> emitter_config(new ParticleEmitterConfig());
-  emitter_config->load_emitter(elem);
+  RETURN_IF_ERROR(emitter_config->LoadEmitter(elem));
 
   emitter_configs_.push_back(emitter_config);
+  return fw::OkStatus();
 }
 
 //-------------------------------------------------------------------------
@@ -152,200 +152,273 @@ ParticleEmitterConfig::ParticleEmitterConfig() {
   initial_count = 0;
 }
 
-void ParticleEmitterConfig::load_emitter(XmlElement const &emitter_elem) {
-  if (emitter_elem.is_attribute_defined("start")) {
-    start_time = emitter_elem.get_attribute<float>("start");
+fw::Status ParticleEmitterConfig::LoadEmitter(XmlElement const &emitter_elem) {
+  auto start_time = emitter_elem.GetAttributef<float>("start");
+  if (start_time.ok()) {
+    this->start_time = *start_time;
   }
 
-  if (emitter_elem.is_attribute_defined("end")) {
-    end_time = emitter_elem.get_attribute<float>("end");
+  auto end_time = emitter_elem.GetAttributef<float>("end");
+  if (end_time.ok()) {
+    this->end_time = *end_time;
   }
 
-  if (emitter_elem.is_attribute_defined("initial")) {
-    initial_count = emitter_elem.get_attribute<int>("initial");
+  auto initial_count = emitter_elem.GetAttributei<int>("initial");
+  if (initial_count.ok()) {
+    initial_count = *initial_count;
   }
 
-  for (XmlElement child = emitter_elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (XmlElement child : emitter_elem.children()) {
     if (child.get_value() == "position") {
-      load_position(child);
+      RETURN_IF_ERROR(LoadPosition(child));
     } else if (child.get_value() == "billboard") {
-      load_billboard(child);
+      RETURN_IF_ERROR(LoadBillboard(child));
     } else if (child.get_value() == "life") {
-      load_life(child);
+      RETURN_IF_ERROR(LoadLife(child));
     } else if (child.get_value() == "age") {
-      parse_random_float(max_age, child);
+      ASSIGN_OR_RETURN(max_age, ParseRandomFloat(child));
     } else if (child.get_value() == "emit") {
-      load_emit_policy(child);
+      RETURN_IF_ERROR(LoadEmitPolicy(child));
     } else {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown child element of <emitter>"));
+      return fw::ErrorStatus("unknown child element of <emitter>: ") << child.get_value();
     }
   }
+  return fw::OkStatus();
 }
 
-void ParticleEmitterConfig::load_position(XmlElement const &elem) {
-  std::vector<float> components = fw::split<float>(elem.get_attribute("offset"));
+fw::Status ParticleEmitterConfig::LoadPosition(XmlElement const &elem) {
+  ASSIGN_OR_RETURN(std::string offset, elem.GetAttribute("offset"));
+  std::vector<std::string> components = absl::StrSplit(offset, " ");
   if (components.size() != 3) {
     BOOST_THROW_EXCEPTION(fw::Exception()
         << fw::message_error_info("'offset' attribute requires 3 floating point values"));
   }
-  position.center = fw::Vector(components[0], components[1], components[2]);
+  position.center =
+      fw::Vector(std::stoi(components[0]), std::stoi(components[1]), std::stoi(components[2]));
 
-  if (elem.is_attribute_defined("radius")) {
-    position.radius = boost::lexical_cast<float>(elem.get_attribute("radius"));
+  auto radius = elem.GetAttributef<float>("radius");
+  if (radius.ok()) {
+    position.radius = *radius;
   }
 
-  if (elem.is_attribute_defined("falloff")) {
-    std::string ParticleRotation = elem.get_attribute("falloff");
-    if (ParticleRotation == "linear") {
+  auto falloff = elem.GetAttribute("falloff");
+  if (falloff.ok()) {
+    if (*falloff == "linear") {
       position.falloff = ParticleEmitterConfig::kLinear;
-    } else if (ParticleRotation == "constant") {
+    } else if (*falloff == "constant") {
       position.falloff = ParticleEmitterConfig::kConstant;
-    } else if (ParticleRotation == "exponential") {
+    } else if (*falloff == "exponential") {
       position.falloff = ParticleEmitterConfig::kExponential;
     } else {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown 'falloff' attribute value"));
+      return fw::ErrorStatus("unknown 'falloff' attribute value: ") << *falloff;
     }
   }
+
+  return fw::OkStatus();
 }
 
-void ParticleEmitterConfig::load_billboard(XmlElement const &elem) {
-  std::string filename = elem.get_attribute("texture");
+fw::Status ParticleEmitterConfig::LoadBillboard(XmlElement const &elem) {
+  ASSIGN_OR_RETURN(auto filename, elem.GetAttribute("texture"));
+
   std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(fw::resolve("particles/" + filename));
   billboard.texture = texture;
 
-  if (elem.is_attribute_defined("mode")) {
-    std::string mode = elem.get_attribute("mode");
-    if (mode == "additive") {
+  auto mode = elem.GetAttribute("mode");
+  if (mode.ok()) {
+    if (*mode == "additive") {
       billboard.mode = ParticleEmitterConfig::kAdditive;
-    } else if (mode != "normal") {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Billboard mode must be 'additive' or 'normal'"));
+    } else if (*mode != "normal") {
+      return fw::ErrorStatus("billboard mode must be 'additive' or 'normal': ") << *mode;
     }
   }
 
-  for (fw::XmlElement child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (fw::XmlElement child : elem.children()) {
     if (child.get_value() == "area") {
-      std::vector<float> components = fw::split<float>(child.get_attribute("rect"));
+      auto rect_attr = child.GetAttribute("rect");
+      if (!rect_attr.ok()) {
+        return fw::ErrorStatus("'rect' attribute is required on <area> element");
+      }
+      std::vector<std::string> components = absl::StrSplit(*rect_attr, " ");
       if (components.size() != 4) {
-        BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("rect values require 4 floating point values"));
+        return fw::ErrorStatus("rect values require 4 floating point values: ") << *rect_attr;
       }
 
       Rectangle<float> rect;
-      rect.left = components[0];
-      rect.top = components[1];
-      rect.width = components[2] - components[0];
-      rect.height = components[3] - components[1];
+      rect.left = std::stof(components[0]);
+      rect.top = std::stof(components[1]);
+      rect.width = std::stof(components[2]) - rect.left;
+      rect.height = std::stof(components[3]) - rect.top;
       billboard.areas.push_back(rect);
     } else {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("Unknown child of 'billboard'."));
+      return fw::ErrorStatus("unknown child of 'billboard': ") << child.get_value();
     }
   }
+  return fw::OkStatus();
 }
 
-void ParticleEmitterConfig::load_life(XmlElement const &elem) {
+fw::Status ParticleEmitterConfig::LoadLife(XmlElement const &elem) {
   LifeState last_state;
-  for (XmlElement child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (XmlElement child : elem.children()) {
     if (child.get_value() == "state") {
-      LifeState state(last_state);
-      parse_life_state(state, child);
+      ASSIGN_OR_RETURN(auto state, ParseLifeState(child, last_state));
       life.push_back(state);
       last_state = state;
     } else {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown child element of <life>"));
+      return fw::ErrorStatus("unknown child element of <life>: ") << elem.get_value();
     }
   }
+  return fw::OkStatus();
 }
 
-void ParticleEmitterConfig::load_emit_policy(XmlElement const &elem) {
-  emit_policy_name = elem.get_attribute("policy");
-  if (elem.is_attribute_defined("value"))
-    emit_policy_value = elem.get_attribute<float>("value");
-  else
+fw::Status ParticleEmitterConfig::LoadEmitPolicy(XmlElement const &elem) {
+  ASSIGN_OR_RETURN(emit_policy_name, elem.GetAttribute("policy"));
+  auto value = elem.GetAttributef<float>("value");
+  if (value.ok()) {
+    emit_policy_value = *value;
+  } else {
     emit_policy_value = 0.0f;
+  }
+  return fw::OkStatus();
 }
 
-void ParticleEmitterConfig::parse_life_state(LifeState &state, XmlElement const &elem) {
-  state.age = boost::lexical_cast<float>(elem.get_attribute("age"));
+fw::StatusOr<ParticleEmitterConfig::LifeState> ParticleEmitterConfig::ParseLifeState(
+    XmlElement const &elem, std::optional<LifeState> last_life_state) {
+  LifeState state = last_life_state.has_value() ? LifeState(*last_life_state) : LifeState();
+  ASSIGN_OR_RETURN(state.age, elem.GetAttributef<float>("age"));
 
-  for (XmlElement child = elem.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (auto child : elem.children()) {
     if (child.get_value() == "size") {
-      parse_random_float(state.size, child);
+      ASSIGN_OR_RETURN(state.size, ParseRandomFloat(child));
     } else if (child.get_value() == "color") {
-      if (child.is_attribute_defined("alpha")) {
-        state.alpha = child.get_attribute<float>("alpha");
+      auto alpha = child.GetAttributef<float>("alpha");
+      if (alpha.ok()) {
+        state.alpha = *alpha;
       }
-      if (child.is_attribute_defined("row")) {
-        state.color_row = child.get_attribute<int>("row");
+      auto row = child.GetAttributei<int>("row");
+      if (row.ok()) {
+        state.color_row = *row;
       }
     } else if (child.get_value() == "rotation") {
-      if (child.is_attribute_defined("kind")) {
-        std::string kind = child.get_attribute("kind");
-        if (kind == "direction") {
+      auto kind = child.GetAttribute("kind");
+      if (kind.ok()) {
+        if (*kind == "direction") {
           state.rotation = ParticleRotation::kDirection;
-        } else if (kind != "random") {
-          BOOST_THROW_EXCEPTION(
-              fw::Exception() << fw::message_error_info("kind expected to be 'random' or 'direction'"));
+        } else if (*kind != "random") {
+          return fw::ErrorStatus("kind expected to be 'random' or 'direction', not ") << *kind;
         }
       }
 
-      if (child.is_attribute_defined("min")) {
-        parse_random_float(state.rotation_speed, child);
+      auto min = child.GetAttribute("min");
+      if (min.ok()) {
+        ASSIGN_OR_RETURN(state.rotation_speed, ParseRandomFloat(child));
       }
     } else if (child.get_value() == "gravity") {
-      parse_random_float(state.gravity, child);
+      ASSIGN_OR_RETURN(state.gravity, ParseRandomFloat(child));
     } else if (child.get_value() == "speed") {
-      parse_random_float(state.speed, child);
+      ASSIGN_OR_RETURN(state.speed, ParseRandomFloat(child));
     } else if (child.get_value() == "direction") {
-      parse_random_vector(state.direction, child);
+      ASSIGN_OR_RETURN(state.direction, ParseRandomVector(child));
     } else {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("unknown child element of <state>"));
+      return fw::ErrorStatus("unknown child element of <state>:") << child.get_value();
     }
   }
+  return fw::OkStatus();
 }
 
-void ParticleEmitterConfig::parse_random_float(Random<float> &ParticleRotation, XmlElement const &elem) {
-  ParticleRotation.min = boost::lexical_cast<float>(elem.get_attribute("min"));
-  ParticleRotation.max = boost::lexical_cast<float>(elem.get_attribute("max"));
+fw::StatusOr<ParticleEmitterConfig::Random<float>> ParticleEmitterConfig::ParseRandomFloat(
+    XmlElement const &elem) {
+  ASSIGN_OR_RETURN(auto min, elem.GetAttributef<float>("min"));
+  ASSIGN_OR_RETURN(auto max, elem.GetAttributef<float>("max"));
+  return Random<float>(min, max);
 }
 
-void ParticleEmitterConfig::parse_random_color(Random<fw::Color> &ParticleRotation, XmlElement const &elem) {
-  std::vector<float> min_components = fw::split<float>(elem.get_attribute("min"));
-  std::vector<float> max_components = fw::split<float>(elem.get_attribute("max"));
+fw::StatusOr<ParticleEmitterConfig::Random<Color>> ParticleEmitterConfig::ParseRandomColor(
+    XmlElement const &elem) {
+  ASSIGN_OR_RETURN(std::string min_attr, elem.GetAttribute("min"));
+  ASSIGN_OR_RETURN(std::string max_attr, elem.GetAttribute("max"));
+  std::vector<std::string> min_components = absl::StrSplit(min_attr, " ");
+  std::vector<std::string> max_components = absl::StrSplit(max_attr, " ");
 
-  if (min_components.size() == 3)
-    ParticleRotation.min = fw::Color(min_components[0], min_components[1], min_components[2]);
-  else if (min_components.size() == 4)
-    ParticleRotation.min = fw::Color(min_components[0], min_components[1], min_components[2], min_components[3]);
-  else {
-    BOOST_THROW_EXCEPTION(
-        fw::Exception() << fw::message_error_info("color values require 3 or 4 floating point values"));
+  auto value = Random<Color>();
+  if (min_components.size() == 3) {
+    float red, green, blue;
+    if (!absl::SimpleAtof(min_components[0], &red)
+        || !absl::SimpleAtof(min_components[1], &green)
+        || !absl::SimpleAtof(min_components[2], &blue)) {
+      return fw::ErrorStatus("invalid color: ") << min_attr;
+    }
+    value.min = fw::Color(red, green, blue);
+  } else if (min_components.size() == 4) {
+    float alpha, red, green, blue;
+    if (!absl::SimpleAtof(min_components[0], &alpha)
+        || !absl::SimpleAtof(min_components[1], &red)
+        || !absl::SimpleAtof(min_components[2], &green)
+        || !absl::SimpleAtof(min_components[2], &blue)) {
+      return fw::ErrorStatus("invalid color: ") << min_attr;
+    }
+    value.min = fw::Color(alpha, red, green, blue);
+  } else {
+    return fw::ErrorStatus("color values require 3 or 4 floating point values, got: ") << min_attr;
   }
 
-  if (max_components.size() == 3)
-    ParticleRotation.max = fw::Color(max_components[0], max_components[1], max_components[2]);
-  else if (max_components.size() == 4)
-    ParticleRotation.max = fw::Color(max_components[0], max_components[1], max_components[2], min_components[3]);
-  else {
-    BOOST_THROW_EXCEPTION(
-        fw::Exception() << fw::message_error_info("color values require 3 or 4 floating point values"));
+  if (max_components.size() == 3) {
+    float red, green, blue;
+    if (!absl::SimpleAtof(max_components[0], &red)
+        || !absl::SimpleAtof(max_components[1], &green)
+        || !absl::SimpleAtof(max_components[2], &blue)) {
+      return fw::ErrorStatus("invalid color: ") << max_attr;
+    }
+    value.max = fw::Color(red, green, blue);
+  } else if (max_components.size() == 4) {
+    float alpha, red, green, blue;
+    if (!absl::SimpleAtof(max_components[0], &alpha)
+        || !absl::SimpleAtof(max_components[1], &red)
+        || !absl::SimpleAtof(max_components[2], &green)
+        || !absl::SimpleAtof(max_components[2], &blue)) {
+      return fw::ErrorStatus("invalid color: ") << max_attr;
+    }
+    value.max = fw::Color(alpha, red, green, blue);
+  } else {
+    return fw::ErrorStatus("color values require 3 or 4 floating point values, got: ") << max_attr;
   }
+
+  return value;
 }
 
-void ParticleEmitterConfig::parse_random_vector(Random<fw::Vector> &ParticleRotation, XmlElement const &elem) {
-  std::vector<float> min_components = fw::split<float>(elem.get_attribute("min"));
-  std::vector<float> max_components = fw::split<float>(elem.get_attribute("max"));
+fw::StatusOr<ParticleEmitterConfig::Random<Vector>> ParticleEmitterConfig::ParseRandomVector(
+    XmlElement const &elem) {
+  ASSIGN_OR_RETURN(std::string min_attr, elem.GetAttribute("min"));
+  ASSIGN_OR_RETURN(std::string max_attr, elem.GetAttribute("max"));
+  std::vector<std::string> min_components = absl::StrSplit(min_attr, " ");
+  std::vector<std::string> max_components = absl::StrSplit(max_attr, " ");
 
-  if (min_components.size() == 3)
-    ParticleRotation.min = fw::Vector(min_components[0], min_components[1], min_components[2]);
-  else {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("values require 3 floating point values"));
+  auto value = Random<Vector>();
+  if (min_components.size() == 3) {
+    float x, y, z;
+    if (!absl::SimpleAtof(min_components[0], &x)
+        || !absl::SimpleAtof(min_components[1], &y)
+        || !absl::SimpleAtof(min_components[2], &z)) {
+      return fw::ErrorStatus("invalid vector: ") << min_attr;
+    }
+    value.min = Vector(x, y, z);
+  } else {
+    return fw::ErrorStatus("vector values require 3 floating point values, got: ") << min_attr;
   }
 
-  if (max_components.size() == 3)
-    ParticleRotation.max = fw::Vector(max_components[0], max_components[1], max_components[2]);
-  else {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("values require 3 floating point values"));
+  if (max_components.size() == 3) {
+    float x, y, z;
+    if (!absl::SimpleAtof(max_components[0], &x)
+        || !absl::SimpleAtof(max_components[1], &y)
+        || !absl::SimpleAtof(max_components[2], &z)) {
+      return fw::ErrorStatus("invalid color: ") << max_attr;
+    }
+    value.max = fw::Vector(x, y, z);
+  } else {
+    return fw::ErrorStatus("vector values require 3 floating point values, got: ") << max_attr;
   }
+
+  return value;
 }
 
 }

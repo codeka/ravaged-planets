@@ -124,7 +124,7 @@ void Http::perform_action(HttpVerb verb, std::string const &url, fw::XmlElement 
   url_ = url;
   verb_ = verb;
   headers_["Content-Type"] = "text/xml";
-  upload_data_ = xml.to_string();
+  upload_data_ = xml.ToString();
   download_data_.clear();
 
   // kick off the post in another thread, TODO: thread pool?

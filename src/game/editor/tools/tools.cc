@@ -79,10 +79,10 @@ void draw_circle(
   node->set_vertex_buffer(vb);
   node->set_index_buffer(ib);
   node->set_primitive_type(fw::sg::PrimitiveType::kLineStrip);
-  std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
-  std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
+  auto shader = fw::Shader::CreateOrEmpty("basic.shader");
+  std::shared_ptr<fw::ShaderParameters> shader_params = shader->CreateParameters();
   shader_params->set_program_name("notexture");
-  node->set_shader(Shader);
+  node->set_shader(shader);
   node->set_shader_parameters(shader_params);
   scenegraph.add_node(node);
 }

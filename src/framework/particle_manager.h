@@ -8,6 +8,7 @@
 
 #include <framework/graphics.h>
 #include <framework/object_pool.h>
+#include <framework/status.h>
 #include <framework/texture.h>
 
 namespace fw {
@@ -23,7 +24,8 @@ public:
   typedef std::list<std::weak_ptr<Particle>> ParticleList;
 
 private:
-  // Controls access to the effect list, which can be access from both the render thread and update thread.
+  // Controls access to the effect list, which can be access from both the render thread and update
+  // thread.
   std::mutex mutex_;
 
   ObjectPool<Particle> particle_pool_;
@@ -34,23 +36,24 @@ private:
   float wrap_x_;
   float wrap_z_;
 
-  // If true, the game is paused, so we shouldn't update any particules either. Particulars are updated on the render
-  // thread, so we need this to be atomic.
+  // If true, the game is paused, so we shouldn't update any particules either. Particulars are
+  // updated on the render thread, so we need this to be atomic.
   std::atomic<bool> paused_;
 
 public:
   ParticleManager();
   ~ParticleManager();
 
-  void initialize(Graphics *g);
+  fw::Status Initialize(Graphics *g);
   void update(float dt);
 
-  // This is called by the ParticleRenderer when we're about to render the particles. We return the particle list so
-  // that it can actually render the particles.
+  // This is called by the ParticleRenderer when we're about to render the particles. We return the
+  // particle list so that it can actually render the particles.
   ParticleList& on_render(float dt);
 
   // created the named effect (we load the properties from the given .wwpart file)
-  std::shared_ptr<ParticleEffect> create_effect(std::string const &name, const fw::Vector& initial_position);
+  fw::StatusOr<std::shared_ptr<ParticleEffect>> CreateEffect(
+      std::string_view name, fw::Vector const &initial_position);
 
   // this is called by the ParticleEffect when it's finished.
   void remove_effect(const std::shared_ptr<ParticleEffect>& effect);

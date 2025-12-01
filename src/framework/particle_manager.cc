@@ -25,9 +25,9 @@ ParticleManager::~ParticleManager() {
   delete renderer_;
 }
 
-void ParticleManager::initialize(Graphics *g) {
+fw::Status ParticleManager::Initialize(Graphics *g) {
   graphics_ = g;
-  renderer_->initialize(g);
+  return renderer_->Initialize(g);
 }
 
 void ParticleManager::set_world_wrap(float x, float z) {
@@ -64,9 +64,9 @@ long ParticleManager::get_num_active_particles() const {
   return particles_.size();
 }
 
-std::shared_ptr<ParticleEffect> ParticleManager::create_effect(
-    std::string const &name, const fw::Vector& initial_position) {
-  auto config = ParticleEffectConfig::load(name);
+fw::StatusOr<std::shared_ptr<ParticleEffect>> ParticleManager::CreateEffect(
+    std::string_view name, fw::Vector const &initial_position) {
+  ASSIGN_OR_RETURN(auto config, ParticleEffectConfig::Load(name));
   auto effect = std::make_shared<ParticleEffect>(this, particle_pool_, config, initial_position);
 
   {

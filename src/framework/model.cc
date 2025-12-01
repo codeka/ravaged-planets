@@ -22,7 +22,7 @@ ModelMeshNoanim::ModelMeshNoanim(int num_vertices, int num_indices) :
 ModelMeshNoanim::~ModelMeshNoanim() {
 }
 
-void ModelMeshNoanim::setup_buffers() {
+void ModelMeshNoanim::SetupBuffers() {
   if (vb_)
     return;
 
@@ -32,7 +32,7 @@ void ModelMeshNoanim::setup_buffers() {
   ib_ = std::shared_ptr<IndexBuffer>(new IndexBuffer());
   ib_->set_data(indices.size(), &indices[0]);
 
-  shader_ = Shader::create("entity.shader");
+  shader_ = Shader::CreateOrEmpty("entity.shader");
 }
 
 //-------------------------------------------------------------------------

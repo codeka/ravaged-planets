@@ -33,8 +33,8 @@ fw::StatusOr<std::shared_ptr<Model>> ModelReader::read(fs::path const &filename)
     Mesh const &pb_mesh = pb_model.meshes(i);
     std::shared_ptr<ModelMeshNoanim> mesh_noanim =
         std::make_shared<ModelMeshNoanim>(
-            pb_mesh.vertices().size() / sizeof(vertex::xyz_n_uv),
-            pb_mesh.indices().size() / sizeof(uint16_t));
+            static_cast<int>(pb_mesh.vertices().size() / sizeof(vertex::xyz_n_uv)),
+            static_cast<int>(pb_mesh.indices().size() / sizeof(uint16_t)));
     vertex::xyz_n_uv const *vertex_begin =
         reinterpret_cast<vertex::xyz_n_uv const *>(pb_mesh.vertices().data());
     vertex::xyz_n_uv const *vertex_end =

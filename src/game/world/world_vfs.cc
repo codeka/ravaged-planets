@@ -49,25 +49,28 @@ void WorldSummary::ensure_extra_loaded() const {
     }
   }
 
-  parse_mapdesc_file(full_path / (name_ + ".mapdesc"));
+  auto status = ParseMapdescFile(full_path / (name_ + ".mapdesc"));
+  if (!status.ok()) {
+    fw::debug << "Error parsing mapdesc file: " << status << std::endl;
+  }
 
   extra_loaded_ = true;
 }
 
-void WorldSummary::parse_mapdesc_file(fs::path const &filename) const {
-  fw::XmlElement xml = fw::load_xml(filename, "mapdesc", 1);
+fw::Status WorldSummary::ParseMapdescFile(fs::path const &filename) const {
+  ASSIGN_OR_RETURN(fw::XmlElement xml, fw::LoadXml(filename, "mapdesc", 1));
 
-  for (fw::XmlElement child = xml.get_first_child(); child.is_valid(); child = child.get_next_sibling()) {
+  for (fw::XmlElement child : xml.children()) {
     if (child.get_value() == "description") {
       description_ = child.get_text();
     } else if (child.get_value() == "author") {
       author_ = child.get_text();
     } else if (child.get_value() == "size") {
-      width_ = boost::lexical_cast<int>(child.get_attribute("width"));
-      height_ = boost::lexical_cast<int>(child.get_attribute("height"));
+      ASSIGN_OR_RETURN(width_, child.GetAttributei<int>("width"));
+      ASSIGN_OR_RETURN(height_, child.GetAttributei<int>("height"));
     } else if (child.get_value() == "players") {
       num_players_ = 0;
-      for (fw::XmlElement player = child.get_first_child(); player.is_valid(); player = player.get_next_sibling()) {
+      for (fw::XmlElement player : child.children()) {
         if (player.get_value() == "player") {
           num_players_ ++;
         } else {
@@ -78,6 +81,7 @@ void WorldSummary::parse_mapdesc_file(fs::path const &filename) const {
       fw::debug << "WARN: unknown child of <mapdesc>: " << child.get_value() << std::endl;
     }
   }
+  return fw::OkStatus();
 }
 
 void WorldSummary::initialize(std::string map_file) {

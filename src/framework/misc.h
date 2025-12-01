@@ -103,6 +103,22 @@ ABSL_MUST_USE_RESULT inline std::string_view StripSpaces(std::string_view str) {
   return StripLeadingSpaces(StripTrailingSpaces(str));
 }
 
+ABSL_MUST_USE_RESULT inline std::string_view StripLeading(std::string_view str, char ch) { 
+  auto it = std::find_if_not(str.begin(), str.end(), [ch](char test) { return ch == test; });
+  return str.substr(it - str.begin());
+}
+
+ABSL_MUST_USE_RESULT inline std::string_view StripTrailing(std::string_view str, char ch) { 
+  auto it = std::find_if_not(str.rbegin(), str.rend(), [ch](char test) { return ch == test; });
+  return str.substr(0, str.rend() - it);
+}
+
+ABSL_MUST_USE_RESULT inline std::string_view Strip(std::string_view str, char ch) { 
+  return StripLeadingSpaces(StripTrailingSpaces(str));
+}
+
+// TODO: support more types of "Strip"? Multiple charachters, generic predicates, etc?
+
 // generates a random float between 0 and 1.
 float random();
 

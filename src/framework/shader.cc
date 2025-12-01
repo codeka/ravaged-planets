@@ -5,7 +5,8 @@
 #include <sstream>
 #include <map>
 
-#include <boost/algorithm/string.hpp>
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_split.h>
 
 #include <framework/color.h>
 #include <framework/exception.h>
@@ -17,6 +18,7 @@
 #include <framework/paths.h>
 #include <framework/scenegraph.h>
 #include <framework/settings.h>
+#include <framework/status.h>
 #include <framework/texture.h>
 #include <framework/xml.h>
 
@@ -25,18 +27,18 @@ namespace fs = std::filesystem;
 //-------------------------------------------------------------------------
 // This is a cache of .Shader files, so we don't have to load them over and over.
 class ShaderCache {
-private:
-  typedef std::map<fs::path, std::shared_ptr<fw::Shader> > shader_map;
-  shader_map shaders_;
-
 public:
-  std::shared_ptr<fw::Shader> get_shader(fs::path const &name);
-  void add_shader(fs::path const &name, std::shared_ptr<fw::Shader> data);
+  std::shared_ptr<fw::Shader> GetShader(fs::path const &name);
+  void AddShader(fs::path const &name, std::shared_ptr<fw::Shader> data);
 
-  void clear_cache();
+  void ClearCache();
+
+private:
+  typedef std::map<fs::path, std::shared_ptr<fw::Shader>> shader_map;
+  shader_map shaders_;
 };
 
-std::shared_ptr<fw::Shader> ShaderCache::get_shader(fs::path const &name) {
+std::shared_ptr<fw::Shader> ShaderCache::GetShader(fs::path const &name) {
   shader_map::iterator it = shaders_.find(name);
   if (it == shaders_.end())
     return std::shared_ptr<fw::Shader>();
@@ -44,11 +46,11 @@ std::shared_ptr<fw::Shader> ShaderCache::get_shader(fs::path const &name) {
   return it->second;
 }
 
-void ShaderCache::add_shader(fs::path const &name, std::shared_ptr<fw::Shader> data) {
+void ShaderCache::AddShader(fs::path const &name, std::shared_ptr<fw::Shader> data) {
   shaders_[name] = data;
 }
 
-void ShaderCache::clear_cache() {
+void ShaderCache::ClearCache() {
   shaders_.clear();
 }
 
@@ -57,38 +59,52 @@ void ShaderCache::clear_cache() {
 namespace {
 
 ShaderCache g_cache;
-void compile_shader(GLuint shader_id, std::string filename);
-void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id);
-std::string find_source(fw::XmlElement const &root_elem, std::string source_name);
-std::string process_includes(std::string source);
-std::string load_include(std::string const &file, std::string const &function_name);
+fw::Status CompileShader(GLuint shader_id, std::string filename);
+fw::Status LinkShader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id);
+fw::StatusOr<std::string> ProcessIncludes(std::string const &source);
 
-std::string find_source(fw::XmlElement const &root_elem, std::string source_name) {
-  for (fw::XmlElement child_elem = root_elem.get_first_child();
-      child_elem.is_valid(); child_elem = child_elem.get_next_sibling()) {
-    if (child_elem.get_name() == "source" && child_elem.get_attribute("name") == source_name) {
-      return "#version 330\n\n" + process_includes(child_elem.get_text());
+fw::StatusOr<std::string> FindSource(fw::XmlElement const &root_elem, std::string source_name) {
+  for (fw::XmlElement child_elem : root_elem.children()) {
+    ASSIGN_OR_RETURN(auto child_name, child_elem.GetAttribute("name"));
+    if (child_elem.get_name() == "source" && child_name == source_name) {
+      ASSIGN_OR_RETURN(auto include_text, ProcessIncludes(child_elem.get_text()));
+      return "#version 330\n\n" + include_text;
     }
   }
-  BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info("No source named '" + source_name + "' found."));
-  return ""; // Just to shut up the warning.
+
+  return fw::ErrorStatus(absl::StrCat("no source named '", source_name, "' found."));
 }
 
-std::string process_includes(std::string source) {
+
+fw::StatusOr<std::string> LoadInclude(
+    std::filesystem::path const &file, std::string_view function_name) {
+  ASSIGN_OR_RETURN(
+      fw::XmlElement root_elem, fw::LoadXml(fw::resolve("shaders") / file, "shader", 1));
+  for (fw::XmlElement child : root_elem.children()) {
+    if (child.get_name() == "function") {
+      ASSIGN_OR_RETURN(auto name, child.GetAttribute("name"));
+      if (name == function_name) {
+        return ProcessIncludes(child.get_text());
+      }
+    }
+  }
+  return std::string("");
+}
+
+fw::StatusOr<std::string> ProcessIncludes(std::string const &source) {
   std::istringstream ins(source);
   std::string line;
   std::ostringstream outs;
 
   while(std::getline(ins, line)) {
-     boost::trim(line);
+     line = fw::StripSpaces(line);
      if (line.find("#include") == 0) {
-       std::vector<std::string> tokens;
-       boost::split(tokens, line, boost::is_any_of(" "));
+       std::vector<std::string> tokens = absl::StrSplit(line, " ");
        if (tokens.size() == 3) {
          std::string file = tokens[1];
-         boost::trim_if(file, boost::is_any_of("\""));
+         file = fw::Strip(file, '\"');
          std::string function_name = tokens[2];
-         line = load_include(file, function_name);
+         ASSIGN_OR_RETURN(line, LoadInclude(file, function_name));
        }
      }
      outs << line << std::endl;
@@ -96,18 +112,8 @@ std::string process_includes(std::string source) {
   return outs.str();
 }
 
-std::string load_include(std::string const &file, std::string const &function_name) {
-  fw::XmlElement root_elem = fw::load_xml(fw::resolve("shaders/" + file), "shader", 1);
-  for (fw::XmlElement child = root_elem.get_first_child();
-      child.is_valid(); child = child.get_next_sibling()) {
-    if (child.get_name() == "function" && child.get_attribute("name") == function_name) {
-      return process_includes(child.get_text());
-    }
-  }
-  return "";
-}
 
-void compile_shader(GLuint shader_id, std::string source) {
+fw::Status CompileShader(GLuint shader_id, std::string source) {
   char const *shader_str = source.c_str();
   glShaderSource(shader_id, 1, &shader_str, nullptr);
   glCompileShader(shader_id);
@@ -121,13 +127,15 @@ void compile_shader(GLuint shader_id, std::string source) {
     glGetShaderInfoLog(shader_id, log_length, nullptr, &error_message[0]);
 
     std::stringstream msg;
-    msg << "Error: " << error_message.data() << std::endl;
-    msg << "Source:" << std::endl << source << std::endl;
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(msg.str()));
+    msg << "failed to compile shader: " << error_message.data() << std::endl;
+    msg << "   source:" << std::endl << source << std::endl;
+    return fw::ErrorStatus(msg.str());
   }
+  
+  return fw::OkStatus();
 }
 
-void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id) {
+fw::Status LinkShader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_shader_id) {
   glAttachShader(program_id, vertex_shader_id);
   glAttachShader(program_id, fragment_shader_id);
   glLinkProgram(program_id);
@@ -140,119 +148,127 @@ void link_shader(GLuint program_id, GLuint vertex_shader_id, GLuint fragment_sha
     std::vector<char> error_message(log_length);
     glGetProgramInfoLog(program_id, log_length, nullptr, &error_message[0]);
 
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(std::string(&error_message[0])));
+    return fw::ErrorStatus("failed to link shader: ") << &error_message[0];
   }
+
+  return fw::OkStatus();
 }
 
 } // namespace
 
 namespace fw {
 //-------------------------------------------------------------------------
-// A ShaderProgram represents the details of a Shader program within a .Shader file.
-// It refers to the fragment/vertex Shader code + OpenGL states they correspond to.
+// A ShaderProgram represents the details of a Shader program within a .shader file.
+// It refers to the fragment/vertex shader code + OpenGL states they correspond to.
 class ShaderProgram {
 private:
   friend class fw::ShaderParameters;
 
   std::string name_;
   std::map<std::string, std::string> states_;
-  GLuint _program_id;
-  std::map<std::string, fw::ShaderVariable> _shader_variables;
+  GLuint program_id_;
+  std::map<std::string, fw::ShaderVariable> shader_variables_;
 
   /**
-   * Called during begin to set the given GL state to the given ParticleRotation.
+   * Called during begin to set the given GL state to the given value.
    *
-   * The names and values of the states are just strings, which we need to translate into actual GL function calls.
+   * The names and values of the states are just strings, which we need to translate into actual GL
+   * function calls.
    */
-  void apply_state(std::string const &name, std::string const &ParticleRotation);
+  void ApplyState(std::string_view name, std::string_view value);
 
 public:
-  ShaderProgram(fw::XmlElement &program_elem);
-  ~ShaderProgram();
+  ShaderProgram() = default;
+  ~ShaderProgram() = default;
 
-  void begin();
+  fw::Status Initialize(fw::XmlElement const &program_elem);
+
+  void Begin();
 };
 
-ShaderProgram::ShaderProgram(fw::XmlElement &program_elem) : _program_id(0) {
+fw::Status ShaderProgram::Initialize(fw::XmlElement const &program_elem) {
   GLint vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
   GLint fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
-  _program_id = glCreateProgram();
+  program_id_ = glCreateProgram();
 
   std::string vertex_shader_source;
   std::string fragment_shader_source;
-  for (fw::XmlElement child_elem = program_elem.get_first_child();
-      child_elem.is_valid(); child_elem = child_elem.get_next_sibling()) {
+  for (fw::XmlElement child_elem : program_elem.children()) {
     if (child_elem.get_name() == "vertex-shader") {
-      vertex_shader_source = find_source(program_elem.get_root(), child_elem.get_attribute("source"));
+      ASSIGN_OR_RETURN(auto source, child_elem.GetAttribute("source"));
+      ASSIGN_OR_RETURN(vertex_shader_source, FindSource(program_elem.get_root(), source));
     } else if (child_elem.get_name() == "fragment-shader") {
-      fragment_shader_source = find_source(program_elem.get_root(), child_elem.get_attribute("source"));
+      ASSIGN_OR_RETURN(auto source, child_elem.GetAttribute("source"));
+      ASSIGN_OR_RETURN(fragment_shader_source, FindSource(program_elem.get_root(), source));
     } else if (child_elem.get_name() == "state") {
-      states_[child_elem.get_attribute("name")] = child_elem.get_attribute("value");
+      ASSIGN_OR_RETURN(auto name, child_elem.GetAttribute("name"));
+      ASSIGN_OR_RETURN(auto value, child_elem.GetAttribute("value"));
+      states_[name] = value;
     }
   }
-  compile_shader(vertex_shader_id, vertex_shader_source);
-  compile_shader(fragment_shader_id, fragment_shader_source);
-  link_shader(_program_id, vertex_shader_id, fragment_shader_id);
+  RETURN_IF_ERROR(CompileShader(vertex_shader_id, vertex_shader_source));
+  RETURN_IF_ERROR(CompileShader(fragment_shader_id, fragment_shader_source));
+  RETURN_IF_ERROR(LinkShader(program_id_, vertex_shader_id, fragment_shader_id));
 
   int num_uniforms;
-  glGetProgramiv(_program_id, GL_ACTIVE_UNIFORMS, &num_uniforms);
+  glGetProgramiv(program_id_, GL_ACTIVE_UNIFORMS, &num_uniforms);
   GLchar buffer[1024];
   for (int i = 0; i < num_uniforms; i++) {
     GLint size;
     GLint length;
     GLenum type;
-    glGetActiveUniform(_program_id, i, sizeof(buffer), &size, &length, &type, buffer);
-    GLint location = glGetUniformLocation(_program_id, buffer);
+    glGetActiveUniform(program_id_, i, sizeof(buffer), &size, &length, &type, buffer);
+    GLint location = glGetUniformLocation(program_id_, buffer);
     std::string name(buffer);
-    _shader_variables[name] = fw::ShaderVariable(location, name, size, type);
+    shader_variables_[name] = fw::ShaderVariable(location, name, size, type);
   }
+
+  return fw::OkStatus();
 }
 
-ShaderProgram::~ShaderProgram() {
-}
-
-void ShaderProgram::begin() {
-  glUseProgram(_program_id);
+void ShaderProgram::Begin() {
+  glUseProgram(program_id_);
 
 #ifdef DEBUG
   GLint status;
-  glValidateProgram(_program_id);
-  glGetProgramiv(_program_id, GL_VALIDATE_STATUS, &status);
+  glValidateProgram(program_id_);
+  glGetProgramiv(program_id_, GL_VALIDATE_STATUS, &status);
   if (status != GL_TRUE) {
     GLint log_length;
-    glGetProgramiv(_program_id, GL_INFO_LOG_LENGTH, &log_length);
+    glGetProgramiv(program_id_, GL_INFO_LOG_LENGTH, &log_length);
     std::vector<char> error_message(log_length);
-    glGetProgramInfoLog(_program_id, log_length, nullptr, &error_message[0]);
+    glGetProgramInfoLog(program_id_, log_length, nullptr, &error_message[0]);
 
     fw::debug << "glValidateProgram error: " << &error_message[0] << std::endl;
   }
 #endif
 
   for(auto it : states_) {
-    apply_state(it.first, it.second);
+    ApplyState(it.first, it.second);
   }
 }
 
-void ShaderProgram::apply_state(std::string const &name, std::string const &ParticleRotation) {
-  // TODO: we could probably do something better than this (e.g. at load time rather than at run time)
+void ShaderProgram::ApplyState(std::string_view name, std::string_view value) {
+  // TODO: we could probably do something better than this (e.g. at load time rather than at run
+  // time)
   if (name == "z-write") {
-    if (ParticleRotation == "on") {
+    if (value == "on") {
       glDepthMask(GL_TRUE);
     } else {
       glDepthMask(GL_FALSE);
     }
   } else if (name == "z-test") {
-    if (ParticleRotation == "on") {
+    if (value == "on") {
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LEQUAL);
     } else {
       glDisable(GL_DEPTH_TEST);
     }
   } else if (name == "blend") {
-    if (ParticleRotation == "alpha") {
+    if (value == "alpha") {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    } else if (ParticleRotation == "additive") {
+    } else if (value == "additive") {
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE);
     } else {
@@ -268,36 +284,36 @@ ShaderParameters::ShaderParameters() {
 ShaderParameters::~ShaderParameters() {
 }
 
-void ShaderParameters::set_program_name(std::string const &name) {
+void ShaderParameters::set_program_name(std::string_view name) {
   program_name_ = name;
 }
 
-void ShaderParameters::set_texture(std::string const &name, std::shared_ptr<Texture> const &tex) {
-  textures_[name] = tex;
+void ShaderParameters::set_texture(std::string_view name, std::shared_ptr<Texture> const &tex) {
+  textures_[std::string(name)] = tex;
 }
 
-void ShaderParameters::set_texture(std::string const& name, std::shared_ptr<TextureArray> const& tex) {
-  textures_[name] = tex;
+void ShaderParameters::set_texture(std::string_view name, std::shared_ptr<TextureArray> const& tex) {
+  textures_[std::string(name)] = tex;
 }
 
-void ShaderParameters::set_matrix(std::string const &name, Matrix const &m) {
-  matrices_[name] = m;
+void ShaderParameters::set_matrix(std::string_view name, Matrix const &m) {
+  matrices_[std::string(name)] = m;
 }
 
-void ShaderParameters::set_vector(std::string const &name, Vector const &v) {
-  vectors_[name] = v;
+void ShaderParameters::set_vector(std::string_view name, Vector const &v) {
+  vectors_[std::string(name)] = v;
 }
 
-void ShaderParameters::set_color(std::string const &name, Color const &c) {
-  colors_[name] = c;
+void ShaderParameters::set_color(std::string_view name, Color const &c) {
+  colors_[std::string(name)] = c;
 }
 
-void ShaderParameters::set_scalar(std::string const &name, float f) {
-  scalars_[name] = f;
+void ShaderParameters::set_scalar(std::string_view name, float f) {
+  scalars_[std::string(name)] = f;
 }
 
-std::shared_ptr<ShaderParameters> ShaderParameters::clone() {
-  std::shared_ptr<ShaderParameters> clone(new ShaderParameters());
+std::shared_ptr<ShaderParameters> ShaderParameters::Clone() {
+  auto clone = std::make_shared<ShaderParameters>();
   clone->textures_ = textures_;
   clone->matrices_ = matrices_;
   clone->vectors_ = vectors_;
@@ -306,10 +322,10 @@ std::shared_ptr<ShaderParameters> ShaderParameters::clone() {
   return clone;
 }
 
-void ShaderParameters::apply(ShaderProgram *prog) const {
+void ShaderParameters::Apply(ShaderProgram &prog) const {
   int texture_unit = 0;
   for (auto it = textures_.begin(); it != textures_.end(); ++it) {
-    ShaderVariable const &var = prog->_shader_variables[it->first];
+    ShaderVariable const &var = prog.shader_variables_[it->first];
     if (var.valid) {
       glActiveTexture(GL_TEXTURE0 + texture_unit);
       auto& texture = it->second;
@@ -328,28 +344,28 @@ void ShaderParameters::apply(ShaderProgram *prog) const {
   }
 
   for (auto it = matrices_.begin(); it != matrices_.end(); ++it) {
-    ShaderVariable const &var = prog->_shader_variables[it->first];
+    ShaderVariable const &var = prog.shader_variables_[it->first];
     if (var.valid) {
       glUniformMatrix4fv(var.location, 1, GL_FALSE, it->second.m[0]);
     }
   }
 
   for (auto it = vectors_.begin(); it != vectors_.end(); ++it) {
-    ShaderVariable const &var = prog->_shader_variables[it->first];
+    ShaderVariable const &var = prog.shader_variables_[it->first];
     if (var.valid) {
       glUniform3fv(var.location, 1, it->second.v);
     }
   }
 
   for (auto it = colors_.begin(); it != colors_.end(); ++it) {
-    ShaderVariable const &var = prog->_shader_variables[it->first];
+    ShaderVariable const &var = prog.shader_variables_[it->first];
     if (var.valid) {
       glUniform4f(var.location, it->second.r, it->second.g, it->second.b, it->second.a);
     }
   }
 
   for (auto it = scalars_.begin(); it != scalars_.end(); ++it) {
-    ShaderVariable const &var = prog->_shader_variables[it->first];
+    ShaderVariable const &var = prog.shader_variables_[it->first];
     if (var.valid) {
       glUniform1f(var.location, it->second);
     }
@@ -373,59 +389,70 @@ Shader::Shader() {
 Shader::~Shader() {
 }
 
-std::shared_ptr<Shader> Shader::create(std::string const &filename) {
+/*static*/
+fw::StatusOr<std::shared_ptr<Shader>> Shader::Create(std::string_view filename) {
   fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
 
-  std::shared_ptr<Shader> shdr = g_cache.get_shader(filename);
-  if (!shdr) {
-    shdr = std::shared_ptr<Shader>(new Shader());
-    shdr->load(g, fw::resolve("shaders/" + filename));
-    g_cache.add_shader(filename, shdr);
+  auto shader = g_cache.GetShader(filename);
+  if (!shader) {
+    shader = std::make_shared<Shader>();
+    RETURN_IF_ERROR(shader->Load(g, fw::resolve(absl::StrCat("shaders/", filename))));
+    g_cache.AddShader(filename, shader);
   }
 
-  return shdr;
+  return shader;
 }
 
-void Shader::begin(std::shared_ptr<ShaderParameters> parameters) {
-  ShaderProgram *prog;
+/*static*/
+std::shared_ptr<Shader> Shader::CreateOrEmpty(std::string_view name) {
+  auto shader = Create(name);
+  if (!shader.ok()) {
+    fw::debug << "ERROR creating shader '" << name << "': " << shader.status() << std::endl;
+    return std::make_shared<Shader>();
+  }
+  return *shader;
+}
+
+void Shader::Begin(std::shared_ptr<ShaderParameters> parameters) {
   std::string program_name = default_program_name_;
   if (parameters && parameters->program_name_ != "") {
     program_name = parameters->program_name_;
   }
-  prog = programs_[program_name];
-  if (prog == nullptr) {
+  auto prog = programs_[program_name];
+  if (!prog) {
     prog = programs_[default_program_name_];
   }
-  prog->begin();
+  prog->Begin();
   if (parameters) {
-    parameters->apply(prog);
+    parameters->Apply(*prog);
   }
 }
 
-void Shader::end() {
+void Shader::End() {
   glUseProgram(0);
 }
 
-std::shared_ptr<ShaderParameters> Shader::create_parameters() {
-  std::shared_ptr<ShaderParameters> params(new ShaderParameters());
-  return params;
+std::shared_ptr<ShaderParameters> Shader::CreateParameters() {
+  return std::make_shared<ShaderParameters>();
 }
 
-void Shader::load(fw::Graphics *g, fs::path const &full_path) {
+fw::Status Shader::Load(fw::Graphics *g, fs::path const &full_path) {
   filename_ = full_path;
-  XmlElement root_elem = fw::load_xml(full_path, "shader", 1);
-  for (XmlElement child = root_elem.get_first_child();
-      child.is_valid(); child = child.get_next_sibling()) {
+  ASSIGN_OR_RETURN(XmlElement root_elem, fw::LoadXml(full_path, "shader", 1));
+  for (XmlElement child : root_elem.children()) {
     if (child.get_name() != "program") {
       continue;
     }
-    ShaderProgram *program = new ShaderProgram(child);
-    std::string program_name = child.get_attribute("name");
+
+    auto program = std::make_shared<ShaderProgram>();
+    RETURN_IF_ERROR(program->Initialize(child));
+    ASSIGN_OR_RETURN(std::string program_name, child.GetAttribute("name"));
     if (default_program_name_ == "") {
       default_program_name_ = program_name;
     }
     programs_[program_name] = program;
   }
+  return fw::OkStatus();
 }
 
 }

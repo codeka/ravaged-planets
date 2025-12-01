@@ -26,7 +26,7 @@ private:
   void ensure_extra_loaded() const;
 
   // parse the <mapdesc> file and populate our extra stuff.
-  void parse_mapdesc_file(std::filesystem::path const &filename) const;
+  fw::Status ParseMapdescFile(std::filesystem::path const &filename) const;
 
 public:
   WorldSummary();

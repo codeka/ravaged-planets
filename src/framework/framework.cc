@@ -114,7 +114,7 @@ fw::StatusOr<bool> Framework::initialize(char const *title) {
     scenegraph_manager_ = new sg::ScenegraphManager();
 
     particle_mgr_ = new ParticleManager();
-    particle_mgr_->initialize(graphics_);
+    RETURN_IF_ERROR(particle_mgr_->Initialize(graphics_));
 
     cursor_ = new Cursor();
     cursor_->initialize();
@@ -132,7 +132,7 @@ fw::StatusOr<bool> Framework::initialize(char const *title) {
 
   if (app_->wants_graphics()) {
     gui_ = new gui::Gui();
-    gui_->initialize(graphics_, audio_manager_);
+    RETURN_IF_ERROR(gui_->Initialize(graphics_, audio_manager_));
   }
 
   if (Settings::get<bool>("debug-view") && app_->wants_graphics()) {

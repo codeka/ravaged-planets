@@ -88,7 +88,12 @@ void ParticleEffectComponent::update(float) {
     if (effect_info.started && !effect_info.effect) {
       // It should be started, but it's not started yet, then start it.
       fw::ParticleManager* mgr = fw::Framework::get_instance()->get_particle_mgr();
-      effect_info.effect = mgr->create_effect(effect_info.name, our_position + effect_info.offset);
+
+      // TODO: return the error?
+      auto effect = mgr->CreateEffect(effect_info.name, our_position + effect_info.offset);
+      if (effect.ok()) {
+        effect_info.effect = *effect;
+      }
     }
     if (!effect_info.effect) {
       return;

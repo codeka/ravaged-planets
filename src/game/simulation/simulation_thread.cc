@@ -57,6 +57,7 @@ fw::Status SimulationThread::connect(uint64_t game_id, std::string address, uint
 fw::Status SimulationThread::connect_player(std::string address) {
   ASSIGN_OR_RETURN(auto player, RemotePlayer::connect(host_, address));
   players_.push_back(player);
+  return fw::OkStatus();
 }
 
 void SimulationThread::new_game(uint64_t game_id) {

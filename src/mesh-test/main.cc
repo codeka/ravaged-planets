@@ -152,17 +152,16 @@ void initialize_ground(std::shared_ptr<fw::sg::Node> node) {
   std::shared_ptr<fw::IndexBuffer> ib(new fw::IndexBuffer());
   ib->set_data(6, indices);
 
-  std::shared_ptr<fw::Shader> Shader = fw::Shader::create("basic.shader");
-
+  auto shader = fw::Shader::CreateOrEmpty("basic.shader");
   std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(fw::resolve("terrain/grass-01.jpg"));
 
-  std::shared_ptr<fw::ShaderParameters> params = Shader->create_parameters();
+  auto params = shader->CreateParameters();
   params->set_texture("tex_sampler", texture);
 
   node->set_vertex_buffer(vb);
   node->set_index_buffer(ib);
-  node->set_shader(Shader);
+  node->set_shader(shader);
   node->set_shader_parameters(params);
   node->set_cast_shadows(false);
   node->set_primitive_type(fw::sg::PrimitiveType::kTriangleList);

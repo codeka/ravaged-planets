@@ -36,7 +36,7 @@ Particle::~Particle() {
 
 void Particle::initialize(std::shared_ptr<ParticleEmitterConfig> const& config) {
   this->config = config;
-  max_age_ = config->max_age.get_value();
+  max_age_ = config->max_age.GetValue();
   random = fw::random();
   alpha = 0;
   color1 = 0;
@@ -51,14 +51,14 @@ void Particle::initialize(std::shared_ptr<ParticleEmitterConfig> const& config) 
   for (auto it = config->life.begin(); it != config->life.end(); it++) {
     LifeState state;
     state.age = (*it).age;
-    state.size = (*it).size.get_value();
+    state.size = (*it).size.GetValue();
     state.color_row = (*it).color_row;
     state.alpha = (*it).alpha;
-    state.rotation_speed = (*it).rotation_speed.get_value();
+    state.rotation_speed = (*it).rotation_speed.GetValue();
     state.rotation = (*it).rotation;
-    state.speed = (*it).speed.get_value();
-    state.gravity = (*it).gravity.get_value();
-    state.direction = (*it).direction.get_value();
+    state.speed = (*it).speed.GetValue();
+    state.gravity = (*it).gravity.GetValue();
+    state.direction = (*it).direction.GetValue();
     if (state.direction.length() > 0.001f) {
       state.direction.normalize();
     }

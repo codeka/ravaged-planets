@@ -44,7 +44,7 @@ void GameScreen::show() {
   }
 
   std::shared_ptr<WorldReader> reader(new WorldReader());
-  auto status = reader->read(options_->map_name);
+  auto status = reader->Read(options_->map_name);
   if (!status.ok()) {
     // TODO: make this return the error the caller instead
     fw::debug << "Error loading world: " << status << std::endl;

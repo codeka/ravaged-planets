@@ -1,18 +1,19 @@
 #include <filesystem>
+#include <string>
 
 #include <absl/strings/str_cat.h>
 
 #include <framework/exception.h>
 #include <framework/logging.h>
+#include <framework/status.h>
 #include <framework/xml.h>
 
 namespace fs = std::filesystem;
 
 namespace fw {
 
-std::string to_string(xml_error_info const &err_info) {
-  fw::xml::XMLError err = err_info.value();
-  switch (err) {
+std::string to_string(fw::xml::XMLError xml_error) {
+  switch (xml_error) {
   case fw::xml::XML_NO_ATTRIBUTE:
     return "XML_NO_ATTRIBUTE";
   case fw::xml::XML_WRONG_ATTRIBUTE_TYPE:
@@ -56,7 +57,8 @@ std::string to_string(xml_error_info const &err_info) {
   }
 }
 
-XmlElement load_xml(fs::path const &filepath, std::string_view format_name, int version) {
+fw::StatusOr<XmlElement> LoadXml(
+    fs::path const &filepath, std::string_view format_name, int version) {
   if (!fs::is_regular_file(filepath)) {
     debug << "error: could not load " << format_name << " " << filepath.string()
         << ": no such file" << std::endl;
@@ -67,25 +69,25 @@ XmlElement load_xml(fs::path const &filepath, std::string_view format_name, int 
   std::shared_ptr<xml::XMLDocument> doc(new xml::XMLDocument());
   doc->LoadFile(filepath.string().c_str());
   if (doc->Error()) {
-    BOOST_THROW_EXCEPTION(fw::Exception() << fw::filename_error_info(filepath.string())
-        << fw::message_error_info(doc->ErrorName()));
+    return fw::ErrorStatus(
+        absl::StrCat("could not parse '", filepath.string(), "': ", doc->ErrorName()));
   }
 
   xml::XMLHandle doch(doc.get());
   xml::XMLElement *root = doch.FirstChildElement().ToElement();
-  if (root != 0) {
+  if (root != nullptr) {
     if (std::string(root->Value()) != format_name) {
-      BOOST_THROW_EXCEPTION(fw::Exception() << fw::message_error_info(
-          absl::StrCat("invalid root node, expected \"", format_name, "\" found \"", root->Value(), "\"")));
+      return fw::ErrorStatus(absl::StrCat(
+          "invalid root name, expected '", format_name, "' found '", root->Value(), "'"));
     }
 
     std::string actual_version = "1";
     if (root->Attribute("version") != nullptr) {
       actual_version = root->Attribute("version");
     }
-    if (actual_version != boost::lexical_cast<std::string>(version)) {
-      BOOST_THROW_EXCEPTION(fw::Exception()
-          << fw::message_error_info(absl::StrCat("invalid ", format_name, " version: ", actual_version, " (expected ", version, ")")));
+    if (actual_version != std::to_string(version)) {
+      return fw::ErrorStatus(absl::StrCat(
+          "invalid ", format_name, " version: ", actual_version, " (expected ", version, ")"));
     }
   }
 
@@ -156,40 +158,77 @@ std::string XmlElement::get_text() const {
   return "";
 }
 
-std::string XmlElement::get_attribute(std::string_view name) const {
+fw::StatusOr<std::string> XmlElement::GetAttribute(std::string_view name) const {
   std::string name2(name);
   char const *attr = elem_->Attribute(name2.c_str());
   if (attr == nullptr) {
-    BOOST_THROW_EXCEPTION(fw::Exception()
-        << fw::message_error_info(absl::StrCat("'", name, "' attribute expected.")));
+    return fw::ErrorStatus(absl::StrCat("'", name, "' attribute expected."));
   }
 
-  return attr;
+  return std::string(attr);
 }
 
-bool XmlElement::is_attribute_defined(std::string_view name) const {
-  std::string name2(name);
-  return (elem_->Attribute(name2.c_str()) != 0);
-}
-
-XmlElement XmlElement::get_first_child() const {
-  return XmlElement(doc_, elem_->FirstChildElement());
-}
-
-XmlElement XmlElement::get_next_sibling() const {
-  return XmlElement(doc_, elem_->NextSiblingElement());
-}
-
-std::string XmlElement::to_string() const {
+std::string XmlElement::ToString() const {
   xml::XMLPrinter printer(nullptr, true);
   elem_->Accept(&printer);
   return printer.CStr();
 }
 
-std::string XmlElement::to_pretty_string() const {
+std::string XmlElement::ToPrettyString() const {
   xml::XMLPrinter printer(nullptr, false);
   elem_->Accept(&printer);
   return printer.CStr();
 }
+
+//-------------------------------------------------------------------------
+
+XmlElement::ElementChildIterator& XmlElement::ElementChildIterator::operator++() {
+    if (curr_child_ && curr_child_->get_element() != nullptr) {
+      const auto doc = curr_child_->get_document();
+      const auto next_sibling_element = curr_child_->get_element()->NextSiblingElement();
+      if (next_sibling_element == nullptr) {
+        curr_child_.reset();
+      } else {
+        curr_child_ = std::make_shared<XmlElement>(doc, next_sibling_element);
+      }
+    }
+    return *this;
+  }
+
+XmlElement::ElementChildIterator XmlElement::ElementChildIterator::operator++(int) {
+  auto tmp = *this;
+  ++(*this);
+  return tmp;
+}
+
+bool operator==(
+    XmlElement::ElementChildIterator const &a, XmlElement::ElementChildIterator const &b) {
+  if (!a.curr_child_ && !b.curr_child_) {
+    // Both null, they are equal.
+    return true;
+  }
+  if (!a.curr_child_ || !b.curr_child_) {
+    // One is null (and one is not), not equal.
+    return false;
+  }
+  return a.curr_child_ == b.curr_child_;
+}
+
+bool operator!=(
+    XmlElement::ElementChildIterator const &a, XmlElement::ElementChildIterator const &b) {
+  return !(a == b);
+}     
+
+XmlElement::ElementChildIterator XmlElement::ElementChildren::begin() {
+  auto first_child =
+      std::make_shared<XmlElement>(
+          element_.get_document(), element_.get_element()->FirstChildElement());
+  return ElementChildIterator(first_child);
+}
+
+XmlElement::ElementChildIterator XmlElement::ElementChildren::end() {
+  return ElementChildIterator();
+}
+
 
 }

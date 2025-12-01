@@ -7,6 +7,7 @@
 #include <framework/texture.h>
 #include <framework/scenegraph.h>
 #include <framework/shader.h>
+#include <framework/status.h>
 
 struct RenderState;
 
@@ -39,7 +40,7 @@ public:
   ParticleRenderer(ParticleManager *mgr);
   ~ParticleRenderer();
 
-  void initialize(Graphics *g);
+  fw::Status Initialize(Graphics *g);
 
   // ScenegraphCallback methods.
   void after_render(fw::sg::Scenegraph& scenegraph, float dt) override;

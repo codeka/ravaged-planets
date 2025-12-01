@@ -54,10 +54,11 @@ fw::Status SessionRequest::parse_response() {
     return xml.status();
   }
   if (xml->get_value() == "error") {
-    return fw::ErrorStatus(xml->get_attribute("msg"));
+    ASSIGN_OR_RETURN(auto msg, xml->GetAttribute("msg"));
+    return fw::ErrorStatus(msg);
   }
 
-  fw::debug << xml->to_string() << std::endl;
+  fw::debug << xml->ToString() << std::endl;
 
   return parse_response(*xml);
 }
@@ -78,7 +79,8 @@ LoginSessionRequest::~LoginSessionRequest() {
 
 void LoginSessionRequest::begin(std::string base_url) {
   std::string url =
-      absl::StrCat("Api/Session/New?name=", _username, "&password=", _password, "&listenPort=", _listen_port);
+      absl::StrCat("Api/Session/New?name=", _username, "&password=", _password, "&listenPort=",
+          _listen_port);
 
   fw::XmlElement xml(get_request_xml());
   post_ = fw::Http::perform(fw::Http::PUT, base_url + url);
@@ -96,8 +98,8 @@ fw::Status LoginSessionRequest::parse_response(fw::XmlElement &xml) {
     return fw::ErrorStatus("unexpected response from login request:") << xml.get_value();
   }
 
-  session_id_ = boost::lexical_cast<uint64_t>(xml.get_attribute("sessionId"));
-  user_id_ = boost::lexical_cast<uint32_t>(xml.get_attribute("userId"));
+  ASSIGN_OR_RETURN(session_id_, xml.GetAttributei<uint64_t>("sessionId"));
+  ASSIGN_OR_RETURN(user_id_, xml.GetAttributei<uint32_t>("userId"));
   Session::get_instance()->set_state(Session::kLoggedIn);
 
   fw::debug << "login successful, session-id:" << session_id_ << std::endl;
@@ -129,7 +131,7 @@ std::string LogoutSessionRequest::get_description() {
 
 fw::Status LogoutSessionRequest::parse_response(fw::XmlElement &xml) {
   if (xml.get_value() != "success") {
-    return fw::ErrorStatus(absl::StrCat("unexpected response from logout request:", xml.get_value()));
+    return fw::ErrorStatus(absl::StrCat("unexpected response from logout: ", xml.get_value()));
   }
 
   Session::get_instance()->set_state(Session::kDisconnected);
@@ -163,11 +165,7 @@ fw::Status CreateGameSessionRequest::parse_response(fw::XmlElement &xml) {
     return fw::ErrorStatus("unexpected response from \"join game\" request: ") << xml.get_value();
   }
 
-  if (!xml.is_attribute_defined("gameId")) {
-    return fw::ErrorStatus("create game response did not include game identifier");
-  }
-
-  uint64_t game_id = boost::lexical_cast<uint64_t>(xml.get_attribute("gameId"));
+  ASSIGN_OR_RETURN(auto game_id, xml.GetAttributei<uint64_t>("gameId"));
   fw::debug << "new game registered, identifier: " << game_id << std::endl;
 
   // now let the simulation thread know we're starting a new game
@@ -199,12 +197,12 @@ std::string ListGamesSessionRequest::get_description() {
 fw::Status ListGamesSessionRequest::parse_response(fw::XmlElement &xml) {
   // parse out the list of games from the response
   std::vector<RemoteGame> games;
-  for (fw::XmlElement game = xml.get_first_child(); game.is_valid(); game = game.get_next_sibling()) {
+  for (fw::XmlElement game : xml.children()) {
     RemoteGame g;
-    g.id = boost::lexical_cast<uint64_t>(game.get_attribute("id"));
-    g.display_name = game.get_attribute("displayName");
-    g.owner_username = game.get_attribute("ownerUser");
-    g.owner_address = game.get_attribute("ownerAddr");
+    ASSIGN_OR_RETURN(g.id, game.GetAttributei<uint64_t>("id"));
+    ASSIGN_OR_RETURN(g.display_name, game.GetAttribute("displayName"));
+    ASSIGN_OR_RETURN(g.owner_username, game.GetAttribute("ownerUser"));
+    ASSIGN_OR_RETURN(g.owner_address, game.GetAttribute("ownerAddr"));
     games.push_back(g);
   }
 
@@ -245,26 +243,13 @@ fw::Status JoinGameSessionRequest::parse_response(fw::XmlElement &xml) {
     return  fw::ErrorStatus("unexpected response from \"join game\" request: ") << xml.get_value();
   }
 
-  if (!xml.is_attribute_defined("serverAddr")) {
-    return fw::ErrorStatus("joing game response did not include server address");
-  }
-
-  if (!xml.is_attribute_defined("playerNo")) {
-    return fw::ErrorStatus("joining game response did not include player#");
-  }
-
-  std::string server_address = xml.get_attribute("serverAddr");
-
-  int player_no = 0;
-  if (!absl::SimpleAtoi(xml.get_attribute("playerNo"), &player_no) || player_no > 255) {
-    return fw::ErrorStatus("Couldn't convert playerNo to int: ") << xml.get_attribute("playerNo");
-  }
+  ASSIGN_OR_RETURN(uint8_t player_no, xml.GetAttributei<uint8_t>("playerNo"));
+  ASSIGN_OR_RETURN(std::string server_address, xml.GetAttribute("serverAddr"));
   fw::debug << "joined game, address: " << server_address << " player# " << player_no << std::endl;
 
   // now connect to that server
   RETURN_IF_ERROR(
-      SimulationThread::get_instance()->connect(
-          game_id_, server_address, static_cast<uint8_t>(player_no)));
+      SimulationThread::get_instance()->connect(game_id_, server_address, player_no));
 
   // set the state to logged_in as well....
   Session::get_instance()->set_state(Session::kLoggedIn);
@@ -302,26 +287,12 @@ fw::Status ConfirmPlayerSessionRequest::parse_response(fw::XmlElement &xml) {
         fw::ErrorStatus("unexpected response from \"confirm player\" request:") << xml.get_value();
   }
 
-  if (!xml.is_attribute_defined("confirmed")) {
-    return fw::ErrorStatus("confirm player response did not include confirmation");
-  }
-
-  std::string confirmed = xml.get_attribute("confirmed");
+  ASSIGN_OR_RETURN(std::string confirmed, xml.GetAttribute("confirmed"));
   if (confirmed == "true") {
     confirmed_ = true;
-
-    if (xml.is_attribute_defined("addr")) {
-      other_address_ = xml.get_attribute("addr");
-    }
-
-    if (xml.is_attribute_defined("user")) {
-      other_user_name_ = xml.get_attribute("user");
-    }
-
-    if (xml.is_attribute_defined("playerNo")) {
-      int player_no = boost::lexical_cast<int>(xml.get_attribute("playerNo"));
-      player_no_ = static_cast<uint8_t>(player_no);
-    }
+    ASSIGN_OR_RETURN(other_address_, xml.GetAttribute("addr"));
+    ASSIGN_OR_RETURN(other_user_name_, xml.GetAttribute("user"));
+    ASSIGN_OR_RETURN(player_no_, xml.GetAttributei<uint8_t>("playerNo"));
 
     fw::debug
         << "connecting player confirmed, user-id: " << other_user_id_

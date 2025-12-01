@@ -32,25 +32,11 @@ public:
 
 // A bitmap_drawable is a drawable that's represented by an actual bitmap (i.e. part of a texture).
 class BitmapDrawable : public Drawable {
-protected:
-  int top_;
-  int left_;
-  int width_;
-  int height_;
-  bool flipped_;
-
-  friend class DrawableManager;
-  BitmapDrawable(std::shared_ptr<fw::Texture> texture);
-  BitmapDrawable(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement* elem);
-
-  std::shared_ptr<fw::Texture> texture_;
-  std::shared_ptr<fw::Shader> shader_;
-  std::shared_ptr<fw::ShaderParameters> shader_params_;
-
-  virtual fw::Matrix get_pos_transform(float x, float y, float width, float height);
-  virtual fw::Matrix get_uv_transform();
 public:
+  BitmapDrawable(std::shared_ptr<fw::Texture> texture);
   virtual ~BitmapDrawable();
+
+  fw::Status Initialize(XmlElement const &element);
 
   virtual void render(float x, float y, float width, float height);
 
@@ -64,22 +50,40 @@ public:
   void set_flipped(bool flipped) {
     flipped_ = flipped;
   }
+
+protected:
+  int top_;
+  int left_;
+  int width_;
+  int height_;
+  bool flipped_;
+
+  friend class DrawableManager;
+
+  std::shared_ptr<fw::Texture> texture_;
+  std::shared_ptr<fw::Shader> shader_;
+  std::shared_ptr<fw::ShaderParameters> shader_params_;
+
+  virtual fw::Matrix get_pos_transform(float x, float y, float width, float height);
+  virtual fw::Matrix get_uv_transform();
 };
 
 // A NinePatchDrawable is a \ref bitmap_drawable that is rendered as a nine-patch.
 class NinePatchDrawable : public BitmapDrawable {
+public:
+  NinePatchDrawable(std::shared_ptr<fw::Texture> texture);
+
+  virtual void render(float x, float y, float width, float height);
+
+protected:
+  friend class DrawableManager;
+  fw::Status Initialize(XmlElement const &element);
+
 private:
   int inner_top_;
   int inner_left_;
   int inner_width_;
   int inner_height_;
-
-protected:
-  friend class DrawableManager;
-  NinePatchDrawable(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement* elem);
-
-public:
-  virtual void render(float x, float y, float width, float height);
 };
 
 class StateDrawable : public Drawable {
@@ -113,13 +117,13 @@ class DrawableManager {
 private:
   std::map<std::string, std::shared_ptr<Drawable>> drawables_;
 
-  void parse_drawable_element(std::shared_ptr<fw::Texture> texture, fw::xml::XMLElement* elem);
+  fw::Status ParseDrawableElement(std::shared_ptr<fw::Texture> texture, XmlElement const &elem);
 public:
   DrawableManager();
   ~DrawableManager();
 
   /** Parses the given XML file and extracts all of the drawables. */
-  void parse(std::filesystem::path const& file);
+  fw::Status Parse(std::filesystem::path const &file);
 
   std::shared_ptr<Drawable> get_drawable(std::string const& name);
   std::shared_ptr<Drawable> build_drawable(std::shared_ptr<fw::Texture> texture,

@@ -18,22 +18,22 @@ protected:
   std::shared_ptr<IndexBuffer> ib_;
   std::shared_ptr<Shader> shader_;
 
-  virtual void setup_buffers() = 0;
+  virtual void SetupBuffers() = 0;
 
 public:
   ModelMesh(int num_vertices, int num_indices);
   virtual ~ModelMesh();
 
   std::shared_ptr<VertexBuffer> get_vertex_buffer() {
-    setup_buffers();
+    SetupBuffers();
     return vb_;
   }
   std::shared_ptr<IndexBuffer> get_index_buffer() {
-    setup_buffers();
+    SetupBuffers();
     return ib_;
   }
   std::shared_ptr<Shader> get_shader() {
-    setup_buffers();
+    SetupBuffers();
     return shader_;
   }
 };
@@ -41,7 +41,7 @@ public:
 // A specialization of ModelMesh that doesn't support animation.
 class ModelMeshNoanim: public ModelMesh {
 protected:
-  virtual void setup_buffers();
+  virtual void SetupBuffers();
 
 public:
   ModelMeshNoanim(int num_vertices, int num_indices);

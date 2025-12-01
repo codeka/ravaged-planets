@@ -37,8 +37,8 @@ std::shared_ptr<fw::sg::Node> create_node() {
   uint16_t indices[6] = { 0, 1, 2, 0, 2, 3 };
   ib->set_data(6, indices);
 
-  auto shader = fw::Shader::create("selection.shader");
-  std::shared_ptr<fw::ShaderParameters> shader_params = shader->create_parameters();
+  auto shader = fw::Shader::CreateOrEmpty("selection.shader");
+  auto shader_params = shader->CreateParameters();
   shader_params->set_color("selection_color", fw::Color::WHITE());
 
   auto node = std::make_shared<fw::sg::Node>();

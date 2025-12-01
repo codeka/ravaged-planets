@@ -1,6 +1,10 @@
+#include <game/world/world_reader.h>
+
 #include <memory>
 
+#include <absl/strings/numbers.h>
 #include <absl/strings/str_cat.h>
+#include <absl/strings/str_split.h>
 
 #include <framework/bitmap.h>
 #include <framework/exception.h>
@@ -11,7 +15,6 @@
 #include <framework/status.h>
 #include <framework/xml.h>
 
-#include <game/world/world_reader.h>
 #include <game/world/world.h>
 #include <game/world/world_vfs.h>
 #include <game/world/terrain.h>
@@ -25,7 +28,7 @@ WorldReader::WorldReader() :
 WorldReader::~WorldReader() {
 }
 
-fw::Status WorldReader::read(std::string name) {
+fw::Status WorldReader::Read(std::string name) {
   WorldVfs vfs;
   WorldFile wf = vfs.open_file(name, false);
 
@@ -76,19 +79,19 @@ fw::Status WorldReader::read(std::string name) {
   if (wfe.exists()) {
     wfe.close();
 
-    fw::XmlElement root(fw::load_xml(wfe.get_full_path(), "mapdesc", 1));
-    read_mapdesc(root);
+    ASSIGN_OR_RETURN(fw::XmlElement root, fw::LoadXml(wfe.get_full_path(), "mapdesc", 1));
+    RETURN_IF_ERROR(ReadMapdesc(root));
   }
 
   wfe = wf.get_entry("collision_data", false /* for_write */);
   if (wfe.exists()) {
-    read_collision_data(wfe);
+    RETURN_IF_ERROR(ReadCollisionData(wfe));
   }
 
   return fw::OkStatus();
 }
 
-void WorldReader::read_collision_data(WorldFileEntry &wfe) {
+fw::Status WorldReader::ReadCollisionData(WorldFileEntry &wfe) {
   int version;
   wfe.read(&version, sizeof(int));
   if (version != 1) {
@@ -105,42 +108,50 @@ void WorldReader::read_collision_data(WorldFileEntry &wfe) {
     wfe.read(&n, sizeof(uint8_t));
     terrain_->collision_data_.push_back(n != 0);
   }
+
+  return fw::OkStatus();
 }
 
-void WorldReader::read_mapdesc(fw::XmlElement root) {
-  for (fw::XmlElement child = root.get_first_child(); child.is_valid(); child =
-      child.get_next_sibling()) {
+fw::Status WorldReader::ReadMapdesc(fw::XmlElement root) {
+  for (fw::XmlElement child : root.children()) {
     if (child.get_value() == "description") {
       description_ = child.get_text();
     } else if (child.get_value() == "author") {
       author_ = child.get_text();
     } else if (child.get_value() == "size") {
     } else if (child.get_value() == "players") {
-      read_mapdesc_players(child);
+      RETURN_IF_ERROR(ReadMapdescPlayers(child));
     } else {
-      BOOST_THROW_EXCEPTION(fw::Exception()
-          << fw::message_error_info("Unknown child element of <mapdesc> node!"));
+      return fw::ErrorStatus("Unknown child element of <mapdesc> node: ") << child.get_value();
     }
   }
+
+  return fw::OkStatus();
 }
 
-void WorldReader::read_mapdesc_players(fw::XmlElement players_node) {
-  for (fw::XmlElement child = players_node.get_first_child(); child.is_valid();
-      child = child.get_next_sibling()) {
+fw::Status WorldReader::ReadMapdescPlayers(fw::XmlElement players_node) {
+  for (fw::XmlElement child : players_node.children()) {
     if (child.get_value() != "player") {
       BOOST_THROW_EXCEPTION(fw::Exception()
           << fw::message_error_info("Unknown child element of <players> node!"));
     }
 
-    int player_no = boost::lexical_cast<int>(child.get_attribute("no"));
-    std::vector<float> start = fw::split<float>(child.get_attribute("start"));
-    if (start.size() != 2) {
-      BOOST_THROW_EXCEPTION(fw::Exception()
-          << fw::message_error_info("<player> node has invalid 'start' attribute."));
+    ASSIGN_OR_RETURN(int player_no, child.GetAttributei<int>("no"));
+    ASSIGN_OR_RETURN(std::string start_str, child.GetAttribute("start"));
+    std::vector<std::string> start_components = absl::StrSplit(start_str, " ");
+    if (start_components.size() != 2) {
+      return fw::ErrorStatus("<player> node has invalid 'start' attribute: ") << start_str;
     }
 
-    player_starts_[player_no] = fw::Vector(start[0], 0.0f, start[1]);
+    float x, z;
+    if (!absl::SimpleAtof(start_components[0], &x) || !absl::SimpleAtof(start_components[1], &z)) {
+      return fw::ErrorStatus("<player> node has invalid 'start' attribute: ") << start_str;
+    }
+
+    player_starts_[player_no] = fw::Vector(x, 0.0f, z);
   }
+
+  return fw::OkStatus();
 }
 
 fw::StatusOr<std::shared_ptr<Terrain>> WorldReader::create_terrain(

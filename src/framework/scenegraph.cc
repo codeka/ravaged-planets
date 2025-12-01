@@ -141,7 +141,7 @@ void Node::render_shader(
   if (shader_params_) {
     parameters = shader_params_;
   } else {
-    parameters = shader->create_parameters();
+    parameters = shader->CreateParameters();
   }
 
   // add the world_view and world_view_proj parameters as well as shadow parameters
@@ -169,7 +169,7 @@ void Node::render_shader(
   }
 
   vb_->begin();
-  shader->begin(parameters);
+  shader->Begin(parameters);
   if (ib_) {
     ib_->begin();
     glDrawElements(
@@ -178,13 +178,13 @@ void Node::render_shader(
   } else {
     glDrawArrays(g_primitive_type_map[primitive_type_], 0, vb_->get_num_vertices());
   }
-  shader->end();
+  shader->End();
   vb_->end();
 }
 
 void Node::render_noshader(const fw::CameraRenderState& camera, fw::Matrix const &transform) {
   if (!basic_shader) {
-    basic_shader = fw::Shader::create("basic.shader");
+    basic_shader = fw::Shader::CreateOrEmpty("basic.shader");
   }
 
   render_shader(basic_shader, camera, transform);
@@ -197,7 +197,7 @@ void Node::populate_clone(std::shared_ptr<Node> clone) {
   clone->ib_ = ib_;
   clone->shader_ = shader_;
   if (shader_params_)
-    clone->shader_params_ = shader_params_->clone();
+    clone->shader_params_ = shader_params_->Clone();
   clone->parent_ = parent_;
   clone->world_ = world_;
 
@@ -273,7 +273,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   Timer* timer = fw::Framework::get_instance()->get_timer();
 
   if (!shadow_shader) {
-    shadow_shader = fw::Shader::create("shadow.shader");
+    shadow_shader = fw::Shader::CreateOrEmpty("shadow.shader");
   }
 
   // set up the shadow sources that we'll need to render from first to get the various shadows going.
@@ -329,41 +329,49 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
     g->before_gui();
 
     if (g_shadow_debug && debug_shadowsrc) {
-      std::shared_ptr<Shader> shader = Shader::create("gui.shader");
-      std::shared_ptr<ShaderParameters> shader_params = shader->create_parameters();
-      // TODO: recalculating this every time seems wasteful
-      fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
-      fw::Matrix pos_transform;
-      pos_transform = fw::projection_orthographic(
-          0.0f, static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
-      pos_transform = fw::scale(fw::Vector(200.0f, 200.0f, 0.0f)) * fw::translation(fw::Vector(10.0f, 10.0f, 0)) * pos_transform;
-      shader_params->set_matrix("pos_transform", pos_transform);
-      shader_params->set_matrix("uv_transform", fw::identity());
-      shader_params->set_texture("texsampler", debug_shadowsrc->get_shadowmap()->get_color_buffer());
+      auto shader = Shader::Create("gui.shader");
+      if (!shader.ok()) {
+        fw::debug << "ERROR creating gui.shader: " << shader.status() << std::endl;
+      } else {
+        auto shader_params = (*shader)->CreateParameters();
+        // TODO: recalculating this every time seems wasteful
+        fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
+        fw::Matrix pos_transform;
+        pos_transform = fw::projection_orthographic(
+            0.0f, static_cast<float>(g->get_width()),
+            static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
+        pos_transform = fw::scale(fw::Vector(200.0f, 200.0f, 0.0f))
+            * fw::translation(fw::Vector(10.0f, 10.0f, 0))
+            * pos_transform;
+        shader_params->set_matrix("pos_transform", pos_transform);
+        shader_params->set_matrix("uv_transform", fw::identity());
+        shader_params->set_texture(
+            "texsampler", debug_shadowsrc->get_shadowmap()->get_color_buffer());
 
-      std::shared_ptr<VertexBuffer> vb = VertexBuffer::create<vertex::xyz_uv>();
-      fw::vertex::xyz_uv vertices[4];
-      vertices[0] = fw::vertex::xyz_uv(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-      vertices[1] = fw::vertex::xyz_uv(0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
-      vertices[2] = fw::vertex::xyz_uv(1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-      vertices[3] = fw::vertex::xyz_uv(1.0f, 1.0f, 0.0f, 1.0f, 1.0f);
-      vb->set_data(4, vertices);
+        std::shared_ptr<VertexBuffer> vb = VertexBuffer::create<vertex::xyz_uv>();
+        fw::vertex::xyz_uv vertices[4];
+        vertices[0] = fw::vertex::xyz_uv(0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+        vertices[1] = fw::vertex::xyz_uv(0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
+        vertices[2] = fw::vertex::xyz_uv(1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+        vertices[3] = fw::vertex::xyz_uv(1.0f, 1.0f, 0.0f, 1.0f, 1.0f);
+        vb->set_data(4, vertices);
 
-      std::shared_ptr<IndexBuffer> ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
-      uint16_t indices[4];
-      indices[0] = 0;
-      indices[1] = 1;
-      indices[2] = 2;
-      indices[3] = 3;
-      ib->set_data(4, indices);
+        auto ib = std::make_shared<fw::IndexBuffer>();
+        uint16_t indices[4];
+        indices[0] = 0;
+        indices[1] = 1;
+        indices[2] = 2;
+        indices[3] = 3;
+        ib->set_data(4, indices);
 
-      vb->begin();
-      ib->begin();
-      shader->begin(shader_params);
-      glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
-      shader->end();
-      ib->end();
-      vb->end();
+        vb->begin();
+        ib->begin();
+        (*shader)->Begin(shader_params);
+        glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_SHORT, nullptr);
+        (*shader)->End();
+        ib->end();
+        vb->end();
+      }
     }
 
     Framework::get_instance()->get_gui()->render();

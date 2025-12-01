@@ -8,6 +8,7 @@
 
 #include <framework/audio.h>
 #include <framework/graphics.h>
+#include <framework/status.h>
 #include <framework/gui/drawable.h>
 
 namespace fw::gui {
@@ -36,7 +37,7 @@ public:
   ~Gui();
 
   // Called to initialize the GUI system.
-  void initialize(fw::Graphics *graphics, fw::AudioManager* audio_manager);
+  fw::Status Initialize(fw::Graphics *graphics, fw::AudioManager* audio_manager);
 
   // Called on the update thread to update the GUI.
   void update(float dt);

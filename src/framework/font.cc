@@ -86,23 +86,23 @@ public:
   float time_since_use;
   std::shared_ptr<VertexBuffer> vb;
   std::shared_ptr<IndexBuffer> ib;
-  std::shared_ptr<fw::Shader> Shader;
+  std::shared_ptr<fw::Shader> shader;
   std::shared_ptr<ShaderParameters> shader_params;
   fw::Point size;
   float distance_to_top;
   float distance_to_bottom;
 
   StringCacheEntry(std::shared_ptr<VertexBuffer> vb, std::shared_ptr<IndexBuffer> ib,
-      std::shared_ptr<fw::Shader> Shader, std::shared_ptr<ShaderParameters> shader_params,
+      std::shared_ptr<fw::Shader> shader, std::shared_ptr<ShaderParameters> shader_params,
       fw::Point size, float distance_to_top, float distance_to_bottom);
   ~StringCacheEntry();
 };
 
 StringCacheEntry::StringCacheEntry(std::shared_ptr<VertexBuffer> vb,
-    std::shared_ptr<IndexBuffer> ib, std::shared_ptr<fw::Shader> Shader,
+    std::shared_ptr<IndexBuffer> ib, std::shared_ptr<fw::Shader> shader,
     std::shared_ptr<ShaderParameters> shader_params, fw::Point size,
     float distance_to_top, float distance_to_bottom) :
-      vb(vb), ib(ib), Shader(Shader), shader_params(shader_params), time_since_use(0), size(size),
+      vb(vb), ib(ib), shader(shader), shader_params(shader_params), time_since_use(0), size(size),
       distance_to_top(distance_to_top), distance_to_bottom(distance_to_bottom) {
 }
 
@@ -287,7 +287,10 @@ void FontFace::draw_string(
   fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
   fw::Matrix pos_transform =
     fw::projection_orthographic(
-      0.0f, static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
+      0.0f,
+      static_cast<float>(g->get_width()),
+      static_cast<float>(g->get_height()),
+      0.0f, 1.0f, -1.0f);
   pos_transform = fw::translation(x, y, 0.0f) * pos_transform;
 
   data->shader_params->set_matrix("pos_transform", pos_transform);
@@ -297,9 +300,9 @@ void FontFace::draw_string(
 
   data->vb->begin();
   data->ib->begin();
-  data->Shader->begin(data->shader_params);
+  data->shader->Begin(data->shader_params);
   glDrawElements(GL_TRIANGLES, data->ib->get_num_indices(), GL_UNSIGNED_SHORT, nullptr);
-  data->Shader->end();
+  data->shader->End();
   data->ib->end();
   data->vb->end();
 
@@ -364,12 +367,13 @@ std::shared_ptr<StringCacheEntry> FontFace::create_cache_entry(std::basic_string
   std::shared_ptr<fw::IndexBuffer> ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
   ib->set_data(indices.size(), indices.data());
 
-  std::shared_ptr<fw::Shader> Shader = fw::Shader::create("gui.shader");
-  std::shared_ptr<fw::ShaderParameters> shader_params = Shader->create_parameters();
+  auto shader = fw::Shader::CreateOrEmpty("gui.shader");
+  auto shader_params = shader->CreateParameters();
   shader_params->set_program_name("font");
 
-  return std::shared_ptr<StringCacheEntry>(new StringCacheEntry(vb, ib, Shader, shader_params,
-      fw::Point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top, max_distance_to_bottom));
+  return std::shared_ptr<StringCacheEntry>(new StringCacheEntry(vb, ib, shader, shader_params,
+      fw::Point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top,
+      max_distance_to_bottom));
 }
 
 //-----------------------------------------------------------------------------

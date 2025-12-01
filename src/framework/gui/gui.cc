@@ -12,9 +12,9 @@
 
 namespace fw::gui {
 
-Gui::Gui() :
-  graphics_(nullptr), drawable_manager_(nullptr), widget_under_mouse_(nullptr), widget_mouse_down_(nullptr),
-  focused_(nullptr) {
+Gui::Gui()
+  : graphics_(nullptr), drawable_manager_(nullptr), widget_under_mouse_(nullptr),
+    widget_mouse_down_(nullptr), focused_(nullptr) {
 }
 
 Gui::~Gui() {
@@ -23,13 +23,14 @@ Gui::~Gui() {
   }
 }
 
-void Gui::initialize(fw::Graphics *graphics, fw::AudioManager* audio_manager) {
+fw::Status Gui::Initialize(fw::Graphics *graphics, fw::AudioManager* audio_manager) {
   graphics_ = graphics;
 
   drawable_manager_ = new DrawableManager();
-  drawable_manager_->parse(fw::resolve("gui/drawables/drawables.xml"));
+  RETURN_IF_ERROR(drawable_manager_->Parse(fw::resolve("gui/drawables/drawables.xml")));
 
   audio_source_ = audio_manager->create_audio_source();
+  return fw::OkStatus();
 }
 
 void Gui::update(float dt) {
@@ -42,7 +43,8 @@ void Gui::update(float dt) {
     widget_under_mouse_ = wdgt;
     if (widget_under_mouse_ != nullptr) {
       widget_under_mouse_->sig_mouse_over();
-      fw::Framework::get_instance()->get_cursor()->set_cursor(2, widget_under_mouse_->get_cursor_name());
+      fw::Framework::get_instance()->get_cursor()->set_cursor(
+          2, widget_under_mouse_->get_cursor_name());
     } else {
       fw::Framework::get_instance()->get_cursor()->set_cursor(2, "");
     }

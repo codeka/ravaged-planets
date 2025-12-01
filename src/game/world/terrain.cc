@@ -68,7 +68,8 @@ fw::Status Terrain::initialize() {
       ib_ = std::make_shared<fw::IndexBuffer>();
       ib_->set_data(index_data.size(), &index_data[0], 0);
 
-      shader_ = fw::Shader::create("terrain.shader");
+      // TODO: we should return an error if this is a real error.
+      shader_ = fw::Shader::CreateOrEmpty("terrain.shader");
 
       scenegraph.add_node(root_node);
     });
@@ -126,7 +127,7 @@ void Terrain::bake_patch(int patch_x, int patch_z) {
   patch->vb->set_data(num_verts, vert_data, 0);
   delete[] vert_data;
 
-  patch->shader_params = shader_->create_parameters();
+  patch->shader_params = shader_->CreateParameters();
   patch->shader_params->set_texture("textures", textures_);
 }
 

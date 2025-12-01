@@ -102,7 +102,7 @@ fw::Status EditorScreen::open_map(std::string const &name) {
   set_active_tool("");
 
   std::shared_ptr<WorldCreate> reader(new WorldCreate());
-  RETURN_IF_ERROR(reader->read(name));
+  RETURN_IF_ERROR(reader->Read(name));
 
   delete world_;
   world_ = new EditorWorld(reader);

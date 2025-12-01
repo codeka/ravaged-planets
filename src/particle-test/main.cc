@@ -53,8 +53,13 @@ void restart_effect() {
       if (g_effect) {
         g_effect->destroy();
       }
-      g_effect = fw::Framework::get_instance()->get_particle_mgr()->create_effect(
+      auto effect = fw::Framework::get_instance()->get_particle_mgr()->CreateEffect(
           fw::Settings::get<std::string>("particle-file"), fw::Vector(0, 0, 0));
+      if (!effect.ok()) {
+        fw::debug << "ERROR creating effect: " << effect.status() << std::endl;
+      } else {
+        g_effect = *effect;
+      }
     });
   update_effect_position();
 }

@@ -2,8 +2,10 @@
 
 #include <memory>
 
+#include <framework/bitmap.h>
 #include <framework/math.h>
 #include <framework/status.h>
+#include <framework/xml.h>
 
 namespace fw {
 class Bitmap;
@@ -30,16 +32,16 @@ protected:
   virtual fw::StatusOr<std::shared_ptr<Terrain>> create_terrain(
       int width, int length, float* height_data);
 
-  void read_mapdesc(fw::XmlElement root);
-  void read_mapdesc_players(fw::XmlElement players_node);
-  void read_collision_data(WorldFileEntry &wfe);
+  fw::Status ReadMapdesc(fw::XmlElement root);
+  fw::Status ReadMapdescPlayers(fw::XmlElement players_node);
+  fw::Status ReadCollisionData(WorldFileEntry &wfe);
 
 public:
   WorldReader();
   virtual ~WorldReader();
 
   // reads the map with the given name and populates our members
-  fw::Status read(std::string name);
+  fw::Status Read(std::string name);
 
   std::shared_ptr<Terrain> get_terrain() const {
     return terrain_;
