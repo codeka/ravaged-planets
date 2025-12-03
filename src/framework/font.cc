@@ -83,29 +83,47 @@ Glyph::~Glyph() {
 class StringCacheEntry {
 public:
   float time_since_use;
-  std::shared_ptr<VertexBuffer> vb;
-  std::shared_ptr<IndexBuffer> ib;
-  std::shared_ptr<fw::Shader> shader;
-  std::shared_ptr<ShaderParameters> shader_params;
+  std::vector<fw::vertex::xyz_uv> verts;
+  std::vector<uint16_t> indices;
   fw::Point size;
   float distance_to_top;
   float distance_to_bottom;
 
-  StringCacheEntry(std::shared_ptr<VertexBuffer> vb, std::shared_ptr<IndexBuffer> ib,
-      std::shared_ptr<fw::Shader> shader, std::shared_ptr<ShaderParameters> shader_params,
+  // These will be created by EnsureReady.
+  std::shared_ptr<VertexBuffer> vb;
+  std::shared_ptr<IndexBuffer> ib;
+  std::shared_ptr<fw::Shader> shader;
+  std::shared_ptr<ShaderParameters> shader_params;
+
+  StringCacheEntry(std::vector<fw::vertex::xyz_uv> verts, std::vector<uint16_t> indices,
       fw::Point size, float distance_to_top, float distance_to_bottom);
   ~StringCacheEntry();
+
+  // Ensures the vertex buffer, index buffer, shader, etc are ready. Must be called on the render
+  // thread.
+  void EnsureReady();
 };
 
-StringCacheEntry::StringCacheEntry(std::shared_ptr<VertexBuffer> vb,
-    std::shared_ptr<IndexBuffer> ib, std::shared_ptr<fw::Shader> shader,
-    std::shared_ptr<ShaderParameters> shader_params, fw::Point size,
+StringCacheEntry::StringCacheEntry(
+    std::vector<fw::vertex::xyz_uv> verts, std::vector<uint16_t> indices, fw::Point size,
     float distance_to_top, float distance_to_bottom) :
-      vb(vb), ib(ib), shader(shader), shader_params(shader_params), time_since_use(0), size(size),
+      verts(std::move(verts)), indices(std::move(indices)), time_since_use(0), size(size),
       distance_to_top(distance_to_top), distance_to_bottom(distance_to_bottom) {
 }
 
 StringCacheEntry::~StringCacheEntry() {
+}
+
+void StringCacheEntry::EnsureReady() {
+  vb = fw::VertexBuffer::create<fw::vertex::xyz_uv>();
+  vb->set_data(verts.size(), verts.data());
+
+  ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
+  ib->set_data(indices.size(), indices.data());
+
+  shader = fw::Shader::CreateOrEmpty("gui.shader");
+  shader_params = shader->CreateParameters();
+  shader_params->set_program_name("font");
 }
 
 //-----------------------------------------------------------------------------
@@ -263,6 +281,7 @@ void FontFace::draw_string(int x, int y, std::string const &str, DrawFlags flags
 void FontFace::draw_string(
     int x, int y, std::u32string_view str, DrawFlags flags, fw::Color color) {
   std::shared_ptr<StringCacheEntry> data = get_or_create_cache_entry(str);
+  data->EnsureReady();
 
   if (texture_dirty_) {
     texture_->create(bitmap_);
@@ -373,17 +392,9 @@ std::shared_ptr<StringCacheEntry> FontFace::create_cache_entry(std::u32string_vi
     }
   }
 
-  std::shared_ptr<fw::VertexBuffer> vb = fw::VertexBuffer::create<fw::vertex::xyz_uv>();
-  vb->set_data(verts.size(), verts.data());
 
-  std::shared_ptr<fw::IndexBuffer> ib = std::shared_ptr<fw::IndexBuffer>(new fw::IndexBuffer());
-  ib->set_data(indices.size(), indices.data());
-
-  auto shader = fw::Shader::CreateOrEmpty("gui.shader");
-  auto shader_params = shader->CreateParameters();
-  shader_params->set_program_name("font");
-
-  return std::shared_ptr<StringCacheEntry>(new StringCacheEntry(vb, ib, shader, shader_params,
+  return std::shared_ptr<StringCacheEntry>(new StringCacheEntry(
+      std::move(verts), std::move(indices),
       fw::Point(x, max_distance_to_bottom + max_distance_to_top), max_distance_to_top,
       max_distance_to_bottom));
 }
