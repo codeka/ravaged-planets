@@ -1,7 +1,6 @@
 #pragma once
 
 #include <queue>
-#include <boost/signals2.hpp>
 
 #include <framework/lua.h>
 
@@ -13,7 +12,7 @@ class ParticleEffectComponent;
 /**
  * This component is attached to entities who have the ability to build things (units, buildings, etc).
  */
-class BuilderComponent : public EntityComponent, public boost::signals2::trackable {
+class BuilderComponent : public EntityComponent {
 private:
   struct QueueEntry {
     fw::lua::Value tmpl;
@@ -21,7 +20,8 @@ private:
     float time_remaining;
     float percent_complete;
 
-    QueueEntry(const fw::lua::Value& tmpl) : tmpl(tmpl), time_to_build(0), time_remaining(0), percent_complete(0) {}
+    QueueEntry(const fw::lua::Value& tmpl)
+        : tmpl(tmpl), time_to_build(0), time_remaining(0), percent_complete(0) {}
   };
   ParticleEffectComponent *_particle_effect_component;
   std::string build_group_;

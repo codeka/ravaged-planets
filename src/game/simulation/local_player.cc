@@ -75,7 +75,7 @@ void LocalPlayer::update() {
     }
 
     last_session_state_ = curr_state;
-    SimulationThread::get_instance()->sig_players_changed();
+    SimulationThread::get_instance()->sig_players_changed.Emit();
   }
 }
 

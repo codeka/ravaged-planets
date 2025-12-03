@@ -1,11 +1,9 @@
 #pragma once
 
-#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
-#include <boost/signals2.hpp>
-
 #include <framework/gui/window.h>
 #include <framework/math.h>
 #include <framework/texture.h>
+#include <framework/signals.h>
 
 namespace fw {
 class Shader;
@@ -30,7 +28,7 @@ private:
 
   // this is fired when the camera is moved/rotated/etc - we have to update our matrix
   void on_camera_updated();
-  boost::signals2::connection camera_updated_connection_;
+  fw::SignalConnection camera_updated_connection_;
 
   // this is called every now&then to update the display of entities on the map
   void update_entity_display();

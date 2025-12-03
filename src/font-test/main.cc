@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include <boost/exception/all.hpp>
-
 #include <framework/bitmap.h>
 #include <framework/settings.h>
 #include <framework/framework.h>
@@ -36,7 +34,7 @@ int main(int argc, char** argv) {
       return 0;
     }
 
-    std::shared_ptr<fw::FontFace> font_face = fw::Framework::get_instance()->get_font_manager()->get_face();
+    auto font_face = fw::Framework::get_instance()->get_font_manager()->get_face();
     font_face->ensure_glyphs("wm");
     status = font_face->get_bitmap()->save_bitmap(fw::resolve("test.png", true));
     if (!status.ok()) {

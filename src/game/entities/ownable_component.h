@@ -1,5 +1,7 @@
 #pragma once
 
+#include <framework/signals.h>
+
 #include <game/entities/entity.h>
 
 namespace game {
@@ -34,7 +36,7 @@ public:
   bool is_local_or_ai_player() const;
 
   // this signal is fired when the owner changes.
-  boost::signals2::signal<void(OwnableComponent *)> owner_changed_event;
+  fw::Signal<OwnableComponent *> owner_changed_event;
 };
 
 }

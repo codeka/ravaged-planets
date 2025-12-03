@@ -72,8 +72,8 @@ void Camera::update(float dt) {
       render_state_.projection = projection_;
     }
 
-    // fire the sig_updated signal, since we were updated
-    sig_updated();
+    // fire the sig_updated signal, since we were updated.
+    sig_updated.Emit();
   }
 }
 

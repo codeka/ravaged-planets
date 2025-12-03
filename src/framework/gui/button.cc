@@ -88,12 +88,15 @@ public:
 
 static std::shared_ptr<fw::AudioBuffer> g_hover_sound;
 
-Button::Button(Gui *gui) : Widget(gui), text_align_(kCenter), is_pressed_(false), is_mouse_over_(false) {
-  sig_mouse_out.connect(std::bind(&Button::on_mouse_out, this));
-  sig_mouse_over.connect(std::bind(&Button::on_mouse_over, this));
+Button::Button(Gui *gui)
+    : Widget(gui), text_align_(kCenter), is_pressed_(false), is_mouse_over_(false) {
+  sig_mouse_out.Connect(std::bind(&Button::on_mouse_out, this));
+  sig_mouse_over.Connect(std::bind(&Button::on_mouse_over, this));
 
   if (!g_hover_sound) {
-    g_hover_sound = fw::Framework::get_instance()->get_audio_manager()->get_audio_buffer("gui/sounds/click.ogg");
+    g_hover_sound =
+        fw::Framework::get_instance()->get_audio_manager()->get_audio_buffer(
+            "gui/sounds/click.ogg");
   }
 }
 

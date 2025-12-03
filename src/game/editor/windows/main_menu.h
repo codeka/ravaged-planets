@@ -1,5 +1,7 @@
 #pragma once
 
+#include <framework/signals.h>
+
 namespace fw {
 namespace gui {
 class Window;
@@ -17,8 +19,9 @@ private:
   fw::gui::Window *wnd_;
   fw::gui::Window *file_menu_;
   fw::gui::Window *tool_menu_;
+  fw::SignalConnection global_click_conn_;
 
-  void global_click_handler(int button, bool is_down, fw::gui::Widget *w);
+  void global_click_handler(int button, bool is_down, fw::gui::Widget const *w);
   bool file_menu_clicked(fw::gui::Widget *w);
   bool tool_menu_clicked(fw::gui::Widget *w);
   bool file_new_clicked(fw::gui::Widget *w);

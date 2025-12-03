@@ -1,9 +1,12 @@
 #pragma once
 
+#include <any>
+#include <memory>
+#include <string>
 #include <vector>
-#include <boost/any.hpp>
-#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
-#include <boost/signals2.hpp>
+
+#include <framework/signals.h>
+
 
 namespace fw::gui {
 class Gui;
@@ -126,7 +129,7 @@ protected:
   bool focused_;
   bool enabled_;
   std::function<bool(Widget *)> on_click_;
-  boost::any data_;
+  std::any data_;
 
 public:
   Widget(Gui *gui);
@@ -137,7 +140,7 @@ public:
   static Property *click(std::function<bool(Widget *)> on_click);
   static Property *visible(bool visible);
   static Property *id(int id);
-  static Property *data(boost::any const &data);
+  static Property *data(std::any const &data);
   static Property *enabled(bool enabled);
 
   void attach_child(Widget *child);
@@ -163,20 +166,26 @@ public:
 
   virtual void update(float dt);
 
-  /** Called just before render. You should not override this, it define the scissor Rectangle and stuff like that. */
+  /**
+   * Called just before render. You should not override this, it define the scissor Rectangle and
+   * stuff like that.
+   */
   bool prerender();
   virtual void render();
-  /** Called just after render. You should not override this, it define the scissor Rectangle and stuff like that. */
+  /**
+   * Called just after render. You should not override this, it define the scissor Rectangle and
+   * stuff like that.
+   */
   void postrender();
 
   /** Signalled when the mouse moves out of this widget. */
-  boost::signals2::signal<void()> sig_mouse_out;
+  fw::Signal<> sig_mouse_out;
 
   /** Signalled when the mouse moves over this widget. */
-  boost::signals2::signal<void()> sig_mouse_over;
+  fw::Signal<> sig_mouse_over;
 
   /** Signalled when the mouse moves over us. (x,y) is relative to this widget's origin. */
-  boost::signals2::signal<void(float x, float y)> sig_mouse_move;
+  fw::Signal<float /*x*/, float /*y*/> sig_mouse_move;
 
   /** Called when the mouse is pressed down, (x,y) is relative to this widget's origin. */
   virtual bool on_mouse_down(float x, float y);
@@ -185,8 +194,9 @@ public:
   virtual bool on_mouse_up(float x, float y);
 
   /**
-   * Gets the child widget at the given (x,y). If the point is outside our bounding box, then null is returned. If
-   * none of our children are contained within the given (x,y) then \code this is returned.
+   * Gets the child widget at the given (x,y). If the point is outside our bounding box, then null
+   * is returned. If none of our children are contained within the given (x,y) then \code this is
+   * returned.
    */
   Widget *get_child_at(float x, float y);
 
@@ -195,7 +205,10 @@ public:
 
   Widget *get_parent();
 
-  /** Gets the root parent, that is, keep looking up the parent chain until you find one that has a null parent. */
+  /**
+   * Gets the root parent, that is, keep looking up the parent chain until you find one that has a
+   * null parent.
+   */
   Widget *get_root();
 
   template<typename T>
@@ -204,7 +217,7 @@ public:
   }
 
   /** Returns true if the given widget is a child (or a child of a child...) of us. */
-  bool is_child(Widget *w);
+  bool is_child(Widget const *w) const;
 
   int get_id() {
     return id_;
@@ -219,8 +232,8 @@ public:
   float get_height();
   void set_height(std::shared_ptr<Dimension> height);
 
-  boost::any const &get_data() const;
-  void set_data(boost::any const &data);
+  std::any const &get_data() const;
+  void set_data(std::any const &data);
 
   void set_on_click(std::function<bool(Widget *)> on_click) {
     on_click_ = on_click;

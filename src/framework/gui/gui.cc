@@ -1,3 +1,4 @@
+#include <framework/gui/gui.h>
 
 #include <algorithm>
 
@@ -6,7 +7,7 @@
 #include <framework/input.h>
 #include <framework/graphics.h>
 #include <framework/paths.h>
-#include <framework/gui/gui.h>
+#include <framework/signals.h>
 #include <framework/gui/drawable.h>
 #include <framework/gui/window.h>
 
@@ -38,11 +39,11 @@ void Gui::update(float dt) {
   Widget *wdgt = get_widget_at(inp->mouse_x(), inp->mouse_y());
   if (wdgt != widget_under_mouse_) {
     if (widget_under_mouse_ != nullptr) {
-      widget_under_mouse_->sig_mouse_out();
+      widget_under_mouse_->sig_mouse_out.Emit();
     }
     widget_under_mouse_ = wdgt;
     if (widget_under_mouse_ != nullptr) {
-      widget_under_mouse_->sig_mouse_over();
+      widget_under_mouse_->sig_mouse_over.Emit();
       fw::Framework::get_instance()->get_cursor()->set_cursor(
           2, widget_under_mouse_->get_cursor_name());
     } else {
@@ -52,7 +53,7 @@ void Gui::update(float dt) {
   if (widget_under_mouse_ != nullptr && (inp->mouse_dx() != 0.0f || inp->mouse_dy() != 0.0f)) {
     float mx = inp->mouse_x() - widget_under_mouse_->get_left();
     float my = inp->mouse_y() - widget_under_mouse_->get_top();
-    widget_under_mouse_->sig_mouse_move(mx, my);
+    widget_under_mouse_->sig_mouse_move.Emit(mx, my);
   }
 
   std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
@@ -72,7 +73,7 @@ void Gui::update(float dt) {
 bool Gui::inject_mouse(int button, bool is_down, float x, float y) {
   if (button != 1 || (is_down && widget_under_mouse_ == nullptr)
       || (!is_down && widget_mouse_down_ == nullptr)) {
-    sig_click(button, is_down, nullptr);
+    sig_click.Emit(button, is_down, nullptr);
     if (focused_ != nullptr) {
       focused_->on_focus_lost();
       focused_ = nullptr;
@@ -87,7 +88,7 @@ bool Gui::inject_mouse(int button, bool is_down, float x, float y) {
   x -= widget_under_mouse_->get_left();
   y -= widget_under_mouse_->get_top();
 
-  sig_click(button, is_down, widget_under_mouse_);
+  sig_click.Emit(button, is_down, widget_under_mouse_);
   if (is_down) {
     widget_mouse_down_ = widget_under_mouse_;
     if (widget_under_mouse_->can_focus()) {

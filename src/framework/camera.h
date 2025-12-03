@@ -2,11 +2,10 @@
 
 #include <mutex>
 #include <vector>
-#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
-#include <boost/signals2.hpp>
 
 #include <framework/logging.h>
 #include <framework/math.h>
+#include <framework/signals.h>
 #include <framework/graphics.h>
 
 namespace fw {
@@ -49,7 +48,7 @@ public:
   virtual ~Camera();
 
   // this signal is fired when the camera has moved or rotated, etc
-  boost::signals2::signal<void()> sig_updated;
+  fw::Signal<> sig_updated;
 
   virtual void update(float dt);
   virtual void set_ground_height(float height);
@@ -116,8 +115,8 @@ public:
   CameraRenderState get_render_state();
 };
 
-// This implementation of camera is a "first-person" camera. The mouse cursor is hidden and you move the mouse to
-// "look around".
+// This implementation of camera is a "first-person" camera. The mouse cursor is hidden and you move
+// the mouse to "look around".
 class FirstPersonCamera: public Camera {
 private:
   bool fly_mode_; // Fly mode means we can "fly", if false we don't move in the y-direction
@@ -147,8 +146,8 @@ public:
   virtual void update(float dt);
 };
 
-// This is a simple static camera where you tell it what to "look at" and from what direction to look from, and
-// that's it - no interaction possible, etc.
+// This is a simple static camera where you tell it what to "look at" and from what direction to
+// look from, and that's it - no interaction possible, etc.
 class LookAtCamera: public Camera {
 protected:
   // This is the "center" that we're looking at and our rotations go around.
@@ -217,8 +216,8 @@ public:
     zooming_ = true;
   }
 
-  // Gets or sets a ParticleRotation which indicates whether we move the camera by moving the mouse to the edge of the Screen (as
-  // well as the usual left/right/up/down keys)
+  // Gets or sets a ParticleRotation which indicates whether we move the camera by moving the mouse
+  // to the edge of the Screen (as well as the usual left/right/up/down keys)
   void set_mouse_move(bool ParticleRotation) {
     enable_mouse_move_ = ParticleRotation;
   }

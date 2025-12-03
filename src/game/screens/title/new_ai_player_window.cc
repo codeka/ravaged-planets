@@ -93,7 +93,7 @@ bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
   if (selected_item == nullptr) {
     return false;
   }
-  ScriptDesc const &desc = boost::any_cast<ScriptDesc const &>(selected_item->get_data());
+  ScriptDesc const &desc = std::any_cast<ScriptDesc const &>(selected_item->get_data());
 
   uint16_t game_id = SimulationThread::get_instance()->get_game_id();
   if (game_id == 0) {

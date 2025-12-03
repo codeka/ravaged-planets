@@ -245,7 +245,7 @@ void Graphics::after_gui() {
 }
 
 void Graphics::present() {
-  sig_before_present();
+  sig_before_present.Emit();
 
   GLenum err = glGetError();
   if (err != GL_NO_ERROR) {

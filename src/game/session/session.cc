@@ -115,7 +115,7 @@ void Session::set_state(SessionState state) {
   state_ = state;
 
   // fire the signal so any listeners know
-  sig_state_changed(state_);
+  sig_state_changed.Emit(state_);
 }
 
 std::string Session::get_base_url() const {

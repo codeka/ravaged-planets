@@ -1,8 +1,6 @@
 #pragma once
 
-#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
-#include <boost/signals2.hpp>
-
+#include <framework/signals.h>
 #include <framework/status.h>
 
 #include <game/session/session.h>
@@ -29,9 +27,9 @@ private:
   fw::gui::Window *wnd_;
   std::shared_ptr<GameScreenOptions> game_options_;
   game::Session::SessionState sess_state_;
-  boost::signals2::connection sig_players_changed_conn_;
-  boost::signals2::connection sig_chat_conn_;
-  boost::signals2::connection sig_session_state_changed_;
+  fw::SignalConnection sig_players_changed_conn_;
+  fw::SignalConnection sig_chat_conn_;
+  fw::SignalConnection sig_session_state_changed_;
   std::vector<uint32_t> ready_players_;
 
   // Set to true when we need to refresh the player list.
@@ -50,7 +48,7 @@ private:
   bool on_new_ai_clicked(fw::gui::Widget *w);
   bool player_properties_clicked(fw::gui::Widget *w);
 
-  void add_chat_msg(std::string const &user_name, std::string const &msg);
+  void add_chat_msg(std::string_view user_name, std::string_view msg);
 
   void on_session_state_changed(Session::SessionState new_state);
 

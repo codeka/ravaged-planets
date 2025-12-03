@@ -95,7 +95,7 @@ void RemotePlayer::pkt_join_req(std::shared_ptr<fw::net::Packet> pkt) {
       SimulationThread::get_instance()->get_game_id(), user_id_);
   sess_req->set_complete_handler(std::bind(&RemotePlayer::join_complete, this, _1));
 
-  SimulationThread::get_instance()->sig_players_changed();
+  SimulationThread::get_instance()->sig_players_changed.Emit();
 }
 
 void RemotePlayer::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
@@ -143,13 +143,13 @@ void RemotePlayer::pkt_join_resp(std::shared_ptr<fw::net::Packet> pkt) {
     }
   }
 
-  SimulationThread::get_instance()->sig_players_changed();
+  SimulationThread::get_instance()->sig_players_changed.Emit();
 }
 
 // when we get a chat Packet, just fire the simulation_thread's chat_msg event
 void RemotePlayer::pkt_chat(std::shared_ptr<fw::net::Packet> pkt) {
   std::shared_ptr<ChatPacket> chat_pkt(std::dynamic_pointer_cast<ChatPacket>(pkt));
-  SimulationThread::get_instance()->sig_chat(user_name_, chat_pkt->get_msg());
+  SimulationThread::get_instance()->sig_chat.Emit(user_name_, chat_pkt->get_msg());
 }
 
 // this is sent to us when our Peer is ready to start the game
@@ -222,7 +222,7 @@ void RemotePlayer::join_complete(SessionRequest &req) {
   }
   peer_->send(resp);
 
-  SimulationThread::get_instance()->sig_players_changed();
+  SimulationThread::get_instance()->sig_players_changed.Emit();
 }
 
 void RemotePlayer::connect_complete(SessionRequest &req) {
@@ -232,7 +232,7 @@ void RemotePlayer::connect_complete(SessionRequest &req) {
   user_name_ = cpsr.get_user_name();
   player_no_ = cpsr.get_player_no();
 
-  SimulationThread::get_instance()->sig_players_changed();
+  SimulationThread::get_instance()->sig_players_changed.Emit();
 }
 
 void RemotePlayer::new_player_confirmed(SessionRequest &req) {

@@ -26,19 +26,20 @@ BuilderComponent::~BuilderComponent() {
 }
 
 void BuilderComponent::initialize() {
-  std::shared_ptr<Entity> Entity(entity_);
-  SelectableComponent *sel = Entity->get_component<SelectableComponent>();
+  std::shared_ptr<Entity> entity(entity_);
+  SelectableComponent *sel = entity->get_component<SelectableComponent>();
   if (sel != nullptr) {
-    sel->sig_selected.connect(std::bind(&BuilderComponent::on_selected, this, _1));
+    sel->sig_selected.Connect(std::bind(&BuilderComponent::on_selected, this, _1));
   }
-  _particle_effect_component = Entity->get_component<ParticleEffectComponent>();
+  _particle_effect_component = entity->get_component<ParticleEffectComponent>();
 }
 
 void BuilderComponent::apply_template(fw::lua::Value tmpl) {
   build_group_ = tmpl["BuildGroup"];
 }
 
-// this is called when our Entity is selected/deselected, we need to show/hide the build window as appropriate.
+// this is called when our Entity is selected/deselected, we need to show/hide the build window as
+// appropriate.
 void BuilderComponent::on_selected(bool selected) {
   if (selected) {
     game::hud_build->show();

@@ -69,6 +69,7 @@ MainMenuWindow::MainMenuWindow() : wnd_(nullptr), file_menu_(nullptr), tool_menu
 }
 
 MainMenuWindow::~MainMenuWindow() {
+  fw::Framework::get_instance()->get_gui()->sig_click.Disconnect(global_click_conn_);
 }
 
 void MainMenuWindow::initialize() {
@@ -105,7 +106,8 @@ void MainMenuWindow::initialize() {
   frmwrk->get_gui()->attach_widget(file_menu_);
   frmwrk->get_gui()->attach_widget(tool_menu_);
 
-  frmwrk->get_gui()->sig_click.connect(std::bind(&MainMenuWindow::global_click_handler, this, _1, _2, _3));
+  global_click_conn_ = frmwrk->get_gui()->sig_click.Connect(
+      std::bind(&MainMenuWindow::global_click_handler, this, _1, _2, _3));
 }
 
 void MainMenuWindow::show() {
@@ -120,7 +122,7 @@ void MainMenuWindow::hide() {
  * This is attached to the global GUI 'click' signal. If you've clicked on a widget that's not one
  * of our menus (or you clicked on blank space) then we need to hide the menus.
  */
-void MainMenuWindow::global_click_handler(int button, bool is_down, fw::gui::Widget *w) {
+void MainMenuWindow::global_click_handler(int button, bool is_down, fw::gui::Widget const *w) {
   std::vector<Window *> menus = {file_menu_, tool_menu_};
   for(Window *menu : menus) {
     if (is_down && menu->is_visible() && !menu->is_child(w)) {

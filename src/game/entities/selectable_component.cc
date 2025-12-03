@@ -73,7 +73,7 @@ void SelectableComponent::initialize() {
 
 void SelectableComponent::set_is_selected(bool selected) {
   is_selected_ = selected;
-  sig_selected(selected);
+  sig_selected.Emit(selected);
 }
 
 void SelectableComponent::apply_template(fw::lua::Value tmpl) {

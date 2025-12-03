@@ -1,3 +1,4 @@
+#include <framework/gui/widget.h>
 
 #include <algorithm>
 #include <functional>
@@ -7,7 +8,6 @@
 
 #include <framework/graphics.h>
 #include <framework/gui/gui.h>
-#include <framework/gui/widget.h>
 #include <framework/misc.h>
 
 namespace fw { namespace gui {
@@ -162,9 +162,9 @@ public:
 
 class WidgetDataProperty : public Property {
 private:
-  boost::any data_;
+  std::any data_;
 public:
-  WidgetDataProperty(boost::any const &data)
+  WidgetDataProperty(std::any const &data)
       : data_(data) {
   }
 
@@ -215,7 +215,7 @@ Property*Widget::id(int id) {
   return new WidgetIdProperty(id);
 }
 
-Property*Widget::data(boost::any const &data) {
+Property*Widget::data(std::any const &data) {
   return new WidgetDataProperty(data);
 }
 
@@ -361,15 +361,15 @@ Widget *Widget::find(int id) {
   return nullptr;
 }
 
-boost::any const &Widget::get_data() const {
+std::any const &Widget::get_data() const {
   return data_;
 }
 
-void Widget::set_data(boost::any const &data) {
+void Widget::set_data(std::any const &data) {
   data_ = data;
 }
 
-bool Widget::is_child(Widget *w) {
+bool Widget::is_child(Widget const *w) const {
   if (w == nullptr) {
     return false;
   }

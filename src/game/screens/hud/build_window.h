@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include <framework/signals.h>
+
 namespace fw {
 namespace gui {
 class Window;

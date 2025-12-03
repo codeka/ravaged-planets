@@ -1,14 +1,13 @@
 #pragma once
 
 #include <mutex>
+#include <optional>
 #include <vector>
-
-#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
-#include <boost/signals2.hpp>
 
 #include <framework/audio.h>
 #include <framework/graphics.h>
 #include <framework/status.h>
+#include <framework/signals.h>
 #include <framework/gui/drawable.h>
 
 namespace fw::gui {
@@ -63,14 +62,16 @@ public:
   int get_width() const;
   int get_height() const;
 
-  // Injects a mouse button up/down event, returns true if we handled it or false if it should be passed through.
+  // Injects a mouse button up/down event, returns true if we handled it or false if it should be
+  // passed through.
   bool inject_mouse(int button, bool is_down, float x, float y);
 
   // Injects a key press, returns true if we handled it or false if it should be passed through.
   bool inject_key(int key, bool is_down);
 
-  // Global 'click' signal, fired whenever you click the mouse. Widget may be null if you clicked on no widget.
-  boost::signals2::signal<void(int button, bool is_down, Widget *widget)> sig_click;
+  // Global 'click' signal, fired whenever you click the mouse. Widget may be nullopt if you clicked
+  // on no widget.
+  fw::Signal<int /*button*/, bool /*is_down*/, Widget const * /*widget*/> sig_click;
 
   bool is_mouse_over_widget() const {
     return widget_under_mouse_ != nullptr;

@@ -18,7 +18,7 @@ OwnableComponent::~OwnableComponent() {
 
 void OwnableComponent::set_owner(std::shared_ptr<game::Player> const &owner) {
   owner_ = owner;
-  owner_changed_event(this);
+  owner_changed_event.Emit(this);
 }
 
 bool OwnableComponent::is_local_player() const {

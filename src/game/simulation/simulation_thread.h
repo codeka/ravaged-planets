@@ -3,12 +3,11 @@
 #include <condition_variable>
 #include <functional>
 #include <memory>
+#include <string_view>
 #include <thread>
 
-#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
-#include <boost/signals2/signal.hpp>
-
 #include <framework/status.h>
+#include <framework/signals.h>
 
 namespace fw {
 namespace net {
@@ -54,10 +53,10 @@ public:
   }
 
   // This signal is fired when the list of players changes (e.g. someone joins, leaves, etc).
-  boost::signals2::signal<void()> sig_players_changed;
+  fw::Signal<> sig_players_changed;
 
   // This signal is fired when a chat message is received.
-  boost::signals2::signal<void(std::string const &, std::string const &)> sig_chat;
+  fw::Signal<std::string_view /*username*/, std::string_view /*message*/> sig_chat;
 
   // Send a chat message from us to all of the players.
   void send_chat_msg(std::string const &msg);

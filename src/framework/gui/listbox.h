@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include <framework/signals.h>
 #include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
@@ -51,10 +52,10 @@ public:
   Widget *get_selected_item();
 
   /** Signaled when an item is selected. */
-  boost::signals2::signal<void(int index)> sig_item_selected;
+  fw::Signal<int /*index*/> sig_item_selected;
 
   /** Signaled when an item is double-clicked. */
-  boost::signals2::signal<void(int index)> sig_item_activated;
+  fw::Signal<int /*index*/> sig_item_activated;
 
   void render();
 };

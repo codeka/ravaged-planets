@@ -4,8 +4,7 @@
 #include <mutex>
 #include <queue>
 
-#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
-#include <boost/signals2.hpp>
+#include <framework/signals.h>
 
 namespace fw {
 class Http;
@@ -82,7 +81,7 @@ public:
   void set_state(SessionState state);
 
   // this signal is fired when the session state changes.
-  boost::signals2::signal<void(SessionState)> sig_state_changed;
+  fw::Signal<SessionState> sig_state_changed;
 
   // gets and sets our session_id and user_name
   uint64_t get_session_id() const {

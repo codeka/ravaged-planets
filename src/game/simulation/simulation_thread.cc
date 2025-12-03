@@ -123,7 +123,7 @@ void SimulationThread::enqueue_command(std::shared_ptr<Command> &cmd) {
 
 void SimulationThread::add_ai_player(std::shared_ptr<AIPlayer> const &player) {
   players_.push_back(player);
-  sig_players_changed();
+  sig_players_changed.Emit();
 }
 
 /** This is the thread procedure for running the simulation thread. */
@@ -150,7 +150,7 @@ void SimulationThread::thread_proc() {
     std::vector<std::shared_ptr<fw::net::Peer>> new_connections = host_->get_new_connections();
     for (auto &new_peer : new_connections) {
       players_.push_back(std::make_shared<RemotePlayer>(host_, new_peer, true));
-      sig_players_changed();
+      sig_players_changed.Emit();
     }
 
     // execute all of the commands that are due this turn

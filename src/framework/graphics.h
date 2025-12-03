@@ -3,14 +3,12 @@
 #include <functional>
 #include <mutex>
 
-#define BOOST_BIND_NO_PLACEHOLDERS // so it doesn't auto-include _1, _2 etc.
-#include <boost/signals2.hpp>
-
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 
 #include <framework/color.h>
 #include <framework/logging.h>
+#include <framework/signals.h>
 #include <framework/status.h>
 
 typedef void *SDL_GLContext;
@@ -64,9 +62,12 @@ public:
   inline int get_height() { return height_; }
 
   // This signal is fired just before the graphics present().
-  boost::signals2::signal<void()> sig_before_present;
+  fw::Signal<> sig_before_present;
 
-  /** Schedules the given function to run on the render thread, just after the scene has finished drawing. */
+  /**
+   * Schedules the given function to run on the render thread, just after the scene has finished
+   * drawing.
+   */
   void run_on_render_thread(std::function<void()> fn);
 
   // For things that must run on the render thread, this can be sure to enforce it.
@@ -117,8 +118,8 @@ public:
   VertexBuffer(const VertexBuffer&) = delete;
   virtual ~VertexBuffer();
 
-  // Helper function that makes it easier to create vertex buffers by assuming that you're passing a type
-  // defined in fw::vertex::xxx (or something compatible).
+  // Helper function that makes it easier to create vertex buffers by assuming that you're passing a
+  // type defined in fw::vertex::xxx (or something compatible).
   template<typename T>
   static inline std::shared_ptr<VertexBuffer> create(bool dynamic = false) {
     return std::shared_ptr<VertexBuffer>(new VertexBuffer(

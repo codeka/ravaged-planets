@@ -3,6 +3,8 @@
 #include <framework/color.h>
 #include <framework/graphics.h>
 #include <framework/scenegraph.h>
+#include <framework/signals.h>
+
 #include <game/entities/entity.h>
 
 namespace ent {
@@ -43,7 +45,7 @@ public:
   bool get_is_selected() const {
     return is_selected_;
   }
-  boost::signals2::signal<void(bool)> sig_selected;
+  fw::Signal<bool /*selected*/> sig_selected;
 
   // highlight the Entity with the given color
   void highlight(fw::Color const &col);

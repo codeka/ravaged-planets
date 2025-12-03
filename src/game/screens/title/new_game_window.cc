@@ -22,6 +22,7 @@
 #include <framework/gui/listbox.h>
 #include <framework/gui/textedit.h>
 #include <framework/status.h>
+#include <framework/signals.h>
 #include <framework/version.h>
 
 #include <game/application.h>
@@ -136,11 +137,11 @@ void NewGameWindow::show() {
     wnd_->find<Listbox>(MAP_LIST_ID)->select_item(0);
   }
 
-  sig_players_changed_conn_ = SimulationThread::get_instance()->sig_players_changed.connect(
+  sig_players_changed_conn_ = SimulationThread::get_instance()->sig_players_changed.Connect(
       std::bind(&NewGameWindow::on_players_changed, this));
-  sig_chat_conn_ = SimulationThread::get_instance()->sig_chat.connect(
+  sig_chat_conn_ = SimulationThread::get_instance()->sig_chat.Connect(
       std::bind(&NewGameWindow::add_chat_msg, this, _1, _2));
-  sig_session_state_changed_ = Session::get_instance()->sig_state_changed.connect(
+  sig_session_state_changed_ = Session::get_instance()->sig_state_changed.Connect(
       std::bind(&NewGameWindow::on_session_state_changed, this, _1));
 
   // call this as if the session state just changed, to make sure we're up-to-date
@@ -151,9 +152,9 @@ void NewGameWindow::show() {
 void NewGameWindow::hide() {
   wnd_->set_visible(false);
 
-  sig_players_changed_conn_.disconnect();
-  sig_chat_conn_.disconnect();
-  sig_session_state_changed_.disconnect();
+  SimulationThread::get_instance()->sig_players_changed.Disconnect(sig_players_changed_conn_);
+  SimulationThread::get_instance()->sig_chat.Disconnect(sig_chat_conn_);
+  Session::get_instance()->sig_state_changed.Disconnect(sig_session_state_changed_);
 }
 
 void NewGameWindow::set_enable_multiplayer_visible(bool visible) {
@@ -291,7 +292,7 @@ fw::StatusOr<game::WorldSummary> NewGameWindow::GetSelectedWorldSummary() {
     return fw::ErrorStatus("no selected world");
   }
 
-  return boost::any_cast<game::WorldSummary>(selected_widget->get_data());
+  return std::any_cast<game::WorldSummary>(selected_widget->get_data());
 }
 
 bool NewGameWindow::on_new_ai_clicked(Widget *w) {
@@ -320,8 +321,8 @@ bool NewGameWindow::on_chat_filter(std::string ch) {
   return false; // ignore the newline character
 }
 
-void NewGameWindow::add_chat_msg(std::string const &user_name, std::string const &msg) {
-  append_chat(user_name + "> " + msg);
+void NewGameWindow::add_chat_msg(std::string_view user_name, std::string_view msg) {
+  append_chat(absl::StrCat(user_name, "> ", msg));
 }
 
 void NewGameWindow::append_chat(std::string const &msg) {
@@ -364,7 +365,7 @@ void NewGameWindow::start_game() {
     return;
   }
 
-  game::WorldSummary const &ws = boost::any_cast<game::WorldSummary const &>(selected_widget->get_data());
+  game::WorldSummary const &ws = std::any_cast<game::WorldSummary const &>(selected_widget->get_data());
   game_options_->map_name = ws.get_name();
 
   hide();

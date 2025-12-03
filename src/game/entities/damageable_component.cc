@@ -20,6 +20,11 @@ DamageableComponent::DamageableComponent() {
 }
 
 DamageableComponent::~DamageableComponent() {
+  std::shared_ptr<Entity> entity(entity_);
+  EntityAttribute *health = entity->get_attribute("health");
+  if (health != nullptr) {
+    health->sig_value_changed.Disconnect(health_value_changed_signal_);
+  }
 }
 
 void DamageableComponent::apply_template(fw::lua::Value tmpl) {
@@ -27,10 +32,11 @@ void DamageableComponent::apply_template(fw::lua::Value tmpl) {
 }
 
 void DamageableComponent::initialize() {
-  std::shared_ptr<Entity> Entity(entity_);
-  EntityAttribute *health = Entity->get_attribute("health");
+  std::shared_ptr<Entity> entity(entity_);
+  EntityAttribute *health = entity->get_attribute("health");
   if (health != nullptr) {
-    health->sig_value_changed.connect(std::bind(&DamageableComponent::check_explode, this, _2));
+    health_value_changed_signal_ =
+        health->sig_value_changed.Connect(std::bind(&DamageableComponent::check_explode, this, _2));
   }
 }
 
@@ -47,8 +53,8 @@ void DamageableComponent::apply_damage(float amt) {
 
 // this is called whenever our health attribute changes value. we check whether it's
 // hit 0, and explode if it has
-void DamageableComponent::check_explode(boost::any health_value) {
-  if (boost::any_cast<float>(health_value) <= 0) {
+void DamageableComponent::check_explode(std::any health_value) {
+  if (std::any_cast<float>(health_value) <= 0) {
     explode();
   }
 }

@@ -1,5 +1,8 @@
+#include <any>
 
 #include <framework/logging.h>
+#include <framework/signals.h>
+
 #include <game/entities/entity_attribute.h>
 
 namespace ent {
@@ -7,7 +10,7 @@ namespace ent {
 EntityAttribute::EntityAttribute() {
 }
 
-EntityAttribute::EntityAttribute(std::string name, boost::any value) :
+EntityAttribute::EntityAttribute(std::string name, std::any value) :
     name_(name), value_(value) {
 }
 
@@ -25,7 +28,7 @@ EntityAttribute &EntityAttribute::operator =(EntityAttribute const &copy) {
   return (*this);
 }
 
-void EntityAttribute::set_value(boost::any value) {
+void EntityAttribute::set_value(std::any value) {
   if (value_.type() != value.type()) {
     fw::debug << "WARN: cannot set value of type " << value_.type().name() << " to value of type "
               << value.type().name() << std::endl;
@@ -33,7 +36,7 @@ void EntityAttribute::set_value(boost::any value) {
   }
 
   value_ = value;
-  sig_value_changed(name_, value_);
+  sig_value_changed.Emit(name_, value_);
 }
 
 }

@@ -75,7 +75,7 @@ void AIPlayer::l_set_ready(fw::lua::MethodContext<AIPlayer>& ctx) {
 void AIPlayer::l_say(fw::lua::MethodContext<AIPlayer>& ctx) {
   // just "say" whatever they told us to say...
   // todo: this should be a proper network call
-  SimulationThread::get_instance()->sig_chat(ctx.owner()->user_name_, ctx.arg<std::string>(0));
+  SimulationThread::get_instance()->sig_chat.Emit(ctx.owner()->user_name_, ctx.arg<std::string>(0));
 }
 
 /* static */
@@ -84,7 +84,7 @@ void AIPlayer::l_local_say(fw::lua::MethodContext<AIPlayer>& ctx) {
 
   fw::debug << "SAY : " << msg << std::endl;
   // just "say" whatever they told us to say... (but just locally, it's for debugging your scripts, basically)
-  SimulationThread::get_instance()->sig_chat(ctx.owner()->user_name_, msg);
+  SimulationThread::get_instance()->sig_chat.Emit(ctx.owner()->user_name_, msg);
 }
 
 /* static */
@@ -97,7 +97,8 @@ void AIPlayer::l_timer(fw::lua::MethodContext<AIPlayer>& ctx) {
   });
 }
 
-void AIPlayer::fire_event(std::string const &event_name, std::map<std::string, std::string> const &parameters) {
+void AIPlayer::fire_event(
+    std::string const &event_name, std::map<std::string, std::string> const &parameters) {
   // fires the given named event (which'll fire off all our lua callbacks)
   auto it = event_map_.find(event_name);
   if (it == event_map_.end())

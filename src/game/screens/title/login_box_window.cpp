@@ -63,8 +63,8 @@ namespace ww {
 	{
 		fw::gui::window::show();
 
-		sig_session_state_changed_ = Session::get_instance()->sig_state_changed.connect(
-			boost::bind(&login_box_window::on_session_state_changed, this, _1));
+		sig_session_state_changed_ = Session::get_instance()->sig_state_changed.Connect(
+			std::bind(&login_box_window::on_session_state_changed, this, _1));
 	}
 
 	void login_box_window::hide()

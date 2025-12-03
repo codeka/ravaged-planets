@@ -114,7 +114,7 @@ void MinimapWindow::show() {
 
   // bind to the camera's sig_updated signal, to be notified when you move the camera around
   camera_updated_connection_ = fw::Framework::get_instance()->get_camera()->sig_updated
-      .connect(std::bind(&MinimapWindow::on_camera_updated, this));
+      .Connect(std::bind(&MinimapWindow::on_camera_updated, this));
 
   wnd_->set_visible(true);
   update_drawable();
@@ -124,7 +124,7 @@ void MinimapWindow::hide() {
   wnd_->set_visible(false);
 
   // disconnect our signals - we don't want to keep showing the minimap!
-  camera_updated_connection_.disconnect();
+  fw::Framework::get_instance()->get_camera()->sig_updated.Disconnect(camera_updated_connection_);
 }
 
 void MinimapWindow::update() {
