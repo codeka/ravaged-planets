@@ -49,22 +49,22 @@ private:
   bool texture_dirty_;
 
   /** Mapping of UTF-32 character to glyph object describing the glyph. */
-  std::map<uint32_t, Glyph *> glyphs_;
+  std::map<char32_t, Glyph *> glyphs_;
 
   // If we try to ensure a glyph and get error, they're added here so that we don't try over and
   // over.
-  std::set<uint32_t> error_glyphs_;
+  std::set<char32_t> error_glyphs_;
 
   /**
    * Mapping of UTF-32 strings to a \ref string_cache_entry which caches the data we need to draw
    * the given string.
    */
-  std::map<std::basic_string<uint32_t>, std::shared_ptr<StringCacheEntry>> string_cache_;
+  std::map<std::u32string, std::shared_ptr<StringCacheEntry>> string_cache_;
 
-  fw::Status ensure_glyph(uint32_t ch);
-  void ensure_glyphs(std::basic_string<uint32_t> const &str);
-  std::shared_ptr<StringCacheEntry> get_or_create_cache_entry(std::basic_string<uint32_t> const &str);
-  std::shared_ptr<StringCacheEntry> create_cache_entry(std::basic_string<uint32_t> const &str);
+  fw::Status ensure_glyph(char32_t ch);
+  void ensure_glyphs(std::u32string_view str);
+  std::shared_ptr<StringCacheEntry> get_or_create_cache_entry(std::u32string_view str);
+  std::shared_ptr<StringCacheEntry> create_cache_entry(std::u32string_view str);
 public:
   FontFace(FontManager *manager);
   ~FontFace();
@@ -83,15 +83,15 @@ public:
    * Pre-renders all of the glyphs required to render the given string, useful when starting up to
    * ensure common characters are already available.
    */
-  void ensure_glyphs(std::string const &str);
+  void ensure_glyphs(std::string_view str);
 
   /** Measures the given string and returns the width/height of the final rendered string. */
-  fw::Point measure_string(std::string const &str);
-  fw::Point measure_string(std::basic_string<uint32_t> const &str);
-  fw::Point measure_substring(std::basic_string<uint32_t> const &str, int pos, int num_chars);
+  fw::Point measure_string(std::string_view str);
+  fw::Point measure_string(std::u32string_view str);
+  fw::Point measure_substring(std::u32string_view str, int pos, int num_chars);
 
   /** Measures a single glyph. */
-  fw::StatusOr<fw::Point> measure_glyph(uint32_t ch);
+  fw::StatusOr<fw::Point> measure_glyph(char32_t ch);
 
   /**
    * Draws the given string on the Screen at the given (x,y) coordinates.
@@ -100,7 +100,7 @@ public:
       int x, int y, std::string const &str, DrawFlags flags = kDrawDefault,
       fw::Color color = fw::Color::WHITE());
   void draw_string(
-      int x, int y, std::basic_string<uint32_t> const &str, DrawFlags flags, fw::Color color);
+      int x, int y, std::u32string_view str, DrawFlags flags, fw::Color color);
 };
 
 class FontManager {

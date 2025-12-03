@@ -1,16 +1,17 @@
+#include <framework/font.h>
 
 #include <filesystem>
 #include <mutex>
-
-#include <boost/locale.hpp>
+#include <string>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+#include <utf8.h>
+
 #include <freetype/fterrors.h>
 
 #include <framework/bitmap.h>
-#include <framework/font.h>
 #include <framework/graphics.h>
 #include <framework/lang.h>
 #include <framework/logging.h>
@@ -21,7 +22,6 @@
 typedef std::basic_string<uint32_t> utf32string;
 
 namespace fs = std::filesystem;
-namespace conv = boost::locale::conv;
 
 namespace fw {
 namespace {
@@ -157,11 +157,11 @@ void FontFace::update(float dt) {
   });
 }
 
-void FontFace::ensure_glyphs(std::string const &str) {
-  ensure_glyphs(conv::utf_to_utf<uint32_t>(str));
+void FontFace::ensure_glyphs(std::string_view str) {
+  ensure_glyphs(utf8::utf8to32(str));
 }
 
-fw::Status FontFace::ensure_glyph(uint32_t ch) {
+fw::Status FontFace::ensure_glyph(char32_t ch) {
   if (glyphs_.find(ch) != glyphs_.end()) {
     // Already cached.
     return OkStatus();
@@ -195,7 +195,7 @@ fw::Status FontFace::ensure_glyph(uint32_t ch) {
     }
   }
 
-  std::string chstr = conv::utf_to_utf<char>(std::basic_string<uint32_t>({ch, 0}));
+  std::string chstr = utf8::utf32to8(std::u32string({ch, 0}));
   glyphs_[ch] = new Glyph(ch, glyph_index, offset_x, offset_y,
       face_->glyph->advance.x / 64.0f, face_->glyph->advance.y / 64.0f, face_->glyph->bitmap_left,
       face_->glyph->bitmap_top, face_->glyph->bitmap.width, face_->glyph->bitmap.rows,
@@ -206,12 +206,12 @@ fw::Status FontFace::ensure_glyph(uint32_t ch) {
   return fw::OkStatus();
 }
 
-void FontFace::ensure_glyphs(std::basic_string<uint32_t> const &str) {
+void FontFace::ensure_glyphs(std::u32string_view str) {
   for (uint32_t ch : str) {
     auto status = ensure_glyph(ch);
     if (!status.ok()) {
       fw::debug << "error ensuring glyph '"
-                << conv::utf_to_utf<char>(std::basic_string<uint32_t>(1, ch)) << "' " << status
+                << utf8::utf32to8(std::u32string(1, ch)) << "' " << status
                 << std::endl;
 
       error_glyphs_.emplace(ch);
@@ -220,16 +220,16 @@ void FontFace::ensure_glyphs(std::basic_string<uint32_t> const &str) {
   }
 }
 
-fw::Point FontFace::measure_string(std::string const &str) {
-  return measure_string(conv::utf_to_utf<uint32_t>(str));
+fw::Point FontFace::measure_string(std::string_view str) {
+  return measure_string(utf8::utf8to32(str));
 }
 
-fw::Point FontFace::measure_string(std::basic_string<uint32_t> const &str) {
+fw::Point FontFace::measure_string(std::u32string_view str) {
   std::shared_ptr<StringCacheEntry> data = get_or_create_cache_entry(str);
   return data->size;
 }
 
-fw::Point FontFace::measure_substring(std::basic_string<uint32_t> const &str, int pos, int num_chars) {
+fw::Point FontFace::measure_substring(std::u32string_view str, int pos, int num_chars) {
   ensure_glyphs(str);
 
   fw::Point size(0, 0);
@@ -248,7 +248,7 @@ fw::Point FontFace::measure_substring(std::basic_string<uint32_t> const &str, in
   return size;
 }
 
-fw::StatusOr<fw::Point> FontFace::measure_glyph(uint32_t ch) {
+fw::StatusOr<fw::Point> FontFace::measure_glyph(char32_t ch) {
   RETURN_IF_ERROR(ensure_glyph(ch));
   Glyph *g = glyphs_[ch];
   float y = g->distance_from_baseline_to_top + g->distance_from_baseline_to_bottom;
@@ -257,11 +257,11 @@ fw::StatusOr<fw::Point> FontFace::measure_glyph(uint32_t ch) {
 
 void FontFace::draw_string(int x, int y, std::string const &str, DrawFlags flags /*= 0*/,
     fw::Color color /*= fw::color::WHITE*/) {
-  draw_string(x, y, conv::utf_to_utf<uint32_t>(str), flags, color);
+  draw_string(x, y, utf8::utf8to32(str), flags, color);
 }
 
 void FontFace::draw_string(
-    int x, int y, std::basic_string<uint32_t> const &str, DrawFlags flags, fw::Color color) {
+    int x, int y, std::u32string_view str, DrawFlags flags, fw::Color color) {
   std::shared_ptr<StringCacheEntry> data = get_or_create_cache_entry(str);
 
   if (texture_dirty_) {
@@ -309,18 +309,19 @@ void FontFace::draw_string(
   data->time_since_use = 0.0f;
 }
 
-std::shared_ptr<StringCacheEntry> FontFace::get_or_create_cache_entry(std::basic_string<uint32_t> const &str) {
+std::shared_ptr<StringCacheEntry> FontFace::get_or_create_cache_entry(std::u32string_view str) {
   std::unique_lock<std::mutex> lock(mutex_);
-  std::shared_ptr<StringCacheEntry> data = string_cache_[str];
-  if (data == nullptr) {
-    data = create_cache_entry(str);
-    string_cache_[str] = data;
+  auto it = string_cache_.find(std::u32string(str));
+  if (it != string_cache_.end()) {
+    return it->second;
   }
 
+  auto data = create_cache_entry(str);
+  string_cache_[std::u32string(str)] = data;
   return data;
 }
 
-std::shared_ptr<StringCacheEntry> FontFace::create_cache_entry(std::basic_string<uint32_t> const &str) {
+std::shared_ptr<StringCacheEntry> FontFace::create_cache_entry(std::u32string_view str) {
   ensure_glyphs(str);
 
   std::vector<fw::vertex::xyz_uv> verts;
@@ -334,14 +335,26 @@ std::shared_ptr<StringCacheEntry> FontFace::create_cache_entry(std::basic_string
   for(uint32_t ch : str) {
     Glyph *g = glyphs_[ch];
     uint16_t index_offset = verts.size();
-    verts.push_back(fw::vertex::xyz_uv(x + g->bitmap_left, y - g->bitmap_top, 0.0f,
-        static_cast<float>(g->offset_x) / bitmap_->get_width(), static_cast<float>(g->offset_y) / bitmap_->get_height()));
-    verts.push_back(fw::vertex::xyz_uv(x + g->bitmap_left, y - g->bitmap_top + g->bitmap_height, 0.0f,
-        static_cast<float>(g->offset_x) / bitmap_->get_width(), static_cast<float>(g->offset_y + g->bitmap_height) / bitmap_->get_height()));
-    verts.push_back(fw::vertex::xyz_uv(x + g->bitmap_left + g->bitmap_width, y - g->bitmap_top + g->bitmap_height, 0.0f,
-        static_cast<float>(g->offset_x + g->bitmap_width) / bitmap_->get_width(), static_cast<float>(g->offset_y + g->bitmap_height) / bitmap_->get_height()));
-    verts.push_back(fw::vertex::xyz_uv(x + g->bitmap_left + g->bitmap_width, y - g->bitmap_top, 0.0f,
-        static_cast<float>(g->offset_x + g->bitmap_width) / bitmap_->get_width(), static_cast<float>(g->offset_y) / bitmap_->get_height()));
+    verts.push_back(fw::vertex::xyz_uv(
+        x + g->bitmap_left,
+        y - g->bitmap_top, 0.0f,
+        static_cast<float>(g->offset_x) / bitmap_->get_width(),
+        static_cast<float>(g->offset_y) / bitmap_->get_height()));
+    verts.push_back(fw::vertex::xyz_uv(
+        x + g->bitmap_left,
+        y - g->bitmap_top + g->bitmap_height, 0.0f,
+        static_cast<float>(g->offset_x) / bitmap_->get_width(),
+        static_cast<float>(g->offset_y + g->bitmap_height) / bitmap_->get_height()));
+    verts.push_back(fw::vertex::xyz_uv(
+        x + g->bitmap_left + g->bitmap_width,
+        y - g->bitmap_top + g->bitmap_height, 0.0f,
+        static_cast<float>(g->offset_x + g->bitmap_width) / bitmap_->get_width(),
+        static_cast<float>(g->offset_y + g->bitmap_height) / bitmap_->get_height()));
+    verts.push_back(fw::vertex::xyz_uv(
+        x + g->bitmap_left + g->bitmap_width,
+        y - g->bitmap_top, 0.0f,
+        static_cast<float>(g->offset_x + g->bitmap_width) / bitmap_->get_width(),
+        static_cast<float>(g->offset_y) / bitmap_->get_height()));
 
     indices.push_back(index_offset);
     indices.push_back(index_offset + 1);

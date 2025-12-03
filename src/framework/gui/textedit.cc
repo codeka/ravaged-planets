@@ -1,7 +1,8 @@
 
-#include <boost/locale.hpp>
+#include <string>
 
 #include <SDL2/SDL.h>
+#include <utf8.h>
 
 #include <framework/framework.h>
 #include <framework/gui/drawable.h>
@@ -10,9 +11,7 @@
 #include <framework/logging.h>
 #include <framework/font.h>
 
-namespace conv = boost::locale::conv;
-
-#define STB_TEXTEDIT_CHARTYPE uint32_t
+#define STB_TEXTEDIT_CHARTYPE char32_t
 #define STB_TEXTEDIT_POSITIONTYPE int
 #define STB_TEXTEDIT_UNDOSTATECOUNT 99
 #define STB_TEXTEDIT_UNDOCHARCOUNT 999
@@ -24,7 +23,7 @@ class TextEditBuffer {
 public:
   STB_TexteditState state;
   std::shared_ptr<fw::FontFace> font;
-  std::basic_string<uint32_t> codepoints;
+  std::u32string codepoints;
 
   inline TextEditBuffer() {
     font = fw::Framework::get_instance()->get_font_manager()->get_face();
@@ -67,7 +66,7 @@ int STB_TEXTEDIT_KEYTOTEXT(int key) {
 }
 
 void STB_TEXTEDIT_LAYOUTROW(StbTexteditRow *r, TextEditBuffer *buffer, int line_start_idx) {
-  const uint32_t *text_remaining = nullptr;
+  const char32_t *text_remaining = nullptr;
 
   // TODO: handle actual more than one line...
   const fw::Point size = buffer->font->measure_string(buffer->codepoints);
@@ -80,8 +79,8 @@ void STB_TEXTEDIT_LAYOUTROW(StbTexteditRow *r, TextEditBuffer *buffer, int line_
 }
 
 /** Not just spaces, but basically anything we can word wrap on. */
-bool STB_TEXTEDIT_IS_SPACE(uint32_t ch) {
-  static std::basic_string<uint32_t> spaces = conv::utf_to_utf<uint32_t>(" \t\n\r,;(){}[]<>|");
+bool STB_TEXTEDIT_IS_SPACE(char32_t ch) {
+  static std::u32string spaces = utf8::utf8to32(std::string(" \t\n\r,;(){}[]<>|"));
   return spaces.find(ch) != std::string::npos;
 }
 
@@ -89,7 +88,8 @@ void STB_TEXTEDIT_DELETECHARS(TextEditBuffer *buffer, int pos, int n) {
   buffer->codepoints.erase(pos, n);
 }
 
-bool STB_TEXTEDIT_INSERTCHARS(TextEditBuffer *buffer, int pos, const uint32_t* new_text, int new_text_len) {
+bool STB_TEXTEDIT_INSERTCHARS(
+    TextEditBuffer *buffer, int pos, const char32_t* new_text, int new_text_len) {
   buffer->codepoints.insert(pos, new_text, new_text_len);
   return true;
 }
@@ -130,7 +130,7 @@ public:
 
   void apply(Widget *widget) {
     TextEdit *te = dynamic_cast<TextEdit *>(widget);
-    te->buffer_->codepoints = conv::utf_to_utf<uint32_t>(text_);
+    te->buffer_->codepoints = utf8::utf8to32(text_);
   }
 };
 
@@ -222,11 +222,11 @@ void TextEdit::select_all() {
 }
 
 std::string TextEdit::get_text() const {
-  return conv::utf_to_utf<char>(buffer_->codepoints);
+  return utf8::utf32to8(buffer_->codepoints);
 }
 
 void TextEdit::set_text(std::string const &text) {
-  buffer_->codepoints = conv::utf_to_utf<uint32_t>(text);
+  buffer_->codepoints = utf8::utf8to32(text);
 }
 
 std::string TextEdit::get_cursor_name() const {
