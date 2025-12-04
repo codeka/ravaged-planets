@@ -7,6 +7,8 @@
 
 #include <SDL2/SDL.h>
 
+#include <absl/strings/match.h>
+
 #include <framework/framework.h>
 #include <framework/audio.h>
 #include <framework/logging.h>
@@ -164,7 +166,7 @@ void Framework::language_initialize() {
   }
 
   std::string lang_name = Settings::get<std::string>("lang");
-  if (!boost::iends_with(lang_name, ".lang")) {
+  if (!absl::EndsWithIgnoreCase(lang_name, ".lang")) {
     lang_name += ".lang";
   }
 

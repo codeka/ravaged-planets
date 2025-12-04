@@ -1,8 +1,10 @@
 #include <unordered_set>
 
-#include <boost/unordered_set.hpp>
-
 #include <SDL2/SDL.h>
+
+#include <absl/container/flat_hash_set.h>
+#include <absl/strings/match.h>
+#include <absl/strings/str_split.h>
 
 #include <framework/gui/gui.h>
 #include <framework/input.h>
@@ -65,20 +67,19 @@ int Input::bind_key(std::string const &keyname, input_bind_fn fn) {
   int token = ++g_next_token;
 
   std::vector<int> tokens;
-  std::vector<std::string> keys = split<std::string>(keyname, ",");
+  std::vector<std::string> keys = absl::StrSplit(keyname, ",");
   for(std::string key : keys) {
-    boost::trim(key);
-    std::vector<std::string> parts = split<std::string>(key, "+");
+    std::vector<std::string> parts = absl::StrSplit(fw::StripSpaces(key), "+");
 
     int key_no = 0;
     InputBinding binding;
     for(std::string part : parts) {
-      boost::trim(part);
-      if (boost::iequals(part, "ctrl")) {
+      part = fw::StripSpaces(part);
+      if (absl::EqualsIgnoreCase(part, "ctrl")) {
         binding.ctrl = true;
-      } else if (boost::iequals(part, "shift")) {
+      } else if (absl::EqualsIgnoreCase(part, "shift")) {
         binding.shift = true;
-      } else if (boost::iequals(part, "alt")) {
+      } else if (absl::EqualsIgnoreCase(part, "alt")) {
         binding.alt = true;
       } else {
         key_names_map::iterator it = g_key_names.find(part);
@@ -293,12 +294,11 @@ void setup_keynames() {
     g_key_names[buff] = key;
   }
   for (int key = 0; key <= 9; key++) {
-    std::string name = std::string("NP-")
-        + boost::lexical_cast<std::string>(key);
+    std::string name = std::string("NP-") + std::to_string(key);
     g_key_names[name] = SDLK_KP_0 + key;
   }
   for (int key = 0; key < 12; key++) {
-    std::string name = "F" + boost::lexical_cast<std::string>(key + 1);
+    std::string name = "F" + std::to_string(key + 1);
     g_key_names[name] = SDLK_F1 + key;
   }
 

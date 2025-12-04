@@ -1,13 +1,15 @@
+#include <framework/lang.h>
+
 #include <iostream>
 #include <filesystem>
 #include <fstream>
 #include <string>
 
-#include <boost/algorithm/string.hpp>
+#include <absl/strings/str_split.h>
 
-#include <framework/lang.h>
-#include <framework/paths.h>
 #include <framework/logging.h>
+#include <framework/misc.h>
+#include <framework/paths.h>
 
 namespace fs = std::filesystem;
 
@@ -108,10 +110,10 @@ std::vector<LangDescription> get_languages() {
 }
 
 //-------------------------------------------------------------------------
-bool get_lang_line(std::fstream &fs, std::string &key, std::string &ParticleRotation,
+bool get_lang_line(std::fstream &fs, std::string &key, std::string &value,
     std::string const &file_name, int &line_num) {
   key.clear();
-  ParticleRotation.clear();
+  value.clear();
 
   std::string line;
   while (std::getline(fs, line)) {
@@ -119,8 +121,7 @@ bool get_lang_line(std::fstream &fs, std::string &key, std::string &ParticleRota
 
     // remove comments (everything after "#") - split the line by the first '#'
     // and discard the second part (if any)
-    std::vector<std::string> parts;
-    boost::split(parts, line, boost::is_any_of("#"));
+    std::vector<std::string> parts = absl::StrSplit(line, "#");
     line = parts[0];
 
     // check for a BOM and remove it as well...
@@ -129,7 +130,7 @@ bool get_lang_line(std::fstream &fs, std::string &key, std::string &ParticleRota
     }
 
     // remove whitespace before and after, and check for empty string (skip it)
-    line = boost::trim_copy(line);
+    line = fw::StripSpaces(line);
     if (line == "")
       continue;
 
@@ -142,17 +143,17 @@ bool get_lang_line(std::fstream &fs, std::string &key, std::string &ParticleRota
         continue;
       }
 
-      key = boost::trim_right_copy(line.substr(0, equals));
-      ParticleRotation = boost::trim_left_copy(line.substr(equals + 1));
+      key = fw::StripSpaces(line.substr(0, equals));
+      value = StripSpaces(line.substr(equals + 1));
     } else {
-      // if this is a continuation from a previous line, just append it to the ParticleRotation
-      ParticleRotation += line;
+      // if this is a continuation from a previous line, just append it to the value
+      value += line;
     }
 
-    if (ParticleRotation[ParticleRotation.size() - 1] == '\\') {
+    if (value[value.size() - 1] == '\\') {
       // if the last character in the line is a '\' it means the line
       // continues on to the next line. strip off the \ and keep looping
-      ParticleRotation = ParticleRotation.substr(0, ParticleRotation.size() - 1);
+      value = value.substr(0, value.size() - 1);
     } else {
       // otherwise, we've found a valid string!
       return true;

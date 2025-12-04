@@ -1,10 +1,12 @@
 #include <framework/http.h>
 
 #include <functional>
-#include <boost/algorithm/string.hpp>
+
+#include <absl/strings/str_split.h>
 
 #include <framework/framework.h>
 #include <framework/logging.h>
+#include <framework/misc.h>
 #include <framework/settings.h>
 #include <framework/status.h>
 #include <framework/xml.h>
@@ -71,10 +73,9 @@ int Http::write_debug(CURL *, curl_infotype type, char *buffer, size_t len, void
     type_name = "UNKNOWN ";
   }
 
-  std::vector<std::string> lines;
-  boost::split(lines, msg, boost::algorithm::is_any_of("\r\n"), boost::algorithm::token_compress_on);
+  std::vector<std::string> lines = absl::StrSplit(msg, absl::ByAnyChar("\r\n"), absl::SkipEmpty());
   for(std::string line : lines) {
-    std::string trimmed = boost::trim_copy(line);
+    auto trimmed = fw::StripSpaces(line);
     if (trimmed != "") {
       debug << "  CURL " << type_name << trimmed << std::endl;
     }
@@ -103,7 +104,8 @@ std::shared_ptr<Http> Http::perform(HttpVerb verb, std::string const &url, XmlEl
   return request;
 }
 
-std::shared_ptr<Http> Http::perform(HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data) {
+std::shared_ptr<Http> Http::perform(
+    HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data) {
   std::shared_ptr<Http> request(new Http());
   request->perform_action(verb, url, data);
   return request;
@@ -130,7 +132,8 @@ void Http::perform_action(HttpVerb verb, std::string const &url, fw::XmlElement 
   thread_ = std::thread(std::bind(&Http::do_action, this));
 }
 
-void Http::perform_action(HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data) {
+void Http::perform_action(
+    HttpVerb verb, std::string const &url, std::map<std::string, std::string> const &data) {
   url_ = url;
   verb_ = verb;
   headers_["Content-Type"] = "application/application/x-www-form-urlencoded";

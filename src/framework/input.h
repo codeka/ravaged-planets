@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
 #include <functional>
+#include <string>
 #include <mutex>
 #include <vector>
-#include <boost/algorithm/string.hpp>
+
 
 union SDL_Event;
 
@@ -51,9 +51,7 @@ public:
 
   // bind the specified function to be called when the given key (or mouse button)
   // is pressed/released. When you call bind_key, you get back an integer token
-  // which you can later pass to unbind_key to unbind that key/function. It's a bit
-  // annoying that you can't compare boost::function<> objects, which is why this
-  // "token" system is required.
+  // which you can later pass to unbind_key to unbind that key/function.
   int bind_key(std::string keyname, InputBinding const &binding);
   void unbind_key(int token);
 

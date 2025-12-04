@@ -2,10 +2,10 @@
 
 #include <filesystem>
 #include <iostream>
+#include <memory>
 
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace fw {
 
@@ -21,7 +21,7 @@ class LogSink {
 private:
   bool open_;
   std::filesystem::path filename_;
-  boost::shared_ptr<std::ofstream> outs_;
+  std::shared_ptr<std::ofstream> outs_;
 
 public:
   typedef char char_type;

@@ -5,7 +5,6 @@
 #include <mutex>
 #include <set>
 #include <string>
-#include <boost/filesystem.hpp>
 
 #include <framework/bitmap.h>
 #include <framework/color.h>
