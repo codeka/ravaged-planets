@@ -20,14 +20,14 @@ namespace fs = std::filesystem;
 namespace fw {
 namespace {
 
-constexpr bool DBG = true;
+constexpr bool SETTINGS_DEBUG = false;
 
 static std::unordered_map<std::string, SettingValue> g_variables_map;
 static std::string g_option_descriptions;
 static fs::path g_executable_path;
 
 inline void dbg(std::string_view msg) {
-  if (!DBG) {
+  if (!SETTINGS_DEBUG) {
     return;
   }
 
@@ -232,6 +232,8 @@ fw::Status Settings::initialize(
           "")
       .add_setting<bool>(
           "debug-console", "If set, we'll log to the console as well as the log file.", true)
+      .add_setting<std::string>(
+          "log-level", "Maximum log level. Allowed values: debug, info, warning, error.", "debug")
       .add_setting<bool>(
           "debug-libcurl", "If true, debug HTTP requests and responses.", false)
       .add_setting<bool>(
