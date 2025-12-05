@@ -182,7 +182,7 @@ PathingTool::PathingTool(EditorWorld *wrld) :
   wnd_ = new PathingToolWindow(this);
   auto model = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
   if (!model.ok()) {
-    fw::debug << "ERROR loading marker: " << model.status() << std::endl;
+    LOG(ERR) << "error loading marker: " << model.status();
   } else {
     marker_ = *model;
   }
@@ -201,7 +201,7 @@ void PathingTool::activate() {
   collision_data_.resize(width * length);
   auto status = get_terrain()->BuildCollisionData(collision_data_);
   if (!status.ok()) {
-    fw::debug << "ERROR building collision data: " << status << std::endl;
+    LOG(ERR) << "error building collision data: " << status;
   }
 
   patches_.resize((width / PATCH_SIZE) * (length / PATCH_SIZE));

@@ -15,7 +15,7 @@ WorldCreate::WorldCreate(int width, int height) {
   auto terrain = create_terrain(width, height, /* height_data= */ nullptr);
   if (!terrain.ok()) {
     // TODO: make this a factory method instead so we can return the error
-    fw::debug << "Error creating terrain: " << terrain.status() << std::endl;
+    LOG(ERR) << "error creating terrain: " << terrain.status();
   } else {
     terrain_ = *terrain;
   }

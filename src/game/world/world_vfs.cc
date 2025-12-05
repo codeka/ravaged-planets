@@ -18,15 +18,14 @@ namespace game {
 namespace {
 
 void PopulateMaps(std::vector<game::WorldSummary> &list, fs::path path) {
-  fw::debug << "populating maps from: " << path.string()
-      << std::endl;
+  LOG(INFO) << "populating maps from: " << path.string();
 
   if (!fs::exists(path) || !fs::is_directory(path))
     return;
 
   for (fs::directory_iterator it(path); it != fs::directory_iterator(); ++it) {
     fs::path p(*it);
-    fw::debug << "  - " << p.string() << std::endl;
+    LOG(DBG) << "  - " << p.string();
     if (fs::is_directory(p)) {
       game::WorldSummary ws;
       ws.initialize(p.filename().string());
@@ -69,7 +68,7 @@ void WorldSummary::ensure_extra_loaded() const {
 
   auto full_path = FindMap(name_);
   if (!full_path.ok()) {
-    fw::debug << "ERROR map does not exist: " << name_ << ": " << full_path.status() << std::endl;
+    LOG(ERR) << "map does not exist: " << name_ << ": " << full_path.status();
     return;
   }
 
@@ -79,13 +78,13 @@ void WorldSummary::ensure_extra_loaded() const {
     if (screenshot.ok()) {
       screenshot_ = *screenshot;
     } else {
-      fw::debug << "Error loading world screenshot: " << screenshot.status() << std::endl;
+      LOG(ERR) << "error loading world screenshot: " << screenshot.status();
     }
   }
 
   auto status = ParseMapdescFile((*full_path) / (name_ + ".mapdesc"));
   if (!status.ok()) {
-    fw::debug << "Error parsing mapdesc file: " << status << std::endl;
+    LOG(ERR) << "error parsing mapdesc file: " << status;
   }
 
   extra_loaded_ = true;
@@ -108,11 +107,11 @@ fw::Status WorldSummary::ParseMapdescFile(fs::path const &filename) const {
         if (player.get_value() == "player") {
           num_players_ ++;
         } else {
-          fw::debug << "WARN: unknown child of <players>: " << child.get_value() << std::endl;
+          LOG(WARN) << "unknown child of <players>: " << child.get_value();
         }
       }
     } else {
-      fw::debug << "WARN: unknown child of <mapdesc>: " << child.get_value() << std::endl;
+      LOG(WARN) << "unknown child of <mapdesc>: " << child.get_value();
     }
   }
   return fw::OkStatus();

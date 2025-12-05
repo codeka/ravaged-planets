@@ -117,7 +117,7 @@ inline std::ostream &Logger::operator <<(T const &t) {
 
 #define DBG fw::Logger::Level::kDebug
 #define INFO  fw::Logger::Level::kInfo
-#define WARN  fw::Logger::Level::kWarn
+#define WARN  fw::Logger::Level::kWarning
 #define ERR fw::Logger::Level::kError
 
 #define LOG(level) fw::Logger(__FILE__, __LINE__, level)

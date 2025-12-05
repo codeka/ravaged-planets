@@ -59,7 +59,7 @@ void MeshComponent::initialize() {
 
   auto model = fw::Framework::get_instance()->get_model_manager()->get_model(model_name_);
   if (!model.ok()) {
-    fw::debug << "ERROR loading model: " << model.status() << std::endl;
+    LOG(ERR) << "error loading model: " << model.status();
   } else {
     auto sg_node = (*model)->create_node(color);
     sg_node_ = sg_node;

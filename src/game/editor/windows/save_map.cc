@@ -109,7 +109,7 @@ bool SaveMapWindow::save_clicked(Widget *w) {
   auto status = writer.write(world->get_name());
   if (!status.ok()) {
     // TODO: show error to user?
-    fw::debug << "Error saving map: " << status << std::endl;
+    LOG(ERR) << "error saving map: " << status << std::endl;
     return true;
   }
 

@@ -142,8 +142,8 @@ fw::Status FontFace::initialize(std::filesystem::path const &filename) {
   auto err = FT_New_Face(manager_->library_, filename.string().c_str(), 0, &face_);
   RETURN_IF_ERROR(check_error(err));
 
-  fw::debug << "loaded " << filename.string() << ": " << face_->num_faces << " face(s) "
-      << face_->num_glyphs << " glyph(s)" << std::endl;
+  LOG(INFO) << "loaded " << filename.string() << ": " << face_->num_faces << " face(s) "
+      << face_->num_glyphs << " glyph(s)";
 
   err = FT_Set_Pixel_Sizes(face_, 0, size_);
   RETURN_IF_ERROR(check_error(err));
@@ -162,9 +162,9 @@ void FontFace::update(float dt) {
     std::unique_lock<std::mutex> lock(mutex_);
     auto it = string_cache_.begin();
     while (it != string_cache_.end()) {
-      // Note we update the time_since_use after adding dt. This ensures that if the thread time is really
-      // long (e.g. if there's been some delay) we'll go through at least one update loop before destroying
-      // the string.
+      // Note we update the time_since_use after adding dt. This ensures that if the thread time is
+      // really long (e.g. if there's been some delay) we'll go through at least one update loop
+      // before destroying the string.
       if (it->second->time_since_use > 1.0f) {
         string_cache_.erase(it++);
       } else {
@@ -228,9 +228,8 @@ void FontFace::ensure_glyphs(std::u32string_view str) {
   for (uint32_t ch : str) {
     auto status = ensure_glyph(ch);
     if (!status.ok()) {
-      fw::debug << "error ensuring glyph '"
-                << utf8::utf32to8(std::u32string(1, ch)) << "' " << status
-                << std::endl;
+      LOG(ERR) << "error ensuring glyph '"
+               << utf8::utf32to8(std::u32string(1, ch)) << "' " << status;
 
       error_glyphs_.emplace(ch);
       // But keep going.
@@ -425,7 +424,7 @@ std::shared_ptr<FontFace> FontManager::get_face(fs::path const &filename) {
     face = std::make_shared<FontFace>(this);
     auto status = face->initialize(filename);
     if (!status.ok()) {
-      fw::debug << "error loading font from " << filename.string() << ": " << status << std::endl;
+      LOG(ERR) << "error loading font from " << filename.string() << ": " << status;
       // Keep going, we'll add the uninitialized font so we don't keep trying.
     }
     faces_[filename.string()] = face;

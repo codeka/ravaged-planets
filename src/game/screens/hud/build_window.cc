@@ -229,7 +229,7 @@ void BuildWindow::do_refresh() {
 
   int index = 0;
   for(auto &tmpl : templates) {
-    fw::debug << " checking " << std::string(tmpl["name"]) << std::endl;
+    LOG(DBG) << " checking " << std::string(tmpl["name"]);
     Button *btn = wnd_->find<Button>(FIRST_BUILD_BUTTON_ID + index);
     if (btn == nullptr) {
       continue; // TODO
@@ -253,7 +253,7 @@ void BuildWindow::do_refresh() {
     fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
       auto mdl = fw::Framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
       if (!mdl.ok()) {
-        fw::debug << "ERROR loading mesh '" << mesh_file_name << "': " << mdl.status() << std::endl;
+        LOG(ERR) << "error loading mesh '" << mesh_file_name << "': " << mdl.status();
       } else {
 //      mdl->set_color(game::SimulationThread::get_instance()->get_local_player()->get_color());
         icon->set_model(tmpl_name, *mdl);

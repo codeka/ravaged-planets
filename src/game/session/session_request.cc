@@ -26,14 +26,14 @@ void SessionRequest::set_complete_handler(complete_handler_fn handler) {
 void SessionRequest::begin(std::string base_url) {
   fw::XmlElement xml(get_request_xml());
   post_ = fw::Http::perform(fw::Http::POST, base_url + get_url(), xml);
-  fw::debug << get_description() << std::endl;
+  LOG(DBG) << get_description();
 }
 
 SessionRequest::UpdateResult SessionRequest::update() {
   if (post_->is_finished()) {
     const auto err = parse_response();
     if (!err.ok()) {
-      fw::debug << "ERR: " << err.message() << std::endl;
+      LOG(ERR) << err.message() << std::endl;
       return SessionRequest::kInError;
     }
 
@@ -58,7 +58,7 @@ fw::Status SessionRequest::parse_response() {
     return fw::ErrorStatus(msg);
   }
 
-  fw::debug << xml->ToString() << std::endl;
+  LOG(DBG) << xml->ToString();
 
   return parse_response(*xml);
 }
@@ -85,7 +85,7 @@ void LoginSessionRequest::begin(std::string base_url) {
   fw::XmlElement xml(get_request_xml());
   post_ = fw::Http::perform(fw::Http::PUT, base_url + url);
 
-  fw::debug << get_description() << std::endl;
+  LOG(DBG) << get_description();
   Session::get_instance()->set_state(Session::kLoggingIn);
 }
 
@@ -102,7 +102,7 @@ fw::Status LoginSessionRequest::parse_response(fw::XmlElement &xml) {
   ASSIGN_OR_RETURN(user_id_, xml.GetAttributei<uint32_t>("userId"));
   Session::get_instance()->set_state(Session::kLoggedIn);
 
-  fw::debug << "login successful, session-id:" << session_id_ << std::endl;
+  LOG(INFO) << "login successful, session-id:" << session_id_;
   return fw::OkStatus();
 }
 
@@ -120,7 +120,7 @@ void LogoutSessionRequest::begin(std::string base_url) {
   fw::XmlElement xml(get_request_xml());
   post_ = fw::Http::perform(fw::Http::DELETE, base_url + url);
 
-  fw::debug << get_description() << std::endl;
+  LOG(DBG) << get_description();
 
   Session::get_instance()->set_state(Session::kLoggingOut);
 }
@@ -136,7 +136,7 @@ fw::Status LogoutSessionRequest::parse_response(fw::XmlElement &xml) {
 
   Session::get_instance()->set_state(Session::kDisconnected);
 
-  fw::debug << "logout successful" << std::endl;
+  LOG(INFO) << "logout successful";
   return fw::OkStatus();
 }
 
@@ -166,7 +166,7 @@ fw::Status CreateGameSessionRequest::parse_response(fw::XmlElement &xml) {
   }
 
   ASSIGN_OR_RETURN(auto game_id, xml.GetAttributei<uint64_t>("gameId"));
-  fw::debug << "new game registered, identifier: " << game_id << std::endl;
+  LOG(INFO) << "new game registered, identifier: " << game_id;
 
   // now let the simulation thread know we're starting a new game
   SimulationThread::get_instance()->new_game(game_id);
@@ -245,7 +245,7 @@ fw::Status JoinGameSessionRequest::parse_response(fw::XmlElement &xml) {
 
   ASSIGN_OR_RETURN(uint8_t player_no, xml.GetAttributei<uint8_t>("playerNo"));
   ASSIGN_OR_RETURN(std::string server_address, xml.GetAttribute("serverAddr"));
-  fw::debug << "joined game, address: " << server_address << " player# " << player_no << std::endl;
+  LOG(INFO) << "joined game, address: " << server_address << " player# " << player_no;
 
   // now connect to that server
   RETURN_IF_ERROR(
@@ -294,16 +294,14 @@ fw::Status ConfirmPlayerSessionRequest::parse_response(fw::XmlElement &xml) {
     ASSIGN_OR_RETURN(other_user_name_, xml.GetAttribute("user"));
     ASSIGN_OR_RETURN(player_no_, xml.GetAttributei<uint8_t>("playerNo"));
 
-    fw::debug
+    LOG(INFO)
         << "connecting player confirmed, user-id: " << other_user_id_
         << ", username: " << other_user_name_
-        << ", player#: " << player_no_
-        << std::endl;
+        << ", player#: " << player_no_;
   } else {
-    fw::debug
+    LOG(INFO)
         << "connecting player is not logged in to server, not allowing! user-id: "
-        << other_user_id_
-        << std::endl;
+        << other_user_id_;
     confirmed_ = false;
   }
 

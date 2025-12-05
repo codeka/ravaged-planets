@@ -61,7 +61,7 @@ bool OpenMapWindow::open_clicked(Widget *w) {
   auto status = EditorScreen::get_instance()->open_map(ws.get_name());
   if (!status.ok()) {
     // TODO: show error to user?
-    fw::debug << "Error opening map: " << status << std::endl;
+    LOG(ERR) << "error opening map: " << status << std::endl;
     return true;
   }
 

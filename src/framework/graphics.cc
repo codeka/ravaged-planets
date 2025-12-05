@@ -95,9 +95,9 @@ void GLAPIENTRY debug_callback(
   }
 
 
-  debug << "opengl error\n  source=" << source_name << "\n  type=" << type_name
-        << "\n  severity=" << severity_name << "\n  id=" << id << "\n  "
-        << message << std::endl;
+  LOG(ERR) << "opengl error\n  source=" << source_name << "\n  type=" << type_name
+           << "\n  severity=" << severity_name << "\n  id=" << id << "\n  "
+           << message;
   // TODO: can we use userParam?
 }
 
@@ -119,8 +119,8 @@ fw::Status Graphics::initialize(char const *title) {
     width_ = Settings::get<int>("fullscreen-width");
     height_ = Settings::get<int>("fullscreen-height");
   }
-  fw::debug << "Graphics initializing; window size=" << width_ << "x" << height_ 
-            << ", windowed=" << windowed_ << std::endl;
+  LOG(INFO) << "Graphics initializing; window size=" << width_ << "x" << height_ 
+            << ", windowed=" << windowed_;
 
   // Add SDL_GL_CONTEXT_DEBUG_FLAG to the default set of context flags. This will let us work with
   // GL_ARB_debug_output to get better error information.
@@ -174,17 +174,17 @@ fw::Status Graphics::initialize(char const *title) {
   }
 
   if(SDL_GL_SetSwapInterval(0) < 0) {
-    fw::debug << "Unable to set vsync, vsync is disabled. error: " << SDL_GetError() << std::endl;
+    LOG(INFO) << "Unable to set vsync, vsync is disabled. error: " << SDL_GetError();
   }
 
-  fw::debug << "GLEW version: " << glewGetString(GLEW_VERSION) << std::endl;
-  fw::debug << "GL vendor: " << glGetString(GL_VENDOR) << std::endl;
-  fw::debug << "GL renderer: " << glGetString(GL_RENDERER) << std::endl;
-  fw::debug << "GL version: " << glGetString(GL_VERSION) << std::endl;
-  fw::debug << "shading language version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-  fw::debug << "  GL_MAX_TEXTURE_SIZE=" << query(GL_MAX_TEXTURE_SIZE) << std::endl;
-  fw::debug << "  GL_MAX_TEXTURE_IMAGE_UNITS=" << query(GL_MAX_TEXTURE_IMAGE_UNITS) << std::endl;
-  fw::debug << "  GL_MAX_ARRAY_TEXTURE_LAYERS=" << query(GL_MAX_ARRAY_TEXTURE_LAYERS) << std::endl;
+  LOG(INFO) << "GLEW version: " << glewGetString(GLEW_VERSION);
+  LOG(INFO) << "GL vendor: " << glGetString(GL_VENDOR);
+  LOG(INFO) << "GL renderer: " << glGetString(GL_RENDERER);
+  LOG(INFO) << "GL version: " << glGetString(GL_VERSION);
+  LOG(INFO) << "shading language version: " << glGetString(GL_SHADING_LANGUAGE_VERSION);
+  LOG(INFO) << "  GL_MAX_TEXTURE_SIZE=" << query(GL_MAX_TEXTURE_SIZE);
+  LOG(INFO) << "  GL_MAX_TEXTURE_IMAGE_UNITS=" << query(GL_MAX_TEXTURE_IMAGE_UNITS);
+  LOG(INFO) << "  GL_MAX_ARRAY_TEXTURE_LAYERS=" << query(GL_MAX_ARRAY_TEXTURE_LAYERS);
 
   if (GLEW_ARB_debug_output) {
     glDebugMessageCallbackARB(&debug_callback, nullptr);
@@ -200,7 +200,7 @@ fw::Status Graphics::initialize(char const *title) {
     glDebugMessageControl(
         GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_ERROR, GL_DONT_CARE, 0, NULL, GL_TRUE);
 
-    fw::debug << "ARB_debug_output enabled" << std::endl;
+    LOG(DBG) << "ARB_debug_output enabled";
   }
 
   { // Bind a vertex array, but we never actually use it...
@@ -251,7 +251,7 @@ void Graphics::present() {
   if (err != GL_NO_ERROR) {
     // This might happen in Release mode, where we don't actually check errors on every single call
     // (it's expensive).
-    fw::debug << "opengl error occured: " << err << std::endl;
+    LOG(ERR) << "opengl error occured: " << err;
     // TODO: better error info?
   }
 
@@ -303,14 +303,14 @@ bool Graphics::is_render_thread() {
 /* static */
 void Graphics::ensure_render_thread() {
   if (!is_render_thread()) {
-    debug << ErrorStatus("expected to be running on the render thread") << std::endl;
+    LOG(ERR) << ErrorStatus("expected to be running on the render thread");
     // TODO: something better?
     std::terminate();
   }
 }
 
 void Graphics::toggle_fullscreen() {
-  fw::debug << "switching to " << (windowed_ ? "full-screen" : "windowed") << std::endl;
+  LOG(INFO) << "switching to " << (windowed_ ? "full-screen" : "windowed");
   windowed_ = !windowed_;
 
   if (windowed_) {

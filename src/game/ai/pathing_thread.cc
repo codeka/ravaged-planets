@@ -54,7 +54,7 @@ void PathingThread::thread_proc() {
   for (;;) {
     PathRequestData request = work_queue_.dequeue();
     if (request.flags == FLAG_STOP) {
-      fw::debug << "pathing_thread::stop() has been called, thread_proc stopping." << std::endl;
+      LOG(INFO) << "pathing_thread::stop() has been called, thread_proc stopping.";
       return;
     }
 

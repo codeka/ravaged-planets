@@ -154,7 +154,7 @@ std::string get_program_name(ParticleEmitterConfig::BillboardMode mode) {
   case ParticleEmitterConfig::kAdditive:
     return "particle-additive";
   default:
-    fw::debug << "ERROR - unknown billboard_mode: " << mode << std::endl;
+    LOG(ERR) << "unknown billboard_mode: " << mode;
     return "particle-normal";
   }
 }

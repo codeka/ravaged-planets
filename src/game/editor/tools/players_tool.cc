@@ -108,7 +108,7 @@ PlayersTool::PlayersTool(EditorWorld *wrld) : wnd_(nullptr), player_no_(1), Tool
   wnd_ = new PlayersToolWindow(this);
   auto model = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
   if (!model.ok()) {
-    fw::debug << "ERROR loading marker: " << model.status() << std::endl;
+    LOG(ERR) << "error loading marker: " << model.status();
   } else {
     marker_ = *model;
   }

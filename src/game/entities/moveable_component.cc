@@ -115,7 +115,7 @@ void MoveableComponent::update(float dt) {
 
       // only worry about the obstacle when it's in front of us
       float d = fw::dot(position_component_->get_direction().normalized(), obstacle_dir.normalized());
-    //  fw::debug << "cml::dot(_position_component->get_direction(), obstacle_dir) = " << d << std::endl;
+    //  LOG(INFO) << "cml::dot(_position_component->get_direction(), obstacle_dir) = " << d << std::endl;
       if (d > 0.0f) {
         // if they're selectable, reduce the distance by their selection radius - that's what we ACTUALLY want to
         // avoid...

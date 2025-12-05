@@ -157,7 +157,7 @@ void OpenFileWindow::on_item_selected(int index) {
       // we only support JPG and PNG image formats
       auto bmp_or_status = fw::load_bitmap(item_path);
       if (!bmp_or_status.ok()) {
-        fw::debug << "Error loading bitmap: " << bmp_or_status.status() << std::endl;
+        LOG(ERR) << "error loading bitmap '" << item_path << "': " << bmp_or_status.status();
       } else {
         auto bmp = *bmp_or_status;
         is_image = true; // if we loaded it, then we know it's an image

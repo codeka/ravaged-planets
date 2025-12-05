@@ -148,7 +148,7 @@ void World::screenshot_callback(fw::Bitmap const &screenshot) {
   fs::path full_path = base_path / std::format("screen-{:04d}.png", (max_file_number + 1));
   auto status = screenshot.save_bitmap(full_path.string());
   if (!status.ok()) {
-    fw::debug << "Error saving screenshot: " << status << std::endl;
+    LOG(ERR) << "error saving screenshot: " << status;
   }
 }
 

@@ -110,8 +110,8 @@ bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
     }
   } else {
     // if we're part of a multiplayer game, we have to join this player like any other player...
-    fw::debug << "you're already in game " << game_id
-              << ", cannot add an AI player (that feature is not yet implemented)" << std::endl;
+    LOG(WARN) << "you're already in game " << game_id
+              << ", cannot add an AI player (that feature is not yet implemented)";
   }
 
   wnd_->set_visible(false);

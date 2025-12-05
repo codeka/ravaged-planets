@@ -122,7 +122,7 @@ template<typename T>
 std::shared_ptr<T> create_command() {
   auto cmd = CreateCommand(T::identifier);
   if (!cmd.ok()) {
-    fw::debug << cmd.status() << std::endl;
+    LOG(ERR) << cmd.status() << std::endl;
     std::terminate();
   }
   return std::dynamic_pointer_cast<T>(*cmd);
@@ -132,7 +132,7 @@ template<typename T>
 std::shared_ptr<T> create_command(uint8_t player_no) {
   auto cmd = CreateCommand(T::identifier, player_no);
   if (!cmd.ok()) {
-    fw::debug << cmd.status() << std::endl;
+    LOG(ERR) << cmd.status() << std::endl;
     std::terminate();
   }
   return std::dynamic_pointer_cast<T>(*cmd);

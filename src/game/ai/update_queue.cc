@@ -54,13 +54,13 @@ void UpdateQueue::update() {
     queue_.pop();
 
     if (!qntry.fn) {
-      fw::debug << "ERR: update function callback cannot be called because it's empty." << std::endl;
+      LOG(ERR) << "update function callback cannot be called because it's empty.";
     } else {
       try {
         qntry.fn();
       } catch (std::exception &e) {
-        fw::debug << "ERR: an exception occurred executing an update function" << std::endl;
-        fw::debug << e.what() << std::endl;
+        LOG(ERR) << "an exception occurred executing an update function";
+        LOG(ERR) << e.what();
       }
     }
   }

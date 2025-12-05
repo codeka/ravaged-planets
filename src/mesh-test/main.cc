@@ -43,7 +43,7 @@ bool restart_handler(fw::gui::Widget *wdgt) {
   auto model = fw::Framework::get_instance()->get_model_manager()->get_model(
       fw::Settings::get<std::string>("mesh-file"));
   if (!model.ok()) {
-    fw::debug << "Error loading model: " << model.status() << std::endl;
+    LOG(ERR) << "error loading model: " << model.status();
   } else {
     g_model = *model;
   }
@@ -110,7 +110,7 @@ fw::Status Application::initialize(fw::Framework *frmwrk) {
       auto model =
           frmwrk->get_model_manager()->get_model(fw::Settings::get<std::string>("mesh-file"));
       if (!model.ok()) {
-        fw::debug << "Error loading model: " << model.status() << std::endl;
+        LOG(ERR) << "error loading model: " << model.status();
       } else {
         g_model = *model;
         g_model_node = g_model->create_node(fw::Color::from_rgba(0xff0000ff));
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
     new fw::Framework(&app);
     auto continue_or_status = fw::Framework::get_instance()->initialize("Mesh Test");
     if (!continue_or_status.ok()) {
-      fw::debug << continue_or_status.status() << std::endl;
+      LOG(ERR) << continue_or_status.status();
       return 1;
     }
     if (!continue_or_status.value()) {
@@ -191,14 +191,14 @@ int main(int argc, char** argv) {
 
     fw::Framework::get_instance()->run();
   } catch (std::exception &e) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
-    fw::debug << e.what() << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION!";
+    LOG(ERR) << e.what();
 
     display_exception(e.what());
   } catch (...) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION! (unknown exception)";
   }
 
   return 0;

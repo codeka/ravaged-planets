@@ -30,8 +30,8 @@ EntityAttribute &EntityAttribute::operator =(EntityAttribute const &copy) {
 
 void EntityAttribute::set_value(std::any value) {
   if (value_.type() != value.type()) {
-    fw::debug << "WARN: cannot set value of type " << value_.type().name() << " to value of type "
-              << value.type().name() << std::endl;
+    LOG(WARN) << "cannot set value of type " << value_.type().name() << " to value of type "
+              << value.type().name();
     return;
   }
 

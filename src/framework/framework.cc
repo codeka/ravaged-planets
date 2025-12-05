@@ -160,9 +160,9 @@ void Framework::on_fullscreen_toggle(std::string keyname, bool is_down) {
 
 void Framework::language_initialize() {
   const std::vector<LangDescription> langs = fw::get_languages();
-  debug << langs.size() << " installed language(s):" << std::endl;
+  LOG(INFO) << langs.size() << " installed language(s):";
   for(const LangDescription &l : langs) {
-    debug << l.name << " (" << l.display_name << ")" << std::endl;
+    LOG(INFO) << "  " << l.name << " (" << l.display_name << ")";
   }
 
   std::string lang_name = Settings::get<std::string>("lang");
@@ -176,7 +176,7 @@ void Framework::language_initialize() {
 void Framework::destroy() {
   app_->destroy();
 
-  debug << "framework is shutting down..." << std::endl;
+  LOG(INFO) << "framework is shutting down...";
   if (debug_view_ != nullptr) {
     debug_view_->destroy();
   }
@@ -228,7 +228,7 @@ void Framework::run() {
 }
 
 void Framework::exit() {
-  fw::debug << "Exiting." << std::endl;
+  LOG(INFO) << "Exiting.";
   running_ = false;
 }
 
@@ -246,14 +246,14 @@ void Framework::update_proc() {
   g_update_thread_id = std::this_thread::get_id();
 
   try {
-    debug << "framework initialization complete, application initialization starting..." << std::endl;
+    LOG(INFO) << "framework initialization complete, application initialization starting...";
     auto status = app_->initialize(this);
     if (!status.ok()) {
-      debug << "app did not iniatilize: " << status << std::endl;
+      LOG(ERR) << "app did not iniatilize: " << status;
       return;
     }
 
-    debug << "application initialization complete, running..." << std::endl;
+    LOG(INFO) << "application initialization complete, running...";
 
     int64_t accum_micros = 0;
     int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
@@ -278,13 +278,13 @@ void Framework::update_proc() {
       std::this_thread::yield();
     }
   }catch(std::exception &e) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
-    fw::debug << e.what() << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION!";
+    LOG(ERR) << e.what();
     throw;
   } catch (...) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION! (unknown exception)";
     throw;
   }
 }
@@ -313,7 +313,7 @@ void Framework::update(float dt) {
 void Framework::ensure_update_thread() {
   std::thread::id this_thread_id = std::this_thread::get_id();
   if (this_thread_id != g_update_thread_id) {
-    debug << fw::ErrorStatus("expected to be running on the update thread.") << std::endl;
+    LOG(ERR) << fw::ErrorStatus("expected to be running on the update thread.");
     // TODO: something else?
     std::terminate();
   }
@@ -347,7 +347,7 @@ bool Framework::poll_events() {
   while (SDL_PollEvent(&e)) {
     input_->process_event(e);
     if (e.type == SDL_QUIT) {
-      fw::debug << "Got quit signal, exiting." << std::endl;
+      LOG(INFO) << "Got quit signal, exiting.";
       return false;
     }
   }
@@ -359,7 +359,7 @@ bool Framework::wait_events() {
   while (SDL_WaitEvent(&e)) {
     input_->process_event(e);
     if (e.type == SDL_QUIT) {
-      fw::debug << "Got quit signal, exiting." << std::endl;
+      LOG(INFO) << "Got quit signal, exiting.";
       return false;
     }
   }

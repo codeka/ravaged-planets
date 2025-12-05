@@ -21,7 +21,8 @@ private:
 
 public:
   void debug(std::string msg) {
-    fw::debug << msg << std::endl;
+    // TODO: include the file/line of the lua file, rather than this line.
+    LOG(INFO) << msg;
   }
 
   LUA_DECLARE_METATABLE(LogWrapper);
@@ -47,8 +48,8 @@ LuaContext::~LuaContext() {
 }
 
 void LuaContext::setup_state() {
-  // first, clear out the default package.path. we want to restrict where we look for scripts to just those areas that
-  // we control.
+  // first, clear out the default package.path. we want to restrict where we look for scripts to
+  // just those areas that we control.
   fw::lua::Value package = globals()["package"];
   if (!package.is_nil()) {
     package["path"] = "";
@@ -68,21 +69,19 @@ void LuaContext::add_path(fs::path const &path) {
 
 bool LuaContext::load_script(fs::path const &filename) {
   last_error_ = "";
-  debug << "loading script: " << filename.string() << std::endl;
+  LOG(INFO) << "loading script: " << filename.string();
 
   int ret = luaL_loadfile(l_, filename.string().c_str());
   if (ret != 0) {
     last_error_ = lua_tostring(l_, -1);
-    debug << "ERR: could not load Lua script " << filename.string() << ":\n" << last_error_
-          << std::endl;
+    LOG(ERR) << "could not load Lua script " << filename.string() << ":\n" << last_error_;
     return false;
   }
 
   ret = lua_pcall(l_, 0, 0, 0);
   if (ret != 0) {
     last_error_ = lua_tostring(l_, -1);
-    debug << "ERR: could not load Lua script " << filename.string() << ":\n" << last_error_
-          << std::endl;
+    LOG(ERR) << "could not load Lua script " << filename.string() << ":\n" << last_error_;
     return false;
   }
 
@@ -106,7 +105,7 @@ Value LuaContext::create_table() {
 //-------------------------------------------------------------------------
 
 void l_log_debug(const std::string &msg) {
-  debug << "LUA : " << msg << std::endl;
+  LOG(DBG) << "LUA : " << msg;
 }
 
 }

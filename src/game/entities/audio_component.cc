@@ -30,7 +30,7 @@ void AudioComponent::apply_template(fw::lua::Value tmpl) {
 				cue.name = cue_value["Name"];
 				cue.audio_buffer = audio_manager->get_audio_buffer(cue_value["Filename"] );
 				if (!cue.audio_buffer) {
-					fw::debug << "  error loading cue \"" << cue.name << "\", could not load audio file." << std::endl;
+					LOG(ERR) << "  error loading cue \"" << cue.name << "\", could not load audio file.";
 				} else {
 					cues_[cue.name] = cue;
 				}
@@ -56,11 +56,11 @@ void AudioComponent::remove_inactive_sources() {
 void AudioComponent::play_cue(std::string const &name) {
 	auto it = cues_.find(name);
 	if (it == cues_.end()) {
-		fw::debug << "error: no cue\"" << name << "\"" << std::endl;
+		LOG(ERR) << "no cue\"" << name << "\"";
 		return;
 	}
 
-	fw::debug << "playing sound \"" << name << "\" \"" << it->second.name << "\"" << std::endl;
+	LOG(DBG) << "playing sound \"" << name << "\" \"" << it->second.name << "\"";
 	source_->play(it->second.audio_buffer);
 }
 

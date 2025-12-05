@@ -12,7 +12,7 @@
 namespace fw::net {
 
 fw::Status initialize() {
-  fw::debug << "initializing networking..." << std::endl;
+  LOG(INFO) << "initializing networking...";
   if (enet_initialize() != 0) {
     return fw::ErrorStatus("error initializing ENet");
   }
@@ -49,14 +49,12 @@ void Peer::send(Packet &pkt, int channel /*= 0*/) {
 }
 
 void Peer::on_connect() {
-  fw::debug << "connected to peer " << peer_->address.host << ":" << peer_->address.port
-            << std::endl;
+  LOG(INFO) << "connected to peer " << peer_->address.host << ":" << peer_->address.port;
   connected_ = true;
 }
 
 void Peer::on_receive(ENetPacket *Packet, enet_uint8 /*channel*/) {
-  fw::debug << "packet received from " << peer_->address.host << ":" << peer_->address.port
-            << std::endl;
+  LOG(INFO) << "packet received from " << peer_->address.host << ":" << peer_->address.port;
 
   if (handler_) {
     PacketBuffer buff(reinterpret_cast<char *>(Packet->data), Packet->dataLength);
@@ -67,7 +65,7 @@ void Peer::on_receive(ENetPacket *Packet, enet_uint8 /*channel*/) {
 }
 
 void Peer::on_disconnect() {
-  fw::debug << "peer disconnected" << std::endl;
+  LOG(INFO) << "peer disconnected";
 }
 
 //-------------------------------------------------------------------------
@@ -182,7 +180,7 @@ fw::Status Host::try_listen(int port) {
   // 32 connections allowed, unlimited bandwidth
   host_ = enet_host_create(port == 0 ? 0 : &addr, 32, ENET_PROTOCOL_MAXIMUM_CHANNEL_COUNT, 0, 0);
   if (host_ == nullptr) {
-    fw::debug << "error listening on port " << port << std::endl;
+    LOG(ERR) << "error listening on port " << port;
     return fw::ErrorStatus(absl::StrCat("error listening on port ", port));
   }
 
@@ -190,8 +188,7 @@ fw::Status Host::try_listen(int port) {
 }
 
 void Host::on_peer_connect(ENetPeer *peer) {
-  fw::debug << "new connection received from " << peer->address.host << ":" << peer->address.port
-            << std::endl;
+  LOG(INFO) << "new connection received from " << peer->address.host << ":" << peer->address.port;
 
   auto new_peer = std::make_shared<Peer>(this, peer, true);
   new_connections_.push_back(new_peer);

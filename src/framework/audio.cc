@@ -80,7 +80,7 @@ std::optional<std::unique_ptr<PcmData>> decode_ogg(const fs::path& path) {
     stb_vorbis_decode_filename(
       pcm_data->filename.c_str(), &pcm_data->channels, &pcm_data->sample_rate, &pcm_data->pcm_data);
   if (pcm_data->samples < 0) {
-    fw::debug << " ERROR decoding file: " << path << std::endl;
+    LOG(ERR) << "error decoding file: " << path;
   }
 
   return std::move(pcm_data);
@@ -89,22 +89,22 @@ std::optional<std::unique_ptr<PcmData>> decode_ogg(const fs::path& path) {
 }  // namespace
 
 void AudioManager::initialize() {
-  fw::debug << "OpenAL devices:" << std::endl;
+  LOG(INFO) << "OpenAL devices:";
   for (std::string device : split_alc_string(alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER))) {
-    fw::debug << "  " << device << std::endl;
+    LOG(INFO) << "  " << device;
   }
-  fw::debug << "default device: " << alcGetString(nullptr, ALC_DEFAULT_ALL_DEVICES_SPECIFIER) << std::endl;
+  LOG(INFO) << "default device: " << alcGetString(nullptr, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
 
   // TODO: allow the user to choose the output device (and change it at runtime).
   device_ = alcOpenDevice(nullptr);
   if (device_ == nullptr) {
-    fw::debug << " ERROR initializing audio subsystem: " << describe_error(alGetError()) << std::endl;
+    LOG(ERR) << "error initializing audio subsystem: " << describe_error(alGetError());
     return;
   }
 
   context_ = alcCreateContext(device_, nullptr);
   if (context_ == nullptr) {
-    fw::debug << " ERROR creating context: " << describe_error(alGetError()) << std::endl;
+    LOG(ERR) << "error creating context: " << describe_error(alGetError());
     alcCloseDevice(device_);
     device_ = nullptr;
     return;
@@ -113,7 +113,7 @@ void AudioManager::initialize() {
   alcMakeContextCurrent(context_);
 
   auto version = alGetString(AL_VERSION);
-  fw::debug << "OpenAL version: " << version << std::endl;
+  LOG(INFO) << "OpenAL version: " << version;
 }
 
 void AudioManager::destroy() {
@@ -165,13 +165,13 @@ AudioBuffer::AudioBuffer(AudioManager *mgr, std::string const &name) {
   fs::path path = fw::resolve(name);
   auto pcm_data = decode_ogg(path);
   if (!pcm_data) {
-    fw::debug << "error loading sound " << path << std::endl;
+    LOG(ERR) << "error loading sound: " << path;
   }
 
   alGenBuffers(1, &id_);
   int err = alGetError();
   if (err != AL_NO_ERROR) {
-    fw::debug << "error creating buffer " << path << ": " << describe_error(err);
+    LOG(ERR) << "error creating buffer " << path << ": " << describe_error(err);
     return;
   }
 
@@ -181,7 +181,7 @@ AudioBuffer::AudioBuffer(AudioManager *mgr, std::string const &name) {
   } else if ((*pcm_data)->channels == 1) {
     format = AL_FORMAT_MONO16;
   } else {
-    fw::debug << "error in " << path << ": unexpected number of channels: " << (*pcm_data)->channels << std::endl;
+    LOG(ERR) << "error in " << path << ": unexpected number of channels: " << (*pcm_data)->channels;
     alDeleteBuffers(1, &id_);
     id_ = 0;
     return;
@@ -192,17 +192,16 @@ AudioBuffer::AudioBuffer(AudioManager *mgr, std::string const &name) {
   alBufferData(id_, format, (*pcm_data)->pcm_data, buffer_size, (*pcm_data)->sample_rate);
   err = alGetError();
   if (err != AL_NO_ERROR) {
-    fw::debug << "error uploading OpenAL buffer " << path << ": " << describe_error(err);
+    LOG(ERR) << "error uploading OpenAL buffer " << path << ": " << describe_error(err);
     alDeleteBuffers(1, &id_);
     id_ = 0;
     return;
   }
 
-  fw::debug << "loaded sound: " << path.string() << " "
+  LOG(INFO) << "loaded sound: " << path.string() << " "
     << static_cast<float>((*pcm_data)->sample_rate) / 1000.0f << "kHz, "
     << (*pcm_data)->channels << " channels, "
-    << static_cast<float>((*pcm_data)->samples) / (*pcm_data)->sample_rate << " seconds"
-    << std::endl;
+    << static_cast<float>((*pcm_data)->samples) / (*pcm_data)->sample_rate << " seconds";
 }
 
 AudioBuffer::~AudioBuffer() {
@@ -239,7 +238,7 @@ AudioSource::PlayState& AudioSource::find_free_playstate() {
   alGenSources(1, &state.id);
   int err = alGetError();
   if (err != AL_NO_ERROR) {
-    fw::debug << "error generating OpenAL source: " << describe_error(err);
+    LOG(ERR) << "error generating OpenAL source: " << describe_error(err);
     return state; // TODO: what to do about errors?
   }
 
@@ -253,14 +252,14 @@ bool AudioSource::play(std::shared_ptr<AudioBuffer> audio) {
   alSourcei(state.id, AL_BUFFER, audio->id_);
   int err = alGetError();
   if (err != AL_NO_ERROR) {
-    fw::debug << "error playing sound: " << describe_error(err);
+    LOG(ERR) << "error playing sound: " << describe_error(err);
     return false; // TODO: what to do about errors?
   }
 
   alSourcePlay(state.id);
   err = alGetError();
   if (err != AL_NO_ERROR) {
-    fw::debug << "error playing sound: " << describe_error(err);
+    LOG(ERR) << "error playing sound: " << describe_error(err);
     return false; // TODO: what to do about errors?
   }
 

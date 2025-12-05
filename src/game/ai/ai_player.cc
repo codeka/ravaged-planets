@@ -67,7 +67,7 @@ AIPlayer::~AIPlayer() {
 
 /* static */
 void AIPlayer::l_set_ready(fw::lua::MethodContext<AIPlayer>& ctx) {
-  fw::debug << "setting AI player ready" << std::endl;
+  LOG(DBG) << "setting AI player ready";
   ctx.owner()->is_ready_to_start_ = true;
 }
 
@@ -82,7 +82,7 @@ void AIPlayer::l_say(fw::lua::MethodContext<AIPlayer>& ctx) {
 void AIPlayer::l_local_say(fw::lua::MethodContext<AIPlayer>& ctx) {
   std::string msg = ctx.arg<std::string>(0);
 
-  fw::debug << "SAY : " << msg << std::endl;
+  LOG(DBG) << "SAY : " << msg;
   // just "say" whatever they told us to say... (but just locally, it's for debugging your scripts, basically)
   SimulationThread::get_instance()->sig_chat.Emit(ctx.owner()->user_name_, msg);
 }
@@ -156,7 +156,7 @@ public:
         const fw::lua::Value value = kvp.value<fw::lua::Value>();
         if (value.type() == LUA_TTABLE) {
           // if it's a table, we treat it as an array
-          fw::debug << "TODO: specifying multiple player_nos is not implemented" << std::endl;
+          LOG(DBG) << "TODO: specifying multiple player_nos is not implemented";
         } else {
           // if it's not a table, it should be an integer
           player_nos_.push_back(static_cast<uint8_t>(value.as<int>()));
@@ -166,7 +166,7 @@ public:
       } else if (key == "state") {
         state_ = kvp.value<std::string>();
       } else {
-        fw::debug << "WARN: unknown option for findunits: " << key << std::endl;
+        LOG(WARN) << "unknown option for findunits: " << key;
       }
     }
 
@@ -281,14 +281,14 @@ void AIPlayer::issue_order(UnitWrapper *unit, fw::lua::Value order) {
 
   std::string order_name = order["order"];
   if (order_name == "build") {
-    fw::debug << "issuing \"build\" order to unit." << std::endl;
+    LOG(DBG) << "issuing \"build\" order to unit.";
 
     // todo: we should make this "generic"
     std::shared_ptr<BuildOrder> build_order = create_order<BuildOrder>();
     build_order->template_name = order["build_unit"];
     orderable->issue_order(build_order);
   } else if (order_name == "attack") {
-    fw::debug << "issuing \"attack\" order to units." << std::endl;
+    LOG(DBG) << "issuing \"attack\" order to units.";
     std::weak_ptr<ent::Entity> target_entity_wp;/// = luabind::object_cast<unit_wrapper*>(orders["target"])->get_entity();
     std::shared_ptr<ent::Entity> target_entity = target_entity_wp.lock();
     if (target_entity) {
@@ -297,7 +297,7 @@ void AIPlayer::issue_order(UnitWrapper *unit, fw::lua::Value order) {
       orderable->issue_order(order);
     }
   } else {
-    fw::debug << "unknown order!" << std::endl;
+    LOG(WARN) << "unknown order: " << order_name;
   }
 }
 
@@ -343,8 +343,7 @@ void AIPlayer::world_loaded() {
 
   auto start_it = game::World::get_instance()->get_player_starts().find(player_no_);
   if (start_it == game::World::get_instance()->get_player_starts().end()) {
-    fw::debug << "WARN: no player_start defined for player " << player_no_ << ", choosing random"
-              << std::endl;
+    LOG(WARN) << "no player_start defined for player " << player_no_ << ", choosing random";
     start_loc = fw::Vector(13.0f, 0, 13.0f); // <todo, Random
   } else {
     start_loc = start_it->second;

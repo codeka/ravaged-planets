@@ -38,7 +38,7 @@ void GameScreen::set_options(std::shared_ptr<ScreenOptions> opt) {
 
 void GameScreen::show() {
   if (options_ == nullptr) {
-    fw::debug << "ERROR no GameScreenOptions has been set, cannot start new game!" << std::endl;
+    LOG(ERR) << "no GameScreenOptions has been set, cannot start new game!";
     return;
   }
 
@@ -46,7 +46,7 @@ void GameScreen::show() {
   auto status = reader->Read(options_->map_name);
   if (!status.ok()) {
     // TODO: make this return the error the caller instead
-    fw::debug << "Error loading world: " << status << std::endl;
+    LOG(ERR) << "error loading world: " << status;
   }
   world_ = new World(reader);
 

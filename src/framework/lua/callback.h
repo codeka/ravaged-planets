@@ -21,7 +21,7 @@ public:
 
   Callback(lua_State* l) : l_(l) {
     if (lua_type(l, -1) != LUA_TFUNCTION) {
-      fw::debug << "Attempt to create a Callback with something that is not a function." << std::endl;
+      LOG(ERR) << "Attempt to create a Callback with something that is not a function.";
       lua_pop(l_, 1);
       l_ = nullptr;
     }
@@ -55,14 +55,14 @@ private:
     int err = lua_pcall(l_, num_args, 0, lua_gettop(l_) - num_args - 1);
     if (err != 0) {
       // TODO: throw exception?
-      fw::debug << "Error calling callback with " << num_args << " arguments, err=" << err << std::endl;
+      LOG(ERR) << "error calling callback with " << num_args << " arguments, err=" << err;
 
       // Lua will push an error message onto the stack in case of "regular" errors.
       if (err == LUA_ERRRUN) {
         size_t length = 0;
         const char* str = lua_tolstring(l_, -1, &length);
         std::string msg(str, length);
-        fw::debug << "  " << msg << std::endl;
+        LOG(ERR) << "  " << msg;
       }
     }
   }

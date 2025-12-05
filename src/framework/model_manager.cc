@@ -13,7 +13,7 @@ namespace fw {
 
 fw::StatusOr<std::shared_ptr<Model>> ModelManager::get_model(std::string const &name) {
   fs::path path = fw::resolve("meshes/" + name + ".mesh");
-  debug << "loading mesh: " << path << std::endl;
+  LOG(INFO) << "loading mesh: " << path;
 
   auto it = models_.find(name);
   if (it == models_.end()) {

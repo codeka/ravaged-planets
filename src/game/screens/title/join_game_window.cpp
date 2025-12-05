@@ -51,16 +51,13 @@ namespace ww {
 			CEGUI::SubscriberSlot(&join_game_window::cancel_clicked, this));
 	}
 
-	void join_game_window::update()
-	{
-		if (Session::get_instance() == 0)
-		{
+	void join_game_window::update() {
+		if (Session::get_instance() == 0) {
 			return;
 		}
 
 		Session::SessionState curr_state = Session::get_instance()->get_state();
-		if (curr_state != sess_state_)
-		{
+		if (curr_state != sess_state_) {
 			sess_state_ = curr_state;
 
 			if (sess_state_ == Session::logged_in)
@@ -70,20 +67,17 @@ namespace ww {
 		}
 	}
 
-	void join_game_window::show()
-	{
+	void join_game_window::show() {
 		fw::gui::window::show();
 	}
 
-	bool join_game_window::games_list_selection_changed(CEGUI::EventArgs const &)
-	{
+	bool join_game_window::games_list_selection_changed(CEGUI::EventArgs const &) {
 		CEGUI::Window *wnd = get_child("JoinGame/Join");
 		wnd->setEnabled(_games_list->getSelectedCount() > 0);
 		return true;
 	}
 
-	bool join_game_window::join_game_clicked(CEGUI::EventArgs const &)
-	{
+	bool join_game_window::join_game_clicked(CEGUI::EventArgs const &) {
 		CEGUI::ListboxItem *selection = _games_list->getFirstSelectedItem();
 		if (selection == 0)
 			return true;
@@ -99,22 +93,18 @@ namespace ww {
 		return true;
 	}
 
-	bool join_game_window::cancel_clicked(CEGUI::EventArgs const &)
-	{
+	bool join_game_window::cancel_clicked(CEGUI::EventArgs const &) {
 		hide();
 		main_menu->show();
 		return true;
 	}
 
-	void join_game_window::refresh_games_list()
-	{
-		fw::debug << "refreshing games list..." << std::endl;
+	void join_game_window::refresh_games_list() {
 		ww::Session::get_instance()->get_games_list(
 			boost::bind(&join_game_window::refresh_games_list_callback, this, _1));
 	}
 
-	void join_game_window::refresh_games_list_callback(std::vector<RemoteGame> const &games)
-	{
+	void join_game_window::refresh_games_list_callback(std::vector<RemoteGame> const &games) {
 		_games = games;
 
 		_games_list->resetList();
@@ -123,8 +113,7 @@ namespace ww {
 		}
 	}
 
-	void join_game_window::add_game(RemoteGame &g)
-	{
+	void join_game_window::add_game(RemoteGame &g) {
 		std::vector<std::string> values;
 		values.push_back(boost::lexical_cast<std::string>(g.id));
 		values.push_back(g.owner_username);

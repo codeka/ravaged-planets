@@ -43,7 +43,7 @@ void PathingComponent::update(float dt) {
       new_path_.clear();
 
       //TODO vector operator << for osteam
-      //fw::debug << "found path to [" << last_request_goal_ << "]: " << path_.size() << " node(s)" << std::endl;
+      //LOG(INFO) << "found path to [" << last_request_goal_ << "]: " << path_.size() << " node(s)" << std::endl;
     }
   }
 

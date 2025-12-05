@@ -46,8 +46,7 @@ void LocalPlayer::world_loaded() {
 
   auto start_it = game::World::get_instance()->get_player_starts().find(player_no_);
   if (start_it == game::World::get_instance()->get_player_starts().end()) {
-    fw::debug << "WARN: no player_start defined for player " << player_no_ << ", choosing random"
-              << std::endl;
+    LOG(WARN) << "no player_start defined for player " << player_no_ << ", choosing random";
     start_loc = fw::Vector(13.0f, 0, 13.0f); // <todo, Random
   } else {
     start_loc = start_it->second;

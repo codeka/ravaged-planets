@@ -126,7 +126,7 @@ void CursorHandler::on_key_select(std::string, bool is_down) {
     } else {
       std::shared_ptr<MoveOrder> order(create_order<MoveOrder>());
       order->goal = terrain_->get_cursor_location();
-//      fw::debug << "cursor_location: " << order->goal << std::endl;
+//      LOG(DBG) << "cursor_location: " << order->goal;
       for (auto it = entities_->get_selection().begin(); it != entities_->get_selection().end(); ++it) {
         std::shared_ptr<ent::Entity> ent = it->lock();
         if (!ent)

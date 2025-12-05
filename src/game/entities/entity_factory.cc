@@ -29,7 +29,7 @@ void EntityFactory::populate(std::shared_ptr<Entity> ent, std::string name) {
   // first, find the template we'll use for creating the Entity
   std::optional<fw::lua::Value> entity_template = get_template(name);
   if (!entity_template) {
-    fw::debug << "  warning: unknown Entity: " << name << std::endl;
+    LOG(WARN) << "  unknown Entity: " << name;
     return;
   }
 
@@ -117,7 +117,7 @@ void EntityFactory::load_entities() {
 EntityComponent *EntityFactory::create_component(std::string component_type_name) {
   std::function<EntityComponent *()> fn = (*comp_registry)[component_type_name];
   if (!fn) {
-    fw::debug << "  warning: skipping unknown component: " << component_type_name << std::endl;
+    LOG(WARN) << "  skipping unknown component: " << component_type_name;
     return nullptr;
   }
 

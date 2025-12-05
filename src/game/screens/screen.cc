@@ -43,7 +43,7 @@ void ScreenStack::set_active_screen(std::string const &name,
 
   auto it = screens_.find(name);
   if (it == screens_.end()) {
-    fw::debug << "ERROR - invalid screen name: " << name << std::endl;
+    LOG(ERR) << "invalid screen name: " << name;
     return;
   }
 

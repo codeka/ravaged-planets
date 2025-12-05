@@ -48,7 +48,7 @@ void EnumerateFiles(fs::path dir, std::vector<ScriptDesc> &desc_list) {
     } else if (it->path().extension() == ".ai") {
       auto desc = ParseAi(dir, it->path());
       if (!desc.ok()) {
-        fw::debug << "ERROR loading AI file '" << it->path() << "': " << desc.status() << std::endl;
+        LOG(ERR) << "error loading AI file '" << it->path() << "': " << desc.status();
       } else {
         desc_list.push_back(*desc);
       }

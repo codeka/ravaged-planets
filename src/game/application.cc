@@ -51,7 +51,7 @@ fw::Status Application::initialize(fw::Framework * framework) {
 }
 
 void Application::destroy() {
-  fw::debug << "application shutting down." << std::endl;
+  LOG(INFO) << "application shutting down.";
   SimulationThread::get_instance()->destroy();
 }
 

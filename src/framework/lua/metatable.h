@@ -122,7 +122,7 @@ Userdata<T>* find_userdata(lua_State* l, int index, std::string_view metatable_n
       return find_userdata<T>(l, -1, metatable_name);
     }
     // TODO: error
-    fw::debug << "  find_userdata called on table with no metatable, expected: " << metatable_name << std::endl;
+    LOG(ERR) << "  find_userdata called on table with no metatable, expected: " << metatable_name;
     return nullptr;
 
   case LUA_TUSERDATA:
@@ -130,7 +130,7 @@ Userdata<T>* find_userdata(lua_State* l, int index, std::string_view metatable_n
 
   default:
     // TODO: error
-    fw::debug << "  find_userdata called on unknown type" << std::endl;
+    LOG(ERR) << "  find_userdata called on unknown type";
     return nullptr;
   }
 }
@@ -139,7 +139,7 @@ template<typename Owner>
 inline int callback_impl(lua_State* l, std::string name) {
   Userdata<Owner>* userdata = impl::find_userdata<Owner>(l, 1, name);
   if (userdata == nullptr) {
-    fw::debug << "invalid call, userdata does not have matching metatable." << std::endl;
+    LOG(ERR) << "invalid call, userdata does not have matching metatable.";
     return 0;
   }
   const MethodClosure<Owner>* closure

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <framework/bitmap.h>
+#include <framework/logging.h>
 #include <framework/settings.h>
 #include <framework/framework.h>
 #include <framework/font.h>
@@ -27,7 +28,7 @@ int main(int argc, char** argv) {
     new fw::Framework(&app);
     auto continue_or_status = fw::Framework::get_instance()->initialize("Font Test");
     if (!continue_or_status.ok()) {
-      fw::debug << continue_or_status.status() << std::endl;
+      LOG(ERR) << continue_or_status.status();
       return 1;
     }
     if (!continue_or_status.value()) {
@@ -38,20 +39,20 @@ int main(int argc, char** argv) {
     font_face->ensure_glyphs("wm");
     status = font_face->get_bitmap()->save_bitmap(fw::resolve("test.png", true));
     if (!status.ok()) {
-      fw::debug << status << std::endl;
+      LOG(ERR) << status;
       return 1;
     }
-    fw::debug << "Bitmap saved to:" << fw::resolve("test.png", true) << std::endl;
+    LOG(INFO) << "Bitmap saved to:" << fw::resolve("test.png", true);
 
   } catch(std::exception &e) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
-    fw::debug << e.what() << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION!";
+    LOG(ERR) << e.what();
 
     display_exception(e.what());
   } catch (...) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION! (unknown exception)";
   }
 
   return 0;

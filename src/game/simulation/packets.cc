@@ -134,7 +134,7 @@ void CommandPacket::deserialize(fw::net::PacketBuffer &buffer) {
     auto cmd = CreateCommand(id, player_no);
     if (!cmd.ok()) {
       // TODO: return error
-      fw::debug << "ERROR deserializing command packet: " << cmd.status() << std::endl;
+      LOG(ERR) << "error deserializing command packet: " << cmd.status();
     } else {
       (*cmd)->deserialize(buffer);
       commands_.push_back(*cmd);

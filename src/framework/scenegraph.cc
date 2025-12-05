@@ -330,7 +330,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
     if (g_shadow_debug && debug_shadowsrc) {
       auto shader = Shader::Create("gui.shader");
       if (!shader.ok()) {
-        fw::debug << "ERROR creating gui.shader: " << shader.status() << std::endl;
+        LOG(ERR) << "creating gui.shader: " << shader.status();
       } else {
         auto shader_params = (*shader)->CreateParameters();
         // TODO: recalculating this every time seems wasteful

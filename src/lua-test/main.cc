@@ -43,7 +43,7 @@ int UnitWrapper::l_attack(fw::lua::MethodContext& ctx) {
 }
 
 void UnitWrapper::attack(std::string const &msg) {
-  fw::debug << "ATTACK: " << msg << std::endl;
+  LOG(INFO) << "ATTACK: " << msg;
 }
 */
 /*
@@ -87,7 +87,7 @@ int ai_player::l_timer(fw::lua_context &ctx) {
 }
 
 void ai_player::say(std::string const &msg) {
-  fw::debug << "SAY: " << msg << std::endl;
+  LOG(INFO) << "SAY: " << msg;
 }
 
 std::vector<unit_wrapper *> ai_player::find() {
@@ -111,8 +111,7 @@ private:
 
 public:
   void debug(std::string msg) {
-    fw::debug << "debug " << n << std::endl;
-    fw::debug << msg << std::endl;
+    LOG(DBG) << n << ": " << msg << std::endl;
   }
 
   int n = 0;
@@ -141,7 +140,7 @@ int main(int argc, char** argv) {
     new fw::Framework(&app);
     auto continue_or_status = fw::Framework::get_instance()->initialize("Lua Test");
     if (!continue_or_status.ok()) {
-      fw::debug << continue_or_status.status() << std::endl;
+      LOG(ERR) << continue_or_status.status() << std::endl;
       return 1;
     }
     if (!continue_or_status.value()) {
@@ -169,12 +168,12 @@ int main(int argc, char** argv) {
 
     fw::lua::Value blah = ctx.globals()["Blah"];
     for (auto& kvp : blah) {
-      fw::debug << "key/value " << kvp.key<std::string>() << " - " << kvp.value<fw::lua::Value>() << std::endl;
+      LOG(INFO) << "key/value " << kvp.key<std::string>() << " - " << kvp.value<fw::lua::Value>();
     }
-    fw::debug << " Blah.name = " << blah["name"].debug_string() << std::endl;
+    LOG(INFO) << " Blah.name = " << blah["name"].debug_string();
     blah["desc"] = "hrm";
     for (auto& kvp : blah) {
-      fw::debug << "key/value " << kvp.key<std::string>() << " - " << kvp.value<fw::lua::Value>() << std::endl;
+      LOG(INFO) << "key/value " << kvp.key<std::string>() << " - " << kvp.value<fw::lua::Value>();
     }
 
     test_class.callback();
@@ -185,19 +184,19 @@ int main(int argc, char** argv) {
     fw::lua_registrar<ai_player>::register_static(ctx.get_state(), "player", new ai_player());
 
     if (g_callback) {
-      fw::debug << "g_callback is non-null, calling it now." << std::endl;
+      LOG(INFO) << "g_callback is non-null, calling it now.";
       g_callback->call();
     }
 */
   } catch(std::exception &e) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
-    fw::debug << e.what() << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION!";
+    LOG(ERR) << e.what();
 
     display_exception(e.what());
   } catch (...) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION! (unknown exception)";
   }
 
   return 0;

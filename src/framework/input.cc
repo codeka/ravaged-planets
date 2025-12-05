@@ -84,7 +84,7 @@ int Input::bind_key(std::string const &keyname, input_bind_fn fn) {
       } else {
         key_names_map::iterator it = g_key_names.find(part);
         if (it == g_key_names.end()) {
-          debug << "ERROR: no such key: " << part << std::endl;
+          LOG(ERR) << "no such key: " << part;
         } else {
           key_no = it->second;
         }
@@ -92,7 +92,7 @@ int Input::bind_key(std::string const &keyname, input_bind_fn fn) {
     }
 
     if (key_no == 0) {
-      debug << "ERROR: invalid binding, no key name specified" << std::endl;
+      LOG(ERR) << "invalid binding, no key name specified";
       return 0;
     }
 
@@ -107,7 +107,7 @@ int Input::bind_key(std::string const &keyname, input_bind_fn fn) {
 int Input::bind_key(std::string keyname, InputBinding const &binding) {
   key_names_map::iterator it = g_key_names.find(keyname);
   if (it == g_key_names.end()) {
-    debug << "ERROR: no such key: " << keyname << std::endl;
+    LOG(ERR) << "no such key: " << keyname;
     return 0;
   }
 

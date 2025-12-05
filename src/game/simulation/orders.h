@@ -138,7 +138,7 @@ template<typename T>
 inline std::shared_ptr<T> create_order() {
   auto order = CreateOrder(T::identifier);
   if (!order.ok()) {
-    fw::debug << order.status() << std::endl;
+    LOG(ERR) << order.status();
     std::terminate();
   }
   return std::dynamic_pointer_cast<T>(*order);

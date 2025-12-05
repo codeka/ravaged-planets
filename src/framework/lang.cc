@@ -31,10 +31,9 @@ Lang::Lang(std::string const &lang_name) :
     ins.open(lang_path.string().c_str());
   }
   if (!ins) {
-    debug << "WARN: could not find language file: " << lang_name << ", loading en.lang instead." 
-          << std::endl;
+    LOG(WARN) << "could not find language file: " << lang_name << ", loading en.lang instead.";
   } else {
-    debug << "loading language: " << lang_path.string() <<std::endl;
+    LOG(INFO) << "loading language: " << lang_path.string();
 
     std::string key, ParticleRotation;
     int line_num = 0;
@@ -61,11 +60,11 @@ std::string Lang::get_string(std::string const &name) {
   if (it == strings_.end()) {
     it = def_strings_.find(name);
     if (it == def_strings_.end()) {
-      debug << "WARN: string \"" << name << "\" does not exist in " << lang_name_
-            << " *or* in en.lang!" << std::endl;
+      LOG(WARN) << "string \"" << name << "\" does not exist in " << lang_name_
+                << " *or* in en.lang!";
       return name;
     } else {
-      debug << "WARN: string \"" << name << "\" does not exist in " << lang_name_ << std::endl;
+      LOG(INFO) << "string \"" << name << "\" does not exist in " << lang_name_;
     }
   }
 
@@ -138,8 +137,8 @@ bool get_lang_line(std::fstream &fs, std::string &key, std::string &value,
       // if this is the first line in a sequence, we'll need to split on the first "="
       int equals = line.find('=');
       if (equals == std::string::npos) {
-        debug << "WARN: invalid line in " << file_name << " (" << line_num
-              << "), expected to find '='" << std::endl;
+        LOG(WARN) << "invalid line in " << file_name << " (" << line_num
+                  << "), expected to find '='" ;
         continue;
       }
 

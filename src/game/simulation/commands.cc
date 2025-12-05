@@ -111,7 +111,7 @@ ent::entity_id generate_entity_id() {
 
   if (entity_id > 0x00ffffff) {
     // this is probably pretty bad! I can't imagine a game that needs 16 million entities.
-    fw::debug << "ERROR - too many entities have been created!!" << std::endl;
+    LOG(ERR) << "too many entities have been created!!";
     std::terminate(); // TODO: should be an exception after all?
   }
 

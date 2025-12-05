@@ -238,7 +238,7 @@ void ShaderProgram::Begin() {
     std::vector<char> error_message(log_length);
     glGetProgramInfoLog(program_id_, log_length, nullptr, &error_message[0]);
 
-    fw::debug << "glValidateProgram error: " << &error_message[0] << std::endl;
+    LOG(ERR) << "glValidateProgram error: " << &error_message[0];
   }
 #endif
 
@@ -406,7 +406,7 @@ fw::StatusOr<std::shared_ptr<Shader>> Shader::Create(std::string_view filename) 
 std::shared_ptr<Shader> Shader::CreateOrEmpty(std::string_view name) {
   auto shader = Create(name);
   if (!shader.ok()) {
-    fw::debug << "ERROR creating shader '" << name << "': " << shader.status() << std::endl;
+    LOG(ERR) << "creating shader '" << name << "': " << shader.status();
     return std::make_shared<Shader>();
   }
   return *shader;

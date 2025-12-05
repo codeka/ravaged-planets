@@ -32,7 +32,7 @@ std::shared_ptr<fw::model_node> add_node(fw::model &mdl, aiNode *node, int level
 void meshexp(std::string input_filename, std::string output_filename) {
   Assimp::Importer importer;
 
-  fw::debug << "reading file: " << input_filename << std::endl;
+  LOG(INFO) << "reading file: " << input_filename;
 
   // set the list of things we want the importer to ignore (COLORS is the most important)
   importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
@@ -54,8 +54,7 @@ void meshexp(std::string input_filename, std::string output_filename) {
           | aiProcess_ValidateDataStructure | aiProcess_FindInvalidData);
 
   if (scene == nullptr) {
-    fw::debug << "-- ERROR --" << std::endl;
-    fw::debug << importer.GetErrorString() << std::endl;
+    LOG(ERR) << importer.GetErrorString();
     return;
   }
 
@@ -63,7 +62,7 @@ void meshexp(std::string input_filename, std::string output_filename) {
 }
 
 bool export_scene(aiScene const *scene, std::string const &filename) {
-  fw::debug << "- writing file: " << filename << std::endl;
+  LOG(INFO) << "- writing file: " << filenam;
 
   // build up the fw::model first, and then use the fw::model_writer to
   // write it to disk.
@@ -79,7 +78,7 @@ bool export_scene(aiScene const *scene, std::string const &filename) {
   if (scene->mAnimations != 0) {
     // add animations
     for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
-      fw::debug << "  adding animation: (\"" << scene->mAnimations[0]->mName.data << "\")" << std::endl;
+      LOG(INFO) << "  adding animation: (\"" << scene->mAnimations[0]->mName.data << "\")";
     }
   }
 
@@ -91,8 +90,8 @@ bool export_scene(aiScene const *scene, std::string const &filename) {
 
 // adds the given aiMesh to the given fw::model
 bool add_mesh(fw::model &mdl, aiMesh *mesh) {
-  fw::debug << "  adding mesh (" << mesh->mNumBones << " bone(s), " << mesh->mNumVertices << " vertex(es), "
-      << mesh->mNumFaces << " face(s))" << std::endl;
+  LOG(INFO) << "  adding mesh (" << mesh->mNumBones << " bone(s), " << mesh->mNumVertices
+      << " vertex(es), " << mesh->mNumFaces << " face(s))";
 
   // create a vector of xyz_n_uv vertices and set it to zero initially
   std::shared_ptr<fw::model_mesh_noanim> mm(new fw::model_mesh_noanim(mesh->mNumVertices, mesh->mNumFaces * 3));
@@ -120,14 +119,14 @@ bool add_mesh(fw::model &mdl, aiMesh *mesh) {
   // each face should be a nice triangle for us
   for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
     if (mesh->mFaces[i].mNumIndices != 3) {
-      fw::debug << "PANIC! face is not a triangle! mNumIndices = " << mesh->mFaces[i].mNumIndices << std::endl;
+      LOG(ERR) << "PANIC! face is not a triangle! mNumIndices = " << mesh->mFaces[i].mNumIndices;
       return false;
     }
 
     for (int j = 0; j < 3; j++) {
       if (mesh->mFaces[i].mIndices[j] > 0xffff) {
-        fw::debug << "PANIC! face index is bigger than that supported by a 16-bit value: "
-            << mesh->mFaces[i].mIndices[j] << std::endl;
+        LOG(ERR) << "PANIC! face index is bigger than that supported by a 16-bit value: "
+            << mesh->mFaces[i].mIndices[j];
         return false;
       }
 
@@ -141,8 +140,8 @@ bool add_mesh(fw::model &mdl, aiMesh *mesh) {
 }
 
 std::shared_ptr<fw::model_node> add_node(fw::model &mdl, aiNode *node, int level) {
-  fw::debug << "  " << std::string(level * 2, ' ') << "adding node \"" << node->mName.data << "\"" << " ("
-      << node->mNumChildren << " child(ren), " << node->mNumMeshes << " meshe(s))" << std::endl;
+  LOG(INFO) << "  " << std::string(level * 2, ' ') << "adding node \"" << node->mName.data << "\"" << " ("
+      << node->mNumChildren << " child(ren), " << node->mNumMeshes << " meshe(s))";
   std::shared_ptr<fw::model_node> root_node;
   if (node->mNumMeshes == 1) {
     // if there's just one mesh (this is the most common case), then we just copy
@@ -191,7 +190,7 @@ public:
   void write(const char* message) {
     std::string msg(message);
     boost::trim(msg);
-    fw::debug << " assimp : " << msg << std::endl;
+    LOG(INFO) << " assimp : " << msg;
   }
 };
 
@@ -211,14 +210,14 @@ int main(int argc, char** argv) {
     fw::settings stg;
     meshexp(stg.get_value<std::string>("input"), stg.get_value<std::string>("output"));
   } catch (std::exception &e) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION!" << std::endl;
-    fw::debug << e.what() << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION!";
+    LOG(ERR) << e.what();
 
     display_exception(e.what());
   } catch (...) {
-    fw::debug << "--------------------------------------------------------------------------------" << std::endl;
-    fw::debug << "UNHANDLED EXCEPTION! (unknown exception)" << std::endl;
+    LOG(ERR) << "--------------------------------------------------------------------------------";
+    LOG(ERR) << "UNHANDLED EXCEPTION! (unknown exception)";
   }
 
   return 0;
@@ -228,7 +227,7 @@ void display_exception(std::string const &msg) {
   std::stringstream ss;
   ss << "An error has occurred. Please send your log file (below) to dean@codeka.com.au for diagnostics." << std::endl;
   ss << std::endl;
-  ss << fw::debug.get_filename() << std::endl;
+  ss << fw::LogFileName() << std::endl;
   ss << std::endl;
   ss << msg;
 }

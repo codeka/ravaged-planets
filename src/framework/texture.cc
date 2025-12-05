@@ -89,7 +89,7 @@ void Texture::create(fs::path const &fn) {
 
   // Local the image on this thread to avoid loading it on the render thread.
   fs::path filename = fn;
-  debug << "loading texture: " << filename.string() << std::endl;
+  LOG(INFO) << "loading texture: " << filename.string();
   int width, height, channels;
   unsigned char* pixels = stbi_load(filename.string().c_str(), &width, &height, &channels, 4);
 
@@ -311,7 +311,7 @@ struct FramebufferData {
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
-      fw::debug << "Framebuffer is not complete, expect errors: " << status << std::endl;
+      LOG(ERR) << "Framebuffer is not complete, expect errors: " << status;
     }
   }
 };

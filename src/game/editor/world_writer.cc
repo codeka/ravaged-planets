@@ -185,7 +185,7 @@ void WorldWriter::calculate_base_minimap_colors() {
      // Use the average color of this layer
     fw::Bitmap const &layer_bmp = trn->get_layer(i);
     base_minimap_colors_[i] = layer_bmp.get_dominant_color();
-    fw::debug << "base minimap color [" << i << "] = " << base_minimap_colors_[i] << std::endl;
+    LOG(DBG) << "base minimap color [" << i << "] = " << base_minimap_colors_[i];
   }
 }
 

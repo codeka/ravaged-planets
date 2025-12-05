@@ -754,7 +754,7 @@ void StackWalker::on_sym_init(char const *search_path, uint32_t options, char co
 }
 
 void StackWalker::on_output(char const *text) {
-  fw::debug << text << std::endl;
+  LOG(INFO) << text;
 }
 
 }

@@ -91,8 +91,7 @@ int generate_terrain_vertices(fw::vertex::xyz_n **buffer, float *height, int wid
     int patch_size /* = 0 */, int patch_x /* = 0 */, int patch_z /* = 0 */) {
   if (patch_size == 0) {
     if (width != length) {
-      fw::debug << "ERROR - if you don't specify a patch_size, width and height must be the same"
-                << std::endl;
+      LOG(ERR) << "if you don't specify a patch_size, width and height must be the same";
       return 0;
     }
 

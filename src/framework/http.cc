@@ -20,7 +20,7 @@ void Http::initialize() {
 
   curl_version_info_data *curl_version = curl_version_info(CURLVERSION_NOW);
   if (curl_version->age >= 0) {
-    debug << "libcurl (" << curl_version->version << ") initialized" << std::endl;
+    LOG(INFO) << "libcurl (" << curl_version->version << ") initialized";
   }
 
 #if defined(_DEBUG)
@@ -77,7 +77,7 @@ int Http::write_debug(CURL *, curl_infotype type, char *buffer, size_t len, void
   for(std::string line : lines) {
     auto trimmed = fw::StripSpaces(line);
     if (trimmed != "") {
-      debug << "  CURL " << type_name << trimmed << std::endl;
+      LOG(INFO) << "  CURL " << type_name << trimmed;
     }
   }
   return 0;
@@ -193,8 +193,8 @@ Status Http::get_status() const {
 void Http::check_error(CURLcode error, char const *fn) {
   if (error != CURLE_OK) {
     last_error_ = error;
-    debug << "WARN: error returned from libcurl call: " << fn << std::endl;
-    debug << "  [" << last_error_ << "] " << curl_easy_strerror(last_error_) << std::endl;
+    LOG(WARN) << "WARN: error returned from libcurl call: " << fn 
+              << " [" << last_error_ << "] " << curl_easy_strerror(last_error_);
   }
 }
 
@@ -205,11 +205,11 @@ void Http::check_error(CURLcode error, char const *fn) {
 void Http::do_action() {
   handle_ = curl_easy_init();
   if (handle_ == 0) {
-    debug << "ERROR: Could not create curl handle, cannot post data!" << std::endl;
+    LOG(ERR) << "could not create curl handle, cannot post data!";
     last_error_ = CURLE_FAILED_INIT;
   } else {
     if (g_enable_debug) {
-      debug << "CURL begin: " << url_ << std::endl;
+      LOG(DBG) << "CURL begin: " << url_;
       CHECK(curl_easy_setopt(handle_, CURLOPT_VERBOSE, 1));
     }
     CHECK(curl_easy_setopt(handle_, CURLOPT_DEBUGFUNCTION, &write_debug));

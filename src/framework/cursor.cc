@@ -64,7 +64,7 @@ void Cursor::set_cursor_for_real(std::string const &name) {
   if (it == loaded_cursors_.end()) {
     auto new_cursor = load_cursor(name);
     if (!new_cursor.ok()) {
-      fw::debug << "Error loading cursor: " << new_cursor.status() << std::endl;
+      LOG(ERR) << "error loading cursor: " << new_cursor.status();
     } else {
       cursor = *new_cursor;
       loaded_cursors_[name] = cursor;

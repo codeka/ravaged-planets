@@ -130,7 +130,7 @@ void SimulationThread::add_ai_player(std::shared_ptr<AIPlayer> const &player) {
 void SimulationThread::thread_proc() {
   auto status = host_->listen(fw::Settings::get<std::string> ("listen-port"));
   if (!status.ok()) {
-    fw::debug << "ERROR listening: " << status << std::endl;
+    LOG(ERR) << "error listening: " << status;
     // TODO: terminate, or something?
     return;
   }
