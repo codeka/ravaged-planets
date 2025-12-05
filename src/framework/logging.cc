@@ -1,3 +1,5 @@
+#include <framework/logging.h>
+
 #include <ctime>
 #include <chrono>
 #include <filesystem>
@@ -12,17 +14,13 @@
 #include <windows.h>
 #endif
 
-#include <framework/logging.h>
 #include <framework/settings.h>
+#include <framework/status.h>
 #include <framework/paths.h>
 
-namespace io = boost::iostreams;
 namespace fs = std::filesystem;
 
 namespace fw {
-
-LogWrapper debug;
-static std::mutex mutex;
 
 static bool g_log_to_console = false;
 static fs::path g_log_filename;
@@ -31,9 +29,7 @@ static Logger::Level g_max_level = Logger::Level::kDebug;
 // The file we're writing to, or nullptr if we're not writing to a file.
 static std::unique_ptr<std::ofstream> g_outs;
 
-THREADLOCAL std::ostream *LogWrapper::log_;
-
-void LoggingInitialize() {
+fw::Status LogInitialize() {
   std::string logfilename = Settings::get<std::string>("debug-logfile");
   if (logfilename != "") {
     g_log_filename = resolve(logfilename, true);
@@ -57,33 +53,9 @@ void LoggingInitialize() {
   LOG(INFO) << "Logging started.";
   LOG(INFO) << "Install base: " << fw::install_base_path().string();
   LOG(INFO) << "User base: " << fw::user_base_path().string();
+
+  return fw::OkStatus();
 }
-
-//-------------------------------------------------------------------------
-LogWrapper::LogWrapper() {
-}
-
-//-------------------------------------------------------------------------
-LogSink::LogSink() {}
-
-LogSink::LogSink(LogSink const &copy) {}
-
-LogSink::~LogSink() {
-}
-
-std::streamsize LogSink::write(const char *s, std::streamsize n) {
-  std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-  std::time_t c_now = std::chrono::system_clock::to_time_t(now);
-
-  std::stringstream ss;
-  ss << std::put_time(std::localtime(&c_now), "%F %T") << " : ";
-  ss.write(s, n);
-  LogWriteRaw(ss.str());
-
-  return n;
-}
-
-//-------------------------------------------------------------------------
 
 fs::path LogFileName() {
   return g_log_filename;

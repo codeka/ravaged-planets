@@ -97,7 +97,7 @@ fw::StatusOr<bool> Framework::initialize(char const *title) {
   }
 
   random_initialize();
-  LoggingInitialize();
+  RETURN_IF_ERROR(LogInitialize());
   language_initialize();
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
