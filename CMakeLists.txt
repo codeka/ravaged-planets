@@ -56,7 +56,7 @@ find_package(OpenAL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ENet REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
-find_package(Boost COMPONENTS iostreams system REQUIRED) # TODO: remove
+find_package(Boost COMPONENTS system REQUIRED) # TODO: remove
 find_package(Absl CONFIG REQUIRED)
 
 if(LINUX)

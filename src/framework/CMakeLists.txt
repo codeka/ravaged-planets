@@ -44,12 +44,8 @@ add_library(framework
     ${PROTO_SRCS}
  "lua/callback.h")
 
-target_link_libraries(framework ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries(framework ${Boost_IOSTREAMS_LIBRARY})
-target_link_libraries(framework ${Boost_PROGRAM_OPTIONS_LIBRARY})
 target_link_libraries(framework ${Boost_THREAD_LIBRARY})
 target_link_libraries(framework ${Boost_SYSTEM_LIBRARY})
-target_link_libraries(framework ${Boost_SIGNALS_LIBRARY})
 target_link_libraries(framework ${OPENGL_LIBRARY})
 target_link_libraries(framework protobuf::libprotobuf)
 target_link_libraries(framework ${LUA_LIBRARIES})
