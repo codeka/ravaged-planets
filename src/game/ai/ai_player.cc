@@ -1,7 +1,5 @@
 #include <functional>
 
-#include <boost/bind/arg.hpp>
-
 #include <framework/lua.h>
 #include <framework/logging.h>
 #include <framework/paths.h>

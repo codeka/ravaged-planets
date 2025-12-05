@@ -1,5 +1,4 @@
 #include <memory>
-#include <boost/lexical_cast.hpp>
 
 #include <framework/logging.h>
 

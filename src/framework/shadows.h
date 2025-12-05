@@ -16,7 +16,7 @@ public:
 
 // This class represents a "shadow source". It contains the camera we use to render the shadow texture, and the shadow
 // texture itself. The graphics class has one instance of us per shadow source in the scene.
-class ShadowSource: private boost::noncopyable {
+class ShadowSource {
 private:
   LightCamera camera_;
   std::shared_ptr<Framebuffer> shadowbuffer_;
@@ -24,6 +24,8 @@ private:
 public:
   ShadowSource();
   ~ShadowSource();
+
+  ShadowSource(ShadowSource const&) = delete; // noncopyable.
 
   void initialize(bool debug = false);
   void destroy();

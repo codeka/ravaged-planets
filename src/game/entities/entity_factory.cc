@@ -1,3 +1,4 @@
+#include <any>
 #include <filesystem>
 
 #include <framework/xml.h>
@@ -41,7 +42,7 @@ void EntityFactory::populate(std::shared_ptr<Entity> ent, std::string name) {
       continue;
     }
 
-    ent->add_attribute(EntityAttribute(key_name, kvp.value<boost::any>()));
+    ent->add_attribute(EntityAttribute(key_name, kvp.value<std::any>()));
   }
 
   // then add all of the components as well

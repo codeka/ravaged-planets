@@ -13,10 +13,9 @@
 #include <framework/logging.h>
 #include <framework/settings.h>
 
-// in order to keep the header clean of platform-specific details, and also since keyboard/mouse Input
-// is inherently singleton anyway, we have a bunch of global variables here. Sorry.
-
-typedef std::map<std::string, int, fw::iless<std::string>> key_names_map;
+// in order to keep the header clean of platform-specific details, and also since keyboard/mouse
+// input is inherently singleton anyway, we have a bunch of global variables here. Sorry.
+typedef std::map<std::string, int, std::less<std::string>> key_names_map;
 typedef std::map<int, std::string> key_codes_map;
 static key_names_map g_key_names;
 static key_codes_map g_key_codes;
@@ -82,7 +81,7 @@ int Input::bind_key(std::string const &keyname, input_bind_fn fn) {
       } else if (absl::EqualsIgnoreCase(part, "alt")) {
         binding.alt = true;
       } else {
-        key_names_map::iterator it = g_key_names.find(part);
+        key_names_map::iterator it = g_key_names.find(absl::AsciiStrToLower(part));
         if (it == g_key_names.end()) {
           LOG(ERR) << "no such key: " << part;
         } else {
@@ -104,8 +103,8 @@ int Input::bind_key(std::string const &keyname, input_bind_fn fn) {
   return token;
 }
 
-int Input::bind_key(std::string keyname, InputBinding const &binding) {
-  key_names_map::iterator it = g_key_names.find(keyname);
+int Input::bind_key(std::string_view keyname, InputBinding const &binding) {
+  key_names_map::iterator it = g_key_names.find(absl::AsciiStrToLower(keyname));
   if (it == g_key_names.end()) {
     LOG(ERR) << "no such key: " << keyname;
     return 0;
@@ -287,58 +286,58 @@ void setup_keynames() {
   // start off with simple ones in a loop
   for (int key = static_cast<int>('a'); key <= static_cast<int>('z'); key++) {
     char buff[2] = { static_cast<char>(key), 0 };
-    g_key_names[buff] = key;
+    g_key_names[absl::AsciiStrToLower(buff)] = key;
   }
   for (int key = static_cast<int>('0'); key <= static_cast<int>('9'); key++) {
     char buff[2] = { static_cast<char>(key), 0 };
-    g_key_names[buff] = key;
+    g_key_names[absl::AsciiStrToLower(buff)] = key;
   }
   for (int key = 0; key <= 9; key++) {
     std::string name = std::string("NP-") + std::to_string(key);
-    g_key_names[name] = SDLK_KP_0 + key;
+    g_key_names[absl::AsciiStrToLower(name)] = SDLK_KP_0 + key;
   }
   for (int key = 0; key < 12; key++) {
     std::string name = "F" + std::to_string(key + 1);
-    g_key_names[name] = SDLK_F1 + key;
+    g_key_names[absl::AsciiStrToLower(name)] = SDLK_F1 + key;
   }
 
-  g_key_names["Left-Mouse"] = KEY_MBTNLEFT;
-  g_key_names["Middle-Mouse"] = KEY_MBTNMIDDLE;
-  g_key_names["Right-Mouse"] = KEY_MBTNRIGHT;
+  g_key_names["left-mouse"] = KEY_MBTNLEFT;
+  g_key_names["middle-mouse"] = KEY_MBTNMIDDLE;
+  g_key_names["right-mouse"] = KEY_MBTNRIGHT;
 
-  g_key_names["Tab"] = SDLK_TAB;
-  g_key_names["Return"] = SDLK_RETURN;
-  g_key_names["Enter"] = SDLK_RETURN;
-  g_key_names["Esc"] = SDLK_ESCAPE;
-  g_key_names["Space"] = SDLK_SPACE;
-  g_key_names["PgUp"] = SDLK_PAGEUP;
-  g_key_names["PgDown"] = SDLK_PAGEDOWN;
-  g_key_names["End"] = SDLK_END;
-  g_key_names["Home"] = SDLK_HOME;
-  g_key_names["Del"] = SDLK_DELETE;
-  g_key_names["Ins"] = SDLK_INSERT;
+  g_key_names["tab"] = SDLK_TAB;
+  g_key_names["return"] = SDLK_RETURN;
+  g_key_names["enter"] = SDLK_RETURN;
+  g_key_names["esc"] = SDLK_ESCAPE;
+  g_key_names["space"] = SDLK_SPACE;
+  g_key_names["pgup"] = SDLK_PAGEUP;
+  g_key_names["pgdown"] = SDLK_PAGEDOWN;
+  g_key_names["end"] = SDLK_END;
+  g_key_names["home"] = SDLK_HOME;
+  g_key_names["del"] = SDLK_DELETE;
+  g_key_names["ins"] = SDLK_INSERT;
 
-  g_key_names["Left"] = SDLK_LEFT;
-  g_key_names["Right"] = SDLK_RIGHT;
-  g_key_names["Up"] = SDLK_UP;
-  g_key_names["Down"] = SDLK_DOWN;
+  g_key_names["left"] = SDLK_LEFT;
+  g_key_names["right"] = SDLK_RIGHT;
+  g_key_names["up"] = SDLK_UP;
+  g_key_names["down"] = SDLK_DOWN;
 
   // technically OEM keys, these are standard on all keyboards (apparently)
-  g_key_names["Comma"] = SDLK_COMMA;
-  g_key_names["Period"] = SDLK_PERIOD;
-  g_key_names["Dot"] = SDLK_PERIOD;
-  g_key_names["Plus"] = SDLK_EQUALS;
-  g_key_names["Minus"] = SDLK_MINUS;
+  g_key_names["comma"] = SDLK_COMMA;
+  g_key_names["period"] = SDLK_PERIOD;
+  g_key_names["dot"] = SDLK_PERIOD;
+  g_key_names["plus"] = SDLK_EQUALS;
+  g_key_names["minus"] = SDLK_MINUS;
 
   // these are US-keyboard only entries, corresponding "OEM-n" values are there
   // as well
-  g_key_names["Colon"] = SDLK_COLON;
-  g_key_names["Slash"] = SDLK_SLASH;
+  g_key_names["colon"] = SDLK_COLON;
+  g_key_names["slash"] = SDLK_SLASH;
   g_key_names["~"] = SDLK_BACKQUOTE;
   g_key_names["["] = SDLK_LEFTBRACKET;
-  g_key_names["Backslash"] = SDLK_BACKSLASH;
+  g_key_names["backslash"] = SDLK_BACKSLASH;
   g_key_names["]"] = SDLK_RIGHTBRACKET;
-  g_key_names["Quote"] = SDLK_QUOTEDBL;
+  g_key_names["quote"] = SDLK_QUOTEDBL;
 
   // now construct the reverse mapping, which is pretty easy...
   for(auto &key : g_key_names) {

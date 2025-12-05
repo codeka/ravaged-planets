@@ -4,8 +4,6 @@
 #include <memory>
 #include <thread>
 
-#include <boost/noncopyable.hpp>
-
 #include <framework/math.h>
 #include <framework/work_queue.h>
 
@@ -18,7 +16,7 @@ class Terrain;
 
 // Encapsulates a thread that all players will queue requests for path-finding to. We then execute one request
 // at a time and call the player back when the path is found.
-class PathingThread: private boost::noncopyable {
+class PathingThread {
 public:
   typedef std::function<void(std::vector<fw::Vector> const &)> callback_fn;
 
@@ -39,6 +37,8 @@ private:
 
 public:
   PathingThread();
+
+  PathingThread(PathingThread const&) = delete;
 
   void start();
   void stop();

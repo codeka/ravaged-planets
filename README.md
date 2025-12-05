@@ -28,7 +28,7 @@ There are a bunch of dependencies, see the CMakeLists.txt file for the complete 
 [and here](https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html) to get started, then:
 
 ```
-vcpkg install assimp boost curl enet glew lua openal-soft protobuf sdl2 freetype
+vcpkg install assimp curl enet glew lua openal-soft protobuf sdl2 freetype
 ```
 
 ### Visual Studio 2022

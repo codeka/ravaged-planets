@@ -2,6 +2,8 @@
 #include <format>
 #include <functional>
 
+#include <absl/strings/match.h>
+
 #include <framework/bitmap.h>
 #include <framework/framework.h>
 #include <framework/logging.h>
@@ -112,6 +114,7 @@ void World::on_key_pause(std::string, bool is_down) {
 
 void World::on_key_screenshot(std::string, bool is_down) {
   if (!is_down) {
+    LOG(INFO) << "requesting screenshot";
     fw::Framework::get_instance()->take_screenshot(
         0, 0, std::bind(&World::screenshot_callback, this, _1));
   }
@@ -131,15 +134,12 @@ void World::screenshot_callback(fw::Bitmap const &screenshot) {
     fs::path p(*it);
     if (fs::is_regular_file(p)) {
       std::string filename = p.filename().string();
-      if (boost::istarts_with(filename, "screen-") && boost::iends_with(filename, ".png")) {
+      if (absl::StartsWithIgnoreCase(filename, "screen-") &&
+          absl::EndsWithIgnoreCase(filename, ".png")) {
         std::string number_part = filename.substr(7, filename.length() - 11);
-        try {
-          int number = boost::lexical_cast<int>(number_part);
-          if (number > max_file_number) {
-            max_file_number = number;
-          }
-        } catch (boost::bad_lexical_cast &) {
-          // Ignore, keep looking?
+        int number;
+        if (absl::SimpleAtoi(number_part, &number) && number > max_file_number) {
+          max_file_number = number;
         }
       }
     }

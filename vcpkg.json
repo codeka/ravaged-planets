@@ -1,6 +1,5 @@
 {
   "dependencies": [
-    "boost",
     "curl",
     "enet",
     "freetype",

@@ -4,12 +4,6 @@
 
 #include <absl/strings/ascii.h>
 
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
-
 #include <framework/math.h>
 
 namespace fw {
@@ -124,37 +118,6 @@ template<typename T>
 inline T lerp(T const &last, T const &next, float t) {
   return (last + (next - last) * t);
 }
-
-// an "iless" functor, similar to "std::less" but case insensitive
-template<typename T>
-struct iless {
-  bool operator()(T const &lhs, T const &rhs) const {
-    return boost::algorithm::ilexicographical_compare(lhs, rhs);
-  }
-};
-
-// an "iequal_to" functor, similar to "std::equal_to" but case insensitive
-template<typename T>
-struct iequal_to {
-  bool operator()(T const &lhs, T const &rhs) const {
-    return boost::algorithm::iequals(lhs, rhs);
-  }
-};
-
-// an "ihash" functor, similar to "std::hash" but case insensitive
-template<typename T>
-struct ihash {
-  inline std::size_t operator()(T const &x) const {
-    std::size_t seed = 0;
-    std::locale locale;
-
-    for (typename T::const_iterator it = x.begin(); it != x.end(); ++it) {
-      boost::hash_combine(seed, std::toupper(*it, locale));
-    }
-
-    return seed;
-  }
-};
 
 /** Small utility class which represents a Rectangle (x,y plus width,height). */
 template<typename T>

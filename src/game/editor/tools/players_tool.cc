@@ -1,8 +1,6 @@
 
 #include <functional>
 
-#include <boost/lexical_cast.hpp>
-
 #include <framework/camera.h>
 #include <framework/framework.h>
 #include <framework/gui/builder.h>
@@ -68,7 +66,7 @@ void PlayersToolWindow::refresh_player_list() {
   lb->clear();
   for (int i = 0; i < tool_->get_world()->get_player_starts().size(); i++) {
     lb->add_item(Builder<Label>(px(4), px(0), pct(100), px(20))
-        << Label::text("Player " + boost::lexical_cast<std::string>(i + 1)));
+        << Label::text("Player " + std::to_string(i + 1)));
   }
 }
 
@@ -83,7 +81,12 @@ void PlayersToolWindow::hide() {
 
 bool PlayersToolWindow::num_players_updated_click(fw::gui::Widget *w) {
   TextEdit *te = wnd_->find<TextEdit>(NUM_PLAYERS_ID);
-  int num_players = boost::lexical_cast<int>(te->get_text());
+  int num_players;
+  if (!absl::SimpleAtoi(te->get_text(), &num_players)) {
+    // TODO: handle errors?
+    LOG(ERR) << "couldn't parse '" << te->get_text() << "' as a number";
+    return true;
+  }
   std::map<int, fw::Vector> &player_starts = tool_->get_world()->get_player_starts();
   if (player_starts.size() < num_players) {
     for (int i = player_starts.size(); i < num_players; i++) {

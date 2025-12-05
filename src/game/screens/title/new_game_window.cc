@@ -5,14 +5,13 @@
 #include <string>
 
 #include <absl/strings/str_cat.h>
-#include <boost/algorithm/string.hpp>
 
 #include <framework/framework.h>
-#include <framework/misc.h>
 #include <framework/texture.h>
 #include <framework/logging.h>
 #include <framework/bitmap.h>
 #include <framework/lang.h>
+#include <framework/misc.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/window.h>
 #include <framework/gui/builder.h>
@@ -263,7 +262,7 @@ void NewGameWindow::refresh_players() {
 
     std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";
     players_list->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20)) << Widget::data(plyr)
-        << (Builder<Label>(px(8), px(0), px(30), px(20)) << Label::text(boost::lexical_cast<std::string>(player_no)))
+        << (Builder<Label>(px(8), px(0), px(30), px(20)) << Label::text(std::to_string(player_no)))
         << (Builder<Label>(px(30), px(0), sum(pct(100), px(-80)), px(20)) << Label::text(plyr->get_user_name()))
         << (Builder<Label>(sum(pct(100), px(-50)), px(0), px(50), px(20)) << Label::text(ready_str)));
   }
@@ -311,8 +310,7 @@ bool NewGameWindow::on_chat_filter(std::string ch) {
   }
 
   TextEdit *ed = wnd_->find<TextEdit>(CHAT_TEXTEDIT_ID);
-  std::string msg = ed->get_text();
-  boost::trim(msg);
+  std::string msg = msg = fw::StripSpaces(ed->get_text());
 
   add_chat_msg(Session::get_instance()->get_user_name(), msg);
   SimulationThread::get_instance()->send_chat_msg(msg);

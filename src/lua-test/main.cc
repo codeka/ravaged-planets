@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include <boost/exception/all.hpp>
-
 #include <framework/lua.h>
 #include <framework/settings.h>
 #include <framework/framework.h>

@@ -1,8 +1,5 @@
 #include <iostream>
 
-#include <boost/program_options.hpp>
-#include <boost/algorithm/string.hpp>
-
 #include <framework/bitmap.h>
 #include <framework/settings.h>
 #include <framework/framework.h>
@@ -15,8 +12,6 @@
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/DefaultLogger.hpp>
-
-namespace po = boost::program_options;
 
 //-----------------------------------------------------------------------------
 
@@ -189,7 +184,7 @@ class LogStream : public Assimp::LogStream {
 public:
   void write(const char* message) {
     std::string msg(message);
-    boost::trim(msg);
+    msg = fw::StripSpaces(msg);
     LOG(INFO) << " assimp : " << msg;
   }
 };

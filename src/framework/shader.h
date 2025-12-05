@@ -5,8 +5,6 @@
 #include <map>
 #include <memory>
 
-#include <boost/noncopyable.hpp>
-
 #include <framework/color.h>
 #include <framework/framework.h>
 #include <framework/graphics.h>

@@ -41,10 +41,6 @@ include_directories(abseil-cpp)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-
 # Look for the various libraries we depend on.
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
@@ -56,7 +52,6 @@ find_package(OpenAL REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ENet REQUIRED)
 find_package(Assimp) # not required, no meshexp if not found.
-find_package(Boost COMPONENTS system REQUIRED) # TODO: remove
 find_package(Absl CONFIG REQUIRED)
 
 if(LINUX)

@@ -1,6 +1,7 @@
 
 #include <functional>
-#include <boost/lexical_cast.hpp>
+
+#include <absl/strings/numbers.h>
 
 #include <framework/framework.h>
 #include <framework/gui/builder.h>
@@ -9,6 +10,7 @@
 #include <framework/gui/button.h>
 #include <framework/gui/label.h>
 #include <framework/gui/textedit.h>
+
 #include <game/application.h>
 #include <game/screens/screen.h>
 #include <game/world/terrain.h>
@@ -62,10 +64,10 @@ bool NewMapWindow::ok_clicked(Widget *w) {
 
   int width;
   int height;
-  try {
-    width = boost::lexical_cast<int>(wnd_->find<TextEdit>(WIDTH_ID)->get_text());
-    height = boost::lexical_cast<int>(wnd_->find<TextEdit>(HEIGHT_ID)->get_text());
-  } catch (boost::bad_lexical_cast &) {
+
+  if (!absl::SimpleAtoi(wnd_->find<TextEdit>(WIDTH_ID)->get_text(), &width) ||
+      !absl::SimpleAtoi(wnd_->find<TextEdit>(HEIGHT_ID)->get_text(), &height)) {
+    // TODO: show error
 //    message_box->show("Invalid Parameters", "Width and Height must be an integer.");
     return true;
   }

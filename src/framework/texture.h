@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <boost/filesystem.hpp>
 
 #include <framework/graphics.h>
 #include <framework/status.h>

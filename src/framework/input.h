@@ -2,9 +2,9 @@
 
 #include <functional>
 #include <string>
+#include <string_view>
 #include <mutex>
 #include <vector>
-
 
 union SDL_Event;
 
@@ -52,7 +52,7 @@ public:
   // bind the specified function to be called when the given key (or mouse button)
   // is pressed/released. When you call bind_key, you get back an integer token
   // which you can later pass to unbind_key to unbind that key/function.
-  int bind_key(std::string keyname, InputBinding const &binding);
+  int bind_key(std::string_view keyname, InputBinding const &binding);
   void unbind_key(int token);
 
   // binds the specified name key (or keys, separated by a comma) to the given callback

@@ -1,9 +1,9 @@
 #pragma once
 
+#include <any>
 #include <iterator>
 #include <optional>
 #include <ostream>
-#include <boost/any.hpp>
 
 #include <framework/logging.h>
 #include <framework/lua/base.h>
@@ -33,7 +33,7 @@ public:
   template<>
   inline int value() const;
   template<>
-  inline boost::any value() const;
+  inline std::any value() const;
 
   // TODO: should we have our own enum here?
   int value_type() const {
@@ -419,7 +419,7 @@ int ValueIteratorEntry::value() const {
 }
 
 template<>
-boost::any ValueIteratorEntry::value() const {
+std::any ValueIteratorEntry::value() const {
   switch (lua_type(l_, -1)) {
   case LUA_TNUMBER:
     return value<float>();
@@ -435,7 +435,7 @@ boost::any ValueIteratorEntry::value() const {
 
   default:
     // TODO: support for LUA_TFUNCTION, LUA_TUSERDATA, LUA_TTHREAD and LUA_TLIGHTUSERDATA?
-    return boost::any();
+    return std::any();
   }
 }
 

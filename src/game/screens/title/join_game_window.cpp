@@ -11,6 +11,8 @@
 #include "../../../framework/misc.h"
 #include "../../../framework/lang.h"
 
+#include <absl/strings/numbers.h>
+
 #include <CEGUIWindow.h>
 #include <CEGUIWindowManager.h>
 #include <CEGUIUDim.h>
@@ -83,7 +85,11 @@ namespace ww {
 			return true;
 
 		std::string id = selection->getText().c_str();
-		uint64_t lobby_id = boost::lexical_cast<uint64_t>(id);
+		uint64_t lobby_id;
+		if (!absl::SimpleAtoi(id, &lobby_id)) {
+			// handle errors
+			return true;
+		}
 
 		hide();
 		new_game->show();
@@ -101,7 +107,7 @@ namespace ww {
 
 	void join_game_window::refresh_games_list() {
 		ww::Session::get_instance()->get_games_list(
-			boost::bind(&join_game_window::refresh_games_list_callback, this, _1));
+			std::bind(&join_game_window::refresh_games_list_callback, this, _1));
 	}
 
 	void join_game_window::refresh_games_list_callback(std::vector<RemoteGame> const &games) {
@@ -115,7 +121,7 @@ namespace ww {
 
 	void join_game_window::add_game(RemoteGame &g) {
 		std::vector<std::string> values;
-		values.push_back(boost::lexical_cast<std::string>(g.id));
+		values.push_back(std::to_string(g.id));
 		values.push_back(g.owner_username);
 		values.push_back(g.display_name);
 		values.push_back(g.owner_address);

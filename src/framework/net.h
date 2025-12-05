@@ -3,7 +3,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
-#include <boost/noncopyable.hpp>
+
 #include <enet/enet.h>
 
 #include <framework/packet.h>

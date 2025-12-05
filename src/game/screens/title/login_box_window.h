@@ -20,7 +20,7 @@ namespace ww {
 		CEGUI::Editbox *_username;
 		CEGUI::Editbox *_password;
 		fw::gui::wait_animation _wait_anim;
-		boost::signals::connection sig_session_state_changed_;
+		fw::SignalConnection sig_session_state_changed_;
 
 		float _reset_time;
 		int _desired_height;

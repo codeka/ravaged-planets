@@ -1,8 +1,7 @@
 #include <filesystem>
 #include <functional>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
+#include <absl/strings/match.h>
 
 #include <framework/bitmap.h>
 #include <framework/gui/builder.h>
@@ -122,9 +121,9 @@ void OpenFileWindow::refresh() {
     } else if (rhs_is_dir && !lhs_is_dir) {
       return false;
     } else {
-      std::string lhs_file = lhs.filename().string();
-      std::string rhs_file = rhs.filename().string();
-      return boost::ilexicographical_compare(lhs_file, rhs_file);
+      std::string lhs_file = absl::AsciiStrToLower(lhs.filename().string());
+      std::string rhs_file = absl::AsciiStrToLower(rhs.filename().string());
+      return lhs_file < rhs_file;
     }
   });
 
@@ -233,9 +232,9 @@ bool OpenFileWindow::on_cancel_clicked(Widget *w) {
 
 std::string format_file_size(uint32_t size) {
   if (size < 1024)
-    return boost::lexical_cast<std::string>(size);
+    return std::to_string(size);
   if (size < (1024 * 1024))
-    return boost::lexical_cast<std::string>(size / 1024) + " KB";
+    return std::to_string(size / 1024) + " KB";
 
-  return boost::lexical_cast<std::string>(size / (1024 * 1024)) + " MB";
+  return std::to_string(size / (1024 * 1024)) + " MB";
 }

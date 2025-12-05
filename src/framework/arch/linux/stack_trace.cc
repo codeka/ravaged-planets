@@ -6,7 +6,9 @@
 #include <execinfo.h>
 #include <stdio.h>
 
-#include <boost/algorithm/string.hpp>
+#include <absl/strings/str_split.h>
+
+#include <framework/misc.h>
 
 namespace fw {
 std::string addr2line(std::string const &program, void *addr);
@@ -24,8 +26,7 @@ std::vector<std::string> GenerateStackTrace() {
     // executable_name(mangled-function-name+0xnnnn) [0xmmmm]
     // we extract the executable name and then try to call addr2line (which may or may not succeed)
     // then we try to demangle the function name
-    std::vector<std::string> split_vector;
-    boost::algorithm::split(split_vector, messages[i], boost::is_any_of("(+)"));
+    std::vector<std::string> split_vector = absl::StrSplit(messages[i], absl::AnyOf("(+)"));
 
     int status;
     char *demangled_name = abi::__cxa_demangle(split_vector[1].c_str(), 0, 0, &status);
@@ -60,7 +61,7 @@ std::string addr2line(std::string const &program, void *addr) {
     ss << program << " [" << addr << "]";
   }
 
-  return boost::algorithm::trim_copy(ss.str());
+  return fw::StripSpaces(ss.str());
 }
 
 }
