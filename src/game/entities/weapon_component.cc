@@ -1,3 +1,6 @@
+#include <game/entities/weapon_component.h>
+
+#include <absl/strings/str_split.h>
 
 #include <framework/framework.h>
 #include <framework/graphics.h>
@@ -6,7 +9,6 @@
 #include <game/entities/entity.h>
 #include <game/entities/entity_factory.h>
 #include <game/entities/entity_manager.h>
-#include <game/entities/weapon_component.h>
 #include <game/entities/position_component.h>
 #include <game/entities/moveable_component.h>
 #include <game/entities/projectile_component.h>
@@ -35,9 +37,10 @@ void WeaponComponent::apply_template(fw::lua::Value tmpl) {
       fire_entity_name_ = kvp.value<std::string>();
     } else if (key == "FireDirection") {
       // TODO: factor this out and use an actual array or something
-      std::vector<float> parts = fw::split<float>(kvp.value<std::string>());
+      std::vector<std::string> parts =
+          absl::StrSplit(kvp.value<std::string>(), absl::ByAsciiWhitespace(), absl::SkipEmpty());
       if (parts.size() == 3) {
-        fire_direction_ = fw::Vector(parts[0], parts[1], parts[2]);
+        fire_direction_ = fw::Vector(std::stof(parts[0]), std::stof(parts[1]), std::stof(parts[2]));
       }
     } else if (key == "Range") {
       range_ = kvp.value<float>();

@@ -76,19 +76,6 @@ inline T clamp(T ParticleRotation, T max_value, T min_value = 0) {
   return ParticleRotation;
 }
 
-// split a string into an array, using the given list of delimiters
-template<typename T>
-inline std::vector<T> split(std::string s, std::string delim = " \r\n\t") {
-  boost::tokenizer<> tok(s,
-      boost::char_delimiters_separator<char>(false, "", delim.c_str()));
-
-  std::vector<T> values;
-  for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it) {
-    values.push_back(boost::lexical_cast<T>(*it));
-  }
-  return values;
-}
-
 ABSL_MUST_USE_RESULT inline std::string_view StripLeadingSpaces(std::string_view str) { 
   auto it = std::find_if_not(str.begin(), str.end(), absl::ascii_isspace);
   return str.substr(it - str.begin());

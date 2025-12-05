@@ -1,8 +1,6 @@
 #include <filesystem>
 #include <map>
 
-#include <boost/lexical_cast.hpp>
-
 #include <framework/lua.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
