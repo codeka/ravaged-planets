@@ -47,17 +47,22 @@ OpenFileWindow::~OpenFileWindow() {
 void OpenFileWindow::initialize() {
   wnd_ = Builder<Window>(sum(pct(50), px(-200)), sum(pct(40), px(-150)), px(400), px(300))
       << Window::background("frame") << Widget::visible(false)
-      << (Builder<TextEdit>(px(8), px(8), sum(pct(100), px(-16)), px(18)) << Widget::id(FILENAME_ID))
-      << (Builder<Listbox>(px(8), px(30), sum(pct(66), px(-12)), sum(pct(100), px(-76))) << Widget::id(FILE_LIST_ID)
+      << (Builder<TextEdit>(px(8), px(8), sum(pct(100), px(-16)), px(18))
+          << Widget::id(FILENAME_ID))
+      << (Builder<Listbox>(px(8), px(30), sum(pct(66), px(-12)), sum(pct(100), px(-76)))
+          << Widget::id(FILE_LIST_ID)
           << Listbox::item_selected(std::bind(&OpenFileWindow::on_item_selected, this, _1))
           << Listbox::item_activated(std::bind(&OpenFileWindow::on_item_activated, this, _1)))
-      << (Builder<Label>(sum(pct(66), px(4)), px(30), sum(pct(33), px(-12)), px(100)) << Widget::id(IMAGE_PREVIEW_ID))
+      << (Builder<Label>(sum(pct(66), px(4)), px(30), sum(pct(33), px(-12)), px(100))
+          << Widget::id(IMAGE_PREVIEW_ID))
       << (Builder<Button>(sum(pct(100), px(-176)), sum(pct(100), px(-38)), px(80), px(30))
           << Button::text("OK") << Widget::id(OK_ID)
           << Button::click(std::bind(&OpenFileWindow::on_ok_clicked, this, _1)))
       << (Builder<Button>(sum(pct(100), px(-88)), sum(pct(100), px(-38)), px(80), px(30))
-          << Button::text("Cancel") << Button::click(std::bind(&OpenFileWindow::on_cancel_clicked, this, _1)))
-      << (Builder<Checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18)) << Checkbox::text("Show hidden files")
+          << Button::text("Cancel")
+          << Button::click(std::bind(&OpenFileWindow::on_cancel_clicked, this, _1)))
+      << (Builder<Checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18))
+          << Checkbox::text("Show hidden files")
           << Widget::click(std::bind(&OpenFileWindow::on_show_hidden_clicked, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
   _curr_directory = fw::user_base_path();
