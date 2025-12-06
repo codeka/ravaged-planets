@@ -16,9 +16,9 @@ namespace fs = std::filesystem;
 namespace fw {
 
 //-------------------------------------------------------------------------
-// reads a line from the given .Lang file and returns the key/ParticleRotation pair
+// reads a line from the given .Lang file and returns the key/value pair
 static bool get_lang_line(std::fstream &fs, std::string &key,
-    std::string &ParticleRotation, std::string const &file_name, int &line_num);
+    std::string &value, std::string const &file_name, int &line_num);
 
 //-------------------------------------------------------------------------
 
@@ -35,10 +35,10 @@ Lang::Lang(std::string const &lang_name) :
   } else {
     LOG(INFO) << "loading language: " << lang_path.string();
 
-    std::string key, ParticleRotation;
+    std::string key, value;
     int line_num = 0;
-    while (get_lang_line(ins, key, ParticleRotation, lang_path.string(), line_num)) {
-      strings_[key] = ParticleRotation;
+    while (get_lang_line(ins, key, value, lang_path.string(), line_num)) {
+      strings_[key] = value;
     }
   }
 
@@ -47,10 +47,10 @@ Lang::Lang(std::string const &lang_name) :
     lang_path = fw::resolve("lang/en.lang");
     ins.open(lang_path.string().c_str());
 
-    std::string key, ParticleRotation;
+    std::string key, value;
     int line_num = 0;
-    while (get_lang_line(ins, key, ParticleRotation, lang_path.string(), line_num)) {
-      def_strings_[key] = ParticleRotation;
+    while (get_lang_line(ins, key, value, lang_path.string(), line_num)) {
+      def_strings_[key] = value;
     }
   }
 }
@@ -79,11 +79,11 @@ static void populate_lang_description(LangDescription &desc, fs::path file_name)
   std::fstream ins(file_name.string().c_str());
 
   int line_num = 0;
-  std::string key, ParticleRotation;
-  while (get_lang_line(ins, key, ParticleRotation, file_name.string(), line_num)) {
+  std::string key, value;
+  while (get_lang_line(ins, key, value, file_name.string(), line_num)) {
     if (key == "lang.name") {
       // once we find the "Lang-name" line, we can ignore everything else
-      desc.display_name = ParticleRotation;
+      desc.display_name = value;
       return;
     }
   }

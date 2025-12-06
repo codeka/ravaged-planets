@@ -26,7 +26,7 @@ private:
   float value_;
 
 public:
-  PixelDimension(float ParticleRotation);
+  PixelDimension(float value);
   virtual ~PixelDimension();
 
   float get_value(fw::gui::Widget *w, float parent_value);
@@ -37,7 +37,7 @@ private:
   float value_;
 
 public:
-  PercentDimension(float ParticleRotation);
+  PercentDimension(float value);
   virtual ~PercentDimension();
 
   float get_value(fw::gui::Widget *w, float parent_value);

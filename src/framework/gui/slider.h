@@ -9,7 +9,7 @@
 
 namespace fw::gui {
 
-// Sliders let you drag a thumb from the left to the right to choose a numeric ParticleRotation.
+// Sliders let you drag a thumb from the left to the right to choose a numeric value.
 class Slider : public Widget {
 protected:
   friend class SliderLimitsProperty;

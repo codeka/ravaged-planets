@@ -27,7 +27,7 @@ public:
   }
 };
 
-/** Property that sets the current ParticleRotation of the slider. */
+/** Property that sets the current value of the slider. */
 class SliderValueProperty : public Property {
 private:
   int curr_value_;

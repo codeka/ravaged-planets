@@ -86,7 +86,7 @@ private:
   fw::Vector last_position_;
 
 public:
-  TimedEmitPolicy(ParticleEmitter* emitter, float ParticleRotation);
+  TimedEmitPolicy(ParticleEmitter* emitter, float value);
   virtual ~TimedEmitPolicy();
 
   virtual void check_emit(float dt);
@@ -100,7 +100,7 @@ private:
   float max_distance_;
 
 public:
-  DistanceEmitPolicy(ParticleEmitter* emitter, float ParticleRotation);
+  DistanceEmitPolicy(ParticleEmitter* emitter, float value);
   virtual ~DistanceEmitPolicy();
 
   virtual void check_emit(float dt);
@@ -110,7 +110,7 @@ public:
 // count of particles to be emitted as soon as the emitter is started.
 class NoEmitPolicy: public EmitPolicy {
 public:
-  NoEmitPolicy(ParticleEmitter* emitter, float ParticleRotation);
+  NoEmitPolicy(ParticleEmitter* emitter, float value);
   virtual ~NoEmitPolicy();
 
   virtual void check_emit(float dt);

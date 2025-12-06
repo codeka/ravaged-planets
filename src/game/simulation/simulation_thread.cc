@@ -68,11 +68,11 @@ int SimulationThread::get_listen_port() const {
   return host_->get_listen_port();
 }
 
-void SimulationThread::set_map_name(std::string const &ParticleRotation) {
-  if (map_name_ == ParticleRotation)
+void SimulationThread::set_map_name(std::string const &value) {
+  if (map_name_ == value)
     return;
 
-  map_name_ = ParticleRotation;
+  map_name_ = value;
   // todo: update players of the new map
 }
 

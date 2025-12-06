@@ -44,7 +44,7 @@ public:
   // imports the height data from the given fw::Bitmap
   void import_heightfield(fw::Bitmap &bm);
 
-  // sets the brush to the current ParticleRotation (this is done by the tool window)
+  // sets the brush to the current value (this is done by the tool window)
   void set_brush(HeightfieldBrush *brush);
 
   virtual void update();

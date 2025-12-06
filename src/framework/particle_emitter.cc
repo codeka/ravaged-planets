@@ -82,9 +82,9 @@ std::shared_ptr<Particle> ParticleEmitter::emit(fw::Vector pos, float time_offse
 
 //-------------------------------------------------------------------------
 
-TimedEmitPolicy::TimedEmitPolicy(ParticleEmitter* emitter, float ParticleRotation) :
+TimedEmitPolicy::TimedEmitPolicy(ParticleEmitter* emitter, float value) :
     EmitPolicy(emitter), particles_per_second_(0.0f), time_since_last_particle_(0.0f), last_position_(0, 0, 0) {
-  particles_per_second_ = ParticleRotation;
+  particles_per_second_ = value;
 }
 
 TimedEmitPolicy::~TimedEmitPolicy() {

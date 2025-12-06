@@ -151,7 +151,7 @@ public:
   BillboardTexture billboard;
 
   /**
-   * This is the maximum age we'll allow for a Particle to exist. The ParticleRotation is Random,
+   * This is the maximum age we'll allow for a Particle to exist. The value is Random,
    * and it causes ALL "age-based" calculations to be randomized as well.
    */
   Random<float> max_age;

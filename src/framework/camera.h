@@ -216,10 +216,10 @@ public:
     zooming_ = true;
   }
 
-  // Gets or sets a ParticleRotation which indicates whether we move the camera by moving the mouse
+  // Gets or sets a value which indicates whether we move the camera by moving the mouse
   // to the edge of the Screen (as well as the usual left/right/up/down keys)
-  void set_mouse_move(bool ParticleRotation) {
-    enable_mouse_move_ = ParticleRotation;
+  void set_mouse_move(bool value) {
+    enable_mouse_move_ = value;
   }
   bool get_mouse_move() const {
     return enable_mouse_move_;

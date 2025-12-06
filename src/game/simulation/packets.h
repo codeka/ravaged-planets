@@ -32,8 +32,8 @@ public:
   JoinRequestPacket();
   virtual ~JoinRequestPacket();
 
-  void set_user_id(uint32_t ParticleRotation) {
-    user_id_ = ParticleRotation;
+  void set_user_id(uint32_t value) {
+    user_id_ = value;
   }
   uint32_t get_user_id() const {
     return user_id_;

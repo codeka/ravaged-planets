@@ -18,8 +18,8 @@ Dimension::Dimension() {
 Dimension::~Dimension() {
 }
 
-PixelDimension::PixelDimension(float ParticleRotation) :
-    value_(ParticleRotation) {
+PixelDimension::PixelDimension(float value) :
+    value_(value) {
 }
 
 PixelDimension::~PixelDimension() {
@@ -29,8 +29,8 @@ float PixelDimension::get_value(fw::gui::Widget *w, float parent_value) {
   return value_;
 }
 
-PercentDimension::PercentDimension(float ParticleRotation) :
-    value_(ParticleRotation) {
+PercentDimension::PercentDimension(float value) :
+    value_(value) {
 }
 
 PercentDimension::~PercentDimension() {

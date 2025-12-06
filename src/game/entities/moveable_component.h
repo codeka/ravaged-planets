@@ -43,8 +43,8 @@ public:
   void set_turn_speed(float turn_speed) {
     turn_speed_ = turn_speed;
   }
-  void set_avoid_collisions(bool ParticleRotation) {
-    avoid_collisions_ = ParticleRotation;
+  void set_avoid_collisions(bool value) {
+    avoid_collisions_ = value;
   }
 
   void set_goal(fw::Vector goal, bool skip_pathing = false);
