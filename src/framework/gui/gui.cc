@@ -14,21 +14,17 @@
 namespace fw::gui {
 
 Gui::Gui()
-  : graphics_(nullptr), drawable_manager_(nullptr), widget_under_mouse_(nullptr),
+  : graphics_(nullptr), widget_under_mouse_(nullptr),
     widget_mouse_down_(nullptr), focused_(nullptr) {
 }
 
 Gui::~Gui() {
-  if (drawable_manager_ != nullptr) {
-    delete drawable_manager_;
-  }
 }
 
 fw::Status Gui::Initialize(fw::Graphics *graphics, fw::AudioManager* audio_manager) {
   graphics_ = graphics;
 
-  drawable_manager_ = new DrawableManager();
-  RETURN_IF_ERROR(drawable_manager_->Parse(fw::resolve("gui/drawables/drawables.xml")));
+  RETURN_IF_ERROR(drawable_manager_.Parse(fw::resolve("gui/drawables/drawables.xml")));
 
   audio_source_ = audio_manager->create_audio_source();
   return fw::OkStatus();

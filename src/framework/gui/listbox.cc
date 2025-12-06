@@ -77,10 +77,10 @@ ListboxItem::ListboxItem(Gui *gui)
   background_ = std::shared_ptr<StateDrawable>(new StateDrawable());
   background_->add_drawable(
       StateDrawable::kNormal,
-      gui_->get_drawable_manager()->get_drawable("listbox_item_normal"));
+      gui_->get_drawable_manager().get_drawable("listbox_item_normal"));
   background_->add_drawable(
       StateDrawable::kSelected,
-      gui_->get_drawable_manager()->get_drawable("listbox_item_selected"));
+      gui_->get_drawable_manager().get_drawable("listbox_item_selected"));
 }
 
 ListboxItem::~ListboxItem() {
@@ -126,15 +126,15 @@ void ListboxItem::render() {
 //-----------------------------------------------------------------------------
 
 Listbox::Listbox(Gui *gui) : Widget(gui), selected_item_(nullptr), scrollbar_visible_(false) {
-  background_ = gui->get_drawable_manager()->get_drawable("listbox_background");
+  background_ = gui->get_drawable_manager().get_drawable("listbox_background");
 
   std::shared_ptr<StateDrawable> bkgnd = std::shared_ptr<StateDrawable>(new StateDrawable());
   bkgnd->add_drawable(
       StateDrawable::kNormal,
-      gui_->get_drawable_manager()->get_drawable("listbox_up_normal"));
+      gui_->get_drawable_manager().get_drawable("listbox_up_normal"));
   bkgnd->add_drawable(
       StateDrawable::kHover,
-      gui_->get_drawable_manager()->get_drawable("listbox_up_hover"));
+      gui_->get_drawable_manager().get_drawable("listbox_up_hover"));
   attach_child(Builder<Button>(sum(pct(100), px(-19)), px(0), px(19), px(19))
       << Button::background(bkgnd)
       << Widget::id(UP_BUTTON)
@@ -143,10 +143,10 @@ Listbox::Listbox(Gui *gui) : Widget(gui), selected_item_(nullptr), scrollbar_vis
   bkgnd = std::shared_ptr<StateDrawable>(new StateDrawable());
   bkgnd->add_drawable(
       StateDrawable::kNormal,
-      gui_->get_drawable_manager()->get_drawable("listbox_down_normal"));
+      gui_->get_drawable_manager().get_drawable("listbox_down_normal"));
   bkgnd->add_drawable(
       StateDrawable::kHover,
-      gui_->get_drawable_manager()->get_drawable("listbox_down_hover"));
+      gui_->get_drawable_manager().get_drawable("listbox_down_hover"));
   attach_child(Builder<Button>(sum(pct(100), px(-19)), sum(pct(100), px(-19)), px(19), px(19))
       << Button::background(bkgnd)
       << Widget::id(DOWN_BUTTON)
@@ -155,10 +155,10 @@ Listbox::Listbox(Gui *gui) : Widget(gui), selected_item_(nullptr), scrollbar_vis
   bkgnd = std::shared_ptr<StateDrawable>(new StateDrawable());
   bkgnd->add_drawable(
       StateDrawable::kNormal,
-      gui_->get_drawable_manager()->get_drawable("listbox_thumb_normal"));
+      gui_->get_drawable_manager().get_drawable("listbox_thumb_normal"));
   bkgnd->add_drawable(
       StateDrawable::kHover,
-      gui_->get_drawable_manager()->get_drawable("listbox_thumb_hover"));
+      gui_->get_drawable_manager().get_drawable("listbox_thumb_hover"));
   attach_child(Builder<Button>(sum(pct(100), px(-19)), px(19), px(19), sum(pct(100), px(-38)))
       << Button::background(bkgnd)
       << Widget::id(THUMB)

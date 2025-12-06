@@ -45,11 +45,11 @@ public:
 
 class SumDimension : public Dimension {
 private:
-  std::shared_ptr<Dimension> one_;
-  std::shared_ptr<Dimension> two_;
+  std::unique_ptr<Dimension> one_;
+  std::unique_ptr<Dimension> two_;
 
 public:
-  SumDimension(std::shared_ptr<Dimension> one, std::shared_ptr<Dimension> two);
+  SumDimension(std::unique_ptr<Dimension> one, std::unique_ptr<Dimension> two);
   virtual ~SumDimension();
 
   float get_value(fw::gui::Widget *w, float parent_value);
@@ -77,24 +77,25 @@ public:
   float get_value(fw::gui::Widget *w, float parent_value);
 };
 
-inline std::shared_ptr<Dimension> px(float ParticleRotation) {
-  return std::shared_ptr<Dimension>(new PixelDimension(ParticleRotation));
+inline std::unique_ptr<Dimension> px(float value) {
+  return std::make_unique<PixelDimension>(value);
 }
 
-inline std::shared_ptr<Dimension> pct(float ParticleRotation) {
-  return std::shared_ptr<Dimension>(new PercentDimension(ParticleRotation));
+inline std::unique_ptr<Dimension> pct(float value) {
+  return std::make_unique<PercentDimension>(value);
 }
 
-inline std::shared_ptr<Dimension> sum(std::shared_ptr<Dimension> one, std::shared_ptr<Dimension> two) {
-  return std::shared_ptr<Dimension>(new SumDimension(one, two));
+inline std::unique_ptr<Dimension> sum(
+    std::unique_ptr<Dimension> one, std::unique_ptr<Dimension> two) {
+  return std::make_unique<SumDimension>(std::move(one), std::move(two));
 }
 
-inline std::shared_ptr<Dimension> fract(OtherDimension dimen, float fraction) {
-  return std::shared_ptr<Dimension>(new FractionDimension(dimen, fraction));
+inline std::unique_ptr<Dimension> fract(OtherDimension dimen, float fraction) {
+  return std::make_unique<FractionDimension>(dimen, fraction);
 }
 
-inline std::shared_ptr<Dimension> fract(int other_widget_id, OtherDimension dimen, float fraction) {
-  return std::shared_ptr<Dimension>(new FractionDimension(other_widget_id, dimen, fraction));
+inline std::unique_ptr<Dimension> fract(int other_widget_id, OtherDimension dimen, float fraction) {
+  return std::make_unique<FractionDimension>(other_widget_id, dimen, fraction);
 }
 
 // Base class for properties that can be added to buildable objects.
@@ -121,10 +122,10 @@ protected:
   Widget *parent_;
   int id_;
   std::vector<Widget *> children_;
-  std::shared_ptr<Dimension> x_;
-  std::shared_ptr<Dimension> y_;
-  std::shared_ptr<Dimension> width_;
-  std::shared_ptr<Dimension> height_;
+  std::unique_ptr<Dimension> x_;
+  std::unique_ptr<Dimension> y_;
+  std::unique_ptr<Dimension> width_;
+  std::unique_ptr<Dimension> height_;
   bool visible_;
   bool focused_;
   bool enabled_;
@@ -135,8 +136,8 @@ public:
   Widget(Gui *gui);
   virtual ~Widget();
 
-  static Property *position(std::shared_ptr<Dimension> x, std::shared_ptr<Dimension> y);
-  static Property *size(std::shared_ptr<Dimension> width, std::shared_ptr<Dimension> height);
+  static std::unique_ptr<Property> position(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y);
+  static std::unique_ptr<Property> size(std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height);
   static Property *click(std::function<bool(Widget *)> on_click);
   static Property *visible(bool visible);
   static Property *id(int id);
@@ -224,13 +225,13 @@ public:
   }
 
   float get_top();
-  void set_top(std::shared_ptr<Dimension> top);
+  void set_top(std::unique_ptr<Dimension> top);
   float get_left();
-  void set_left(std::shared_ptr<Dimension> left);
+  void set_left(std::unique_ptr<Dimension> left);
   float get_width();
-  void set_width(std::shared_ptr<Dimension> width);
+  void set_width(std::unique_ptr<Dimension> width);
   float get_height();
-  void set_height(std::shared_ptr<Dimension> height);
+  void set_height(std::unique_ptr<Dimension> height);
 
   std::any const &get_data() const;
   void set_data(std::any const &data);

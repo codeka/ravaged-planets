@@ -20,7 +20,7 @@ public:
 
   void apply(Widget *widget) {
     Label *wdgt = dynamic_cast<Label *>(widget);
-    wdgt->background_ = wdgt->gui_->get_drawable_manager()->get_drawable(drawable_name_);
+    wdgt->background_ = wdgt->gui_->get_drawable_manager().get_drawable(drawable_name_);
     wdgt->background_centred_ = centred_;
   }
 };
@@ -129,7 +129,7 @@ void Label::set_background(Bitmap const &bmp, bool centred /*= false*/) {
   std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(bmp);
   background_ =
-      gui_->get_drawable_manager()->build_drawable(
+      gui_->get_drawable_manager().build_drawable(
           texture, 0, 0, bmp.get_width(), bmp.get_height());
   background_centred_ = centred;
 }

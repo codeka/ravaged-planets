@@ -81,7 +81,7 @@ void EntityIcon::initialize() {
   framebuffer_->set_depth_buffer(depth_texture_);
 
   drawable_ = fw::Framework::get_instance()->get_gui()->get_drawable_manager()
-      ->build_drawable(color_texture_, 7, 7, 50, 50);
+      .build_drawable(color_texture_, 7, 7, 50, 50);
   std::dynamic_pointer_cast<BitmapDrawable>(drawable_)->set_flipped(true);
   render();
 }

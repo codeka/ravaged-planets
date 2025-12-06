@@ -40,8 +40,9 @@ float PercentDimension::get_value(fw::gui::Widget *w, float parent_value) {
   return parent_value * (value_ / 100.0f);
 }
 
-SumDimension::SumDimension(std::shared_ptr<Dimension> one, std::shared_ptr<Dimension> two) :
-    one_(one), two_(two) {
+SumDimension::SumDimension(
+    std::unique_ptr<Dimension> one, std::unique_ptr<Dimension> two)
+    : one_(std::move(one)), two_(std::move(two)) {
 }
 
 SumDimension::~SumDimension() {
@@ -87,38 +88,40 @@ float FractionDimension::get_value(fw::gui::Widget *w, float parent_value) {
 //-----------------------------------------------------------------------------
 class WidgetPositionProperty : public Property {
 private:
-  std::shared_ptr<Dimension> x_;
-  std::shared_ptr<Dimension> y_;
+  std::unique_ptr<Dimension> x_;
+  std::unique_ptr<Dimension> y_;
 public:
-  WidgetPositionProperty(std::shared_ptr<Dimension> x, std::shared_ptr<Dimension> y);
+  WidgetPositionProperty(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y);
   void apply(Widget *widget);
 };
 
-WidgetPositionProperty::WidgetPositionProperty(std::shared_ptr<Dimension> x, std::shared_ptr<Dimension> y) :
-    x_(x), y_(y) {
+WidgetPositionProperty::WidgetPositionProperty(
+    std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y)
+    : x_(std::move(x)), y_(std::move(y)) {
 }
 
 void WidgetPositionProperty::apply(Widget *widget) {
-  widget->x_ = x_;
-  widget->y_ = y_;
+  widget->x_ = std::move(x_);
+  widget->y_ = std::move(y_);
 }
 
 class WidgetSizeProperty : public Property {
 private:
-  std::shared_ptr<Dimension> width_;
-  std::shared_ptr<Dimension> height_;
+  std::unique_ptr<Dimension> width_;
+  std::unique_ptr<Dimension> height_;
 public:
-  WidgetSizeProperty(std::shared_ptr<Dimension> width, std::shared_ptr<Dimension> height);
+  WidgetSizeProperty(std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height);
   void apply(Widget *widget);
 };
 
-WidgetSizeProperty::WidgetSizeProperty(std::shared_ptr<Dimension> width, std::shared_ptr<Dimension> height) :
-    width_(width), height_(height) {
+WidgetSizeProperty::WidgetSizeProperty(
+    std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height)
+    : width_(std::move(width)), height_(std::move(height)) {
 }
 
 void WidgetSizeProperty::apply(Widget *widget) {
-  widget->width_ = width_;
-  widget->height_ = height_;
+  widget->width_ = std::move(width_);
+  widget->height_ = std::move(height_);
 }
 
 class WidgetClickProperty : public Property {
@@ -195,12 +198,12 @@ Widget::Widget(Gui *gui) :
 Widget::~Widget() {
 }
 
-Property *Widget::position(std::shared_ptr<Dimension> x, std::shared_ptr<Dimension> y) {
-  return new WidgetPositionProperty(x, y);
+std::unique_ptr<Property> Widget::position(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y) {
+  return std::make_unique<WidgetPositionProperty>(std::move(x), std::move(y));
 }
 
-Property*Widget::size(std::shared_ptr<Dimension> width, std::shared_ptr<Dimension> height) {
-  return new WidgetSizeProperty(width, height);
+std::unique_ptr<Property> Widget::size(std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height) {
+  return std::make_unique<WidgetSizeProperty>(std::move(width), std::move(height));
 }
 
 Property*Widget::click(std::function<bool(Widget *)> on_click) {
@@ -403,8 +406,8 @@ float Widget::get_top() {
   return parent_top + y_->get_value(this, parent_size);
 }
 
-void Widget::set_top(std::shared_ptr<Dimension> top) {
-  y_ = top;
+void Widget::set_top(std::unique_ptr<Dimension> top) {
+  y_ = std::move(top);
 }
 
 float Widget::get_left() {
@@ -413,8 +416,8 @@ float Widget::get_left() {
   return parent_left + x_->get_value(this, parent_size);
 }
 
-void Widget::set_left(std::shared_ptr<Dimension> left) {
-  x_ = left;
+void Widget::set_left(std::unique_ptr<Dimension> left) {
+  x_ = std::move(left);
 }
 
 float Widget::get_width() {
@@ -422,8 +425,8 @@ float Widget::get_width() {
   return width_->get_value(this, parent_size);
 }
 
-void Widget::set_width(std::shared_ptr<Dimension> width) {
-  width_ = width;
+void Widget::set_width(std::unique_ptr<Dimension> width) {
+  width_ = std::move(width);
 }
 
 float Widget::get_height() {
@@ -431,8 +434,8 @@ float Widget::get_height() {
   return height_->get_value(this, parent_size);
 }
 
-void Widget::set_height(std::shared_ptr<Dimension> height) {
-  height_ = height;
+void Widget::set_height(std::unique_ptr<Dimension> height) {
+  height_ = std::move(height);
 }
 
 } }

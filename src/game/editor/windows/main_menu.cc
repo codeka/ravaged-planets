@@ -54,8 +54,10 @@ menu_item::~menu_item() {
 
 void menu_item::on_attached_to_parent(Widget *parent) {
   StateDrawable *bkgnd = new StateDrawable();
-  bkgnd->add_drawable(StateDrawable::kNormal, gui_->get_drawable_manager()->get_drawable("menu_normal"));
-  bkgnd->add_drawable(StateDrawable::kHover, gui_->get_drawable_manager()->get_drawable("menu_hover"));
+  bkgnd->add_drawable(
+      StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("menu_normal"));
+  bkgnd->add_drawable(
+      StateDrawable::kHover, gui_->get_drawable_manager().get_drawable("menu_hover"));
   background_ = std::shared_ptr<Drawable>(bkgnd);
 
   text_align_ = Button::kLeft;

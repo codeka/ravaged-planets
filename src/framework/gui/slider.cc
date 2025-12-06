@@ -79,10 +79,12 @@ Property *Slider::on_update(std::function<void(int)> on_update) {
 
 void Slider::on_attached_to_parent(Widget *parent) {
   StateDrawable *bkgnd = new StateDrawable();
-  bkgnd->add_drawable(StateDrawable::kNormal, gui_->get_drawable_manager()->get_drawable("slider_thumb_normal"));
-  bkgnd->add_drawable(StateDrawable::kHover, gui_->get_drawable_manager()->get_drawable("slider_thumb_hover"));
+  bkgnd->add_drawable(
+      StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("slider_thumb_normal"));
+  bkgnd->add_drawable(
+      StateDrawable::kHover, gui_->get_drawable_manager().get_drawable("slider_thumb_hover"));
   thumb_ = std::shared_ptr<Drawable>(bkgnd);
-  line_ = gui_->get_drawable_manager()->get_drawable("slider_line");
+  line_ = gui_->get_drawable_manager().get_drawable("slider_line");
 }
 
 void Slider::on_mouse_out() {

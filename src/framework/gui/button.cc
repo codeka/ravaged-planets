@@ -26,7 +26,7 @@ public:
     if (drawable_) {
       btn->background_ = drawable_;
     } else {
-      btn->background_ = btn->gui_->get_drawable_manager()->get_drawable(drawable_name_);
+      btn->background_ = btn->gui_->get_drawable_manager().get_drawable(drawable_name_);
     }
   }
 };
@@ -49,7 +49,7 @@ public:
     if (drawable_) {
       btn->icon_ = drawable_;
     } else {
-      btn->icon_ = btn->gui_->get_drawable_manager()->get_drawable(drawable_name_);
+      btn->icon_ = btn->gui_->get_drawable_manager().get_drawable(drawable_name_);
     }
   }
 };
@@ -131,9 +131,12 @@ void Button::on_attached_to_parent(Widget *parent) {
   // Assign default values for things that haven't been overwritten.
   if (!background_) {
     StateDrawable *bkgnd = new StateDrawable();
-    bkgnd->add_drawable(StateDrawable::kNormal, gui_->get_drawable_manager()->get_drawable("button_normal"));
-    bkgnd->add_drawable(StateDrawable::kHover, gui_->get_drawable_manager()->get_drawable("button_hover"));
-    bkgnd->add_drawable(StateDrawable::kPressed, gui_->get_drawable_manager()->get_drawable("button_hover"));
+    bkgnd->add_drawable(
+        StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("button_normal"));
+    bkgnd->add_drawable(
+        StateDrawable::kHover, gui_->get_drawable_manager().get_drawable("button_hover"));
+    bkgnd->add_drawable(
+        StateDrawable::kPressed, gui_->get_drawable_manager().get_drawable("button_hover"));
     background_ = std::shared_ptr<Drawable>(bkgnd);
   }
 }

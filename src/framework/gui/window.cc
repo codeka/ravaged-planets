@@ -17,7 +17,7 @@ public:
 
   void apply(Widget *widget) {
     Window *wnd = dynamic_cast<Window *>(widget);
-    wnd->background_ = wnd->gui_->get_drawable_manager()->get_drawable(_drawable_name);
+    wnd->background_ = wnd->gui_->get_drawable_manager().get_drawable(_drawable_name);
   }
 };
 

@@ -86,7 +86,8 @@ void OpenFileWindow::add_row(Listbox *lbx, std::string const &name) {
     file_size = format_file_size(fs::file_size(full_path));
   }
 
-  std::string icon_name = fs::is_directory(full_path) ? "editor_icon_directory" : "editor_icon_file";
+  std::string icon_name =
+      fs::is_directory(full_path) ? "editor_icon_directory" : "editor_icon_file";
 
   lbx->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20))
       << (Builder<Label>(px(0), px(0), px(20), px(20))
@@ -98,7 +99,7 @@ void OpenFileWindow::add_row(Listbox *lbx, std::string const &name) {
 }
 
 void OpenFileWindow::refresh() {
-  Listbox*lbx = wnd_->find<Listbox>(FILE_LIST_ID);
+  Listbox *lbx = wnd_->find<Listbox>(FILE_LIST_ID);
   lbx->clear();
   _items.clear();
 
@@ -188,7 +189,7 @@ void OpenFileWindow::on_item_selected(int index) {
         std::shared_ptr<fw::Texture> texture = std::shared_ptr<fw::Texture>(new fw::Texture());
         texture->create(bmp);
         std::shared_ptr<Drawable> drawable =
-            fw::Framework::get_instance()->get_gui()->get_drawable_manager()->build_drawable(
+            fw::Framework::get_instance()->get_gui()->get_drawable_manager().build_drawable(
                 texture, 0, 0, bmp_width, bmp_height);
         preview->set_background(drawable, true);
       }

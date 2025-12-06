@@ -31,8 +31,12 @@ void DebugView::initialize() {
     time_to_update_ = 1.0f;
 
     wnd_ = Builder<Window>(sum(pct(100), px(-200)), sum(pct(100), px(-50)), px(190), px(40))
-      << (Builder<Label>(px(0), px(0), px(190), px(20)) << Label::text_align(Label::Alignment::kRight) << Widget::id(FPS_ID))
-      << (Builder<Label>(px(0), px(20), px(190), px(20)) << Label::text_align(Label::Alignment::kRight) << Widget::id(PARTICLES_ID));
+      << (Builder<Label>(px(0), px(0), px(190), px(20))
+          << Label::text_align(Label::Alignment::kRight)
+          << Widget::id(FPS_ID))
+      << (Builder<Label>(px(0), px(20), px(190), px(20))
+          << Label::text_align(Label::Alignment::kRight)
+          << Widget::id(PARTICLES_ID));
     Framework::get_instance()->get_gui()->attach_widget(wnd_);
   }
 }

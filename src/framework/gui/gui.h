@@ -15,22 +15,6 @@ class Widget;
 
 // This is the main entry point into the GUI subsystem. You get an instance of this class from \ref fw::Framework.
 class Gui {
-private:
-  fw::Graphics *graphics_;
-  DrawableManager *drawable_manager_;
-  std::mutex top_level_widget_mutex_;
-  std::vector<Widget *> top_level_widgets_;
-  std::vector<Widget *> pending_remove_;
-  Widget *widget_under_mouse_;
-  Widget *widget_mouse_down_;
-  Widget *focused_;
-  std::shared_ptr<AudioSource> audio_source_;
-
-  // Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget.
-  Widget *get_widget_at(float x, float y);
-
-  void propagate_mouse_event(Widget *w, bool is_down, float x, float y);
-
 public:
   Gui();
   ~Gui();
@@ -77,9 +61,25 @@ public:
     return widget_under_mouse_ != nullptr;
   }
 
-  inline DrawableManager *get_drawable_manager() const {
+  inline DrawableManager &get_drawable_manager() {
     return drawable_manager_;
   }
+
+private:
+  fw::Graphics *graphics_;
+  DrawableManager drawable_manager_;
+  std::mutex top_level_widget_mutex_;
+  std::vector<Widget *> top_level_widgets_;
+  std::vector<Widget *> pending_remove_;
+  Widget *widget_under_mouse_;
+  Widget *widget_mouse_down_;
+  Widget *focused_;
+  std::shared_ptr<AudioSource> audio_source_;
+
+  // Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget.
+  Widget *get_widget_at(float x, float y);
+
+  void propagate_mouse_event(Widget *w, bool is_down, float x, float y);
 };
 
 } 

@@ -14,18 +14,21 @@ namespace fw::gui {
 template <class WidgetType>
 class Builder {
 private:
-  std::vector<Property *> properties_;
+  std::vector<std::unique_ptr<Property>> properties_;
   std::vector<Widget *> child_widgets_;
 
 public:
   inline Builder();
-  // Helper constructor which auto-adds a position and size property for the specified (x, y) and (width, height).
-  inline Builder(std::shared_ptr<Dimension> x, std::shared_ptr<Dimension> y, std::shared_ptr<Dimension> width,
-      std::shared_ptr<Dimension> height);
-  inline ~Builder();
+  // Helper constructor which auto-adds a position and size property for the specified (x, y) and
+  // (width, height).
+  inline Builder(
+      std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y, std::unique_ptr<Dimension> width,
+      std::unique_ptr<Dimension> height);
+  inline ~Builder() = default;
 
   inline operator WidgetType *();
   inline Builder &operator <<(Property *prop);
+  inline Builder &operator <<(std::unique_ptr<Property> prop);
   inline Builder &operator <<(Widget *child);
 };
 
@@ -34,23 +37,16 @@ inline Builder<WidgetType>::Builder() {
 }
 
 template<class WidgetType>
-inline Builder<WidgetType>::Builder(std::shared_ptr<Dimension> x, std::shared_ptr<Dimension> y,
-    std::shared_ptr<Dimension> width, std::shared_ptr<Dimension> height) {
-  properties_.push_back(Widget::position(x, y));
-  properties_.push_back(Widget::size(width, height));
-}
-
-template<class WidgetType>
-inline Builder<WidgetType>::~Builder() {
-  for (Property *prop : properties_) {
-    delete prop;
-  }
+inline Builder<WidgetType>::Builder(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y,
+    std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height) {
+  properties_.push_back(std::move(Widget::position(std::move(x), std::move(y))));
+  properties_.push_back(std::move(Widget::size(std::move(width), std::move(height))));
 }
 
 template<class WidgetType>
 inline Builder<WidgetType>::operator WidgetType*() {
   WidgetType *new_widget = new WidgetType(fw::Framework::get_instance()->get_gui());
-  for (Property *prop : properties_) {
+  for (auto &prop : properties_) {
     prop->apply(new_widget);
   }
   for (Widget *child : child_widgets_) {
@@ -61,7 +57,13 @@ inline Builder<WidgetType>::operator WidgetType*() {
 
 template<class WidgetType>
 inline Builder<WidgetType> & Builder<WidgetType>::operator <<(Property *prop) {
-  properties_.push_back(prop);
+  properties_.push_back(std::unique_ptr<Property>(prop));
+  return *this;
+}
+
+template<class WidgetType>
+inline Builder<WidgetType> & Builder<WidgetType>::operator <<(std::unique_ptr<Property> prop) {
+  properties_.push_back(std::move(prop));
   return *this;
 }
 
