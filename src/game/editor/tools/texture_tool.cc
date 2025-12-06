@@ -53,7 +53,7 @@ TextureToolWindow::TextureToolWindow(ed::TextureTool *tool) : tool_(tool) {
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
       << (Builder<Slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
           << Slider::limits(10, 100) << Slider::on_update(std::bind(&TextureToolWindow::on_radius_updated, this, _1))
-          << Slider::ParticleRotation(40))
+          << Slider::value(40))
       << (Builder<Listbox>(px(4), px(48), sum(pct(100), px(-8)), px(80)) << Widget::id(TEXTURES_ID)
           << Listbox::item_selected(std::bind(&TextureToolWindow::on_texture_selected, this, _1)))
       << (Builder<Label>(px(4), px(132), sum(pct(100), px(-8)), px(92)) << Widget::id(TEXTURE_PREVIEW_ID))

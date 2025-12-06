@@ -20,10 +20,10 @@ public:
     min_value_(min_value), max_value_(max_value) {
   }
 
-  void apply(Widget *widget) {
-    Slider *sldr = dynamic_cast<Slider *>(widget);
-    sldr->min_value_ = min_value_;
-    sldr->max_value_ = max_value_;
+  void apply(Widget &widget) override {
+    Slider &slider = dynamic_cast<Slider &>(widget);
+    slider.min_value_ = min_value_;
+    slider.max_value_ = max_value_;
   }
 };
 
@@ -36,9 +36,9 @@ public:
       curr_value_(curr_value) {
   }
 
-  void apply(Widget *widget) {
-    Slider *slider = dynamic_cast<Slider *>(widget);
-    slider->curr_value_ = curr_value_;
+  void apply(Widget &widget) override {
+    Slider &slider = dynamic_cast<Slider &>(widget);
+    slider.curr_value_ = curr_value_;
   }
 };
 
@@ -51,9 +51,9 @@ public:
     on_update_(on_update) {
   }
 
-  void apply(Widget *widget) {
-    Slider *sldr = dynamic_cast<Slider *>(widget);
-    sldr->on_update_ = on_update_;
+  void apply(Widget &widget) override {
+    Slider &slider = dynamic_cast<Slider &>(widget);
+    slider.on_update_ = on_update_;
   }
 };
 
@@ -65,16 +65,16 @@ Slider::Slider(Gui *gui) : Widget(gui), min_value_(0), max_value_(100), curr_val
 Slider::~Slider() {
 }
 
-Property *Slider::limits(int min_value, int max_value) {
-  return new SliderLimitsProperty(min_value, max_value);
+std::unique_ptr<Property> Slider::limits(int min_value, int max_value) {
+  return std::make_unique<SliderLimitsProperty>(min_value, max_value);
 }
 
-Property *Slider::ParticleRotation(int curr_value) {
-  return new SliderValueProperty(curr_value);
+std::unique_ptr<Property> Slider::value(int curr_value) {
+  return std::make_unique<SliderValueProperty>(curr_value);
 }
 
-Property *Slider::on_update(std::function<void(int)> on_update) {
-  return new SliderOnUpdateProperty(on_update);
+std::unique_ptr<Property> Slider::on_update(std::function<void(int)> on_update) {
+  return std::make_unique<SliderOnUpdateProperty>(on_update);
 }
 
 void Slider::on_attached_to_parent(Widget *parent) {

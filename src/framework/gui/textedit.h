@@ -10,7 +10,7 @@
 
 class TextEditBuffer;
 
-namespace fw { namespace gui {
+namespace fw::gui {
 
 // A TextEdit widget is a complex widget which allows the user to type, edit, select, cut & copy text.
 class TextEdit : public Widget {
@@ -30,8 +30,8 @@ public:
   TextEdit(Gui *gui);
   virtual ~TextEdit();
 
-  static Property *text(std::string const &text);
-  static Property *filter(std::function<bool(std::string ch)> filter);
+  static std::unique_ptr<Property> text(std::string_view text);
+  static std::unique_ptr<Property> filter(std::function<bool(std::string ch)> filter);
 
   virtual void on_focus_gained();
   virtual void on_focus_lost();
@@ -46,7 +46,7 @@ public:
 
   void select_all();
   std::string get_text() const;
-  void set_text(std::string const &text);
+  void set_text(std::string_view text);
 
   void set_filter(std::function<bool(std::string ch)> filter);
 
@@ -54,4 +54,4 @@ public:
   virtual void render();
 };
 
-} }
+}  // namespace fw::gui

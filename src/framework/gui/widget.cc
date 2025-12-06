@@ -92,7 +92,7 @@ private:
   std::unique_ptr<Dimension> y_;
 public:
   WidgetPositionProperty(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y);
-  void apply(Widget *widget);
+  void apply(Widget &widget) override;
 };
 
 WidgetPositionProperty::WidgetPositionProperty(
@@ -100,9 +100,9 @@ WidgetPositionProperty::WidgetPositionProperty(
     : x_(std::move(x)), y_(std::move(y)) {
 }
 
-void WidgetPositionProperty::apply(Widget *widget) {
-  widget->x_ = std::move(x_);
-  widget->y_ = std::move(y_);
+void WidgetPositionProperty::apply(Widget &widget) {
+  widget.x_ = std::move(x_);
+  widget.y_ = std::move(y_);
 }
 
 class WidgetSizeProperty : public Property {
@@ -111,7 +111,7 @@ private:
   std::unique_ptr<Dimension> height_;
 public:
   WidgetSizeProperty(std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height);
-  void apply(Widget *widget);
+  void apply(Widget &widget) override;
 };
 
 WidgetSizeProperty::WidgetSizeProperty(
@@ -119,9 +119,9 @@ WidgetSizeProperty::WidgetSizeProperty(
     : width_(std::move(width)), height_(std::move(height)) {
 }
 
-void WidgetSizeProperty::apply(Widget *widget) {
-  widget->width_ = std::move(width_);
-  widget->height_ = std::move(height_);
+void WidgetSizeProperty::apply(Widget &widget) {
+  widget.width_ = std::move(width_);
+  widget.height_ = std::move(height_);
 }
 
 class WidgetClickProperty : public Property {
@@ -132,8 +132,8 @@ public:
       : on_click_(on_click) {
   }
 
-  void apply(Widget *widget) {
-    widget->on_click_ = on_click_;
+  void apply(Widget &widget) override {
+    widget.on_click_ = on_click_;
   }
 };
 
@@ -145,8 +145,8 @@ public:
       : id_(id) {
   }
 
-  void apply(Widget *widget) {
-    widget->id_ = id_;
+  void apply(Widget &widget) override {
+    widget.id_ = id_;
   }
 };
 
@@ -158,8 +158,8 @@ public:
       : visible_(visible) {
   }
 
-  void apply(Widget *widget) {
-    widget->visible_ = visible_;
+  void apply(Widget &widget) override {
+    widget.visible_ = visible_;
   }
 };
 
@@ -171,8 +171,8 @@ public:
       : data_(data) {
   }
 
-  void apply(Widget *widget) {
-    widget->data_ = data_;
+  void apply(Widget &widget) override {
+    widget.data_ = data_;
   }
 };
 
@@ -184,8 +184,8 @@ public:
       : enabled_(enabled) {
   }
 
-  void apply(Widget *widget) {
-    widget->set_enabled(enabled_);
+  void apply(Widget &widget) override  {
+    widget.set_enabled(enabled_);
   }
 };
 
@@ -198,32 +198,34 @@ Widget::Widget(Gui *gui) :
 Widget::~Widget() {
 }
 
-std::unique_ptr<Property> Widget::position(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y) {
+std::unique_ptr<Property> Widget::position(
+    std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y) {
   return std::make_unique<WidgetPositionProperty>(std::move(x), std::move(y));
 }
 
-std::unique_ptr<Property> Widget::size(std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height) {
+std::unique_ptr<Property> Widget::size(
+    std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height) {
   return std::make_unique<WidgetSizeProperty>(std::move(width), std::move(height));
 }
 
-Property*Widget::click(std::function<bool(Widget *)> on_click) {
-  return new WidgetClickProperty(on_click);
+std::unique_ptr<Property> Widget::click(std::function<bool(Widget *)> on_click) {
+  return std::make_unique<WidgetClickProperty>(on_click);
 }
 
-Property*Widget::visible(bool visible) {
-  return new WidgetVisibleProperty(visible);
+std::unique_ptr<Property> Widget::visible(bool visible) {
+  return std::make_unique<WidgetVisibleProperty>(visible);
 }
 
-Property*Widget::id(int id) {
-  return new WidgetIdProperty(id);
+std::unique_ptr<Property> Widget::id(int id) {
+  return std::make_unique<WidgetIdProperty>(id);
 }
 
-Property*Widget::data(std::any const &data) {
-  return new WidgetDataProperty(data);
+std::unique_ptr<Property> Widget::data(std::any const &data) {
+  return std::make_unique<WidgetDataProperty>(data);
 }
 
-Property*Widget::enabled(bool enabled) {
-  return new WidgetEnabledProperty(enabled);
+std::unique_ptr<Property> Widget::enabled(bool enabled) {
+  return std::make_unique<WidgetEnabledProperty>(enabled);
 }
 
 void Widget::attach_child(Widget *child) {

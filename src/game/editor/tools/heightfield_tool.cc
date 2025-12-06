@@ -195,7 +195,7 @@ private:
   Window *wnd_;
   ed::HeightfieldTool *tool_;
 
-  void on_radius_updated(int ParticleRotation);
+  void on_radius_updated(int value);
   bool on_tool_clicked(fw::gui::Widget *w);
   bool on_import_clicked(fw::gui::Widget *w);
   void on_import_file_selected(ed::OpenFileWindow *ofw);
@@ -219,7 +219,7 @@ HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *Tool) :
           << Button::click(std::bind(&HeightfieldToolWindow::on_tool_clicked, this, _1)))
       << (Builder<Label>(px(4), px(52), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
       << (Builder<Slider>(px(4), px(74), sum(pct(100), px(-8)), px(18))
-          << Slider::limits(20, 100) << Slider::ParticleRotation(40)
+          << Slider::limits(20, 100) << Slider::value(40)
           << Slider::on_update(std::bind(&HeightfieldToolWindow::on_radius_updated, this, _1)))
       << (Builder<Button>(px(4), px(96), sum(pct(100), px(-8)), px(30)) << Button::text("Import")
           << Button::click(std::bind(&HeightfieldToolWindow::on_import_clicked, this, _1)));
@@ -238,8 +238,8 @@ void HeightfieldToolWindow::hide() {
   wnd_->set_visible(false);
 }
 
-void HeightfieldToolWindow::on_radius_updated(int ParticleRotation) {
-  int radius = ParticleRotation / 10;
+void HeightfieldToolWindow::on_radius_updated(int value) {
+  int radius = value / 10;
   tool_->set_radius(radius);
 }
 

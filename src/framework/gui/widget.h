@@ -103,7 +103,7 @@ class Property {
 public:
   inline virtual ~Property() { }
 
-  virtual void apply(Widget *widget) = 0;
+  virtual void apply(Widget &widget) = 0;
 };
 
 // This is the base class of all widgets in the GUI. A widget has a specific position within it's parent, size and
@@ -138,11 +138,11 @@ public:
 
   static std::unique_ptr<Property> position(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y);
   static std::unique_ptr<Property> size(std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height);
-  static Property *click(std::function<bool(Widget *)> on_click);
-  static Property *visible(bool visible);
-  static Property *id(int id);
-  static Property *data(std::any const &data);
-  static Property *enabled(bool enabled);
+  static std::unique_ptr<Property> click(std::function<bool(Widget *)> on_click);
+  static std::unique_ptr<Property> visible(bool visible);
+  static std::unique_ptr<Property> id(int id);
+  static std::unique_ptr<Property> data(std::any const &data);
+  static std::unique_ptr<Property> enabled(bool enabled);
 
   void attach_child(Widget *child);
   void detach_child(Widget *child);

@@ -14,19 +14,19 @@ private:
   std::string drawable_name_;
   std::shared_ptr<Drawable> drawable_;
 public:
-  ButtonBackgroundProperty(std::string const &drawable_name) :
+  ButtonBackgroundProperty(std::string_view drawable_name) :
       drawable_name_(drawable_name) {
   }
   ButtonBackgroundProperty(std::shared_ptr<Drawable> drawable) :
       drawable_(drawable) {
   }
 
-  void apply(Widget *widget) {
-    Button *btn = dynamic_cast<Button *>(widget);
+  void apply(Widget &widget) override {
+    Button &btn = dynamic_cast<Button &>(widget);
     if (drawable_) {
-      btn->background_ = drawable_;
+      btn.background_ = drawable_;
     } else {
-      btn->background_ = btn->gui_->get_drawable_manager().get_drawable(drawable_name_);
+      btn.background_ = btn.gui_->get_drawable_manager().get_drawable(drawable_name_);
     }
   }
 };
@@ -37,19 +37,19 @@ private:
   std::string drawable_name_;
   std::shared_ptr<Drawable> drawable_;
 public:
-  ButtonIconProperty(std::string const &drawable_name) :
+  ButtonIconProperty(std::string_view drawable_name) :
       drawable_name_(drawable_name) {
   }
   ButtonIconProperty(std::shared_ptr<Drawable> drawable) :
       drawable_(drawable) {
   }
 
-  void apply(Widget *widget) {
-    Button *btn = dynamic_cast<Button *>(widget);
+  void apply(Widget &widget) override {
+    Button &btn = dynamic_cast<Button &>(widget);
     if (drawable_) {
-      btn->icon_ = drawable_;
+      btn.icon_ = drawable_;
     } else {
-      btn->icon_ = btn->gui_->get_drawable_manager().get_drawable(drawable_name_);
+      btn.icon_ = btn.gui_->get_drawable_manager().get_drawable(drawable_name_);
     }
   }
 };
@@ -59,13 +59,13 @@ class ButtonTextProperty : public Property {
 private:
   std::string text_;
 public:
-  ButtonTextProperty(std::string const &text) :
+  ButtonTextProperty(std::string_view text) :
       text_(text) {
   }
 
-  void apply(Widget *widget) {
-    Button *btn = dynamic_cast<Button *>(widget);
-    btn->text_ = text_;
+  void apply(Widget &widget) override {
+    Button &btn = dynamic_cast<Button &>(widget);
+    btn.text_ = text_;
   }
 };
 
@@ -78,9 +78,9 @@ public:
       text_align_(text_align) {
   }
 
-  void apply(Widget *widget) {
-    Button *btn = dynamic_cast<Button *>(widget);
-    btn->text_align_ = text_align_;
+  void apply(Widget &widget) override {
+    Button &btn = dynamic_cast<Button &>(widget);
+    btn.text_align_ = text_align_;
   }
 };
 
@@ -103,28 +103,28 @@ Button::Button(Gui *gui)
 Button::~Button() {
 }
 
-Property * Button::background(std::string const &drawable_name) {
-  return new ButtonBackgroundProperty(drawable_name);
+std::unique_ptr<Property> Button::background(std::string_view drawable_name) {
+  return std::make_unique<ButtonBackgroundProperty>(drawable_name);
 }
 
-Property * Button::background(std::shared_ptr<Drawable> drawable) {
-  return new ButtonBackgroundProperty(drawable);
+std::unique_ptr<Property> Button::background(std::shared_ptr<Drawable> drawable) {
+  return std::make_unique<ButtonBackgroundProperty>(drawable);
 }
 
-Property * Button::icon(std::string const &drawable_name) {
-  return new ButtonIconProperty(drawable_name);
+std::unique_ptr<Property> Button::icon(std::string_view drawable_name) {
+  return std::make_unique<ButtonIconProperty>(drawable_name);
 }
 
-Property * Button::icon(std::shared_ptr<Drawable> drawable) {
-  return new ButtonIconProperty(drawable);
+std::unique_ptr<Property> Button::icon(std::shared_ptr<Drawable> drawable) {
+  return std::make_unique<ButtonIconProperty>(drawable);
 }
 
-Property * Button::text(std::string const &text) {
-  return new ButtonTextProperty(text);
+std::unique_ptr<Property> Button::text(std::string_view text) {
+  return std::make_unique<ButtonTextProperty>(text);
 }
 
-Property * Button::text_align(Button::Alignment align) {
-  return new ButtonTextAlignProperty(align);
+std::unique_ptr<Property> Button::text_align(Button::Alignment align) {
+  return std::make_unique<ButtonTextAlignProperty>(align);
 }
 
 void Button::on_attached_to_parent(Widget *parent) {

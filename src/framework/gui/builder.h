@@ -9,8 +9,9 @@
 
 namespace fw::gui {
 
-// This class can be used to build other GUI classes. It keeps a list of attribute definitions and child elements
-// and when you call build() will actually build the class, passing in all those things.
+// This class can be used to build other GUI classes. It keeps a list of attribute definitions and
+// child elements and when you call build() will actually build the class, passing in all those
+// things.
 template <class WidgetType>
 class Builder {
 private:
@@ -27,7 +28,6 @@ public:
   inline ~Builder() = default;
 
   inline operator WidgetType *();
-  inline Builder &operator <<(Property *prop);
   inline Builder &operator <<(std::unique_ptr<Property> prop);
   inline Builder &operator <<(Widget *child);
 };
@@ -47,18 +47,12 @@ template<class WidgetType>
 inline Builder<WidgetType>::operator WidgetType*() {
   WidgetType *new_widget = new WidgetType(fw::Framework::get_instance()->get_gui());
   for (auto &prop : properties_) {
-    prop->apply(new_widget);
+    prop->apply(*new_widget);
   }
   for (Widget *child : child_widgets_) {
     new_widget->attach_child(child);
   }
   return new_widget;
-}
-
-template<class WidgetType>
-inline Builder<WidgetType> & Builder<WidgetType>::operator <<(Property *prop) {
-  properties_.push_back(std::unique_ptr<Property>(prop));
-  return *this;
 }
 
 template<class WidgetType>

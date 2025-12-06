@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 
 #include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
@@ -19,7 +20,7 @@ public:
   Window(Gui *gui);
   ~Window();
 
-  static Property *background(std::string const &drawable_name);
+  static std::unique_ptr<Property> background(std::string_view drawable_name);
 
   void render();
 };

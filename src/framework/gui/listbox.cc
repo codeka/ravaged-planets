@@ -30,8 +30,8 @@ public:
       : on_selected_(on_selected) {
   }
 
-  void apply(Widget *widget) {
-    dynamic_cast<Listbox *>(widget)->sig_item_selected.Connect(on_selected_);
+  void apply(Widget &widget) override {
+    dynamic_cast<Listbox &>(widget).sig_item_selected.Connect(on_selected_);
   }
 };
 
@@ -43,8 +43,8 @@ public:
       : on_activated_(on_activated) {
   }
 
-  void apply(Widget *widget) {
-    dynamic_cast<Listbox *>(widget)->sig_item_activated.Connect(on_activated_);
+  void apply(Widget &widget) override {
+    dynamic_cast<Listbox &>(widget).sig_item_activated.Connect(on_activated_);
   }
 };
 
@@ -171,12 +171,12 @@ Listbox::Listbox(Gui *gui) : Widget(gui), selected_item_(nullptr), scrollbar_vis
 Listbox::~Listbox() {
 }
 
-Property * Listbox::item_selected(std::function<void(int index)> on_selected) {
-  return new ListboxItemSelectedProperty(on_selected);
+std::unique_ptr<Property> Listbox::item_selected(std::function<void(int index)> on_selected) {
+  return std::make_unique<ListboxItemSelectedProperty>(on_selected);
 }
 
-Property * Listbox::item_activated(std::function<void(int index)> on_activated) {
-  return new ListboxItemActivatedProperty(on_activated);
+std::unique_ptr<Property> Listbox::item_activated(std::function<void(int index)> on_activated) {
+  return std::make_unique<ListboxItemActivatedProperty>(on_activated);
 }
 
 void Listbox::add_item(Widget *w) {

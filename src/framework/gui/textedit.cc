@@ -124,13 +124,13 @@ class TextEditTextProperty : public Property {
 private:
   std::string text_;
 public:
-  TextEditTextProperty(std::string const &text) :
+  TextEditTextProperty(std::string_view text) :
     text_(text) {
   }
 
-  void apply(Widget *widget) {
-    TextEdit *te = dynamic_cast<TextEdit *>(widget);
-    te->buffer_->codepoints = utf8::utf8to32(text_);
+  void apply(Widget &widget) override {
+    TextEdit &te = dynamic_cast<TextEdit &>(widget);
+    te.buffer_->codepoints = utf8::utf8to32(text_);
   }
 };
 
@@ -142,15 +142,16 @@ public:
     filter_(filter) {
   }
 
-  void apply(Widget *widget) {
-    TextEdit *te = dynamic_cast<TextEdit *>(widget);
-    te->filter_ = filter_;
+  void apply(Widget &widget) override {
+    TextEdit &te = dynamic_cast<TextEdit &>(widget);
+    te.filter_ = filter_;
   }
 };
 
 //-----------------------------------------------------------------------------
 
-TextEdit::TextEdit(Gui *gui) : Widget(gui), buffer_(new TextEditBuffer()), cursor_flip_time_(0), draw_cursor_(true) {
+TextEdit::TextEdit(Gui *gui)
+    : Widget(gui), buffer_(new TextEditBuffer()), cursor_flip_time_(0), draw_cursor_(true) {
   background_ = gui->get_drawable_manager().get_drawable("textedit");
   selection_background_ = gui->get_drawable_manager().get_drawable("textedit_selection");
   cursor_ = gui->get_drawable_manager().get_drawable("textedit_cursor");
@@ -161,12 +162,12 @@ TextEdit::~TextEdit() {
   delete buffer_;
 }
 
-Property * TextEdit::text(std::string const &text) {
-  return new TextEditTextProperty(text);
+std::unique_ptr<Property> TextEdit::text(std::string_view text) {
+  return std::make_unique<TextEditTextProperty>(text);
 }
 
-Property * TextEdit::filter(std::function<bool(std::string ch)> filter) {
-  return new TextEditFilterProperty(filter);
+std::unique_ptr<Property> TextEdit::filter(std::function<bool(std::string ch)> filter) {
+  return std::make_unique<TextEditFilterProperty>(filter);
 }
 
 void TextEdit::on_focus_gained() {
@@ -225,7 +226,7 @@ std::string TextEdit::get_text() const {
   return utf8::utf32to8(buffer_->codepoints);
 }
 
-void TextEdit::set_text(std::string const &text) {
+void TextEdit::set_text(std::string_view text) {
   buffer_->codepoints = utf8::utf8to32(text);
 }
 

@@ -33,7 +33,7 @@ public:
   Checkbox(Gui *gui);
   virtual ~Checkbox();
 
-  static Property *text(std::string const &text);
+  static std::unique_ptr<Property> text(std::string_view text);
 
   void on_attached_to_parent(Widget *parent);
   void on_mouse_out();

@@ -18,6 +18,34 @@ public:
     kRight
   };
 
+  static std::unique_ptr<Property> background(std::string_view drawable_name);
+  static std::unique_ptr<Property> background(std::shared_ptr<Drawable> drawable);
+  static std::unique_ptr<Property> icon(std::string_view drawable_name);
+  static std::unique_ptr<Property> icon(std::shared_ptr<Drawable> drawable);
+  static std::unique_ptr<Property> text(std::string_view text);
+  static std::unique_ptr<Property> text_align(Alignment align);
+
+  Button(Gui *gui);
+  virtual ~Button();
+
+  void on_attached_to_parent(Widget *parent);
+  void render();
+
+  inline void set_text(std::string_view new_text) {
+    text_ = new_text;
+  }
+  inline std::string get_text() const {
+    return text_;
+  }
+  inline void set_icon(std::shared_ptr<Drawable> drawable) {
+    icon_ = drawable;
+  }
+
+  void set_pressed(bool is_pressed);
+  bool is_pressed() {
+    return is_pressed_;
+  }
+
 protected:
   friend class ButtonBackgroundProperty;
   friend class ButtonTextProperty;
@@ -35,35 +63,6 @@ protected:
   void on_mouse_over();
 
   void update_drawable_state();
-
-public:
-  Button(Gui *gui);
-  virtual ~Button();
-
-  static Property *background(std::string const &drawable_name);
-  static Property *background(std::shared_ptr<Drawable> drawable);
-  static Property *icon(std::string const &drawable_name);
-  static Property *icon(std::shared_ptr<Drawable> drawable);
-  static Property *text(std::string const &text);
-  static Property *text_align(Alignment align);
-
-  void on_attached_to_parent(Widget *parent);
-  void render();
-
-  inline void set_text(std::string const &new_text) {
-    text_ = new_text;
-  }
-  inline std::string get_text() const {
-    return text_;
-  }
-  inline void set_icon(std::shared_ptr<Drawable> drawable) {
-    icon_ = drawable;
-  }
-
-  void set_pressed(bool is_pressed);
-  bool is_pressed() {
-    return is_pressed_;
-  }
 };
 
 }

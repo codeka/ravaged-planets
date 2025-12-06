@@ -14,13 +14,13 @@ class CheckboxTextProperty : public Property {
 private:
   std::string text_;
 public:
-  CheckboxTextProperty(std::string const &text) :
+  CheckboxTextProperty(std::string_view text) :
       text_(text) {
   }
 
-  void apply(Widget *widget) {
-    Checkbox *chbx = dynamic_cast<Checkbox *>(widget);
-    chbx->text_ = text_;
+  void apply(Widget &widget) override {
+    Checkbox &chbx = dynamic_cast<Checkbox &>(widget);
+    chbx.text_ = text_;
   }
 };
 
@@ -32,8 +32,8 @@ Checkbox::Checkbox(Gui *gui) : Widget(gui), is_checked_(false), is_mouse_over_(f
 Checkbox::~Checkbox() {
 }
 
-Property * Checkbox::text(std::string const &text) {
-  return new CheckboxTextProperty(text);
+std::unique_ptr<Property> Checkbox::text(std::string_view text) {
+  return std::make_unique<CheckboxTextProperty>(text);
 }
 
 void Checkbox::on_attached_to_parent(Widget *parent) {

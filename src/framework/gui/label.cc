@@ -14,14 +14,14 @@ private:
   std::string drawable_name_;
   bool centred_;
 public:
-  LabelBackgroundProperty(std::string const &drawable_name, bool centred) :
-      drawable_name_(drawable_name), centred_(centred) {
+  LabelBackgroundProperty(std::string_view drawable_name, bool centred)
+      : drawable_name_(drawable_name), centred_(centred) {
   }
 
-  void apply(Widget *widget) {
-    Label *wdgt = dynamic_cast<Label *>(widget);
-    wdgt->background_ = wdgt->gui_->get_drawable_manager().get_drawable(drawable_name_);
-    wdgt->background_centred_ = centred_;
+  void apply(Widget &widget) override {
+    Label &label = dynamic_cast<Label &>(widget);
+    label.background_ = label.gui_->get_drawable_manager().get_drawable(drawable_name_);
+    label.background_centred_ = centred_;
   }
 };
 
@@ -30,13 +30,13 @@ class LabelTextProperty : public Property {
 private:
   std::string text_;
 public:
-    LabelTextProperty(std::string const &text) :
-    text_(text) {
+    LabelTextProperty(std::string_view text)
+        : text_(text) {
   }
 
-  void apply(Widget *widget) {
-    Label *wdgt = dynamic_cast<Label *>(widget);
-    wdgt->text_ = text_;
+  void apply(Widget &widget) override {
+    Label &label = dynamic_cast<Label &>(widget);
+    label.text_ = text_;
   }
 };
 
@@ -45,13 +45,13 @@ class LabelTextAlignProperty : public Property {
 private:
   Label::Alignment text_alignment_;
 public:
-    LabelTextAlignProperty(Label::Alignment text_alignment) :
-    text_alignment_(text_alignment) {
+    LabelTextAlignProperty(Label::Alignment text_alignment)
+        : text_alignment_(text_alignment) {
   }
 
-  void apply(Widget *widget) {
-    Label *wdgt = dynamic_cast<Label *>(widget);
-    wdgt->text_alignment_ = text_alignment_;
+  void apply(Widget &widget) override {
+    Label &label = dynamic_cast<Label &>(widget);
+    label.text_alignment_ = text_alignment_;
   }
 };
 
@@ -61,16 +61,16 @@ Label::Label(Gui *gui) : Widget(gui), background_centred_(false), text_alignment
 Label::~Label() {
 }
 
-Property * Label::background(std::string const &drawable_name, bool centred /*= false */) {
-  return new LabelBackgroundProperty(drawable_name, centred);
+std::unique_ptr<Property> Label::background(std::string_view drawable_name, bool centred /*= false */) {
+  return std::make_unique<LabelBackgroundProperty>(drawable_name, centred);
 }
 
-Property * Label::text(std::string const &text) {
-  return new LabelTextProperty(text);
+std::unique_ptr<Property> Label::text(std::string_view text) {
+  return std::make_unique<LabelTextProperty>(text);
 }
 
-Property * Label::text_align(Label::Alignment text_alignment) {
-  return new LabelTextAlignProperty(text_alignment);
+std::unique_ptr<Property> Label::text_align(Label::Alignment text_alignment) {
+  return std::make_unique<LabelTextAlignProperty>(text_alignment);
 }
 
 void Label::render() {
@@ -96,17 +96,17 @@ void Label::render() {
     case Alignment::kLeft:
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
         get_left(), get_top() + get_height() / 2, text_,
-        static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
+        static_cast<FontFace::DrawFlags>(FontFace::kAlignLeft | FontFace::kAlignMiddle));
       break;
     case Alignment::kCenter:
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
         get_left() + get_width() / 2, get_top() + get_height() / 2, text_,
-        static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignCenter | fw::FontFace::kAlignMiddle));
+        static_cast<FontFace::DrawFlags>(FontFace::kAlignCenter | FontFace::kAlignMiddle));
       break;
     case Alignment::kRight:
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
           get_left() + get_width(), get_top() + get_height() / 2, text_,
-          static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignRight | fw::FontFace::kAlignMiddle));
+          static_cast<FontFace::DrawFlags>(FontFace::kAlignRight | FontFace::kAlignMiddle));
       break;
     }
   }

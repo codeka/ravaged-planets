@@ -30,9 +30,9 @@ public:
   Slider(Gui *gui);
   virtual ~Slider();
 
-  static Property *limits(int min_value, int max_value);
-  static Property *ParticleRotation(int curr_value);
-  static Property *on_update(std::function<void(int)> fn);
+  static std::unique_ptr<Property> limits(int min_value, int max_value);
+  static std::unique_ptr<Property> value(int curr_value);
+  static std::unique_ptr<Property> on_update(std::function<void(int)> fn);
 
   void on_attached_to_parent(Widget *parent);
   void on_mouse_out();

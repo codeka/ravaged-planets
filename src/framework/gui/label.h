@@ -33,9 +33,9 @@ public:
   Label(Gui *gui);
   virtual ~Label();
 
-  static Property *background(std::string const &drawable_name, bool centred = false);
-  static Property *text(std::string const &text);
-  static Property *text_align(Alignment text_alignment);
+  static std::unique_ptr<Property> background(std::string_view drawable_name, bool centred = false);
+  static std::unique_ptr<Property> text(std::string_view text);
+  static std::unique_ptr<Property> text_align(Alignment text_alignment);
 
   void render();
 
