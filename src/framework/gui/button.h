@@ -28,7 +28,7 @@ public:
   Button(Gui *gui);
   virtual ~Button();
 
-  void on_attached_to_parent(Widget *parent);
+  void OnAttachedToParent(Widget &parent) override;
   void render();
 
   inline void set_text(std::string_view new_text) {

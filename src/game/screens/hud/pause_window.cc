@@ -45,13 +45,13 @@ void PauseWindow::initialize() {
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
-bool PauseWindow::on_resume_clicked(Widget *w) {
+bool PauseWindow::on_resume_clicked(Widget &w) {
   fw::Framework::get_instance()->unpause();
   hide();
   return true;
 }
 
-bool PauseWindow::on_exit_to_menu_clicked(Widget *w) {
+bool PauseWindow::on_exit_to_menu_clicked(Widget &w) {
   fw::Framework::get_instance()->unpause();
 
   Application *app = dynamic_cast<Application *>(fw::Framework::get_instance()->get_app());
@@ -61,7 +61,7 @@ bool PauseWindow::on_exit_to_menu_clicked(Widget *w) {
   return true;
 }
 
-bool PauseWindow::on_exit_game_clicked(Widget *w) {
+bool PauseWindow::on_exit_game_clicked(Widget &w) {
   fw::Framework::get_instance()->unpause();
   fw::Framework::get_instance()->exit();
   return true;

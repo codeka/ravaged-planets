@@ -192,13 +192,13 @@ enum IDS {
 
 class HeightfieldToolWindow {
 private:
-  Window *wnd_;
+  std::shared_ptr<Window> wnd_;
   ed::HeightfieldTool *tool_;
 
   void on_radius_updated(int value);
-  bool on_tool_clicked(fw::gui::Widget *w);
-  bool on_import_clicked(fw::gui::Widget *w);
-  void on_import_file_selected(ed::OpenFileWindow *ofw);
+  bool on_tool_clicked(fw::gui::Widget &w);
+  bool on_import_clicked(fw::gui::Widget &w);
+  void on_import_file_selected(ed::OpenFileWindow &ofw);
 
 public:
   HeightfieldToolWindow(ed::HeightfieldTool *Tool);
@@ -208,8 +208,8 @@ public:
   void hide();
 };
 
-HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *Tool) :
-    tool_(Tool) {
+HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *tool) :
+    tool_(tool) {
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(130)) << Window::background("frame")
       << (Builder<Button>(px(8), px(8), px(36), px(36)) << Widget::id(RAISE_LOWER_BRUSH_ID)
           << Button::icon("editor_hightfield_raiselower")
@@ -243,13 +243,13 @@ void HeightfieldToolWindow::on_radius_updated(int value) {
   tool_->set_radius(radius);
 }
 
-bool HeightfieldToolWindow::on_import_clicked(fw::gui::Widget *w) {
+bool HeightfieldToolWindow::on_import_clicked(fw::gui::Widget &w) {
   ed::open_file->show(std::bind(&HeightfieldToolWindow::on_import_file_selected, this, _1));
   return true;
 }
 
-void HeightfieldToolWindow::on_import_file_selected(ed::OpenFileWindow *ofw) {
-  auto bmp = fw::load_bitmap(ofw->get_selected_file());
+void HeightfieldToolWindow::on_import_file_selected(ed::OpenFileWindow &ofw) {
+  auto bmp = fw::load_bitmap(ofw.get_selected_file());
   if (!bmp.ok()) {
     // error, probably not an image?
     return;
@@ -257,17 +257,17 @@ void HeightfieldToolWindow::on_import_file_selected(ed::OpenFileWindow *ofw) {
   tool_->import_heightfield(*bmp);
 }
 
-bool HeightfieldToolWindow::on_tool_clicked(fw::gui::Widget *w) {
-  Button *raise_lower = wnd_->find<Button>(RAISE_LOWER_BRUSH_ID);
-  Button *level = wnd_->find<Button>(LEVEL_BRUSH_ID);
+bool HeightfieldToolWindow::on_tool_clicked(fw::gui::Widget &w) {
+  auto raise_lower = wnd_->Find<Button>(RAISE_LOWER_BRUSH_ID);
+  auto level = wnd_->Find<Button>(LEVEL_BRUSH_ID);
 
   raise_lower->set_pressed(false);
   level->set_pressed(false);
-  dynamic_cast<Button *>(w)->set_pressed(true);
+  dynamic_cast<Button &>(w).set_pressed(true);
 
-  if (w == raise_lower) {
+  if (w.get_id() == RAISE_LOWER_BRUSH_ID) {
     tool_->set_brush(new RaiseLowerBrush());
-  } else if (w == level) {
+  } else if (w.get_id() == LEVEL_BRUSH_ID) {
     tool_->set_brush(new LevelBrush());
   }
 
@@ -282,12 +282,10 @@ float HeightfieldTool::max_radius = 6;
 
 HeightfieldTool::HeightfieldTool(EditorWorld *wrld) :
     Tool(wrld), radius_(4), brush_(nullptr) {
-  wnd_ = new HeightfieldToolWindow(this);
+  wnd_ = std::make_unique<HeightfieldToolWindow>(this);
 }
 
-HeightfieldTool::~HeightfieldTool() {
-  delete wnd_;
-}
+HeightfieldTool::~HeightfieldTool() {}
 
 void HeightfieldTool::activate() {
   Tool::activate();

@@ -36,8 +36,8 @@ NewAIPlayerWindow::~NewAIPlayerWindow() {
   fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
-void NewAIPlayerWindow::initialize(NewGameWindow *NewGameWindow) {
-  new_game_window_ = NewGameWindow;
+void NewAIPlayerWindow::initialize(NewGameWindow *new_game_window) {
+  new_game_window_ = new_game_window;
   wnd_ = Builder<Window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
       << Window::background("frame")
       << Widget::visible(false)
@@ -59,14 +59,16 @@ void NewAIPlayerWindow::initialize(NewGameWindow *NewGameWindow) {
   ScriptManager scriptmgr;
   std::vector<ScriptDesc> &scripts = scriptmgr.get_scripts();
   for (ScriptDesc &desc : scripts) {
-    wnd_->find<Listbox>(AI_LIST_ID)->add_item(
-        Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(desc.name) << Widget::data(desc));
+    wnd_->Find<Listbox>(AI_LIST_ID)->add_item(
+        Builder<Label>(px(8), px(0), pct(100), px(20))
+            << Label::text(desc.name)
+            << Widget::data(desc));
   }
 
   // if there's at least one script (which there should be...) we'll want the default
   // one to be the first one in the list.
   if (scripts.size() > 0) {
-    wnd_->find<Listbox>(AI_LIST_ID)->select_item(0);
+    wnd_->Find<Listbox>(AI_LIST_ID)->select_item(0);
   }
 }
 
@@ -82,15 +84,15 @@ void NewAIPlayerWindow::show() {
 
   std::stringstream ss;
   ss << "Player " << (max_player_no + 1);
-  wnd_->find<TextEdit>(PLAYER_NAME_ID)->set_text(ss.str());
+  wnd_->Find<TextEdit>(PLAYER_NAME_ID)->set_text(ss.str());
 }
 
-bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
-  wnd_->find<TextEdit>(PLAYER_NAME_ID)->get_text();
+bool NewAIPlayerWindow::on_ok_clicked(Widget &w) {
+  wnd_->Find<TextEdit>(PLAYER_NAME_ID)->get_text();
   std::string name("Player 2");
 
-  Widget *selected_item = wnd_->find<Listbox>(AI_LIST_ID)->get_selected_item();
-  if (selected_item == nullptr) {
+  auto selected_item = wnd_->Find<Listbox>(AI_LIST_ID)->get_selected_item();
+  if (!selected_item) {
     return false;
   }
   ScriptDesc const &desc = std::any_cast<ScriptDesc const &>(selected_item->get_data());
@@ -118,7 +120,7 @@ bool NewAIPlayerWindow::on_ok_clicked(Widget *w) {
   return true;
 }
 
-bool NewAIPlayerWindow::on_cancel_clicked(Widget *w) {
+bool NewAIPlayerWindow::on_cancel_clicked(Widget &w) {
   wnd_->set_visible(false);
   return true;
 }

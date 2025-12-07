@@ -48,9 +48,11 @@ void SaveMapWindow::initialize() {
       << (Builder<Label>(px(260), px(10), px(230), px(172)) << Widget::id(SCREENSHOT_ID))
       << (Builder<Button>(px(90), px(152), px(160), px(30)) << Button::text("Update screenshot")
           << Widget::click(std::bind(&SaveMapWindow::screenshot_clicked, this, _1)))
-      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-38)), px(80), px(30)) << Button::text("Save")
+      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-38)), px(80), px(30))
+          << Button::text("Save")
           << Widget::click(std::bind(&SaveMapWindow::save_clicked, this, _1)))
-      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-38)), px(80), px(30)) << Button::text("Cancel")
+      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-38)), px(80), px(30))
+          << Button::text("Cancel")
           << Widget::click(std::bind(&SaveMapWindow::cancel_clicked, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
@@ -61,12 +63,12 @@ void SaveMapWindow::show() {
 
   auto world = dynamic_cast<EditorWorld *>(game::World::get_instance());
 
-  wnd_->find<TextEdit>(NAME_ID)->set_text(world->get_name());
-  wnd_->find<TextEdit>(DESCRIPTION_ID)->set_text(world->get_description());
+  wnd_->Find<TextEdit>(NAME_ID)->set_text(world->get_name());
+  wnd_->Find<TextEdit>(DESCRIPTION_ID)->set_text(world->get_description());
   if (world->get_author() == "") {
-    wnd_->find<TextEdit>(AUTHOR_ID)->set_text(fw::get_user_name());
+    wnd_->Find<TextEdit>(AUTHOR_ID)->set_text(fw::get_user_name());
   } else {
-    wnd_->find<TextEdit>(AUTHOR_ID)->set_text(world->get_author());
+    wnd_->Find<TextEdit>(AUTHOR_ID)->set_text(world->get_author());
   }
   update_screenshot();
 }
@@ -78,10 +80,10 @@ void SaveMapWindow::update_screenshot() {
     return;
 
   fw::Bitmap const &bmp = world->get_screenshot();
-  wnd_->find<Label>(SCREENSHOT_ID)->set_background(bmp);
+  wnd_->Find<Label>(SCREENSHOT_ID)->set_background(bmp);
 }
 
-bool SaveMapWindow::screenshot_clicked(Widget *w) {
+bool SaveMapWindow::screenshot_clicked(Widget &w) {
   auto world = dynamic_cast<EditorWorld *>(game::World::get_instance());
   fw::Framework::get_instance()->take_screenshot(
       1024, 768, std::bind(&SaveMapWindow::screenshot_complete, this, _1), false);
@@ -99,11 +101,11 @@ void SaveMapWindow::screenshot_complete(fw::Bitmap const &bitmap) {
   });
 }
 
-bool SaveMapWindow::save_clicked(Widget *w) {
+bool SaveMapWindow::save_clicked(Widget &w) {
   auto world = dynamic_cast<EditorWorld *>(game::World::get_instance());
-  world->set_name(wnd_->find<TextEdit>(NAME_ID)->get_text());
-  world->set_author(wnd_->find<TextEdit>(AUTHOR_ID)->get_text());
-  world->set_description(wnd_->find<TextEdit>(DESCRIPTION_ID)->get_text());
+  world->set_name(wnd_->Find<TextEdit>(NAME_ID)->get_text());
+  world->set_author(wnd_->Find<TextEdit>(AUTHOR_ID)->get_text());
+  world->set_description(wnd_->Find<TextEdit>(DESCRIPTION_ID)->get_text());
 
   WorldWriter writer(world);
   auto status = writer.write(world->get_name());
@@ -117,7 +119,7 @@ bool SaveMapWindow::save_clicked(Widget *w) {
   return true;
 }
 
-bool SaveMapWindow::cancel_clicked(Widget *w) {
+bool SaveMapWindow::cancel_clicked(Widget &w) {
   wnd_->set_visible(false);
   return true;
 }

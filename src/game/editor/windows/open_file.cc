@@ -1,3 +1,5 @@
+#include <game/editor/windows/open_file.h>
+
 #include <filesystem>
 #include <functional>
 
@@ -17,8 +19,6 @@
 #include <framework/logging.h>
 #include <framework/paths.h>
 #include <framework/texture.h>
-
-#include <game/editor/windows/open_file.h>
 
 namespace fs = std::filesystem;
 using namespace fw::gui;
@@ -78,7 +78,7 @@ void OpenFileWindow::hide() {
   wnd_->set_visible(false);
 }
 
-void OpenFileWindow::add_row(Listbox *lbx, std::string const &name) {
+void OpenFileWindow::add_row(Listbox &lbx, std::string const &name) {
   fs::path full_path = _curr_directory / name;
 
   std::string file_size = "";
@@ -89,7 +89,7 @@ void OpenFileWindow::add_row(Listbox *lbx, std::string const &name) {
   std::string icon_name =
       fs::is_directory(full_path) ? "editor_icon_directory" : "editor_icon_file";
 
-  lbx->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20))
+  lbx.add_item(Builder<Widget>(px(0), px(0), pct(100), px(20))
       << (Builder<Label>(px(0), px(0), px(20), px(20))
           << Label::background(icon_name, true /* centered */))
       << (Builder<Label>(px(28), px(0), sum(pct(75), px(-28)), px(20)) << Label::text(name))
@@ -99,14 +99,18 @@ void OpenFileWindow::add_row(Listbox *lbx, std::string const &name) {
 }
 
 void OpenFileWindow::refresh() {
-  Listbox *lbx = wnd_->find<Listbox>(FILE_LIST_ID);
+  if (!fw::Graphics::is_render_thread()) {
+    // Make sure refresh() runs on the render thread.
+    fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this](){ refresh(); });
+  }
+  auto lbx = wnd_->Find<Listbox>(FILE_LIST_ID);
   lbx->clear();
   _items.clear();
 
   _curr_directory = fs::canonical(_curr_directory);
   if (_curr_directory != _curr_directory.root_name()) {
     // if it's not the root folder, add a ".." entry
-    add_row(lbx, "..");
+    add_row(*lbx, "..");
   }
 
   // Add them all to a directory so that we can sort them.
@@ -135,15 +139,15 @@ void OpenFileWindow::refresh() {
 
   // Now add them to the listbox
   for(fs::path path : paths) {
-    add_row(lbx, path.filename().string());
+    add_row(*lbx, path.filename().string());
   }
 
   // we also want to set the "Path" to be the full path that we're currently displaying
-  wnd_->find<TextEdit>(FILENAME_ID)->set_text(_curr_directory.string());
+  wnd_->Find<TextEdit>(FILENAME_ID)->set_text(_curr_directory.string());
 }
 
 fs::path OpenFileWindow::get_selected_file() const {
-  return fs::path(wnd_->find<TextEdit>(FILENAME_ID)->get_text());
+  return fs::path(wnd_->Find<TextEdit>(FILENAME_ID)->get_text());
 }
 
 void OpenFileWindow::navigate_to_directory(fs::path const &new_directory) {
@@ -153,7 +157,7 @@ void OpenFileWindow::navigate_to_directory(fs::path const &new_directory) {
 
 void OpenFileWindow::on_item_selected(int index) {
   fs::path item_path = _curr_directory / _items[index];
-  wnd_->find<TextEdit>(FILENAME_ID)->set_text(item_path.string());
+  wnd_->Find<TextEdit>(FILENAME_ID)->set_text(item_path.string());
 
   if (fs::is_regular_file(item_path)) {
     std::string ext = item_path.extension().string();
@@ -167,7 +171,7 @@ void OpenFileWindow::on_item_selected(int index) {
         auto bmp = *bmp_or_status;
         is_image = true; // if we loaded it, then we know it's an image
 
-        Label *preview = wnd_->find<Label>(IMAGE_PREVIEW_ID);
+        auto preview = wnd_->Find<Label>(IMAGE_PREVIEW_ID);
         float width = preview->get_width();
         float height = preview->get_height();
         float bmp_width = bmp.get_width();
@@ -196,24 +200,24 @@ void OpenFileWindow::on_item_selected(int index) {
     }
 
     if (!is_image) {
-      Label *preview = wnd_->find<Label>(IMAGE_PREVIEW_ID);
+      auto preview = wnd_->Find<Label>(IMAGE_PREVIEW_ID);
       preview->set_background(std::shared_ptr<Drawable>());
     }
   }
 }
 
 void OpenFileWindow::on_item_activated(int index) {
-  on_ok_clicked(wnd_->find<Button>(OK_ID));
+  on_ok_clicked(*wnd_->Find<Button>(OK_ID));
 }
 
-bool OpenFileWindow::on_show_hidden_clicked(Widget *w) {
-  _show_hidden = dynamic_cast<Checkbox *>(w)->is_checked();
+bool OpenFileWindow::on_show_hidden_clicked(Widget &w) {
+  _show_hidden = dynamic_cast<Checkbox &>(w).is_checked();
   refresh();
   return true;
 }
 
-bool OpenFileWindow::on_ok_clicked(Widget *w) {
-  fs::path item_path = fs::path(wnd_->find<TextEdit>(FILENAME_ID)->get_text());
+bool OpenFileWindow::on_ok_clicked(Widget &w) {
+  fs::path item_path = fs::path(wnd_->Find<TextEdit>(FILENAME_ID)->get_text());
   if (fs::is_directory(item_path)) {
     _curr_directory = item_path;
     refresh();
@@ -222,14 +226,14 @@ bool OpenFileWindow::on_ok_clicked(Widget *w) {
 
   if (fs::is_regular_file(item_path)) {
     if (_file_selected_handler) {
-      _file_selected_handler(this);
+      _file_selected_handler(*this);
     }
     hide();
   }
   return true;
 }
 
-bool OpenFileWindow::on_cancel_clicked(Widget *w) {
+bool OpenFileWindow::on_cancel_clicked(Widget &w) {
   hide();
   return true;
 }

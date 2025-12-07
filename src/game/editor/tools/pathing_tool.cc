@@ -54,23 +54,23 @@ int get_patch_index(int patch_x, int patch_z, int patches_width, int patches_len
 
 class PathingToolWindow {
 private:
-  Window *wnd_;
-  ed::PathingTool *tool_;
+  std::shared_ptr<Window> wnd_;
+  ed::PathingTool &tool_;
 
-  bool on_start_click(Widget *w);
-  bool on_end_click(Widget *w);
-  bool on_simplify_click(Widget *w);
+  bool on_start_click(Widget &w);
+  bool on_end_click(Widget &w);
+  bool on_simplify_click(Widget &w);
 
 public:
-  PathingToolWindow(ed::PathingTool *Tool);
+  PathingToolWindow(ed::PathingTool &tool);
   virtual ~PathingToolWindow();
 
   void show();
   void hide();
 };
 
-PathingToolWindow::PathingToolWindow(ed::PathingTool *tool) :
-    tool_(tool), wnd_(nullptr) {
+PathingToolWindow::PathingToolWindow(ed::PathingTool &tool) :
+    tool_(tool) {
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(94))
       << Window::background("frame")
       << (Builder<Button>(px(4), px(4), sum(pct(100), px(-8)), px(30))
@@ -99,24 +99,24 @@ void PathingToolWindow::hide() {
   wnd_->set_visible(false);
 }
 
-bool PathingToolWindow::on_start_click(Widget *w) {
+bool PathingToolWindow::on_start_click(Widget &w) {
   ed::statusbar->set_message("Set test start...");
-  tool_->set_test_start();
-  wnd_->find<Button>(START_ID)->set_pressed(true);
-  wnd_->find<Button>(END_ID)->set_pressed(false);
+  tool_.set_test_start();
+  wnd_->Find<Button>(START_ID)->set_pressed(true);
+  wnd_->Find<Button>(END_ID)->set_pressed(false);
   return true;
 }
 
-bool PathingToolWindow::on_end_click(Widget *w) {
+bool PathingToolWindow::on_end_click(Widget &w) {
   ed::statusbar->set_message("Set test end...");
-  tool_->set_test_end();
-  wnd_->find<Button>(START_ID)->set_pressed(false);
-  wnd_->find<Button>(END_ID)->set_pressed(true);
+  tool_.set_test_end();
+  wnd_->Find<Button>(START_ID)->set_pressed(false);
+  wnd_->Find<Button>(END_ID)->set_pressed(true);
   return true;
 }
 
-bool PathingToolWindow::on_simplify_click(Widget *w) {
-  tool_->set_simplify(dynamic_cast<Checkbox *>(w)->is_checked());
+bool PathingToolWindow::on_simplify_click(Widget &w) {
+  tool_.set_simplify(dynamic_cast<Checkbox &>(w).is_checked());
   return true;
 }
 
@@ -179,7 +179,7 @@ REGISTER_TOOL("pathing", PathingTool);
 
 PathingTool::PathingTool(EditorWorld *wrld) :
     Tool(wrld), start_set_(false), end_set_(false), test_mode_(kTestNone), simplify_(true) {
-  wnd_ = new PathingToolWindow(this);
+  wnd_ = std::make_unique<PathingToolWindow>(*this);
   auto model = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
   if (!model.ok()) {
     LOG(ERR) << "error loading marker: " << model.status();
@@ -188,9 +188,7 @@ PathingTool::PathingTool(EditorWorld *wrld) :
   }
 }
 
-PathingTool::~PathingTool() {
-  delete wnd_;
-}
+PathingTool::~PathingTool() {}
 
 void PathingTool::activate() {
   Tool::activate();

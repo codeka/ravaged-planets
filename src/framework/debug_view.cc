@@ -42,13 +42,13 @@ void DebugView::initialize() {
 }
 
 void DebugView::destroy() {
-  if (wnd_ != nullptr) {
+  if (wnd_) {
     Framework::get_instance()->get_gui()->detach_widget(wnd_);
   }
 }
 
 void DebugView::update(float dt) {
-  if (wnd_ == nullptr) {
+  if (!wnd_) {
     return;
   }
 
@@ -56,10 +56,10 @@ void DebugView::update(float dt) {
   if (time_to_update_ <= 0.0f) {
     fw::Framework *frmwrk = fw::Framework::get_instance();
 
-    Label *fps = wnd_->find<Label>(FPS_ID);
+    auto fps = wnd_->Find<Label>(FPS_ID);
     fps->set_text(absl::StrCat(frmwrk->get_timer()->get_fps(), " fps"));
 
-    Label *particles = wnd_->find<Label>(PARTICLES_ID);
+    auto particles = wnd_->Find<Label>(PARTICLES_ID);
     particles->set_text(
       absl::StrCat(frmwrk->get_particle_mgr()->get_num_active_particles(), " particles"));
 

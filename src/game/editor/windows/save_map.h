@@ -14,11 +14,11 @@ namespace ed {
 
 class SaveMapWindow {
 private:
-  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::gui::Window> wnd_;
 
-  bool save_clicked(fw::gui::Widget *w);
-  bool cancel_clicked(fw::gui::Widget *w);
-  bool screenshot_clicked(fw::gui::Widget *w);
+  bool save_clicked(fw::gui::Widget &w);
+  bool cancel_clicked(fw::gui::Widget &w);
+  bool screenshot_clicked(fw::gui::Widget &w);
   void screenshot_complete(fw::Bitmap const &bitmap);
 
   void update_screenshot();

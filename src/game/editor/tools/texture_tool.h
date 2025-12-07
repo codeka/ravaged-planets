@@ -22,7 +22,7 @@ public:
 private:
   int radius_;
   uint8_t layer_;
-  TextureToolWindow *wnd_;
+  std::unique_ptr<TextureToolWindow> wnd_;
   bool is_painting_;
 
   std::shared_ptr<IndicatorNode> indicator_;
@@ -31,7 +31,7 @@ private:
 
 public:
   TextureTool(EditorWorld *wrld);
-  virtual ~TextureTool();
+  virtual ~TextureTool() = default;
 
   virtual void activate();
   virtual void deactivate();

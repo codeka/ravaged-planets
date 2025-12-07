@@ -4,6 +4,7 @@
 #include <string>
 
 #include <framework/signals.h>
+#include <framework/gui/builder.h>
 #include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
@@ -18,17 +19,19 @@ private:
   friend class ListboxItemActivatedProperty;
 
   std::shared_ptr<Drawable> background_;
-  Widget *item_container_;
-  std::vector<ListboxItem *> items_;
-  ListboxItem *selected_item_;
+  std::shared_ptr<Widget> item_container_;
+  std::vector<std::shared_ptr<ListboxItem>> items_;
+  std::weak_ptr<ListboxItem> selected_item_;
   bool scrollbar_visible_;
 
   void update_thumb_button(bool adjust_height);
-  bool on_down_button_click(Widget *w);
-  bool on_up_button_click(Widget *w);
+  bool on_down_button_click(Widget &w);
+  bool on_up_button_click(Widget &w);
 public:
   Listbox(Gui *gui);
   virtual ~Listbox();
+
+  void OnAttachedToParent(Widget &parent) override;
 
   static std::unique_ptr<Property> item_selected(std::function<void(int index)> on_selected);
   static std::unique_ptr<Property> item_activated(std::function<void(int index)> on_activated);
@@ -36,7 +39,16 @@ public:
   // Add an item to the list. This is not quite the same as attach_child, so be sure to not use
   // that. You must give the widget you want to add an explicit height (in pixel, not percent).
   // It's typically also best to give it an (x,y) of (0,0) and a width of 100%.
-  void add_item(Widget *w);
+  void add_item(std::shared_ptr<Widget> w);
+
+  template <IsSubclassOfWidget T>
+  inline void add_item(std::shared_ptr<T> w) {
+    add_item(std::dynamic_pointer_cast<Widget>(w));
+  }
+  template <IsSubclassOfWidget T>
+  inline void add_item(Builder<T> &builder) {
+    add_item(std::dynamic_pointer_cast<Widget>(std::shared_ptr<T>(builder)));
+  }
 
   /** Removes all the items in the listbox. */
   void clear();
@@ -48,8 +60,8 @@ public:
   void activate_item(int index);
 
   int get_selected_index();
-  Widget *get_item(int index);
-  Widget *get_selected_item();
+  std::shared_ptr<Widget> get_item(int index);
+  std::shared_ptr<Widget> get_selected_item();
 
   /** Signaled when an item is selected. */
   fw::Signal<int /*index*/> sig_item_selected;

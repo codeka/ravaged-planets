@@ -127,7 +127,7 @@ std::unique_ptr<Property> Button::text_align(Button::Alignment align) {
   return std::make_unique<ButtonTextAlignProperty>(align);
 }
 
-void Button::on_attached_to_parent(Widget *parent) {
+void Button::OnAttachedToParent(Widget &parent) {
   // Assign default values for things that haven't been overwritten.
   if (!background_) {
     StateDrawable *bkgnd = new StateDrawable();

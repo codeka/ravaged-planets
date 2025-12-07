@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <framework/gui/window.h>
 #include <framework/math.h>
 #include <framework/texture.h>
@@ -21,7 +23,7 @@ class MinimapDrawable;
 // The MinimapWindow shows a graphic with the current map and all the friendlies/enemies/etc
 class MinimapWindow {
 private:
-  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::gui::Window> wnd_;
   std::shared_ptr<fw::Texture> texture_;
   std::shared_ptr<MinimapDrawable> drawable_;
   float last_entity_display_update_;

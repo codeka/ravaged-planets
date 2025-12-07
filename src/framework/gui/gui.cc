@@ -14,8 +14,7 @@
 namespace fw::gui {
 
 Gui::Gui()
-  : graphics_(nullptr), widget_under_mouse_(nullptr),
-    widget_mouse_down_(nullptr), focused_(nullptr) {
+  : graphics_(nullptr) {
 }
 
 Gui::~Gui() {
@@ -32,34 +31,36 @@ fw::Status Gui::Initialize(fw::Graphics *graphics, fw::AudioManager* audio_manag
 
 void Gui::update(float dt) {
   Input *inp = fw::Framework::get_instance()->get_input();
-  Widget *wdgt = get_widget_at(inp->mouse_x(), inp->mouse_y());
-  if (wdgt != widget_under_mouse_) {
-    if (widget_under_mouse_ != nullptr) {
-      widget_under_mouse_->sig_mouse_out.Emit();
+  auto widget = get_widget_at(inp->mouse_x(), inp->mouse_y());
+  auto widget_under_mouse = widget_under_mouse_.lock();
+  if (widget != widget_under_mouse) {
+    if (widget_under_mouse) {
+      widget_under_mouse->sig_mouse_out.Emit();
     }
-    widget_under_mouse_ = wdgt;
-    if (widget_under_mouse_ != nullptr) {
-      widget_under_mouse_->sig_mouse_over.Emit();
+    widget_under_mouse = widget;
+    if (widget_under_mouse) {
+      widget_under_mouse->sig_mouse_over.Emit();
       fw::Framework::get_instance()->get_cursor()->set_cursor(
-          2, widget_under_mouse_->get_cursor_name());
+          2, widget_under_mouse->get_cursor_name());
     } else {
       fw::Framework::get_instance()->get_cursor()->set_cursor(2, "");
     }
+    widget_under_mouse_ = widget_under_mouse;
   }
-  if (widget_under_mouse_ != nullptr && (inp->mouse_dx() != 0.0f || inp->mouse_dy() != 0.0f)) {
-    float mx = inp->mouse_x() - widget_under_mouse_->get_left();
-    float my = inp->mouse_y() - widget_under_mouse_->get_top();
-    widget_under_mouse_->sig_mouse_move.Emit(mx, my);
+  if (widget_under_mouse && (inp->mouse_dx() != 0.0f || inp->mouse_dy() != 0.0f)) {
+    float mx = inp->mouse_x() - widget_under_mouse->get_left();
+    float my = inp->mouse_y() - widget_under_mouse->get_top();
+    widget_under_mouse->sig_mouse_move.Emit(mx, my);
   }
 
   std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
-  for(Widget *wdgt : pending_remove_) {
-    top_level_widgets_.erase(std::find(top_level_widgets_.begin(), top_level_widgets_.end(), wdgt));
-    delete wdgt;
+  for(auto widget : pending_remove_) {
+    top_level_widgets_.erase(
+        std::find(top_level_widgets_.begin(), top_level_widgets_.end(), widget));
   }
   pending_remove_.clear();
 
-  for(Widget *widget : top_level_widgets_) {
+  for(auto widget : top_level_widgets_) {
     if (widget->is_visible()) {
       widget->update(dt);
     }
@@ -67,42 +68,47 @@ void Gui::update(float dt) {
 }
 
 bool Gui::inject_mouse(int button, bool is_down, float x, float y) {
-  if (button != 1 || (is_down && widget_under_mouse_ == nullptr)
-      || (!is_down && widget_mouse_down_ == nullptr)) {
-    sig_click.Emit(button, is_down, nullptr);
-    if (focused_ != nullptr) {
-      focused_->on_focus_lost();
-      focused_ = nullptr;
+  std::shared_ptr<Widget> widget_under_mouse = widget_under_mouse_.lock();
+  std::shared_ptr<Widget> widget_mouse_down = widget_mouse_down_.lock();
+  std::shared_ptr<Widget> focused = focused_.lock();
+  if (button != 1 || (is_down && !widget_under_mouse)
+      || (!is_down && !widget_mouse_down)) {
+    sig_click_away.Emit(button, is_down);
+    if (focused) {
+      focused->on_focus_lost();
+      focused_.reset();
     }
     return false;
   }
 
-  if (widget_under_mouse_ == nullptr) {
+  if (!widget_under_mouse) {
     return false;
   }
 
-  x -= widget_under_mouse_->get_left();
-  y -= widget_under_mouse_->get_top();
+  x -= widget_under_mouse->get_left();
+  y -= widget_under_mouse->get_top();
 
-  sig_click.Emit(button, is_down, widget_under_mouse_);
+  sig_click.Emit(button, is_down, *widget_under_mouse);
   if (is_down) {
-    widget_mouse_down_ = widget_under_mouse_;
-    if (widget_under_mouse_->can_focus()) {
-      if (focused_ != nullptr) {
-        focused_->on_focus_lost();
+    widget_mouse_down = widget_under_mouse;
+    widget_mouse_down_ = widget_mouse_down;
+    if (widget_under_mouse->can_focus()) {
+      if (focused) {
+        focused->on_focus_lost();
       }
-      focused_ = widget_under_mouse_;
-      focused_->on_focus_gained();
+      focused = widget_under_mouse;
+      focused->on_focus_gained();
+      focused_ = focused;
     }
-    propagate_mouse_event(widget_mouse_down_, true, x, y);
+    propagate_mouse_event(widget_mouse_down, true, x, y);
   } else {
-    propagate_mouse_event(widget_mouse_down_, false, x, y);
-    widget_mouse_down_ = nullptr;
+    propagate_mouse_event(widget_mouse_down, false, x, y);
+    widget_mouse_down_.reset();
   }
   return true;
 }
 
-void Gui::propagate_mouse_event(Widget *w, bool is_down, float x, float y) {
+void Gui::propagate_mouse_event(std::shared_ptr<Widget> w, bool is_down, float x, float y) {
   bool handled = (is_down ? w->on_mouse_down(x, y) : w->on_mouse_up(x, y));
   if (!handled && w->get_parent() != nullptr) {
     propagate_mouse_event(w->get_parent(), is_down, x, y);
@@ -110,8 +116,9 @@ void Gui::propagate_mouse_event(Widget *w, bool is_down, float x, float y) {
 }
 
 bool Gui::inject_key(int key, bool is_down) {
-  if (focused_ != nullptr) {
-    return focused_->on_key(key, is_down);
+  std::shared_ptr<Widget> focused = focused_.lock();
+  if (focused) {
+    return focused->on_key(key, is_down);
   }
   return false;
 }
@@ -119,7 +126,7 @@ bool Gui::inject_key(int key, bool is_down) {
 void Gui::render() {
   glEnable(GL_SCISSOR_TEST);
   std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
-  for(Widget *widget : top_level_widgets_) {
+  for(auto widget : top_level_widgets_) {
     if (widget->is_visible() && widget->prerender()) {
       widget->render();
       widget->postrender();
@@ -128,16 +135,16 @@ void Gui::render() {
   glDisable(GL_SCISSOR_TEST);
 }
 
-Widget *Gui::get_widget_at(float x, float y) {
+std::shared_ptr<Widget> Gui::get_widget_at(float x, float y) {
   std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
   // We want to make sure we pick the top-most widget at this position, so search in reverse.
   for (auto it = top_level_widgets_.rbegin(); it != top_level_widgets_.rend(); ++it) {
-    Widget* wdgt = *it;
+    auto wdgt = *it;
     if (!wdgt->is_visible()) {
       continue;
     }
-    Widget *child = wdgt->get_child_at(x, y);
-    if (child != nullptr) {
+    auto child = wdgt->GetChildAt(x, y);
+    if (child) {
       return child;
     }
   }
@@ -145,18 +152,20 @@ Widget *Gui::get_widget_at(float x, float y) {
   return nullptr;
 }
 
-void Gui::attach_widget(Widget *widget) {
+void Gui::attach_widget(std::shared_ptr<Widget> widget) {
   std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
   top_level_widgets_.push_back(widget);
 }
 
-void Gui::detach_widget(Widget *widget) {
+void Gui::detach_widget(std::shared_ptr<Widget> widget) {
   pending_remove_.push_back(widget);
 }
 
-void Gui::bring_to_top(Widget *widget) {
+void Gui::bring_to_top(std::shared_ptr<Widget> widget) {
   std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
-  top_level_widgets_.erase(std::find(top_level_widgets_.begin(), top_level_widgets_.end(), widget));
+  top_level_widgets_.erase(
+      std::remove(top_level_widgets_.begin(), top_level_widgets_.end(), widget),
+      top_level_widgets_.end());
   top_level_widgets_.push_back(widget);
 }
 

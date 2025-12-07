@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -19,24 +20,24 @@ namespace ed {
 // particular focus on opening images.
 class OpenFileWindow {
 public:
-  typedef std::function<void(OpenFileWindow *)> file_selected_handler;
+  typedef std::function<void(OpenFileWindow &)> file_selected_handler;
 
 private:
-  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::gui::Window> wnd_;
   std::filesystem::path _curr_directory;
   file_selected_handler _file_selected_handler;
   std::vector<std::string> _items;
   bool _show_hidden;
 
-  bool on_ok_clicked(fw::gui::Widget *w);
-  bool on_cancel_clicked(fw::gui::Widget *w);
+  bool on_ok_clicked(fw::gui::Widget &w);
+  bool on_cancel_clicked(fw::gui::Widget &w);
   void on_item_selected(int index);
   void on_item_activated(int index);
-  bool on_show_hidden_clicked(fw::gui::Widget *w);
+  bool on_show_hidden_clicked(fw::gui::Widget &w);
 
   void refresh();
   void navigate_to_directory(std::filesystem::path const &new_directory);
-  void add_row(fw::gui::Listbox *lbx, std::string const &name);
+  void add_row(fw::gui::Listbox &lbx, std::string const &name);
 
 public:
   OpenFileWindow();

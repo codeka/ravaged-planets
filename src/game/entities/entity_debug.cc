@@ -124,9 +124,9 @@ void EntityDebug::update() {
   auto cursor = game::World::get_instance()->get_terrain()->get_cursor_location();
   new_cursor_value = std::format("Cursor: ({:1f}, {:1f}, {:1f})", cursor[0], cursor[1], cursor[2]);
 
-  wnd_->find<Label>(POSITION_ID)->set_text(new_pos_value);
-  wnd_->find<Label>(GOAL_ID)->set_text(new_goal_value);
-  wnd_->find<Label>(CURSOR_ID)->set_text(new_cursor_value);
+  wnd_->Find<Label>(POSITION_ID)->set_text(new_pos_value);
+  wnd_->Find<Label>(GOAL_ID)->set_text(new_goal_value);
+  wnd_->Find<Label>(CURSOR_ID)->set_text(new_cursor_value);
 }
 
 void EntityDebug::on_key_press(std::string /*key*/, bool is_down) {
@@ -138,15 +138,15 @@ void EntityDebug::on_key_press(std::string /*key*/, bool is_down) {
   }
 }
 
-bool EntityDebug::on_show_steering_changed(Widget *w) {
-  const Checkbox* cbx = dynamic_cast<Checkbox*>(w);
-  update_debug_flag(mgr_, kDebugShowSteering, cbx->is_checked());
+bool EntityDebug::on_show_steering_changed(Widget &w) {
+  auto &cbx = dynamic_cast<Checkbox &>(w);
+  update_debug_flag(mgr_, kDebugShowSteering, cbx.is_checked());
   return true;
 }
 
-bool EntityDebug::on_show_path_changed(Widget* w) {
-  Checkbox* cbx = dynamic_cast<Checkbox*>(w);
-  update_debug_flag(mgr_, kDebugShowPathing, cbx->is_checked());
+bool EntityDebug::on_show_path_changed(Widget &w) {
+  auto &cbx = dynamic_cast<Checkbox &>(w);
+  update_debug_flag(mgr_, kDebugShowPathing, cbx.is_checked());
   return true;
 }
 

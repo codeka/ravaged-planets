@@ -12,13 +12,16 @@ namespace fw::gui {
 class Gui;
 class Widget;
 
+template <typename T>
+class Builder;
+
 // Represents a dimension: either an (x,y) coordinate or a width/height.
 class Dimension {
 public:
   Dimension();
   virtual ~Dimension();
 
-  virtual float get_value(fw::gui::Widget *w, float parent_value) = 0;
+  virtual float get_value(fw::gui::Widget &w, float parent_value) = 0;
 };
 
 class PixelDimension : public Dimension {
@@ -29,7 +32,7 @@ public:
   PixelDimension(float value);
   virtual ~PixelDimension();
 
-  float get_value(fw::gui::Widget *w, float parent_value);
+  float get_value(fw::gui::Widget &w, float parent_value) override;
 };
 
 class PercentDimension : public Dimension {
@@ -40,7 +43,7 @@ public:
   PercentDimension(float value);
   virtual ~PercentDimension();
 
-  float get_value(fw::gui::Widget *w, float parent_value);
+  float get_value(fw::gui::Widget &w, float parent_value) override;
 };
 
 class SumDimension : public Dimension {
@@ -52,7 +55,7 @@ public:
   SumDimension(std::unique_ptr<Dimension> one, std::unique_ptr<Dimension> two);
   virtual ~SumDimension();
 
-  float get_value(fw::gui::Widget *w, float parent_value);
+  float get_value(fw::gui::Widget &w, float parent_value) override;
 };
 
 enum OtherDimension {
@@ -74,7 +77,7 @@ public:
   FractionDimension(int other_widget_id, OtherDimension dim, float fraction);
   virtual ~FractionDimension();
 
-  float get_value(fw::gui::Widget *w, float parent_value);
+  float get_value(fw::gui::Widget &w, float parent_value) override;
 };
 
 inline std::unique_ptr<Dimension> px(float value) {
@@ -106,9 +109,12 @@ public:
   virtual void apply(Widget &widget) = 0;
 };
 
+template<typename T>
+concept IsSubclassOfWidget = std::is_base_of_v<Widget, T>;
+
 // This is the base class of all widgets in the GUI. A widget has a specific position within it's parent, size and
 // so on.
-class Widget {
+class Widget : public std::enable_shared_from_this<Widget> {
 protected:
   friend class WidgetPositionProperty;
   friend class WidgetSizeProperty;
@@ -119,9 +125,10 @@ protected:
   friend class WidgetEnabledProperty;
 
   Gui *gui_;
-  Widget *parent_;
+
+  std::weak_ptr<Widget> parent_;
   int id_;
-  std::vector<Widget *> children_;
+  std::vector<std::shared_ptr<Widget>> children_;
   std::unique_ptr<Dimension> x_;
   std::unique_ptr<Dimension> y_;
   std::unique_ptr<Dimension> width_;
@@ -129,25 +136,36 @@ protected:
   bool visible_;
   bool focused_;
   bool enabled_;
-  std::function<bool(Widget *)> on_click_;
+  std::function<bool(Widget &)> on_click_;
   std::any data_;
 
 public:
   Widget(Gui *gui);
   virtual ~Widget();
 
-  static std::unique_ptr<Property> position(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y);
-  static std::unique_ptr<Property> size(std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height);
-  static std::unique_ptr<Property> click(std::function<bool(Widget *)> on_click);
+  static std::unique_ptr<Property> position(
+      std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y);
+  static std::unique_ptr<Property> size(
+      std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height);
+  static std::unique_ptr<Property> click(std::function<bool(Widget &)> on_click);
   static std::unique_ptr<Property> visible(bool visible);
   static std::unique_ptr<Property> id(int id);
   static std::unique_ptr<Property> data(std::any const &data);
   static std::unique_ptr<Property> enabled(bool enabled);
 
-  void attach_child(Widget *child);
-  void detach_child(Widget *child);
-  void clear_children();
-  virtual void on_attached_to_parent(Widget *parent);
+  void AttachChild(std::shared_ptr<Widget> child);
+
+  template<IsSubclassOfWidget T>
+  void AttachChild(std::shared_ptr<T> child) {
+    AttachChild(std::dynamic_pointer_cast<Widget>(child));
+  }
+
+  template<IsSubclassOfWidget T>
+  void AttachChild(Builder<T> &child);
+
+  void DetachChild(std::shared_ptr<Widget> child);
+  void ClearChildren();
+  virtual void OnAttachedToParent(Widget &parent);
 
   virtual void on_focus_gained();
   virtual void on_focus_lost();
@@ -199,26 +217,27 @@ public:
    * is returned. If none of our children are contained within the given (x,y) then \code this is
    * returned.
    */
-  Widget *get_child_at(float x, float y);
+  std::shared_ptr<Widget> GetChildAt(float x, float y);
 
   /** Searches the heirarchy for the widget with the given id. */
-  Widget *find(int id);
+  std::shared_ptr<Widget> Find(int id);
 
-  Widget *get_parent();
+  template<typename T>
+  inline std::shared_ptr<T> Find(int id) {
+    return std::dynamic_pointer_cast<T>(Find(id));
+  }
+
+  std::shared_ptr<Widget> get_parent();
 
   /**
    * Gets the root parent, that is, keep looking up the parent chain until you find one that has a
    * null parent.
    */
-  Widget *get_root();
-
-  template<typename T>
-  inline T *find(int id) {
-    return dynamic_cast<T *>(find(id));
-  }
+  std::shared_ptr<Widget> get_root();
 
   /** Returns true if the given widget is a child (or a child of a child...) of us. */
-  bool is_child(Widget const *w) const;
+  bool IsChild(std::shared_ptr<Widget const> w) const;
+  bool IsChild(Widget const &w) const;
 
   int get_id() {
     return id_;
@@ -236,7 +255,7 @@ public:
   std::any const &get_data() const;
   void set_data(std::any const &data);
 
-  void set_on_click(std::function<bool(Widget *)> on_click) {
+  void set_on_click(std::function<bool(Widget &)> on_click) {
     on_click_ = on_click;
   }
 

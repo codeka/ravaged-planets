@@ -37,20 +37,27 @@ void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
   new_game_window_ = new_game_window;
   std::string name = "Dean Harding";
   std::string email = "dean@codeka.com";
-  wnd_ = Builder<Window>(px(0), px(0), pct(100), pct(100)) << Window::background("title_background")
+  wnd_ = Builder<Window>(px(0), px(0), pct(100), pct(100))
+      << Window::background("title_background")
       << Widget::visible(false)
       // Title "Ravaged Planets"
-      << (Builder<Label>(px(40), px(20), px(417), px(49)) << Label::background("title_heading"))
+      << (Builder<Label>(px(40), px(20), px(417), px(49))
+          << Label::background("title_heading"))
       // "A game by Dean Harding (dean@codeka.com.au)" text
       << (Builder<Label>(px(40), px(70), px(500), px(16))
           << Label::text(std::vformat(fw::text("title.sub-title"), std::make_format_args(name, email))))
-      << (Builder<Button>(px(40), px(100), px(180), px(30)) << Button::text(fw::text("title.new-game"))
+      << (Builder<Button>(px(40), px(100), px(180), px(30))
+          << Button::text(fw::text("title.new-game"))
           << Widget::click(std::bind(&MainMenuWindow::new_game_clicked, this, _1)))
-      << (Builder<Button>(px(40), px(140), px(180), px(30)) << Button::text(fw::text("title.join-game")))
-      << (Builder<Button>(px(40), px(180), px(180), px(30)) << Button::text(fw::text("title.options")))
-      << (Builder<Button>(px(40), px(220), px(180), px(30)) << Button::text(fw::text("title.editor"))
+      << (Builder<Button>(px(40), px(140), px(180), px(30))
+          << Button::text(fw::text("title.join-game")))
+      << (Builder<Button>(px(40), px(180), px(180), px(30))
+          << Button::text(fw::text("title.options")))
+      << (Builder<Button>(px(40), px(220), px(180), px(30))
+          << Button::text(fw::text("title.editor"))
           << Widget::click(std::bind(&MainMenuWindow::editor_clicked, this, _1)))
-      << (Builder<Button>(px(40), px(260), px(180), px(30)) << Button::text(fw::text("title.quit"))
+      << (Builder<Button>(px(40), px(260), px(180), px(30))
+          << Button::text(fw::text("title.quit"))
           << Widget::click(std::bind(&MainMenuWindow::quit_clicked, this, _1)))
       // "v1.2.3"
       << (Builder<Label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
@@ -75,19 +82,19 @@ void MainMenuWindow::update() {
   }
 }
 
-bool MainMenuWindow::new_game_clicked(Widget *w) {
+bool MainMenuWindow::new_game_clicked(Widget &w) {
   hide();
   new_game_window_->show();
   return true;
 }
 
-bool MainMenuWindow::join_game_clicked(Widget *w) {
+bool MainMenuWindow::join_game_clicked(Widget &w) {
   hide();
   //join_game->show();
   return true;
 }
 
-bool MainMenuWindow::editor_clicked(Widget *w) {
+bool MainMenuWindow::editor_clicked(Widget &w) {
   Application *app = dynamic_cast<Application *>(fw::Framework::get_instance()->get_app());
   ScreenStack *ss = app->get_screen_stack();
 
@@ -96,7 +103,7 @@ bool MainMenuWindow::editor_clicked(Widget *w) {
 }
 
 // This is called when you click "Quit", we need to exit...
-bool MainMenuWindow::quit_clicked(Widget *w) {
+bool MainMenuWindow::quit_clicked(Widget &w) {
   exiting_ = true;
 
   if (Session::get_instance()->get_state() != Session::SessionState::kDisconnected) {

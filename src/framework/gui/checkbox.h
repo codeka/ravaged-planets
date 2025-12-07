@@ -35,7 +35,7 @@ public:
 
   static std::unique_ptr<Property> text(std::string_view text);
 
-  void on_attached_to_parent(Widget *parent);
+  void OnAttachedToParent(Widget &parent) override;
   void on_mouse_out();
   void on_mouse_over();
   bool on_mouse_down(float x, float y);

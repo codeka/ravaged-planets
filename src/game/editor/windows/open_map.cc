@@ -35,10 +35,13 @@ OpenMapWindow::~OpenMapWindow() {
 void OpenMapWindow::initialize() {
   wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-150)), px(200), px(200))
       << Window::background("frame") << Widget::visible(false)
-      << (Builder<Listbox>(px(10), px(10), sum(pct(100), px(-20)), sum(pct(100), px(-50))) << Widget::id(MAP_LIST))
-      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Open")
+      << (Builder<Listbox>(px(10), px(10), sum(pct(100), px(-20)), sum(pct(100), px(-50)))
+          << Widget::id(MAP_LIST))
+      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20))
+          << Button::text("Open")
           << Widget::click(std::bind(&OpenMapWindow::open_clicked, this, _1)))
-      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Cancel")
+      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20))
+          << Button::text("Cancel")
           << Widget::click(std::bind(&OpenMapWindow::cancel_clicked, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
@@ -46,14 +49,14 @@ void OpenMapWindow::initialize() {
   std::vector<game::WorldSummary> map_list = vfs.list_maps();
   for(game::WorldSummary &ws : map_list) {
     std::string title = ws.get_name();
-    wnd_->find<Listbox>(MAP_LIST)->add_item(
+    wnd_->Find<Listbox>(MAP_LIST)->add_item(
         Builder<Label>(px(0), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
   }
 }
 
-bool OpenMapWindow::open_clicked(Widget *w) {
-  Widget *selected_widget = wnd_->find<Listbox>(MAP_LIST)->get_selected_item();
-  if (selected_widget == nullptr) {
+bool OpenMapWindow::open_clicked(Widget &w) {
+  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST)->get_selected_item();
+  if (!selected_widget) {
     return true;
   }
 
@@ -69,7 +72,7 @@ bool OpenMapWindow::open_clicked(Widget *w) {
   return true;
 }
 
-bool OpenMapWindow::cancel_clicked(Widget *w) {
+bool OpenMapWindow::cancel_clicked(Widget &w) {
   hide();
   return true;
 }

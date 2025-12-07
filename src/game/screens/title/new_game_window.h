@@ -24,7 +24,7 @@ class NewGameWindow {
 private:
   MainMenuWindow *main_menu_window_;
   NewAIPlayerWindow *new_ai_player_window_;
-  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::gui::Window> wnd_;
   std::shared_ptr<GameScreenOptions> game_options_;
   game::Session::SessionState sess_state_;
   fw::SignalConnection sig_players_changed_conn_;
@@ -40,13 +40,13 @@ private:
 
   std::vector<WorldSummary> map_list_;
 
-  bool on_start_game_clicked(fw::gui::Widget *w);
-  bool on_cancel_clicked(fw::gui::Widget *w);
+  bool on_start_game_clicked(fw::gui::Widget &w);
+  bool on_cancel_clicked(fw::gui::Widget &w);
   void on_maps_selection_changed(int index);
-  bool multiplayer_enabled_checked(fw::gui::Widget *w);
+  bool multiplayer_enabled_checked(fw::gui::Widget &w);
   bool on_chat_filter(std::string ch);
-  bool on_new_ai_clicked(fw::gui::Widget *w);
-  bool player_properties_clicked(fw::gui::Widget *w);
+  bool on_new_ai_clicked(fw::gui::Widget &w);
+  bool player_properties_clicked(fw::gui::Widget &w);
 
   void add_chat_msg(std::string_view user_name, std::string_view msg);
 

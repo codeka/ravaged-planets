@@ -1,10 +1,12 @@
+#include <framework/gui/listbox.h>
+
+#include <memory>
 
 #include <framework/framework.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
 #include <framework/gui/drawable.h>
-#include <framework/gui/listbox.h>
 #include <framework/timer.h>
 
 using namespace std::placeholders;
@@ -17,7 +19,10 @@ enum ids {
   DOWN_BUTTON = 56758
 };
 
-/** If you click again within this amount of time, then we count your click as "activate" (i.e. double-click) */
+/**
+ * If you click again within this amount of time, then we count your click as "activate" (i.e.
+ * double-click)
+ */
 static const float ACTIVATE_TIME_MS = 600.0f;
 
 //-----------------------------------------------------------------------------
@@ -54,7 +59,7 @@ public:
 // of the item.
 class ListboxItem : public Widget {
 private:
-  Listbox *listbox_;
+  std::weak_ptr<Listbox> listbox_;
   int index_;
   std::shared_ptr<StateDrawable> background_;
   float last_down_time_;
@@ -64,16 +69,16 @@ public:
 
   virtual bool on_mouse_down(float x, float y);
 
-  void setup(Listbox *listbox, int index);
+  void setup(std::shared_ptr<Listbox> listbox, int index);
   int get_index() const;
   void set_selected(bool selected);
-  Widget *get_widget();
+  std::shared_ptr<Widget> get_widget();
 
   void render();
 };
 
 ListboxItem::ListboxItem(Gui *gui)
-    : Widget(gui), listbox_(nullptr), index_(-1), last_down_time_(0) {
+    : Widget(gui), index_(-1), last_down_time_(0) {
   background_ = std::shared_ptr<StateDrawable>(new StateDrawable());
   background_->add_drawable(
       StateDrawable::kNormal,
@@ -88,16 +93,17 @@ ListboxItem::~ListboxItem() {
 
 // When you click a listbox item, we want to make sure it's the selected one.
 bool ListboxItem::on_mouse_down(float x, float y) {
-  listbox_->select_item(index_);
+  auto listbox = listbox_.lock();
+  listbox->select_item(index_);
   float now = fw::Framework::get_instance()->get_timer()->get_total_time();
   if (now - last_down_time_ < (ACTIVATE_TIME_MS / 1000.0f)) {
-    listbox_->activate_item(index_);
+    listbox->activate_item(index_);
   }
   last_down_time_ = now;
   return true;
 }
 
-void ListboxItem::setup(Listbox *listbox, int index) {
+void ListboxItem::setup(std::shared_ptr<Listbox> listbox, int index) {
   listbox_ = listbox;
   index_ = index;
 }
@@ -106,7 +112,7 @@ int ListboxItem::get_index() const {
   return index_;
 }
 
-Widget *ListboxItem::get_widget() {
+std::shared_ptr<Widget> ListboxItem::get_widget() {
   return children_[0];
 }
 
@@ -125,9 +131,14 @@ void ListboxItem::render() {
 
 //-----------------------------------------------------------------------------
 
-Listbox::Listbox(Gui *gui) : Widget(gui), selected_item_(nullptr), scrollbar_visible_(false) {
+Listbox::Listbox(Gui *gui) : Widget(gui), scrollbar_visible_(false) {
   background_ = gui->get_drawable_manager().get_drawable("listbox_background");
+}
 
+Listbox::~Listbox() {
+}
+
+void Listbox::OnAttachedToParent(Widget &parent) {
   std::shared_ptr<StateDrawable> bkgnd = std::shared_ptr<StateDrawable>(new StateDrawable());
   bkgnd->add_drawable(
       StateDrawable::kNormal,
@@ -135,7 +146,7 @@ Listbox::Listbox(Gui *gui) : Widget(gui), selected_item_(nullptr), scrollbar_vis
   bkgnd->add_drawable(
       StateDrawable::kHover,
       gui_->get_drawable_manager().get_drawable("listbox_up_hover"));
-  attach_child(Builder<Button>(sum(pct(100), px(-19)), px(0), px(19), px(19))
+  AttachChild(Builder<Button>(sum(pct(100), px(-19)), px(0), px(19), px(19))
       << Button::background(bkgnd)
       << Widget::id(UP_BUTTON)
       << Widget::visible(false)
@@ -147,7 +158,7 @@ Listbox::Listbox(Gui *gui) : Widget(gui), selected_item_(nullptr), scrollbar_vis
   bkgnd->add_drawable(
       StateDrawable::kHover,
       gui_->get_drawable_manager().get_drawable("listbox_down_hover"));
-  attach_child(Builder<Button>(sum(pct(100), px(-19)), sum(pct(100), px(-19)), px(19), px(19))
+  AttachChild(Builder<Button>(sum(pct(100), px(-19)), sum(pct(100), px(-19)), px(19), px(19))
       << Button::background(bkgnd)
       << Widget::id(DOWN_BUTTON)
       << Widget::visible(false)
@@ -159,16 +170,13 @@ Listbox::Listbox(Gui *gui) : Widget(gui), selected_item_(nullptr), scrollbar_vis
   bkgnd->add_drawable(
       StateDrawable::kHover,
       gui_->get_drawable_manager().get_drawable("listbox_thumb_hover"));
-  attach_child(Builder<Button>(sum(pct(100), px(-19)), px(19), px(19), sum(pct(100), px(-38)))
+  AttachChild(Builder<Button>(sum(pct(100), px(-19)), px(19), px(19), sum(pct(100), px(-38)))
       << Button::background(bkgnd)
       << Widget::id(THUMB)
       << Widget::visible(false));
 
   item_container_ = Builder<Widget>(px(0), px(0), pct(100), px(0));
-  attach_child(item_container_);
-}
-
-Listbox::~Listbox() {
+  AttachChild(item_container_);  
 }
 
 std::unique_ptr<Property> Listbox::item_selected(std::function<void(int index)> on_selected) {
@@ -179,19 +187,19 @@ std::unique_ptr<Property> Listbox::item_activated(std::function<void(int index)>
   return std::make_unique<ListboxItemActivatedProperty>(on_activated);
 }
 
-void Listbox::add_item(Widget *w) {
+void Listbox::add_item(std::shared_ptr<Widget> w) {
   int top = item_container_->get_height();
-  ListboxItem *item = Builder<ListboxItem>(px(0), px(top), pct(100), px(w->get_height()));
-  item->attach_child(w);
-  item->setup(this, items_.size());
-  item_container_->attach_child(item);
+  auto item = std::shared_ptr<ListboxItem>(Builder<ListboxItem>(px(0), px(top), pct(100), px(w->get_height())));
+  item->AttachChild(w);
+  item->setup(std::dynamic_pointer_cast<Listbox>(this->shared_from_this()), items_.size());
+  item_container_->AttachChild(item);
   item_container_->set_height(px(item_container_->get_height() + w->get_height()));
   items_.push_back(item);
   update_thumb_button(true);
 }
 
 void Listbox::clear() {
-  item_container_->clear_children();
+  item_container_->ClearChildren();
   item_container_->set_height(px(0));
   item_container_->set_top(px(0));
   items_.clear();
@@ -203,7 +211,7 @@ void Listbox::update_thumb_button(bool adjust_height) {
   float content_height = item_container_->get_height();
   float thumb_max_height = widget_height - 38.0f; // the up/down buttons
   float thumb_height;
-  Button *thumb = find<Button>(THUMB);
+  auto thumb = Find<Button>(THUMB);
 
   if (adjust_height) {
     if (content_height <= widget_height) {
@@ -236,8 +244,8 @@ void Listbox::update_thumb_button(bool adjust_height) {
   float thumb_offset = max_thumb_offset * offset_ratio;
   thumb->set_top(px(19 + thumb_offset));
 
-  Button *up_button = find<Button>(UP_BUTTON);
-  Button *down_button = find<Button>(DOWN_BUTTON);
+  auto up_button = Find<Button>(UP_BUTTON);
+  auto down_button = Find<Button>(DOWN_BUTTON);
   if (scrollbar_visible_) {
     item_container_->set_width(sum(pct(100), px(-20)));
     thumb->set_visible(true);
@@ -251,7 +259,7 @@ void Listbox::update_thumb_button(bool adjust_height) {
   }
 }
 
-bool Listbox::on_down_button_click(Widget *w) {
+bool Listbox::on_down_button_click(Widget &w) {
   float current_top = item_container_->get_top() - get_top();
   current_top -= get_height() / 4.0f;
   float max_offset = item_container_->get_height() - get_height();
@@ -263,7 +271,7 @@ bool Listbox::on_down_button_click(Widget *w) {
   return true;
 }
 
-bool Listbox::on_up_button_click(Widget *w) {
+bool Listbox::on_up_button_click(Widget &w) {
   float current_top = item_container_->get_top() - get_top();
   current_top += get_height() / 4.0f;
   if (current_top > 0) {
@@ -275,11 +283,13 @@ bool Listbox::on_up_button_click(Widget *w) {
 }
 
 void Listbox::select_item(int index) {
-  if (selected_item_ != nullptr) {
-    selected_item_->set_selected(false);
+  auto selected_item = selected_item_.lock();
+  if (selected_item) {
+    selected_item->set_selected(false);
   }
-  selected_item_ = items_[index];
-  selected_item_->set_selected(true);
+  selected_item = items_[index];
+  selected_item->set_selected(true);
+  selected_item_ = selected_item;
   sig_item_selected.Emit(index);
 }
 
@@ -288,21 +298,23 @@ void Listbox::activate_item(int index) {
 }
 
 int Listbox::get_selected_index() {
-  if (selected_item_ == nullptr) {
+  auto selected_item = selected_item_.lock();
+  if (!selected_item) {
     return -1;
   }
-  return selected_item_->get_index();
+  return selected_item->get_index();
 }
 
-Widget * Listbox::get_item(int index) {
+std::shared_ptr<Widget> Listbox::get_item(int index) {
   if (index < 0 || index >= items_.size()) {
     return nullptr;
   }
   return items_[index]->get_widget();
 }
 
-Widget * Listbox::get_selected_item() {
-  return selected_item_ == nullptr ? nullptr : selected_item_->get_widget();
+std::shared_ptr<Widget> Listbox::get_selected_item() {
+  auto selected_item = selected_item_.lock();
+  return selected_item ? selected_item->get_widget() : nullptr;
 }
 
 void Listbox::render() {

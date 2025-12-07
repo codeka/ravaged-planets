@@ -11,10 +11,10 @@ namespace ed {
 
 class OpenMapWindow {
 private:
-  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::gui::Window> wnd_;
 
-  bool open_clicked(fw::gui::Widget *w);
-  bool cancel_clicked(fw::gui::Widget *w);
+  bool open_clicked(fw::gui::Widget &w);
+  bool cancel_clicked(fw::gui::Widget &w);
 
 public:
   OpenMapWindow();

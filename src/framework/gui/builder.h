@@ -16,7 +16,7 @@ template <class WidgetType>
 class Builder {
 private:
   std::vector<std::unique_ptr<Property>> properties_;
-  std::vector<Widget *> child_widgets_;
+  std::vector<std::shared_ptr<Widget>> child_widgets_;
 
 public:
   inline Builder();
@@ -27,9 +27,15 @@ public:
       std::unique_ptr<Dimension> height);
   inline ~Builder() = default;
 
-  inline operator WidgetType *();
+  inline operator std::shared_ptr<WidgetType>();
   inline Builder &operator <<(std::unique_ptr<Property> prop);
-  inline Builder &operator <<(Widget *child);
+  inline Builder &operator <<(std::shared_ptr<Widget> child);
+
+  template <IsSubclassOfWidget T>
+  inline Builder &operator <<(Builder<T> &child_builder) {
+    child_widgets_.push_back(std::dynamic_pointer_cast<Widget>(std::shared_ptr<T>(child_builder)));
+    return *this;
+  }
 };
 
 template<class WidgetType>
@@ -44,13 +50,13 @@ inline Builder<WidgetType>::Builder(std::unique_ptr<Dimension> x, std::unique_pt
 }
 
 template<class WidgetType>
-inline Builder<WidgetType>::operator WidgetType*() {
-  WidgetType *new_widget = new WidgetType(fw::Framework::get_instance()->get_gui());
+inline Builder<WidgetType>::operator std::shared_ptr<WidgetType>() {
+  auto new_widget = std::make_shared<WidgetType>(fw::Framework::get_instance()->get_gui());
   for (auto &prop : properties_) {
     prop->apply(*new_widget);
   }
-  for (Widget *child : child_widgets_) {
-    new_widget->attach_child(child);
+  for (auto &child : child_widgets_) {
+    new_widget->AttachChild(child);
   }
   return new_widget;
 }
@@ -62,9 +68,14 @@ inline Builder<WidgetType> & Builder<WidgetType>::operator <<(std::unique_ptr<Pr
 }
 
 template<class WidgetType>
-inline Builder<WidgetType> & Builder<WidgetType>::operator <<(Widget *child) {
+inline Builder<WidgetType> & Builder<WidgetType>::operator <<(std::shared_ptr<Widget> child) {
   child_widgets_.push_back(child);
   return *this;
+}
+
+template<IsSubclassOfWidget T>
+void Widget::AttachChild(Builder<T> &child_builder) {
+  AttachChild(std::dynamic_pointer_cast<Widget>(std::shared_ptr<T>(child_builder)));
 }
 
 }

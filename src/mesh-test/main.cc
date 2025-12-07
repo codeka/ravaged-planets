@@ -22,6 +22,8 @@
 #include <framework/scenegraph.h>
 #include <framework/status.h>
 
+using namespace fw::gui;
+
 fw::Status settings_initialize(int argc, char** argv);
 void display_exception(std::string const &msg);
 void initialize_ground(std::shared_ptr<fw::sg::Node> Node);
@@ -39,7 +41,7 @@ static std::shared_ptr<fw::sg::Node> g_ground;
 static bool g_rotating = false;
 static float g_rotate_angle = 0.0f;
 
-bool restart_handler(fw::gui::Widget *wdgt) {
+bool restart_handler(Widget &wdgt) {
   auto model = fw::Framework::get_instance()->get_model_manager()->get_model(
       fw::Settings::get<std::string>("mesh-file"));
   if (!model.ok()) {
@@ -50,13 +52,14 @@ bool restart_handler(fw::gui::Widget *wdgt) {
   return true;
 }
 
-bool ground_handler(fw::gui::Widget *wdgt) {
+bool ground_handler(Widget &widget) {
+  auto &button = dynamic_cast<Button &>(widget);
   if (g_show_ground) {
     g_show_ground = false;
-    dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Show ground");
+    button.set_text("Show ground");
   } else {
     g_show_ground = true;
-    dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Hide ground");
+    button.set_text("Hide ground");
   }
 
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
@@ -67,13 +70,14 @@ bool ground_handler(fw::gui::Widget *wdgt) {
   return true;
 }
 
-bool rotate_handler(fw::gui::Widget *wdgt) {
+bool rotate_handler(Widget &widget) {
+  auto &button = dynamic_cast<Button &>(widget);
   if (g_rotating) {
     g_rotating = false;
-    dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Rotate");
+    button.set_text("Rotate");
   } else {
     g_rotating = true;
-    dynamic_cast<fw::gui::Button *>(wdgt)->set_text("Stop rotating");
+    button.set_text("Stop rotating");
   }
   return true;
 }
@@ -83,18 +87,18 @@ fw::Status Application::initialize(fw::Framework *frmwrk) {
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
 
-  fw::gui::Window *wnd;
-  wnd = fw::gui::Builder<fw::gui::Window>(fw::gui::px(20), fw::gui::px(20), fw::gui::px(150), fw::gui::px(130))
-      << fw::gui::Window::background("frame")
-      << (fw::gui::Builder<fw::gui::Button>(fw::gui::px(10), fw::gui::px(10), fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::Button::text("Restart")
-          << fw::gui::Widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
-      << (fw::gui::Builder<fw::gui::Button>(fw::gui::px(10), fw::gui::px(50), fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::Button::text("Show ground")
-          << fw::gui::Widget::click(std::bind<bool>(ground_handler, std::placeholders::_1)))
-      << (fw::gui::Builder<fw::gui::Button>(fw::gui::px(10), fw::gui::px(90), fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::Button::text("Rotate")
-          << fw::gui::Widget::click(std::bind<bool>(rotate_handler, std::placeholders::_1)));
+  std::shared_ptr<Window> wnd =
+      Builder<Window>(px(20), px(20), px(150), px(130))
+      << Window::background("frame")
+      << (Builder<Button>(px(10), px(10), px(130), px(30))
+          << Button::text("Restart")
+          << Widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
+      << (Builder<Button>(px(10), px(50), px(130), px(30))
+          << Button::text("Show ground")
+          << Widget::click(std::bind<bool>(ground_handler, std::placeholders::_1)))
+      << (Builder<Button>(px(10), px(90), px(130), px(30))
+          << Button::text("Rotate")
+          << Widget::click(std::bind<bool>(rotate_handler, std::placeholders::_1)));
   frmwrk->get_gui()->attach_widget(wnd);
 
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(

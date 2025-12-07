@@ -36,7 +36,7 @@ std::unique_ptr<Property> Checkbox::text(std::string_view text) {
   return std::make_unique<CheckboxTextProperty>(text);
 }
 
-void Checkbox::on_attached_to_parent(Widget *parent) {
+void Checkbox::OnAttachedToParent(Widget &parent) {
   StateDrawable *bkgnd = new StateDrawable();
   bkgnd->add_drawable(
       StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("button_normal"));

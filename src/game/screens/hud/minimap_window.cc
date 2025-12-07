@@ -110,7 +110,7 @@ void MinimapWindow::show() {
   auto terrain = game::World::get_instance()->get_terrain();
   texture_->create(terrain->get_width(), terrain->get_length());
   drawable_ = std::shared_ptr<MinimapDrawable>(new MinimapDrawable(texture_));
-  wnd_->find<Label>(MINIMAP_IMAGE_ID)->set_background(drawable_);
+  wnd_->Find<Label>(MINIMAP_IMAGE_ID)->set_background(drawable_);
 
   // bind to the camera's sig_updated signal, to be notified when you move the camera around
   camera_updated_connection_ = fw::Framework::get_instance()->get_camera()->sig_updated

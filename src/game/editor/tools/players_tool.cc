@@ -29,22 +29,22 @@ enum widget_ids {
 
 class PlayersToolWindow {
 private:
-  ed::PlayersTool *tool_;
-  Window *wnd_;
+  ed::PlayersTool &tool_;
+  std::shared_ptr<Window> wnd_;
 
   void selection_changed(int index);
-  bool num_players_updated_click(fw::gui::Widget *w);
+  bool num_players_updated_click(fw::gui::Widget &w);
 
   void refresh_player_list();
 public:
-  PlayersToolWindow(ed::PlayersTool *Tool);
+  PlayersToolWindow(ed::PlayersTool &tool);
   ~PlayersToolWindow();
 
   void show();
   void hide();
 };
 
-PlayersToolWindow::PlayersToolWindow(ed::PlayersTool *Tool) : tool_(Tool) {
+PlayersToolWindow::PlayersToolWindow(ed::PlayersTool &tool) : tool_(tool) {
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(200)) << Window::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Num players:"))
       << (Builder<TextEdit>(px(4), px(26), sum(pct(100), px(-8)), px(20))
@@ -62,9 +62,9 @@ PlayersToolWindow::~PlayersToolWindow() {
 }
 
 void PlayersToolWindow::refresh_player_list() {
-  Listbox *lb = wnd_->find<Listbox>(PLAYER_LIST_ID);
+  auto lb = wnd_->Find<Listbox>(PLAYER_LIST_ID);
   lb->clear();
-  for (int i = 0; i < tool_->get_world()->get_player_starts().size(); i++) {
+  for (int i = 0; i < tool_.get_world()->get_player_starts().size(); i++) {
     lb->add_item(Builder<Label>(px(4), px(0), pct(100), px(20))
         << Label::text("Player " + std::to_string(i + 1)));
   }
@@ -79,15 +79,15 @@ void PlayersToolWindow::hide() {
   wnd_->set_visible(false);
 }
 
-bool PlayersToolWindow::num_players_updated_click(fw::gui::Widget *w) {
-  TextEdit *te = wnd_->find<TextEdit>(NUM_PLAYERS_ID);
+bool PlayersToolWindow::num_players_updated_click(fw::gui::Widget &w) {
+  auto te = wnd_->Find<TextEdit>(NUM_PLAYERS_ID);
   int num_players;
   if (!absl::SimpleAtoi(te->get_text(), &num_players)) {
     // TODO: handle errors?
     LOG(ERR) << "couldn't parse '" << te->get_text() << "' as a number";
     return true;
   }
-  std::map<int, fw::Vector> &player_starts = tool_->get_world()->get_player_starts();
+  std::map<int, fw::Vector> &player_starts = tool_.get_world()->get_player_starts();
   if (player_starts.size() < num_players) {
     for (int i = player_starts.size(); i < num_players; i++) {
       player_starts[i + 1] = fw::Vector(0, 0, 0);
@@ -101,14 +101,14 @@ bool PlayersToolWindow::num_players_updated_click(fw::gui::Widget *w) {
 
 
 void PlayersToolWindow::selection_changed(int index) {
-  tool_->set_curr_player(index + 1);
+  tool_.set_curr_player(index + 1);
 }
 
 namespace ed {
 REGISTER_TOOL("players", PlayersTool);
 
 PlayersTool::PlayersTool(EditorWorld *wrld) : wnd_(nullptr), player_no_(1), Tool(wrld) {
-  wnd_ = new PlayersToolWindow(this);
+  wnd_ = std::make_unique<PlayersToolWindow>(*this);
   auto model = fw::Framework::get_instance()->get_model_manager()->get_model("marker");
   if (!model.ok()) {
     LOG(ERR) << "error loading marker: " << model.status();
@@ -117,9 +117,7 @@ PlayersTool::PlayersTool(EditorWorld *wrld) : wnd_(nullptr), player_no_(1), Tool
   }
 }
 
-PlayersTool::~PlayersTool() {
-  delete wnd_;
-}
+PlayersTool::~PlayersTool() {}
 
 void PlayersTool::activate() {
   Tool::activate();
@@ -157,7 +155,7 @@ void PlayersTool::set_curr_player(int player_no) {
   player_no_ = player_no;
 }
 
-void PlayersTool::on_key(std::string keyname, bool is_down) {
+void PlayersTool::on_key(std::string_view keyname, bool is_down) {
   if (keyname == "Left-Mouse" && !is_down) {
     if (player_no_ <= 0) {
       return;

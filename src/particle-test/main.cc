@@ -64,34 +64,34 @@ void restart_effect() {
   update_effect_position();
 }
 
-bool restart_handler(fw::gui::Widget *wdgt) {
+bool restart_handler(fw::gui::Widget &wdgt) {
   restart_effect();
   return true;
 }
 
-bool pause_handler(fw::gui::Widget *wdgt) {
-  fw::gui::Button *btn = dynamic_cast<fw::gui::Button *>(wdgt);
+bool pause_handler(fw::gui::Widget &wdgt) {
+  fw::gui::Button &btn = dynamic_cast<fw::gui::Button &>(wdgt);
   fw::Framework *framework = fw::Framework::get_instance();
   if (framework->is_paused()) {
     framework->unpause();
-    btn->set_text("Pause");
+    btn.set_text("Pause");
   } else {
     framework->pause();
-    btn->set_text("Unpause");
+    btn.set_text("Unpause");
   }
 
   return true;
 }
 
-bool movement_handler(fw::gui::Widget *wdgt) {
-  fw::gui::Button *btn = dynamic_cast<fw::gui::Button *>(wdgt);
+bool movement_handler(fw::gui::Widget &wdgt) {
+  auto &btn = dynamic_cast<fw::gui::Button &>(wdgt);
   if (is_moving) {
     is_moving = false;
-    btn->set_text("Stationary");
+    btn.set_text("Stationary");
     update_effect_position();
   } else {
     is_moving = true;
-    btn->set_text("Moving");
+    btn.set_text("Moving");
   }
 
   return true;
@@ -102,8 +102,8 @@ fw::Status Application::initialize(fw::Framework *frmwrk) {
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
 
-  fw::gui::Window *wnd;
-  wnd = fw::gui::Builder<fw::gui::Window>()
+  std::shared_ptr<fw::gui::Window> wnd =
+      fw::gui::Builder<fw::gui::Window>()
       << fw::gui::Widget::position(fw::gui::px(20), fw::gui::px(20))
       << fw::gui::Widget::size(fw::gui::px(150), fw::gui::px(130))
       << fw::gui::Window::background("frame")

@@ -68,7 +68,9 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
       << (Builder<Label>(px(40), px(20), px(417), px(49))
         << Label::background("title_heading"))
       << (Builder<Label>(px(40), px(70), px(500), px(16))
-          << Label::text(std::vformat(fw::text("title.sub-title"), std::make_format_args("Dean Harding", "dean@codeka.com.au"))))
+          << Label::text(std::vformat(
+                fw::text("title.sub-title"),
+                std::make_format_args("Dean Harding", "dean@codeka.com.au"))))
       << (Builder<Label>(px(40), px(100), px(200), px(20))
         << Label::text(fw::text("title.new-game.choose-map")))
       << (Builder<Listbox>(px(40), px(120), px(200), sum(pct(100), px(-190)))
@@ -129,11 +131,11 @@ void NewGameWindow::show() {
   map_list_ = vfs.list_maps();
   for (WorldSummary &ws : map_list_) {
     std::string title = ws.get_name();
-    wnd_->find<Listbox>(MAP_LIST_ID)->add_item(
+    wnd_->Find<Listbox>(MAP_LIST_ID)->add_item(
         Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
   }
   if (!map_list_.empty()) {
-    wnd_->find<Listbox>(MAP_LIST_ID)->select_item(0);
+    wnd_->Find<Listbox>(MAP_LIST_ID)->select_item(0);
   }
 
   sig_players_changed_conn_ = SimulationThread::get_instance()->sig_players_changed.Connect(
@@ -255,7 +257,7 @@ void NewGameWindow::on_players_changed() {
 
 // refreshes the list of players in the game
 void NewGameWindow::refresh_players() {
-  Listbox *players_list = wnd_->find<Listbox>(PLAYER_LIST_ID);
+  auto players_list = wnd_->Find<Listbox>(PLAYER_LIST_ID);
   players_list->clear();
   for (auto &plyr : SimulationThread::get_instance()->get_players()) {
     int player_no = static_cast<int>(plyr->get_player_no());
@@ -285,7 +287,7 @@ void NewGameWindow::on_maps_selection_changed(int index) {
 }
 
 fw::StatusOr<game::WorldSummary> NewGameWindow::GetSelectedWorldSummary() {
-  Widget *selected_widget = wnd_->find<Listbox>(MAP_LIST_ID)->get_selected_item();
+  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST_ID)->get_selected_item();
   if (selected_widget == nullptr) {
     // Can happen if there are no maps installed at all.
     return fw::ErrorStatus("no selected world");
@@ -294,12 +296,12 @@ fw::StatusOr<game::WorldSummary> NewGameWindow::GetSelectedWorldSummary() {
   return std::any_cast<game::WorldSummary>(selected_widget->get_data());
 }
 
-bool NewGameWindow::on_new_ai_clicked(Widget *w) {
+bool NewGameWindow::on_new_ai_clicked(Widget &w) {
   new_ai_player_window_->show();
   return true;
 }
 
-bool NewGameWindow::player_properties_clicked(Widget *w) {
+bool NewGameWindow::player_properties_clicked(Widget &w) {
   //player_properties->show();
   return true;
 }
@@ -309,7 +311,7 @@ bool NewGameWindow::on_chat_filter(std::string ch) {
     return true;
   }
 
-  TextEdit *ed = wnd_->find<TextEdit>(CHAT_TEXTEDIT_ID);
+  auto ed = wnd_->Find<TextEdit>(CHAT_TEXTEDIT_ID);
   std::string msg = msg = fw::StripSpaces(ed->get_text());
 
   add_chat_msg(Session::get_instance()->get_user_name(), msg);
@@ -324,7 +326,7 @@ void NewGameWindow::add_chat_msg(std::string_view user_name, std::string_view ms
 }
 
 void NewGameWindow::append_chat(std::string const &msg) {
-  Listbox *chat_list = wnd_->find<Listbox>(CHAT_LIST_ID);
+  auto chat_list = wnd_->Find<Listbox>(CHAT_LIST_ID);
   chat_list->add_item(Builder<Label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << Label::text(msg));
 }
 
@@ -336,28 +338,28 @@ void NewGameWindow::update_selection() {
 
   SimulationThread::get_instance()->set_map_name(ws->get_name());
 
-  wnd_->find<Label>(MAP_NAME_ID)->set_text(absl::StrCat(ws->get_name(), " by ", ws->get_author()));
+  wnd_->Find<Label>(MAP_NAME_ID)->set_text(absl::StrCat(ws->get_name(), " by ", ws->get_author()));
   int width = ws->get_width();
   int height = ws->get_height();
   int num_players = ws->get_num_players();
-  wnd_->find<Label>(MAP_SIZE_ID)->set_text(std::vformat(fw::text("title.new-game.map-size"),
+  wnd_->Find<Label>(MAP_SIZE_ID)->set_text(std::vformat(fw::text("title.new-game.map-size"),
       std::make_format_args(width, height, num_players)));
-  wnd_->find<Label>(MAP_SCREENSHOT_ID)->set_background(ws->get_screenshot());
+  wnd_->Find<Label>(MAP_SCREENSHOT_ID)->set_background(ws->get_screenshot());
 }
 
 // when we're ready to start, we need to mark our own player as ready and then
 // wait for others. Once they're ready as well, start_game() is called.
-bool NewGameWindow::on_start_game_clicked(Widget *w) {
+bool NewGameWindow::on_start_game_clicked(Widget &w) {
   SimulationThread::get_instance()->get_local_player()->local_player_is_ready();
 
   // disable the start_game button, since we don't want you clicking it twice.
-  w->set_enabled(false);
+  w.set_enabled(false);
   return true;
 }
 
 // once all players are ready to start, this is called to actually start the game
 void NewGameWindow::start_game() {
-  Widget *selected_widget = wnd_->find<Listbox>(MAP_LIST_ID)->get_selected_item();
+  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST_ID)->get_selected_item();
   if (selected_widget == nullptr) {
     // should never happen (unless you have no maps installed at all)
     return;
@@ -375,7 +377,7 @@ void NewGameWindow::start_game() {
 
 // this is called when you check/uncheck the "Enable multiplayer" checkbox. We've got
 // let the session manager know we're starting a new multiplayer game (or not).
-bool NewGameWindow::multiplayer_enabled_checked(Widget *w) {
+bool NewGameWindow::multiplayer_enabled_checked(Widget &w) {
 /*  bool enabled = _multiplayer_enable->isSelected();
   if (enabled) {
     session::get_instance()->create_game();
@@ -387,7 +389,7 @@ bool NewGameWindow::multiplayer_enabled_checked(Widget *w) {
   return true;
 }
 
-bool NewGameWindow::on_cancel_clicked(Widget *w) {
+bool NewGameWindow::on_cancel_clicked(Widget &w) {
   hide();
   main_menu_window_->show();
   return true;

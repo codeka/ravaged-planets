@@ -25,7 +25,7 @@ PixelDimension::PixelDimension(float value) :
 PixelDimension::~PixelDimension() {
 }
 
-float PixelDimension::get_value(fw::gui::Widget *w, float parent_value) {
+float PixelDimension::get_value(fw::gui::Widget &w, float parent_value) {
   return value_;
 }
 
@@ -36,7 +36,7 @@ PercentDimension::PercentDimension(float value) :
 PercentDimension::~PercentDimension() {
 }
 
-float PercentDimension::get_value(fw::gui::Widget *w, float parent_value) {
+float PercentDimension::get_value(fw::gui::Widget &w, float parent_value) {
   return parent_value * (value_ / 100.0f);
 }
 
@@ -48,7 +48,7 @@ SumDimension::SumDimension(
 SumDimension::~SumDimension() {
 }
 
-float SumDimension::get_value(fw::gui::Widget *w, float parent_value) {
+float SumDimension::get_value(fw::gui::Widget &w, float parent_value) {
   return one_->get_value(w, parent_value) + two_->get_value(w, parent_value);
 }
 
@@ -63,23 +63,27 @@ FractionDimension::FractionDimension(int other_widget_id, OtherDimension dim, fl
 FractionDimension::~FractionDimension() {
 }
 
-float FractionDimension::get_value(fw::gui::Widget *w, float parent_value) {
+float FractionDimension::get_value(fw::gui::Widget &w, float parent_value) {
+  std::shared_ptr<Widget> other_widget;
   if (other_widget_id_ >= 0) {
-    w = w->get_root()->find<Widget>(other_widget_id_);
+    other_widget = w.get_root()->Find<Widget>(other_widget_id_);
+  } else {
+    other_widget = w.shared_from_this();
   }
+
   float other_value;
   switch (other_dimension_) {
   case kTop:
-    other_value = w->get_top();
+    other_value = other_widget->get_top();
     break;
   case kLeft:
-    other_value = w->get_left();
+    other_value = other_widget->get_left();
     break;
   case kWidth:
-    other_value = w->get_width();
+    other_value = other_widget->get_width();
     break;
   case kHeight:
-    other_value = w->get_height();
+    other_value = other_widget->get_height();
     break;
   }
   return other_value * fraction_;
@@ -126,9 +130,9 @@ void WidgetSizeProperty::apply(Widget &widget) {
 
 class WidgetClickProperty : public Property {
 private:
-  std::function<bool(Widget *)> on_click_;
+  std::function<bool(Widget &)> on_click_;
 public:
-  WidgetClickProperty(std::function<bool(Widget *)> on_click)
+  WidgetClickProperty(std::function<bool(Widget &)> on_click)
       : on_click_(on_click) {
   }
 
@@ -192,7 +196,7 @@ public:
 //-----------------------------------------------------------------------------
 
 Widget::Widget(Gui *gui) :
-    gui_(gui), parent_(nullptr), id_(-1), visible_(true), focused_(false), enabled_(true) {
+    gui_(gui), id_(-1), visible_(true), focused_(false), enabled_(true) {
 }
 
 Widget::~Widget() {
@@ -208,7 +212,7 @@ std::unique_ptr<Property> Widget::size(
   return std::make_unique<WidgetSizeProperty>(std::move(width), std::move(height));
 }
 
-std::unique_ptr<Property> Widget::click(std::function<bool(Widget *)> on_click) {
+std::unique_ptr<Property> Widget::click(std::function<bool(Widget &)> on_click) {
   return std::make_unique<WidgetClickProperty>(on_click);
 }
 
@@ -228,41 +232,41 @@ std::unique_ptr<Property> Widget::enabled(bool enabled) {
   return std::make_unique<WidgetEnabledProperty>(enabled);
 }
 
-void Widget::attach_child(Widget *child) {
-  if (child->parent_ != nullptr) {
-    child->parent_->detach_child(child);
+void Widget::AttachChild(std::shared_ptr<Widget> child) {
+  std::shared_ptr<Widget> old_parent = child->parent_.lock();
+  if (old_parent) {
+    old_parent->DetachChild(child);
   }
-  child->parent_ = this;
+  child->parent_ = this->shared_from_this();
   children_.push_back(child);
-  child->on_attached_to_parent(this);
+  child->OnAttachedToParent(*this);
 }
 
-void Widget::detach_child(Widget *child) {
+void Widget::DetachChild(std::shared_ptr<Widget> child) {
   children_.erase(std::find(children_.begin(), children_.end(), child));
-  child->parent_ = nullptr;
+  child->parent_.reset();
 }
 
-void Widget::clear_children() {
-  for(Widget *child : children_) {
-    child->parent_ = nullptr;
+void Widget::ClearChildren() {
+  for(auto &child : children_) {
+    child->parent_.reset();
   }
   children_.clear();
 }
 
-void Widget::on_attached_to_parent(Widget *parent) {
+void Widget::OnAttachedToParent(Widget &parent) {
 }
 
-Widget *Widget::get_parent() {
-  return parent_;
+std::shared_ptr<Widget> Widget::get_parent() {
+  return parent_.lock();
 }
 
-Widget *Widget::get_root() {
-  if (parent_ == nullptr) {
-    return this;
-  }
-  Widget *root = parent_;
-  while (root->parent_ != nullptr) {
-    root = root->parent_;
+std::shared_ptr<Widget> Widget::get_root() {
+  std::shared_ptr<Widget> root = this->shared_from_this();
+  std::shared_ptr<Widget> parent = root->parent_.lock();
+  while (parent) {
+    root = parent;
+    parent = root->parent_.lock();
   }
   return root;
 }
@@ -280,7 +284,7 @@ void Widget::on_focus_lost() {
 }
 
 void Widget::update(float dt) {
-  for(Widget *child : children_) {
+  for(auto &child : children_) {
     child->update(dt);
   }
 }
@@ -303,7 +307,7 @@ bool Widget::prerender() {
 }
 
 void Widget::render() {
-  for(Widget *child : children_) {
+  for(auto &child : children_) {
     if (child->is_visible() && child->prerender()) {
       child->render();
       child->postrender();
@@ -325,12 +329,12 @@ bool Widget::on_mouse_down(float x, float y) {
 
 bool Widget::on_mouse_up(float x, float y) {
   if (enabled_ && on_click_) {
-    return on_click_(this);
+    return on_click_(*this);
   }
   return false;
 }
 
-Widget *Widget::get_child_at(float x, float y) {
+std::shared_ptr<Widget> Widget::GetChildAt(float x, float y) {
   float left = get_left();
   float top = get_top();
   float right = left + get_width();
@@ -342,23 +346,23 @@ Widget *Widget::get_child_at(float x, float y) {
   }
 
   // If one of our children is within the (x,y) then return that.
-  for(Widget *child : children_) {
-    Widget *found = child->get_child_at(x, y);
-    if (found != nullptr) {
+  for(auto &child : children_) {
+    auto found = child->GetChildAt(x, y);
+    if (found) {
       return found;
     }
   }
 
   // Otherwise, return ourselves.
-  return this;
+  return this->shared_from_this();
 }
 
-Widget *Widget::find(int id) {
+std::shared_ptr<Widget> Widget::Find(int id) {
   if (id_ == id) {
-    return this;
+    return this->shared_from_this();
   }
-  for(Widget *child : children_) {
-    Widget *found = child->find(id);
+  for(auto &child : children_) {
+    auto found = child->Find(id);
     if (found != nullptr) {
       return found;
     }
@@ -374,15 +378,27 @@ void Widget::set_data(std::any const &data) {
   data_ = data;
 }
 
-bool Widget::is_child(Widget const *w) const {
+bool Widget::IsChild(std::shared_ptr<Widget const> w) const {
   if (w == nullptr) {
     return false;
   }
 
-  for(Widget *child : children_) {
+  for(auto child : children_) {
     if (w == child) {
       return true;
-    } else if (child->is_child(w)) {
+    } else if (child->IsChild(w)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool Widget::IsChild(Widget const &w) const {
+  for(auto child : children_) {
+    if (&w == child.get()) {
+      return true;
+    } else if (child->IsChild(w)) {
       return true;
     }
   }
@@ -392,9 +408,10 @@ bool Widget::is_child(Widget const *w) const {
 
 void Widget::set_visible(bool visible) {
   visible_ = visible;
-  if (parent_ == nullptr) {
+  std::shared_ptr<Widget> parent = parent_.lock();
+  if (!parent) {
     // if it's a top-level widget, move it to the front of the z-order
-    gui_->bring_to_top(this);
+    gui_->bring_to_top(this->shared_from_this());
   }
 }
 
@@ -403,9 +420,10 @@ void Widget::set_enabled(bool enabled) {
 }
 
 float Widget::get_top() {
-  float parent_top = (parent_ != nullptr) ? parent_->get_top() : 0;
-  float parent_size = (parent_ != nullptr) ? parent_->get_height() : gui_->get_height();
-  return parent_top + y_->get_value(this, parent_size);
+  std::shared_ptr<Widget> parent = parent_.lock();
+  float parent_top = (parent) ? parent->get_top() : 0;
+  float parent_size = (parent) ? parent->get_height() : gui_->get_height();
+  return parent_top + y_->get_value(*this, parent_size);
 }
 
 void Widget::set_top(std::unique_ptr<Dimension> top) {
@@ -413,9 +431,10 @@ void Widget::set_top(std::unique_ptr<Dimension> top) {
 }
 
 float Widget::get_left() {
-  float parent_left = (parent_ != nullptr) ? parent_->get_left() : 0;
-  float parent_size = (parent_ != nullptr) ? parent_->get_width() : gui_->get_width();
-  return parent_left + x_->get_value(this, parent_size);
+  std::shared_ptr<Widget> parent = parent_.lock();
+  float parent_left = (parent) ? parent->get_left() : 0;
+  float parent_size = (parent) ? parent->get_width() : gui_->get_width();
+  return parent_left + x_->get_value(*this, parent_size);
 }
 
 void Widget::set_left(std::unique_ptr<Dimension> left) {
@@ -423,8 +442,9 @@ void Widget::set_left(std::unique_ptr<Dimension> left) {
 }
 
 float Widget::get_width() {
-  float parent_size = (parent_ != nullptr) ? parent_->get_width() : gui_->get_width();
-  return width_->get_value(this, parent_size);
+  std::shared_ptr<Widget> parent = parent_.lock();
+  float parent_size = (parent) ? parent->get_width() : gui_->get_width();
+  return width_->get_value(*this, parent_size);
 }
 
 void Widget::set_width(std::unique_ptr<Dimension> width) {
@@ -432,8 +452,9 @@ void Widget::set_width(std::unique_ptr<Dimension> width) {
 }
 
 float Widget::get_height() {
-  float parent_size = (parent_ != nullptr) ? parent_->get_height() : gui_->get_height();
-  return height_->get_value(this, parent_size);
+  std::shared_ptr<Widget> parent = parent_.lock();
+  float parent_size = (parent) ? parent->get_height() : gui_->get_height();
+  return height_->get_value(*this, parent_size);
 }
 
 void Widget::set_height(std::unique_ptr<Dimension> height) {

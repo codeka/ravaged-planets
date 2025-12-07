@@ -13,16 +13,16 @@ class NewGameWindow;
 class NewAIPlayerWindow {
 private:
   NewGameWindow *new_game_window_;
-  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::gui::Window> wnd_;
 
-  bool on_ok_clicked(fw::gui::Widget *w);
-  bool on_cancel_clicked(fw::gui::Widget *w);
+  bool on_ok_clicked(fw::gui::Widget &w);
+  bool on_cancel_clicked(fw::gui::Widget &w);
 
 public:
   NewAIPlayerWindow();
   ~NewAIPlayerWindow();
 
-  void initialize(NewGameWindow *NewGameWindow);
+  void initialize(NewGameWindow *new_game_window);
   void show();
   void hide();
 };

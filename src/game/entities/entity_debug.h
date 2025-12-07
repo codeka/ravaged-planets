@@ -30,13 +30,13 @@ enum EntityDebugFlags {
 class EntityDebug {
 private:
   EntityManager *mgr_;
-  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::gui::Window> wnd_;
 
   bool just_shown_;
 
   void on_key_press(std::string keyname, bool is_down);
-  bool on_show_steering_changed(fw::gui::Widget *w);
-  bool on_show_path_changed(fw::gui::Widget* w);
+  bool on_show_steering_changed(fw::gui::Widget &w);
+  bool on_show_path_changed(fw::gui::Widget &w);
 
 public:
   EntityDebug(EntityManager *mgr);

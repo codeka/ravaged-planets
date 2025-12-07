@@ -169,7 +169,7 @@ void BuildWindow::initialize() {
 
   for (int i = 0; i < 9; i++) {
     int id = FIRST_BUILD_BUTTON_ID + i;
-    Button *btn = wnd_->find<Button>(id);
+    auto btn = wnd_->Find<Button>(id);
     btn->sig_mouse_over.Connect(std::bind(&BuildWindow::on_mouse_over_button, this, id));
     btn->sig_mouse_out.Connect(std::bind(&BuildWindow::on_mouse_out_button, this, id));
     btn->set_on_click(std::bind(&BuildWindow::on_build_clicked, this, _1, id));
@@ -190,9 +190,9 @@ void BuildWindow::refresh(std::weak_ptr<ent::Entity> entity, std::string build_g
   require_refresh_ = true;
 }
 
-bool BuildWindow::on_build_clicked(Widget *w, int id) {
-  Button *btn = dynamic_cast<Button *>(w);
-  auto iconp = std::any_cast<std::shared_ptr<EntityIcon>>(&btn->get_data());
+bool BuildWindow::on_build_clicked(Widget &w, int id) {
+  auto &btn = dynamic_cast<Button &>(w);
+  auto iconp = std::any_cast<std::shared_ptr<EntityIcon>>(&btn.get_data());
   if (iconp != nullptr) {
     std::string tmpl_name = (*iconp)->get_template_name();
     std::shared_ptr<ent::Entity> Entity(entity_);
@@ -210,8 +210,8 @@ void BuildWindow::on_mouse_over_button(int id) {
 
 void BuildWindow::on_mouse_out_button(int id) {
   if (mouse_over_button_id_ == id) {
-    Button *btn = wnd_->find<Button>(mouse_over_button_id_);
-    if (btn != nullptr) {
+    auto btn = wnd_->Find<Button>(mouse_over_button_id_);
+    if (btn) {
       auto iconp = std::any_cast<std::shared_ptr<EntityIcon>>(&btn->get_data());
       if (iconp != nullptr) {
         (*iconp)->reset();
@@ -230,8 +230,8 @@ void BuildWindow::do_refresh() {
   int index = 0;
   for(auto &tmpl : templates) {
     LOG(DBG) << " checking " << std::string(tmpl["name"]);
-    Button *btn = wnd_->find<Button>(FIRST_BUILD_BUTTON_ID + index);
-    if (btn == nullptr) {
+    auto btn = wnd_->Find<Button>(FIRST_BUILD_BUTTON_ID + index);
+    if (!btn) {
       continue; // TODO
     }
 
@@ -272,7 +272,7 @@ void BuildWindow::update() {
 
   // if the mouse is over a button, call the icon's update so that it rotates the icon.
   if (mouse_over_button_id_ > 0) {
-    Button *btn = wnd_->find<Button>(mouse_over_button_id_);
+    auto btn = wnd_->Find<Button>(mouse_over_button_id_);
     if (btn != nullptr) {
       auto icon = std::any_cast<std::shared_ptr<EntityIcon>>(&btn->get_data());
       if (icon != nullptr) {

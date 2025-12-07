@@ -14,13 +14,13 @@ class NewGameWindow;
 class MainMenuWindow {
 private:
   NewGameWindow *new_game_window_;
-  fw::gui::Window *wnd_;
+  std::shared_ptr<fw::gui::Window> wnd_;
   bool exiting_;
 
-  bool new_game_clicked(fw::gui::Widget *w);
-  bool join_game_clicked(fw::gui::Widget *w);
-  bool quit_clicked(fw::gui::Widget *w);
-  bool editor_clicked(fw::gui::Widget *w);
+  bool new_game_clicked(fw::gui::Widget &w);
+  bool join_game_clicked(fw::gui::Widget &w);
+  bool quit_clicked(fw::gui::Widget &w);
+  bool editor_clicked(fw::gui::Widget &w);
 
 public:
   MainMenuWindow();

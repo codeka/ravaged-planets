@@ -29,16 +29,16 @@ public:
   void render();
 
   // Register a new top-level widget.
-  void attach_widget(Widget *widget);
+  void attach_widget(std::shared_ptr<Widget> widget);
 
   // Destroys the given top-level widget, unhooks any signals and removes it from the Screen.
-  void detach_widget(Widget *widget);
+  void detach_widget(std::shared_ptr<Widget> widget);
 
   // Bring the given widget to the top.
-  void bring_to_top(Widget *widget);
+  void bring_to_top(std::shared_ptr<Widget> widget);
 
   // Give the specified widget Input focus. Keystrokes will be sent to this widget only.
-  void focus(Widget *widget);
+  void focus(std::shared_ptr<Widget> widget);
 
   // Gets the one-and-only AudioSource that all GUI element should use to play audio.
   std::shared_ptr<AudioSource> get_audio_source() { return audio_source_;  }
@@ -53,12 +53,13 @@ public:
   // Injects a key press, returns true if we handled it or false if it should be passed through.
   bool inject_key(int key, bool is_down);
 
-  // Global 'click' signal, fired whenever you click the mouse. Widget may be nullopt if you clicked
-  // on no widget.
-  fw::Signal<int /*button*/, bool /*is_down*/, Widget const * /*widget*/> sig_click;
+  // Global 'click' signal, fired whenever you click the mouse. sig_click is fired if you click a
+  // widget, and sig_click_away is fired if you click outside of any widgets.
+  fw::Signal<int /*button*/, bool /*is_down*/, Widget const &/*widget*/> sig_click;
+  fw::Signal<int /*button*/, bool /*is_down*/> sig_click_away;
 
   bool is_mouse_over_widget() const {
-    return widget_under_mouse_ != nullptr;
+    return !widget_under_mouse_.expired();
   }
 
   inline DrawableManager &get_drawable_manager() {
@@ -69,17 +70,17 @@ private:
   fw::Graphics *graphics_;
   DrawableManager drawable_manager_;
   std::mutex top_level_widget_mutex_;
-  std::vector<Widget *> top_level_widgets_;
-  std::vector<Widget *> pending_remove_;
-  Widget *widget_under_mouse_;
-  Widget *widget_mouse_down_;
-  Widget *focused_;
+  std::vector<std::shared_ptr<Widget>> top_level_widgets_;
+  std::vector<std::shared_ptr<Widget>> pending_remove_;
+  std::weak_ptr<Widget> widget_under_mouse_;
+  std::weak_ptr<Widget> widget_mouse_down_;
+  std::weak_ptr<Widget> focused_;
   std::shared_ptr<AudioSource> audio_source_;
 
   // Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget.
-  Widget *get_widget_at(float x, float y);
+  std::shared_ptr<Widget> get_widget_at(float x, float y);
 
-  void propagate_mouse_event(Widget *w, bool is_down, float x, float y);
+  void propagate_mouse_event(std::shared_ptr<Widget> w, bool is_down, float x, float y);
 };
 
 } 

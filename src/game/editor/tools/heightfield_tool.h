@@ -22,7 +22,7 @@ public:
 
 private:
   int radius_;
-  HeightfieldToolWindow *wnd_;
+  std::unique_ptr<HeightfieldToolWindow> wnd_;
   HeightfieldBrush *brush_;
 
   std::shared_ptr<IndicatorNode> indicator_;

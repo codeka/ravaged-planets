@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 #include <game/editor/tools/tools.h>
 
 namespace fw {
@@ -12,11 +14,11 @@ namespace ed {
 
 class PlayersTool: public Tool {
 private:
-  PlayersToolWindow *wnd_;
+  std::unique_ptr<PlayersToolWindow> wnd_;
   std::shared_ptr<fw::Model> marker_;
   int player_no_;
 
-  void on_key(std::string keyname, bool is_down);
+  void on_key(std::string_view keyname, bool is_down);
 
 public:
   PlayersTool(EditorWorld *wrld);

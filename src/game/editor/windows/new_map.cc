@@ -59,14 +59,14 @@ void NewMapWindow::hide() {
   wnd_->set_visible(false);
 }
 
-bool NewMapWindow::ok_clicked(Widget *w) {
+bool NewMapWindow::ok_clicked(Widget &w) {
   wnd_->set_visible(false);
 
   int width;
   int height;
 
-  if (!absl::SimpleAtoi(wnd_->find<TextEdit>(WIDTH_ID)->get_text(), &width) ||
-      !absl::SimpleAtoi(wnd_->find<TextEdit>(HEIGHT_ID)->get_text(), &height)) {
+  if (!absl::SimpleAtoi(wnd_->Find<TextEdit>(WIDTH_ID)->get_text(), &width) ||
+      !absl::SimpleAtoi(wnd_->Find<TextEdit>(HEIGHT_ID)->get_text(), &height)) {
     // TODO: show error
 //    message_box->show("Invalid Parameters", "Width and Height must be an integer.");
     return true;
@@ -76,7 +76,7 @@ bool NewMapWindow::ok_clicked(Widget *w) {
   return true;
 }
 
-bool NewMapWindow::cancel_clicked(Widget *w) {
+bool NewMapWindow::cancel_clicked(Widget &w) {
   wnd_->set_visible(false);
   return true;
 }

@@ -77,7 +77,7 @@ std::unique_ptr<Property> Slider::on_update(std::function<void(int)> on_update) 
   return std::make_unique<SliderOnUpdateProperty>(on_update);
 }
 
-void Slider::on_attached_to_parent(Widget *parent) {
+void Slider::OnAttachedToParent(Widget &parent) {
   StateDrawable *bkgnd = new StateDrawable();
   bkgnd->add_drawable(
       StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("slider_thumb_normal"));
