@@ -161,6 +161,25 @@ void Gui::detach_widget(std::shared_ptr<Widget> widget) {
   pending_remove_.push_back(widget);
 }
 
+bool Gui::IsAttached(Widget const &widget) {
+  std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
+  for (auto top_level_widget : top_level_widgets_) {
+    if (top_level_widget->IsChild(widget)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// If the given widget is attached to the view heriarchy, ensures that we're running on the render
+// thread. Once attached to the heriarchy, all operations on widgets should be done on the
+// render thread (you can perform operations in the view heriarchy while it's not attached).
+void Gui::EnsureThread(Widget const &widget) {
+  if (IsAttached(widget)) {
+    fw::Graphics::ensure_render_thread();
+  }
+}
+
 void Gui::bring_to_top(std::shared_ptr<Widget> widget) {
   std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
   top_level_widgets_.erase(

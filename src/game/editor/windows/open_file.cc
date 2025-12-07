@@ -102,6 +102,7 @@ void OpenFileWindow::refresh() {
   if (!fw::Graphics::is_render_thread()) {
     // Make sure refresh() runs on the render thread.
     fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this](){ refresh(); });
+    return;
   }
   auto lbx = wnd_->Find<Listbox>(FILE_LIST_ID);
   lbx->clear();

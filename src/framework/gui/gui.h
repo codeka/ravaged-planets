@@ -34,6 +34,15 @@ public:
   // Destroys the given top-level widget, unhooks any signals and removes it from the Screen.
   void detach_widget(std::shared_ptr<Widget> widget);
 
+  // Returns true if the given widget is attached to the view heriarchy. Once it is, all operations
+  // on the widget should be on the render thread.
+  bool IsAttached(Widget const &widget);
+
+  // If the given widget is attached to the view heriarchy, ensures that we're running on the render
+  // thread. Once attached to the heriarchy, all operations on widgets should be done on the
+  // render thread (you can perform operations in the view heriarchy while it's not attached).
+  void EnsureThread(Widget const &widget);
+
   // Bring the given widget to the top.
   void bring_to_top(std::shared_ptr<Widget> widget);
 

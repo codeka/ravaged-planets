@@ -233,6 +233,8 @@ std::unique_ptr<Property> Widget::enabled(bool enabled) {
 }
 
 void Widget::AttachChild(std::shared_ptr<Widget> child) {
+  gui_->EnsureThread(*this);
+
   std::shared_ptr<Widget> old_parent = child->parent_.lock();
   if (old_parent) {
     old_parent->DetachChild(child);
@@ -243,11 +245,15 @@ void Widget::AttachChild(std::shared_ptr<Widget> child) {
 }
 
 void Widget::DetachChild(std::shared_ptr<Widget> child) {
+  gui_->EnsureThread(*this);
+
   children_.erase(std::find(children_.begin(), children_.end(), child));
   child->parent_.reset();
 }
 
 void Widget::ClearChildren() {
+  gui_->EnsureThread(*this);
+
   for(auto &child : children_) {
     child->parent_.reset();
   }
