@@ -244,7 +244,7 @@ void HeightfieldToolWindow::on_radius_updated(int value) {
 }
 
 bool HeightfieldToolWindow::on_import_clicked(fw::gui::Widget &w) {
-  ed::open_file->show(std::bind(&HeightfieldToolWindow::on_import_file_selected, this, _1));
+  ed::open_file->Show(std::bind(&HeightfieldToolWindow::on_import_file_selected, this, _1));
   return true;
 }
 

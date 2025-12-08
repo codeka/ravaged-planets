@@ -33,7 +33,7 @@ EditorScreen::EditorScreen() :
   ed::new_map->initialize();
   ed::save_map->initialize();
   ed::open_map->initialize();
-  ed::open_file->initialize();
+  ed::open_file->Initialize();
   ed::statusbar->initialize();
 }
 

@@ -1,11 +1,9 @@
 #pragma once
 
-namespace fw {
-namespace gui {
-class Window;
-class Widget;
-}
-}
+#include <memory>
+
+#include <framework/gui/widget.h>
+#include <framework/gui/window.h>
 
 namespace ed {
 
