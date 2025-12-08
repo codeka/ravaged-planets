@@ -21,13 +21,12 @@ public:
   static float max_radius;
 
 private:
-  int radius_;
+  int radius_ = 4;
+  float speed_ = 0.25f;
   std::unique_ptr<HeightfieldToolWindow> wnd_;
-  HeightfieldBrush *brush_;
+  std::unique_ptr<HeightfieldBrush> brush_;
 
   std::shared_ptr<IndicatorNode> indicator_;
-
-  void on_key(std::string keyname, bool is_down);
 
 public:
   HeightfieldTool(EditorWorld *wrld);
@@ -41,11 +40,18 @@ public:
     return radius_;
   }
 
+  void set_speed(float value) {
+    speed_ = value;
+  }
+  float get_speed() const {
+    return speed_;
+  }
+
   // imports the height data from the given fw::Bitmap
   void import_heightfield(fw::Bitmap &bm);
 
   // sets the brush to the current value (this is done by the tool window)
-  void set_brush(HeightfieldBrush *brush);
+  void set_brush(std::unique_ptr<HeightfieldBrush> brush);
 
   virtual void update();
 };

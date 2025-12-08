@@ -35,10 +35,8 @@ public:
   HeightfieldBrush();
   virtual ~HeightfieldBrush();
 
-  void initialize(ed::HeightfieldTool *tool, std::shared_ptr<ed::EditorTerrain> terrain);
+  void Initialize(ed::HeightfieldTool *tool, std::shared_ptr<ed::EditorTerrain> terrain);
 
-  virtual void on_key(std::string, bool) {
-  }
   virtual void update(fw::Vector const &) {
   }
 };
@@ -50,55 +48,62 @@ HeightfieldBrush::HeightfieldBrush() :
 HeightfieldBrush::~HeightfieldBrush() {
 }
 
-void HeightfieldBrush::initialize(
-    ed::HeightfieldTool *Tool,
+void HeightfieldBrush::Initialize(
+    ed::HeightfieldTool *tool,
     std::shared_ptr<ed::EditorTerrain> terrain) {
-  tool_ = Tool;
+  tool_ = tool;
   terrain_ = terrain;
 }
 
 //-----------------------------------------------------------------------------
 class RaiseLowerBrush: public HeightfieldBrush {
-private:
-  enum RaiseDirection {
-    none, up, down
-  };
-  RaiseDirection raise_direction_;
-
 public:
   RaiseLowerBrush();
   virtual ~RaiseLowerBrush();
 
-  virtual void on_key(std::string keyname, bool is_down);
-  virtual void update(fw::Vector const &cursor_loc);
+  void OnRaiseKey(std::string keyname, bool is_down);
+  void OnLowerKey(std::string keyname, bool is_down);
+  virtual void update(fw::Vector const &cursor_loc) override;
+
+private:
+  bool is_raising_ = false;
+  bool is_lowering_ = false;
+
+  int raise_key_bind_;
+  int lower_key_bind_;
 };
 
-RaiseLowerBrush::RaiseLowerBrush() :
-    raise_direction_(none) {
+RaiseLowerBrush::RaiseLowerBrush() {
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
+  raise_key_bind_ = inp->bind_key(
+      "Left-Mouse",
+      fw::InputBinding(std::bind(&RaiseLowerBrush::OnRaiseKey, this, _1, _2)));
+  lower_key_bind_ = inp->bind_key(
+      "Right-Mouse",
+      fw::InputBinding(std::bind(&RaiseLowerBrush::OnLowerKey, this, _1, _2)));
 }
 
 RaiseLowerBrush::~RaiseLowerBrush() {
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
+  inp->unbind_key(raise_key_bind_);
+  inp->unbind_key(lower_key_bind_);
 }
 
-void RaiseLowerBrush::on_key(std::string keyname, bool is_down) {
-  if (keyname == "Left-Mouse") {
-    if (is_down)
-      raise_direction_ = up;
-    else
-      raise_direction_ = none;
-  } else if (keyname == "Right-Mouse") {
-    if (is_down)
-      raise_direction_ = down;
-    else
-      raise_direction_ = none;
-  }
+void RaiseLowerBrush::OnRaiseKey(std::string keyname, bool is_down) {
+  is_raising_ = is_down;
 }
+
+void RaiseLowerBrush::OnLowerKey(std::string keyname, bool is_down) {
+  is_lowering_ = is_down;
+}
+
 
 void RaiseLowerBrush::update(fw::Vector const &cursor_loc) {
   float dy = 0.0f;
-  if (raise_direction_ == up) {
+  if (is_raising_) {
     dy += 5.0f * fw::Framework::get_instance()->get_timer()->get_update_time();
-  } else if (raise_direction_ == down) {
+  }
+  if (is_lowering_) {
     dy -= 5.0f * fw::Framework::get_instance()->get_timer()->get_update_time();
   }
 
@@ -110,12 +115,15 @@ void RaiseLowerBrush::update(fw::Vector const &cursor_loc) {
     int ex = cx + tool_->get_radius();
     int ez = cz + tool_->get_radius();
 
+    float amount = 4.0f * tool_->get_speed();
+
     for (int z = sz; z < ez; z++) {
       for (int x = sx; x < ex; x++) {
         float height = terrain_->get_vertex_height(x, z);
-        float distance = sqrt((float) ((x - cx) * (x - cx) + (z - cz) * (z - cz))) / tool_->get_radius();
+        float distance =
+            sqrt((float) ((x - cx) * (x - cx) + (z - cz) * (z - cz))) / tool_->get_radius();
         if (distance < 1.0f)
-          terrain_->set_vertex_height(x, z, height + (dy * (1.0f - distance)));
+          terrain_->set_vertex_height(x, z, height + (dy * (1.0f - distance)) * amount);
       }
     }
   }
@@ -127,30 +135,35 @@ private:
   bool start_;
   bool levelling_;
   float level_height_;
+  int key_bind_;
 
 public:
   LevelBrush();
   virtual ~LevelBrush();
 
-  virtual void on_key(std::string keyname, bool is_down);
-  virtual void update(fw::Vector const &cursor_loc);
+  void OnLevelKey(std::string keyname, bool is_down);
+  virtual void update(fw::Vector const &cursor_loc) override;
 };
 
 LevelBrush::LevelBrush() :
     start_(false), levelling_(false), level_height_(0.0f) {
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
+  key_bind_ = inp->bind_key(
+      "Left-Mouse",
+      fw::InputBinding(std::bind(&LevelBrush::OnLevelKey, this, _1, _2)));
 }
 
 LevelBrush::~LevelBrush() {
+  fw::Input *inp = fw::Framework::get_instance()->get_input();
+  inp->unbind_key(key_bind_);
 }
 
-void LevelBrush::on_key(std::string keyname, bool is_down) {
-  if (keyname == "Left-Mouse") {
-    if (is_down) {
-      start_ = true;
-    } else {
-      start_ = false;
-      levelling_ = false;
-    }
+void LevelBrush::OnLevelKey(std::string keyname, bool is_down) {
+  if (!levelling_ && is_down) {
+    levelling_ = true;
+    start_ = true;
+  } else {
+    levelling_ = is_down;
   }
 }
 
@@ -171,13 +184,15 @@ void LevelBrush::update(fw::Vector const &cursor_loc) {
     int ex = cx + tool_->get_radius();
     int ez = cz + tool_->get_radius();
 
+    float amount = 4.0f * tool_->get_speed();
+
     for (int z = sz; z < ez; z++) {
       for (int x = sx; x < ex; x++) {
         float height = terrain_->get_vertex_height(x, z);
         float diff = (level_height_ - height) * fw::Framework::get_instance()->get_timer()->get_update_time();
         float distance = sqrt((float) ((x - cx) * (x - cx) + (z - cz) * (z - cz))) / tool_->get_radius();
         if (distance < 1.0f) {
-          terrain_->set_vertex_height(x, z, height + (diff * (1.0f - distance)));
+          terrain_->set_vertex_height(x, z, height + (diff * (1.0f - distance)) * amount);
         }
       }
     }
@@ -195,7 +210,8 @@ private:
   std::shared_ptr<Window> wnd_;
   ed::HeightfieldTool *tool_;
 
-  void on_radius_updated(int value);
+  void OnRadiusUpdated(int value);
+  void OnSpeedUpdated(int value);
   bool on_tool_clicked(fw::gui::Widget &w);
   bool on_import_clicked(fw::gui::Widget &w);
   void on_import_file_selected(ed::OpenFileWindow &ofw);
@@ -210,7 +226,7 @@ public:
 
 HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *tool) :
     tool_(tool) {
-  wnd_ = Builder<Window>(px(10), px(30), px(100), px(130)) << Window::background("frame")
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(170)) << Window::background("frame")
       << (Builder<Button>(px(8), px(8), px(36), px(36)) << Widget::id(RAISE_LOWER_BRUSH_ID)
           << Button::icon("editor_hightfield_raiselower")
           << Button::click(std::bind(&HeightfieldToolWindow::on_tool_clicked, this, _1)))
@@ -220,8 +236,12 @@ HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *tool) :
       << (Builder<Label>(px(4), px(52), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
       << (Builder<Slider>(px(4), px(74), sum(pct(100), px(-8)), px(18))
           << Slider::limits(20, 100) << Slider::value(40)
-          << Slider::on_update(std::bind(&HeightfieldToolWindow::on_radius_updated, this, _1)))
-      << (Builder<Button>(px(4), px(96), sum(pct(100), px(-8)), px(30)) << Button::text("Import")
+          << Slider::on_update(std::bind(&HeightfieldToolWindow::OnRadiusUpdated, this, _1)))
+      << (Builder<Label>(px(4), px(92), sum(pct(100), px(-8)), px(18)) << Label::text("Speed:"))
+      << (Builder<Slider>(px(4), px(114), sum(pct(100), px(-8)), px(18))
+          << Slider::limits(20, 100) << Slider::value(25)
+          << Slider::on_update(std::bind(&HeightfieldToolWindow::OnSpeedUpdated, this, _1)))
+      << (Builder<Button>(px(4), px(132), sum(pct(100), px(-8)), px(30)) << Button::text("Import")
           << Button::click(std::bind(&HeightfieldToolWindow::on_import_clicked, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
@@ -238,9 +258,14 @@ void HeightfieldToolWindow::hide() {
   wnd_->set_visible(false);
 }
 
-void HeightfieldToolWindow::on_radius_updated(int value) {
+void HeightfieldToolWindow::OnRadiusUpdated(int value) {
   int radius = value / 10;
   tool_->set_radius(radius);
+}
+
+void HeightfieldToolWindow::OnSpeedUpdated(int value) {
+  float speed = value / 100.0f;
+  tool_->set_speed(speed);
 }
 
 bool HeightfieldToolWindow::on_import_clicked(fw::gui::Widget &w) {
@@ -266,9 +291,9 @@ bool HeightfieldToolWindow::on_tool_clicked(fw::gui::Widget &w) {
   dynamic_cast<Button &>(w).set_pressed(true);
 
   if (w.get_id() == RAISE_LOWER_BRUSH_ID) {
-    tool_->set_brush(new RaiseLowerBrush());
+    tool_->set_brush(std::make_unique<RaiseLowerBrush>());
   } else if (w.get_id() == LEVEL_BRUSH_ID) {
-    tool_->set_brush(new LevelBrush());
+    tool_->set_brush(std::make_unique<LevelBrush>());
   }
 
   return true;
@@ -281,7 +306,7 @@ REGISTER_TOOL("heightfield", HeightfieldTool);
 float HeightfieldTool::max_radius = 6;
 
 HeightfieldTool::HeightfieldTool(EditorWorld *wrld) :
-    Tool(wrld), radius_(4), brush_(nullptr) {
+    Tool(wrld), brush_(nullptr) {
   wnd_ = std::make_unique<HeightfieldToolWindow>(this);
 }
 
@@ -290,16 +315,7 @@ HeightfieldTool::~HeightfieldTool() {}
 void HeightfieldTool::activate() {
   Tool::activate();
 
-  fw::Input *inp = fw::Framework::get_instance()->get_input();
-  keybind_tokens_.push_back(
-      inp->bind_key("Left-Mouse", fw::InputBinding(std::bind(&HeightfieldTool::on_key, this, _1, _2))));
-  keybind_tokens_.push_back(
-      inp->bind_key("Right-Mouse", fw::InputBinding(std::bind(&HeightfieldTool::on_key, this, _1, _2))));
-
-  if (brush_ != nullptr) {
-    delete brush_;
-  }
-  set_brush(new RaiseLowerBrush());
+  set_brush(std::make_unique<RaiseLowerBrush>());
 
   indicator_ = std::make_shared<IndicatorNode>(terrain_);
   indicator_->set_radius(radius_);
@@ -323,18 +339,9 @@ void HeightfieldTool::deactivate() {
   wnd_->hide();
 }
 
-void HeightfieldTool::set_brush(HeightfieldBrush *brush) {
-  delete brush_;
-  brush_ = brush;
-  brush_->initialize(this, terrain_);
-}
-
-// This is called when you press or release one of the keys we use for interacting with the terrain (left mouse button
-// for "raise", right mouse button for "lower" etc)
-void HeightfieldTool::on_key(std::string keyname, bool is_down) {
-  if (brush_ != nullptr) {
-    brush_->on_key(keyname, is_down);
-  }
+void HeightfieldTool::set_brush(std::unique_ptr<HeightfieldBrush> brush) {
+  brush_ = std::move(brush);
+  brush_->Initialize(this, terrain_);
 }
 
 void HeightfieldTool::set_radius(int radius) {
