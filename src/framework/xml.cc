@@ -219,9 +219,12 @@ bool operator!=(
 }     
 
 XmlElement::ElementChildIterator XmlElement::ElementChildren::begin() {
-  auto first_child =
-      std::make_shared<XmlElement>(
-          element_.get_document(), element_.get_element()->FirstChildElement());
+  auto first_child_element = element_.get_element()->FirstChildElement();
+  if (first_child_element == nullptr) {
+    return end();
+  }
+
+  auto first_child = std::make_shared<XmlElement>(element_.get_document(), first_child_element);
   return ElementChildIterator(first_child);
 }
 
