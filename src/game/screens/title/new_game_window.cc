@@ -129,14 +129,22 @@ void NewGameWindow::show() {
 
   WorldVfs vfs;
   map_list_ = vfs.list_maps();
-  for (WorldSummary &ws : map_list_) {
-    std::string title = ws.get_name();
-    wnd_->Find<Listbox>(MAP_LIST_ID)->add_item(
-        Builder<Label>(px(8), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
-  }
-  if (!map_list_.empty()) {
-    wnd_->Find<Listbox>(MAP_LIST_ID)->select_item(0);
-  }
+  auto listbox = wnd_->Find<Listbox>(MAP_LIST_ID);
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread(
+    [map_list = map_list_, listbox]() {
+      listbox->clear();
+
+      for (WorldSummary const &ws : map_list) {
+        std::string title = ws.get_name();
+        listbox->add_item(
+            Builder<Label>(px(8), px(0), pct(100), px(20))
+                << Label::text(title)
+                << Widget::data(ws));
+      }
+      if (!map_list.empty()) {
+        listbox->select_item(0);
+      }
+    });
 
   sig_players_changed_conn_ = SimulationThread::get_instance()->sig_players_changed.Connect(
       std::bind(&NewGameWindow::on_players_changed, this));
@@ -249,25 +257,31 @@ void NewGameWindow::on_session_state_changed(Session::SessionState new_state) {
 */
 }
 
-// this is called when the list of players has changed, we set a flag (because it can happen on another thread)
-// and update the players in the main update() call.
+// this is called when the list of players has changed, we set a flag (because it can happen on
+// another thread) and update the players in the main update() call.
 void NewGameWindow::on_players_changed() {
   need_refresh_players_ = true;
 }
 
 // refreshes the list of players in the game
 void NewGameWindow::refresh_players() {
+  auto players = SimulationThread::get_instance()->get_players();
   auto players_list = wnd_->Find<Listbox>(PLAYER_LIST_ID);
-  players_list->clear();
-  for (auto &plyr : SimulationThread::get_instance()->get_players()) {
-    int player_no = static_cast<int>(plyr->get_player_no());
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([players, players_list]() {
+    players_list->clear();
+    for (auto &plyr : players) {
+      int player_no = static_cast<int>(plyr->get_player_no());
 
-    std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";
-    players_list->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20)) << Widget::data(plyr)
-        << (Builder<Label>(px(8), px(0), px(30), px(20)) << Label::text(std::to_string(player_no)))
-        << (Builder<Label>(px(30), px(0), sum(pct(100), px(-80)), px(20)) << Label::text(plyr->get_user_name()))
-        << (Builder<Label>(sum(pct(100), px(-50)), px(0), px(50), px(20)) << Label::text(ready_str)));
-  }
+      std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";
+      players_list->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20)) << Widget::data(plyr)
+          << (Builder<Label>(px(8), px(0), px(30), px(20))
+              << Label::text(std::to_string(player_no)))
+          << (Builder<Label>(px(30), px(0), sum(pct(100), px(-80)), px(20))
+              << Label::text(plyr->get_user_name()))
+          << (Builder<Label>(sum(pct(100), px(-50)), px(0), px(50), px(20))
+              << Label::text(ready_str)));
+    }
+  });
 }
 
 void NewGameWindow::select_map(std::string const &map_name) {
@@ -327,7 +341,10 @@ void NewGameWindow::add_chat_msg(std::string_view user_name, std::string_view ms
 
 void NewGameWindow::append_chat(std::string const &msg) {
   auto chat_list = wnd_->Find<Listbox>(CHAT_LIST_ID);
-  chat_list->add_item(Builder<Label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << Label::text(msg));
+  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([chat_list, msg] {
+    chat_list->add_item(
+        Builder<Label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << Label::text(msg));
+  });
 }
 
 void NewGameWindow::update_selection() {

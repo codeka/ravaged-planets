@@ -43,7 +43,6 @@ void OpenMapWindow::initialize() {
       << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20))
           << Button::text("Cancel")
           << Widget::click(std::bind(&OpenMapWindow::cancel_clicked, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 
   game::WorldVfs vfs;
   std::vector<game::WorldSummary> map_list = vfs.list_maps();
@@ -52,6 +51,8 @@ void OpenMapWindow::initialize() {
     wnd_->Find<Listbox>(MAP_LIST)->add_item(
         Builder<Label>(px(0), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
   }
+
+  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
 bool OpenMapWindow::open_clicked(Widget &w) {
