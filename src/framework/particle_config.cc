@@ -50,6 +50,7 @@ static ParticleEffectConfigCache g_cache;
 ParticleEffectConfig::ParticleEffectConfig() {
 }
 
+/* static */
 fw::StatusOr<std::shared_ptr<ParticleEffectConfig>> ParticleEffectConfig::Load(
     std::string_view name) {
   fs::path filepath;
@@ -321,7 +322,7 @@ fw::StatusOr<ParticleEmitterConfig::LifeState> ParticleEmitterConfig::ParseLifeS
       return fw::ErrorStatus("unknown child element of <state>:") << child.get_value();
     }
   }
-  return fw::OkStatus();
+  return state;
 }
 
 fw::StatusOr<ParticleEmitterConfig::Random<float>> ParticleEmitterConfig::ParseRandomFloat(

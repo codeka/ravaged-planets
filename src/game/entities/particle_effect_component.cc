@@ -93,6 +93,8 @@ void ParticleEffectComponent::update(float) {
       auto effect = mgr->CreateEffect(effect_info.name, our_position + effect_info.offset);
       if (effect.ok()) {
         effect_info.effect = *effect;
+      } else {
+        LOG(ERR) << "error loading particle effect: " << effect.status();
       }
     }
     if (!effect_info.effect) {

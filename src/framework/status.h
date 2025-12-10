@@ -75,7 +75,14 @@ Status ErrorStatus(std::string_view message);
 template <typename T>
 class [[nodiscard]] StatusOr {
 public:
-  StatusOr(Status const &status) : status_(status) {}
+  StatusOr(Status const &status) : status_(status) {
+    if (status_.ok()) {
+      // It's actually an error to construct this with an OkStatus.
+      status_ =
+          fw::ErrorStatus(
+              "StatusOr constructed with OkStatus (should be constructed with a value instead)");
+    }
+  }
   StatusOr(T const &value) : value_(value) {}
   StatusOr(T &&value) noexcept : value_(std::move(value)) {}
 

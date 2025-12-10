@@ -17,7 +17,7 @@ std::vector<std::string> GenerateStackTrace(int skip_frames /*= 2*/) {
       continue;
     }
 
-    entries.push_back(entry.to_string());
+    entries.push_back("    " + entry.to_string());
   }
 
   return entries;
