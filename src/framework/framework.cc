@@ -5,9 +5,10 @@
 #include <thread>
 #include <vector>
 
-#include <SDL2/SDL.h>
-
 #include <absl/strings/match.h>
+#include <cpptrace/from_current.hpp>
+#include <cpptrace/exceptions_macros.hpp>
+#include <SDL2/SDL.h>
 
 #include <framework/framework.h>
 #include <framework/audio.h>
@@ -242,51 +243,57 @@ void Framework::set_camera(Camera *cam) {
     camera_->enable();
 }
 
+void Framework::update_proc_impl() {
+  LOG(INFO) << "framework initialization complete, application initialization starting...";
+  auto status = app_->initialize(this);
+  if (!status.ok()) {
+    LOG(ERR) << "app did not iniatilize: " << status;
+    return;
+  }
+
+  LOG(INFO) << "application initialization complete, running...";
+
+  int64_t accum_micros = 0;
+  int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
+  while (running_) {
+    timer_->update();
+    accum_micros += std::chrono::duration_cast<std::chrono::microseconds>(
+        timer_->get_frame_duration()).count();
+
+    int64_t remaining_micros = timestep_micros - accum_micros;
+    if (remaining_micros > 1000) {
+      std::this_thread::sleep_for(std::chrono::microseconds(remaining_micros));
+      continue;
+    }
+
+    while (accum_micros > timestep_micros && running_) {
+      float dt = static_cast<float>(timestep_micros) / 1000000.f;
+      update(dt);
+      accum_micros -= timestep_micros;
+    }
+
+    // TODO: should we yield or sleep for a while?
+    std::this_thread::yield();
+  }
+}
+
 void Framework::update_proc() {
   g_update_thread_id = std::this_thread::get_id();
 
-  try {
-    LOG(INFO) << "framework initialization complete, application initialization starting...";
-    auto status = app_->initialize(this);
-    if (!status.ok()) {
-      LOG(ERR) << "app did not iniatilize: " << status;
-      return;
-    }
-
-    LOG(INFO) << "application initialization complete, running...";
-
-    int64_t accum_micros = 0;
-    int64_t timestep_micros = 1000000 / 40; // 40 frames per second update frequency.
-    while (running_) {
-      timer_->update();
-      accum_micros += std::chrono::duration_cast<std::chrono::microseconds>(
-          timer_->get_frame_duration()).count();
-
-      int64_t remaining_micros = timestep_micros - accum_micros;
-      if (remaining_micros > 1000) {
-        std::this_thread::sleep_for(std::chrono::microseconds(remaining_micros));
-        continue;
-      }
-
-      while (accum_micros > timestep_micros && running_) {
-        float dt = static_cast<float>(timestep_micros) / 1000000.f;
-        update(dt);
-        accum_micros -= timestep_micros;
-      }
-
-      // TODO: should we yield or sleep for a while?
-      std::this_thread::yield();
-    }
-  }catch(std::exception &e) {
+  CPPTRACE_TRY {
+    update_proc_impl();
+  } CPPTRACE_CATCH(std::exception const &e) {
     LOG(ERR) << "--------------------------------------------------------------------------------";
     LOG(ERR) << "UNHANDLED EXCEPTION!";
     LOG(ERR) << e.what();
+    LOG(ERR) << cpptrace::from_current_exception().to_string();
     throw;
-  } catch (...) {
+  }/* CPPTRACE_CATCH (...) {
     LOG(ERR) << "--------------------------------------------------------------------------------";
     LOG(ERR) << "UNHANDLED EXCEPTION! (unknown exception)";
+    LOG(ERR) << cpptrace::from_current_exception().to_string();
     throw;
-  }
+  }*/
 }
 
 void Framework::update(float dt) {

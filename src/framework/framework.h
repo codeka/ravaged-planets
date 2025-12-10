@@ -110,6 +110,7 @@ private:
 
   // game updates happen (synchronized) on this thread in constant timestep
   void update_proc();
+  void update_proc_impl();
 
   std::list<std::shared_ptr<ScreenshotRequest>> screenshot_requests_;
   void take_screenshots(sg::Scenegraph &Scenegraph);

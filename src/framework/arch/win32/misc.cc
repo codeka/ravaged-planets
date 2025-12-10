@@ -1,5 +1,4 @@
 
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #define SECURITY_WIN32
 #include <Security.h>

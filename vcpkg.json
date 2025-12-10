@@ -1,5 +1,8 @@
 {
   "dependencies": [
+    "abseil",
+    "assimp",
+    "cpptrace",
     "curl",
     "enet",
     "freetype",
@@ -7,8 +10,6 @@
     "lua",
     "openal-soft",
     "protobuf",
-    "sdl2",
-    "assimp",
-    "abseil"
+    "sdl2"
   ]
 }

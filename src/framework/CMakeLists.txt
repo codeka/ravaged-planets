@@ -44,18 +44,18 @@ add_library(framework
     ${PROTO_SRCS}
  "lua/callback.h")
 
-target_link_libraries(framework ${OPENGL_LIBRARY})
-target_link_libraries(framework protobuf::libprotobuf)
-target_link_libraries(framework ${LUA_LIBRARIES})
+target_link_libraries(framework cpptrace::cpptrace)
 target_link_libraries(framework ${CURL_LIBRARY})
 target_link_libraries(framework ${ENET_LIBRARY})
 target_link_libraries(framework ${FREETYPE_LIBRARY})
+target_link_libraries(framework ${GLEW_LIBRARY})
+target_link_libraries(framework ${LUA_LIBRARIES})
+target_link_libraries(framework ${OPENAL_LIBRARY})
+target_link_libraries(framework ${OPENGL_LIBRARY})
 target_link_libraries(framework ${PNG_LIBRARY})
-
+target_link_libraries(framework protobuf::libprotobuf)
 target_link_libraries(framework SDL2::SDL2main)
 target_link_libraries(framework SDL2::SDL2)
-target_link_libraries(framework ${OPENAL_LIBRARY})
-target_link_libraries(framework ${GLEW_LIBRARY})
 
 if(MSVC)
     # Set /EHsc so we can have proper unwind semantics in Visual C++
@@ -70,6 +70,14 @@ if(MSVC)
     target_compile_options(framework PUBLIC /MP)
 endif()
 
+if(WIN32)
+  add_custom_command(
+    TARGET framework POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:cpptrace::cpptrace>
+    $<TARGET_FILE_DIR:framework>
+  )
+endif()
 
 if(UNIX)
    target_link_libraries(framework
@@ -83,6 +91,18 @@ if(UNIX AND NOT APPLE)
         pthread
     )
 elseif(APPLE)
+    set_target_properties(framework
+        PROPERTIES
+        XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT
+        "dwarf-with-dsym"
+    )
+
+    add_custom_command(
+        TARGET framework
+        POST_BUILD
+        COMMAND dsymutil $<TARGET_FILE:framework>
+    )
+
     target_link_libraries(framework
         -lobjc "-framework Foundation" "-framework Carbon" "-framework AppKit" "-framework AudioUnit"
         "-framework CoreAudio" "-framework IOKit" "-framework ForceFeedback"

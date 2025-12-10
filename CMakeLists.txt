@@ -23,6 +23,9 @@ if(WIN32)
       set (CMAKE_INSTALL_PREFIX ${PGM_FILES}/Codeka/Ravaged-Planets
            CACHE STRING "Default Install Path" FORCE)
     endif()
+
+    # Make sure we always define WIN32_LEAN_AND_MEAN so we don't include too much Windows junk.
+    add_definitions(-DWIN32_LEAN_AND_MEAN)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
@@ -42,17 +45,18 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 # Look for the various libraries we depend on.
-find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(Protobuf CONFIG REQUIRED)
-find_package(Lua REQUIRED)
-find_package(CURL REQUIRED)
-find_package(SDL2 REQUIRED)
-find_package(OpenAL REQUIRED)
-find_package(Freetype REQUIRED)
-find_package(ENet REQUIRED)
-find_package(Assimp) # not required, no meshexp if not found.
 find_package(Absl CONFIG REQUIRED)
+find_package(OpenAL REQUIRED)
+find_package(Assimp) # not required, no meshexp if not found.
+find_package(CURL REQUIRED)
+find_package(CppTrace REQUIRED)
+find_package(ENet REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(Lua REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(SDL2 REQUIRED)
 
 if(LINUX)
     # I don't know why, but libSDL is importing symbols from libX11.
