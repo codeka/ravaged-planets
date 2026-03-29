@@ -122,8 +122,10 @@ fw::Status ParseConfigFile(fs::path const &path, SettingDefinition const &settin
 // the form --name=value. We also support --name only for boolean values (which will be set to
 // true). And "--name value" is also supported for convenience.
 fw::Status ParseCommandLine(int argc, char **argv, SettingDefinition const &settings) {
+	std::cerr << "Parsing command-line arguments..." << std::endl;
   for (int i = 1; i < argc; ++i) {
     std::string_view arg = argv[i];
+	std::cerr << "Parsing command-line argument: " << arg << std::endl;
     if (!arg.starts_with("--")) {
       return fw::ErrorStatus("invalid command-line argument: ") << arg;
     }
@@ -310,7 +312,8 @@ fw::Status Settings::initialize(
       // if the setting isn't already set, and it has a default value, set it now.
       if (g_variables_map.find(setting.name) == g_variables_map.end() &&
           setting.default_value.has_value()) {
-        g_variables_map.emplace(setting.name, *setting.default_value);
+
+          g_variables_map.emplace(setting.name, *setting.default_value);
       }
     }
   }

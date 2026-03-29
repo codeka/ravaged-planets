@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <string_view>
 
 namespace fw {
 
@@ -10,7 +11,7 @@ namespace fw {
 
   // Resolves the given path by looking for it first in the user directory, then in the data path, and finally, in
   // the install path. If for_write is true, then the file is always created in the user directory.
-  std::filesystem::path resolve(std::string const &path, bool for_write = false);
+  std::filesystem::path resolve(std::string_view path, bool for_write = false);
 
   /** Determines whether the given file is 'hidden' according to this system's rules for hidden files. */
   bool is_hidden(std::filesystem::path const &path);

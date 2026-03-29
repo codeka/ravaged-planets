@@ -94,6 +94,9 @@ std::vector<LangDescription> get_languages() {
     return g_langs;
 
   auto lang_path = fw::resolve("lang");
+  if (!fs::exists(lang_path)) {
+	  return g_langs;
+  }
 
   fs::directory_iterator end;
   for (fs::directory_iterator it(lang_path); it != end; ++it) {

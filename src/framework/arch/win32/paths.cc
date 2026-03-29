@@ -2,6 +2,7 @@
 #include <Shlobj.h>
 
 #include <filesystem>
+#include <string_view>
 
 #include <framework/paths.h>
 #include <framework/settings.h>
@@ -53,7 +54,7 @@ fs::path install_base_path() {
   return g_install_base_path;
 }
 
-fs::path resolve(std::string const &path, bool for_write /*=false*/) {
+fs::path resolve(std::string_view path, bool for_write /*=false*/) {
   fs::path absolute_path(path);
   if (!absolute_path.is_absolute()) {
     absolute_path = user_base_path() / path;

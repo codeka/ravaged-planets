@@ -6,8 +6,10 @@
 
 namespace fw {
 
-// A work queue is basically a thread-safe queue that, when you call dequeue, it'll block until a work-item
-// is available.
+/**
+ * A work queue is basically a thread-safe queue that, when you call dequeue, it'll block until a
+ * work-item is available.
+ */
 template<typename T>
 class WorkQueue {
 private:
@@ -16,7 +18,9 @@ private:
   std::condition_variable condition_;
 
 public:
-  /** Remove an item from the queue, wait until an item is available if the queue is currently empty. */
+  /**
+   * Remove an item from the queue, wait until an item is available if the queue is currently empty.
+   */
   inline T dequeue();
 
   /** Add an item to the queue. */

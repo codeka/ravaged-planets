@@ -12,6 +12,8 @@ namespace ed {
 static const int splatt_width = 128;
 static const int splatt_height = 128;
 
+static fw::Bitmap tmp_bmp_;
+
 EditorTerrain::EditorTerrain(int width, int height, float* height_data/*= nullptr*/)
   : Terrain(width, height, height_data) {
 }
@@ -117,7 +119,7 @@ int EditorTerrain::get_num_layers() const {
 fw::Bitmap const &EditorTerrain::get_layer(int number) {
   if (number < 0 || number >= static_cast<int>(layer_bitmaps_.size())) {
     // TODO: this isn't right...
-    return fw::Bitmap();
+    return tmp_bmp_;
   }
 
   return layer_bitmaps_[number];
