@@ -23,6 +23,6 @@ public:
   void hide();
 };
 
-extern NewMapWindow *new_map;
+extern std::unique_ptr<NewMapWindow> new_map;
 
 }

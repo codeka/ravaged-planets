@@ -21,7 +21,7 @@ using namespace std::placeholders;
 
 namespace ed {
 
-SaveMapWindow *save_map = nullptr;
+std::unique_ptr<SaveMapWindow> save_map;
 
 enum ids {
   NAME_ID,
@@ -57,7 +57,8 @@ void SaveMapWindow::initialize() {
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }
 
-// when we go to show, we have to update our controls with what we currently know about the map we're editing.
+// when we go to show, we have to update our controls with what we currently know about the map
+// we're editing.
 void SaveMapWindow::show() {
   wnd_->set_visible(true);
 
@@ -71,6 +72,10 @@ void SaveMapWindow::show() {
     wnd_->Find<TextEdit>(AUTHOR_ID)->set_text(world->get_author());
   }
   update_screenshot();
+}
+
+void SaveMapWindow::hide() {
+  // TODO?
 }
 
 // updates the screenshot that we're displaying whenever it changes.

@@ -50,5 +50,5 @@ public:
 
 };
 
-extern OpenFileWindow *open_file;
+extern std::unique_ptr<OpenFileWindow> open_file;
 }

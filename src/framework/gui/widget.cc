@@ -71,7 +71,7 @@ float FractionDimension::get_value(fw::gui::Widget &w, float parent_value) {
     other_widget = w.shared_from_this();
   }
 
-  float other_value;
+  float other_value = 0.0f;
   switch (other_dimension_) {
   case kTop:
     other_value = other_widget->get_top();

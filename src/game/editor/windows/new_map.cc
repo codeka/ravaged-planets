@@ -1,5 +1,6 @@
 
 #include <functional>
+#include <memory>
 
 #include <absl/strings/numbers.h>
 
@@ -24,7 +25,7 @@ namespace ed {
 using namespace fw::gui;
 using namespace std::placeholders;
 
-NewMapWindow *new_map = nullptr;
+std::unique_ptr<NewMapWindow> new_map;
 
 static const int WIDTH_ID = 1;
 static const int HEIGHT_ID = 2;
@@ -38,15 +39,19 @@ NewMapWindow::~NewMapWindow() {
 void NewMapWindow::initialize() {
   wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-100)), px(200), px(100))
           << Window::background("frame") << Widget::visible(false)
-      << (Builder<Label>(px(10), px(10), sum(pct(100), px(-20)), px(18)) << Label::text("Size:"))
+      << (Builder<Label>(px(10), px(10), sum(pct(100), px(-20)), px(18))
+          << Label::text("Size:"))
       << (Builder<TextEdit>(px(10), px(30), sum(pct(50), px(-20)), px(20))
           << TextEdit::text("4") << Widget::id(WIDTH_ID))
-      << (Builder<Label>(sum(pct(50), px(-8)), px(30), px(16), px(20)) << Label::text("x"))
+      << (Builder<Label>(sum(pct(50), px(-8)), px(30), px(16), px(20))
+          << Label::text("x"))
       << (Builder<TextEdit>(sum(pct(50), px(10)), px(30), sum(pct(50), px(-20)), px(20))
           << TextEdit::text("4") << Widget::id(HEIGHT_ID))
-      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Create")
+      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) 
+          << Button::text("Create")
           << Widget::click(std::bind(&NewMapWindow::ok_clicked, this, _1)))
-      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20)) << Button::text("Cancel")
+      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20))
+          << Button::text("Cancel")
           << Widget::click(std::bind(&NewMapWindow::cancel_clicked, this, _1)));
   fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <framework/signals.h>
 
 namespace fw {
@@ -28,6 +30,7 @@ private:
   bool file_new_clicked(fw::gui::Widget &w);
   bool file_save_clicked(fw::gui::Widget &w);
   bool file_open_clicked(fw::gui::Widget &w);
+  bool file_show_message_clicked(fw::gui::Widget& w);
   bool file_quit_clicked(fw::gui::Widget &w);
   bool tool_clicked(fw::gui::Widget &w, std::string tool_name);
 
@@ -58,7 +61,7 @@ public:
   void set_message(std::string const &msg);
 };
 
-extern MainMenuWindow *main_menu;
-extern StatusbarWindow *statusbar;
+extern std::unique_ptr<MainMenuWindow> main_menu;
+extern std::unique_ptr<StatusbarWindow> statusbar;
 
 }

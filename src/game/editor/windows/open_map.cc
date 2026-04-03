@@ -20,7 +20,7 @@ using namespace std::placeholders;
 
 namespace ed {
 
-OpenMapWindow *open_map = nullptr;
+std::unique_ptr<OpenMapWindow> open_map;
 
 enum ids {
   MAP_LIST

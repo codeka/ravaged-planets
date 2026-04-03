@@ -1,21 +1,34 @@
 #pragma once
 
+#include <functional>
+#include <memory>
+#include <string_view>
+
+#include <framework/gui/widget.h>
+#include <framework/gui/window.h>
+
 namespace ed {
-/*
+
 // This is a simple message box that lets you display a simple message
 // to the user with an "OK" button.
-class message_box_window {
+class MessageBoxWindow {
 private:
-  bool ok_clicked(CEGUI::EventArgs const &e);
+  std::shared_ptr<fw::gui::Window> wnd_;
+  std::function<void()> ok_click_handler_;
+
+  bool ok_clicked(fw::gui::Widget& w);
 
 public:
-  message_box_window();
-  virtual ~message_box_window();
+  MessageBoxWindow() = default;
+  virtual ~MessageBoxWindow() = default;
 
-  virtual void initialize();
-  void show(std::string const &caption, std::string const &message);
+  void initialize();
+  void show(
+	  std::string_view caption,
+	  std::string_view message,
+	  std::function<void()> ok_click_handler);
 };
 
-extern message_box_window *message_box;
-*/
+extern std::unique_ptr<MessageBoxWindow> message_box;
+
 }

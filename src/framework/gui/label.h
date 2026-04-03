@@ -39,7 +39,7 @@ public:
 
   void render();
 
-  void set_text(std::string const &text);
+  void set_text(std::string_view text);
   std::string get_text() const;
 
   void set_background(std::shared_ptr<Drawable> background, bool centred = false);

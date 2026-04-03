@@ -23,8 +23,12 @@
 #include <game/editor/windows/new_map.h>
 #include <game/editor/windows/open_map.h>
 #include <game/editor/windows/save_map.h>
+#include <game/editor/windows/message_box.h>
 
 namespace ed {
+
+std::unique_ptr<MainMenuWindow> main_menu;
+std::unique_ptr<StatusbarWindow> statusbar;
 
 using namespace fw::gui;
 using namespace std::placeholders;
@@ -65,8 +69,6 @@ void MenuItem::OnAttachedToParent(Widget &parent) {
 
 //-----------------------------------------------------------------------------
 
-MainMenuWindow *main_menu = nullptr;
-
 MainMenuWindow::MainMenuWindow() : wnd_(nullptr), file_menu_(nullptr), tool_menu_(nullptr) {
 }
 
@@ -85,7 +87,7 @@ void MainMenuWindow::initialize() {
           << Button::text("Tool")
           << Widget::click(std::bind(&MainMenuWindow::tool_menu_clicked, this, _1)));
 
-  file_menu_ = Builder<Window>(px(0), px(20), px(100), px(80))
+  file_menu_ = Builder<Window>(px(0), px(20), px(100), px(100))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<MenuItem>(px(0), px(0), px(100), px(20))
           << Button::text("New")
@@ -97,6 +99,9 @@ void MainMenuWindow::initialize() {
           << Button::text("Save")
           << Widget::click(std::bind(&MainMenuWindow::file_save_clicked, this, _1)))
       << (Builder<MenuItem>(px(0), px(60), px(100), px(20))
+          << Button::text("Show message")
+          << Widget::click(std::bind(&MainMenuWindow::file_show_message_clicked, this, _1)))
+      << (Builder<MenuItem>(px(0), px(80), px(100), px(20))
           << Button::text("Quit")
           << Widget::click(std::bind(&MainMenuWindow::file_quit_clicked, this, _1)));
 
@@ -177,6 +182,13 @@ bool MainMenuWindow::file_save_clicked(fw::gui::Widget &w) {
   return true;
 }
 
+bool MainMenuWindow::file_show_message_clicked(fw::gui::Widget& w) {
+  message_box->show("foo", "This is a message box! Isn't it great?", []() {
+    LOG(INFO) << "You clicked OK on the message box!" << std::endl;
+	  });
+  return true;
+}
+
 bool MainMenuWindow::file_open_clicked(fw::gui::Widget &w) {
   open_map->show();
   return true;
@@ -223,7 +235,6 @@ bool MainMenuWindow::tool_clicked(fw::gui::Widget &w, std::string tool_name) {
 }
 
 //-------------------------------------------------------------------------
-StatusbarWindow *statusbar = nullptr;
 
 StatusbarWindow::StatusbarWindow() : wnd_(nullptr) {
 }

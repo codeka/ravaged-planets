@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 namespace fw {
 namespace gui {
 class Widget;
@@ -25,6 +27,6 @@ public:
   void hide();
 };
 
-extern OpenMapWindow *open_map;
+extern std::unique_ptr<OpenMapWindow> open_map;
 
 }

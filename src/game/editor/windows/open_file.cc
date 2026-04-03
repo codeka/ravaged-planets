@@ -45,7 +45,7 @@ enum IDS {
   IMAGE_PREVIEW_ID
 };
 
-OpenFileWindow *open_file = nullptr;
+std::unique_ptr<OpenFileWindow> open_file;
 
 OpenFileWindow::OpenFileWindow() : wnd_(nullptr), show_hidden_(false) {
 }

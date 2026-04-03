@@ -32,6 +32,6 @@ public:
   void hide();
 };
 
-extern SaveMapWindow *save_map;
+extern std::unique_ptr<SaveMapWindow> save_map;
 
 }

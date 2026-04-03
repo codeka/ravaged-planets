@@ -21,15 +21,16 @@ namespace ed {
 
 EditorScreen::EditorScreen() :
     tool_(nullptr), world_(nullptr) {
-  ed::statusbar = new StatusbarWindow();
-  ed::main_menu = new MainMenuWindow();
-  ed::open_map = new OpenMapWindow();
-  ed::new_map = new NewMapWindow();
-//  ed::message_box = new message_box_window();
-  ed::save_map = new SaveMapWindow();
-  ed::open_file = new OpenFileWindow();
+  ed::statusbar = std::make_unique<StatusbarWindow>();
+  ed::main_menu = std::make_unique<MainMenuWindow>();
+  ed::open_map = std::make_unique<OpenMapWindow>();
+  ed::new_map = std::make_unique<NewMapWindow>();
+  ed::message_box = std::make_unique<MessageBoxWindow>();
+  ed::save_map = std::make_unique<SaveMapWindow>();
+  ed::open_file = std::make_unique<OpenFileWindow>();
 
   ed::main_menu->initialize();
+  ed::message_box->initialize();
   ed::new_map->initialize();
   ed::save_map->initialize();
   ed::open_map->initialize();
@@ -38,13 +39,13 @@ EditorScreen::EditorScreen() :
 }
 
 EditorScreen::~EditorScreen() {
-  delete ed::main_menu;
-  delete ed::open_map;
-  delete ed::new_map;
-//  delete ed::message_box;
-  delete ed::save_map;
-  delete ed::open_file;
-  delete ed::statusbar;
+  ed::main_menu.reset();
+  ed::open_map.reset();
+  ed::new_map.reset();
+  ed::message_box.reset();
+  ed::save_map.reset();
+  ed::open_file.reset();
+  ed::statusbar.reset();
 }
 
 void EditorScreen::show() {
