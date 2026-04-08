@@ -30,7 +30,7 @@ private:
   bool background_centred_;
 
 public:
-  Label(Gui *gui);
+  Label();
   virtual ~Label();
 
   static std::unique_ptr<Property> background(std::string_view drawable_name, bool centred = false);

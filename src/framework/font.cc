@@ -16,6 +16,7 @@
 #include <framework/lang.h>
 #include <framework/logging.h>
 #include <framework/paths.h>
+#include <framework/service_locator.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
 
@@ -158,7 +159,7 @@ fw::Status FontFace::initialize(std::filesystem::path const &filename) {
 
 void FontFace::update(float dt) {
   // We actually want this to run on the render thread.
-  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+  fw::Get<fw::Graphics>().run_on_render_thread([=]() {
     std::unique_lock<std::mutex> lock(mutex_);
     auto it = string_cache_.begin();
     while (it != string_cache_.end()) {
@@ -301,12 +302,12 @@ void FontFace::draw_string(
   }
 
   // TODO: recalculating this every time seems wasteful
-  fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
+  auto& g = fw::Get<Graphics>();
   fw::Matrix pos_transform =
     fw::projection_orthographic(
       0.0f,
-      static_cast<float>(g->get_width()),
-      static_cast<float>(g->get_height()),
+      static_cast<float>(g.get_width()),
+      static_cast<float>(g.get_height()),
       0.0f, 1.0f, -1.0f);
   pos_transform = fw::translation(x, y, 0.0f) * pos_transform;
 

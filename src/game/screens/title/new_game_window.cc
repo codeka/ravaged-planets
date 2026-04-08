@@ -120,7 +120,7 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
           << Widget::click(std::bind(&NewGameWindow::on_start_game_clicked, this, _1)))
       << (Builder<Label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
           << Label::text(fw::version_str));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
   game_options_ = std::shared_ptr<GameScreenOptions>(new GameScreenOptions());
 }
 
@@ -130,7 +130,7 @@ void NewGameWindow::show() {
   WorldVfs vfs;
   map_list_ = vfs.list_maps();
   auto listbox = wnd_->Find<Listbox>(MAP_LIST_ID);
-  fw::Framework::get_instance()->get_graphics()->run_on_render_thread(
+  fw::Get<fw::Graphics>().run_on_render_thread(
     [map_list = map_list_, listbox]() {
       listbox->clear();
 
@@ -267,7 +267,7 @@ void NewGameWindow::on_players_changed() {
 void NewGameWindow::refresh_players() {
   auto players = SimulationThread::get_instance()->get_players();
   auto players_list = wnd_->Find<Listbox>(PLAYER_LIST_ID);
-  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([players, players_list]() {
+  fw::Get<fw::Graphics>().run_on_render_thread([players, players_list]() {
     players_list->clear();
     for (auto &plyr : players) {
       int player_no = static_cast<int>(plyr->get_player_no());
@@ -341,7 +341,7 @@ void NewGameWindow::add_chat_msg(std::string_view user_name, std::string_view ms
 
 void NewGameWindow::append_chat(std::string const &msg) {
   auto chat_list = wnd_->Find<Listbox>(CHAT_LIST_ID);
-  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([chat_list, msg] {
+  fw::Get<fw::Graphics>().run_on_render_thread([chat_list, msg] {
     chat_list->add_item(
         Builder<Label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << Label::text(msg));
   });

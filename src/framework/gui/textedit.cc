@@ -150,11 +150,11 @@ public:
 
 //-----------------------------------------------------------------------------
 
-TextEdit::TextEdit(Gui *gui)
-    : Widget(gui), buffer_(new TextEditBuffer()), cursor_flip_time_(0), draw_cursor_(true) {
-  background_ = gui->get_drawable_manager().get_drawable("textedit");
-  selection_background_ = gui->get_drawable_manager().get_drawable("textedit_selection");
-  cursor_ = gui->get_drawable_manager().get_drawable("textedit_cursor");
+TextEdit::TextEdit()
+    : Widget(), buffer_(new TextEditBuffer()), cursor_flip_time_(0), draw_cursor_(true) {
+  background_ = fw::Get<Gui>().get_drawable_manager().get_drawable("textedit");
+  selection_background_ = fw::Get<Gui>().get_drawable_manager().get_drawable("textedit_selection");
+  cursor_ = fw::Get<Gui>().get_drawable_manager().get_drawable("textedit_cursor");
   stb_textedit_initialize_state(&buffer_->state, true /* is_single_line */);
 }
 

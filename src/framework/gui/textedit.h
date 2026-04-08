@@ -27,7 +27,7 @@ private:
   float cursor_flip_time_;
 
 public:
-  TextEdit(Gui *gui);
+  TextEdit();
   virtual ~TextEdit();
 
   static std::unique_ptr<Property> text(std::string_view text);

@@ -10,7 +10,7 @@
 #include <framework/gui/gui.h>
 #include <framework/misc.h>
 
-namespace fw { namespace gui {
+namespace fw::gui {
 
 Dimension::Dimension() {
 }
@@ -195,8 +195,8 @@ public:
 
 //-----------------------------------------------------------------------------
 
-Widget::Widget(Gui *gui) :
-    gui_(gui), id_(-1), visible_(true), focused_(false), enabled_(true) {
+Widget::Widget() :
+    id_(-1), visible_(true), focused_(false), enabled_(true) {
 }
 
 Widget::~Widget() {
@@ -233,7 +233,7 @@ std::unique_ptr<Property> Widget::enabled(bool enabled) {
 }
 
 void Widget::AttachChild(std::shared_ptr<Widget> child) {
-  gui_->EnsureThread(*this);
+  fw::Get<Gui>().EnsureThread(*this);
 
   std::shared_ptr<Widget> old_parent = child->parent_.lock();
   if (old_parent) {
@@ -245,14 +245,14 @@ void Widget::AttachChild(std::shared_ptr<Widget> child) {
 }
 
 void Widget::DetachChild(std::shared_ptr<Widget> child) {
-  gui_->EnsureThread(*this);
+  fw::Get<Gui>().EnsureThread(*this);
 
   children_.erase(std::find(children_.begin(), children_.end(), child));
   child->parent_.reset();
 }
 
 void Widget::ClearChildren() {
-  gui_->EnsureThread(*this);
+  fw::Get<Gui>().EnsureThread(*this);
 
   for(auto &child : children_) {
     child->parent_.reset();
@@ -308,7 +308,11 @@ bool Widget::prerender() {
   }
 
   scissor_rectangles.push(rect);
-  glScissor(rect.left, gui_->get_height() - rect.top - rect.height, rect.width, rect.height);
+  glScissor(
+      rect.left,
+      fw::Get<Gui>().get_height() - rect.top - rect.height,
+      rect.width,
+      rect.height);
   return true;
 }
 
@@ -325,7 +329,11 @@ void Widget::postrender() {
   scissor_rectangles.pop();
   if (!scissor_rectangles.empty()) {
     fw::Rectangle<float> const &top = scissor_rectangles.top();
-    glScissor(top.left, gui_->get_height() - top.top - top.height, top.width, top.height);
+    glScissor(
+        top.left,
+        fw::Get<Gui>().get_height() - top.top - top.height,
+        top.width,
+        top.height);
   }
 }
 
@@ -417,7 +425,7 @@ void Widget::set_visible(bool visible) {
   std::shared_ptr<Widget> parent = parent_.lock();
   if (!parent) {
     // if it's a top-level widget, move it to the front of the z-order
-    gui_->bring_to_top(this->shared_from_this());
+    fw::Get<Gui>().bring_to_top(this->shared_from_this());
   }
 }
 
@@ -428,7 +436,7 @@ void Widget::set_enabled(bool enabled) {
 float Widget::get_top() {
   std::shared_ptr<Widget> parent = parent_.lock();
   float parent_top = (parent) ? parent->get_top() : 0;
-  float parent_size = (parent) ? parent->get_height() : gui_->get_height();
+  float parent_size = (parent) ? parent->get_height() : fw::Get<Gui>().get_height();
   return parent_top + y_->get_value(*this, parent_size);
 }
 
@@ -439,7 +447,7 @@ void Widget::set_top(std::unique_ptr<Dimension> top) {
 float Widget::get_left() {
   std::shared_ptr<Widget> parent = parent_.lock();
   float parent_left = (parent) ? parent->get_left() : 0;
-  float parent_size = (parent) ? parent->get_width() : gui_->get_width();
+  float parent_size = (parent) ? parent->get_width() : fw::Get<Gui>().get_width();
   return parent_left + x_->get_value(*this, parent_size);
 }
 
@@ -449,7 +457,7 @@ void Widget::set_left(std::unique_ptr<Dimension> left) {
 
 float Widget::get_width() {
   std::shared_ptr<Widget> parent = parent_.lock();
-  float parent_size = (parent) ? parent->get_width() : gui_->get_width();
+  float parent_size = (parent) ? parent->get_width() : fw::Get<Gui>().get_width();
   return width_->get_value(*this, parent_size);
 }
 
@@ -459,7 +467,7 @@ void Widget::set_width(std::unique_ptr<Dimension> width) {
 
 float Widget::get_height() {
   std::shared_ptr<Widget> parent = parent_.lock();
-  float parent_size = (parent) ? parent->get_height() : gui_->get_height();
+  float parent_size = (parent) ? parent->get_height() : fw::Get<Gui>().get_height();
   return height_->get_value(*this, parent_size);
 }
 
@@ -467,4 +475,4 @@ void Widget::set_height(std::unique_ptr<Dimension> height) {
   height_ = std::move(height);
 }
 
-} }
+}

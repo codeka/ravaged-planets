@@ -8,21 +8,17 @@
 #include <framework/graphics.h>
 #include <framework/paths.h>
 #include <framework/signals.h>
+#include <framework/service_locator.h>
 #include <framework/gui/drawable.h>
 #include <framework/gui/window.h>
 
 namespace fw::gui {
 
-Gui::Gui()
-  : graphics_(nullptr) {
-}
+std::string Gui::service_name = "Gui";
+REGISTER_SERVICE(Gui);
 
-Gui::~Gui() {
-}
-
-fw::Status Gui::Initialize(fw::Graphics *graphics, fw::AudioManager* audio_manager) {
-  graphics_ = graphics;
-
+fw::Status Gui::Initialize(fw::AudioManager* audio_manager) {
+  enabled_ = true;
   RETURN_IF_ERROR(drawable_manager_.Parse(fw::resolve("gui/drawables/drawables.xml")));
 
   audio_source_ = audio_manager->create_audio_source();
@@ -30,6 +26,10 @@ fw::Status Gui::Initialize(fw::Graphics *graphics, fw::AudioManager* audio_manag
 }
 
 void Gui::update(float dt) {
+  if (!enabled_) {
+    return;
+	}
+
   Input *inp = fw::Framework::get_instance()->get_input();
   auto widget = get_widget_at(inp->mouse_x(), inp->mouse_y());
   auto widget_under_mouse = widget_under_mouse_.lock();
@@ -189,11 +189,11 @@ void Gui::bring_to_top(std::shared_ptr<Widget> widget) {
 }
 
 int Gui::get_width() const {
-  return graphics_->get_width();
+  return fw::Get<Graphics>().get_width();
 }
 
 int Gui::get_height() const {
-  return graphics_->get_height();
+  return fw::Get<Graphics>().get_height();
 }
 
 }

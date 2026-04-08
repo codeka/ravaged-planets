@@ -4,7 +4,6 @@
 #include <string_view>
 
 #include <framework/gui/drawable.h>
-#include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
 
 namespace fw::gui {
@@ -17,7 +16,7 @@ private:
   std::shared_ptr<Drawable> background_;
 
 public:
-  Window(Gui *gui);
+  Window();
   ~Window();
 
   static std::unique_ptr<Property> background(std::string_view drawable_name);

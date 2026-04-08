@@ -9,6 +9,7 @@
 #include <framework/gui/widget.h>
 #include <framework/gui/window.h>
 #include <framework/particle_manager.h>
+#include <framework/service_locator.h>
 #include <framework/settings.h>
 #include <framework/timer.h>
 
@@ -37,13 +38,13 @@ void DebugView::initialize() {
       << (Builder<Label>(px(0), px(20), px(190), px(20))
           << Label::text_align(Label::Alignment::kRight)
           << Widget::id(PARTICLES_ID));
-    Framework::get_instance()->get_gui()->attach_widget(wnd_);
+    fw::Get<Gui>().attach_widget(wnd_);
   }
 }
 
 void DebugView::destroy() {
   if (wnd_) {
-    Framework::get_instance()->get_gui()->detach_widget(wnd_);
+    fw::Get<Gui>().detach_widget(wnd_);
   }
 }
 

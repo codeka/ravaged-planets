@@ -33,7 +33,7 @@ NewAIPlayerWindow::NewAIPlayerWindow() : wnd_(nullptr), new_game_window_(nullptr
 }
 
 NewAIPlayerWindow::~NewAIPlayerWindow() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
+  fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void NewAIPlayerWindow::initialize(NewGameWindow *new_game_window) {
@@ -70,7 +70,7 @@ void NewAIPlayerWindow::initialize(NewGameWindow *new_game_window) {
     wnd_->Find<Listbox>(AI_LIST_ID)->select_item(0);
   }
 
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 void NewAIPlayerWindow::show() {

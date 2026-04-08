@@ -54,11 +54,11 @@ PlayersToolWindow::PlayersToolWindow(ed::PlayersTool &tool) : tool_(tool) {
       << (Builder<Label>(px(4), px(80), sum(pct(100), px(-8)), px(1)) << Label::background("filler"))
       << (Builder<Listbox>(px(4), px(88), sum(pct(100), px(-8)), px(108)) << Widget::id(PLAYER_LIST_ID)
           << Listbox::item_selected(std::bind(&PlayersToolWindow::selection_changed, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 PlayersToolWindow::~PlayersToolWindow() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
+  fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void PlayersToolWindow::refresh_player_list() {

@@ -5,10 +5,10 @@
 #include <memory>
 #include <string>
 
+#include <framework/service_locator.h>
 #include <framework/status.h>
 
 namespace fw {
-class Graphics;
 class Framework;
 class FontManager;
 class DebugView;
@@ -29,10 +29,6 @@ class Input;
 #else
 #define FW_ENSURE_UPDATE_THREAD()
 #endif
-
-namespace gui {
-class Gui;
-}
 
 namespace sg {
 class Scenegraph;
@@ -92,11 +88,9 @@ private:
   bool active_;
 
   Input * input_;
-  Graphics * graphics_;
   BaseApp * app_;
   Timer *timer_;
   Camera *camera_;
-  gui::Gui *gui_;
   ParticleManager *particle_mgr_;
   bool paused_;
   AudioManager *audio_manager_;
@@ -173,12 +167,6 @@ public:
   }
   Input *get_input() const {
     return input_;
-  }
-  Graphics *get_graphics() const {
-    return graphics_;
-  }
-  gui::Gui *get_gui() const {
-    return gui_;
   }
   BaseApp *get_app() const {
     return app_;

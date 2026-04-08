@@ -26,7 +26,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-Checkbox::Checkbox(Gui *gui) : Widget(gui), is_checked_(false), is_mouse_over_(false) {
+Checkbox::Checkbox() : Widget(), is_checked_(false), is_mouse_over_(false) {
 }
 
 Checkbox::~Checkbox() {
@@ -39,12 +39,12 @@ std::unique_ptr<Property> Checkbox::text(std::string_view text) {
 void Checkbox::OnAttachedToParent(Widget &parent) {
   StateDrawable *bkgnd = new StateDrawable();
   bkgnd->add_drawable(
-      StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("button_normal"));
+      StateDrawable::kNormal, fw::Get<Gui>().get_drawable_manager().get_drawable("button_normal"));
   bkgnd->add_drawable(
-      StateDrawable::kHover, gui_->get_drawable_manager().get_drawable("button_hover"));
+      StateDrawable::kHover, fw::Get<Gui>().get_drawable_manager().get_drawable("button_hover"));
   background_ = std::shared_ptr<Drawable>(bkgnd);
 
-  check_icon_ = gui_->get_drawable_manager().get_drawable("checkbox");
+  check_icon_ = fw::Get<Gui>().get_drawable_manager().get_drawable("checkbox");
 }
 
 void Checkbox::on_mouse_out() {

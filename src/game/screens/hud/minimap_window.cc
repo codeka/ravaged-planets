@@ -70,10 +70,10 @@ fw::Matrix MinimapDrawable::get_uv_transform() {
 }
 
 fw::Matrix MinimapDrawable::get_pos_transform(float x, float y, float width, float height) {
-  fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
+  fw::Graphics &g = fw::Get<fw::Graphics>();
   fw::Matrix transform =
     fw::projection_orthographic(
-      0.0f, static_cast<float>(g->get_width()), static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
+      0.0f, static_cast<float>(g.get_width()), static_cast<float>(g.get_height()), 0.0f, 1.0f, -1.0f);
   transform = fw::translation(fw::Vector(x - width, y - height, 0)) * transform;
   transform = fw::scale(fw::Vector(width * 3, height * 3, 0.0f)) * transform;
   return transform_ * transform;
@@ -92,7 +92,7 @@ MinimapWindow::MinimapWindow() :
 }
 
 MinimapWindow::~MinimapWindow() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
+  fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void MinimapWindow::initialize() {
@@ -103,7 +103,7 @@ void MinimapWindow::initialize() {
           << Widget::id(MINIMAP_IMAGE_ID))
       << (Builder<Label>(sum(pct(50), px(-10)), sum(pct(50), px(-22)), px(19), px(31))
           << Label::background("hud_minimap_crosshair"));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 void MinimapWindow::show() {
@@ -168,9 +168,9 @@ void MinimapWindow::update_entity_display() {
   int width = game::World::get_instance()->get_terrain()->get_width();
   int height = game::World::get_instance()->get_terrain()->get_length();
 
-  fw::Graphics *graphics = fw::Framework::get_instance()->get_graphics();
-  float screen_width = graphics->get_width();
-  float screen_height = graphics->get_height();
+  fw::Graphics& graphics = fw::Get<fw::Graphics>();
+  float screen_width = graphics.get_width();
+  float screen_height = graphics.get_height();
 
   int wnd_width = wnd_->get_width();
   int wnd_height = wnd_->get_height();
@@ -219,7 +219,7 @@ void MinimapWindow::update_entity_display() {
   }
 
   fw::Bitmap bm(width, height, pixels.data());
-  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this, bm]() {
+  fw::Get<fw::Graphics>().run_on_render_thread([this, bm]() {
     texture_->create(bm);
   });
 }

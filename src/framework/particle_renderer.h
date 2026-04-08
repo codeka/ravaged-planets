@@ -3,7 +3,6 @@
 #include <list>
 #include <memory>
 
-#include <framework/graphics.h>
 #include <framework/texture.h>
 #include <framework/scenegraph.h>
 #include <framework/shader.h>
@@ -23,7 +22,6 @@ public:
   typedef std::list<std::weak_ptr<Particle>> ParticleList;
 
 private:
-  Graphics *graphics_;
   std::shared_ptr<Shader> shader_;
   std::shared_ptr<ShaderParameters> shader_params_;
   std::shared_ptr<Texture> color_texture_;
@@ -40,7 +38,7 @@ public:
   ParticleRenderer(ParticleManager *mgr);
   ~ParticleRenderer();
 
-  fw::Status Initialize(Graphics *g);
+  fw::Status Initialize();
 
   // ScenegraphCallback methods.
   void after_render(fw::sg::Scenegraph& scenegraph, float dt) override;

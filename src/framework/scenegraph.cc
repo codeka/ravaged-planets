@@ -268,7 +268,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
     bool render_gui /*= true*/) {
   ensure_primitive_type_map();
 
-  Graphics *g = fw::Framework::get_instance()->get_graphics();
+  auto &g = fw::Get<Graphics>();
   Timer* timer = fw::Framework::get_instance()->get_timer();
 
   if (!shadow_shader) {
@@ -295,22 +295,22 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
   for(auto shadowsrc : shadows) {
     shadowsrc->begin_scene();
     scenegraph.push_camera(shadowsrc->get_camera().get_render_state());
-    g->begin_scene();
+    g.begin_scene();
     for(auto& node : scenegraph.get_nodes()) {
       node->render(&scenegraph);
     }
-    g->end_scene();
+    g.end_scene();
     scenegraph.pop_camera();
     shadowsrc->end_scene();
   }
   is_rendering_shadow = false;
 
   if (render_target) {
-    g->set_render_target(render_target);
+    g.set_render_target(render_target);
   }
 
   // now, render the main scene
-  g->begin_scene(scenegraph.get_clear_color());
+  g.begin_scene(scenegraph.get_clear_color());
   for(auto& node : scenegraph.get_nodes()) {
     node->render(&scenegraph);
   }
@@ -325,7 +325,7 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
 
   if (render_gui) {
     // render the GUI now
-    g->before_gui();
+    g.before_gui();
 
     if (g_shadow_debug && debug_shadowsrc) {
       auto shader = Shader::Create("gui.shader");
@@ -334,11 +334,10 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       } else {
         auto shader_params = (*shader)->CreateParameters();
         // TODO: recalculating this every time seems wasteful
-        fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
         fw::Matrix pos_transform;
         pos_transform = fw::projection_orthographic(
-            0.0f, static_cast<float>(g->get_width()),
-            static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
+            0.0f, static_cast<float>(g.get_width()),
+            static_cast<float>(g.get_height()), 0.0f, 1.0f, -1.0f);
         pos_transform = fw::scale(fw::Vector(200.0f, 200.0f, 0.0f))
             * fw::translation(fw::Vector(10.0f, 10.0f, 0))
             * pos_transform;
@@ -373,15 +372,15 @@ void render(sg::Scenegraph &scenegraph, std::shared_ptr<fw::Framebuffer> render_
       }
     }
 
-    Framework::get_instance()->get_gui()->render();
-    g->after_gui();
+    fw::Get<gui::Gui>().render();
+    g.after_gui();
   }
 
-  g->end_scene();
+  g.end_scene();
   if (render_target) {
-    g->set_render_target(nullptr);
+    g.set_render_target(nullptr);
   } else {
-    g->present();
+    g.present();
   }
 }
 }

@@ -29,7 +29,6 @@ private:
   std::mutex mutex_;
 
   ObjectPool<Particle> particle_pool_;
-  Graphics *graphics_;
   ParticleRenderer *renderer_;
   EffectList effects_;
   ParticleList particles_;
@@ -44,7 +43,7 @@ public:
   ParticleManager();
   ~ParticleManager();
 
-  fw::Status Initialize(Graphics *g);
+  fw::Status Initialize();
   void update(float dt);
 
   // This is called by the ParticleRenderer when we're about to render the particles. We return the

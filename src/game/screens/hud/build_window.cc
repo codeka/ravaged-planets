@@ -80,7 +80,7 @@ void EntityIcon::initialize() {
   framebuffer_->set_color_buffer(color_texture_);
   framebuffer_->set_depth_buffer(depth_texture_);
 
-  drawable_ = fw::Framework::get_instance()->get_gui()->get_drawable_manager()
+  drawable_ = fw::Get<Gui>().get_drawable_manager()
       .build_drawable(color_texture_, 7, 7, 50, 50);
   std::dynamic_pointer_cast<BitmapDrawable>(drawable_)->set_flipped(true);
   render();
@@ -124,14 +124,14 @@ void EntityIcon::render() {
 
 void EntityIcon::update() {
   rotation_ += 3.14159f * fw::Framework::get_instance()->get_timer()->get_update_time();
-  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+  fw::Get<fw::Graphics>().run_on_render_thread([=]() {
     render();
   });
 }
 
 void EntityIcon::reset() {
   rotation_ = 0.0f;
-  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+  fw::Get<fw::Graphics>().run_on_render_thread([=]() {
     render();
   });
 }
@@ -150,7 +150,7 @@ BuildWindow::BuildWindow() : wnd_(nullptr), require_refresh_(false), mouse_over_
 }
 
 BuildWindow::~BuildWindow() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
+  fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void BuildWindow::initialize() {
@@ -165,7 +165,7 @@ void BuildWindow::initialize() {
       << (Builder<Button>(px(10), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 6))
       << (Builder<Button>(px(73), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 7))
       << (Builder<Button>(px(136), px(136), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 8));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 
   for (int i = 0; i < 9; i++) {
     int id = FIRST_BUILD_BUTTON_ID + i;
@@ -242,7 +242,7 @@ void BuildWindow::do_refresh() {
     } else {
       icon = std::shared_ptr<EntityIcon>(new EntityIcon());
       btn->set_data(icon);
-      fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+      fw::Get<fw::Graphics>().run_on_render_thread([=]() {
         icon->initialize();
         btn->set_icon(icon->get_drawable());
       });
@@ -250,7 +250,7 @@ void BuildWindow::do_refresh() {
 
     std::string mesh_file_name = tmpl["components"]["Mesh"]["FileName"];
     std::string tmpl_name = tmpl["name"];
-    fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    fw::Get<fw::Graphics>().run_on_render_thread([=]() {
       auto mdl = fw::Framework::get_instance()->get_model_manager()->get_model(mesh_file_name);
       if (!mdl.ok()) {
         LOG(ERR) << "error loading mesh '" << mesh_file_name << "': " << mdl.status();

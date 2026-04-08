@@ -9,6 +9,7 @@
 #include <framework/graphics.h>
 #include <framework/paths.h>
 #include <framework/texture.h>
+#include <framework/service_locator.h>
 #include <framework/shader.h>
 #include <framework/status.h>
 #include <framework/xml.h>
@@ -105,11 +106,11 @@ fw::Matrix BitmapDrawable::get_uv_transform() {
 }
 
 fw::Matrix BitmapDrawable::get_pos_transform(float x, float y, float width, float height) {
-  fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
+  auto& g = fw::Get<fw::Graphics>();
   fw::Matrix transform =
     fw::projection_orthographic(
-      0.0f, static_cast<float>(g->get_width()),
-      static_cast<float>(g->get_height()), 0.0f, 1.0f, -1.0f);
+      0.0f, static_cast<float>(g.get_width()),
+      static_cast<float>(g.get_height()), 0.0f, 1.0f, -1.0f);
   return fw::scale(fw::Vector(width, height, 0.0f))
       * fw::translation(fw::Vector(x, y, 0))
       * transform;

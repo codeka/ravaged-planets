@@ -84,11 +84,11 @@ PathingToolWindow::PathingToolWindow(ed::PathingTool &tool) :
       << (Builder<Checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18))
           << Checkbox::text("Simplify")
           << Widget::click(std::bind(&PathingToolWindow::on_simplify_click, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 PathingToolWindow::~PathingToolWindow() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
+  fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void PathingToolWindow::show() {

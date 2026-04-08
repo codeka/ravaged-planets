@@ -20,7 +20,7 @@ public:
 
   void apply(Widget &widget) override {
     Label &label = dynamic_cast<Label &>(widget);
-    label.background_ = label.gui_->get_drawable_manager().get_drawable(drawable_name_);
+    label.background_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
     label.background_centred_ = centred_;
   }
 };
@@ -55,13 +55,17 @@ public:
   }
 };
 
-Label::Label(Gui *gui) : Widget(gui), background_centred_(false), text_alignment_(Alignment::kLeft) {
+Label::Label()
+  : Widget(),
+    background_centred_(false),
+    text_alignment_(Alignment::kLeft) {
 }
 
 Label::~Label() {
 }
 
-std::unique_ptr<Property> Label::background(std::string_view drawable_name, bool centred /*= false */) {
+std::unique_ptr<Property> Label::background(
+    std::string_view drawable_name, bool centred /*= false */) {
   return std::make_unique<LabelBackgroundProperty>(drawable_name, centred);
 }
 
@@ -129,7 +133,7 @@ void Label::set_background(Bitmap const &bmp, bool centred /*= false*/) {
   std::shared_ptr<fw::Texture> texture(new fw::Texture());
   texture->create(bmp);
   background_ =
-      gui_->get_drawable_manager().build_drawable(
+    fw::Get<Gui>().get_drawable_manager().build_drawable(
           texture, 0, 0, bmp.get_width(), bmp.get_height());
   background_centred_ = centred;
 }

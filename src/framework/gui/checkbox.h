@@ -30,7 +30,7 @@ protected:
   void update_drawable_state();
 
 public:
-  Checkbox(Gui *gui);
+  Checkbox();
   virtual ~Checkbox();
 
   static std::unique_ptr<Property> text(std::string_view text);

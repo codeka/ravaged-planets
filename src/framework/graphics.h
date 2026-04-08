@@ -25,6 +25,9 @@ class Framebuffer;
 #endif
 
 class Graphics {
+public:
+	static std::string service_name;
+
 private:
   SDL_Window *wnd_;
   SDL_GLContext context_;

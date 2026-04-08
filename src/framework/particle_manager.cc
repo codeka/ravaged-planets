@@ -12,7 +12,7 @@
 namespace fw {
 
 ParticleManager::ParticleManager() :
-    renderer_(nullptr), graphics_(nullptr), wrap_x_(0.0f), wrap_z_(0.0f), particle_pool_(/*initial_size=*/1000) {
+    renderer_(nullptr), wrap_x_(0.0f), wrap_z_(0.0f), particle_pool_(/*initial_size=*/1000) {
   renderer_ = new ParticleRenderer(this);
   auto* renderer = renderer_;
   fw::Framework::get_instance()->get_scenegraph_manager()->enqueue(
@@ -25,9 +25,8 @@ ParticleManager::~ParticleManager() {
   delete renderer_;
 }
 
-fw::Status ParticleManager::Initialize(Graphics *g) {
-  graphics_ = g;
-  return renderer_->Initialize(g);
+fw::Status ParticleManager::Initialize() {
+  return renderer_->Initialize();
 }
 
 void ParticleManager::set_world_wrap(float x, float z) {

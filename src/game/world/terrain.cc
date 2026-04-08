@@ -263,8 +263,8 @@ fw::Vector Terrain::get_cursor_location() {
   float mx = (float) Input->mouse_x();
   float my = (float) Input->mouse_y();
 
-  mx = 1.0f - (2.0f * mx / frmwrk->get_graphics()->get_width());
-  my = 1.0f - (2.0f * my / frmwrk->get_graphics()->get_height());
+  mx = 1.0f - (2.0f * mx / fw::Get<fw::Graphics>().get_width());
+  my = 1.0f - (2.0f * my / fw::Get<fw::Graphics>().get_height());
 
   fw::Vector mvec = camera->unproject(-mx, my);
 

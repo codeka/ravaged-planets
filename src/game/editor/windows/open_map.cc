@@ -52,7 +52,7 @@ void OpenMapWindow::initialize() {
         Builder<Label>(px(0), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
   }
 
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 bool OpenMapWindow::open_clicked(Widget &w) {

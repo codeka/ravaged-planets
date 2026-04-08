@@ -4,6 +4,7 @@
 #include <framework/framework.h>
 #include <framework/graphics.h>
 #include <framework/math.h>
+#include <framework/service_locator.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
 #include <framework/timer.h>
@@ -52,14 +53,12 @@ void ShadowSource::initialize(bool debug /*= false */) {
 void ShadowSource::begin_scene() {
   Framework *frmwrk = fw::Framework::get_instance();
   camera_.update(frmwrk->get_timer()->get_update_time());
-  frmwrk->get_graphics()->set_render_target(shadowbuffer_);
+  fw::Get<Graphics>().set_render_target(shadowbuffer_);
 }
 
 void ShadowSource::end_scene() {
-  Framework *frmwrk = fw::Framework::get_instance();
-
   // reset the render target and camera back to the "real" one
-  frmwrk->get_graphics()->set_render_target(nullptr);
+  fw::Get<Graphics>().set_render_target(nullptr);
 }
 
 }

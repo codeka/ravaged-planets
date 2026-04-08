@@ -51,7 +51,6 @@ OpenFileWindow::OpenFileWindow() : wnd_(nullptr), show_hidden_(false) {
 }
 
 OpenFileWindow::~OpenFileWindow() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
 }
 
 void OpenFileWindow::Initialize() {
@@ -74,7 +73,7 @@ void OpenFileWindow::Initialize() {
       << (Builder<Checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18))
           << Checkbox::text("Show hidden files")
           << Widget::click(std::bind(&OpenFileWindow::OnShowHiddenClicked, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
   curr_directory_ = fw::user_base_path();
 }
 
@@ -111,7 +110,7 @@ void OpenFileWindow::AddRow(Listbox &lbx, std::string_view name) {
 void OpenFileWindow::Refresh() {
   if (!fw::Graphics::is_render_thread()) {
     // Make sure refresh() runs on the render thread.
-    fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this](){ Refresh(); });
+    fw::Get<fw::Graphics>().run_on_render_thread([this](){ Refresh(); });
     return;
   }
   auto lbx = wnd_->Find<Listbox>(FILE_LIST_ID);
@@ -204,7 +203,7 @@ void OpenFileWindow::OnItemSelected(int index) {
         std::shared_ptr<fw::Texture> texture = std::shared_ptr<fw::Texture>(new fw::Texture());
         texture->create(bmp);
         std::shared_ptr<Drawable> drawable =
-            fw::Framework::get_instance()->get_gui()->get_drawable_manager().build_drawable(
+            fw::Get<Gui>().get_drawable_manager().build_drawable(
                 texture, 0, 0, bmp_width, bmp_height);
         preview->set_background(drawable, true);
       }

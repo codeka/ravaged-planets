@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <framework/audio.h>
-#include <framework/graphics.h>
 #include <framework/status.h>
 #include <framework/signals.h>
 #include <framework/gui/drawable.h>
@@ -13,14 +12,18 @@
 namespace fw::gui {
 class Widget;
 
-// This is the main entry point into the GUI subsystem. You get an instance of this class from \ref fw::Framework.
+// This is the main entry point into the GUI subsystem. You get an instance of this class from
+// \ref fw::Framework.
 class Gui {
 public:
-  Gui();
-  ~Gui();
+	static std::string service_name;
+
+public:
+  Gui() = default;
+  ~Gui() = default;
 
   // Called to initialize the GUI system.
-  fw::Status Initialize(fw::Graphics *graphics, fw::AudioManager* audio_manager);
+  fw::Status Initialize(fw::AudioManager* audio_manager);
 
   // Called on the update thread to update the GUI.
   void update(float dt);
@@ -38,8 +41,8 @@ public:
   // on the widget should be on the render thread.
   bool IsAttached(Widget const &widget);
 
-  // If the given widget is attached to the view heriarchy, ensures that we're running on the render
-  // thread. Once attached to the heriarchy, all operations on widgets should be done on the
+  // If the given widget is attached to the view heriarchy, ensures that we're running on the
+  // render thread. Once attached to the heriarchy, all operations on widgets should be done on the
   // render thread (you can perform operations in the view heriarchy while it's not attached).
   void EnsureThread(Widget const &widget);
 
@@ -76,7 +79,7 @@ public:
   }
 
 private:
-  fw::Graphics *graphics_;
+  bool enabled_ = false;
   DrawableManager drawable_manager_;
   std::mutex top_level_widget_mutex_;
   std::vector<std::shared_ptr<Widget>> top_level_widgets_;

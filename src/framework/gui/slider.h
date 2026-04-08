@@ -27,7 +27,7 @@ protected:
   void update_value(float mouse_x);
 
 public:
-  Slider(Gui *gui);
+  Slider();
   virtual ~Slider();
 
   static std::unique_ptr<Property> limits(int min_value, int max_value);

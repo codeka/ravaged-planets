@@ -62,11 +62,11 @@ TextureToolWindow::TextureToolWindow(ed::TextureTool &tool) : tool_(tool) {
           << Widget::id(TEXTURE_PREVIEW_ID))
       << (Builder<Button>(px(4), px(228), sum(pct(100), px(-8)), px(30))
           << Button::text("Change"));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 TextureToolWindow::~TextureToolWindow() {
-  fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
+  fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void TextureToolWindow::show() {
@@ -92,7 +92,7 @@ void TextureToolWindow::on_texture_selected(int index) {
   layer->create(tool_.get_terrain()->get_layer(index));
 
   std::shared_ptr<Drawable> drawable =
-      fw::Framework::get_instance()->get_gui()->get_drawable_manager().build_drawable(
+      fw::Get<Gui>().get_drawable_manager().build_drawable(
         layer, 0, 0, layer->get_width(), layer->get_height());
   wnd_->Find<Label>(TEXTURE_PREVIEW_ID)->set_background(drawable);
   tool_.set_layer(index);
@@ -207,7 +207,7 @@ void TextureTool::update() {
     }
 
     splatt.set_pixels(data);
-    fw::Framework::get_instance()->get_graphics()->run_on_render_thread([=]() {
+    fw::Get<fw::Graphics>().run_on_render_thread([=]() {
       terrain_->set_splatt(patch_x, patch_z, splatt);
     });
   }

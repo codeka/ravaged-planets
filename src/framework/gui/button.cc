@@ -26,7 +26,7 @@ public:
     if (drawable_) {
       btn.background_ = drawable_;
     } else {
-      btn.background_ = btn.gui_->get_drawable_manager().get_drawable(drawable_name_);
+      btn.background_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
     }
   }
 };
@@ -49,7 +49,7 @@ public:
     if (drawable_) {
       btn.icon_ = drawable_;
     } else {
-      btn.icon_ = btn.gui_->get_drawable_manager().get_drawable(drawable_name_);
+      btn.icon_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
     }
   }
 };
@@ -88,8 +88,8 @@ public:
 
 static std::shared_ptr<fw::AudioBuffer> g_hover_sound;
 
-Button::Button(Gui *gui)
-    : Widget(gui), text_align_(kCenter), is_pressed_(false), is_mouse_over_(false) {
+Button::Button()
+    : Widget(), text_align_(kCenter), is_pressed_(false), is_mouse_over_(false) {
   sig_mouse_out.Connect(std::bind(&Button::on_mouse_out, this));
   sig_mouse_over.Connect(std::bind(&Button::on_mouse_over, this));
 
@@ -132,11 +132,11 @@ void Button::OnAttachedToParent(Widget &parent) {
   if (!background_) {
     StateDrawable *bkgnd = new StateDrawable();
     bkgnd->add_drawable(
-        StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("button_normal"));
+        StateDrawable::kNormal, fw::Get<Gui>().get_drawable_manager().get_drawable("button_normal"));
     bkgnd->add_drawable(
-        StateDrawable::kHover, gui_->get_drawable_manager().get_drawable("button_hover"));
+        StateDrawable::kHover, fw::Get<Gui>().get_drawable_manager().get_drawable("button_hover"));
     bkgnd->add_drawable(
-        StateDrawable::kPressed, gui_->get_drawable_manager().get_drawable("button_hover"));
+        StateDrawable::kPressed, fw::Get<Gui>().get_drawable_manager().get_drawable("button_hover"));
     background_ = std::shared_ptr<Drawable>(bkgnd);
   }
 }
@@ -150,7 +150,7 @@ void Button::on_mouse_over() {
   is_mouse_over_ = true;
   update_drawable_state();
 
-  gui_->get_audio_source()->play(g_hover_sound);
+  fw::Get<Gui>().get_audio_source()->play(g_hover_sound);
 }
 
 void Button::set_pressed(bool is_pressed) {

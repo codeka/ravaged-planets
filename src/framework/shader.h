@@ -7,7 +7,6 @@
 
 #include <framework/color.h>
 #include <framework/framework.h>
-#include <framework/graphics.h>
 #include <framework/math.h>
 #include <framework/texture.h>
 
@@ -79,7 +78,7 @@ private:
   std::map<std::string, std::shared_ptr<ShaderProgram>> programs_;
   std::string default_program_name_;
 
-  fw::Status Load(fw::Graphics *g, std::filesystem::path const &full_path);
+  fw::Status Load(std::filesystem::path const &full_path);
 };
 
 }

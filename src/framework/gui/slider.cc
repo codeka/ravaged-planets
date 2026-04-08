@@ -59,7 +59,7 @@ public:
 
 //-----------------------------------------------------------------------------
 
-Slider::Slider(Gui *gui) : Widget(gui), min_value_(0), max_value_(100), curr_value_(0), dragging_(false) {
+Slider::Slider() : Widget(), min_value_(0), max_value_(100), curr_value_(0), dragging_(false) {
 }
 
 Slider::~Slider() {
@@ -80,11 +80,11 @@ std::unique_ptr<Property> Slider::on_update(std::function<void(int)> on_update) 
 void Slider::OnAttachedToParent(Widget &parent) {
   StateDrawable *bkgnd = new StateDrawable();
   bkgnd->add_drawable(
-      StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("slider_thumb_normal"));
+      StateDrawable::kNormal, fw::Get<Gui>().get_drawable_manager().get_drawable("slider_thumb_normal"));
   bkgnd->add_drawable(
-      StateDrawable::kHover, gui_->get_drawable_manager().get_drawable("slider_thumb_hover"));
+      StateDrawable::kHover, fw::Get<Gui>().get_drawable_manager().get_drawable("slider_thumb_hover"));
   thumb_ = std::shared_ptr<Drawable>(bkgnd);
-  line_ = gui_->get_drawable_manager().get_drawable("slider_line");
+  line_ = fw::Get<Gui>().get_drawable_manager().get_drawable("slider_line");
 }
 
 void Slider::on_mouse_out() {

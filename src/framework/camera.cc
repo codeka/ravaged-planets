@@ -298,11 +298,11 @@ void TopDownCamera::update(float dt) {
 
     if (mx <= 0)
       right -= 15.0f * dt;
-    if (mx >= Framework::get_instance()->get_graphics()->get_width() - 1)
+    if (mx >= fw::Get<Graphics>().get_width() - 1)
       right += 15.0f * dt;
     if (my <= 0)
       forward -= 15.0f * dt;
-    if (my >= Framework::get_instance()->get_graphics()->get_height() - 1)
+    if (my >= fw::Get<Graphics>().get_height() - 1)
       forward += 15.0f * dt;
   }
 

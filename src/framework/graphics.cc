@@ -7,11 +7,16 @@
 #include <SDL2/SDL.h>
 
 #include <framework/graphics.h>
+#include <framework/service_locator.h>
 #include <framework/settings.h>
 #include <framework/logging.h>
 #include <framework/texture.h>
 
 namespace fw {
+
+std::string Graphics::service_name = "Graphics";
+REGISTER_SERVICE(Graphics);
+
 namespace {
 // The render thread is the thread we start on, so this is right.
 static std::thread::id render_thread_id = std::this_thread::get_id();

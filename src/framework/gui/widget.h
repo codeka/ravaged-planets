@@ -9,7 +9,6 @@
 
 
 namespace fw::gui {
-class Gui;
 class Widget;
 
 template <typename T>
@@ -124,8 +123,6 @@ protected:
   friend class WidgetDataProperty;
   friend class WidgetEnabledProperty;
 
-  Gui *gui_;
-
   std::weak_ptr<Widget> parent_;
   int id_;
   std::vector<std::shared_ptr<Widget>> children_;
@@ -140,7 +137,7 @@ protected:
   std::any data_;
 
 public:
-  Widget(Gui *gui);
+  Widget();
   virtual ~Widget();
 
   static std::unique_ptr<Property> position(

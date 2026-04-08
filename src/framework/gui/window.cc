@@ -17,13 +17,13 @@ public:
 
   void apply(Widget &widget) override {
     Window &wnd = dynamic_cast<Window &>(widget);
-    wnd.background_ = wnd.gui_->get_drawable_manager().get_drawable(drawable_name_);
+    wnd.background_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
   }
 };
 
 //-----------------------------------------------------------------------------
 
-Window::Window(Gui *gui) : Widget(gui) {
+Window::Window() : Widget() {
 }
 
 Window::~Window() {

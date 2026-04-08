@@ -54,7 +54,7 @@ void SaveMapWindow::initialize() {
       << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-38)), px(80), px(30))
           << Button::text("Cancel")
           << Widget::click(std::bind(&SaveMapWindow::cancel_clicked, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 // when we go to show, we have to update our controls with what we currently know about the map
@@ -101,7 +101,7 @@ void SaveMapWindow::screenshot_complete(fw::Bitmap const &bitmap) {
 
   auto world = dynamic_cast<EditorWorld *>(game::World::get_instance());
   world->set_screenshot(resized);
-  fw::Framework::get_instance()->get_graphics()->run_on_render_thread([this]() {
+  fw::Get<fw::Graphics>().run_on_render_thread([this]() {
     update_screenshot();
   });
 }

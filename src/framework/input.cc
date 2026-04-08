@@ -158,14 +158,14 @@ void Input::update(float dt) {
 
   bool mouse_moved = false;
   bool mouse_wheel_moved = false;
-  fw::gui::Gui* gui = fw::Framework::get_instance()->get_gui();
+  auto &gui = fw::Get<fw::gui::Gui>();
   for (auto& event : pending_events) {
     if (event.type == SDL_KEYDOWN) {
-      if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), true)) {
+      if (!gui.inject_key(static_cast<int>(event.key.keysym.sym), true)) {
         callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, true);
       }
     } else if (event.type == SDL_KEYUP) {
-      if (!gui->inject_key(static_cast<int>(event.key.keysym.sym), false)) {
+      if (!gui.inject_key(static_cast<int>(event.key.keysym.sym), false)) {
         callback(static_cast<int>(event.key.keysym.sym), event.key.keysym.mod, false);
       }
     } else if (event.type == SDL_TEXTINPUT) {
@@ -181,12 +181,12 @@ void Input::update(float dt) {
       mouse_moved = true;
     } else if (event.type == SDL_MOUSEBUTTONDOWN) {
       int keycode = 0xffffff00 + (event.button.button - 1);
-      if (!gui->inject_mouse(event.button.button, true, g_mx, g_my)) {
+      if (!gui.inject_mouse(event.button.button, true, g_mx, g_my)) {
         callback(keycode, 0, true);
       }
     } else if (event.type == SDL_MOUSEBUTTONUP) {
       int keycode = 0xffffff00 + (event.button.button - 1);
-      if (!gui->inject_mouse(event.button.button, false, g_mx, g_my)) {
+      if (!gui.inject_mouse(event.button.button, false, g_mx, g_my)) {
         callback(keycode, 0, false);
       }
     } else if (event.type == SDL_MOUSEWHEEL) {

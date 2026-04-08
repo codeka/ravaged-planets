@@ -44,24 +44,18 @@ enum IDS {
  */
 class MenuItem : public Button {
 public:
-  MenuItem(Gui *gui);
-  virtual ~MenuItem();
+  MenuItem() = default;
+  virtual ~MenuItem() = default;
 
   void OnAttachedToParent(Widget &parent) override;
 };
 
-MenuItem::MenuItem(Gui *gui) : Button(gui) {
-}
-
-MenuItem::~MenuItem() {
-}
-
 void MenuItem::OnAttachedToParent(Widget &parent) {
   auto bkgnd = std::make_shared<StateDrawable>();
   bkgnd->add_drawable(
-      StateDrawable::kNormal, gui_->get_drawable_manager().get_drawable("menu_normal"));
+      StateDrawable::kNormal, fw::Get<Gui>().get_drawable_manager().get_drawable("menu_normal"));
   bkgnd->add_drawable(
-      StateDrawable::kHover, gui_->get_drawable_manager().get_drawable("menu_hover"));
+      StateDrawable::kHover, fw::Get<Gui>().get_drawable_manager().get_drawable("menu_hover"));
   background_ = bkgnd;
 
   text_align_ = Button::kLeft;
@@ -73,7 +67,6 @@ MainMenuWindow::MainMenuWindow() : wnd_(nullptr), file_menu_(nullptr), tool_menu
 }
 
 MainMenuWindow::~MainMenuWindow() {
-  fw::Framework::get_instance()->get_gui()->sig_click.Disconnect(global_click_conn_);
 }
 
 void MainMenuWindow::initialize() {
@@ -116,14 +109,14 @@ void MainMenuWindow::initialize() {
       << (Builder<MenuItem>(px(0), px(60), px(100), px(20)) << Button::text("Pathing")
           << Widget::click(std::bind(&MainMenuWindow::tool_clicked, this, _1, "pathing")));
 
-  fw::Framework *frmwrk = fw::Framework::get_instance();
-  frmwrk->get_gui()->attach_widget(wnd_);
-  frmwrk->get_gui()->attach_widget(file_menu_);
-  frmwrk->get_gui()->attach_widget(tool_menu_);
+  auto& gui = fw::Get<Gui>();
+  gui.attach_widget(wnd_);
+  gui.attach_widget(file_menu_);
+  gui.attach_widget(tool_menu_);
 
-  global_click_conn_ = frmwrk->get_gui()->sig_click.Connect(
+  global_click_conn_ = gui.sig_click.Connect(
       std::bind(&MainMenuWindow::global_click_handler, this, _1, _2, _3));
-  global_click_conn_ = frmwrk->get_gui()->sig_click_away.Connect(
+  global_click_conn_ = gui.sig_click_away.Connect(
       std::bind(&MainMenuWindow::global_click_away_handler, this, _1, _2));
 }
 
@@ -246,8 +239,7 @@ void StatusbarWindow::initialize() {
   wnd_ = Builder<Window>(px(0), sum(pct(100), px(-20)), pct(100), px(20)) << Window::background("frame")
       << Widget::visible(false)
       << (Builder<Label>(px(0), px(0), pct(100), pct(100)) << Widget::id(STATUS_MESSAGE_ID));
-  fw::Framework *frmwrk = fw::Framework::get_instance();
-  frmwrk->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 void StatusbarWindow::show() {

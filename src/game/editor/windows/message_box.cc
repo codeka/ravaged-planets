@@ -29,7 +29,7 @@ void MessageBoxWindow::initialize() {
     << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20))
         << Button::text("OK")
         << Widget::click(std::bind(&MessageBoxWindow::ok_clicked, this, _1)));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 void MessageBoxWindow::show(

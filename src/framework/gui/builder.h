@@ -51,7 +51,7 @@ inline Builder<WidgetType>::Builder(std::unique_ptr<Dimension> x, std::unique_pt
 
 template<class WidgetType>
 inline Builder<WidgetType>::operator std::shared_ptr<WidgetType>() {
-  auto new_widget = std::make_shared<WidgetType>(fw::Framework::get_instance()->get_gui());
+  auto new_widget = std::make_shared<WidgetType>();
   for (auto &prop : properties_) {
     prop->apply(*new_widget);
   }

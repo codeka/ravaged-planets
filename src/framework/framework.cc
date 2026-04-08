@@ -54,17 +54,13 @@ static Framework *only_instance = 0;
 
 Framework::Framework(BaseApp* app) :
     app_(app), active_(true), camera_(nullptr), paused_(false), particle_mgr_(nullptr),
-    graphics_(nullptr), timer_(nullptr), audio_manager_(nullptr), input_(nullptr), lang_(nullptr),
-    gui_(nullptr), font_manager_(nullptr), model_manager_(nullptr), cursor_(nullptr),
+    timer_(nullptr), audio_manager_(nullptr), input_(nullptr), lang_(nullptr),
+    font_manager_(nullptr), model_manager_(nullptr), cursor_(nullptr),
     debug_view_(nullptr), scenegraph_manager_(nullptr), running_(true) {
   only_instance = this;
 }
 
 Framework::~Framework() {
-  if (graphics_ != nullptr)
-    delete graphics_;
-  if (gui_ != nullptr)
-    delete gui_;
   if (lang_ != nullptr)
     delete lang_;
   if (input_ != nullptr)
@@ -109,14 +105,13 @@ fw::StatusOr<bool> Framework::initialize(char const *title) {
 
   // initialize graphics
   if (app_->wants_graphics()) {
-    graphics_ = new Graphics();
-    RETURN_IF_ERROR(graphics_->initialize(title));
+    RETURN_IF_ERROR(fw::Get<Graphics>().initialize(title));
 
     model_manager_ = new ModelManager();
     scenegraph_manager_ = new sg::ScenegraphManager();
 
     particle_mgr_ = new ParticleManager();
-    RETURN_IF_ERROR(particle_mgr_->Initialize(graphics_));
+    RETURN_IF_ERROR(particle_mgr_->Initialize());
 
     cursor_ = new Cursor();
     cursor_->initialize();
@@ -133,8 +128,7 @@ fw::StatusOr<bool> Framework::initialize(char const *title) {
   RETURN_IF_ERROR(font_manager_->initialize());
 
   if (app_->wants_graphics()) {
-    gui_ = new gui::Gui();
-    RETURN_IF_ERROR(gui_->Initialize(graphics_, audio_manager_));
+    RETURN_IF_ERROR(fw::Get<gui::Gui>().Initialize(audio_manager_));
   }
 
   if (Settings::get<bool>("debug-view") && app_->wants_graphics()) {
@@ -155,7 +149,7 @@ fw::StatusOr<bool> Framework::initialize(char const *title) {
 
 void Framework::on_fullscreen_toggle(std::string keyname, bool is_down) {
   if (!is_down) {
-    graphics_->toggle_fullscreen();
+    fw::Get<Graphics>().toggle_fullscreen();
   }
 }
 
@@ -182,9 +176,8 @@ void Framework::destroy() {
     debug_view_->destroy();
   }
 
-  if (graphics_ != nullptr) {
-    graphics_->destroy();
-  }
+	fw::Get<Graphics>().destroy();
+
   Http::destroy();
   net::destroy();
   if (cursor_ != nullptr) {
@@ -205,10 +198,7 @@ void Framework::run() {
   // kick off the update thread
   std::thread update_thread(std::bind(&Framework::update_proc, this));
   try {
-    if (graphics_ == nullptr) {
-      wait_events();
-      running_ = false;
-    } else {
+		if (app_->wants_graphics()) {
       // do the event/render loop
       while (running_) {
         if (!poll_events()) {
@@ -218,6 +208,9 @@ void Framework::run() {
 
         render();
       }
+    } else {
+      wait_events();
+      running_ = false;
     }
 
     // wait for the update thread to exit (once we set running_ to false, it'll stop as well)
@@ -297,9 +290,7 @@ void Framework::update_proc() {
 }
 
 void Framework::update(float dt) {
-  if (gui_ != nullptr) {
-    gui_->update(dt);
-  }
+  fw::Get<gui::Gui>().update(dt);
   font_manager_->update(dt);
   audio_manager_->update(dt);
   if (!paused_) {
@@ -328,7 +319,7 @@ void Framework::ensure_update_thread() {
 
 void Framework::render() {
   Camera* cam = fw::Framework::get_instance()->get_camera();
-  if (graphics_ == nullptr || cam == nullptr) {
+  if (!app_->wants_graphics() || cam == nullptr) {
     return;
   }
 
@@ -346,7 +337,7 @@ void Framework::render() {
     take_screenshots(scenegraph);
   }
 
-  graphics_->after_render();
+  fw::Get<Graphics>().after_render();
 }
 
 bool Framework::poll_events() {
@@ -377,8 +368,9 @@ void Framework::take_screenshot(
     int width, int height, std::function<void(fw::Bitmap const &bmp)> callback_fn,
     bool include_gui /*= true */) {
   if (width == 0 || height == 0) {
-    width = graphics_->get_width();
-    height = graphics_->get_height();
+    auto &graphics = fw::Get<Graphics>();
+    width = graphics.get_width();
+    height = graphics.get_height();
   }
 
   auto request = std::make_shared<ScreenshotRequest>();

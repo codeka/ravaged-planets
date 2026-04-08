@@ -28,7 +28,7 @@ private:
   bool on_down_button_click(Widget &w);
   bool on_up_button_click(Widget &w);
 public:
-  Listbox(Gui *gui);
+  Listbox();
   virtual ~Listbox();
 
   void OnAttachedToParent(Widget &parent) override;

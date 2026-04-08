@@ -31,7 +31,7 @@ struct TextureData {
   ~TextureData() {
     GLuint id = texture_id;
     if (id != 0) {
-      fw::Framework::get_instance()->get_graphics()->run_on_render_thread(
+      fw::Get<Graphics>().run_on_render_thread(
         [id]() {
           glDeleteTextures(1, &id);
         });
@@ -85,8 +85,6 @@ Texture::~Texture() {
 }
 
 void Texture::create(fs::path const &fn) {
-  Graphics *g = fw::Framework::get_instance()->get_graphics();
-
   // Local the image on this thread to avoid loading it on the render thread.
   fs::path filename = fn;
   LOG(INFO) << "loading texture: " << filename.string();
@@ -100,7 +98,7 @@ void Texture::create(fs::path const &fn) {
   data_->width = width;
   data_->height = height;
 
-  data_creator_ = [g, filename, pixels, width, height, channels](TextureData& data) {
+  data_creator_ = [filename, pixels, width, height, channels](TextureData& data) {
     if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }
@@ -120,7 +118,6 @@ void Texture::create(std::shared_ptr<fw::Bitmap> bmp) {
 
 void Texture::create(fw::Bitmap const &bmp, GLenum internal_format /*= GL_RGBA8*/, GLenum format /*= GL_RGBA*/,
                      GLenum component_type /*= GL_UNSIGNED_BYTE*/) {
-  Graphics *g = fw::Framework::get_instance()->get_graphics();
   fw::Bitmap bitmap(bmp);
 
   if (!data_) {
@@ -129,7 +126,7 @@ void Texture::create(fw::Bitmap const &bmp, GLenum internal_format /*= GL_RGBA8*
   data_->width = bitmap.get_width();
   data_->height = bitmap.get_height();
 
-  data_creator_ = [g, bitmap, internal_format, format, component_type](TextureData& data) {
+  data_creator_ = [bitmap, internal_format, format, component_type](TextureData& data) {
     if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }
@@ -142,15 +139,13 @@ void Texture::create(fw::Bitmap const &bmp, GLenum internal_format /*= GL_RGBA8*
 
 void Texture::create(int width, int height, GLenum internal_format /*=GL_RGBA8*/, GLenum format /*= GL_RGBA*/,
                      GLenum component_type /*= GL_UNSIGNED_BYTE*/) {
-  Graphics *g = fw::Framework::get_instance()->get_graphics();
-
   if (!data_) {
     data_ = std::make_shared<TextureData>();
   }
   data_->width = width;
   data_->height = height;
 
-  data_creator_ = [g, width, height, internal_format, format, component_type](TextureData& data) {
+  data_creator_ = [width, height, internal_format, format, component_type](TextureData& data) {
     if (data.texture_id == 0) {
       glGenTextures(1, &data.texture_id);
     }

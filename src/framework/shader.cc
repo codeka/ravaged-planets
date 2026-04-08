@@ -390,12 +390,10 @@ Shader::~Shader() {
 
 /*static*/
 fw::StatusOr<std::shared_ptr<Shader>> Shader::Create(std::string_view filename) {
-  fw::Graphics *g = fw::Framework::get_instance()->get_graphics();
-
   auto shader = g_cache.GetShader(filename);
   if (!shader) {
     shader = std::make_shared<Shader>();
-    RETURN_IF_ERROR(shader->Load(g, fw::resolve(absl::StrCat("shaders/", filename))));
+    RETURN_IF_ERROR(shader->Load(fw::resolve(absl::StrCat("shaders/", filename))));
     g_cache.AddShader(filename, shader);
   }
 
@@ -435,7 +433,7 @@ std::shared_ptr<ShaderParameters> Shader::CreateParameters() {
   return std::make_shared<ShaderParameters>();
 }
 
-fw::Status Shader::Load(fw::Graphics *g, fs::path const &full_path) {
+fw::Status Shader::Load(fs::path const &full_path) {
   filename_ = full_path;
   ASSIGN_OR_RETURN(XmlElement root_elem, fw::LoadXml(full_path, "shader", 1));
   for (XmlElement child : root_elem.children()) {

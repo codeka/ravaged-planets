@@ -1,6 +1,5 @@
 #include <framework/particle_renderer.h>
 
-#include <framework/graphics.h>
 #include <framework/shader.h>
 #include <framework/texture.h>
 #include <framework/camera.h>
@@ -129,15 +128,13 @@ static BufferCache g_buffer_cache;
 namespace fw {
 
 ParticleRenderer::ParticleRenderer(ParticleManager *mgr) :
-    graphics_(nullptr), shader_(nullptr), mgr_(mgr), draw_frame_(1), color_texture_(new fw::Texture()) {
+    shader_(nullptr), mgr_(mgr), draw_frame_(1), color_texture_(new fw::Texture()) {
 }
 
 ParticleRenderer::~ParticleRenderer() {
 }
 
-fw::Status ParticleRenderer::Initialize(Graphics *g) {
-  graphics_ = g;
-
+fw::Status ParticleRenderer::Initialize() {
   color_texture_->create(fw::resolve("particles/colors.png"));
   ASSIGN_OR_RETURN(shader_, fw::Shader::Create("particle.shader"));
   shader_params_ = shader_->CreateParameters();

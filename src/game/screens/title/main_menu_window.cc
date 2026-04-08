@@ -29,7 +29,7 @@ MainMenuWindow::MainMenuWindow() : exiting_(false), new_game_window_(nullptr), w
 
 MainMenuWindow::~MainMenuWindow() {
   if (wnd_ != nullptr) {
-    fw::Framework::get_instance()->get_gui()->detach_widget(wnd_);
+    fw::Get<Gui>().detach_widget(wnd_);
   }
 }
 
@@ -62,7 +62,7 @@ void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
       // "v1.2.3"
       << (Builder<Label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
           << Label::text(fw::version_str));
-  fw::Framework::get_instance()->get_gui()->attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);
 }
 
 void MainMenuWindow::show() {

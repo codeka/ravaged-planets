@@ -25,7 +25,7 @@ public:
   static std::unique_ptr<Property> text(std::string_view text);
   static std::unique_ptr<Property> text_align(Alignment align);
 
-  Button(Gui *gui);
+  Button();
   virtual ~Button();
 
   void OnAttachedToParent(Widget &parent) override;
