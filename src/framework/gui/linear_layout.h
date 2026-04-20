@@ -15,6 +15,8 @@ public:
 			float height)
 		: LayoutParams(width_mode, width, height_mode, height) {
 	}
+
+	float weight = 0.f;
 };
 
 // LinearLayout is a container layout that aligns children in a row or column, depending on the
@@ -31,6 +33,10 @@ class LinearLayout : public Widget {
 	~LinearLayout() = default;
 
 	static std::unique_ptr<Property> orientation(Orientation orientation);
+
+	// This property sets the "weight" of the widget's layout params. The weight is used to
+	// distribute widgets in the direction of the layout (e.g. horizontally for a horizontal layout).
+	static std::unique_ptr<Property> weight(float weight);
 
 	void set_orientation(Orientation orientation) {
 		orientation_ = orientation;

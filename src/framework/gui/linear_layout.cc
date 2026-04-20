@@ -6,9 +6,9 @@
 
 namespace fw::gui {
 
-class LinearLayoutOrientationProperty : public Property {
+class OrientationProperty : public Property {
 public:
-	LinearLayoutOrientationProperty(LinearLayout::Orientation orientation)
+  OrientationProperty(LinearLayout::Orientation orientation)
 		: orientation_(orientation) {}
 
 	void apply(Widget& widget) override {
@@ -19,17 +19,37 @@ private:
 	LinearLayout::Orientation orientation_;
 };
 
+class WeightProperty : public Property {
+public:
+  WeightProperty(float weight)
+    : weight_(weight) {}
+
+  void apply(Widget& widget) override {
+    auto lp = widget.get_layout_params<LinearLayoutParams>();
+    if (lp) {
+			lp->weight = weight_;
+    }
+  }
+private:
+  float weight_;
+};
+
 std::unique_ptr<Property> LinearLayout::orientation(Orientation orientation) {
-	return std::make_unique<LinearLayoutOrientationProperty>(orientation);
+	return std::make_unique<OrientationProperty>(orientation);
+}
+
+std::unique_ptr<Property> LinearLayout::weight(float weight) {
+	return std::make_unique<WeightProperty>(weight);
 }
 
 MeasuredSize LinearLayout::OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) {
-	// Calculate both the total width/height and the max width/height of the children. Depending on
-	// the orientation and the measure specs, we will use one or the other to determine our size.
+  // Calculate both the total width/height and the max width/height of the children. Depending on
+  // the orientation and the measure specs, we will use one or the other to determine our size.
   float max_width = 0.f;
   float total_width = 0.f;
   float max_height = 0.f;
   float total_height = 0.f;
+  float total_weight = 0.f;
 
   for (auto child : children_) {
     if (!child->is_visible()) {
@@ -39,23 +59,89 @@ MeasuredSize LinearLayout::OnMeasure(MeasureSpec width_spec, MeasureSpec height_
 
     auto lp = child->get_layout_params<LinearLayoutParams>();
 
-    MeasuredSize child_size = child->MeasureChild(width_spec, 0.f, height_spec, 0.f);
-    float width =
-      child_size.width
-      + lp->left_margin
-      + lp->right_margin;
-    float height =
-      child_size.height
-      + lp->top_margin
-      + lp->bottom_margin;
+    float width = lp->left_margin + lp->right_margin;
+    float height = lp->top_margin + lp->bottom_margin;
+
+    MeasuredSize child_size = child->MeasureChild(
+        width_spec,
+        (orientation_ == Orientation::kHorizontal) ? total_width : 0.f,
+        height_spec,
+        (orientation_ == Orientation::kVertical) ? total_height : 0.f);
+    if (lp->weight > 0.f) {
+      // Skip normal measurement (in the direction of the orientation) when there's a non-zero 
+      // weight.
+      if (orientation_ == Orientation::kHorizontal) {
+        height += child_size.height;
+        width = 0.f;
+      } else {
+        width += child_size.width;
+        height = 0.f;
+      }
+      total_weight += lp->weight;
+    } else {
+      width += child_size.width;
+      height += child_size.height;
+    }
 
     max_width = std::max(max_width, width);
-		total_width += width;
+    total_width += width;
     max_height = std::max(max_height, height);
-		total_height += height;
+    total_height += height;
   }
 
-	if (orientation_ == Orientation::kHorizontal) {
+	// Note: weighted views assume the parent has some kind of fixed size. If the parent is
+  // wrap_content, then the weighted views will not get any extra space.
+  float remaining_space = 0.f;
+  if (orientation_ == Orientation::kHorizontal) {
+    remaining_space = width_spec.size - total_width;
+  } else {
+    remaining_space = height_spec.size - total_height;
+	}
+  
+  // Second pass to calculate the weighted views.
+	for (auto child : children_) {
+    if (!child->is_visible()) {
+      // Ignore invisible children.
+      continue;
+    }
+    auto lp = child->get_layout_params<LinearLayoutParams>();
+    if (lp->weight > 0.f) {
+      float extra_space = (lp->weight / total_weight) * remaining_space;
+
+      // If the child has a weight, then we need to give it all the remaining space in the
+      // direction of the orientation.
+      MeasureSpec new_width_spec = width_spec;
+      float width_used = 0.f;
+			MeasureSpec new_height_spec = height_spec;
+			float height_used = 0.f;
+			if (orientation_ == Orientation::kHorizontal) {
+        new_width_spec = MeasureSpec::Exactly(extra_space);
+				width_used = width_spec.size - extra_space;
+				lp->width_mode = LayoutParams::Mode::kMatchParent;
+      } else {
+        new_height_spec = MeasureSpec::Exactly(extra_space);
+        height_used = height_spec.size - extra_space;
+        lp->height_mode = LayoutParams::Mode::kMatchParent;
+      }
+
+      // Re-measure the size with the new remaining space.
+      MeasuredSize child_size = child->MeasureChild(
+          new_width_spec,
+          0.f,
+          new_height_spec,
+          0.f);
+
+      if (orientation_ == Orientation::kHorizontal) {
+        total_width += extra_space;
+      } else {
+        total_height += extra_space;
+      }
+      max_width = std::max(max_width, child_size.width);
+      max_height = std::max(max_height, child_size.height);
+    }
+  }
+
+  if (orientation_ == Orientation::kHorizontal) {
     return ResolveSize(width_spec, total_width, height_spec, max_height);
   } else {
     return ResolveSize(width_spec, max_width, height_spec, total_height);
