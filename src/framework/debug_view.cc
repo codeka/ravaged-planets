@@ -31,20 +31,26 @@ void DebugView::initialize() {
   if (Settings::get<bool>("debug-view")) {
     time_to_update_ = 1.0f;
 
-    wnd_ = Builder<Window>(sum(pct(100), px(-200)), sum(pct(100), px(-50)), px(190), px(40))
-      << (Builder<Label>(px(0), px(0), px(190), px(20))
+    wnd_ = Builder<Window>()
+			<< Widget::width(LayoutParams::Mode::kFixed, 190)
+      << Widget::height(LayoutParams::Mode::kFixed, 40)
+      << (Builder<Label>()
+				  << Widget::width(LayoutParams::Mode::kMatchParent, 0)
+				  << Widget::height(LayoutParams::Mode::kFixed, 20)
           << Label::text_align(Label::Alignment::kRight)
           << Widget::id(FPS_ID))
-      << (Builder<Label>(px(0), px(20), px(190), px(20))
+      << (Builder<Label>()
+          << Widget::width(LayoutParams::Mode::kMatchParent, 0)
+          << Widget::height(LayoutParams::Mode::kFixed, 20)
           << Label::text_align(Label::Alignment::kRight)
           << Widget::id(PARTICLES_ID));
-    fw::Get<Gui>().attach_widget(wnd_);
+    fw::Get<Gui>().AttachWindow(wnd_);
   }
 }
 
 void DebugView::destroy() {
   if (wnd_) {
-    fw::Get<Gui>().detach_widget(wnd_);
+    fw::Get<Gui>().DetachWindow(wnd_);
   }
 }
 

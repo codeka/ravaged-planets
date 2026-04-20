@@ -131,7 +131,44 @@ public:
   inline Rectangle() : left(0), top(0), width(0), height(0) {
   }
 
-  inline Rectangle(T left, T top, T width, T height) : left(left), top(top), width(width), height(height) {
+  inline Rectangle(T left, T top, T width, T height)
+      : left(left), top(top), width(width), height(height) {
+  }
+
+  inline T right() const {
+    return left + width;
+	}
+
+  inline T bottom() const {
+    return top + height;
+	}
+
+	inline Rectangle<T> Grow(T amount) const {
+    return Rectangle<T>(left - amount, top - amount, width + 2*amount, height + 2*amount);
+  }
+	inline Rectangle<T> Grow(T horizontal_amount, T vertical_amount) const {
+    return Rectangle<T>(
+        left - horizontal_amount,
+        top - vertical_amount,
+        width + 2*horizontal_amount,
+        height + 2*vertical_amount);
+  }
+  inline Rectangle<T> Grow(T left_amount, T top_amount, T right_amount, T bottom_amount) const {
+    return Rectangle<T>(
+        left - left_amount,
+        top - top_amount,
+        width + left_amount + right_amount,
+        height + top_amount + bottom_amount);
+	}
+
+  inline Rectangle<T> Shrink(T amount) const {
+    return Grow(-amount);
+  }
+  inline Rectangle<T> Shrink(T horizontal_amount, T vertical_amount) const {
+		return Grow(-horizontal_amount, -vertical_amount);
+  }
+  inline Rectangle<T> Shrink(T left_amount, T top_amount, T right_amount, T bottom_amount) const {
+		return Grow(-left_amount, -top_amount, -right_amount, -bottom_amount);
   }
 
   /** Returns the intersection of the two given Rectangle. */

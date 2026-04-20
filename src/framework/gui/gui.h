@@ -8,6 +8,7 @@
 #include <framework/status.h>
 #include <framework/signals.h>
 #include <framework/gui/drawable.h>
+#include <framework/gui/window.h>
 
 namespace fw::gui {
 class Widget;
@@ -32,10 +33,10 @@ public:
   void render();
 
   // Register a new top-level widget.
-  void attach_widget(std::shared_ptr<Widget> widget);
+  void AttachWindow(std::shared_ptr<Window> window);
 
   // Destroys the given top-level widget, unhooks any signals and removes it from the Screen.
-  void detach_widget(std::shared_ptr<Widget> widget);
+  void DetachWindow(std::shared_ptr<Window> window);
 
   // Returns true if the given widget is attached to the view heriarchy. Once it is, all operations
   // on the widget should be on the render thread.
@@ -46,11 +47,11 @@ public:
   // render thread (you can perform operations in the view heriarchy while it's not attached).
   void EnsureThread(Widget const &widget);
 
-  // Bring the given widget to the top.
-  void bring_to_top(std::shared_ptr<Widget> widget);
+  // Bring the given window to the top.
+  void BringToTop(std::shared_ptr<Window> window);
 
   // Give the specified widget Input focus. Keystrokes will be sent to this widget only.
-  void focus(std::shared_ptr<Widget> widget);
+  void Focus(std::shared_ptr<Widget> widget);
 
   // Gets the one-and-only AudioSource that all GUI element should use to play audio.
   std::shared_ptr<AudioSource> get_audio_source() { return audio_source_;  }
@@ -60,10 +61,10 @@ public:
 
   // Injects a mouse button up/down event, returns true if we handled it or false if it should be
   // passed through.
-  bool inject_mouse(int button, bool is_down, float x, float y);
+  bool InjectMouse(int button, bool is_down, float x, float y);
 
   // Injects a key press, returns true if we handled it or false if it should be passed through.
-  bool inject_key(int key, bool is_down);
+  bool InjectKey(int key, bool is_down);
 
   // Global 'click' signal, fired whenever you click the mouse. sig_click is fired if you click a
   // widget, and sig_click_away is fired if you click outside of any widgets.
@@ -81,18 +82,18 @@ public:
 private:
   bool enabled_ = false;
   DrawableManager drawable_manager_;
-  std::mutex top_level_widget_mutex_;
-  std::vector<std::shared_ptr<Widget>> top_level_widgets_;
-  std::vector<std::shared_ptr<Widget>> pending_remove_;
+  std::mutex window_mutex_;
+  std::vector<std::shared_ptr<Window>> windows_;
+  std::vector<std::shared_ptr<Window>> pending_remove_;
   std::weak_ptr<Widget> widget_under_mouse_;
   std::weak_ptr<Widget> widget_mouse_down_;
   std::weak_ptr<Widget> focused_;
   std::shared_ptr<AudioSource> audio_source_;
 
   // Gets the leaf-most widget at the given (x, y) coordinates, or null if there's no widget.
-  std::shared_ptr<Widget> get_widget_at(float x, float y);
+  std::shared_ptr<Widget> GetWidgetAt(float x, float y);
 
-  void propagate_mouse_event(std::shared_ptr<Widget> w, bool is_down, float x, float y);
+  void PropagateMouseEvent(std::shared_ptr<Widget> w, bool is_down, float x, float y);
 };
 
 } 

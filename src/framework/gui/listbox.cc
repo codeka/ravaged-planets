@@ -125,7 +125,8 @@ void ListboxItem::set_selected(bool selected) {
 }
 
 void ListboxItem::render() {
-  background_->render(get_left(), get_top(), get_width(), get_height());
+  auto rect = GetScreenRect();
+  background_->render(rect.left, rect.top, rect.width, rect.height);
   Widget::render();
 }
 
@@ -139,6 +140,9 @@ Listbox::~Listbox() {
 }
 
 void Listbox::OnAttachedToParent(Widget &parent) {
+  Widget::OnAttachedToParent(parent);
+
+  /*
   std::shared_ptr<StateDrawable> bkgnd = std::shared_ptr<StateDrawable>(new StateDrawable());
   bkgnd->add_drawable(
       StateDrawable::kNormal,
@@ -176,7 +180,7 @@ void Listbox::OnAttachedToParent(Widget &parent) {
       << Widget::visible(false));
 
   item_container_ = Builder<Widget>(px(0), px(0), pct(100), px(0));
-  AttachChild(item_container_);  
+  AttachChild(item_container_);  */
 }
 
 std::unique_ptr<Property> Listbox::item_selected(std::function<void(int index)> on_selected) {
@@ -187,7 +191,7 @@ std::unique_ptr<Property> Listbox::item_activated(std::function<void(int index)>
   return std::make_unique<ListboxItemActivatedProperty>(on_activated);
 }
 
-void Listbox::add_item(std::shared_ptr<Widget> w) {
+void Listbox::add_item(std::shared_ptr<Widget> w) {/*
   int top = item_container_->get_height();
   auto item = std::shared_ptr<ListboxItem>(Builder<ListboxItem>(px(0), px(top), pct(100), px(w->get_height())));
   item->AttachChild(w);
@@ -256,10 +260,10 @@ void Listbox::update_thumb_button(bool adjust_height) {
     thumb->set_visible(false);
     up_button->set_visible(false);
     down_button->set_visible(false);
-  }
+  }*/
 }
 
-bool Listbox::on_down_button_click(Widget &w) {
+bool Listbox::on_down_button_click(Widget &w) {/*
   float current_top = item_container_->get_top() - get_top();
   current_top -= get_height() / 4.0f;
   float max_offset = item_container_->get_height() - get_height();
@@ -267,18 +271,18 @@ bool Listbox::on_down_button_click(Widget &w) {
     current_top = -max_offset;
   }
   item_container_->set_top(px(current_top));
-  update_thumb_button(false);
+  update_thumb_button(false);*/
   return true;
 }
 
-bool Listbox::on_up_button_click(Widget &w) {
+bool Listbox::on_up_button_click(Widget &w) {/*
   float current_top = item_container_->get_top() - get_top();
   current_top += get_height() / 4.0f;
   if (current_top > 0) {
     current_top = 0.0f;
   }
   item_container_->set_top(px(current_top));
-  update_thumb_button(false);
+  update_thumb_button(false);*/
   return true;
 }
 
@@ -318,7 +322,8 @@ std::shared_ptr<Widget> Listbox::get_selected_item() {
 }
 
 void Listbox::render() {
-  background_->render(get_left(), get_top(), get_width(), get_height());
+	auto rect = GetScreenRect();
+  background_->render(rect.left, rect.top, rect.width, rect.height);
 
   Widget::render();
 }

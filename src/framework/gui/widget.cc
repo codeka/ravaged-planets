@@ -8,135 +8,61 @@
 
 #include <framework/graphics.h>
 #include <framework/gui/gui.h>
+#include <framework/logging.h>
 #include <framework/misc.h>
 
 namespace fw::gui {
 
-Dimension::Dimension() {
-}
+class WidgetWidthHeightProperty : public Property {
+private:
+	bool is_width_;
+  LayoutParams::Mode mode_;
+  float value_;
 
-Dimension::~Dimension() {
-}
-
-PixelDimension::PixelDimension(float value) :
-    value_(value) {
-}
-
-PixelDimension::~PixelDimension() {
-}
-
-float PixelDimension::get_value(fw::gui::Widget &w, float parent_value) {
-  return value_;
-}
-
-PercentDimension::PercentDimension(float value) :
-    value_(value) {
-}
-
-PercentDimension::~PercentDimension() {
-}
-
-float PercentDimension::get_value(fw::gui::Widget &w, float parent_value) {
-  return parent_value * (value_ / 100.0f);
-}
-
-SumDimension::SumDimension(
-    std::unique_ptr<Dimension> one, std::unique_ptr<Dimension> two)
-    : one_(std::move(one)), two_(std::move(two)) {
-}
-
-SumDimension::~SumDimension() {
-}
-
-float SumDimension::get_value(fw::gui::Widget &w, float parent_value) {
-  return one_->get_value(w, parent_value) + two_->get_value(w, parent_value);
-}
-
-FractionDimension::FractionDimension(OtherDimension dim, float fraction) :
-    other_dimension_(dim), fraction_(fraction), other_widget_id_(-1) {
-}
-
-FractionDimension::FractionDimension(int other_widget_id, OtherDimension dim, float fraction) :
-    other_dimension_(dim), fraction_(fraction), other_widget_id_(other_widget_id) {
-}
-
-FractionDimension::~FractionDimension() {
-}
-
-float FractionDimension::get_value(fw::gui::Widget &w, float parent_value) {
-  std::shared_ptr<Widget> other_widget;
-  if (other_widget_id_ >= 0) {
-    other_widget = w.get_root()->Find<Widget>(other_widget_id_);
-  } else {
-    other_widget = w.shared_from_this();
+public:
+  WidgetWidthHeightProperty(bool is_width, LayoutParams::Mode mode, float value)
+    : is_width_(is_width), mode_(mode), value_(value) {
   }
 
-  float other_value = 0.0f;
-  switch (other_dimension_) {
-  case kTop:
-    other_value = other_widget->get_top();
-    break;
-  case kLeft:
-    other_value = other_widget->get_left();
-    break;
-  case kWidth:
-    other_value = other_widget->get_width();
-    break;
-  case kHeight:
-    other_value = other_widget->get_height();
-    break;
+  void apply(Widget& widget) override {
+    if (is_width_) {
+      widget.get_layout_params()->width_mode = mode_;
+      widget.get_layout_params()->width = value_;
+    } else {
+      widget.get_layout_params()->height_mode = mode_;
+      widget.get_layout_params()->height = value_;
+		}
   }
-  return other_value * fraction_;
-}
-
-//-----------------------------------------------------------------------------
-class WidgetPositionProperty : public Property {
-private:
-  std::unique_ptr<Dimension> x_;
-  std::unique_ptr<Dimension> y_;
-public:
-  WidgetPositionProperty(std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y);
-  void apply(Widget &widget) override;
 };
 
-WidgetPositionProperty::WidgetPositionProperty(
-    std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y)
-    : x_(std::move(x)), y_(std::move(y)) {
-}
-
-void WidgetPositionProperty::apply(Widget &widget) {
-  widget.x_ = std::move(x_);
-  widget.y_ = std::move(y_);
-}
-
-class WidgetSizeProperty : public Property {
+class WidgetMarginProperty : public Property {
 private:
-  std::unique_ptr<Dimension> width_;
-  std::unique_ptr<Dimension> height_;
+  float top_;
+  float right_;
+  float bottom_;
+  float left_;
+
 public:
-  WidgetSizeProperty(std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height);
-  void apply(Widget &widget) override;
+  WidgetMarginProperty(float top, float right, float bottom, float left)
+    : top_(top), right_(right), bottom_(bottom), left_(left) {
+  }
+  void apply(Widget& widget) override {
+    widget.get_layout_params()->top_margin = top_;
+    widget.get_layout_params()->right_margin = right_;
+    widget.get_layout_params()->bottom_margin = bottom_;
+    widget.get_layout_params()->left_margin = left_;
+  }
 };
-
-WidgetSizeProperty::WidgetSizeProperty(
-    std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height)
-    : width_(std::move(width)), height_(std::move(height)) {
-}
-
-void WidgetSizeProperty::apply(Widget &widget) {
-  widget.width_ = std::move(width_);
-  widget.height_ = std::move(height_);
-}
 
 class WidgetClickProperty : public Property {
 private:
-  std::function<bool(Widget &)> on_click_;
+  std::function<bool(Widget&)> on_click_;
 public:
-  WidgetClickProperty(std::function<bool(Widget &)> on_click)
-      : on_click_(on_click) {
+  WidgetClickProperty(std::function<bool(Widget&)> on_click)
+    : on_click_(on_click) {
   }
 
-  void apply(Widget &widget) override {
+  void apply(Widget& widget) override {
     widget.on_click_ = on_click_;
   }
 };
@@ -146,11 +72,24 @@ private:
   int id_;
 public:
   WidgetIdProperty(int id)
-      : id_(id) {
+    : id_(id) {
   }
 
-  void apply(Widget &widget) override {
+  void apply(Widget& widget) override {
     widget.id_ = id_;
+  }
+};
+
+class WidgetNameProperty : public Property {
+private:
+  std::string name_;
+public:
+  WidgetNameProperty(std::string_view name)
+    : name_(name) {
+  }
+
+  void apply(Widget& widget) override {
+    widget.name_ = name_;
   }
 };
 
@@ -159,10 +98,10 @@ private:
   bool visible_;
 public:
   WidgetVisibleProperty(bool visible)
-      : visible_(visible) {
+    : visible_(visible) {
   }
 
-  void apply(Widget &widget) override {
+  void apply(Widget& widget) override {
     widget.visible_ = visible_;
   }
 };
@@ -171,11 +110,11 @@ class WidgetDataProperty : public Property {
 private:
   std::any data_;
 public:
-  WidgetDataProperty(std::any const &data)
-      : data_(data) {
+  WidgetDataProperty(std::any const& data)
+    : data_(data) {
   }
 
-  void apply(Widget &widget) override {
+  void apply(Widget& widget) override {
     widget.data_ = data_;
   }
 };
@@ -185,10 +124,10 @@ private:
   bool enabled_;
 public:
   WidgetEnabledProperty(bool enabled)
-      : enabled_(enabled) {
+    : enabled_(enabled) {
   }
 
-  void apply(Widget &widget) override  {
+  void apply(Widget& widget) override {
     widget.set_enabled(enabled_);
   }
 };
@@ -196,23 +135,25 @@ public:
 //-----------------------------------------------------------------------------
 
 Widget::Widget() :
-    id_(-1), visible_(true), focused_(false), enabled_(true) {
+  measured_size_(0,0) {
 }
 
 Widget::~Widget() {
 }
 
-std::unique_ptr<Property> Widget::position(
-    std::unique_ptr<Dimension> x, std::unique_ptr<Dimension> y) {
-  return std::make_unique<WidgetPositionProperty>(std::move(x), std::move(y));
+std::unique_ptr<Property> Widget::width(LayoutParams::Mode mode, float width) {
+	return std::make_unique<WidgetWidthHeightProperty>(true, mode, width);
 }
 
-std::unique_ptr<Property> Widget::size(
-    std::unique_ptr<Dimension> width, std::unique_ptr<Dimension> height) {
-  return std::make_unique<WidgetSizeProperty>(std::move(width), std::move(height));
+std::unique_ptr<Property> Widget::height(LayoutParams::Mode mode, float height) {
+  return std::make_unique<WidgetWidthHeightProperty>(false, mode, height);
 }
 
-std::unique_ptr<Property> Widget::click(std::function<bool(Widget &)> on_click) {
+std::unique_ptr<Property> Widget::margin(float top, float right, float bottom, float left) {
+  return std::make_unique<WidgetMarginProperty>(top, right, bottom, left);
+}
+
+std::unique_ptr<Property> Widget::click(std::function<bool(Widget&)> on_click) {
   return std::make_unique<WidgetClickProperty>(on_click);
 }
 
@@ -224,7 +165,11 @@ std::unique_ptr<Property> Widget::id(int id) {
   return std::make_unique<WidgetIdProperty>(id);
 }
 
-std::unique_ptr<Property> Widget::data(std::any const &data) {
+std::unique_ptr<Property> Widget::name(std::string_view name) {
+  return std::make_unique<WidgetNameProperty>(name);
+}
+
+std::unique_ptr<Property> Widget::data(std::any const& data) {
   return std::make_unique<WidgetDataProperty>(data);
 }
 
@@ -242,6 +187,7 @@ void Widget::AttachChild(std::shared_ptr<Widget> child) {
   child->parent_ = this->shared_from_this();
   children_.push_back(child);
   child->OnAttachedToParent(*this);
+  RequestLayout();
 }
 
 void Widget::DetachChild(std::shared_ptr<Widget> child) {
@@ -249,18 +195,189 @@ void Widget::DetachChild(std::shared_ptr<Widget> child) {
 
   children_.erase(std::find(children_.begin(), children_.end(), child));
   child->parent_.reset();
+  RequestLayout();
 }
 
 void Widget::ClearChildren() {
   fw::Get<Gui>().EnsureThread(*this);
 
-  for(auto &child : children_) {
+  for (auto& child : children_) {
     child->parent_.reset();
   }
   children_.clear();
+  RequestLayout();
 }
 
-void Widget::OnAttachedToParent(Widget &parent) {
+void Widget::OnAttachedToParent(Widget& parent) {
+  layout_params_ = parent.CreateLayoutParams();
+  RequestLayout();
+}
+
+MeasuredSize Widget::ResolveSize(
+    MeasureSpec width_spec,
+    float measured_width,
+    MeasureSpec height_spec,
+    float measured_height) {
+	LOG(INFO) << name_
+            << " ResolveSize: width_spec=" << static_cast<int>(width_spec.mode) << " " << width_spec.size
+            << ", height_spec=" << static_cast<int>(height_spec.mode) << " " << height_spec.size
+            << ", measured_width=" << measured_width
+            << ", measured_height=" << measured_height;
+
+	float width = measured_width;
+	float height = measured_height;
+
+  switch (width_spec.mode) {
+  case MeasureSpec::Mode::kExactly:
+    width = width_spec.size;
+    break;
+  case MeasureSpec::Mode::kAtMost:
+    if (width > width_spec.size) {
+      width = width_spec.size;
+    }
+    break;
+  }
+
+  switch (height_spec.mode) {
+  case MeasureSpec::Mode::kExactly:
+    height = height_spec.size;
+    break;
+  case MeasureSpec::Mode::kAtMost:
+    if (height > height_spec.size) {
+      height = height_spec.size;
+    }
+    break;
+  }
+
+	LOG(INFO) << name_ << " Resolved size: width=" << width << ", height=" << height;
+	return MeasuredSize(width, height);
+}
+
+MeasureSpec GetChildMeasureSpec(
+    MeasureSpec parent_spec,
+    float padding_and_margins,
+    LayoutParams::Mode layout_mode,
+    float layout_size) {
+
+  MeasureSpec result_spec = MeasureSpec::Unspecified();
+  if (parent_spec.mode == MeasureSpec::Mode::kExactly) {
+    float available_size = std::max(0.f, parent_spec.size - padding_and_margins);
+    if (layout_mode == LayoutParams::Mode::kFixed) {
+      result_spec = MeasureSpec::Exactly(layout_size);
+    } else if (layout_mode == LayoutParams::Mode::kMatchParent) {
+      result_spec = MeasureSpec::Exactly(available_size);
+    } else if (layout_mode == LayoutParams::Mode::kWrapContent) {
+      result_spec = MeasureSpec::AtMost(available_size);
+    }
+  } else if (parent_spec.mode == MeasureSpec::Mode::kAtMost) {
+    float available_size = std::max(0.f, parent_spec.size - padding_and_margins);
+    if (layout_mode == LayoutParams::Mode::kFixed) {
+      result_spec = MeasureSpec::Exactly(layout_size);
+    } else if (layout_mode == LayoutParams::Mode::kMatchParent) {
+      result_spec = MeasureSpec::AtMost(available_size);
+    } else if (layout_mode == LayoutParams::Mode::kWrapContent) {
+      result_spec = MeasureSpec::AtMost(available_size);
+    }
+  } else if (parent_spec.mode == MeasureSpec::Mode::kUnspecified) {
+    if (layout_mode == LayoutParams::Mode::kFixed) {
+      result_spec = MeasureSpec::Exactly(layout_size);
+    } else {
+      // Match parent doesn't make sense when the parent has not specified a size. Fall back to
+      // wrap content.
+      result_spec = MeasureSpec::Unspecified();
+    }
+  }
+  return result_spec;
+}
+
+MeasuredSize Widget::MeasureChild(
+    MeasureSpec parent_width_spec,
+    float width_used,
+    MeasureSpec parent_height_spec,
+    float height_used) {
+
+  MeasureSpec width_spec = GetChildMeasureSpec(
+    parent_width_spec,
+    layout_params_->left_margin + layout_params_->right_margin + width_used,
+    layout_params_->width_mode,
+    layout_params_->width);
+  MeasureSpec height_spec = GetChildMeasureSpec(
+    parent_height_spec,
+    layout_params_->top_margin + layout_params_->bottom_margin + height_used,
+    layout_params_->height_mode,
+    layout_params_->height);
+
+  measured_size_ = OnMeasure(width_spec, height_spec);
+  return measured_size_;
+}
+
+MeasuredSize Widget::Measure(MeasureSpec width_spec, MeasureSpec height_spec) {
+  measured_size_ = OnMeasure(width_spec, height_spec);
+	return measured_size_;
+}
+
+MeasuredSize Widget::OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) {
+	LOG(INFO) << name_ << " OnMeasure: width_spec=" << static_cast<int>(width_spec.mode) << " " << width_spec.size
+            << ", height_spec=" << static_cast<int>(height_spec.mode) << " " << height_spec.size;
+  float max_width = 0;
+  float max_height = 0;
+
+	for (auto child : children_) {
+    if (!child->is_visible()) {
+      // Ignore invisible children.
+      continue;
+		}
+
+    MeasuredSize child_size = child->MeasureChild(width_spec, 0.f, height_spec, 0.f);
+    float width =
+        child_size.width
+        + child->layout_params_->left_margin
+        + child->layout_params_->right_margin;
+		float height =
+        child_size.height
+        + child->layout_params_->top_margin
+        + child->layout_params_->bottom_margin;
+
+    max_width = std::max(max_width, width);
+    max_height = std::max(max_height, height);
+  }
+
+	return ResolveSize(width_spec, max_width, height_spec, max_height);
+}
+
+void Widget::PerformLayout(float top, float right, float bottom, float left) {
+	LOG(INFO) << name_ << " PerformLayout: top=" << top << ", right=" << right << ", bottom=" << bottom << ", left=" << left;
+  OnLayout(top, right, bottom, left);
+
+	for (auto child : children_) {
+    if (!child->is_visible()) {
+      // Ignore invisible children.
+      continue;
+    }
+
+		auto lp = child->layout_params_;
+		auto measured_size = child->get_measured_size();
+
+    float child_left = 0;
+    float child_top = 0;
+
+    // TODO: gravity?
+		child_left += lp->left_margin;
+		child_top += lp->top_margin;
+
+		child->PerformLayout(
+        child_top,
+        measured_size.width + child_left,
+        measured_size.height + child_top,
+        child_left);
+  }
+}
+
+void Widget::OnLayout(float top, float right, float bottom, float left) {
+  this->x_ = left;
+	this->y_ = top;
+	this->width_ = right - left;
+	this->height_ = bottom - top;
 }
 
 std::shared_ptr<Widget> Widget::get_parent() {
@@ -298,7 +415,7 @@ void Widget::update(float dt) {
 std::stack<fw::Rectangle<float>> scissor_rectangles;
 
 bool Widget::prerender() {
-  fw::Rectangle<float> rect(get_left(), get_top(), get_width(), get_height());
+  fw::Rectangle<float> rect = GetScreenRect();
   if (!scissor_rectangles.empty()) {
     fw::Rectangle<float> const &top = scissor_rectangles.top();
     rect = fw::Rectangle<float>::intersect(top, rect);
@@ -349,13 +466,9 @@ bool Widget::on_mouse_up(float x, float y) {
 }
 
 std::shared_ptr<Widget> Widget::GetChildAt(float x, float y) {
-  float left = get_left();
-  float top = get_top();
-  float right = left + get_width();
-  float bottom = top + get_height();
-
   // If we're outside the given (x,y) then return null.
-  if (x < left || y < top || x >= right || y >= bottom) {
+  auto rect = GetScreenRect();
+  if (x < rect.left || y < rect.top  || x >= rect.right() || y >= rect.bottom()) {
     return nullptr;
   }
 
@@ -422,57 +535,27 @@ bool Widget::IsChild(Widget const &w) const {
 
 void Widget::set_visible(bool visible) {
   visible_ = visible;
-  std::shared_ptr<Widget> parent = parent_.lock();
-  if (!parent) {
-    // if it's a top-level widget, move it to the front of the z-order
-    fw::Get<Gui>().bring_to_top(this->shared_from_this());
-  }
+  RequestLayout();
 }
 
 void Widget::set_enabled(bool enabled) {
   enabled_ = enabled;
 }
 
-float Widget::get_top() {
-  std::shared_ptr<Widget> parent = parent_.lock();
-  float parent_top = (parent) ? parent->get_top() : 0;
-  float parent_size = (parent) ? parent->get_height() : fw::Get<Gui>().get_height();
-  return parent_top + y_->get_value(*this, parent_size);
+fw::Point Widget::GetScreenPosition() {
+	fw::Point pos(x_, y_);
+
+  auto parent = parent_.lock();
+  if (parent) {
+    pos += parent->GetScreenPosition();
+	}
+
+  return pos;
 }
 
-void Widget::set_top(std::unique_ptr<Dimension> top) {
-  y_ = std::move(top);
-}
-
-float Widget::get_left() {
-  std::shared_ptr<Widget> parent = parent_.lock();
-  float parent_left = (parent) ? parent->get_left() : 0;
-  float parent_size = (parent) ? parent->get_width() : fw::Get<Gui>().get_width();
-  return parent_left + x_->get_value(*this, parent_size);
-}
-
-void Widget::set_left(std::unique_ptr<Dimension> left) {
-  x_ = std::move(left);
-}
-
-float Widget::get_width() {
-  std::shared_ptr<Widget> parent = parent_.lock();
-  float parent_size = (parent) ? parent->get_width() : fw::Get<Gui>().get_width();
-  return width_->get_value(*this, parent_size);
-}
-
-void Widget::set_width(std::unique_ptr<Dimension> width) {
-  width_ = std::move(width);
-}
-
-float Widget::get_height() {
-  std::shared_ptr<Widget> parent = parent_.lock();
-  float parent_size = (parent) ? parent->get_height() : fw::Get<Gui>().get_height();
-  return height_->get_value(*this, parent_size);
-}
-
-void Widget::set_height(std::unique_ptr<Dimension> height) {
-  height_ = std::move(height);
+fw::Rectangle<float> Widget::GetScreenRect() {
+  auto pos = GetScreenPosition();
+	return fw::Rectangle<float>(pos[0], pos[1], get_width(), get_height());
 }
 
 }

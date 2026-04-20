@@ -245,17 +245,18 @@ void TextEdit::update(float dt) {
 }
 
 void TextEdit::render() {
-  background_->render(get_left(), get_top(), get_width(), get_height());
+	auto rect = GetScreenRect();
+  background_->render(rect.left, rect.top, rect.width, rect.height);
 
   if (buffer_->state.select_start != buffer_->state.select_end) {
-    float left = get_left() /* + something */;
-    float width = get_left() + 100 /*something else */;
-    selection_background_->render(left, get_top() + 1, width, get_height() - 2);
+    float left = rect.left /* + something */;
+    float width = rect.top + 100 /*something else */;
+    selection_background_->render(left, rect.top + 1, width, rect.height - 2);
   }
 
   if (!buffer_->codepoints.empty()) {
     fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        get_left(), get_top() + get_height() / 2, buffer_->codepoints,
+        rect.left, rect.top + rect.height / 2, buffer_->codepoints,
         static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle),
         fw::Color::BLACK());
   }
@@ -263,8 +264,8 @@ void TextEdit::render() {
   if (focused_ && draw_cursor_) {
     int cursor_pos = buffer_->state.cursor;
     fw::Point size_to_cursor = buffer_->font->measure_substring(buffer_->codepoints, 0, cursor_pos);
-    float left = get_left() + size_to_cursor[0];
-    cursor_->render(left, get_top() + 2, 1.0f, get_height() - 4.0f);
+    float left = rect.left + size_to_cursor[0];
+    cursor_->render(left, rect.top + 2, 1.0f, rect.height - 4.0f);
   }
 }
 

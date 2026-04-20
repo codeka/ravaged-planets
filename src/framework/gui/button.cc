@@ -128,6 +128,8 @@ std::unique_ptr<Property> Button::text_align(Button::Alignment align) {
 }
 
 void Button::OnAttachedToParent(Widget &parent) {
+	Widget::OnAttachedToParent(parent);
+
   // Assign default values for things that haven't been overwritten.
   if (!background_) {
     StateDrawable *bkgnd = new StateDrawable();
@@ -176,37 +178,34 @@ void Button::update_drawable_state() {
 }
 
 void Button::render() {
-  float left = get_left();
-  float top = get_top();
-  float width = get_width();
-  float height = get_height();
+  auto rect = GetScreenRect();
 
   if (background_) {
-    background_->render(left, top, width, height);
+    background_->render(rect.left, rect.top, rect.width, rect.height);
   }
 
   if (icon_) {
     float icon_width = icon_->get_intrinsic_width();
     float icon_height = icon_->get_intrinsic_height();
     if (icon_width == 0.0f) {
-      icon_width = width * 0.75f;
+      icon_width = rect.width * 0.75f;
     }
     if (icon_height == 0.0f) {
-      icon_height = height * 0.75f;
+      icon_height = rect.height * 0.75f;
     }
-    float x = left + (width / 2.0f) - (icon_width / 2.0f);
-    float y = top + (height / 2.0f) - (icon_height / 2.0f);
+    float x = rect.left + (rect.width / 2.0f) - (icon_width / 2.0f);
+    float y = rect.top + (rect.height / 2.0f) - (icon_height / 2.0f);
     icon_->render(x, y, icon_width, icon_height);
   }
 
   if (text_.length() > 0) {
     if (text_align_ == kLeft) {
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          left + 4, top + height / 2, text_,
+          rect.left + 4, rect.top + rect.height / 2, text_,
           static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
     } else if (text_align_ == kCenter) {
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          left + width / 2, top + height / 2, text_,
+          rect.left + rect.width / 2, rect.top + rect.height / 2, text_,
           static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignCenter | fw::FontFace::kAlignMiddle));
     }
   }

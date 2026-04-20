@@ -11,6 +11,7 @@
 #include <framework/gui/button.h>
 #include <framework/gui/window.h>
 #include <framework/logging.h>
+#include <framework/service_locator.h>
 #include <framework/particle_manager.h>
 #include <framework/particle_effect.h>
 #include <framework/math.h>
@@ -102,27 +103,39 @@ fw::Status Application::initialize(fw::Framework *frmwrk) {
   cam->set_mouse_move(false);
   frmwrk->set_camera(cam);
 
-  std::shared_ptr<fw::gui::Window> wnd =
-      fw::gui::Builder<fw::gui::Window>()
-      << fw::gui::Widget::position(fw::gui::px(20), fw::gui::px(20))
-      << fw::gui::Widget::size(fw::gui::px(150), fw::gui::px(130))
-      << fw::gui::Window::background("frame")
-      << (fw::gui::Builder<fw::gui::Button>()
-          << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(10))
-          << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::Button::text("Restart")
-          << fw::gui::Widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))
-      << (fw::gui::Builder<fw::gui::Button>()
-          << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(50))
-          << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::Button::text("Pause")
-          << fw::gui::Widget::click(std::bind<bool>(pause_handler, std::placeholders::_1)))
-      << (fw::gui::Builder<fw::gui::Button>()
-          << fw::gui::Widget::position(fw::gui::px(10), fw::gui::px(90))
-          << fw::gui::Widget::size(fw::gui::px(130), fw::gui::px(30))
-          << fw::gui::Button::text("Stationary")
-          << fw::gui::Widget::click(std::bind<bool>(movement_handler, std::placeholders::_1)));
-  frmwrk->get_gui()->attach_widget(wnd);
+	using namespace fw::gui;
+  using namespace std::placeholders;
+
+  std::shared_ptr<Window> wnd =
+    Builder<Window>()
+      << Widget::width(LayoutParams::kFixed, 130.0f)
+      << Widget::height(LayoutParams::kWrapContent, 0.0f)
+      << Widget::margin(15.0f, 15.0f, 15.0f, 15.0f)
+      << Window::initial_position(WindowInitialPosition::Absolute(0.f, 0.f))
+		  << Widget::name("frame")
+      << Window::background("frame")
+      << (Builder<Button>()
+          << Widget::width(LayoutParams::kMatchParent, 0.f)
+          << Widget::height(LayoutParams::kFixed, 30.0f)
+          << Widget::name("restart_button")
+          << Widget::margin(10.0f, 10.0f, 0.0f, 10.0f)
+          << Button::text("Restart")
+          << Widget::click(std::bind<bool>(restart_handler, _1)))
+      << (Builder<Button>()
+          << Widget::width(LayoutParams::kMatchParent, 0.f)
+          << Widget::height(LayoutParams::kFixed, 30.0f)
+          << Widget::name("pause_button")
+          << Widget::margin(50.0f, 10.0f, 0.0f, 10.0f)
+          << Button::text("Pause")
+          << Widget::click(std::bind<bool>(pause_handler, _1)))
+      << (Builder<Button>()
+          << Widget::width(LayoutParams::kMatchParent, 0.f)
+          << Widget::height(LayoutParams::kFixed, 30.0f)
+          << Widget::name("movement_button")
+          << Widget::margin(90.0f, 10.0f, 10.0f, 10.0f)
+          << Button::text("Stationary")
+          << Widget::click(std::bind<bool>(movement_handler, _1)));
+  fw::Get<Gui>().AttachWindow(wnd);
 
   restart_effect();
   return fw::OkStatus();

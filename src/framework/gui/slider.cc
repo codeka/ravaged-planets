@@ -78,6 +78,8 @@ std::unique_ptr<Property> Slider::on_update(std::function<void(int)> on_update) 
 }
 
 void Slider::OnAttachedToParent(Widget &parent) {
+  Widget::OnAttachedToParent(parent);
+
   StateDrawable *bkgnd = new StateDrawable();
   bkgnd->add_drawable(
       StateDrawable::kNormal, fw::Get<Gui>().get_drawable_manager().get_drawable("slider_thumb_normal"));
@@ -135,14 +137,16 @@ void Slider::update_value(float mouse_x) {
 }
 
 void Slider::render() {
-  int left = get_left();
-  int top = get_top();
-  int height = get_height();
-  int width = get_width();
-  line_->render(left, top + (height / 2), width, 1);
+  auto rect = GetScreenRect();
+  line_->render(rect.left, rect.top + (rect.height / 2), rect.width, 1);
 
-  float thumb_offset = (get_width() - THUMB_WIDTH) * (curr_value_ - min_value_) / (max_value_ - min_value_);
-  thumb_->render(left + thumb_offset, top + (height / 2) - (THUMB_HEIGHT / 2), THUMB_WIDTH, THUMB_HEIGHT);
+  float thumb_offset =
+      (rect.width - THUMB_WIDTH) * (curr_value_ - min_value_) / (max_value_ - min_value_);
+  thumb_->render(
+      rect.left + thumb_offset,
+      rect.top + (rect.height / 2) - (THUMB_HEIGHT / 2),
+      THUMB_WIDTH,
+      THUMB_HEIGHT);
 }
 
 }

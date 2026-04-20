@@ -31,7 +31,7 @@ void Gui::update(float dt) {
 	}
 
   Input *inp = fw::Framework::get_instance()->get_input();
-  auto widget = get_widget_at(inp->mouse_x(), inp->mouse_y());
+  auto widget = GetWidgetAt(inp->mouse_x(), inp->mouse_y());
   auto widget_under_mouse = widget_under_mouse_.lock();
   if (widget != widget_under_mouse) {
     if (widget_under_mouse) {
@@ -48,26 +48,27 @@ void Gui::update(float dt) {
     widget_under_mouse_ = widget_under_mouse;
   }
   if (widget_under_mouse && (inp->mouse_dx() != 0.0f || inp->mouse_dy() != 0.0f)) {
-    float mx = inp->mouse_x() - widget_under_mouse->get_left();
-    float my = inp->mouse_y() - widget_under_mouse->get_top();
+		auto screen_pos = widget_under_mouse->GetScreenPosition();
+    float mx = inp->mouse_x() - screen_pos[0];
+    float my = inp->mouse_y() - screen_pos[1];
     widget_under_mouse->sig_mouse_move.Emit(mx, my);
   }
 
-  std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
+  std::unique_lock<std::mutex> lock(window_mutex_);
   for(auto widget : pending_remove_) {
-    top_level_widgets_.erase(
-        std::find(top_level_widgets_.begin(), top_level_widgets_.end(), widget));
+    windows_.erase(
+        std::find(windows_.begin(), windows_.end(), widget));
   }
   pending_remove_.clear();
 
-  for(auto widget : top_level_widgets_) {
-    if (widget->is_visible()) {
-      widget->update(dt);
+  for(auto window : windows_) {
+    if (window->is_visible()) {
+      window->update(dt);
     }
   }
 }
 
-bool Gui::inject_mouse(int button, bool is_down, float x, float y) {
+bool Gui::InjectMouse(int button, bool is_down, float x, float y) {
   std::shared_ptr<Widget> widget_under_mouse = widget_under_mouse_.lock();
   std::shared_ptr<Widget> widget_mouse_down = widget_mouse_down_.lock();
   std::shared_ptr<Widget> focused = focused_.lock();
@@ -85,8 +86,9 @@ bool Gui::inject_mouse(int button, bool is_down, float x, float y) {
     return false;
   }
 
-  x -= widget_under_mouse->get_left();
-  y -= widget_under_mouse->get_top();
+	auto screen_pos = widget_under_mouse->GetScreenPosition();
+  x -= screen_pos[0];
+  y -= screen_pos[1];
 
   sig_click.Emit(button, is_down, *widget_under_mouse);
   if (is_down) {
@@ -100,22 +102,22 @@ bool Gui::inject_mouse(int button, bool is_down, float x, float y) {
       focused->on_focus_gained();
       focused_ = focused;
     }
-    propagate_mouse_event(widget_mouse_down, true, x, y);
+    PropagateMouseEvent(widget_mouse_down, true, x, y);
   } else {
-    propagate_mouse_event(widget_mouse_down, false, x, y);
+    PropagateMouseEvent(widget_mouse_down, false, x, y);
     widget_mouse_down_.reset();
   }
   return true;
 }
 
-void Gui::propagate_mouse_event(std::shared_ptr<Widget> w, bool is_down, float x, float y) {
+void Gui::PropagateMouseEvent(std::shared_ptr<Widget> w, bool is_down, float x, float y) {
   bool handled = (is_down ? w->on_mouse_down(x, y) : w->on_mouse_up(x, y));
   if (!handled && w->get_parent() != nullptr) {
-    propagate_mouse_event(w->get_parent(), is_down, x, y);
+    PropagateMouseEvent(w->get_parent(), is_down, x, y);
   }
 }
 
-bool Gui::inject_key(int key, bool is_down) {
+bool Gui::InjectKey(int key, bool is_down) {
   std::shared_ptr<Widget> focused = focused_.lock();
   if (focused) {
     return focused->on_key(key, is_down);
@@ -125,20 +127,20 @@ bool Gui::inject_key(int key, bool is_down) {
 
 void Gui::render() {
   glEnable(GL_SCISSOR_TEST);
-  std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
-  for(auto widget : top_level_widgets_) {
-    if (widget->is_visible() && widget->prerender()) {
-      widget->render();
-      widget->postrender();
+  std::unique_lock<std::mutex> lock(window_mutex_);
+  for(auto window : windows_) {
+    if (window->is_visible() && window->prerender()) {
+      window->render();
+      window->postrender();
     }
   }
   glDisable(GL_SCISSOR_TEST);
 }
 
-std::shared_ptr<Widget> Gui::get_widget_at(float x, float y) {
-  std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
+std::shared_ptr<Widget> Gui::GetWidgetAt(float x, float y) {
+  std::unique_lock<std::mutex> lock(window_mutex_);
   // We want to make sure we pick the top-most widget at this position, so search in reverse.
-  for (auto it = top_level_widgets_.rbegin(); it != top_level_widgets_.rend(); ++it) {
+  for (auto it = windows_.rbegin(); it != windows_.rend(); ++it) {
     auto wdgt = *it;
     if (!wdgt->is_visible()) {
       continue;
@@ -152,19 +154,21 @@ std::shared_ptr<Widget> Gui::get_widget_at(float x, float y) {
   return nullptr;
 }
 
-void Gui::attach_widget(std::shared_ptr<Widget> widget) {
-  std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
-  top_level_widgets_.push_back(widget);
+void Gui::AttachWindow(std::shared_ptr<Window> window) {
+  std::unique_lock<std::mutex> lock(window_mutex_);
+  windows_.push_back(window);
+	window->OnAttachedToGui();
 }
 
-void Gui::detach_widget(std::shared_ptr<Widget> widget) {
-  pending_remove_.push_back(widget);
+void Gui::DetachWindow(std::shared_ptr<Window> window) {
+  window->OnDetachedFromGui();
+  pending_remove_.push_back(window);
 }
 
 bool Gui::IsAttached(Widget const &widget) {
-  std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
-  for (auto top_level_widget : top_level_widgets_) {
-    if (top_level_widget->IsChild(widget)) {
+  std::unique_lock<std::mutex> lock(window_mutex_);
+  for (auto window : windows_) {
+    if (window->IsChild(widget)) {
       return true;
     }
   }
@@ -180,12 +184,12 @@ void Gui::EnsureThread(Widget const &widget) {
   }
 }
 
-void Gui::bring_to_top(std::shared_ptr<Widget> widget) {
-  std::unique_lock<std::mutex> lock(top_level_widget_mutex_);
-  top_level_widgets_.erase(
-      std::remove(top_level_widgets_.begin(), top_level_widgets_.end(), widget),
-      top_level_widgets_.end());
-  top_level_widgets_.push_back(widget);
+void Gui::BringToTop(std::shared_ptr<Window> window) {
+  std::unique_lock<std::mutex> lock(window_mutex_);
+  windows_.erase(
+      std::remove(windows_.begin(), windows_.end(), window),
+      windows_.end());
+  windows_.push_back(window);
 }
 
 int Gui::get_width() const {

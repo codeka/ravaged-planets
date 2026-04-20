@@ -21,6 +21,9 @@ protected:
 public:
   virtual ~Drawable();
   virtual void render(float x, float y, float width, float height);
+  inline void Render(const fw::Rectangle<float>& rect) {
+		render(rect.left, rect.top, rect.width, rect.height);
+  }
 
   virtual float get_intrinsic_width() const {
     return 0.0f;

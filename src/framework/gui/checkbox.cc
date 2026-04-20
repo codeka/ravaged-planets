@@ -37,6 +37,8 @@ std::unique_ptr<Property> Checkbox::text(std::string_view text) {
 }
 
 void Checkbox::OnAttachedToParent(Widget &parent) {
+  Widget::OnAttachedToParent(parent);
+
   StateDrawable *bkgnd = new StateDrawable();
   bkgnd->add_drawable(
       StateDrawable::kNormal, fw::Get<Gui>().get_drawable_manager().get_drawable("button_normal"));
@@ -77,30 +79,26 @@ void Checkbox::update_drawable_state() {
 }
 
 void Checkbox::render() {
-  float left = get_left();
-  float top = get_top();
-  float width = get_width();
-  float height = get_height();
-
-  background_->render(left + 2, top + 2, height - 4, height - 4);
+	auto rect = GetScreenRect();
+  background_->Render(rect.Shrink(2.0f));
 
   if (is_checked_) {
     float icon_width = check_icon_->get_intrinsic_width();
     float icon_height = check_icon_->get_intrinsic_height();
     if (icon_width == 0.0f) {
-      icon_width = height * 0.75f;
+      icon_width = rect.height * 0.75f;
     }
     if (icon_height == 0.0f) {
-      icon_height = height * 0.75f;
+      icon_height = rect.height * 0.75f;
     }
-    float x = left + (height / 2.0f) - (icon_width / 2.0f);
-    float y = top + (height / 2.0f) - (icon_height / 2.0f);
+    float x = rect.left + (rect.height / 2.0f) - (icon_width / 2.0f);
+    float y = rect.top + (rect.height / 2.0f) - (icon_height / 2.0f);
     check_icon_->render(x, y, icon_width, icon_height);
   }
 
   if (text_.length() > 0) {
     fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        left + height + 4, top + height / 2, text_,
+        rect.left + rect.height + 4, rect.top + rect.height / 2, text_,
         static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
   }
 }

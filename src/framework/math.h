@@ -113,6 +113,22 @@ public:
     return v[n];
   }
 
+  inline Point operator+(const Point& rhs) const {
+    return Point(v[0] + rhs.v[0], v[1] + rhs.v[1]);
+  }
+  inline Point& operator +=(const Point& rhs) {
+    vec2_add(v, v, rhs.v);
+    return *this;
+  }
+
+  inline Point operator-(const Point& rhs) const {
+    return Point(v[0] - rhs.v[0], v[1] - rhs.v[1]);
+  }
+  inline Point& operator -=(const Point& rhs) {
+    vec2_sub(v, v, rhs.v);
+    return (*this);
+  }
+
   inline void normalize() {
     const float l = length();
     v[0] /= l;

@@ -78,38 +78,39 @@ std::unique_ptr<Property> Label::text_align(Label::Alignment text_alignment) {
 }
 
 void Label::render() {
+	auto rect = GetScreenRect();
   if (background_) {
     if (background_centred_) {
       float background_width = background_->get_intrinsic_width();
       float background_height = background_->get_intrinsic_height();
       if (background_width == 0.0f) {
-        background_width = get_width();
+        background_width = rect.width;
       }
       if (background_height == 0.0f) {
-        background_height = get_height();
+        background_height = rect.height;
       }
-      float x = get_left() + (get_width() / 2.0f) - (background_width / 2.0f);
-      float y = get_top() + (get_height() / 2.0f) - (background_height / 2.0f);
+      float x = rect.left + (rect.width / 2.0f) - (background_width / 2.0f);
+      float y = rect.top + (rect.height / 2.0f) - (background_height / 2.0f);
       background_->render(x, y, background_width, background_height);
     } else {
-      background_->render(get_left(), get_top(), get_width(), get_height());
+      background_->render(rect.left, rect.top, rect.width, rect.height);
     }
   }
   if (text_ != "") {
     switch (text_alignment_) {
     case Alignment::kLeft:
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        get_left(), get_top() + get_height() / 2, text_,
+        rect.left, rect.top + rect.height / 2, text_,
         static_cast<FontFace::DrawFlags>(FontFace::kAlignLeft | FontFace::kAlignMiddle));
       break;
     case Alignment::kCenter:
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        get_left() + get_width() / 2, get_top() + get_height() / 2, text_,
+        rect.left + rect.width / 2, rect.top + rect.height / 2, text_,
         static_cast<FontFace::DrawFlags>(FontFace::kAlignCenter | FontFace::kAlignMiddle));
       break;
     case Alignment::kRight:
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          get_left() + get_width(), get_top() + get_height() / 2, text_,
+          rect.left + rect.width, rect.top + rect.height / 2, text_,
           static_cast<FontFace::DrawFlags>(FontFace::kAlignRight | FontFace::kAlignMiddle));
       break;
     }
