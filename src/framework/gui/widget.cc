@@ -8,7 +8,6 @@
 
 #include <framework/graphics.h>
 #include <framework/gui/gui.h>
-#include <framework/logging.h>
 #include <framework/misc.h>
 
 namespace fw::gui {
@@ -218,12 +217,6 @@ MeasuredSize Widget::ResolveSize(
     float measured_width,
     MeasureSpec height_spec,
     float measured_height) {
-	LOG(INFO) << name_
-            << " ResolveSize: width_spec=" << static_cast<int>(width_spec.mode) << " " << width_spec.size
-            << ", height_spec=" << static_cast<int>(height_spec.mode) << " " << height_spec.size
-            << ", measured_width=" << measured_width
-            << ", measured_height=" << measured_height;
-
 	float width = measured_width;
 	float height = measured_height;
 
@@ -249,7 +242,6 @@ MeasuredSize Widget::ResolveSize(
     break;
   }
 
-	LOG(INFO) << name_ << " Resolved size: width=" << width << ", height=" << height;
 	return MeasuredSize(width, height);
 }
 
@@ -317,8 +309,6 @@ MeasuredSize Widget::Measure(MeasureSpec width_spec, MeasureSpec height_spec) {
 }
 
 MeasuredSize Widget::OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) {
-	LOG(INFO) << name_ << " OnMeasure: width_spec=" << static_cast<int>(width_spec.mode) << " " << width_spec.size
-            << ", height_spec=" << static_cast<int>(height_spec.mode) << " " << height_spec.size;
   float max_width = 0;
   float max_height = 0;
 
@@ -346,38 +336,37 @@ MeasuredSize Widget::OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) 
 }
 
 void Widget::PerformLayout(float top, float right, float bottom, float left) {
-	LOG(INFO) << name_ << " PerformLayout: top=" << top << ", right=" << right << ", bottom=" << bottom << ", left=" << left;
-  OnLayout(top, right, bottom, left);
+  this->x_ = left;
+  this->y_ = top;
+  this->width_ = right - left;
+  this->height_ = bottom - top;
 
-	for (auto child : children_) {
+	OnLayout(top, right, bottom, left);
+}
+
+void Widget::OnLayout(float top, float right, float bottom, float left) {
+  for (auto child : children_) {
     if (!child->is_visible()) {
       // Ignore invisible children.
       continue;
     }
 
-		auto lp = child->layout_params_;
-		auto measured_size = child->get_measured_size();
+    auto lp = child->layout_params_;
+    auto measured_size = child->get_measured_size();
 
     float child_left = 0;
     float child_top = 0;
 
     // TODO: gravity?
-		child_left += lp->left_margin;
-		child_top += lp->top_margin;
+    child_left += lp->left_margin;
+    child_top += lp->top_margin;
 
-		child->PerformLayout(
-        child_top,
-        measured_size.width + child_left,
-        measured_size.height + child_top,
-        child_left);
+    child->PerformLayout(
+      child_top,
+      measured_size.width + child_left,
+      measured_size.height + child_top,
+      child_left);
   }
-}
-
-void Widget::OnLayout(float top, float right, float bottom, float left) {
-  this->x_ = left;
-	this->y_ = top;
-	this->width_ = right - left;
-	this->height_ = bottom - top;
 }
 
 std::shared_ptr<Widget> Widget::get_parent() {

@@ -9,6 +9,7 @@
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
+#include <framework/gui/linear_layout.h>
 #include <framework/gui/window.h>
 #include <framework/logging.h>
 #include <framework/service_locator.h>
@@ -109,32 +110,36 @@ fw::Status Application::initialize(fw::Framework *frmwrk) {
   std::shared_ptr<Window> wnd =
     Builder<Window>()
       << Widget::width(LayoutParams::kFixed, 130.0f)
-      << Widget::height(LayoutParams::kWrapContent, 0.0f)
+      << Widget::height(LayoutParams::kMatchParent, 0.0f)
       << Widget::margin(15.0f, 15.0f, 15.0f, 15.0f)
       << Window::initial_position(WindowInitialPosition::Absolute(0.f, 0.f))
 		  << Widget::name("frame")
       << Window::background("frame")
-      << (Builder<Button>()
+      << (Builder<LinearLayout>()
+				<< Widget::width(LayoutParams::kMatchParent, 0.f)
+				<< Widget::height(LayoutParams::kWrapContent, 0.f)
+				<< LinearLayout::orientation(LinearLayout::Orientation::kVertical)
+        << (Builder<Button>()
           << Widget::width(LayoutParams::kMatchParent, 0.f)
           << Widget::height(LayoutParams::kFixed, 30.0f)
           << Widget::name("restart_button")
           << Widget::margin(10.0f, 10.0f, 0.0f, 10.0f)
           << Button::text("Restart")
           << Widget::click(std::bind<bool>(restart_handler, _1)))
-      << (Builder<Button>()
+        << (Builder<Button>()
           << Widget::width(LayoutParams::kMatchParent, 0.f)
           << Widget::height(LayoutParams::kFixed, 30.0f)
           << Widget::name("pause_button")
-          << Widget::margin(50.0f, 10.0f, 0.0f, 10.0f)
+          << Widget::margin(10.0f, 10.0f, 0.0f, 10.0f)
           << Button::text("Pause")
           << Widget::click(std::bind<bool>(pause_handler, _1)))
-      << (Builder<Button>()
+        << (Builder<Button>()
           << Widget::width(LayoutParams::kMatchParent, 0.f)
           << Widget::height(LayoutParams::kFixed, 30.0f)
           << Widget::name("movement_button")
-          << Widget::margin(90.0f, 10.0f, 10.0f, 10.0f)
+          << Widget::margin(10.0f, 10.0f, 10.0f, 10.0f)
           << Button::text("Stationary")
-          << Widget::click(std::bind<bool>(movement_handler, _1)));
+          << Widget::click(std::bind<bool>(movement_handler, _1))));
   fw::Get<Gui>().AttachWindow(wnd);
 
   restart_effect();

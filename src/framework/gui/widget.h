@@ -98,6 +98,8 @@ public:
 		width_mode(width_mode), width(width), height_mode(height_mode), height(height),
     top_margin(0), right_margin(0), bottom_margin(0), left_margin(0) {
 	}
+
+	virtual ~LayoutParams() = default;
 };
 
 // This is the base class of all widgets in the GUI. A widget has a specific position within it's
@@ -146,18 +148,8 @@ protected:
   }
 
   MeasuredSize Measure(MeasureSpec width_spec, MeasureSpec height_spec);
-  MeasuredSize MeasureChild(
-      MeasureSpec parent_width_spec,
-      float width_used,
-      MeasureSpec parent_height_spec,
-      float height_used);
 
   virtual MeasuredSize OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec);
-
-	// Performa a layout of this widget. If you need to customize this behavior, you should override
-  // OnLayout() which is called by this method.
-  void PerformLayout(float top, float right, float bottom, float left);
-
   virtual void OnLayout(float top, float right, float bottom, float left);
 
 public:
@@ -204,13 +196,24 @@ public:
     return lp;
   }
 
+  // Performa a layout of this widget. If you need to customize this behavior, you should override
+  // OnLayout() which is called by this method.
+  void PerformLayout(float top, float right, float bottom, float left);
+
+  MeasuredSize MeasureChild(
+    MeasureSpec parent_width_spec,
+    float width_used,
+    MeasureSpec parent_height_spec,
+    float height_used);
+
   inline MeasuredSize get_measured_size() const {
     return measured_size_;
 	}
 
   // Gets the layout params for this widget. This will be null if we're not attached to a parent.
-  inline std::shared_ptr<LayoutParams> get_layout_params() const {
-    return layout_params_;
+	template <typename T = LayoutParams>
+  inline std::shared_ptr<T> get_layout_params() const {
+    return std::dynamic_pointer_cast<T>(layout_params_);
 	}
 
   virtual void on_focus_gained();

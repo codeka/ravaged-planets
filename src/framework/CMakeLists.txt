@@ -42,7 +42,7 @@ add_library(framework
     ${ARCH_FILES}
     ${ARCH_HEADERS}
     ${PROTO_SRCS}
- "lua/callback.h")
+ "lua/callback.h" "gui/linear_layout.h")
 
 target_link_libraries(framework cpptrace::cpptrace)
 target_link_libraries(framework ${CURL_LIBRARY})
