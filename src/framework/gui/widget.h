@@ -149,7 +149,15 @@ protected:
 
   MeasuredSize Measure(MeasureSpec width_spec, MeasureSpec height_spec);
 
+	// Called by Measure() to actually perform the measurement. This should combine the 'self'
+  // measurement (of OnMeasureSelf) with the measured size of all the children.
   virtual MeasuredSize OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec);
+
+	// Called by OnMeasure() to measure the size of this widget without looking at the children.
+	// For example, a Label might measure the size of the text it contains. A button might measure
+  // the text plus the size of the button background, etc.
+  virtual Point OnMeasureSelf();
+
   virtual void OnLayout(float top, float right, float bottom, float left);
 
 public:

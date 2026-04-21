@@ -177,6 +177,33 @@ void Button::update_drawable_state() {
   }
 }
 
+Point Button::OnMeasureSelf() {
+  float max_width = 0.0f;
+  float max_height = 0.0f;
+
+  if (background_) {
+    max_width = background_->get_intrinsic_width();
+    max_height = background_->get_intrinsic_height();
+  }
+
+  auto font_face = fw::Framework::get_instance()->get_font_manager()->get_face();
+  auto text_size = font_face->measure_string(text_);
+	float text_width = text_size.v[0];
+	float text_height = text_size.v[1];
+
+	if (icon_) {
+    float icon_width = icon_->get_intrinsic_width();
+    float icon_height = icon_->get_intrinsic_height();
+    text_width += icon_width;
+    text_height = std::max(text_height, icon_height);
+  }
+
+  max_width = std::max(max_width, text_width);
+  max_height = std::max(max_height, text_height);
+
+  return Point(max_width, max_height);
+}
+
 void Button::render() {
   auto rect = GetScreenRect();
 

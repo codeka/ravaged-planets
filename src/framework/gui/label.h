@@ -19,17 +19,6 @@ public:
     kRight
   };
 
-private:
-  friend class LabelBackgroundProperty;
-  friend class LabelTextProperty;
-  friend class LabelTextAlignProperty;
-
-  std::string text_;
-  Alignment text_alignment_;
-  std::shared_ptr<Drawable> background_;
-  bool background_centred_;
-
-public:
   Label();
   virtual ~Label();
 
@@ -44,6 +33,20 @@ public:
 
   void set_background(std::shared_ptr<Drawable> background, bool centred = false);
   void set_background(Bitmap const &bmp, bool centred = false);
+
+protected:
+  Point OnMeasureSelf() override;
+
+private:
+  friend class LabelBackgroundProperty;
+  friend class LabelTextProperty;
+  friend class LabelTextAlignProperty;
+
+  std::string text_;
+  Alignment text_alignment_;
+  std::shared_ptr<Drawable> background_;
+  bool background_centred_;
+
 };
 
 }

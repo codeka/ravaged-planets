@@ -50,23 +50,21 @@ void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
 				  << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
           // Title "Ravaged Planets"
           << (Builder<Label>()
-				      //<< Widget::width(LayoutParams::kWrapContent, 0.f)
-				      //<< Widget::height(LayoutParams::kWrapContent, 0.f)
-              << Widget::width(LayoutParams::kFixed, 417.f)
-              << Widget::height(LayoutParams::kFixed, 49.f)
+				      << Widget::width(LayoutParams::kWrapContent, 0.f)
+				      << Widget::height(LayoutParams::kWrapContent, 0.f)
+              << Widget::name("title")
               << Label::background("title_heading"))
           // "A game by Dean Harding (dean@codeka.com.au)" text
          << (Builder<Label>()
-              //<< Widget::width(LayoutParams::kWrapContent, 0.f)
-              //<< Widget::height(LayoutParams::kWrapContent, 0.f)
-              << Widget::width(LayoutParams::kFixed, 500.f)
-              << Widget::height(LayoutParams::kFixed, 16.f)
+              << Widget::width(LayoutParams::kWrapContent, 0.f)
+              << Widget::height(LayoutParams::kWrapContent, 0.f)
+              << Widget::name("subtitle")
               << Label::text(std::vformat(fw::text("title.sub-title"), std::make_format_args(name, email))))
           << (Builder<Button>()
-              << Button::text(fw::text("title.new-game"))
               << Widget::width(LayoutParams::kFixed, 180)
               << Widget::height(LayoutParams::kFixed, 30.f)
               << Widget::margin(120.f, 0.f, 0.f, 0.f)
+              << Button::text(fw::text("title.new-game"))
               << Widget::click(std::bind(&MainMenuWindow::new_game_clicked, this, _1)))
           << (Builder<Button>()
               << Widget::width(LayoutParams::kFixed, 180)
@@ -92,10 +90,8 @@ void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
               << Widget::click(std::bind(&MainMenuWindow::quit_clicked, this, _1))))
       // "v1.2.3"
       << (Builder<Label>()
-          //<< Widget::width(LayoutParams::kWrapContent, 0.f)
-          //<< Widget::height(LayoutParams::kWrapContent, 0.f)
-          << Widget::width(LayoutParams::kFixed, 500.f)
-          << Widget::height(LayoutParams::kFixed, 16.f)
+          << Widget::width(LayoutParams::kWrapContent, 0.f)
+          << Widget::height(LayoutParams::kWrapContent, 0.f)
 				  << Widget::margin(0.f, 0.f, 20.f, 0.f) // TODO: align bottom?
           << Label::text(fw::version_str));
   fw::Get<Gui>().AttachWindow(wnd_);

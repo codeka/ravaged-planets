@@ -77,6 +77,24 @@ std::unique_ptr<Property> Label::text_align(Label::Alignment text_alignment) {
   return std::make_unique<LabelTextAlignProperty>(text_alignment);
 }
 
+Point Label::OnMeasureSelf() {
+	float max_width = 0.0f;
+	float max_height = 0.0f;
+
+  if (background_) {
+    max_width = background_->get_intrinsic_width();
+    max_height = background_->get_intrinsic_height();
+	}
+
+  auto font_face = fw::Framework::get_instance()->get_font_manager()->get_face();
+  auto text_size = font_face->measure_string(text_);
+
+	max_width = std::max(max_width, text_size.v[0]);
+	max_height = std::max(max_height, text_size.v[1]);
+
+	return Point(max_width, max_height);
+}
+
 void Label::render() {
 	auto rect = GetScreenRect();
   if (background_) {

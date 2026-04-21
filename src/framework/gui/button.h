@@ -63,6 +63,8 @@ protected:
   void on_mouse_over();
 
   void update_drawable_state();
+
+  Point OnMeasureSelf() override;
 };
 
 }

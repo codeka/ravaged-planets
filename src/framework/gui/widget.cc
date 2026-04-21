@@ -309,8 +309,9 @@ MeasuredSize Widget::Measure(MeasureSpec width_spec, MeasureSpec height_spec) {
 }
 
 MeasuredSize Widget::OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) {
-  float max_width = 0;
-  float max_height = 0;
+	auto self_size = OnMeasureSelf();
+  float max_width = self_size[0];
+  float max_height = self_size[1];
 
 	for (auto child : children_) {
     if (!child->is_visible()) {
@@ -333,6 +334,10 @@ MeasuredSize Widget::OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) 
   }
 
 	return ResolveSize(width_spec, max_width, height_spec, max_height);
+}
+
+Point Widget::OnMeasureSelf() {
+  return Point(0.f, 0.f);
 }
 
 void Widget::PerformLayout(float top, float right, float bottom, float left) {
