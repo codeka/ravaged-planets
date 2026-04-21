@@ -19,7 +19,7 @@ constexpr int MESSAGE_BOX_MESSAGE_ID = 2;
 
 std::unique_ptr<MessageBoxWindow> message_box;
 
-void MessageBoxWindow::initialize() {
+void MessageBoxWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-100)), px(200), px(100))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Label>(px(10), px(10), sum(pct(100), px(-20)), px(18))
@@ -29,7 +29,7 @@ void MessageBoxWindow::initialize() {
     << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20))
         << Button::text("OK")
         << Widget::click(std::bind(&MessageBoxWindow::ok_clicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 void MessageBoxWindow::show(

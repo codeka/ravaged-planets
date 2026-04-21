@@ -69,7 +69,7 @@ MainMenuWindow::MainMenuWindow() : wnd_(nullptr), file_menu_(nullptr), tool_menu
 MainMenuWindow::~MainMenuWindow() {
 }
 
-void MainMenuWindow::initialize() {
+void MainMenuWindow::initialize() {/*
   wnd_ = Builder<Window>(px(0), px(0), pct(100), px(20))
       << Window::background("frame")
       << Widget::visible(false)
@@ -117,7 +117,7 @@ void MainMenuWindow::initialize() {
   global_click_conn_ = gui.sig_click.Connect(
       std::bind(&MainMenuWindow::global_click_handler, this, _1, _2, _3));
   global_click_conn_ = gui.sig_click_away.Connect(
-      std::bind(&MainMenuWindow::global_click_away_handler, this, _1, _2));
+      std::bind(&MainMenuWindow::global_click_away_handler, this, _1, _2));*/
 }
 
 void MainMenuWindow::show() {
@@ -235,11 +235,11 @@ StatusbarWindow::StatusbarWindow() : wnd_(nullptr) {
 StatusbarWindow::~StatusbarWindow() {
 }
 
-void StatusbarWindow::initialize() {
+void StatusbarWindow::initialize() {/*
   wnd_ = Builder<Window>(px(0), sum(pct(100), px(-20)), pct(100), px(20)) << Window::background("frame")
       << Widget::visible(false)
       << (Builder<Label>(px(0), px(0), pct(100), pct(100)) << Widget::id(STATUS_MESSAGE_ID));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 void StatusbarWindow::show() {

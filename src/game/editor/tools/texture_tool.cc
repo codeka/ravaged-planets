@@ -48,7 +48,7 @@ public:
   void hide();
 };
 
-TextureToolWindow::TextureToolWindow(ed::TextureTool &tool) : tool_(tool) {
+TextureToolWindow::TextureToolWindow(ed::TextureTool &tool) : tool_(tool) {/*
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(262)) << Window::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
       << (Builder<Slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
@@ -62,23 +62,23 @@ TextureToolWindow::TextureToolWindow(ed::TextureTool &tool) : tool_(tool) {
           << Widget::id(TEXTURE_PREVIEW_ID))
       << (Builder<Button>(px(4), px(228), sum(pct(100), px(-8)), px(30))
           << Button::text("Change"));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 TextureToolWindow::~TextureToolWindow() {
-  fw::Get<Gui>().detach_widget(wnd_);
+ // fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void TextureToolWindow::show() {
   wnd_->set_visible(true);
 
   auto lbx = wnd_->Find<Listbox>(TEXTURES_ID);
-  lbx->clear();
+  lbx->Clear();
   for (int i = 0; i < tool_.get_terrain()->get_num_layers(); i++) {
-    fs::path filename = tool_.get_terrain()->get_layer(i).get_filename();
+    fs::path filename = tool_.get_terrain()->get_layer(i).get_filename();/*
     lbx->add_item(
         Builder<Label>(px(0), px(0), pct(100), px(18))
-            << Label::text(filename.stem().string()));
+            << Label::text(filename.stem().string()));*/
   }
   lbx->select_item(0);
 }

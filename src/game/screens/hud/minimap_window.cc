@@ -92,10 +92,10 @@ MinimapWindow::MinimapWindow() :
 }
 
 MinimapWindow::~MinimapWindow() {
-  fw::Get<Gui>().detach_widget(wnd_);
+ // fw::Get<Gui>().detach_widget(wnd_);
 }
 
-void MinimapWindow::initialize() {
+void MinimapWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(100), px(-210)), px(10), px(200), px(200))
       << Window::background("frame")
           << Widget::visible(false)
@@ -103,7 +103,7 @@ void MinimapWindow::initialize() {
           << Widget::id(MINIMAP_IMAGE_ID))
       << (Builder<Label>(sum(pct(50), px(-10)), sum(pct(50), px(-22)), px(19), px(31))
           << Label::background("hud_minimap_crosshair"));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 void MinimapWindow::show() {

@@ -58,7 +58,6 @@ MeasuredSize LinearLayout::OnMeasure(MeasureSpec width_spec, MeasureSpec height_
     }
 
     auto lp = child->get_layout_params<LinearLayoutParams>();
-
     float width = lp->left_margin + lp->right_margin;
     float height = lp->top_margin + lp->bottom_margin;
 
@@ -149,8 +148,8 @@ MeasuredSize LinearLayout::OnMeasure(MeasureSpec width_spec, MeasureSpec height_
 }
 
 void LinearLayout::OnLayout(float top, float right, float bottom, float left) {
-	float current_x = left;
-	float current_y = top;
+	float current_x = 0.f;
+	float current_y = 0.f;
 
   for (auto child : children_) {
     if (!child->is_visible()) {

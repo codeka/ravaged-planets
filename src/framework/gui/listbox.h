@@ -51,7 +51,7 @@ public:
   }
 
   /** Removes all the items in the listbox. */
-  void clear();
+  void Clear();
 
   /** Select the item with the given index. */
   void select_item(int index);

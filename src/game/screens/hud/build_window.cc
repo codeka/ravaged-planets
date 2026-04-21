@@ -150,10 +150,10 @@ BuildWindow::BuildWindow() : wnd_(nullptr), require_refresh_(false), mouse_over_
 }
 
 BuildWindow::~BuildWindow() {
-  fw::Get<Gui>().detach_widget(wnd_);
+  //fw::Get<Gui>().detach_widget(wnd_);
 }
 
-void BuildWindow::initialize() {
+void BuildWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(100), px(-210)), px(220), px(200), px(200))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Button>(px(10), px(10), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 0))
@@ -173,7 +173,7 @@ void BuildWindow::initialize() {
     btn->sig_mouse_over.Connect(std::bind(&BuildWindow::on_mouse_over_button, this, id));
     btn->sig_mouse_out.Connect(std::bind(&BuildWindow::on_mouse_out_button, this, id));
     btn->set_on_click(std::bind(&BuildWindow::on_build_clicked, this, _1, id));
-  }
+  }*/
 }
 
 void BuildWindow::show() {

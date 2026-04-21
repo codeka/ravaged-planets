@@ -358,8 +358,8 @@ void Widget::OnLayout(float top, float right, float bottom, float left) {
     float child_top = 0;
 
     // TODO: gravity?
-    child_left += lp->left_margin;
-    child_top += lp->top_margin;
+    child_left = lp->left_margin;
+    child_top = lp->top_margin;
 
     child->PerformLayout(
       child_top,
@@ -544,7 +544,8 @@ fw::Point Widget::GetScreenPosition() {
 
 fw::Rectangle<float> Widget::GetScreenRect() {
   auto pos = GetScreenPosition();
-	return fw::Rectangle<float>(pos[0], pos[1], get_width(), get_height());
+	auto size = get_measured_size();
+	return fw::Rectangle<float>(pos[0], pos[1], size.width, size.height);
 }
 
 }

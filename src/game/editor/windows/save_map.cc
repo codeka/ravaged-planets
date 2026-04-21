@@ -36,7 +36,7 @@ SaveMapWindow::SaveMapWindow() : wnd_(nullptr) {
 SaveMapWindow::~SaveMapWindow() {
 }
 
-void SaveMapWindow::initialize() {
+void SaveMapWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-250)), sum(pct(50), px(-150)), px(500), px(232))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Label>(px(10), px(10), px(80), px(20)) << Label::text("Name:"))
@@ -54,7 +54,7 @@ void SaveMapWindow::initialize() {
       << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-38)), px(80), px(30))
           << Button::text("Cancel")
           << Widget::click(std::bind(&SaveMapWindow::cancel_clicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 // when we go to show, we have to update our controls with what we currently know about the map

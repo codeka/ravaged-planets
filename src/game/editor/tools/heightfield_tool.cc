@@ -225,7 +225,7 @@ public:
 };
 
 HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *tool) :
-    tool_(tool) {
+    tool_(tool) {/*
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(170)) << Window::background("frame")
       << (Builder<Button>(px(8), px(8), px(36), px(36)) << Widget::id(RAISE_LOWER_BRUSH_ID)
           << Button::icon("editor_hightfield_raiselower")
@@ -243,11 +243,11 @@ HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *tool) :
           << Slider::on_update(std::bind(&HeightfieldToolWindow::OnSpeedUpdated, this, _1)))
       << (Builder<Button>(px(4), px(132), sum(pct(100), px(-8)), px(30)) << Button::text("Import")
           << Button::click(std::bind(&HeightfieldToolWindow::on_import_clicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 HeightfieldToolWindow::~HeightfieldToolWindow() {
-  fw::Get<Gui>().detach_widget(wnd_);
+  //fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void HeightfieldToolWindow::show() {

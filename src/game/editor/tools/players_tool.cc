@@ -44,7 +44,7 @@ public:
   void hide();
 };
 
-PlayersToolWindow::PlayersToolWindow(ed::PlayersTool &tool) : tool_(tool) {
+PlayersToolWindow::PlayersToolWindow(ed::PlayersTool &tool) : tool_(tool) {/*
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(200)) << Window::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Num players:"))
       << (Builder<TextEdit>(px(4), px(26), sum(pct(100), px(-8)), px(20))
@@ -54,20 +54,20 @@ PlayersToolWindow::PlayersToolWindow(ed::PlayersTool &tool) : tool_(tool) {
       << (Builder<Label>(px(4), px(80), sum(pct(100), px(-8)), px(1)) << Label::background("filler"))
       << (Builder<Listbox>(px(4), px(88), sum(pct(100), px(-8)), px(108)) << Widget::id(PLAYER_LIST_ID)
           << Listbox::item_selected(std::bind(&PlayersToolWindow::selection_changed, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 PlayersToolWindow::~PlayersToolWindow() {
-  fw::Get<Gui>().detach_widget(wnd_);
+ // fw::Get<Gui>().detach_widget(wnd_);
 }
 
 void PlayersToolWindow::refresh_player_list() {
   auto lb = wnd_->Find<Listbox>(PLAYER_LIST_ID);
-  lb->clear();
-  for (int i = 0; i < tool_.get_world()->get_player_starts().size(); i++) {
+  lb->Clear();
+  for (int i = 0; i < tool_.get_world()->get_player_starts().size(); i++) {/*
     lb->add_item(Builder<Label>(px(4), px(0), pct(100), px(20))
         << Label::text("Player " + std::to_string(i + 1)));
-  }
+  */}
 }
 
 void PlayersToolWindow::show() {

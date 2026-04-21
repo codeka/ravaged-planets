@@ -61,7 +61,7 @@ NewGameWindow::~NewGameWindow() {
 void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow *NewAIPlayerWindow) {
   main_menu_window_ = MainMenuWindow;
   new_ai_player_window_ = NewAIPlayerWindow;
-
+  /*
   wnd_ = Builder<Window>(px(0), px(0), pct(100), pct(100))
       << Window::background("title_background")
       << Widget::visible(false)
@@ -121,7 +121,7 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
       << (Builder<Label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
           << Label::text(fw::version_str));
   fw::Get<Gui>().attach_widget(wnd_);
-  game_options_ = std::shared_ptr<GameScreenOptions>(new GameScreenOptions());
+  game_options_ = std::shared_ptr<GameScreenOptions>(new GameScreenOptions());*/
 }
 
 void NewGameWindow::show() {
@@ -132,8 +132,8 @@ void NewGameWindow::show() {
   auto listbox = wnd_->Find<Listbox>(MAP_LIST_ID);
   fw::Get<fw::Graphics>().run_on_render_thread(
     [map_list = map_list_, listbox]() {
-      listbox->clear();
-
+      listbox->Clear();
+      /*
       for (WorldSummary const &ws : map_list) {
         std::string title = ws.get_name();
         listbox->add_item(
@@ -143,7 +143,7 @@ void NewGameWindow::show() {
       }
       if (!map_list.empty()) {
         listbox->select_item(0);
-      }
+      }*/
     });
 
   sig_players_changed_conn_ = SimulationThread::get_instance()->sig_players_changed.Connect(
@@ -268,10 +268,10 @@ void NewGameWindow::refresh_players() {
   auto players = SimulationThread::get_instance()->get_players();
   auto players_list = wnd_->Find<Listbox>(PLAYER_LIST_ID);
   fw::Get<fw::Graphics>().run_on_render_thread([players, players_list]() {
-    players_list->clear();
+    players_list->Clear();
     for (auto &plyr : players) {
       int player_no = static_cast<int>(plyr->get_player_no());
-
+      /*
       std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";
       players_list->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20)) << Widget::data(plyr)
           << (Builder<Label>(px(8), px(0), px(30), px(20))
@@ -279,7 +279,7 @@ void NewGameWindow::refresh_players() {
           << (Builder<Label>(px(30), px(0), sum(pct(100), px(-80)), px(20))
               << Label::text(plyr->get_user_name()))
           << (Builder<Label>(sum(pct(100), px(-50)), px(0), px(50), px(20))
-              << Label::text(ready_str)));
+              << Label::text(ready_str)));*/
     }
   });
 }
@@ -341,10 +341,10 @@ void NewGameWindow::add_chat_msg(std::string_view user_name, std::string_view ms
 
 void NewGameWindow::append_chat(std::string const &msg) {
   auto chat_list = wnd_->Find<Listbox>(CHAT_LIST_ID);
-  fw::Get<fw::Graphics>().run_on_render_thread([chat_list, msg] {
+  fw::Get<fw::Graphics>().run_on_render_thread([chat_list, msg] {/*
     chat_list->add_item(
         Builder<Label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << Label::text(msg));
-  });
+  */});
 }
 
 void NewGameWindow::update_selection() {

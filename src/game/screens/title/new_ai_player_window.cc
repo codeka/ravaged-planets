@@ -33,10 +33,10 @@ NewAIPlayerWindow::NewAIPlayerWindow() : wnd_(nullptr), new_game_window_(nullptr
 }
 
 NewAIPlayerWindow::~NewAIPlayerWindow() {
-  fw::Get<Gui>().detach_widget(wnd_);
+ // fw::Get<Gui>().detach_widget(wnd_);
 }
 
-void NewAIPlayerWindow::initialize(NewGameWindow *new_game_window) {
+void NewAIPlayerWindow::initialize(NewGameWindow *new_game_window) {/*
   new_game_window_ = new_game_window;
   wnd_ = Builder<Window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
       << Window::background("frame")
@@ -70,7 +70,7 @@ void NewAIPlayerWindow::initialize(NewGameWindow *new_game_window) {
     wnd_->Find<Listbox>(AI_LIST_ID)->select_item(0);
   }
 
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 void NewAIPlayerWindow::show() {

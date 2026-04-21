@@ -36,7 +36,7 @@ NewMapWindow::NewMapWindow() : wnd_(nullptr) {
 NewMapWindow::~NewMapWindow() {
 }
 
-void NewMapWindow::initialize() {
+void NewMapWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-100)), px(200), px(100))
           << Window::background("frame") << Widget::visible(false)
       << (Builder<Label>(px(10), px(10), sum(pct(100), px(-20)), px(18))
@@ -53,7 +53,7 @@ void NewMapWindow::initialize() {
       << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20))
           << Button::text("Cancel")
           << Widget::click(std::bind(&NewMapWindow::cancel_clicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 void NewMapWindow::show() {

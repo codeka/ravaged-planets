@@ -4,12 +4,13 @@
 
 #include <framework/framework.h>
 #include <framework/lang.h>
-#include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/button.h>
+#include <framework/gui/gui.h>
+#include <framework/gui/label.h>
+#include <framework/gui/linear_layout.h>
 #include <framework/gui/widget.h>
 #include <framework/gui/window.h>
-#include <framework/gui/button.h>
-#include <framework/gui/label.h>
 #include <framework/version.h>
 
 #include <game/application.h>
@@ -29,7 +30,7 @@ MainMenuWindow::MainMenuWindow() : exiting_(false), new_game_window_(nullptr), w
 
 MainMenuWindow::~MainMenuWindow() {
   if (wnd_ != nullptr) {
-    fw::Get<Gui>().detach_widget(wnd_);
+    fw::Get<Gui>().DetachWindow(wnd_);
   }
 }
 
@@ -37,32 +38,67 @@ void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
   new_game_window_ = new_game_window;
   std::string name = "Dean Harding";
   std::string email = "dean@codeka.com";
-  wnd_ = Builder<Window>(px(0), px(0), pct(100), pct(100))
+  wnd_ = Builder<Window>()
+      << Widget::width(LayoutParams::kMatchParent, 0.f)
+      << Widget::height(LayoutParams::kMatchParent, 0.f)
       << Window::background("title_background")
       << Widget::visible(false)
-      // Title "Ravaged Planets"
-      << (Builder<Label>(px(40), px(20), px(417), px(49))
-          << Label::background("title_heading"))
-      // "A game by Dean Harding (dean@codeka.com.au)" text
-      << (Builder<Label>(px(40), px(70), px(500), px(16))
-          << Label::text(std::vformat(fw::text("title.sub-title"), std::make_format_args(name, email))))
-      << (Builder<Button>(px(40), px(100), px(180), px(30))
-          << Button::text(fw::text("title.new-game"))
-          << Widget::click(std::bind(&MainMenuWindow::new_game_clicked, this, _1)))
-      << (Builder<Button>(px(40), px(140), px(180), px(30))
-          << Button::text(fw::text("title.join-game")))
-      << (Builder<Button>(px(40), px(180), px(180), px(30))
-          << Button::text(fw::text("title.options")))
-      << (Builder<Button>(px(40), px(220), px(180), px(30))
-          << Button::text(fw::text("title.editor"))
-          << Widget::click(std::bind(&MainMenuWindow::editor_clicked, this, _1)))
-      << (Builder<Button>(px(40), px(260), px(180), px(30))
-          << Button::text(fw::text("title.quit"))
-          << Widget::click(std::bind(&MainMenuWindow::quit_clicked, this, _1)))
+      << (Builder<LinearLayout>()
+          << Widget::width(LayoutParams::kMatchParent, 0.f)
+          << Widget::height(LayoutParams::kWrapContent, 0.f)
+          << Widget::margin(60.f, 0.f, 0.f, 40.f)
+				  << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
+          // Title "Ravaged Planets"
+          << (Builder<Label>()
+				      //<< Widget::width(LayoutParams::kWrapContent, 0.f)
+				      //<< Widget::height(LayoutParams::kWrapContent, 0.f)
+              << Widget::width(LayoutParams::kFixed, 417.f)
+              << Widget::height(LayoutParams::kFixed, 49.f)
+              << Label::background("title_heading"))
+          // "A game by Dean Harding (dean@codeka.com.au)" text
+         << (Builder<Label>()
+              //<< Widget::width(LayoutParams::kWrapContent, 0.f)
+              //<< Widget::height(LayoutParams::kWrapContent, 0.f)
+              << Widget::width(LayoutParams::kFixed, 500.f)
+              << Widget::height(LayoutParams::kFixed, 16.f)
+              << Label::text(std::vformat(fw::text("title.sub-title"), std::make_format_args(name, email))))
+          << (Builder<Button>()
+              << Button::text(fw::text("title.new-game"))
+              << Widget::width(LayoutParams::kFixed, 180)
+              << Widget::height(LayoutParams::kFixed, 30.f)
+              << Widget::margin(120.f, 0.f, 0.f, 0.f)
+              << Widget::click(std::bind(&MainMenuWindow::new_game_clicked, this, _1)))
+          << (Builder<Button>()
+              << Widget::width(LayoutParams::kFixed, 180)
+              << Widget::height(LayoutParams::kFixed, 30.f)
+              << Widget::margin(20.f, 0.f, 0.f, 0.f)
+              << Button::text(fw::text("title.join-game")))
+          << (Builder<Button>()
+              << Widget::width(LayoutParams::kFixed, 180)
+              << Widget::height(LayoutParams::kFixed, 30.f)
+              << Widget::margin(20.f, 0.f, 0.f, 0.f)
+              << Button::text(fw::text("title.options")))
+          << (Builder<Button>()
+              << Widget::width(LayoutParams::kFixed, 180)
+              << Widget::height(LayoutParams::kFixed, 30.f)
+              << Widget::margin(20.f, 0.f, 0.f, 0.f)
+              << Button::text(fw::text("title.editor"))
+              << Widget::click(std::bind(&MainMenuWindow::editor_clicked, this, _1)))
+          << (Builder<Button>()
+              << Widget::width(LayoutParams::kFixed, 180)
+              << Widget::height(LayoutParams::kFixed, 30.f)
+              << Widget::margin(20.f, 0.f, 0.f, 0.f)
+              << Button::text(fw::text("title.quit"))
+              << Widget::click(std::bind(&MainMenuWindow::quit_clicked, this, _1))))
       // "v1.2.3"
-      << (Builder<Label>(sum(pct(50.0f), px(100)), sum(pct(100), px(-20)), px(500), px(16))
+      << (Builder<Label>()
+          //<< Widget::width(LayoutParams::kWrapContent, 0.f)
+          //<< Widget::height(LayoutParams::kWrapContent, 0.f)
+          << Widget::width(LayoutParams::kFixed, 500.f)
+          << Widget::height(LayoutParams::kFixed, 16.f)
+				  << Widget::margin(0.f, 0.f, 20.f, 0.f) // TODO: align bottom?
           << Label::text(fw::version_str));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().AttachWindow(wnd_);
 }
 
 void MainMenuWindow::show() {

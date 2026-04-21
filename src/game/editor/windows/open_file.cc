@@ -53,7 +53,7 @@ OpenFileWindow::OpenFileWindow() : wnd_(nullptr), show_hidden_(false) {
 OpenFileWindow::~OpenFileWindow() {
 }
 
-void OpenFileWindow::Initialize() {
+void OpenFileWindow::Initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-200)), sum(pct(40), px(-150)), px(400), px(300))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<TextEdit>(px(8), px(8), sum(pct(100), px(-16)), px(18))
@@ -73,7 +73,7 @@ void OpenFileWindow::Initialize() {
       << (Builder<Checkbox>(px(8), sum(pct(100), px(-32)), px(150), px(18))
           << Checkbox::text("Show hidden files")
           << Widget::click(std::bind(&OpenFileWindow::OnShowHiddenClicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
   curr_directory_ = fw::user_base_path();
 }
 
@@ -97,14 +97,14 @@ void OpenFileWindow::AddRow(Listbox &lbx, std::string_view name) {
 
   std::string icon_name =
       fs::is_directory(full_path) ? "editor_icon_directory" : "editor_icon_file";
-
+  /*
   lbx.add_item(Builder<Widget>(px(0), px(0), pct(100), px(20))
       << (Builder<Label>(px(0), px(0), px(20), px(20))
-          << Label::background(icon_name, true /* centered */))
+          << Label::background(icon_name, true))
       << (Builder<Label>(px(28), px(0), sum(pct(75), px(-28)), px(20)) << Label::text(name))
       << (Builder<Label>(pct(75), px(0), pct(25), px(20))
           << Label::text(file_size) << Label::text_align(Label::kRight)));
-  items_.push_back(std::string(name));
+  items_.push_back(std::string(name));*/
 }
 
 void OpenFileWindow::Refresh() {
@@ -114,7 +114,7 @@ void OpenFileWindow::Refresh() {
     return;
   }
   auto lbx = wnd_->Find<Listbox>(FILE_LIST_ID);
-  lbx->clear();
+  lbx->Clear();
   items_.clear();
 
   curr_directory_ = fs::canonical(curr_directory_);

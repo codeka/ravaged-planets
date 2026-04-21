@@ -24,10 +24,10 @@ PauseWindow::PauseWindow() : wnd_(nullptr) {
 }
 
 PauseWindow::~PauseWindow() {
-  fw::Get<Gui>().detach_widget(wnd_);
+  //fw::Get<Gui>().detach_widget(wnd_);
 }
 
-void PauseWindow::initialize() {
+void PauseWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-75)), sum(pct(50), px(-100)), px(150), px(130))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(20))
@@ -42,7 +42,7 @@ void PauseWindow::initialize() {
           << Button::text(fw::text("hud.pause.exit-game"))
           << Button::click(std::bind(&PauseWindow::on_exit_game_clicked, this, _1)))
       ;
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 bool PauseWindow::on_resume_clicked(Widget &w) {

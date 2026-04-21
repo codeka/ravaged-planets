@@ -199,18 +199,18 @@ void Listbox::add_item(std::shared_ptr<Widget> w) {/*
   item_container_->AttachChild(item);
   item_container_->set_height(px(item_container_->get_height() + w->get_height()));
   items_.push_back(item);
-  update_thumb_button(true);
+  update_thumb_button(true);*/
 }
 
-void Listbox::clear() {
+void Listbox::Clear() {/*
   item_container_->ClearChildren();
   item_container_->set_height(px(0));
   item_container_->set_top(px(0));
   items_.clear();
-  update_thumb_button(true);
+  update_thumb_button(true);*/
 }
 
-void Listbox::update_thumb_button(bool adjust_height) {
+void Listbox::update_thumb_button(bool adjust_height) {/*
   float widget_height = get_height();
   float content_height = item_container_->get_height();
   float thumb_max_height = widget_height - 38.0f; // the up/down buttons

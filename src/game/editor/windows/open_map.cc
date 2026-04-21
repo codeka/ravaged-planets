@@ -32,7 +32,7 @@ OpenMapWindow::OpenMapWindow() : wnd_(nullptr) {
 OpenMapWindow::~OpenMapWindow() {
 }
 
-void OpenMapWindow::initialize() {
+void OpenMapWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-150)), px(200), px(200))
       << Window::background("frame") << Widget::visible(false)
       << (Builder<Listbox>(px(10), px(10), sum(pct(100), px(-20)), sum(pct(100), px(-50)))
@@ -52,7 +52,7 @@ void OpenMapWindow::initialize() {
         Builder<Label>(px(0), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
   }
 
-  fw::Get<Gui>().attach_widget(wnd_);
+  fw::Get<Gui>().attach_widget(wnd_);*/
 }
 
 bool OpenMapWindow::open_clicked(Widget &w) {
