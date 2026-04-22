@@ -14,7 +14,7 @@ class WindowInitialPosition {
     kCenter,
     kAbsolute,
   };
-  Type type = Type::kCenter;
+  Type type = Type::kAbsolute;
   float x = 0.f;
   float y = 0.f;
 
