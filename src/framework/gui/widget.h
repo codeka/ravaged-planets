@@ -80,6 +80,16 @@ public:
 		kWrapContent,
   };
 
+  enum Gravity {
+    kLeft = 1 << 0,
+    kTop = 1 << 1,
+    kRight = 1 << 2,
+    kBottom = 1 << 3,
+    kCenterHorizontal = 1 << 4,
+    kCenterVertical = 1 << 5,
+    kCenter = kCenterHorizontal | kCenterVertical,
+	};
+
   Mode width_mode;
   float width;
 
@@ -90,6 +100,9 @@ public:
   float right_margin;
 	float bottom_margin;
   float left_margin;
+
+	// Or-mask of Gravity values that specify how the widget should be positioned within it's parent.
+	int gravity = Gravity::kLeft | Gravity::kTop;
 
   LayoutParams() : width_mode(Mode::kFixed), width(0), height_mode(Mode::kFixed), height(0),
     top_margin(0), right_margin(0), bottom_margin(0), left_margin(0) {
@@ -114,6 +127,7 @@ protected:
   friend class WidgetNameProperty;
   friend class WidgetDataProperty;
   friend class WidgetEnabledProperty;
+  friend class WidgetGravityProperty;
 
   std::weak_ptr<Widget> parent_;
   std::shared_ptr<LayoutParams> layout_params_ = std::make_shared<LayoutParams>();
@@ -174,6 +188,7 @@ public:
   static std::unique_ptr<Property> name(std::string_view name);
   static std::unique_ptr<Property> data(std::any const &data);
   static std::unique_ptr<Property> enabled(bool enabled);
+	static std::unique_ptr<Property> gravity(int gravity);
 
   void AttachChild(std::shared_ptr<Widget> child);
 

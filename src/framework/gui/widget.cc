@@ -14,14 +14,13 @@ namespace fw::gui {
 
 class WidgetWidthHeightProperty : public Property {
 private:
-	bool is_width_;
+  bool is_width_;
   LayoutParams::Mode mode_;
   float value_;
 
 public:
   WidgetWidthHeightProperty(bool is_width, LayoutParams::Mode mode, float value)
-    : is_width_(is_width), mode_(mode), value_(value) {
-  }
+    : is_width_(is_width), mode_(mode), value_(value) {}
 
   void apply(Widget& widget) override {
     if (is_width_) {
@@ -30,7 +29,7 @@ public:
     } else {
       widget.get_layout_params()->height_mode = mode_;
       widget.get_layout_params()->height = value_;
-		}
+    }
   }
 };
 
@@ -43,8 +42,7 @@ private:
 
 public:
   WidgetMarginProperty(float top, float right, float bottom, float left)
-    : top_(top), right_(right), bottom_(bottom), left_(left) {
-  }
+    : top_(top), right_(right), bottom_(bottom), left_(left) {}
   void apply(Widget& widget) override {
     widget.get_layout_params()->top_margin = top_;
     widget.get_layout_params()->right_margin = right_;
@@ -58,8 +56,7 @@ private:
   std::function<bool(Widget&)> on_click_;
 public:
   WidgetClickProperty(std::function<bool(Widget&)> on_click)
-    : on_click_(on_click) {
-  }
+    : on_click_(on_click) {}
 
   void apply(Widget& widget) override {
     widget.on_click_ = on_click_;
@@ -71,8 +68,7 @@ private:
   int id_;
 public:
   WidgetIdProperty(int id)
-    : id_(id) {
-  }
+    : id_(id) {}
 
   void apply(Widget& widget) override {
     widget.id_ = id_;
@@ -84,8 +80,7 @@ private:
   std::string name_;
 public:
   WidgetNameProperty(std::string_view name)
-    : name_(name) {
-  }
+    : name_(name) {}
 
   void apply(Widget& widget) override {
     widget.name_ = name_;
@@ -97,8 +92,7 @@ private:
   bool visible_;
 public:
   WidgetVisibleProperty(bool visible)
-    : visible_(visible) {
-  }
+    : visible_(visible) {}
 
   void apply(Widget& widget) override {
     widget.visible_ = visible_;
@@ -110,8 +104,7 @@ private:
   std::any data_;
 public:
   WidgetDataProperty(std::any const& data)
-    : data_(data) {
-  }
+    : data_(data) {}
 
   void apply(Widget& widget) override {
     widget.data_ = data_;
@@ -123,25 +116,37 @@ private:
   bool enabled_;
 public:
   WidgetEnabledProperty(bool enabled)
-    : enabled_(enabled) {
-  }
+    : enabled_(enabled) {}
 
   void apply(Widget& widget) override {
     widget.set_enabled(enabled_);
   }
 };
 
+class WidgetGravityProperty : public Property {
+private:
+  int gravity_;
+public:
+  WidgetGravityProperty(int gravity)
+    : gravity_(gravity) {}
+
+  void apply(Widget& widget) override {
+		auto lp = widget.get_layout_params();
+    if (lp) {
+      lp->gravity = gravity_;
+		}
+  }
+};
+
 //-----------------------------------------------------------------------------
 
 Widget::Widget() :
-  measured_size_(0,0) {
-}
+  measured_size_(0, 0) {}
 
-Widget::~Widget() {
-}
+Widget::~Widget() {}
 
 std::unique_ptr<Property> Widget::width(LayoutParams::Mode mode, float width) {
-	return std::make_unique<WidgetWidthHeightProperty>(true, mode, width);
+  return std::make_unique<WidgetWidthHeightProperty>(true, mode, width);
 }
 
 std::unique_ptr<Property> Widget::height(LayoutParams::Mode mode, float height) {
@@ -174,6 +179,10 @@ std::unique_ptr<Property> Widget::data(std::any const& data) {
 
 std::unique_ptr<Property> Widget::enabled(bool enabled) {
   return std::make_unique<WidgetEnabledProperty>(enabled);
+}
+
+std::unique_ptr<Property> Widget::gravity(int gravity) {
+  return std::make_unique<WidgetGravityProperty>(gravity);
 }
 
 void Widget::AttachChild(std::shared_ptr<Widget> child) {
@@ -362,9 +371,20 @@ void Widget::OnLayout(float top, float right, float bottom, float left) {
     float child_left = 0;
     float child_top = 0;
 
-    // TODO: gravity?
-    child_left = lp->left_margin;
-    child_top = lp->top_margin;
+		if (lp->gravity & LayoutParams::Gravity::kLeft) {
+      child_left = lp->left_margin;
+    } else if (lp->gravity & LayoutParams::Gravity::kRight) {
+      child_left = width_ - measured_size.width - lp->right_margin;
+    } else if (lp->gravity & LayoutParams::Gravity::kCenterHorizontal) {
+      child_left = (width_ - measured_size.width) / 2.f + lp->left_margin - lp->right_margin;
+    }
+		if (lp->gravity & LayoutParams::Gravity::kTop) {
+      child_top = lp->top_margin;
+    } else if (lp->gravity & LayoutParams::Gravity::kBottom) {
+      child_top = height_ - measured_size.height - lp->bottom_margin;
+    } else if (lp->gravity & LayoutParams::Gravity::kCenterVertical) {
+      child_top = (height_ - measured_size.height) / 2.f + lp->top_margin - lp->bottom_margin;
+    }
 
     child->PerformLayout(
       child_top,

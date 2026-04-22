@@ -3,7 +3,6 @@
 #include <string>
 
 #include <framework/framework.h>
-#include <framework/lang.h>
 #include <framework/gui/builder.h>
 #include <framework/gui/button.h>
 #include <framework/gui/gui.h>
@@ -11,13 +10,14 @@
 #include <framework/gui/linear_layout.h>
 #include <framework/gui/widget.h>
 #include <framework/gui/window.h>
+#include <framework/lang.h>
 #include <framework/version.h>
 
 #include <game/application.h>
+#include <game/screens/screen.h>
 #include <game/screens/title/main_menu_window.h>
 #include <game/screens/title/new_game_window.h>
 #include <game/screens/title/join_game_window.h>
-#include <game/screens/screen.h>
 #include <game/session/session.h>
 
 using namespace std::placeholders;
@@ -59,7 +59,8 @@ void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
               << Widget::width(LayoutParams::kWrapContent, 0.f)
               << Widget::height(LayoutParams::kWrapContent, 0.f)
               << Widget::name("subtitle")
-              << Label::text(std::vformat(fw::text("title.sub-title"), std::make_format_args(name, email))))
+              << Label::text(
+                  std::vformat(fw::text("title.sub-title"), std::make_format_args(name, email))))
           << (Builder<Button>()
               << Widget::width(LayoutParams::kFixed, 180)
               << Widget::height(LayoutParams::kFixed, 30.f)
@@ -92,7 +93,8 @@ void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
       << (Builder<Label>()
           << Widget::width(LayoutParams::kWrapContent, 0.f)
           << Widget::height(LayoutParams::kWrapContent, 0.f)
-				  << Widget::margin(0.f, 0.f, 20.f, 0.f) // TODO: align bottom?
+				  << Widget::margin(0.f, 20.f, 20.f, 0.f)
+          << Widget::gravity(LayoutParams::Gravity::kBottom | LayoutParams::Gravity::kRight)
           << Label::text(fw::version_str));
   fw::Get<Gui>().AttachWindow(wnd_);
 }
