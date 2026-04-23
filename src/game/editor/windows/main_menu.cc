@@ -227,7 +227,7 @@ bool MainMenuWindow::file_save_clicked(fw::gui::Widget &w) {
 }
 
 bool MainMenuWindow::file_show_message_clicked(fw::gui::Widget& w) {
-  message_box->show("foo", "This is a message box! Isn't it great?", []() {
+  message_box->show("foo", "This is a message box! Isn't it great? Blah blah blah, yada yada yada.", []() {
     LOG(INFO) << "You clicked OK on the message box!" << std::endl;
 	  });
   return true;

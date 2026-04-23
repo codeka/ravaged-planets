@@ -138,6 +138,25 @@ public:
   }
 };
 
+class WidgetPaddingProperty : public Property {
+private:
+  float top_; 
+  float right_;
+  float bottom_;
+  float left_;
+
+public:
+  WidgetPaddingProperty(float top, float right, float bottom, float left)
+    : top_(top), right_(right), bottom_(bottom), left_(left) {}
+
+  void apply(Widget& widget) override {
+    widget.padding_top_= top_;
+    widget.padding_right_ = right_;
+    widget.padding_bottom_ = bottom_;
+    widget.padding_left_ = left_;
+  }
+};
+
 //-----------------------------------------------------------------------------
 
 Widget::Widget() :
@@ -183,6 +202,10 @@ std::unique_ptr<Property> Widget::enabled(bool enabled) {
 
 std::unique_ptr<Property> Widget::gravity(int gravity) {
   return std::make_unique<WidgetGravityProperty>(gravity);
+}
+
+std::unique_ptr<Property> Widget::padding(float top, float right, float bottom, float left) {
+  return std::make_unique<WidgetPaddingProperty>(top, right, bottom, left);
 }
 
 void Widget::AttachChild(std::shared_ptr<Widget> child) {

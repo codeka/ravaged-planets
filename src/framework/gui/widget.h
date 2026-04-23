@@ -128,6 +128,7 @@ protected:
   friend class WidgetDataProperty;
   friend class WidgetEnabledProperty;
   friend class WidgetGravityProperty;
+	friend class WidgetPaddingProperty;
 
   std::weak_ptr<Widget> parent_;
   std::shared_ptr<LayoutParams> layout_params_ = std::make_shared<LayoutParams>();
@@ -138,6 +139,10 @@ protected:
   float y_ = 0.f;
   float width_ = 0.f;
   float height_ = 0.f;
+	float padding_top_ = 0.f;
+	float padding_right_ = 0.f;
+	float padding_bottom_ = 0.f;
+	float padding_left_ = 0.f;
   bool visible_ = true;
   bool focused_ = false;
   bool enabled_ = true;
@@ -189,6 +194,7 @@ public:
   static std::unique_ptr<Property> data(std::any const &data);
   static std::unique_ptr<Property> enabled(bool enabled);
 	static std::unique_ptr<Property> gravity(int gravity);
+	static std::unique_ptr<Property> padding(float top, float right, float bottom, float left);
 
   void AttachChild(std::shared_ptr<Widget> child);
 
