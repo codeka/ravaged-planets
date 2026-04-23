@@ -371,19 +371,21 @@ void Widget::OnLayout(float top, float right, float bottom, float left) {
     float child_left = 0;
     float child_top = 0;
 
-		if (lp->gravity & LayoutParams::Gravity::kLeft) {
-      child_left = lp->left_margin;
-    } else if (lp->gravity & LayoutParams::Gravity::kRight) {
+		if (lp->gravity & LayoutParams::Gravity::kRight) {
       child_left = width_ - measured_size.width - lp->right_margin;
     } else if (lp->gravity & LayoutParams::Gravity::kCenterHorizontal) {
       child_left = (width_ - measured_size.width) / 2.f + lp->left_margin - lp->right_margin;
+    } else {
+      // kLeft
+      child_left = lp->left_margin;
     }
-		if (lp->gravity & LayoutParams::Gravity::kTop) {
-      child_top = lp->top_margin;
-    } else if (lp->gravity & LayoutParams::Gravity::kBottom) {
+		if (lp->gravity & LayoutParams::Gravity::kBottom) {
       child_top = height_ - measured_size.height - lp->bottom_margin;
     } else if (lp->gravity & LayoutParams::Gravity::kCenterVertical) {
       child_top = (height_ - measured_size.height) / 2.f + lp->top_margin - lp->bottom_margin;
+    } else {
+      // kTop
+      child_top = lp->top_margin;
     }
 
     child->PerformLayout(

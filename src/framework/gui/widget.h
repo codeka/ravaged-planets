@@ -81,12 +81,12 @@ public:
   };
 
   enum Gravity {
-    kLeft = 1 << 0,
-    kTop = 1 << 1,
-    kRight = 1 << 2,
-    kBottom = 1 << 3,
-    kCenterHorizontal = 1 << 4,
-    kCenterVertical = 1 << 5,
+    kLeft = 0,
+    kTop = 0,
+    kRight = 1 << 0,
+    kBottom = 1 << 1,
+    kCenterHorizontal = 1 << 2,
+    kCenterVertical = 1 << 3,
     kCenter = kCenterHorizontal | kCenterVertical,
 	};
 

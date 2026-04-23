@@ -5,6 +5,7 @@
 #include <framework/gui/button.h>
 #include <framework/gui/label.h>
 #include <framework/gui/widget.h>
+#include <framework/gui/linear_layout.h>
 
 namespace ed {
 namespace {
@@ -19,17 +20,32 @@ constexpr int MESSAGE_BOX_MESSAGE_ID = 2;
 
 std::unique_ptr<MessageBoxWindow> message_box;
 
-void MessageBoxWindow::initialize() {/*
-  wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-100)), px(200), px(100))
+void MessageBoxWindow::initialize() {
+  wnd_ = Builder<Window>()
+      << Widget::width(LayoutParams::Mode::kFixed, 240.f)
+      << Widget::height(LayoutParams::Mode::kWrapContent, 0)
+		  << Window::initial_position(WindowInitialPosition::Center())
       << Window::background("frame") << Widget::visible(false)
-      << (Builder<Label>(px(10), px(10), sum(pct(100), px(-20)), px(18))
-          << Widget::id(MESSAGE_BOX_CAPTION_ID))
-    << (Builder<Label>(px(10), px(30), sum(pct(100), px(-20)), px(18))
-        << Widget::id(MESSAGE_BOX_MESSAGE_ID))
-    << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20))
-        << Button::text("OK")
-        << Widget::click(std::bind(&MessageBoxWindow::ok_clicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);*/
+      << (Builder<LinearLayout>()
+          << Widget::width(LayoutParams::Mode::kMatchParent, 0)
+          << Widget::height(LayoutParams::Mode::kWrapContent, 0)
+				  << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
+          << (Builder<Label>()
+              << Widget::width(LayoutParams::Mode::kMatchParent, 0)
+              << Widget::height(LayoutParams::Mode::kWrapContent, 0)
+              << Widget::id(MESSAGE_BOX_CAPTION_ID))
+          << (Builder<Label>()
+              << Widget::width(LayoutParams::Mode::kMatchParent, 0)
+              << Widget::height(LayoutParams::Mode::kWrapContent, 0)
+              << Widget::id(MESSAGE_BOX_MESSAGE_ID))
+          << (Builder<Button>()
+              << Widget::width(LayoutParams::Mode::kFixed, 100.f)
+              << Widget::height(LayoutParams::Mode::kFixed, 20.f)
+							<< Widget::margin(10.f, 0.f, 10.f, 0.f)
+						  << Widget::gravity(LayoutParams::Gravity::kCenterHorizontal)
+              << Button::text("OK")
+              << Widget::click(std::bind(&MessageBoxWindow::ok_clicked, this, _1))));
+  fw::Get<Gui>().AttachWindow(wnd_);
 }
 
 void MessageBoxWindow::show(
