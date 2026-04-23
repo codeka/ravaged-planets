@@ -39,7 +39,7 @@ NewAIPlayerWindow::~NewAIPlayerWindow() {
 void NewAIPlayerWindow::initialize(NewGameWindow *new_game_window) {/*
   new_game_window_ = new_game_window;
   wnd_ = Builder<Window>(sum(pct(50), px(-250)), sum(pct(40), px(-100)), px(500), px(200))
-      << Window::background("frame")
+      << Widget::background("frame")
       << Widget::visible(false)
       << (Builder<Listbox>(px(10), px(10), px(250), sum(pct(100), px(-60)))
           << Widget::id(AI_LIST_ID))

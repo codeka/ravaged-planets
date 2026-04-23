@@ -155,7 +155,7 @@ BuildWindow::~BuildWindow() {
 
 void BuildWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(100), px(-210)), px(220), px(200), px(200))
-      << Window::background("frame") << Widget::visible(false)
+      << Widget::background("frame") << Widget::visible(false)
       << (Builder<Button>(px(10), px(10), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 0))
       << (Builder<Button>(px(73), px(10), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 1))
       << (Builder<Button>(px(136), px(10), px(54), px(54)) << Widget::id(FIRST_BUILD_BUTTON_ID + 2))

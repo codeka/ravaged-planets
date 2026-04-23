@@ -49,7 +49,7 @@ public:
 };
 
 TextureToolWindow::TextureToolWindow(ed::TextureTool &tool) : tool_(tool) {/*
-  wnd_ = Builder<Window>(px(10), px(30), px(100), px(262)) << Window::background("frame")
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(262)) << Widget::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
       << (Builder<Slider>(px(4), px(26), sum(pct(100), px(-8)), px(18))
           << Slider::limits(10, 100)

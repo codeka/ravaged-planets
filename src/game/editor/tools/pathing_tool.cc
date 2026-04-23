@@ -72,7 +72,7 @@ public:
 PathingToolWindow::PathingToolWindow(ed::PathingTool &tool) :
     tool_(tool) {/*
   wnd_ = Builder<Window>(px(10), px(30), px(100), px(94))
-      << Window::background("frame")
+      << Widget::background("frame")
       << (Builder<Button>(px(4), px(4), sum(pct(100), px(-8)), px(30))
           << Button::text("Start")
           << Widget::id(START_ID)

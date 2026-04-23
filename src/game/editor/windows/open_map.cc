@@ -34,7 +34,7 @@ OpenMapWindow::~OpenMapWindow() {
 
 void OpenMapWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-150)), px(200), px(200))
-      << Window::background("frame") << Widget::visible(false)
+      << Widget::background("frame") << Widget::visible(false)
       << (Builder<Listbox>(px(10), px(10), sum(pct(100), px(-20)), sum(pct(100), px(-50)))
           << Widget::id(MAP_LIST))
       << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20))

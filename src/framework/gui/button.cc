@@ -22,11 +22,15 @@ public:
   }
 
   void apply(Widget &widget) override {
-    Button &btn = dynamic_cast<Button &>(widget);
+    Button* btn = dynamic_cast<Button*>(&widget);
+    if (!btn) {
+      LOG(WARN) << "Button::background set on non-button widget " << widget.get_name();
+      return;
+    }
     if (drawable_) {
-      btn.background_ = drawable_;
+      btn->background_ = drawable_;
     } else {
-      btn.background_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
+      btn->background_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
     }
   }
 };
@@ -45,11 +49,15 @@ public:
   }
 
   void apply(Widget &widget) override {
-    Button &btn = dynamic_cast<Button &>(widget);
+    Button* btn = dynamic_cast<Button*>(&widget);
+    if (!btn) {
+      LOG(WARN) << "Button::icon set on non-button widget " << widget.get_name();
+      return;
+    }
     if (drawable_) {
-      btn.icon_ = drawable_;
+      btn->icon_ = drawable_;
     } else {
-      btn.icon_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
+      btn->icon_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
     }
   }
 };
@@ -64,8 +72,12 @@ public:
   }
 
   void apply(Widget &widget) override {
-    Button &btn = dynamic_cast<Button &>(widget);
-    btn.text_ = text_;
+    Button *btn = dynamic_cast<Button *>(&widget);
+    if (!btn) {
+			LOG(WARN) << "Button::text set on non-button widget " << widget.get_name();
+      return;
+    }
+    btn->text_ = text_;
   }
 };
 

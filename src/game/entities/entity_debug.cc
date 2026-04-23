@@ -66,7 +66,7 @@ EntityDebug::~EntityDebug() {
 
 void EntityDebug::initialize() {/*
   wnd_ = Builder<Window>(px(10), px(10), px(200), px(172))
-      << Window::background("frame") << Widget::visible(false)
+      << Widget::background("frame") << Widget::visible(false)
       << (Builder<Checkbox>(px(10), px(10), sum(pct(100), px(-20)), px(26))
           << Checkbox::text("Show steering") << Widget::id(SHOW_STEERING_ID)
           << Widget::click(std::bind(&EntityDebug::on_show_steering_changed, this, _1)))

@@ -38,7 +38,7 @@ NewMapWindow::~NewMapWindow() {
 
 void NewMapWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-100)), px(200), px(100))
-          << Window::background("frame") << Widget::visible(false)
+          << Widget::background("frame") << Widget::visible(false)
       << (Builder<Label>(px(10), px(10), sum(pct(100), px(-20)), px(18))
           << Label::text("Size:"))
       << (Builder<TextEdit>(px(10), px(30), sum(pct(50), px(-20)), px(20))

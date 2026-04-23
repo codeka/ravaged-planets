@@ -89,7 +89,7 @@ fw::Status Application::initialize(fw::Framework *frmwrk) {
 
   std::shared_ptr<Window> wnd =
       Builder<Window>(px(20), px(20), px(150), px(130))
-      << Window::background("frame")
+      << Widget::background("frame")
       << (Builder<Button>(px(10), px(10), px(130), px(30))
           << Button::text("Restart")
           << Widget::click(std::bind<bool>(restart_handler, std::placeholders::_1)))

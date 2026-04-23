@@ -97,7 +97,7 @@ MinimapWindow::~MinimapWindow() {
 
 void MinimapWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(100), px(-210)), px(10), px(200), px(200))
-      << Window::background("frame")
+      << Widget::background("frame")
           << Widget::visible(false)
       << (Builder<Label>(px(8), px(8), sum(pct(100), px(-16)), sum(pct(100), px(-16)))
           << Widget::id(MINIMAP_IMAGE_ID))

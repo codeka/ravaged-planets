@@ -45,7 +45,7 @@ public:
 };
 
 PlayersToolWindow::PlayersToolWindow(ed::PlayersTool &tool) : tool_(tool) {/*
-  wnd_ = Builder<Window>(px(10), px(30), px(100), px(200)) << Window::background("frame")
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(200)) << Widget::background("frame")
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(18)) << Label::text("Num players:"))
       << (Builder<TextEdit>(px(4), px(26), sum(pct(100), px(-8)), px(20))
           << TextEdit::text("4") << Widget::id(NUM_PLAYERS_ID))

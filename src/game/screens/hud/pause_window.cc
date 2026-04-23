@@ -29,7 +29,7 @@ PauseWindow::~PauseWindow() {
 
 void PauseWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-75)), sum(pct(50), px(-100)), px(150), px(130))
-      << Window::background("frame") << Widget::visible(false)
+      << Widget::background("frame") << Widget::visible(false)
       << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(20))
          << Label::text(fw::text("hud.pause.title")))
       << (Builder<Button>(px(4), px(28), sum(pct(100), px(-8)), px(30))

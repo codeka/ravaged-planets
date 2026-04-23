@@ -226,7 +226,7 @@ public:
 
 HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *tool) :
     tool_(tool) {/*
-  wnd_ = Builder<Window>(px(10), px(30), px(100), px(170)) << Window::background("frame")
+  wnd_ = Builder<Window>(px(10), px(30), px(100), px(170)) << Widget::background("frame")
       << (Builder<Button>(px(8), px(8), px(36), px(36)) << Widget::id(RAISE_LOWER_BRUSH_ID)
           << Button::icon("editor_hightfield_raiselower")
           << Button::click(std::bind(&HeightfieldToolWindow::on_tool_clicked, this, _1)))

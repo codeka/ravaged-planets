@@ -6,20 +6,6 @@
 
 namespace fw::gui {
 
-class WindowBackgroundProperty : public Property {
-private:
-  std::string drawable_name_;
-public:
-  WindowBackgroundProperty(std::string_view drawable_name)
-      : drawable_name_(drawable_name) {
-  }
-
-  void apply(Widget &widget) override {
-    Window &wnd = dynamic_cast<Window &>(widget);
-    wnd.background_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
-  }
-};
-
 class WindowInitialPositionProperty : public Property {
 private:
   WindowInitialPosition initial_position_;
@@ -40,10 +26,6 @@ std::unique_ptr<Property> Window::initial_position(WindowInitialPosition initial
 	return std::make_unique<WindowInitialPositionProperty>(initial_position);
 }
 
-std::unique_ptr<Property> Window::background(std::string_view drawable_name) {
-  return std::make_unique<WindowBackgroundProperty>(drawable_name);
-}
-
 Window::Window() : Widget() {
 }
 
@@ -51,11 +33,6 @@ Window::~Window() {
 }
 
 void Window::render() {
-  if (background_) {
-    auto rect = GetScreenRect();
-		background_->Render(rect);
-  }
-
   Widget::render();
 }
 

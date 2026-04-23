@@ -12,8 +12,12 @@ public:
 		: orientation_(orientation) {}
 
 	void apply(Widget& widget) override {
-		LinearLayout& layout = dynamic_cast<LinearLayout&>(widget);
-		layout.set_orientation(orientation_);
+		LinearLayout* layout = dynamic_cast<LinearLayout*>(&widget);
+    if (!layout) {
+      LOG(WARN) << "LinearLayout::orientation set on non-LinearLayout widget " << widget.get_name();
+			return;
+    }
+		layout->set_orientation(orientation_);
 	}
 private:
 	LinearLayout::Orientation orientation_;
@@ -26,9 +30,11 @@ public:
 
   void apply(Widget& widget) override {
     auto lp = widget.get_layout_params<LinearLayoutParams>();
-    if (lp) {
-			lp->weight = weight_;
+    if (!lp) {
+      LOG(WARN) << "LinearLayout::weight set on widget " << widget.get_name() << " with non-LinearLayout layout params";
+			return;
     }
+   	lp->weight = weight_;
   }
 private:
   float weight_;

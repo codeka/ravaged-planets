@@ -38,7 +38,7 @@ SaveMapWindow::~SaveMapWindow() {
 
 void SaveMapWindow::initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-250)), sum(pct(50), px(-150)), px(500), px(232))
-      << Window::background("frame") << Widget::visible(false)
+      << Widget::background("frame") << Widget::visible(false)
       << (Builder<Label>(px(10), px(10), px(80), px(20)) << Label::text("Name:"))
       << (Builder<TextEdit>(px(90), px(10), px(160), px(20)) << Widget::id(NAME_ID))
       << (Builder<Label>(px(10), px(40), px(80), px(20)) << Label::text("Author:"))

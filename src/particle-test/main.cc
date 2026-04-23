@@ -113,7 +113,7 @@ fw::Status Application::initialize(fw::Framework *frmwrk) {
       << Widget::height(LayoutParams::kWrapContent, 0.0f)
       << Widget::margin(15.0f, 15.0f, 15.0f, 15.0f)
       << Window::initial_position(WindowInitialPosition::Absolute(0.f, 0.f))
-      << Window::background("frame")
+      << Widget::background("frame")
       << (Builder<LinearLayout>()
 				<< Widget::width(LayoutParams::kMatchParent, 0.f)
 				<< Widget::height(LayoutParams::kWrapContent, 0.f)

@@ -157,6 +157,18 @@ public:
   }
 };
 
+class WidgetBackgroundProperty : public Property {
+private:
+  std::string drawable_name_;
+public:
+  WidgetBackgroundProperty(std::string_view drawable_name)
+    : drawable_name_(drawable_name) {}
+
+  void apply(Widget& widget) override {
+    widget.background_ = fw::Get<Gui>().get_drawable_manager().get_drawable(drawable_name_);
+  }
+};
+
 //-----------------------------------------------------------------------------
 
 Widget::Widget() :
@@ -206,6 +218,10 @@ std::unique_ptr<Property> Widget::gravity(int gravity) {
 
 std::unique_ptr<Property> Widget::padding(float top, float right, float bottom, float left) {
   return std::make_unique<WidgetPaddingProperty>(top, right, bottom, left);
+}
+
+std::unique_ptr<Property> Widget::background(std::string_view drawable_name) {
+  return std::make_unique<WidgetBackgroundProperty>(drawable_name);
 }
 
 void Widget::AttachChild(std::shared_ptr<Widget> child) {
@@ -473,6 +489,11 @@ bool Widget::prerender() {
 }
 
 void Widget::render() {
+  if (background_) {
+    auto rect = GetScreenRect();
+    background_->Render(rect);
+  }
+
   for(auto &child : children_) {
     if (child->is_visible() && child->prerender()) {
       child->render();

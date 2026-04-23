@@ -6,6 +6,7 @@
 #include <string_view>
 #include <vector>
 
+#include <framework/gui/drawable.h>
 #include <framework/math.h>
 #include <framework/misc.h>
 #include <framework/signals.h>
@@ -129,6 +130,7 @@ protected:
   friend class WidgetEnabledProperty;
   friend class WidgetGravityProperty;
 	friend class WidgetPaddingProperty;
+  friend class WidgetBackgroundProperty;
 
   std::weak_ptr<Widget> parent_;
   std::shared_ptr<LayoutParams> layout_params_ = std::make_shared<LayoutParams>();
@@ -149,6 +151,7 @@ protected:
   std::function<bool(Widget&)> on_click_;
   std::any data_;
 	MeasuredSize measured_size_;
+  std::shared_ptr<Drawable> background_;
 
   MeasuredSize ResolveSize(
       MeasureSpec width_spec,
@@ -195,6 +198,7 @@ public:
   static std::unique_ptr<Property> enabled(bool enabled);
 	static std::unique_ptr<Property> gravity(int gravity);
 	static std::unique_ptr<Property> padding(float top, float right, float bottom, float left);
+  static std::unique_ptr<Property> background(std::string_view drawable_name);
 
   void AttachChild(std::shared_ptr<Widget> child);
 

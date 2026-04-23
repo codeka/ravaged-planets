@@ -41,7 +41,7 @@ void MainMenuWindow::initialize(NewGameWindow * new_game_window) {
   wnd_ = Builder<Window>()
       << Widget::width(LayoutParams::kMatchParent, 0.f)
       << Widget::height(LayoutParams::kMatchParent, 0.f)
-      << Window::background("title_background")
+      << Widget::background("title_background")
       << Widget::visible(false)
       << (Builder<LinearLayout>()
           << Widget::width(LayoutParams::kMatchParent, 0.f)

@@ -55,7 +55,7 @@ OpenFileWindow::~OpenFileWindow() {
 
 void OpenFileWindow::Initialize() {/*
   wnd_ = Builder<Window>(sum(pct(50), px(-200)), sum(pct(40), px(-150)), px(400), px(300))
-      << Window::background("frame") << Widget::visible(false)
+      << Widget::background("frame") << Widget::visible(false)
       << (Builder<TextEdit>(px(8), px(8), sum(pct(100), px(-16)), px(18))
           << Widget::id(FILENAME_ID))
       << (Builder<Listbox>(px(8), px(30), sum(pct(66), px(-12)), sum(pct(100), px(-76)))

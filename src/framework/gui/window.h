@@ -33,10 +33,8 @@ class WindowInitialPosition {
 // happens inside a window.
 class Window : public Widget {
 private:
-  friend class WindowBackgroundProperty;
   friend class WindowInitialPositionProperty;
 
-  std::shared_ptr<Drawable> background_;
 	WindowInitialPosition initial_position_;
 	bool need_layout_ = true;
 	bool need_initial_position_ = false;
@@ -46,7 +44,6 @@ public:
   ~Window();
 
 	static std::unique_ptr<Property> initial_position(WindowInitialPosition initial_position);
-  static std::unique_ptr<Property> background(std::string_view drawable_name);
 
 	void update(float dt) override;
   void render() override;
