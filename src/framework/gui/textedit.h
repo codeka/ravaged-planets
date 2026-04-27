@@ -33,16 +33,18 @@ public:
   static std::unique_ptr<Property> text(std::string_view text);
   static std::unique_ptr<Property> filter(std::function<bool(std::string ch)> filter);
 
-  virtual void on_focus_gained();
-  virtual void on_focus_lost();
-  virtual bool on_key(int key, bool is_down);
-  virtual bool on_mouse_down(float x, float y);
-  virtual bool on_mouse_up(float x, float y);
+  fw::Point OnMeasureSelf() override;
 
-  virtual bool can_focus() const {
+  void on_focus_gained() override;
+  void on_focus_lost() override;
+  bool on_key(int key, bool is_down) override;
+  bool on_mouse_down(float x, float y) override;
+  bool on_mouse_up(float x, float y) override;
+
+  bool can_focus() const override {
     return true;
   }
-  virtual std::string get_cursor_name() const;
+  std::string get_cursor_name() const override;
 
   void select_all();
   std::string get_text() const;
@@ -50,8 +52,8 @@ public:
 
   void set_filter(std::function<bool(std::string ch)> filter);
 
-  virtual void update(float dt);
-  virtual void render();
+  void update(float dt) override;
+  void render() override;
 };
 
 }  // namespace fw::gui

@@ -19,6 +19,7 @@
 #include <game/editor/windows/new_map.h>
 #include <game/editor/windows/message_box.h>
 #include <game/editor/editor_screen.h>
+#include <framework/gui/linear_layout.h>
 
 namespace ed {
 
@@ -36,24 +37,67 @@ NewMapWindow::NewMapWindow() : wnd_(nullptr) {
 NewMapWindow::~NewMapWindow() {
 }
 
-void NewMapWindow::initialize() {/*
-  wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-100)), px(200), px(100))
-          << Widget::background("frame") << Widget::visible(false)
-      << (Builder<Label>(px(10), px(10), sum(pct(100), px(-20)), px(18))
-          << Label::text("Size:"))
-      << (Builder<TextEdit>(px(10), px(30), sum(pct(50), px(-20)), px(20))
-          << TextEdit::text("4") << Widget::id(WIDTH_ID))
-      << (Builder<Label>(sum(pct(50), px(-8)), px(30), px(16), px(20))
-          << Label::text("x"))
-      << (Builder<TextEdit>(sum(pct(50), px(10)), px(30), sum(pct(50), px(-20)), px(20))
-          << TextEdit::text("4") << Widget::id(HEIGHT_ID))
-      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20)) 
-          << Button::text("Create")
-          << Widget::click(std::bind(&NewMapWindow::ok_clicked, this, _1)))
-      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20))
-          << Button::text("Cancel")
-          << Widget::click(std::bind(&NewMapWindow::cancel_clicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);*/
+void NewMapWindow::initialize() {
+  wnd_ = Builder<Window>()
+      << Widget::width(Widget::Fixed(400.f))
+      << Widget::height(Widget::WrapContent())
+      << Widget::background("frame")
+      << Window::initial_position(WindowInitialPosition::Center())
+      << Widget::visible(false)
+      << (Builder<LinearLayout>()
+          << Widget::width(Widget::MatchParent())
+          << Widget::height(Widget::WrapContent())
+          << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
+          << (Builder<Label>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::WrapContent())
+              << Widget::margin(10.f, 10.f, 5.f, 10.f)
+              << Label::text("Size:"))
+          << (Builder<LinearLayout>()
+            << Widget::width(Widget::MatchParent())
+            << Widget::height(Widget::WrapContent())
+            << Widget::margin(5.f, 10.f, 5.f, 10.f)
+            << LinearLayout::orientation(LinearLayout::Orientation::kHorizontal)
+                << (Builder<TextEdit>()
+                    << LinearLayout::weight(1.0f)
+                    << Widget::height(Widget::WrapContent())
+                    << Widget::padding(4.f, 4.f, 4.f, 4.f)
+                    << TextEdit::text("4")
+                    << Widget::id(WIDTH_ID))
+                << (Builder<Label>()
+                    << Widget::width(Widget::WrapContent())
+                    << Widget::height(Widget::WrapContent())
+                    << Widget::margin(0.f, 10.f, 0.f, 10.f)
+                    << Label::text("x"))
+                << (Builder<TextEdit>()
+                  << LinearLayout::weight(1.0f)
+                  << Widget::height(Widget::WrapContent())
+                  << Widget::padding(4.f, 4.f, 4.f, 4.f)
+                  << TextEdit::text("4")
+                  << Widget::id(HEIGHT_ID))
+          )
+          << (Builder<LinearLayout>()
+            << Widget::width(Widget::MatchParent())
+            << Widget::height(Widget::WrapContent())
+            << Widget::margin(5.f, 10.f, 10.f, 10.f)
+            << LinearLayout::orientation(LinearLayout::Orientation::kHorizontal)
+            << (Builder<Widget>()
+                << LinearLayout::weight(1.0f)
+                << Widget::height(Widget::Fixed(1.f)))
+            << (Builder<Button>()
+                << Widget::width(Widget::Fixed(100.f))
+                << Widget::height(Widget::Fixed(30.f))
+                << Widget::margin(0.f, 5.f, 0.f, 0.f)
+                << Button::text("Cancel")
+                << Widget::click(std::bind(&NewMapWindow::cancel_clicked, this, _1)))
+            << (Builder<Button>()
+              << Widget::width(Widget::Fixed(100.f))
+              << Widget::height(Widget::Fixed(30.f))
+              << Widget::margin(0.f, 0.f, 0.f, 5.f)
+              << Button::text("Create")
+              << Widget::click(std::bind(&NewMapWindow::ok_clicked, this, _1)))
+      ));
+  fw::Get<Gui>().AttachWindow(wnd_);
 }
 
 void NewMapWindow::show() {
@@ -72,8 +116,7 @@ bool NewMapWindow::ok_clicked(Widget &w) {
 
   if (!absl::SimpleAtoi(wnd_->Find<TextEdit>(WIDTH_ID)->get_text(), &width) ||
       !absl::SimpleAtoi(wnd_->Find<TextEdit>(HEIGHT_ID)->get_text(), &height)) {
-    // TODO: show error
-//    message_box->show("Invalid Parameters", "Width and Height must be an integer.");
+    message_box->show("Invalid Parameters", "Width and Height must be an integer.", []() {});
     return true;
   }
 
