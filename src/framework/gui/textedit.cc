@@ -228,6 +228,9 @@ std::string TextEdit::get_text() const {
 
 void TextEdit::set_text(std::string_view text) {
   buffer_->codepoints = utf8::utf8to32(text);
+  if (buffer_->state.cursor > buffer_->codepoints.size()) {
+		buffer_->state.cursor = buffer_->codepoints.size();
+  }
 }
 
 std::string TextEdit::get_cursor_name() const {

@@ -45,6 +45,7 @@ title.new-game.type-to-chat = Type to chat:
 
 title.new-ai-player.player-name = Player name:
 title.new-ai-player.player-color = Player color:
+title.new-ai-player.add-player = Add player
 title.new-ai-player.script = Script:
 
 title.player-props.title = Player Properties

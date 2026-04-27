@@ -52,14 +52,14 @@ enum ids {
 };
 
 NewGameWindow::NewGameWindow() :
-    wnd_(nullptr), main_menu_window_(nullptr), sess_state_(Session::SessionState::kDisconnected),
-    need_refresh_players_(false) {
+    wnd_(nullptr), main_menu_window_(nullptr), sess_state_(Session::SessionState::kDisconnected) {
 }
 
 NewGameWindow::~NewGameWindow() {
 }
 
-void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow *NewAIPlayerWindow) {
+void NewGameWindow::initialize(
+    MainMenuWindow *MainMenuWindow, NewAIPlayerWindow *NewAIPlayerWindow) {
   main_menu_window_ = MainMenuWindow;
   new_ai_player_window_ = NewAIPlayerWindow;
 
@@ -102,7 +102,9 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
                     << Widget::height(LayoutParams::kFixed, 0.f)
                     << LinearLayout::weight(1.0f)
                     << Widget::id(MAP_LIST_ID)
-                    << Listbox::item_selected(std::bind(&NewGameWindow::on_maps_selection_changed, this, _1))))
+									  << Widget::name("map_list")
+                    << Listbox::item_selected(
+                        std::bind(&NewGameWindow::OnMapsSelectionChanged, this, _1))))
               << (Builder<LinearLayout>()
                 << Widget::width(LayoutParams::kFixed, 0.f)
                 << Widget::height(LayoutParams::kMatchParent, 0.f)
@@ -146,30 +148,52 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
                   << LinearLayout::weight(1.0f)
                   << LinearLayout::orientation(LinearLayout::Orientation::kHorizontal)
                   << (Builder<Widget>()
-                      << Widget::width(LayoutParams::kFixed, 0.f)
+                      << Widget::width(LayoutParams::kFixed, 300.f)
                       << Widget::height(LayoutParams::kMatchParent, 0.f)
                       << Widget::margin(0.f, 20.f, 0.f, 0.f)
-                      << LinearLayout::weight(2.0f)
-                      << Widget::background("frame")/*
-                      << (Builder<Label>(px(10), px(10), sum(pct(50), px(-10)), px(20))
-                        << Label::text(fw::text("title.new-game.players")))
-                      << (Builder<Listbox>(px(10), px(30), sum(pct(50), px(-10)), sum(pct(100), px(-80)))
-                        << Widget::id(PLAYER_LIST_ID))
-                      << (Builder<Listbox>(sum(pct(50), px(10)), px(10), sum(pct(50), px(-20)), sum(pct(100), px(-40)))
-                        << Widget::id(CHAT_LIST_ID))
-                      << (Builder<TextEdit>(sum(pct(50), px(10)), sum(pct(100), px(-30)), sum(pct(50), px(-20)), px(20))
-                        << Widget::id(CHAT_TEXTEDIT_ID)
-                        << TextEdit::filter(std::bind(&NewGameWindow::on_chat_filter, this, _1)))
-                      << (Builder<Button>(sum(pct(50), px(-110)), sum(pct(100), px(-40)), px(110), px(30))
-                        << Button::text(fw::text("title.new-game.add-ai-player"))
-                        << Button::click(std::bind(&NewGameWindow::on_new_ai_clicked, this, _1)))
-                      << (Builder<Button>(sum(pct(50), px(-240)), sum(pct(100), px(-40)), px(120), px(30))
-                        << Button::text(fw::text("title.new-game.start-multiplayer"))))*/)
+                      << Widget::background("frame")
+                      << (Builder<Listbox>()
+                          << Widget::width(LayoutParams::kMatchParent, 0.f)
+                          << Widget::height(LayoutParams::kMatchParent, 0.f)
+												  << Widget::margin(30.f, 10.f, 50.f, 10.f)
+                          << Widget::id(PLAYER_LIST_ID))
+                      << (Builder<Label>()
+                          << Widget::width(LayoutParams::kWrapContent, 0.f)
+                          << Widget::height(LayoutParams::kFixed, 30.f)
+                          << Label::text(fw::text("title.new-game.players")))
+                      << (Builder<Button>()
+                          << Widget::width(LayoutParams::kFixed, 100.f)
+                          << Widget::height(LayoutParams::kFixed, 30.f)
+                          << Widget::margin(0.f, 10.f, 10.f, 0.f)
+  												<< Widget::gravity(
+                              LayoutParams::Gravity::kRight | LayoutParams::Gravity::kBottom)
+                          << Button::text(fw::text("title.new-game.add-ai-player"))
+                          << Button::click(std::bind(&NewGameWindow::OnNewAiClicked, this, _1)))
+                      << (Builder<Button>()
+                          << Widget::width(LayoutParams::kFixed, 130.f)
+                          << Widget::height(LayoutParams::kFixed, 30.f)
+                          << Widget::gravity(
+                              LayoutParams::Gravity::kRight | LayoutParams::Gravity::kBottom)
+												  << Widget::margin(0.f, 120.f, 10.f, 0.f)
+                          << Button::text(fw::text("title.new-game.start-multiplayer"))))
                   << (Builder<Widget>()
                     << Widget::width(LayoutParams::kFixed, 0.f)
                     << Widget::height(LayoutParams::kMatchParent, 0.f)
                     << LinearLayout::weight(1.0f)
-                    << Widget::background("frame")))))
+                    << Widget::background("frame")
+                    << (Builder<Listbox>()
+											  << Widget::width(LayoutParams::kMatchParent, 0.f)
+                        << Widget::height(LayoutParams::kMatchParent, 0.f)
+											  << Widget::margin(0.f, 0.f, 26.f, 0.f)
+                        << Widget::id(CHAT_LIST_ID))
+                    << (Builder<TextEdit>()
+                        << Widget::width(LayoutParams::kMatchParent, 0.f)
+                        << Widget::height(LayoutParams::kFixed, 26.f)
+											  << Widget::gravity(
+                            LayoutParams::Gravity::kLeft | LayoutParams::Gravity::kBottom)
+                        << Widget::id(CHAT_TEXTEDIT_ID)
+                        << TextEdit::filter(std::bind(&NewGameWindow::OnChatFilter, this, _1)))
+                    ))))
           << (Builder<LinearLayout>()
               << Widget::width(LayoutParams::kMatchParent, 0.f)
               << Widget::height(LayoutParams::kWrapContent, 0.f)
@@ -179,7 +203,7 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
                   << Widget::width(LayoutParams::kFixed, 100.f)
                   << Widget::height(LayoutParams::kFixed, 30.f)
                   << Button::text(fw::text("title.new-game.login"))
-                  << Widget::click(std::bind(&NewGameWindow::on_cancel_clicked, this, _1)))
+                  << Widget::click(std::bind(&NewGameWindow::OnCancelClicked, this, _1)))
               << (Builder<Widget>()
                   << Widget::width(LayoutParams::kFixed, 0.f)
                   << Widget::height(LayoutParams::kMatchParent, 0.f)
@@ -189,14 +213,12 @@ void NewGameWindow::initialize(MainMenuWindow *MainMenuWindow, NewAIPlayerWindow
                   << Widget::height(LayoutParams::kFixed, 30.f)
                   << Widget::margin(0.f, 10.f, 0.f, 0.f)
                   << Button::text(fw::text("cancel"))
-                  << Widget::click(std::bind(&NewGameWindow::on_cancel_clicked, this, _1)))
+                  << Widget::click(std::bind(&NewGameWindow::OnCancelClicked, this, _1)))
               << (Builder<Button>()
                   << Widget::width(LayoutParams::kFixed, 100.f)
                   << Widget::height(LayoutParams::kFixed, 30.f)
                   << Button::text(fw::text("title.new-game.start-game"))
-                  << Widget::click(std::bind(&NewGameWindow::on_start_game_clicked, this, _1))))
-              /* << (Builder<Label>()
-                  << Label::text(fw::version_str))*/);
+                  << Widget::click(std::bind(&NewGameWindow::OnStartGameClicked, this, _1)))));
   fw::Get<Gui>().AttachWindow(wnd_);
   game_options_ = std::shared_ptr<GameScreenOptions>(new GameScreenOptions());
 }
@@ -210,29 +232,32 @@ void NewGameWindow::show() {
   fw::Get<fw::Graphics>().run_on_render_thread(
     [map_list = map_list_, listbox]() {
       listbox->Clear();
-      /*
       for (WorldSummary const &ws : map_list) {
         std::string title = ws.get_name();
-        listbox->add_item(
-            Builder<Label>(px(8), px(0), pct(100), px(20))
+        listbox->AddItem(
+            Builder<Label>()
+					      << Widget::width(LayoutParams::kMatchParent, 0.f)
+                << Widget::height(LayoutParams::kWrapContent, 0.f)
+					      << Widget::padding(4.f, 4.f, 4.f, 4.f)
                 << Label::text(title)
                 << Widget::data(ws));
       }
+      
       if (!map_list.empty()) {
-        listbox->select_item(0);
-      }*/
+        listbox->SelectItem(0);
+      }
     });
 
   sig_players_changed_conn_ = SimulationThread::get_instance()->sig_players_changed.Connect(
-      std::bind(&NewGameWindow::on_players_changed, this));
+      std::bind(&NewGameWindow::OnPlayersChanged, this));
   sig_chat_conn_ = SimulationThread::get_instance()->sig_chat.Connect(
-      std::bind(&NewGameWindow::add_chat_msg, this, _1, _2));
+      std::bind(&NewGameWindow::AddChatMsg, this, _1, _2));
   sig_session_state_changed_ = Session::get_instance()->sig_state_changed.Connect(
-      std::bind(&NewGameWindow::on_session_state_changed, this, _1));
+      std::bind(&NewGameWindow::OnSessionStateChanged, this, _1));
 
   // call this as if the session state just changed, to make sure we're up-to-date
-  on_session_state_changed(Session::get_instance()->get_state());
-  refresh_players();
+  OnSessionStateChanged(Session::get_instance()->get_state());
+  RefreshPlayers();
 }
 
 void NewGameWindow::hide() {
@@ -244,7 +269,7 @@ void NewGameWindow::hide() {
 }
 
 void NewGameWindow::set_enable_multiplayer_visible(bool visible) {
-//  _multiplayer_enable->setVisible(visible);
+//  _multiplayer_enable->SetVisible(visible);
 }
 
 void NewGameWindow::update() {
@@ -275,23 +300,23 @@ void NewGameWindow::update() {
         std::string user_name = p->get_user_name();
         std::string msg = std::vformat(
           fw::text("title.new-game.ready-to-go"), std::make_format_args(user_name));
-        append_chat(msg);
+        AppendChat(msg);
       }
     }
   }
 
   if (need_refresh_players_) {
-    refresh_players();
+    RefreshPlayers();
     need_refresh_players_ = false;
   }
 
   if (static_cast<int>(ready_players_.size()) == num_players) {
     // if all players are now ready to start, we can start the game
-    start_game();
+    StartGame();
   }
 }
 
-void NewGameWindow::on_session_state_changed(Session::SessionState new_state) {
+void NewGameWindow::OnSessionStateChanged(Session::SessionState new_state) {
 /*
   CEGUI::Window *state_msg = get_child("NewGame/Multiplayer/Status");
   CEGUI::Window *multiplayer_enable_checkbox = get_child("NewGame/Multiplayer/Enable");
@@ -336,32 +361,30 @@ void NewGameWindow::on_session_state_changed(Session::SessionState new_state) {
 
 // this is called when the list of players has changed, we set a flag (because it can happen on
 // another thread) and update the players in the main update() call.
-void NewGameWindow::on_players_changed() {
+void NewGameWindow::OnPlayersChanged() {
   need_refresh_players_ = true;
 }
 
 // refreshes the list of players in the game
-void NewGameWindow::refresh_players() {
+void NewGameWindow::RefreshPlayers() {
   auto players = SimulationThread::get_instance()->get_players();
   auto players_list = wnd_->Find<Listbox>(PLAYER_LIST_ID);
   fw::Get<fw::Graphics>().run_on_render_thread([players, players_list]() {
     players_list->Clear();
     for (auto &plyr : players) {
       int player_no = static_cast<int>(plyr->get_player_no());
-      /*
       std::string ready_str = plyr->is_ready() ? fw::text("title.new-game.ready") : "";
-      players_list->add_item(Builder<Widget>(px(0), px(0), pct(100), px(20)) << Widget::data(plyr)
-          << (Builder<Label>(px(8), px(0), px(30), px(20))
-              << Label::text(std::to_string(player_no)))
-          << (Builder<Label>(px(30), px(0), sum(pct(100), px(-80)), px(20))
-              << Label::text(plyr->get_user_name()))
-          << (Builder<Label>(sum(pct(100), px(-50)), px(0), px(50), px(20))
-              << Label::text(ready_str)));*/
+      players_list->AddItem(Builder<Label>()
+				  << Widget::width(LayoutParams::kMatchParent, 0.f)
+				  << Widget::height(LayoutParams::kWrapContent, 0.f)
+				  << Widget::padding(4.f, 4.f, 4.f, 4.f)
+          << Widget::data(plyr)
+          << Label::text(absl::StrCat(plyr->get_user_name(), " ", ready_str)));
     }
   });
 }
 
-void NewGameWindow::select_map(std::string const &map_name) {
+void NewGameWindow::SelectMap(std::string const &map_name) {
 /*  _selection_changing = true;
   _maps->clearAllSelections();
 
@@ -373,58 +396,66 @@ void NewGameWindow::select_map(std::string const &map_name) {
   _selection_changing = false;*/
 }
 
-void NewGameWindow::on_maps_selection_changed(int index) {
-  update_selection();
+void NewGameWindow::OnMapsSelectionChanged(int index) {
+  UpdateSelection();
 }
 
 fw::StatusOr<game::WorldSummary> NewGameWindow::GetSelectedWorldSummary() {
-  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST_ID)->get_selected_item();
+  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST_ID)->GetSelectedItem();
   if (selected_widget == nullptr) {
     // Can happen if there are no maps installed at all.
     return fw::ErrorStatus("no selected world");
   }
 
+  if (!selected_widget->get_data().has_value()) {
+    return fw::ErrorStatus("selected world has no data");
+	}
+
   return std::any_cast<game::WorldSummary>(selected_widget->get_data());
 }
 
-bool NewGameWindow::on_new_ai_clicked(Widget &w) {
+bool NewGameWindow::OnNewAiClicked(Widget &w) {
   new_ai_player_window_->show();
   return true;
 }
 
-bool NewGameWindow::player_properties_clicked(Widget &w) {
+bool NewGameWindow::PlayerPropertiesClicked(Widget &w) {
   //player_properties->show();
   return true;
 }
 
-bool NewGameWindow::on_chat_filter(std::string ch) {
+bool NewGameWindow::OnChatFilter(std::string ch) {
   if (ch != "\r" && ch != "\n" && ch != "\r\n") {
     return true;
   }
 
   auto ed = wnd_->Find<TextEdit>(CHAT_TEXTEDIT_ID);
-  std::string msg = msg = fw::StripSpaces(ed->get_text());
+  std::string msg(fw::StripSpaces(ed->get_text()));
 
-  add_chat_msg(Session::get_instance()->get_user_name(), msg);
+  AddChatMsg(Session::get_instance()->get_user_name(), msg);
   SimulationThread::get_instance()->send_chat_msg(msg);
 
   ed->set_text("");
   return false; // ignore the newline character
 }
 
-void NewGameWindow::add_chat_msg(std::string_view user_name, std::string_view msg) {
-  append_chat(absl::StrCat(user_name, "> ", msg));
+void NewGameWindow::AddChatMsg(std::string_view user_name, std::string_view msg) {
+  AppendChat(absl::StrCat(user_name, "> ", msg));
 }
 
-void NewGameWindow::append_chat(std::string const &msg) {
+void NewGameWindow::AppendChat(std::string const &msg) {
   auto chat_list = wnd_->Find<Listbox>(CHAT_LIST_ID);
-  fw::Get<fw::Graphics>().run_on_render_thread([chat_list, msg] {/*
-    chat_list->add_item(
-        Builder<Label>(px(8), px(0), sum(pct(100), px(-16)), px(20)) << Label::text(msg));
-  */});
+  fw::Get<fw::Graphics>().run_on_render_thread([chat_list, msg] {
+    chat_list->AddItem(
+      Builder<Label>()
+          << Widget::width(LayoutParams::kMatchParent, 0.f)
+          << Widget::height(LayoutParams::kWrapContent, 0.f)
+			    << Widget::padding(4.f, 4.f, 4.f, 4.f)
+          << Label::text(msg));
+  });
 }
 
-void NewGameWindow::update_selection() {
+void NewGameWindow::UpdateSelection() {
   auto ws = GetSelectedWorldSummary();
   if (!ws.ok()) {
     return;
@@ -443,7 +474,7 @@ void NewGameWindow::update_selection() {
 
 // when we're ready to start, we need to mark our own player as ready and then
 // wait for others. Once they're ready as well, start_game() is called.
-bool NewGameWindow::on_start_game_clicked(Widget &w) {
+bool NewGameWindow::OnStartGameClicked(Widget &w) {
   SimulationThread::get_instance()->get_local_player()->local_player_is_ready();
 
   // disable the start_game button, since we don't want you clicking it twice.
@@ -452,8 +483,8 @@ bool NewGameWindow::on_start_game_clicked(Widget &w) {
 }
 
 // once all players are ready to start, this is called to actually start the game
-void NewGameWindow::start_game() {
-  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST_ID)->get_selected_item();
+void NewGameWindow::StartGame() {
+  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST_ID)->GetSelectedItem();
   if (selected_widget == nullptr) {
     // should never happen (unless you have no maps installed at all)
     return;
@@ -471,7 +502,7 @@ void NewGameWindow::start_game() {
 
 // this is called when you check/uncheck the "Enable multiplayer" checkbox. We've got
 // let the session manager know we're starting a new multiplayer game (or not).
-bool NewGameWindow::multiplayer_enabled_checked(Widget &w) {
+bool NewGameWindow::MultiplayerEnabledChecked(Widget &w) {
 /*  bool enabled = _multiplayer_enable->isSelected();
   if (enabled) {
     session::get_instance()->create_game();
@@ -483,7 +514,7 @@ bool NewGameWindow::multiplayer_enabled_checked(Widget &w) {
   return true;
 }
 
-bool NewGameWindow::on_cancel_clicked(Widget &w) {
+bool NewGameWindow::OnCancelClicked(Widget &w) {
   hide();
   main_menu_window_->show();
   return true;

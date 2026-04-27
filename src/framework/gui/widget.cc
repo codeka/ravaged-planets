@@ -228,6 +228,10 @@ void Widget::AttachChild(std::shared_ptr<Widget> child) {
   fw::Get<Gui>().EnsureThread(*this);
 
   std::shared_ptr<Widget> old_parent = child->parent_.lock();
+	if (old_parent.get() == this) {
+    // Already attached to this parent, do nothing.
+    return;
+  }
   if (old_parent) {
     old_parent->DetachChild(child);
   }
@@ -256,7 +260,12 @@ void Widget::ClearChildren() {
 }
 
 void Widget::OnAttachedToParent(Widget& parent) {
-  layout_params_ = parent.CreateLayoutParams();
+  auto new_layout_params = parent.CreateLayoutParams();
+  if (layout_params_) {
+		new_layout_params->CopyFrom(*layout_params_);
+  }
+	layout_params_ = new_layout_params;
+
   RequestLayout();
 }
 

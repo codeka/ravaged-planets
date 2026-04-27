@@ -56,6 +56,10 @@ public:
     return std::dynamic_pointer_cast<WidgetType>(real_builder->Build(nullptr));
   }
 
+  inline std::shared_ptr<WidgetType> Build(std::shared_ptr<Widget> parent) {
+    return std::dynamic_pointer_cast<WidgetType>(real_builder->Build(parent));
+	}
+
   inline Builder& operator <<(std::unique_ptr<Property> prop) {
     real_builder->properties.push_back(std::move(prop));
     return *this;
@@ -70,7 +74,7 @@ public:
 
 template<IsSubclassOfWidget T>
 void Widget::AttachChild(Builder<T> &child_builder) {
-  AttachChild(child_builder.Build());
+  AttachChild(child_builder.real_builder->Build(this->shared_from_this()));
 }
 
 }

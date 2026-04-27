@@ -17,6 +17,15 @@ public:
 	}
 
 	float weight = 0.f;
+
+	void CopyFrom(LayoutParams const& other) override {
+		LayoutParams::CopyFrom(other);
+
+		LinearLayoutParams const *other_linear = dynamic_cast<LinearLayoutParams const*>(&other);
+		if (other_linear) {
+			weight = other_linear->weight;
+		}
+	}
 };
 
 // LinearLayout is a container layout that aligns children in a row or column, depending on the
@@ -42,6 +51,8 @@ class LinearLayout : public Widget {
 		orientation_ = orientation;
 		RequestLayout();
 	}
+
+	float CalculateItemsTotalHeight() const;
 
 protected:
 	MeasuredSize OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) override;

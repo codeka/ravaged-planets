@@ -80,7 +80,7 @@ void TextureToolWindow::show() {
         Builder<Label>(px(0), px(0), pct(100), px(18))
             << Label::text(filename.stem().string()));*/
   }
-  lbx->select_item(0);
+  lbx->SelectItem(0);
 }
 
 void TextureToolWindow::hide() {

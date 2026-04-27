@@ -31,7 +31,9 @@ public:
   void apply(Widget& widget) override {
     auto lp = widget.get_layout_params<LinearLayoutParams>();
     if (!lp) {
-      LOG(WARN) << "LinearLayout::weight set on widget " << widget.get_name() << " with non-LinearLayout layout params";
+      LOG(WARN) << "LinearLayout::weight set on widget "
+                << widget.get_name()
+                << " with non-LinearLayout layout params";
 			return;
     }
    	lp->weight = weight_;
@@ -67,11 +69,7 @@ MeasuredSize LinearLayout::OnMeasure(MeasureSpec width_spec, MeasureSpec height_
     float width = lp->left_margin + lp->right_margin;
     float height = lp->top_margin + lp->bottom_margin;
 
-    MeasuredSize child_size = child->MeasureChild(
-        width_spec,
-        (orientation_ == Orientation::kHorizontal) ? total_width : 0.f,
-        height_spec,
-        (orientation_ == Orientation::kVertical) ? total_height : 0.f);
+    MeasuredSize child_size = child->MeasureChild(width_spec,  0.f, height_spec, 0.f);
     if (lp->weight > 0.f) {
       // Skip normal measurement (in the direction of the orientation) when there's a non-zero 
       // weight.
@@ -200,5 +198,12 @@ void LinearLayout::OnLayout(float top, float right, float bottom, float left) {
   }
 }
 
+float LinearLayout::CalculateItemsTotalHeight() const {
+  float total_height = 0.f;
+  for (auto const& child : children_) {
+    total_height += child->get_height();
+  }
+  return total_height;
+}
 
 }  // namespace fw::gui

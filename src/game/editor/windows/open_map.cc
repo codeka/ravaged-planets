@@ -56,12 +56,13 @@ void OpenMapWindow::initialize() {/*
 }
 
 bool OpenMapWindow::open_clicked(Widget &w) {
-  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST)->get_selected_item();
+  auto selected_widget = wnd_->Find<Listbox>(MAP_LIST)->GetSelectedItem();
   if (!selected_widget) {
     return true;
   }
 
-  game::WorldSummary const &ws = std::any_cast<game::WorldSummary const &>(selected_widget->get_data());
+  game::WorldSummary const &ws =
+      std::any_cast<game::WorldSummary const &>(selected_widget->get_data());
   auto status = EditorScreen::get_instance()->open_map(ws.get_name());
   if (!status.ok()) {
     // TODO: show error to user?

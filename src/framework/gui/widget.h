@@ -114,6 +114,18 @@ public:
 	}
 
 	virtual ~LayoutParams() = default;
+
+	virtual void CopyFrom(LayoutParams const& other) {
+    width_mode = other.width_mode;
+    width = other.width;
+    height_mode = other.height_mode;
+    height = other.height;
+    top_margin = other.top_margin;
+    right_margin = other.right_margin;
+    bottom_margin = other.bottom_margin;
+    left_margin = other.left_margin;
+    gravity = other.gravity;
+  }
 };
 
 // This is the base class of all widgets in the GUI. A widget has a specific position within it's
@@ -215,8 +227,7 @@ public:
   virtual void OnAttachedToParent(Widget &parent);
 
   virtual std::shared_ptr<LayoutParams> CreateLayoutParams() {
-    return std::make_shared<LayoutParams>(
-      LayoutParams::Mode::kFixed, 0.f, LayoutParams::Mode::kFixed, 0.f);
+		return std::make_shared<LayoutParams>();
   }
   std::shared_ptr<LayoutParams> CreateLayoutParams(
       LayoutParams::Mode width_mode, float width,

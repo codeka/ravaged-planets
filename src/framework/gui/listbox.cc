@@ -58,23 +58,23 @@ public:
 // A special widget that we add children to. This item handles the selection colors and positioning
 // of the item.
 class ListboxItem : public Widget {
-private:
-  std::weak_ptr<Listbox> listbox_;
-  int index_;
-  std::shared_ptr<StateDrawable> background_;
-  float last_down_time_;
 public:
   ListboxItem();
   virtual ~ListboxItem();
 
   virtual bool on_mouse_down(float x, float y);
 
-  void setup(std::shared_ptr<Listbox> listbox, int index);
-  int get_index() const;
-  void set_selected(bool selected);
-  std::shared_ptr<Widget> get_widget();
+  void Setup(std::shared_ptr<Listbox> listbox, int index);
+  int GetIndex() const;
+  void SetSelected(bool selected);
+  std::shared_ptr<Widget> GetWidget();
 
-  void render();
+  void render() override;
+private:
+  std::weak_ptr<Listbox> listbox_;
+  int index_;
+  std::shared_ptr<StateDrawable> background_;
+  float last_down_time_;
 };
 
 ListboxItem::ListboxItem()
@@ -94,29 +94,29 @@ ListboxItem::~ListboxItem() {
 // When you click a listbox item, we want to make sure it's the selected one.
 bool ListboxItem::on_mouse_down(float x, float y) {
   auto listbox = listbox_.lock();
-  listbox->select_item(index_);
+  listbox->SelectItem(index_);
   float now = fw::Framework::get_instance()->get_timer()->get_total_time();
   if (now - last_down_time_ < (ACTIVATE_TIME_MS / 1000.0f)) {
-    listbox->activate_item(index_);
+    listbox->ActivateItem(index_);
   }
   last_down_time_ = now;
   return true;
 }
 
-void ListboxItem::setup(std::shared_ptr<Listbox> listbox, int index) {
+void ListboxItem::Setup(std::shared_ptr<Listbox> listbox, int index) {
   listbox_ = listbox;
   index_ = index;
 }
 
-int ListboxItem::get_index() const {
+int ListboxItem::GetIndex() const {
   return index_;
 }
 
-std::shared_ptr<Widget> ListboxItem::get_widget() {
+std::shared_ptr<Widget> ListboxItem::GetWidget() {
   return children_[0];
 }
 
-void ListboxItem::set_selected(bool selected) {
+void ListboxItem::SetSelected(bool selected) {
   if (selected) {
     background_->set_current_state(StateDrawable::kSelected);
   } else {
@@ -142,7 +142,6 @@ Listbox::~Listbox() {
 void Listbox::OnAttachedToParent(Widget &parent) {
   Widget::OnAttachedToParent(parent);
 
-  /*
   std::shared_ptr<StateDrawable> bkgnd = std::shared_ptr<StateDrawable>(new StateDrawable());
   bkgnd->add_drawable(
       StateDrawable::kNormal,
@@ -150,11 +149,14 @@ void Listbox::OnAttachedToParent(Widget &parent) {
   bkgnd->add_drawable(
       StateDrawable::kHover,
       fw::Get<Gui>().get_drawable_manager().get_drawable("listbox_up_hover"));
-  AttachChild(Builder<Button>(sum(pct(100), px(-19)), px(0), px(19), px(19))
+  AttachChild(Builder<Button>()
+		  << Widget::width(LayoutParams::kFixed, 19.0f)
+      << Widget::height(LayoutParams::kFixed, 19.0f)
+		  << Widget::gravity(LayoutParams::Gravity::kRight | LayoutParams::Gravity::kTop)
       << Button::background(bkgnd)
       << Widget::id(UP_BUTTON)
-      << Widget::visible(false)
-      << Button::click(std::bind(&Listbox::on_up_button_click, this, _1)));
+      //<< Widget::visible(false)
+      << Button::click(std::bind(&Listbox::OnUpButtonClick, this, _1)));
   bkgnd = std::shared_ptr<StateDrawable>(new StateDrawable());
   bkgnd->add_drawable(
       StateDrawable::kNormal,
@@ -162,11 +164,14 @@ void Listbox::OnAttachedToParent(Widget &parent) {
   bkgnd->add_drawable(
       StateDrawable::kHover,
       fw::Get<Gui>().get_drawable_manager().get_drawable("listbox_down_hover"));
-  AttachChild(Builder<Button>(sum(pct(100), px(-19)), sum(pct(100), px(-19)), px(19), px(19))
+  AttachChild(Builder<Button>()
+      << Widget::width(LayoutParams::kFixed, 19.0f)
+      << Widget::height(LayoutParams::kFixed, 19.0f)
+      << Widget::gravity(LayoutParams::Gravity::kRight | LayoutParams::Gravity::kBottom)
       << Button::background(bkgnd)
       << Widget::id(DOWN_BUTTON)
-      << Widget::visible(false)
-      << Button::click(std::bind(&Listbox::on_down_button_click, this, _1)));
+      //<< Widget::visible(false)
+      << Button::click(std::bind(&Listbox::OnDownButtonClick, this, _1)));
   bkgnd = std::shared_ptr<StateDrawable>(new StateDrawable());
   bkgnd->add_drawable(
       StateDrawable::kNormal,
@@ -174,13 +179,21 @@ void Listbox::OnAttachedToParent(Widget &parent) {
   bkgnd->add_drawable(
       StateDrawable::kHover,
       fw::Get<Gui>().get_drawable_manager().get_drawable("listbox_thumb_hover"));
-  AttachChild(Builder<Button>(sum(pct(100), px(-19)), px(19), px(19), sum(pct(100), px(-38)))
+  AttachChild(Builder<Button>()
+      << Widget::width(LayoutParams::kFixed, 19.0f)
+      << Widget::height(LayoutParams::kFixed, 19.0f)
+      << Widget::gravity(LayoutParams::Gravity::kRight | LayoutParams::Gravity::kTop)
+		  << Widget::margin(19.0f, 0.0f, 0.0f, 0.0f)
       << Button::background(bkgnd)
       << Widget::id(THUMB)
-      << Widget::visible(false));
+      /*<< Widget::visible(false)*/);
 
-  item_container_ = Builder<Widget>(px(0), px(0), pct(100), px(0));
-  AttachChild(item_container_);  */
+  item_container_ = Builder<LinearLayout>()
+      << Widget::width(LayoutParams::kMatchParent, 0.f)
+      << Widget::height(LayoutParams::kMatchParent, 0.f)
+      << Widget::margin(0.f, 19.f, 0.f, 0.f)
+	    << LinearLayout::orientation(LinearLayout::Orientation::kVertical);
+  AttachChild(item_container_);
 }
 
 std::unique_ptr<Property> Listbox::item_selected(std::function<void(int index)> on_selected) {
@@ -191,29 +204,33 @@ std::unique_ptr<Property> Listbox::item_activated(std::function<void(int index)>
   return std::make_unique<ListboxItemActivatedProperty>(on_activated);
 }
 
-void Listbox::add_item(std::shared_ptr<Widget> w) {/*
-  int top = item_container_->get_height();
-  auto item = std::shared_ptr<ListboxItem>(Builder<ListboxItem>(px(0), px(top), pct(100), px(w->get_height())));
+void Listbox::AddItem(std::shared_ptr<Widget> w) {
+  auto item = std::shared_ptr<ListboxItem>(
+      Builder<ListboxItem>()
+          << Widget::width(LayoutParams::kMatchParent, 0.f)
+          << Widget::height(LayoutParams::kWrapContent, 0.f));
   item->AttachChild(w);
-  item->setup(std::dynamic_pointer_cast<Listbox>(this->shared_from_this()), items_.size());
+  item->Setup(std::dynamic_pointer_cast<Listbox>(this->shared_from_this()), items_.size());
   item_container_->AttachChild(item);
-  item_container_->set_height(px(item_container_->get_height() + w->get_height()));
   items_.push_back(item);
-  update_thumb_button(true);*/
 }
 
-void Listbox::Clear() {/*
+void Listbox::Clear() {
   item_container_->ClearChildren();
-  item_container_->set_height(px(0));
-  item_container_->set_top(px(0));
   items_.clear();
-  update_thumb_button(true);*/
+  UpdateThumbButton(true);
 }
 
-void Listbox::update_thumb_button(bool adjust_height) {/*
-  float widget_height = get_height();
-  float content_height = item_container_->get_height();
-  float thumb_max_height = widget_height - 38.0f; // the up/down buttons
+MeasuredSize Listbox::OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) {
+	UpdateThumbButton(true);
+
+  return Widget::OnMeasure(width_spec, height_spec);
+}
+
+void Listbox::UpdateThumbButton(bool adjust_height) {
+  const float widget_height = get_height();
+  const float content_height = item_container_->CalculateItemsTotalHeight();
+  const float thumb_max_height = widget_height - 38.0f; // the up/down buttons
   float thumb_height;
   auto thumb = Find<Button>(THUMB);
 
@@ -235,90 +252,94 @@ void Listbox::update_thumb_button(bool adjust_height) {/*
         scrollbar_visible_ = true;
       }
     }
-    thumb->set_height(px(thumb_height));
+    thumb->get_layout_params()->height = std::floor(thumb_height);
   } else {
     thumb_height = thumb->get_height();
   }
 
-  float offset = get_top() - item_container_->get_top();
-  float max_offset = item_container_->get_height() - get_height();
-  float offset_ratio = offset / max_offset;
-
-  float max_thumb_offset = thumb_max_height - thumb_height;
-  float thumb_offset = max_thumb_offset * offset_ratio;
-  thumb->set_top(px(19 + thumb_offset));
-
   auto up_button = Find<Button>(UP_BUTTON);
   auto down_button = Find<Button>(DOWN_BUTTON);
   if (scrollbar_visible_) {
-    item_container_->set_width(sum(pct(100), px(-20)));
+    item_container_->get_layout_params()->right_margin = 20.f;
     thumb->set_visible(true);
     up_button->set_visible(true);
     down_button->set_visible(true);
+
+    float top_margin = item_container_->get_layout_params()->top_margin;
+    float max_top_margin = content_height - get_height();
+    float offset_ratio = -top_margin / max_top_margin;
+
+    float max_thumb_offset = thumb_max_height - thumb_height;
+    float thumb_offset = max_thumb_offset * offset_ratio;
+    thumb->get_layout_params()->top_margin = std::floor(19.f + thumb_offset);
   } else {
-    item_container_->set_width(pct(100));
+    item_container_->get_layout_params()->right_margin = 0.f;
     thumb->set_visible(false);
     up_button->set_visible(false);
     down_button->set_visible(false);
-  }*/
+  }
 }
 
-bool Listbox::on_down_button_click(Widget &w) {/*
-  float current_top = item_container_->get_top() - get_top();
-  current_top -= get_height() / 4.0f;
-  float max_offset = item_container_->get_height() - get_height();
-  if (current_top < -max_offset) {
-    current_top = -max_offset;
+bool Listbox::OnDownButtonClick(Widget &w) {
+  float top_margin = item_container_->get_layout_params()->top_margin;
+  top_margin -= get_height() / 4.0f;
+
+  float item_container_height = item_container_->CalculateItemsTotalHeight();
+  float max_top_margin = item_container_height - get_height();
+  if (top_margin < -max_top_margin) {
+    top_margin = -max_top_margin;
   }
-  item_container_->set_top(px(current_top));
-  update_thumb_button(false);*/
+  item_container_->get_layout_params()->top_margin = top_margin;
+  UpdateThumbButton(false);
+  RequestLayout();
   return true;
 }
 
-bool Listbox::on_up_button_click(Widget &w) {/*
-  float current_top = item_container_->get_top() - get_top();
-  current_top += get_height() / 4.0f;
-  if (current_top > 0) {
-    current_top = 0.0f;
+bool Listbox::OnUpButtonClick(Widget &w) {
+  float top_margin = item_container_->get_layout_params()->top_margin;
+  top_margin += get_height() / 4.0f;
+  if (top_margin > 0) {
+    top_margin = 0.0f;
   }
-  item_container_->set_top(px(current_top));
-  update_thumb_button(false);*/
+  item_container_->get_layout_params()->top_margin = top_margin;
+  UpdateThumbButton(false);
+  RequestLayout();
   return true;
 }
 
-void Listbox::select_item(int index) {
+void Listbox::SelectItem(int index) {
   auto selected_item = selected_item_.lock();
   if (selected_item) {
-    selected_item->set_selected(false);
+    selected_item->SetSelected(false);
   }
   selected_item = items_[index];
-  selected_item->set_selected(true);
+  selected_item->SetSelected(true);
   selected_item_ = selected_item;
   sig_item_selected.Emit(index);
 }
 
-void Listbox::activate_item(int index) {
+void Listbox::ActivateItem(int index) {
   sig_item_activated.Emit(index);
 }
 
-int Listbox::get_selected_index() {
+int Listbox::GetSelectedIndex() {
   auto selected_item = selected_item_.lock();
   if (!selected_item) {
     return -1;
   }
-  return selected_item->get_index();
+  return selected_item->GetIndex();
 }
 
-std::shared_ptr<Widget> Listbox::get_item(int index) {
+std::shared_ptr<Widget> Listbox::GetItem(int index) {
   if (index < 0 || index >= items_.size()) {
     return nullptr;
   }
-  return items_[index]->get_widget();
+  return items_[index]->GetWidget();
 }
 
-std::shared_ptr<Widget> Listbox::get_selected_item() {
+std::shared_ptr<Widget> Listbox::GetSelectedItem() {
   auto selected_item = selected_item_.lock();
-  return selected_item ? selected_item->get_widget() : nullptr;
+  return selected_item ? selected_item->GetWidget() : nullptr;
 }
 
 void Listbox::render() {

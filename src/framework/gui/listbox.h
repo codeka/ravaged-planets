@@ -8,25 +8,15 @@
 #include <framework/gui/drawable.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/widget.h>
+#include "linear_layout.h"
 
 namespace fw::gui {
 class ListboxItem;
 
-/** A Listbox is a scrollable list of items. */
+/**
+ * A Listbox is a scrollable list of items.
+ */
 class Listbox : public Widget {
-private:
-  friend class ListboxItemSelectedProperty;
-  friend class ListboxItemActivatedProperty;
-
-  std::shared_ptr<Drawable> background_;
-  std::shared_ptr<Widget> item_container_;
-  std::vector<std::shared_ptr<ListboxItem>> items_;
-  std::weak_ptr<ListboxItem> selected_item_;
-  bool scrollbar_visible_;
-
-  void update_thumb_button(bool adjust_height);
-  bool on_down_button_click(Widget &w);
-  bool on_up_button_click(Widget &w);
 public:
   Listbox();
   virtual ~Listbox();
@@ -39,29 +29,31 @@ public:
   // Add an item to the list. This is not quite the same as attach_child, so be sure to not use
   // that. You must give the widget you want to add an explicit height (in pixel, not percent).
   // It's typically also best to give it an (x,y) of (0,0) and a width of 100%.
-  void add_item(std::shared_ptr<Widget> w);
+  void AddItem(std::shared_ptr<Widget> w);
 
   template <IsSubclassOfWidget T>
-  inline void add_item(std::shared_ptr<T> w) {
-    add_item(std::dynamic_pointer_cast<Widget>(w));
+  inline void AddItem(std::shared_ptr<T> w) {
+    AddItem(std::dynamic_pointer_cast<Widget>(w));
   }
   template <IsSubclassOfWidget T>
-  inline void add_item(Builder<T> &builder) {
-    add_item(std::dynamic_pointer_cast<Widget>(std::shared_ptr<T>(builder)));
+  inline void AddItem(Builder<T> &builder) {
+    AddItem(builder.Build(this->shared_from_this()));
   }
 
   /** Removes all the items in the listbox. */
   void Clear();
 
   /** Select the item with the given index. */
-  void select_item(int index);
+  void SelectItem(int index);
 
   /** Activates the item with the given index. Basically just fires the signal. */
-  void activate_item(int index);
+  void ActivateItem(int index);
 
-  int get_selected_index();
-  std::shared_ptr<Widget> get_item(int index);
-  std::shared_ptr<Widget> get_selected_item();
+  int GetSelectedIndex();
+  std::shared_ptr<Widget> GetItem(int index);
+  std::shared_ptr<Widget> GetSelectedItem();
+
+  MeasuredSize OnMeasure(MeasureSpec width_spec, MeasureSpec height_spec) override;
 
   /** Signaled when an item is selected. */
   fw::Signal<int /*index*/> sig_item_selected;
@@ -69,7 +61,20 @@ public:
   /** Signaled when an item is double-clicked. */
   fw::Signal<int /*index*/> sig_item_activated;
 
-  void render();
+  void render() override;
+private:
+  friend class ListboxItemSelectedProperty;
+  friend class ListboxItemActivatedProperty;
+
+  std::shared_ptr<Drawable> background_;
+  std::shared_ptr<LinearLayout> item_container_;
+  std::vector<std::shared_ptr<ListboxItem>> items_;
+  std::weak_ptr<ListboxItem> selected_item_;
+  bool scrollbar_visible_;
+
+  void UpdateThumbButton(bool adjust_height);
+  bool OnDownButtonClick(Widget& w);
+  bool OnUpButtonClick(Widget& w);
 };
 
 }
