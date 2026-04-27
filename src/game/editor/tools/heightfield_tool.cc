@@ -20,6 +20,7 @@
 #include <game/editor/windows/open_file.h>
 #include <game/editor/windows/message_box.h>
 #include <game/editor/tools/heightfield_tool.h>
+#include <framework/gui/linear_layout.h>
 
 using namespace fw::gui;
 using namespace std::placeholders;
@@ -201,7 +202,7 @@ void LevelBrush::update(fw::Vector const &cursor_loc) {
 
 //-----------------------------------------------------------------------------
 enum IDS {
-  RAISE_LOWER_BRUSH_ID,
+  RAISE_LOWER_BRUSH_ID = 329723,
   LEVEL_BRUSH_ID
 };
 
@@ -225,29 +226,71 @@ public:
 };
 
 HeightfieldToolWindow::HeightfieldToolWindow(ed::HeightfieldTool *tool) :
-    tool_(tool) {/*
-  wnd_ = Builder<Window>(px(10), px(30), px(100), px(170)) << Widget::background("frame")
-      << (Builder<Button>(px(8), px(8), px(36), px(36)) << Widget::id(RAISE_LOWER_BRUSH_ID)
-          << Button::icon("editor_hightfield_raiselower")
-          << Button::click(std::bind(&HeightfieldToolWindow::on_tool_clicked, this, _1)))
-      << (Builder<Button>(px(56), px(8), px(36), px(36)) << Widget::id(LEVEL_BRUSH_ID)
-          << Button::icon("editor_hightfield_level")
-          << Button::click(std::bind(&HeightfieldToolWindow::on_tool_clicked, this, _1)))
-      << (Builder<Label>(px(4), px(52), sum(pct(100), px(-8)), px(18)) << Label::text("Size:"))
-      << (Builder<Slider>(px(4), px(74), sum(pct(100), px(-8)), px(18))
-          << Slider::limits(20, 100) << Slider::value(40)
-          << Slider::on_update(std::bind(&HeightfieldToolWindow::OnRadiusUpdated, this, _1)))
-      << (Builder<Label>(px(4), px(92), sum(pct(100), px(-8)), px(18)) << Label::text("Speed:"))
-      << (Builder<Slider>(px(4), px(114), sum(pct(100), px(-8)), px(18))
-          << Slider::limits(20, 100) << Slider::value(25)
-          << Slider::on_update(std::bind(&HeightfieldToolWindow::OnSpeedUpdated, this, _1)))
-      << (Builder<Button>(px(4), px(132), sum(pct(100), px(-8)), px(30)) << Button::text("Import")
-          << Button::click(std::bind(&HeightfieldToolWindow::on_import_clicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);*/
+    tool_(tool) {
+  wnd_ = Builder<Window>()
+      << Widget::width(Widget::Fixed(100.f))
+      << Widget::height(Widget::WrapContent())
+      << Window::initial_position(WindowInitialPosition::Absolute(20.f, 40.f))
+      << Widget::background("frame")
+      << (Builder<LinearLayout>()
+          << Widget::width(Widget::MatchParent())
+          << Widget::height(Widget::WrapContent())
+          << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
+          << (Builder<LinearLayout>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::WrapContent())
+              << LinearLayout::orientation(LinearLayout::Orientation::kHorizontal)
+              << (Builder<Button>()
+                  << Widget::height(Widget::Fixed(30.f))
+                  << LinearLayout::weight(1.0f)
+                  << Widget::margin(10.f, 5.f, 10.0f, 10.0f)
+                  << Widget::id(RAISE_LOWER_BRUSH_ID)
+                  << Button::icon("editor_hightfield_raiselower")
+                  << Button::click(std::bind(&HeightfieldToolWindow::on_tool_clicked, this, _1)))
+              << (Builder<Button>()
+                  << Widget::height(Widget::Fixed(30.f))
+                  << LinearLayout::weight(1.0f)
+                  << Widget::margin(10.f, 10.f, 10.0f, 5.0f)
+                  << Widget::id(LEVEL_BRUSH_ID)
+                  << Button::icon("editor_hightfield_level")
+                  << Button::click(std::bind(&HeightfieldToolWindow::on_tool_clicked, this, _1)))
+              )
+        << (Builder<Label>()
+            << Widget::width(Widget::MatchParent())
+            << Widget::height(Widget::WrapContent())
+            << Widget::margin(5.f, 10.f, 5.0f, 10.0f)
+            << Label::text("Size:"))
+        << (Builder<Slider>()
+            << Widget::width(Widget::MatchParent())
+            << Widget::height(Widget::WrapContent())
+            << Widget::margin(5.f, 10.f, 5.0f, 10.0f)
+            << Slider::limits(20, 100)
+            << Slider::value(40)
+            << Slider::on_update(std::bind(&HeightfieldToolWindow::OnRadiusUpdated, this, _1)))
+        << (Builder<Label>()
+            << Widget::width(Widget::MatchParent())
+            << Widget::height(Widget::WrapContent())
+            << Widget::margin(5.f, 10.f, 5.0f, 10.0f)
+            << Label::text("Speed:"))
+        << (Builder<Slider>()
+            << Widget::width(Widget::MatchParent())
+            << Widget::height(Widget::WrapContent())
+            << Widget::margin(5.f, 10.f, 5.0f, 10.0f)
+            << Slider::limits(20, 100)
+            << Slider::value(25)
+            << Slider::on_update(std::bind(&HeightfieldToolWindow::OnSpeedUpdated, this, _1)))
+        << (Builder<Button>()
+            << Widget::width(Widget::MatchParent())
+            << Widget::height(Widget::Fixed(30.f))
+            << Widget::margin(5.f, 10.f, 10.0f, 10.0f)
+            << Button::text("Import")
+            << Button::click(std::bind(&HeightfieldToolWindow::on_import_clicked, this, _1)))
+        );
+  fw::Get<Gui>().AttachWindow(wnd_);
 }
 
 HeightfieldToolWindow::~HeightfieldToolWindow() {
-  //fw::Get<Gui>().detach_widget(wnd_);
+  fw::Get<Gui>().DetachWindow(wnd_);
 }
 
 void HeightfieldToolWindow::show() {

@@ -110,6 +110,9 @@ public:
   void add_drawable(State state, std::shared_ptr<Drawable> drawable);
   void set_current_state(State state);
 
+  float get_intrinsic_width() const override;
+  float get_intrinsic_height() const override;
+
   virtual void render(float x, float y, float width, float height);
 };
 

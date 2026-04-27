@@ -77,6 +77,12 @@ std::unique_ptr<Property> Slider::on_update(std::function<void(int)> on_update) 
   return std::make_unique<SliderOnUpdateProperty>(on_update);
 }
 
+fw::Point Slider::OnMeasureSelf() {
+  return fw::Point(
+    0.f,
+    thumb_->get_intrinsic_height());
+}
+
 void Slider::OnAttachedToParent(Widget &parent) {
   Widget::OnAttachedToParent(parent);
 

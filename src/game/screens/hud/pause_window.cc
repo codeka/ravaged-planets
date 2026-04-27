@@ -12,6 +12,7 @@
 #include <game/application.h>
 #include <game/screens/screen.h>
 #include <game/screens/hud/pause_window.h>
+#include <framework/gui/linear_layout.h>
 
 using namespace fw::gui;
 using namespace std::placeholders;
@@ -24,25 +25,42 @@ PauseWindow::PauseWindow() : wnd_(nullptr) {
 }
 
 PauseWindow::~PauseWindow() {
-  //fw::Get<Gui>().detach_widget(wnd_);
+  fw::Get<Gui>().DetachWindow(wnd_);
 }
 
-void PauseWindow::initialize() {/*
-  wnd_ = Builder<Window>(sum(pct(50), px(-75)), sum(pct(50), px(-100)), px(150), px(130))
-      << Widget::background("frame") << Widget::visible(false)
-      << (Builder<Label>(px(4), px(4), sum(pct(100), px(-8)), px(20))
-         << Label::text(fw::text("hud.pause.title")))
-      << (Builder<Button>(px(4), px(28), sum(pct(100), px(-8)), px(30))
-          << Button::text(fw::text("hud.pause.resume"))
-          << Button::click(std::bind(&PauseWindow::on_resume_clicked, this, _1)))
-      << (Builder<Button>(px(4), px(62), sum(pct(100), px(-8)), px(30))
-          << Button::text(fw::text("hud.pause.exit-to-menu"))
-          << Button::click(std::bind(&PauseWindow::on_exit_to_menu_clicked, this, _1)))
-      << (Builder<Button>(px(4), px(96), sum(pct(100), px(-8)), px(30))
-          << Button::text(fw::text("hud.pause.exit-game"))
-          << Button::click(std::bind(&PauseWindow::on_exit_game_clicked, this, _1)))
+void PauseWindow::initialize() {
+  wnd_ = Builder<Window>()
+      << Widget::width(Widget::Fixed(300.f))
+      << Widget::height(Widget::WrapContent())
+      << Window::initial_position(WindowInitialPosition::Center())
+      << Widget::background("frame")
+      << Widget::visible(false)
+      << (Builder<LinearLayout>()
+          << Widget::width(Widget::MatchParent())
+          << Widget::height(Widget::WrapContent())
+          << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
+          << (Builder<Label>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::WrapContent())
+              << Label::text(fw::text("hud.pause.title")))
+          << (Builder<Button>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::Fixed(30.f))
+              << Button::text(fw::text("hud.pause.resume"))
+              << Button::click(std::bind(&PauseWindow::on_resume_clicked, this, _1)))
+          << (Builder<Button>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::Fixed(30.f))
+              << Button::text(fw::text("hud.pause.exit-to-menu"))
+              << Button::click(std::bind(&PauseWindow::on_exit_to_menu_clicked, this, _1)))
+          << (Builder<Button>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::Fixed(30.f))
+              << Button::text(fw::text("hud.pause.exit-game"))
+              << Button::click(std::bind(&PauseWindow::on_exit_game_clicked, this, _1)))
+        )
       ;
-  fw::Get<Gui>().attach_widget(wnd_);*/
+  fw::Get<Gui>().AttachWindow(wnd_);
 }
 
 bool PauseWindow::on_resume_clicked(Widget &w) {

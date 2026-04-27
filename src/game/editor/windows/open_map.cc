@@ -69,14 +69,15 @@ bool OpenMapWindow::open_clicked(Widget &w) {
     return true;
   }
 
-  game::WorldSummary const &ws =
+  game::WorldSummary ws =
       std::any_cast<game::WorldSummary const &>(selected_widget->get_data());
-  auto status = EditorScreen::get_instance()->open_map(ws.get_name());
-  if (!status.ok()) {
-    // TODO: show error to user?
-    LOG(ERR) << "error opening map: " << status << std::endl;
-    return true;
-  }
+  fw::Get<fw::Graphics>().run_on_render_thread([ws]() {
+      auto status = EditorScreen::get_instance()->open_map(ws.get_name());
+      if (!status.ok()) {
+        // TODO: show error to user?
+        LOG(ERR) << "error opening map: " << status << std::endl;
+      }
+    });
 
   hide();
   return true;

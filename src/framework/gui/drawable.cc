@@ -231,6 +231,23 @@ void StateDrawable::render(float x, float y, float width, float height) {
   }
 }
 
+float StateDrawable::get_intrinsic_width() const {
+  float max_width = 0.0f;
+  for (auto const &entry : drawable_map_) {
+    max_width = std::max(max_width, entry.second->get_intrinsic_width());
+  }
+  return max_width;
+}
+
+float StateDrawable::get_intrinsic_height() const {
+  float max_height = 0.f;
+  for (auto const& entry : drawable_map_) {
+    max_height = std::max(max_height, entry.second->get_intrinsic_height());
+  }
+  return max_height;
+}
+
+
 //-----------------------------------------------------------------------------
 
 DrawableManager::DrawableManager() {
