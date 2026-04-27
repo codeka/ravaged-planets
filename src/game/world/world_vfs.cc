@@ -123,13 +123,7 @@ void WorldSummary::initialize(std::string map_file) {
 
 //----------------------------------------------------------------------------
 
-WorldVfs::WorldVfs() {
-}
-
-WorldVfs::~WorldVfs() {
-}
-
-std::vector<WorldSummary> WorldVfs::list_maps() {
+std::vector<WorldSummary> ListMaps() {
   std::vector<WorldSummary> list;
   PopulateMaps(list, fw::install_base_path() / "maps");
   PopulateMaps(list, fw::user_base_path() / "maps");
@@ -139,7 +133,7 @@ std::vector<WorldSummary> WorldVfs::list_maps() {
   return list;
 }
 
-fw::StatusOr<WorldFile> WorldVfs::OpenFile(std::string name, bool for_writing /*= false*/) {
+fw::StatusOr<WorldFile> OpenWorldFile(std::string name, bool for_writing /*= false*/) {
   // check the user's profile directory first
   fs::path map_path = fw::user_base_path() / "maps";
   fs::path full_path = map_path / name;

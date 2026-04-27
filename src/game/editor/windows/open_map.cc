@@ -89,10 +89,7 @@ bool OpenMapWindow::cancel_clicked(Widget &w) {
 
 void OpenMapWindow::show() {
   auto map_list = wnd_->Find<Listbox>(MAP_LIST);
-
-  game::WorldVfs vfs;
-  auto maps = vfs.list_maps();
-
+  auto maps = game::ListMaps();
   fw::Get<fw::Graphics>().run_on_render_thread([maps, map_list]() {
     for (game::WorldSummary const &ws : maps) {
       std::string title = ws.get_name();

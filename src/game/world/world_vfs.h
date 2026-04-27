@@ -114,18 +114,11 @@ public:
   WorldFileEntry get_entry(std::string name, bool for_write);
 };
 
-// This class represents a "virtual file system" containing the world file(s). Basically this just
-// combines the world files in the install directory and the user's personal directory.
-class WorldVfs {
-public:
-  WorldVfs();
-  ~WorldVfs();
 
-  // gets a list of all the maps
-  std::vector<WorldSummary> list_maps();
+// gets a list of all the maps in the world.
+std::vector<WorldSummary> ListMaps();
 
-  // opens a new world_file with the complete details of the given map
-  fw::StatusOr<WorldFile> OpenFile(std::string name, bool for_writing = false);
-};
+// opens a new world_file with the complete details of the given map
+fw::StatusOr<WorldFile> OpenWorldFile(std::string name, bool for_writing = false);
 
 }

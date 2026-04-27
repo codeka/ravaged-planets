@@ -226,8 +226,7 @@ void NewGameWindow::initialize(
 void NewGameWindow::show() {
   wnd_->set_visible(true);
 
-  WorldVfs vfs;
-  map_list_ = vfs.list_maps();
+  map_list_ = game::ListMaps();
   auto listbox = wnd_->Find<Listbox>(MAP_LIST_ID);
   fw::Get<fw::Graphics>().run_on_render_thread(
     [map_list = map_list_, listbox]() {

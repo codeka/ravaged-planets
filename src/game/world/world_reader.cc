@@ -28,8 +28,7 @@ WorldReader::~WorldReader() {
 }
 
 fw::Status WorldReader::Read(std::string name) {
-  WorldVfs vfs;
-  ASSIGN_OR_RETURN(WorldFile wf, vfs.OpenFile(name, false));
+  ASSIGN_OR_RETURN(WorldFile wf, OpenWorldFile(name, false));
 
   int version;
   int trn_width;

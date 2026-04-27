@@ -29,8 +29,7 @@ WorldWriter::~WorldWriter() {
 fw::Status WorldWriter::write(std::string name) {
   name_ = name;
 
-  game::WorldVfs vfs;
-  ASSIGN_OR_RETURN(game::WorldFile wf, vfs.OpenFile(name, /* for_writing= */ true));
+  ASSIGN_OR_RETURN(game::WorldFile wf, game::OpenWorldFile(name, /* for_writing= */ true));
 
   RETURN_IF_ERROR(write_terrain(wf));
   write_mapdesc(wf);
