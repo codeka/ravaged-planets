@@ -49,6 +49,14 @@ void Checkbox::OnAttachedToParent(Widget &parent) {
   check_icon_ = fw::Get<Gui>().get_drawable_manager().get_drawable("checkbox");
 }
 
+fw::Point Checkbox::OnMeasureSelf() {
+  fw::Point text_size = 
+      fw::Framework::get_instance()->get_font_manager()->get_face()->measure_string(text_);
+  return fw::Point(
+    check_icon_->get_intrinsic_width() + 12.f + text_size[0],
+    std::max(check_icon_->get_intrinsic_height() + 8.f, text_size[1]));
+}
+
 void Checkbox::on_mouse_out() {
   is_mouse_over_ = false;
   update_drawable_state();
@@ -80,25 +88,28 @@ void Checkbox::update_drawable_state() {
 
 void Checkbox::render() {
 	auto rect = GetScreenRect();
-  background_->Render(rect.Shrink(2.0f));
+
+  float icon_width = check_icon_->get_intrinsic_width();
+  float icon_height = check_icon_->get_intrinsic_height();
+
+  fw::Rectangle<float> icon_rect(
+    rect.left + 4.f,
+    rect.top + (rect.height / 2.0f) - (icon_height / 2.0f),
+    icon_width,
+    icon_height);
+  background_->Render(icon_rect.Grow(4.0f));
 
   if (is_checked_) {
-    float icon_width = check_icon_->get_intrinsic_width();
-    float icon_height = check_icon_->get_intrinsic_height();
-    if (icon_width == 0.0f) {
-      icon_width = rect.height * 0.75f;
-    }
-    if (icon_height == 0.0f) {
-      icon_height = rect.height * 0.75f;
-    }
     float x = rect.left + (rect.height / 2.0f) - (icon_width / 2.0f);
     float y = rect.top + (rect.height / 2.0f) - (icon_height / 2.0f);
-    check_icon_->render(x, y, icon_width, icon_height);
+    check_icon_->render(icon_rect.left, icon_rect.top, icon_rect.width, icon_rect.height);
   }
 
   if (text_.length() > 0) {
     fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-        rect.left + rect.height + 4, rect.top + rect.height / 2, text_,
+        rect.left + icon_rect.width + 12.f,
+        rect.top + rect.height / 2,
+        text_,
         static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
   }
 }

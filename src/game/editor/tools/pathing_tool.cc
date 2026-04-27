@@ -26,6 +26,7 @@
 #include <game/editor/editor_terrain.h>
 #include <game/editor/editor_world.h>
 #include <game/world/terrain_helper.h>
+#include <framework/gui/linear_layout.h>
 
 static int PATCH_SIZE = 32; // our patches are independent of the terrain patches
 
@@ -35,7 +36,7 @@ using namespace fw::gui;
 //-----------------------------------------------------------------------------
 
 enum IDS {
-  START_ID,
+  START_ID = 97634,
   END_ID,
 };
 
@@ -70,25 +71,42 @@ public:
 };
 
 PathingToolWindow::PathingToolWindow(ed::PathingTool &tool) :
-    tool_(tool) {/*
-  wnd_ = Builder<Window>(px(10), px(30), px(100), px(94))
+    tool_(tool) {
+  wnd_ = Builder<Window>()
+      << Widget::width(Widget::Fixed(100.f))
+      << Widget::height(Widget::WrapContent())
+      << Window::initial_position(WindowInitialPosition::Absolute(20.f, 40.f))
       << Widget::background("frame")
-      << (Builder<Button>(px(4), px(4), sum(pct(100), px(-8)), px(30))
-          << Button::text("Start")
-          << Widget::id(START_ID)
-          << Widget::click(std::bind(&PathingToolWindow::on_start_click, this, _1)))
-      << (Builder<Button>(px(4), px(38), sum(pct(100), px(-8)), px(30))
-          << Button::text("End")
-          << Widget::id(END_ID)
-          << Widget::click(std::bind(&PathingToolWindow::on_end_click, this, _1)))
-      << (Builder<Checkbox>(px(4), px(72), sum(pct(100), px(-8)), px(18))
-          << Checkbox::text("Simplify")
-          << Widget::click(std::bind(&PathingToolWindow::on_simplify_click, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);*/
+      << (Builder<LinearLayout>()
+          << Widget::width(Widget::MatchParent())
+          << Widget::height(Widget::WrapContent())
+          << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
+          << (Builder<Button>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::WrapContent())
+              << Widget::margin(10.f, 10.f, 5.0f, 10.0f)
+              << Button::text("Start")
+              << Widget::id(START_ID)
+              << Widget::click(std::bind(&PathingToolWindow::on_start_click, this, _1)))
+          << (Builder<Button>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::WrapContent())
+              << Widget::margin(5.f, 10.f, 5.0f, 10.0f)
+              << Button::text("End")
+              << Widget::id(END_ID)
+              << Widget::click(std::bind(&PathingToolWindow::on_end_click, this, _1)))
+          << (Builder<Checkbox>()
+              << Widget::width(Widget::MatchParent())
+              << Widget::height(Widget::WrapContent())
+              << Widget::margin(5.f, 10.f, 10.0f, 10.0f)
+              << Checkbox::text("Simplify")
+              << Widget::click(std::bind(&PathingToolWindow::on_simplify_click, this, _1)))
+      );
+  fw::Get<Gui>().AttachWindow(wnd_);
 }
 
 PathingToolWindow::~PathingToolWindow() {
- // fw::Get<Gui>().detach_widget(wnd_);
+  fw::Get<Gui>().DetachWindow(wnd_);
 }
 
 void PathingToolWindow::show() {

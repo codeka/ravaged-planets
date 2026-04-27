@@ -35,6 +35,7 @@ public:
 
   static std::unique_ptr<Property> text(std::string_view text);
 
+  fw::Point OnMeasureSelf() override;
   void OnAttachedToParent(Widget &parent) override;
   void on_mouse_out();
   void on_mouse_over();

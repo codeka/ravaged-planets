@@ -36,7 +36,7 @@ using namespace std::placeholders;
 
 //-----------------------------------------------------------------------------
 enum IDS {
-  STATUS_MESSAGE_ID,
+  STATUS_MESSAGE_ID = 238765,
 };
 
 /**
