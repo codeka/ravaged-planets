@@ -30,7 +30,6 @@ private:
   bool file_new_clicked(fw::gui::Widget &w);
   bool file_save_clicked(fw::gui::Widget &w);
   bool file_open_clicked(fw::gui::Widget &w);
-  bool file_show_message_clicked(fw::gui::Widget& w);
   bool file_quit_clicked(fw::gui::Widget &w);
   bool tool_clicked(fw::gui::Widget &w, std::string tool_name);
 

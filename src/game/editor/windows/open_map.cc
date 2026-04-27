@@ -8,6 +8,7 @@
 #include <framework/gui/button.h>
 #include <framework/gui/label.h>
 #include <framework/gui/listbox.h>
+#include <framework/service_locator.h>
 
 #include <game/world/world.h>
 #include <game/world/world_reader.h>
@@ -23,7 +24,7 @@ namespace ed {
 std::unique_ptr<OpenMapWindow> open_map;
 
 enum ids {
-  MAP_LIST
+  MAP_LIST = 8735
 };
 
 OpenMapWindow::OpenMapWindow() : wnd_(nullptr) {
@@ -32,27 +33,34 @@ OpenMapWindow::OpenMapWindow() : wnd_(nullptr) {
 OpenMapWindow::~OpenMapWindow() {
 }
 
-void OpenMapWindow::initialize() {/*
-  wnd_ = Builder<Window>(sum(pct(50), px(-100)), sum(pct(50), px(-150)), px(200), px(200))
-      << Widget::background("frame") << Widget::visible(false)
-      << (Builder<Listbox>(px(10), px(10), sum(pct(100), px(-20)), sum(pct(100), px(-50)))
+void OpenMapWindow::initialize() {
+  wnd_ = Builder<Window>()
+		  << Widget::width(Widget::Fixed(400.f))
+      << Widget::height(Widget::Fixed(200.f))
+		  << Window::initial_position(WindowInitialPosition::Center())
+      << Widget::background("frame")
+      << Widget::visible(false)
+      << (Builder<Listbox>()
+          << Widget::width(Widget::MatchParent())
+          << Widget::height(Widget::MatchParent())
+				  << Widget::margin(10.f, 10.f, 50.f, 10.f)
           << Widget::id(MAP_LIST))
-      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-28)), px(80), px(20))
+      << (Builder<Button>()
           << Button::text("Open")
+          << Widget::width(Widget::Fixed(100.f))
+          << Widget::height(Widget::Fixed(30.f))
+          << Widget::margin(0.f, 10.f, 10.f, 0.f)
+				  << Widget::gravity(LayoutParams::Gravity::kBottom | LayoutParams::Gravity::kRight)
           << Widget::click(std::bind(&OpenMapWindow::open_clicked, this, _1)))
-      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-28)), px(80), px(20))
+      << (Builder<Button>()
           << Button::text("Cancel")
+          << Widget::width(Widget::Fixed(100.f))
+          << Widget::height(Widget::Fixed(30.f))
+          << Widget::margin(0.f, 120.f, 10.f, 0.f)
+          << Widget::gravity(LayoutParams::Gravity::kBottom | LayoutParams::Gravity::kRight)
           << Widget::click(std::bind(&OpenMapWindow::cancel_clicked, this, _1)));
 
-  game::WorldVfs vfs;
-  std::vector<game::WorldSummary> map_list = vfs.list_maps();
-  for(game::WorldSummary &ws : map_list) {
-    std::string title = ws.get_name();
-    wnd_->Find<Listbox>(MAP_LIST)->add_item(
-        Builder<Label>(px(0), px(0), pct(100), px(20)) << Label::text(title) << Widget::data(ws));
-  }
-
-  fw::Get<Gui>().attach_widget(wnd_);*/
+  fw::Get<Gui>().AttachWindow(wnd_);
 }
 
 bool OpenMapWindow::open_clicked(Widget &w) {
@@ -80,6 +88,24 @@ bool OpenMapWindow::cancel_clicked(Widget &w) {
 }
 
 void OpenMapWindow::show() {
+  auto map_list = wnd_->Find<Listbox>(MAP_LIST);
+
+  game::WorldVfs vfs;
+  auto maps = vfs.list_maps();
+
+  fw::Get<fw::Graphics>().run_on_render_thread([maps, map_list]() {
+    for (game::WorldSummary const &ws : maps) {
+      std::string title = ws.get_name();
+      map_list->AddItem(
+        Builder<Label>()
+        << Widget::width(Widget::MatchParent())
+        << Widget::height(Widget::WrapContent())
+        << Widget::padding(4.f, 4.f, 4.f, 4.f)
+        << Label::text(title)
+        << Widget::data(ws));
+    }
+  });
+
   wnd_->set_visible(true);
 }
 

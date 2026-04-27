@@ -213,6 +213,9 @@ Point Button::OnMeasureSelf() {
   max_width = std::max(max_width, text_width);
   max_height = std::max(max_height, text_height);
 
+	max_width += padding_left_ + padding_right_;
+	max_height += padding_top_ + padding_bottom_;
+
   return Point(max_width, max_height);
 }
 
@@ -240,11 +243,15 @@ void Button::render() {
   if (text_.length() > 0) {
     if (text_align_ == kLeft) {
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          rect.left + 4, rect.top + rect.height / 2, text_,
+          rect.left + padding_left_,
+          rect.top + rect.height / 2,
+          text_,
           static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignLeft | fw::FontFace::kAlignMiddle));
     } else if (text_align_ == kCenter) {
       fw::Framework::get_instance()->get_font_manager()->get_face()->draw_string(
-          rect.left + rect.width / 2, rect.top + rect.height / 2, text_,
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2,
+          text_,
           static_cast<fw::FontFace::DrawFlags>(fw::FontFace::kAlignCenter | fw::FontFace::kAlignMiddle));
     }
   }

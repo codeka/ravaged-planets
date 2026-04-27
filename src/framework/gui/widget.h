@@ -198,9 +198,33 @@ public:
   Widget();
   virtual ~Widget();
 
+  struct WidgetSizePropertyValue {
+    LayoutParams::Mode mode;
+    float size;
+
+    inline WidgetSizePropertyValue(LayoutParams::Mode mode, float size) : mode(mode), size(size) {}
+  };
+
+  inline static WidgetSizePropertyValue Fixed(float size) {
+    return WidgetSizePropertyValue(LayoutParams::Mode::kFixed, size);
+	}
+  inline static WidgetSizePropertyValue MatchParent() {
+    return WidgetSizePropertyValue(LayoutParams::Mode::kMatchParent, 0.f);
+  }
+  inline static WidgetSizePropertyValue WrapContent() {
+    return WidgetSizePropertyValue(LayoutParams::Mode::kWrapContent, 0.f);
+  }
+
   static std::unique_ptr<Property> width(LayoutParams::Mode width_mode, float width);
   static std::unique_ptr<Property> height(LayoutParams::Mode height_mode, float height);
-	static std::unique_ptr<Property> margin(float top, float right, float bottom, float left);
+  inline static std::unique_ptr<Property> width(WidgetSizePropertyValue size) {
+		return width(size.mode, size.size);
+  }
+  inline static std::unique_ptr<Property> height(WidgetSizePropertyValue size) {
+		return height(size.mode, size.size);
+  }
+  
+  static std::unique_ptr<Property> margin(float top, float right, float bottom, float left);
 
   static std::unique_ptr<Property> click(std::function<bool(Widget &)> on_click);
   static std::unique_ptr<Property> visible(bool visible);

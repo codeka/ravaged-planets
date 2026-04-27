@@ -83,13 +83,15 @@ void MainMenuWindow::initialize() {
 				<< Widget::height(LayoutParams::kMatchParent, 0)
 				<< LinearLayout::orientation(LinearLayout::Orientation::kHorizontal)
         << (Builder<MenuItem>()
-          << Widget::width(LayoutParams::kFixed, 100.f)
+          << Widget::width(LayoutParams::kWrapContent, 0.f)
           << Widget::height(LayoutParams::kMatchParent, 0)
+					<< Widget::padding(0.f, 10.f, 0.f, 10.f)
           << Button::text("File")
           << Widget::click(std::bind(&MainMenuWindow::file_menu_clicked, this, _1)))
         << (Builder<MenuItem>()
-          << Widget::width(LayoutParams::kFixed, 100.f)
+          << Widget::width(LayoutParams::kWrapContent, 0.f)
           << Widget::height(LayoutParams::kMatchParent, 0)
+          << Widget::padding(0.f, 10.f, 0.f, 10.f)
           << Button::text("Tool")
           << Widget::click(std::bind(&MainMenuWindow::tool_menu_clicked, this, _1))));
 
@@ -104,29 +106,27 @@ void MainMenuWindow::initialize() {
           << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
           << (Builder<MenuItem>()
               << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
+              << Widget::height(LayoutParams::kWrapContent, 0)
+              << Widget::padding(10.f, 10.f, 10.f, 10.f)
               << Button::text("New")
               << Widget::click(std::bind(&MainMenuWindow::file_new_clicked, this, _1)))
           << (Builder<MenuItem>()
               << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
+              << Widget::height(LayoutParams::kWrapContent, 0)
+              << Widget::padding(10.f, 10.f, 10.f, 10.f)
               << Button::text("Open")
               << Widget::click(std::bind(&MainMenuWindow::file_open_clicked, this, _1)))
           << (Builder<MenuItem>()
               << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
+              << Widget::height(LayoutParams::kWrapContent, 0)
+              << Widget::padding(10.f, 10.f, 10.f, 10.f)
               << Button::text("Save")
               << Widget::click(std::bind(&MainMenuWindow::file_save_clicked, this, _1)))
           << (Builder<MenuItem>()
               << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
-              << Widget::margin(10.f, 0.f, 10.f, 0.f)
-              << Button::text("Show message")
-              << Widget::click(std::bind(&MainMenuWindow::file_show_message_clicked, this, _1)))
-          << (Builder<MenuItem>()
-              << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
-              << Widget::margin(10.f, 0.f, 10.f, 0.f)
+              << Widget::height(LayoutParams::kWrapContent, 0)
+              << Widget::padding(10.f, 10.f, 10.f, 10.f)
+              << Widget::margin(10.f, 0.f, 0.f, 0.f)
               << Button::text("Quit")
               << Widget::click(std::bind(&MainMenuWindow::file_quit_clicked, this, _1))));
 
@@ -134,29 +134,33 @@ void MainMenuWindow::initialize() {
       << Widget::width(LayoutParams::kFixed, 100.f)
       << Widget::height(LayoutParams::kWrapContent, 0)
       << Widget::background("frame") << Widget::visible(false)
-      << Widget::margin(20.f, 0.f, 0.f, 100.f)
+      << Widget::margin(20.f, 0.f, 0.f, 0.f)
       << (Builder<LinearLayout>()
           << Widget::width(LayoutParams::kMatchParent, 0)
           << Widget::height(LayoutParams::kWrapContent, 0)
           << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
           << (Builder<MenuItem>()
               << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
+              << Widget::height(LayoutParams::kWrapContent, 0)
+              << Widget::padding(10.f, 10.f, 10.f, 10.f)
               << Button::text("Heightfield")
               << Widget::click(std::bind(&MainMenuWindow::tool_clicked, this, _1, "heightfield")))
           << (Builder<MenuItem>()
               << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
+              << Widget::height(LayoutParams::kWrapContent, 0)
+              << Widget::padding(10.f, 10.f, 10.f, 10.f)
               << Button::text("Texture")
               << Widget::click(std::bind(&MainMenuWindow::tool_clicked, this, _1, "texture")))
           << (Builder<MenuItem>()
               << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
+              << Widget::height(LayoutParams::kWrapContent, 0)
+              << Widget::padding(10.f, 10.f, 10.f, 10.f)
               << Button::text("Players")
               << Widget::click(std::bind(&MainMenuWindow::tool_clicked, this, _1, "players")))
           << (Builder<MenuItem>()
               << Widget::width(LayoutParams::kMatchParent, 0)
-              << Widget::height(LayoutParams::kFixed, 20.f)
+              << Widget::height(LayoutParams::kWrapContent, 0)
+              << Widget::padding(10.f, 10.f, 10.f, 10.f)
               << Button::text("Pathing")
               << Widget::click(std::bind(&MainMenuWindow::tool_clicked, this, _1, "pathing"))));
 
@@ -205,11 +209,13 @@ void MainMenuWindow::global_click_away_handler(int button, bool is_down) {
 }
 
 bool MainMenuWindow::file_menu_clicked(fw::gui::Widget &w) {
+  file_menu_->get_layout_params()->left_margin = w.GetScreenPosition()[0];
   file_menu_->set_visible(true);
   return true;
 }
 
 bool MainMenuWindow::tool_menu_clicked(fw::gui::Widget &w) {
+  tool_menu_->get_layout_params()->left_margin = w.GetScreenPosition()[0];
   tool_menu_->set_visible(true);
   return true;
 }
@@ -223,13 +229,6 @@ bool MainMenuWindow::file_new_clicked(fw::gui::Widget &w) {
 
 bool MainMenuWindow::file_save_clicked(fw::gui::Widget &w) {
   save_map->show();
-  return true;
-}
-
-bool MainMenuWindow::file_show_message_clicked(fw::gui::Widget& w) {
-  message_box->show("foo", "This is a message box! Isn't it great? Blah blah blah, yada yada yada.", []() {
-    LOG(INFO) << "You clicked OK on the message box!" << std::endl;
-	  });
   return true;
 }
 
