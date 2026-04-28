@@ -119,21 +119,14 @@ MeasuredSize LinearLayout::OnMeasure(MeasureSpec width_spec, MeasureSpec height_
 			float height_used = 0.f;
 			if (orientation_ == Orientation::kHorizontal) {
         new_width_spec = MeasureSpec::Exactly(extra_space);
-				width_used = width_spec.size - extra_space;
 				lp->width_mode = LayoutParams::Mode::kMatchParent;
       } else {
         new_height_spec = MeasureSpec::Exactly(extra_space);
-        height_used = height_spec.size - extra_space;
         lp->height_mode = LayoutParams::Mode::kMatchParent;
       }
 
       // Re-measure the size with the new remaining space.
-      MeasuredSize child_size = child->MeasureChild(
-          new_width_spec,
-          0.f,
-          new_height_spec,
-          0.f);
-
+      MeasuredSize child_size = child->MeasureChild(new_width_spec, 0.f, new_height_spec, 0.f);
       if (orientation_ == Orientation::kHorizontal) {
         total_width += extra_space;
       } else {

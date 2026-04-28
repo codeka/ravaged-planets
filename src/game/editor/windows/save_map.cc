@@ -3,7 +3,9 @@
 #include <framework/graphics.h>
 #include <framework/gui/gui.h>
 #include <framework/gui/builder.h>
+#include <framework/gui/grid_layout.h>
 #include <framework/gui/label.h>
+#include <framework/gui/linear_layout.h>
 #include <framework/gui/textedit.h>
 #include <framework/gui/window.h>
 #include <framework/gui/button.h>
@@ -24,7 +26,7 @@ namespace ed {
 std::unique_ptr<SaveMapWindow> save_map;
 
 enum ids {
-  NAME_ID,
+  NAME_ID = 1343,
   AUTHOR_ID,
   DESCRIPTION_ID,
   SCREENSHOT_ID
@@ -34,27 +36,95 @@ SaveMapWindow::SaveMapWindow() : wnd_(nullptr) {
 }
 
 SaveMapWindow::~SaveMapWindow() {
+  fw::Get<Gui>().DetachWindow(wnd_);
 }
 
-void SaveMapWindow::initialize() {/*
-  wnd_ = Builder<Window>(sum(pct(50), px(-250)), sum(pct(50), px(-150)), px(500), px(232))
-      << Widget::background("frame") << Widget::visible(false)
-      << (Builder<Label>(px(10), px(10), px(80), px(20)) << Label::text("Name:"))
-      << (Builder<TextEdit>(px(90), px(10), px(160), px(20)) << Widget::id(NAME_ID))
-      << (Builder<Label>(px(10), px(40), px(80), px(20)) << Label::text("Author:"))
-      << (Builder<TextEdit>(px(90), px(40), px(160), px(20)) << Widget::id(AUTHOR_ID))
-      << (Builder<Label>(px(10), px(70), px(80), px(20)) << Label::text("Description:"))
-      << (Builder<TextEdit>(px(90), px(70), px(160), px(20)) << Widget::id(DESCRIPTION_ID))
-      << (Builder<Label>(px(260), px(10), px(230), px(172)) << Widget::id(SCREENSHOT_ID))
-      << (Builder<Button>(px(90), px(152), px(160), px(30)) << Button::text("Update screenshot")
-          << Widget::click(std::bind(&SaveMapWindow::screenshot_clicked, this, _1)))
-      << (Builder<Button>(sum(pct(100), px(-180)), sum(pct(100), px(-38)), px(80), px(30))
-          << Button::text("Save")
-          << Widget::click(std::bind(&SaveMapWindow::save_clicked, this, _1)))
-      << (Builder<Button>(sum(pct(100), px(-90)), sum(pct(100), px(-38)), px(80), px(30))
-          << Button::text("Cancel")
-          << Widget::click(std::bind(&SaveMapWindow::cancel_clicked, this, _1)));
-  fw::Get<Gui>().attach_widget(wnd_);*/
+void SaveMapWindow::initialize() {
+  wnd_ = Builder<Window>()
+      << Widget::width(Widget::Fixed(500.f))
+      << Widget::height(Widget::WrapContent())
+      << Window::initial_position(WindowInitialPosition::Center())
+      << Widget::background("frame")
+      << Widget::visible(false)
+      << (Builder<LinearLayout>()
+          << Widget::width(Widget::MatchParent())
+          << Widget::height(Widget::WrapContent())
+          << Widget::margin(0.f, 0.f, 50.f, 0.f)
+          << LinearLayout::orientation(LinearLayout::Orientation::kHorizontal)
+          << (Builder<GridLayout>()
+              << LinearLayout::weight(1.0f)
+              << Widget::height(Widget::WrapContent())
+              << (Builder<Label>()
+                  << Widget::width(Widget::WrapContent())
+                  << Widget::height(Widget::WrapContent())
+                  << Widget::margin(10.f, 5.0f, 5.0f, 10.f)
+                  << Label::text("Name:"))
+              << (Builder<TextEdit>()
+                  << Widget::width(Widget::MatchParent())
+                  << Widget::height(Widget::WrapContent())
+                  << Widget::margin(10.f, 10.0f, 5.0f, 5.f)
+                  << Widget::padding(4.f, 4.f, 4.f, 4.f)
+                  << Widget::id(NAME_ID))
+              << (Builder<Label>()
+                  << Widget::width(Widget::WrapContent())
+                  << Widget::height(Widget::WrapContent())
+                  << Widget::margin(5.f, 5.0f, 5.0f, 10.f)
+                  << Label::text("Author:"))
+              << (Builder<TextEdit>()
+                  << Widget::width(Widget::MatchParent())
+                  << Widget::height(Widget::WrapContent())
+                  << Widget::margin(5.f, 10.0f, 5.0f, 5.f)
+                  << Widget::padding(4.f, 4.f, 4.f, 4.f)
+                  << Widget::id(AUTHOR_ID))
+              << (Builder<Label>()
+                  << Widget::width(Widget::WrapContent())
+                  << Widget::height(Widget::WrapContent())
+                  << Widget::margin(5.f, 5.0f, 10.0f, 10.f)
+                  << Label::text("Description:"))
+              << (Builder<TextEdit>()
+                  << Widget::width(Widget::MatchParent())
+                  << Widget::height(Widget::WrapContent())
+                  << Widget::margin(5.f, 10.0f, 10.0f, 5.f)
+                  << Widget::padding(4.f, 4.f, 4.f, 4.f)
+                  << Widget::id(DESCRIPTION_ID))
+            )
+          << (Builder<LinearLayout>()
+              << Widget::width(Widget::WrapContent())
+              << Widget::height(Widget::MatchParent())
+              << LinearLayout::orientation(LinearLayout::Orientation::kVertical)
+                  << (Builder<Label>()
+                      << Widget::width(Widget::Fixed(160.0f))
+                      << Widget::height(Widget::Fixed(120.0f))
+                      << Widget::margin(10.f, 10.f, 10.f, 0.f)
+                      << Widget::background("frame")
+                      << Widget::id(SCREENSHOT_ID))
+                  << (Builder<Button>()
+                      << Widget::width(Widget::WrapContent())
+                      << Widget::height(Widget::Fixed(30.0f))
+                      << Widget::padding(0.f, 8.f, 0.f, 8.f)
+                      << Widget::gravity(LayoutParams::Gravity::kCenterHorizontal)
+                      << Button::text("Update screenshot")
+                      << Widget::click(std::bind(&SaveMapWindow::screenshot_clicked, this, _1)))
+              )
+          )
+      << (Builder<LinearLayout>()
+          << Widget::width(Widget::WrapContent())
+          << Widget::height(Widget::WrapContent())
+          << Widget::gravity(LayoutParams::Gravity::kBottom | LayoutParams::Gravity::kRight)
+          << Widget::margin(0.f, 10.f, 10.f, 0.f)
+          << LinearLayout::orientation(LinearLayout::Orientation::kHorizontal)
+          << (Builder<Button>()
+              << Widget::width(Widget::Fixed(100.f))
+              << Widget::height(Widget::Fixed(30.f))
+              << Button::text("Cancel")
+              << Widget::click(std::bind(&SaveMapWindow::cancel_clicked, this, _1)))
+          << (Builder<Button>()
+              << Widget::width(Widget::Fixed(100.f))
+              << Widget::height(Widget::Fixed(30.f))
+              << Button::text("Save")
+              << Widget::click(std::bind(&SaveMapWindow::save_clicked, this, _1)))
+          );
+  fw::Get<Gui>().AttachWindow(wnd_);
 }
 
 // when we go to show, we have to update our controls with what we currently know about the map

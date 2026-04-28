@@ -68,7 +68,4 @@ private:
 	Orientation orientation_ = Orientation::kHorizontal;
 };
 
-
-
-
 }  // namespace fw::gui
